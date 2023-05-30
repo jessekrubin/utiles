@@ -1,0 +1,217 @@
+[build-system]
+requires = ["maturin>=0.14,<0.15"]
+build-backend = "maturin"
+
+[project]
+name = "utiles"
+version = "0.0.1"
+description = "utiles = (utils + tiles) * rust"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+authors = [{ name = "Jesse Rubin", email = "jessekrubin@gmail.com" }]
+maintainers = [{ name = "Jesse Rubin", email = "jessekrubin@gmail.com" }]
+dependencies = [
+    'click>=7.1.2',
+]
+
+[project.scripts]
+utiles = "utiles.cli:cli"
+
+[tool.maturin]
+python-source = "python"
+features = ["pyo3/extension-module"]
+module-name = "utiles.libutiles"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+#    "python"
+]
+addopts = [
+    "--doctest-modules"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "bench"
+]
+
+# =============================================================================
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "mercantile",
+  "click",
+  "typing_extensions",
+  "tomli",
+  "hypothesis",
+  "maturin",
+  "pytest",
+  "pytest-benchmark",
+  "pytest-cov",
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "ruff>=0.0.265",
+]
+[tool.hatch.envs.lint.scripts]
+typing = "mypy --install-types --non-interactive {args:utiles tests}"
+style = [
+  "ruff {args:.}",
+  "black --check --diff {args:.}",
+]
+fmt = [
+  "black {args:.}",
+  "ruff --fix {args:.}",
+  "style",
+]
+all = [
+  "style",
+  "typing",
+]
+
+[tool.black]
+target-version = ["py37"]
+line-length = 88
+
+[tool.ruff]
+target-version = "py37"
+line-length = 88
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+#  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+include = [
+  "python/utiles/**/*.{py,pyi}",
+  "tests/**/*.{py,pyi}",
+  "bench/**/*.{py,pyi}"
+]
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+]
+ignore = [
+  "A003",
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  #  shadowing builtins
+  "A002",
+  "E501", # line length
+  # type annotations union
+  "UP007",
+  # todo figure out if this is needed
+  "UP006",
+  # magic value cmp super annoying
+  "PLR2004",
+  "PLW0120",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.isort]
+known-first-party = ["utiles"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.coverage.run]
+source_pkgs = ["utiles", "tests"]
+branch = true
+parallel = true
+omit = [
+  "python/utiles/__about__.py",
+]
+
+[tool.coverage.paths]
+utiles = ["utiles", "*/utiles/utiles"]
+tests = ["tests", "*/utiles/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true

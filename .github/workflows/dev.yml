@@ -1,0 +1,53 @@
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [x86_64, x86, aarch64, armv7]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist --find-interpreter
+          sccache: "true"
+          manylinux: auto
+
+      - name: pytest
+        if: ${{ startsWith(matrix.target, 'x86_64') }}
+        shell: bash
+        run: |
+          set -e
+          pip install utiles --find-links dist --force-reinstall
+          pip install -r requirements/dev.txt
+          pytest
+#      - name: pytest
+#        if: ${{ !startsWith(matrix.target, 'x86') && matrix.target != 'ppc64' }}
+#        uses: uraimo/run-on-arch-action@v2.5.0
+#        with:
+#          arch: ${{ matrix.target }}
+#          distro: ubuntu22.04
+#          githubToken: ${{ github.token }}
+#          install: |
+#            apt-get update
+#            apt-get install -y --no-install-recommends python3 python3-pip
+#            pip3 install -U pip pytest
+#            pip3 install -r requirements/dev.txt
+#          run: |
+#            set -e
+#            pip3 install utiles --find-links dist --force-reinstall
+#            pip3 install -r requirements/dev.txt

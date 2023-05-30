@@ -1,0 +1,14 @@
+black
+isort
+maturin
+mypy
+nox
+pytest
+ruff
+tomli
+hypothesis
+mercantile
+typing_extensions
+pytest
+pytest-benchmark
+pytest-cov
