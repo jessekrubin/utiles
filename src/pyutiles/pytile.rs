@@ -5,7 +5,7 @@ use crate::pyutiles::pyiters::IntIterator;
 use crate::pyutiles::tuple_slice;
 use crate::utiles::{BBox, Tile};
 
-use crate::{utiles, PyLngLat, PyLngLatBbox, TileTuple};
+use crate::{utiles, TileTuple};
 use pyo3::basic::CompareOp;
 use pyo3::types::PyType;
 
@@ -17,6 +17,8 @@ use pyo3::{
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 
+use crate::pyutiles::pylnglat::PyLngLat;
+use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
 use std::hash::{Hash, Hasher};
 
 /// `PyTile` macro to create a new tile.

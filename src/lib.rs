@@ -6,7 +6,10 @@ use pyo3::exceptions::{self, PyValueError};
 
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple, PyType};
+use pyutiles::pybbox::PyBbox;
 use pyutiles::pyiters::{CoordinateIterator, FloatIterator};
+use pyutiles::pylnglat::PyLngLat;
+use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
 
 use utiles::zoom::ZoomOrZooms;
@@ -15,23 +18,6 @@ use utiles::libtiletype;
 
 mod pyutiles;
 mod utiles;
-
-#[pyclass(name = "LngLat")]
-pub struct PyLngLat {
-    lnglat: utiles::LngLat,
-}
-
-#[pyclass(name = "LngLatBbox")]
-#[derive(Clone)]
-pub struct PyLngLatBbox {
-    pub bbox: BBox,
-}
-
-#[pyclass(name = "Bbox")]
-#[derive(Clone)]
-pub struct PyBbox {
-    pub bbox: BBox,
-}
 
 #[derive(FromPyObject)]
 pub struct TileTuple(u32, u32, u8);
@@ -48,409 +34,9 @@ impl From<Vec<u32>> for TileTuple {
     }
 }
 
-#[pymethods]
-impl PyLngLat {
-    #[new]
-    fn new(lng: f64, lat: f64) -> Self {
-        Self {
-            lnglat: utiles::LngLat::new(lng, lat),
-        }
-    }
-
-    #[classmethod]
-    fn from_tile(_cls: &PyType, tile: &PyTile) -> PyResult<Self> {
-        let ll = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Ok(Self::new(ll.lng(), ll.lat()))
-    }
-
-    fn __repr__(&self) -> String {
-        format!("LngLat(lng={}, lat={})", self._lng(), self._lat())
-    }
-
-    fn _lng(&self) -> f64 {
-        self.lnglat.lng()
-    }
-
-    fn _lat(&self) -> f64 {
-        self.lnglat.lat()
-    }
-
-    #[getter]
-    fn lng(&self) -> PyResult<f64> {
-        Ok(self._lng())
-    }
-
-    #[getter]
-    fn lat(&self) -> PyResult<f64> {
-        Ok(self._lat())
-    }
-
-    fn __str__(&self) -> String {
-        self.__repr__()
-    }
-
-    fn __richcmp__(&self, other: &PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
-        let maybetuple = other.extract::<(f64, f64)>();
-        if let Ok(tuple) = maybetuple {
-            match op {
-                CompareOp::Eq => {
-                    (self._lng() == tuple.0 && self._lat() == tuple.1).into_py(py)
-                }
-                CompareOp::Ne => {
-                    (self._lng() != tuple.0 || self._lat() != tuple.1).into_py(py)
-                }
-                CompareOp::Lt => {
-                    (self._lng() < tuple.0 || self._lat() < tuple.1).into_py(py)
-                }
-                _ => py.NotImplemented(),
-            }
-        } else {
-            let other = other.extract::<PyRef<PyLngLat>>().unwrap();
-            match op {
-                CompareOp::Eq => (self._lng() == other._lng()
-                    && self._lat() == other._lat())
-                .into_py(py),
-                CompareOp::Ne => (self._lng() != other._lng()
-                    || self._lat() != other._lat())
-                .into_py(py),
-                CompareOp::Lt => (self._lng() < other._lng()
-                    || self._lat() < other._lat())
-                .into_py(py),
-                _ => py.NotImplemented(),
-            }
-        }
-    }
-
-    fn __len__(&self) -> usize {
-        2
-    }
-
-    fn members(&self) -> (f64, f64) {
-        self.tuple()
-    }
-
-    fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
-        match idx {
-            0 => Ok(self._lng()),
-            1 => Ok(self._lat()),
-            -1 => Ok(self._lat()),
-            -2 => Ok(self._lng()),
-            2 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-
-            _ => panic!("Index {idx} out of range for tile"),
-        }
-    }
-
-    fn tuple(&self) -> (f64, f64) {
-        (self._lng(), self._lat())
-    }
-}
-
-#[pymethods]
-impl PyLngLatBbox {
-    #[new]
-    fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
-        PyLngLatBbox {
-            bbox: BBox {
-                north,
-                south,
-                east,
-                west,
-            },
-        }
-    }
-
-    fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<FloatIterator>> {
-        let iter = FloatIterator {
-            iter: Box::new(
-                vec![
-                    slf.bbox.west(),
-                    slf.bbox.south(),
-                    slf.bbox.east(),
-                    slf.bbox.north(),
-                ]
-                .into_iter(),
-            ),
-        };
-        Py::new(slf.py(), iter)
-    }
-
-    fn __repr__(&self) -> String {
-        format!(
-            "LngLatBbox(west={}, south={}, east={}, north={})",
-            self.bbox.west(),
-            self.bbox.south(),
-            self.bbox.east(),
-            self.bbox.north()
-        )
-    }
-
-    fn __str__(&self) -> String {
-        self.__repr__()
-    }
-
-    #[classmethod]
-    fn from_tile(_cls: &PyType, tile: &PyTile) -> PyResult<Self> {
-        let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Ok(Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat()))
-    }
-
-    #[getter]
-    fn west(&self) -> PyResult<f64> {
-        Ok(self.bbox.west())
-    }
-
-    #[getter]
-    fn south(&self) -> PyResult<f64> {
-        Ok(self.bbox.south())
-    }
-
-    #[getter]
-    fn east(&self) -> PyResult<f64> {
-        Ok(self.bbox.east())
-    }
-
-    #[getter]
-    fn north(&self) -> PyResult<f64> {
-        Ok(self.bbox.north())
-    }
-
-    fn members(&self) -> (f64, f64, f64, f64) {
-        self.tuple()
-    }
-
-    fn __len__(&self) -> usize {
-        4
-    }
-
-    fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
-        match idx {
-            0 => Ok(self.bbox.west),
-            1 => Ok(self.bbox.south),
-            2 => Ok(self.bbox.east),
-            3 => Ok(self.bbox.north),
-            -1 => Ok(self.bbox.north),
-            -2 => Ok(self.bbox.east),
-            -3 => Ok(self.bbox.south),
-            -4 => Ok(self.bbox.west),
-            4 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-
-            _ => panic!("Index {idx} out of range for tile"),
-        }
-    }
-
-    fn tuple(&self) -> (f64, f64, f64, f64) {
-        self.bbox.tuple()
-    }
-
-    fn __richcmp__(&self, other: &PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
-        // fn __richcmp__(&self, other: PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
-        let maybetuple = other.extract::<(f64, f64, f64, f64)>();
-
-        if let Ok(tuple) = maybetuple {
-            match op {
-                CompareOp::Eq => (self.bbox.west() == tuple.0
-                    && self.bbox.south() == tuple.1
-                    && self.bbox.east() == tuple.2
-                    && self.bbox.north() == tuple.3)
-                    .into_py(py),
-                CompareOp::Ne => (self.bbox.west() != tuple.0
-                    || self.bbox.south() != tuple.1
-                    || self.bbox.east() != tuple.2
-                    || self.bbox.north() != tuple.3)
-                    .into_py(py),
-                CompareOp::Lt => (self.bbox.west() < tuple.0
-                    || self.bbox.south() < tuple.1
-                    || self.bbox.east() < tuple.2
-                    || self.bbox.north() < tuple.3)
-                    .into_py(py),
-                _ => py.NotImplemented(),
-            }
-        } else {
-            let other = other.extract::<PyRef<PyLngLatBbox>>().unwrap();
-            match op {
-                CompareOp::Eq => (self.bbox.west() == other.bbox.west()
-                    && self.bbox.south() == other.bbox.south()
-                    && self.bbox.east() == other.bbox.east()
-                    && self.bbox.north() == other.bbox.north())
-                .into_py(py),
-                CompareOp::Ne => (self.bbox.west != other.bbox.west()
-                    || self.bbox.south() != other.bbox.south()
-                    || self.bbox.east() != other.bbox.east()
-                    || self.bbox.north() != other.bbox.north())
-                .into_py(py),
-                CompareOp::Lt => (self.bbox.west() < other.bbox.west()
-                    || self.bbox.south() < other.bbox.south()
-                    || self.bbox.east() < other.bbox.east()
-                    || self.bbox.north() < other.bbox.north())
-                .into_py(py),
-                _ => py.NotImplemented(),
-            }
-        }
-    }
-}
-
-#[pymethods]
-impl PyBbox {
-    #[new]
-    fn new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
-        PyBbox {
-            bbox: BBox {
-                west: left,
-                south: bottom,
-                east: right,
-                north: top,
-            },
-        }
-    }
-
-    #[classmethod]
-    fn from_tile(_cls: &PyType, tile: &PyTile) -> PyResult<Self> {
-        let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Ok(Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat()))
-    }
-
-    fn __str__(&self) -> String {
-        format!(
-            "Bbox(left={}, bottom={}, right={}, top={})",
-            self.bbox.left(),
-            self.bbox.bottom(),
-            self.bbox.right(),
-            self.bbox.top()
-        )
-    }
-
-    fn __repr__(&self) -> String {
-        self.__str__()
-    }
-
-    #[getter]
-    fn left(&self) -> PyResult<f64> {
-        Ok(self.bbox.left())
-    }
-
-    #[getter]
-    fn bottom(&self) -> PyResult<f64> {
-        Ok(self.bbox.bottom())
-    }
-
-    #[getter]
-    fn right(&self) -> PyResult<f64> {
-        Ok(self.bbox.right())
-    }
-
-    #[getter]
-    fn top(&self) -> PyResult<f64> {
-        Ok(self.bbox.top())
-    }
-
-    #[getter]
-    fn west(&self) -> f64 {
-        self.bbox.left()
-    }
-
-    #[getter]
-    fn south(&self) -> f64 {
-        self.bbox.bottom()
-    }
-
-    #[getter]
-    fn east(&self) -> f64 {
-        self.bbox.right()
-    }
-
-    #[getter]
-    fn north(&self) -> f64 {
-        self.bbox.top()
-    }
-
-    fn members(&self) -> (f64, f64, f64, f64) {
-        self.tuple()
-    }
-
-    fn tuple(&self) -> (f64, f64, f64, f64) {
-        self.bbox.tuple()
-    }
-
-    fn __len__(&self) -> usize {
-        4
-    }
-
-    fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
-        match idx {
-            0 => Ok(self.bbox.left()),
-            1 => Ok(self.bbox.bottom()),
-            2 => Ok(self.bbox.right()),
-            3 => Ok(self.bbox.top()),
-            -1 => Ok(self.bbox.top()),
-            -2 => Ok(self.bbox.right()),
-            -3 => Ok(self.bbox.bottom()),
-            -4 => Ok(self.bbox.left()),
-            4 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-            _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
-                "index out of range (must be -4..4)",
-            )),
-        }
-    }
-
-    fn __richcmp__(&self, other: &PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
-        // fn __richcmp__(&self, other: PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
-        let maybetuple = other.extract::<(f64, f64, f64, f64)>();
-
-        if let Ok(tuple) = maybetuple {
-            match op {
-                CompareOp::Eq => (self.bbox.left() == tuple.0
-                    && self.bbox.bottom() == tuple.1
-                    && self.bbox.right() == tuple.2
-                    && self.bbox.top() == tuple.3)
-                    .into_py(py),
-                CompareOp::Ne => (self.bbox.left() != tuple.0
-                    || self.bbox.bottom() != tuple.1
-                    || self.bbox.right() != tuple.2
-                    || self.bbox.top() != tuple.3)
-                    .into_py(py),
-                CompareOp::Lt => (self.bbox.left() < tuple.0
-                    || self.bbox.bottom() < tuple.1
-                    || self.bbox.right() < tuple.2
-                    || self.bbox.top() < tuple.3)
-                    .into_py(py),
-                _ => py.NotImplemented(),
-            }
-        } else {
-            let other = other.extract::<PyRef<PyBbox>>().unwrap();
-            match op {
-                CompareOp::Eq => (self.bbox.left() == other.bbox.left()
-                    && self.bbox.bottom() == other.bbox.bottom()
-                    && self.bbox.right() == other.bbox.right()
-                    && self.bbox.top() == other.bbox.top())
-                .into_py(py),
-                CompareOp::Ne => (self.bbox.left() != other.bbox.left()
-                    || self.bbox.bottom() != other.bbox.bottom()
-                    || self.bbox.right() != other.bbox.right()
-                    || self.bbox.top() != other.bbox.top())
-                .into_py(py),
-                CompareOp::Lt => (self.bbox.left() < other.bbox.left()
-                    || self.bbox.bottom() < other.bbox.bottom()
-                    || self.bbox.right() < other.bbox.right()
-                    || self.bbox.top() < other.bbox.top())
-                .into_py(py),
-                _ => py.NotImplemented(),
-            }
-        }
-    }
-}
-
 impl From<PyLngLatBbox> for BBox {
     fn from(val: PyLngLatBbox) -> Self {
         val.bbox
-    }
-}
-
-impl From<utiles::LngLat> for PyLngLat {
-    fn from(val: utiles::LngLat) -> Self {
-        Self { lnglat: val }
     }
 }
 
@@ -461,7 +47,6 @@ fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
             "zoom must be between 0 and 32: {zoom}"
         )))?;
     }
-    // let zoom = zoom.try_into().unwrap();
     Ok(utiles::minmax(zoom as u32))
 }
 
@@ -630,7 +215,6 @@ fn ul(args: &PyTuple) -> PyResult<PyLngLat> {
 
 #[pyfunction]
 fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
-    // let trunc = truncate.unwrap_or(false);
     let xy = utiles::xy(lng, lat, truncate);
     Ok(xy)
 }
@@ -650,7 +234,6 @@ fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
             "Invalid latitude: {lat}"
         )))?,
     }
-    // Ok(xy)
 }
 
 #[pyfunction]
