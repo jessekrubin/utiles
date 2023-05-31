@@ -19,7 +19,7 @@ use std::collections::hash_map::DefaultHasher;
 
 use std::hash::{Hash, Hasher};
 
-/// PyTile macro to create a new tile.
+/// `PyTile` macro to create a new tile.
 ///  - do you need this? probably not
 ///  - Did I write to to figure out how to write a macro? yes
 #[macro_export]
@@ -54,7 +54,7 @@ impl PyTile {
         let json = serde_json::to_string(&self.xyz);
         match json {
             Ok(json) => json,
-            Err(e) => format!("Error: {}", e),
+            Err(e) => format!("Error: {e}"),
         }
     }
 
@@ -75,13 +75,15 @@ impl PyTile {
         let mut map = HashMap::new();
         map.insert("x", self.xyz.x());
         map.insert("y", self.xyz.y());
-        map.insert("z", self.xyz.z() as u32);
+        map.insert("z", u32::from(self.xyz.z()));
         map
     }
 
     pub fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<IntIterator>> {
         let iter = IntIterator {
-            iter: Box::new(vec![slf.xyz.x, slf.xyz.y, slf.xyz.z as u32].into_iter()),
+            iter: Box::new(
+                vec![slf.xyz.x, slf.xyz.y, u32::from(slf.xyz.z)].into_iter(),
+            ),
         };
         Py::new(slf.py(), iter)
     }
@@ -185,7 +187,7 @@ impl PyTile {
     }
 
     pub fn members(&self) -> Vec<u32> {
-        vec![self.xyz.x, self.xyz.y, self.xyz.z as u32]
+        vec![self.xyz.x, self.xyz.y, u32::from(self.xyz.z)]
     }
 
     pub fn __getitem__(
@@ -208,8 +210,8 @@ impl PyTile {
             tuple_slice::SliceOrInt::Int(idx) => match idx {
                 0 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.x)),
                 1 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.y)),
-                2 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.z as u32)),
-                -1 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.z as u32)),
+                2 => Ok(tuple_slice::TupleSliceResult::It(u32::from(self.xyz.z))),
+                -1 => Ok(tuple_slice::TupleSliceResult::It(u32::from(self.xyz.z))),
                 -2 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.y)),
                 -3 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.x)),
                 3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
@@ -222,10 +224,10 @@ impl PyTile {
         let (west, south, east, north) = self.xyz.bounds();
         PyLngLatBbox {
             bbox: BBox {
-                west,
+                north,
                 south,
                 east,
-                north,
+                west,
             },
         }
     }
@@ -403,7 +405,7 @@ impl PyTile {
         .collect::<HashMap<String, PyObject>>();
 
         // Create the feature dictionary
-        let xyz = format!("({}, {}, {})", x, y, z).into_py(py);
+        let xyz = format!("({x}, {y}, {z})").into_py(py);
         let mut feature_dict = HashMap::new();
         feature_dict.insert("type".to_string(), "Feature".to_object(py));
         feature_dict.insert("bbox".to_string(), bbox.to_object(py));

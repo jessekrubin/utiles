@@ -152,10 +152,10 @@ impl PyLngLatBbox {
     fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         PyLngLatBbox {
             bbox: BBox {
-                west,
+                north,
                 south,
                 east,
-                north,
+                west,
             },
         }
     }
@@ -930,14 +930,14 @@ fn _coords(_py: Python, obj: &PyAny) -> PyResult<CoordinateIterator> {
             })
         }
         CoordsExtractor::IntTuple3d(t) => {
-            let iter = vec![(t.0 as f64, t.1 as f64)];
+            let iter = vec![(f64::from(t.0), f64::from(t.1))];
             Ok(CoordinateIterator {
                 iter: Box::new(iter.into_iter()),
             })
         }
         CoordsExtractor::IntTuple2d(t) => {
             // return an iterator of the tuple
-            let iter = vec![(t.0 as f64, t.1 as f64)];
+            let iter = vec![(f64::from(t.0), f64::from(t.1))];
             Ok(CoordinateIterator {
                 iter: Box::new(iter.into_iter()),
             })
@@ -953,7 +953,7 @@ fn _coords(_py: Python, obj: &PyAny) -> PyResult<CoordinateIterator> {
                 });
             }
             let mut coordsvec: Vec<(f64, f64)> = Vec::new();
-            for item in l.iter() {
+            for item in &l {
                 let c = _coords(_py, item)?;
                 let cv = c.iter.collect::<Vec<_>>();
                 coordsvec.extend(cv)
@@ -1051,7 +1051,7 @@ fn simplify(_py: Python, args: &PyTuple) -> PyResult<HashSet<PyTile>> {
     // Ensure that tiles are sorted by zoom so parents are encountered first.
     // If so, discard the child (it's covered in the parent)
     let mut root_set: HashSet<PyTile> = HashSet::new();
-    for tile in _tiles.iter() {
+    for tile in &_tiles {
         let mut is_new_tile = true;
         for i in 0..tile.xyz.z {
             let supertile = tile.parent(Some(i));

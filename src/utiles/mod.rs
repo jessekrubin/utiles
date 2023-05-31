@@ -57,9 +57,9 @@ impl traits::Utiles<LngLat, BBox> for Tile {
 }
 
 pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
-    let z2 = 2_u32.pow(z as u32) as f64;
-    let lon_deg = (x as f64 / z2) * 360.0 - 180.0;
-    let lat_rad = ((1.0 - 2.0 * y as f64 / z2) * PI).sinh().atan();
+    let z2 = f64::from(2_u32.pow(u32::from(z)));
+    let lon_deg = (f64::from(x) / z2) * 360.0 - 180.0;
+    let lat_rad = ((1.0 - 2.0 * f64::from(y) / z2) * PI).sinh().atan();
 
     let lat_deg = lat_rad.to_degrees();
     (lon_deg, lat_deg)
@@ -147,7 +147,12 @@ impl From<(f64, f64, f64, f64)> for BBox {
 impl From<(i32, i32, i32, i32)> for BBox {
     fn from(bbox: (i32, i32, i32, i32)) -> Self {
         // convert to f64
-        let bbox = (bbox.0 as f64, bbox.1 as f64, bbox.2 as f64, bbox.3 as f64);
+        let bbox = (
+            f64::from(bbox.0),
+            f64::from(bbox.1),
+            f64::from(bbox.2),
+            f64::from(bbox.3),
+        );
         BBox {
             north: bbox.0,
             south: bbox.1,
@@ -333,13 +338,13 @@ pub fn minmax(zoom: u32) -> (u32, u32) {
 }
 
 pub fn valid(x: u32, y: u32, z: u8) -> bool {
-    let (minx, maxx) = minmax(z as u32);
-    let (miny, maxy) = minmax(z as u32);
+    let (minx, maxx) = minmax(u32::from(z));
+    let (miny, maxy) = minmax(u32::from(z));
     x >= minx && x <= maxx && y >= miny && y <= maxy
 }
 
 pub fn flipy(y: u32, z: u8) -> u32 {
-    2_u32.pow(z as u32) - 1 - y
+    2_u32.pow(u32::from(z)) - 1 - y
 }
 
 pub fn get_bbox_zoom(bbox: (u32, u32, u32, u32)) -> u8 {
@@ -586,7 +591,7 @@ fn _tile_edge_info(x: u32, y: u32, z: u8) -> TileEdgeInfo {
     if x == 0 && y == 0 {
         return TileEdgeInfo::TopLeft;
     }
-    let max_xy = 2u32.pow(z as u32);
+    let max_xy = 2u32.pow(u32::from(z));
     if x == max_xy && y == 0 {
         return TileEdgeInfo::TopRight;
     }
@@ -830,7 +835,7 @@ impl Tile {
         match res {
             Ok(tile) => tile,
             Err(e) => {
-                panic!("Invalid quadkey: {}", e);
+                panic!("Invalid quadkey: {e}");
             }
         }
     }
@@ -853,10 +858,10 @@ impl Tile {
         let (x, y) = match xy {
             Ok(xy) => xy,
             Err(e) => {
-                panic!("Invalid lnglat: {}", e);
+                panic!("Invalid lnglat: {e}");
             }
         };
-        let z2 = 2.0_f64.powi(zoom as i32);
+        let z2 = 2.0_f64.powi(i32::from(zoom));
         let z2f = z2;
         let xtile = if x <= 0.0 {
             0
@@ -998,10 +1003,10 @@ impl From<Tile> for (u32, u32, u8) {
 }
 
 pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
-    let tile_size = EARTH_CIRCUMFERENCE / 2.0_f64.powi(z as i32);
-    let left = x as f64 * tile_size - EARTH_CIRCUMFERENCE / 2.0;
+    let tile_size = EARTH_CIRCUMFERENCE / 2.0_f64.powi(i32::from(z));
+    let left = f64::from(x) * tile_size - EARTH_CIRCUMFERENCE / 2.0;
     let right = left + tile_size;
-    let top = EARTH_CIRCUMFERENCE / 2.0 - y as f64 * tile_size;
+    let top = EARTH_CIRCUMFERENCE / 2.0 - f64::from(y) * tile_size;
     let bottom = top - tile_size;
     WebMercatorBbox {
         left,
@@ -1149,8 +1154,8 @@ pub fn tiles(
         .map(|bbox| {
             // clip to web mercator extent
             BBox {
-                north: bbox.north.min(85.051129),
-                south: bbox.south.max(-85.051129),
+                north: bbox.north.min(85.051_129),
+                south: bbox.south.max(-85.051_129),
                 east: bbox.east.min(180.0),
                 west: bbox.west.max(-180.0),
             }
@@ -1222,7 +1227,7 @@ pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
     // Ensure that tiles are sorted by zoom so parents are encountered first.
     // If so, discard the child (it's covered in the parent)
     let mut root_set: HashSet<Tile> = HashSet::new();
-    for tile in _tiles.iter() {
+    for tile in &_tiles {
         let mut is_new_tile = true;
         for i in 0..tile.z {
             let supertile = tile.parent(Some(i));
