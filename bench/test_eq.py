@@ -1,11 +1,14 @@
-import utiles
-from pytest_benchmark.fixture import BenchmarkFixture
 from typing import Any
+
+from pytest_benchmark.fixture import BenchmarkFixture
+
+import utiles
+
 
 def test_tile_equality() -> None:
     t = (1, 2, 3)
     tile_obj = utiles.from_tuple(t)
-    assert tile_obj == t
+    assert tile_obj == t  # noqa: S101
 
 
 def _equal(a: Any, b: Any) -> bool:
@@ -15,7 +18,6 @@ def _equal(a: Any, b: Any) -> bool:
 def test_tile_equality_tuple2tuple(benchmark: BenchmarkFixture) -> None:
     t = (1, 2, 3)
     t2 = (1, 2, 3)
-    # tile_obj = utiles.from_tuple(t)
     benchmark(_equal, t, t2)
 
 

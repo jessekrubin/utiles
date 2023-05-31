@@ -1,11 +1,13 @@
 from __future__ import annotations
-from pathlib import Path
-import utiles
-import pytest
-from typing import Tuple, Any, Union, List
 
+from pathlib import Path
+from typing import Any, List, Tuple, Union
+
+import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 from typing_extensions import TypedDict
+
+import utiles
 from utiles import Tile
 
 PWD = Path(__file__).parent
@@ -46,7 +48,7 @@ def test_quadkey(tile: Tuple[int, int, int], quadkey: str) -> None:
 
     utiles_qk = utiles.xyz2quadkey(*tile)
     assert utiles_qk == quadkey, f"utiles: {utiles_qk} ~ mercantile: {quadkey}"
-    assert utiles.xyz2quadkey(0, 0, 0) == ""
+    assert utiles.xyz2quadkey(0, 0, 0) == ""  # noqa: PLC1901
     assert utiles.xyz2quadkey(1, 0, 1) == "1"
     assert utiles.quadkey(utiles.Tile(1, 0, 1)) == "1"
     assert utiles.xyz2quadkey(1, 1, 1) == "3"
@@ -241,3 +243,29 @@ def test_parse_tile_arg() -> None:
     assert utiles.parse_tile_arg(toop) == tile_obj
     assert utiles.parse_tile_arg(1, 2, 3) == tile_obj
     assert utiles.parse_tile_arg(utiles.Tile(1, 2, 3)) == tile_obj
+
+
+def test_tile_feature() -> None:
+    t = utiles.Tile(1, 2, 3)
+    f = utiles.feature(t, props={"x": 1, "y": 2, "z": 3})
+    expected = {
+        "bbox": [-135.0, 40.97989806962013, -90.0, 66.51326044311186],
+        "type": "Feature",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [-135.0, 40.97989806962013],
+                    [-135.0, 66.51326044311186],
+                    [-90.0, 66.51326044311186],
+                    [-90.0, 40.97989806962013],
+                    [-135.0, 40.97989806962013],
+                ]
+            ],
+        },
+        "id": "(1, 2, 3)",
+        "properties": {"title": "XYZ tile (1, 2, 3)", "z": 3, "y": 2, "x": 1},
+    }
+
+    assert f == expected
+    assert t.feature(props={"x": 1, "y": 2, "z": 3}) == expected

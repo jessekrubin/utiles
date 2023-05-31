@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable, Tuple, Any, Union, List
+from typing import Any, Callable, List, Tuple, Union
 
 import mercantile
 import pytest
@@ -47,9 +47,9 @@ tile_pytest_params = pytest.mark.parametrize(
     group="quadkey",
 )
 def test_quadkey_bench(
-        tile: Tuple[int, int, int],
-        func: Callable[[Tuple[int, int, int]], str],
-        benchmark: BenchmarkFixture,
+    tile: Tuple[int, int, int],
+    func: Callable[[Tuple[int, int, int]], str],
+    benchmark: BenchmarkFixture,
 ) -> None:
     benchmark(func, *tile)
 
@@ -69,9 +69,9 @@ def test_quadkey_bench(
     group="ul",
 )
 def test_ul_bench(
-        tile: Tuple[int, int, int],
-        func: Callable[[Tuple[int, int, int]], Tuple[float, float]],
-        benchmark: BenchmarkFixture,
+    tile: Tuple[int, int, int],
+    func: Callable[[Tuple[int, int, int]], Tuple[float, float]],
+    benchmark: BenchmarkFixture,
 ) -> None:
     benchmark(func, *tile)
 
@@ -123,11 +123,11 @@ def test_tiles_gen_bench(func: Callable[[], None], benchmark: BenchmarkFixture) 
 # COORDS BENCH ~ COORDS BENCH ~ COORDS BENCH ~ COORDS BENCH ~ COORDS BENCH
 # ========================================================================
 def mercantile_coords(obj: Any) -> None:
-    assert list(mercantile._coords(obj)) == [(1, 2)]
+    assert list(mercantile._coords(obj)) == [(1, 2)]  # noqa: S101
 
 
 def utiles_coords(obj: Any) -> None:
-    assert list(utiles._coords(obj)) == [(1, 2)]
+    assert list(utiles._coords(obj)) == [(1, 2)]  # noqa: S101
 
 
 @pytest.mark.benchmark(
@@ -151,8 +151,27 @@ def utiles_coords(obj: Any) -> None:
         pytest.param(utiles_coords, id="utiles"),
     ],
 )
-def test_coords(func: Callable[
-    [Any], Union[Tuple[float, float], List[Tuple[float, float]]]
-], obj: Any, benchmark: BenchmarkFixture) -> None:
+def test_coords(
+    func: Callable[[Any], Union[Tuple[float, float], List[Tuple[float, float]]]],
+    obj: Any,
+    benchmark: BenchmarkFixture,
+) -> None:
     """Get coordinates of mock geojson objects"""
     benchmark(func, obj)
+
+
+@pytest.mark.benchmark(
+    group="feature",
+)
+@pytest.mark.parametrize(
+    "func",
+    [
+        pytest.param(mercantile.feature, id="mercantile"),
+        pytest.param(utiles.feature, id="utiles"),
+    ],
+)
+def test_feature(
+    func: Callable[[mercantile.Tile], dict], benchmark: BenchmarkFixture
+) -> None:
+    """Get feature of tile"""
+    benchmark(func, mercantile.Tile(1, 2, 3))

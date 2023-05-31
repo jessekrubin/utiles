@@ -1,6 +1,8 @@
-from typing import Union
-import pytest
 from pathlib import Path
+from typing import Union
+
+import pytest
+
 import utiles
 
 Extensions = Union[str, bool]

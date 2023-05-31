@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Union, Tuple, List
+from typing import Any, List, Tuple, Union
 
 import pytest
 from hypothesis import example, given
-from hypothesis.strategies import composite, integers, SearchStrategy
+from hypothesis.strategies import SearchStrategy, composite, integers
+
 import utiles
 import utiles as mercantile
 
@@ -110,7 +111,6 @@ def test_xy_bounds(args: TileArgs) -> None:
 
 def test_tile_not_truncated() -> None:
     tile = mercantile.tile(20.6852, 40.1222, 9)
-    print(tile)
     expected = (285, 193)
     assert tile[0] == expected[0]
     assert tile[1] == expected[1]
@@ -336,7 +336,7 @@ def test_child_bad_tile_zoom() -> None:
 
 
 def test_parent_fractional_tile() -> None:
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError):
         mercantile.parent((243.3, 166.2, 9), zoom=1)  # type: ignore
 
 
@@ -344,13 +344,13 @@ def test_parent_fractional_tile() -> None:
 
 
 def test_parent_fractional_zoom() -> None:
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError):
         mercantile.parent((243, 166, 9), zoom=1.2)  # type: ignore
     # assert "zoom must be an integer and less than" in str(e.value)
 
 
 def test_parent_bad_tile_zoom() -> None:
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError):
         mercantile.parent((243.3, 166.2, 9), zoom=10)  # type: ignore
     # assert "zoom must be an integer and less than" in str(e.value)
 
@@ -407,7 +407,6 @@ def test_simplify_removal() -> None:
     ]
     tiles = mercantile.parse_tiles(tiles_tuples)
     simplified = mercantile.simplify(tiles)
-    print(simplified)
     assert mercantile.Tile(1298, 3129, 13) not in simplified, "Tile covered by a parent"
     assert mercantile.Tile(650, 1564, 12) in simplified, "Highest-level tile"
     assert mercantile.Tile(649, 1564, 12) in simplified, "Also highest-level tile"
@@ -427,7 +426,6 @@ def test_bounding_tile(
     bounds: Union[Tuple[int, int, int, int], Tuple[float, float, float, float]],
     tile: Tuple[int, int, int],
 ) -> None:
-    print(f"bounds: {bounds} -> tile: {tile}")
     assert mercantile.bounding_tile(*bounds) == mercantile.Tile(*tile)
 
 
@@ -490,10 +488,11 @@ def test_arg_parse_error(
         mercantile._parse_tile_arg(*args)
 
 
+_zooms = integers(min_value=0, max_value=28)
+
+
 @composite
-def tiles(
-    draw: Any, zooms: SearchStrategy[int] = integers(min_value=0, max_value=28)
-) -> mercantile.Tile:
+def tiles(draw: Any, zooms: SearchStrategy[int] = _zooms) -> mercantile.Tile:
     z = draw(zooms)
     x = draw(integers(min_value=0, max_value=2**z - 1))
     y = draw(integers(min_value=0, max_value=2**z - 1))

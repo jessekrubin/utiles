@@ -2,7 +2,7 @@ pub fn xyz2id(x: u32, y: u32, z: u8) -> u64 {
     if z == 0 {
         return 0;
     }
-    let base_id: u64 = 1 + (1..z).map(|i| 4u64.pow(i as u32)).sum::<u64>();
+    let base_id: u64 = 1 + (1..z).map(|i| 4u64.pow(u32::from(i))).sum::<u64>();
     let h = fast_hilbert::xy2h(x, y, z);
     base_id + h
 }
