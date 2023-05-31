@@ -1,6 +1,7 @@
+from collections import Counter
+
 import utiles
 from utiles import libutiles
-from collections import Counter
 
 
 def test_import() -> None:
@@ -42,11 +43,10 @@ def test_missing_from_libutiles() -> None:
         )
     )
 
-    libutiles_imports_str = "\n".join(
-        [f"from utiles.libutiles import {el}" for el in all_tuple]
-    )
+    "\n".join([f"from utiles.libutiles import {el}" for el in all_tuple])
     if missing:
-        raise AssertionError(f"Missing from libutiles: {missing}")
+        msg = f"Missing from libutiles: {missing}"
+        raise AssertionError(msg)
     # print(libutiles_imports_str)
 
 

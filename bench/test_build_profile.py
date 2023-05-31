@@ -1,5 +1,6 @@
-import utiles
 import warnings
+
+import utiles
 
 
 def test_check_build_profile() -> None:

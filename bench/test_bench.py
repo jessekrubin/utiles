@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable, Tuple, Any, Union, List
+from typing import Any, Callable, List, Tuple, Union
 
 import mercantile
 import pytest
