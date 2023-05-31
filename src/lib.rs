@@ -7,7 +7,7 @@ use pyo3::exceptions::{self, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
 use pyutiles::pybbox::PyBbox;
-use pyutiles::pyiters::{CoordinateIterator};
+use pyutiles::pyiters::CoordinateIterator;
 use pyutiles::pylnglat::PyLngLat;
 use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
@@ -80,9 +80,9 @@ fn tiletype_str(buffer: &[u8]) -> String {
 }
 
 #[pyfunction]
-fn tiletype2headers(tiletype: usize) -> PyResult<Vec<(&'static str, &'static str)>> {
+fn tiletype2headers(tiletype: usize) -> Vec<(&'static str, &'static str)> {
     let headers = libtiletype::headers(libtiletype::const2enum(tiletype));
-    Ok(headers)
+    headers
 }
 
 #[pyfunction]
