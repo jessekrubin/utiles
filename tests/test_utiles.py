@@ -241,3 +241,30 @@ def test_parse_tile_arg() -> None:
     assert utiles.parse_tile_arg(toop) == tile_obj
     assert utiles.parse_tile_arg(1, 2, 3) == tile_obj
     assert utiles.parse_tile_arg(utiles.Tile(1, 2, 3)) == tile_obj
+
+
+def test_tile_feature() -> None:
+    t = utiles.Tile(1, 2, 3)
+    f = utiles.feature(t, props={"x": 1, "y": 2, "z": 3})
+    print(f)
+    expected = {
+        "bbox": [-135.0, 40.97989806962013, -90.0, 66.51326044311186],
+        "type": "Feature",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [-135.0, 40.97989806962013],
+                    [-135.0, 66.51326044311186],
+                    [-90.0, 66.51326044311186],
+                    [-90.0, 40.97989806962013],
+                    [-135.0, 40.97989806962013],
+                ]
+            ],
+        },
+        "id": "(1, 2, 3)",
+        "properties": {"title": "XYZ tile (1, 2, 3)", "z": 3, "y": 2, "x": 1},
+    }
+
+    assert f == expected
+    assert t.feature(props={"x": 1, "y": 2, "z": 3}) == expected

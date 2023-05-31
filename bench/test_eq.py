@@ -2,6 +2,7 @@ import utiles
 from pytest_benchmark.fixture import BenchmarkFixture
 from typing import Any
 
+
 def test_tile_equality() -> None:
     t = (1, 2, 3)
     tile_obj = utiles.from_tuple(t)
