@@ -1,19 +1,19 @@
-use std::collections::{HashMap, HashSet};
+
 
 use pyo3::class::basic::CompareOp;
-use pyo3::exceptions::{self, PyValueError};
+use pyo3::exceptions::{self};
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyTuple, PyType};
+use pyo3::types::{PyType};
 
 // use pyutiles::pyiters::{CoordinateIterator, FloatIterator};
 // use pyutiles::pytile::PyTile;
 use crate::pyutiles::pytile::PyTile;
-use utiles::libtiletype;
-use utiles::zoom::ZoomOrZooms;
-use utiles::LngLat;
+
+
+
 
 use crate::utiles;
-use crate::utiles::BBox;
+
 
 #[pyclass(name = "LngLat")]
 pub struct PyLngLat {

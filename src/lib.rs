@@ -1,13 +1,13 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::utiles::BBox;
-use pyo3::class::basic::CompareOp;
+
 use pyo3::exceptions::{self, PyValueError};
 
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyTuple, PyType};
+use pyo3::types::{PyDict, PyTuple};
 use pyutiles::pybbox::PyBbox;
-use pyutiles::pyiters::{CoordinateIterator, FloatIterator};
+use pyutiles::pyiters::{CoordinateIterator};
 use pyutiles::pylnglat::PyLngLat;
 use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
