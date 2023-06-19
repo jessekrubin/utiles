@@ -1,12 +1,12 @@
 use crate::pyutiles::pytile::PyTile;
-use crate::utiles;
-use crate::utiles::BBox;
 use pyo3::basic::CompareOp;
 use pyo3::types::PyType;
 use pyo3::{
     exceptions, pyclass, pymethods, IntoPy, PyAny, PyErr, PyObject, PyRef, PyResult,
     Python,
 };
+use utiles;
+use utiles::BBox;
 
 #[pyclass(name = "Bbox")]
 #[derive(Clone)]

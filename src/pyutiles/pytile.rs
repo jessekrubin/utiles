@@ -3,9 +3,11 @@ use std::collections::HashMap;
 
 use crate::pyutiles::pyiters::IntIterator;
 use crate::pyutiles::tuple_slice;
-use crate::utiles::{BBox, Tile};
+use crate::TileTuple;
+use utiles::{BBox, Tile};
 
-use crate::{utiles, TileTuple};
+use utiles;
+
 use pyo3::basic::CompareOp;
 use pyo3::types::PyType;
 
@@ -28,7 +30,7 @@ use std::hash::{Hash, Hasher};
 macro_rules! pytile {
     ($x:expr, $y:expr, $z:expr) => {
         PyTile {
-            xyz: utile!($x, $y, $z),
+            xyz: utiles::utile!($x, $y, $z),
         }
     };
 }
