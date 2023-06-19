@@ -1,7 +1,8 @@
 on:
   push:
     branches:
-      - dev
+      - "!main"
+      - "!master"
   pull_request:
   workflow_dispatch:
 
@@ -35,6 +36,7 @@ jobs:
           pip install utiles --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
+
 #      - name: pytest
 #        if: ${{ !startsWith(matrix.target, 'x86') && matrix.target != 'ppc64' }}
 #        uses: uraimo/run-on-arch-action@v2.5.0

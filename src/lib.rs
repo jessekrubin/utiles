@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::utiles::BBox;
+use utiles::BBox;
 
 use pyo3::exceptions::{self, PyValueError};
 
@@ -17,7 +17,7 @@ use utiles::zoom::ZoomOrZooms;
 use utiles::libtiletype;
 
 mod pyutiles;
-mod utiles;
+// mod utiles;
 
 #[derive(FromPyObject)]
 pub struct TileTuple(u32, u32, u8);
@@ -670,17 +670,17 @@ fn coords(py: Python, obj: &PyAny) -> PyResult<Vec<(f64, f64)>> {
     }
 }
 
-impl Iterator for utiles::LngLat {
-    type Item = (f64, f64);
+// impl Iterator for utiles::LngLat {
+//     type Item = (f64, f64);
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let lng = self.xy.x;
-        let lat = self.xy.y;
-        self.xy.x += 1.0;
-        self.xy.y += 1.0;
-        Some((lng, lat))
-    }
-}
+//     fn next(&mut self) -> Option<Self::Item> {
+//         let lng = self.xy.x;
+//         let lat = self.xy.y;
+//         self.xy.x += 1.0;
+//         self.xy.y += 1.0;
+//         Some((lng, lat))
+//     }
+// }
 
 #[pyfunction]
 fn geojson_bounds(py: Python, obj: &PyAny) -> PyResult<PyLngLatBbox> {
