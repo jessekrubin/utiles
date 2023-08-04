@@ -95,6 +95,7 @@ __all__ = (
     "simplify",
     "tile",
     "tiles",
+    "tiles_count",
     "tiles_list",
     "tiletype",
     "tiletype2headers",

@@ -814,12 +814,20 @@ impl Tile {
         Tile::new(x, y, z)
     }
 
-    pub fn fmt_zxy(&self) -> String {
-        format!("{}/{}/{}", self.z, self.x, self.y)
+    pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
+        match sep {
+            Some(sep) => format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y),
+            None => format!("{}/{}/{}", self.z, self.x, self.y),
+        }
     }
 
-    pub fn fmt_zxy_ext(&self, ext: &str) -> String {
-        format!("{}/{}/{}.{}", self.z, self.x, self.y, ext)
+    pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
+        match sep {
+            Some(sep) => {
+                format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext)
+            }
+            None => format!("{}/{}/{}.{}", self.z, self.x, self.y, ext),
+        }
     }
 
     pub fn parent_id(&self) -> u64 {
@@ -1031,17 +1039,51 @@ pub fn as_zooms(zoom_or_zooms: ZoomOrZooms) -> Vec<u8> {
     }
 }
 
-pub struct TilesRange {
+pub struct TileRange {
     curx: u32,
     cury: u32,
-    pub minx: u32,
-    pub maxx: u32,
-    pub miny: u32,
-    pub maxy: u32,
-    pub zoom: u8,
+    minx: u32,
+    maxx: u32,
+    miny: u32,
+    maxy: u32,
+    zoom: u8,
 }
 
-impl Iterator for TilesRange {
+impl TileRange {
+    pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
+        Self {
+            curx: minx,
+            cury: miny,
+            minx,
+            maxx,
+            miny,
+            maxy,
+            zoom,
+        }
+    }
+
+    pub fn minx(&self) -> u32 {
+        self.minx
+    }
+    pub fn maxx(&self) -> u32 {
+        self.maxx
+    }
+    pub fn miny(&self) -> u32 {
+        self.miny
+    }
+    pub fn maxy(&self) -> u32 {
+        self.maxy
+    }
+    pub fn zoom(&self) -> u8 {
+        self.zoom
+    }
+
+    pub fn length(&self) -> u64 {
+        ((self.maxx - self.minx + 1) * (self.maxy - self.miny + 1)) as u64
+    }
+}
+
+impl Iterator for TileRange {
     type Item = (u32, u32, u8);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -1063,11 +1105,37 @@ impl Iterator for TilesRange {
     }
 }
 
-pub struct TilesRanges {
-    ranges: Vec<TilesRange>,
+pub struct TileRanges {
+    ranges: Vec<TileRange>,
 }
 
-impl Iterator for TilesRanges {
+impl TileRanges {
+    pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
+        Self {
+            ranges: vec![TileRange::new(minx, maxx, miny, maxy, zoom)],
+        }
+    }
+
+    pub fn length(&self) -> u64 {
+        self.ranges.iter().map(|r| r.length()).sum()
+    }
+}
+
+impl From<TileRange> for TileRanges {
+    fn from(range: TileRange) -> Self {
+        Self {
+            ranges: vec![range],
+        }
+    }
+}
+
+impl From<Vec<TileRange>> for TileRanges {
+    fn from(ranges: Vec<TileRange>) -> Self {
+        Self { ranges }
+    }
+}
+
+impl Iterator for TileRanges {
     type Item = (u32, u32, u8);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -1136,6 +1204,69 @@ pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
 //     let maxy = (maxy * z2).floor() as i32;
 //     (minx, miny, maxx, maxy)
 // }
+
+pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRanges {
+    let zooms = as_zooms(zooms);
+    let bboxthing = BBox {
+        north: bounds.3,
+        south: bounds.1,
+        east: bounds.2,
+        west: bounds.0,
+    };
+    let bboxes: Vec<BBox> = bboxthing
+        .bboxes()
+        .into_iter()
+        .map(|bbox| {
+            // clip to web mercator extent
+            BBox {
+                north: bbox.north.min(85.051_129),
+                south: bbox.south.max(-85.051_129),
+                east: bbox.east.min(180.0),
+                west: bbox.west.max(-180.0),
+            }
+        })
+        .collect();
+    let ranges: Vec<TileRange> = bboxes
+        .into_iter()
+        .flat_map(move |bbox| {
+            let zooms = zooms.clone();
+            zooms.into_iter().map(move |zoom| {
+                let upper_left_lnglat = LngLat {
+                    xy: coord! { x: bbox.west, y: bbox.north },
+                };
+                let lower_right_lnglat = LngLat {
+                    xy: coord! { x: bbox.east, y: bbox.south },
+                };
+                let top_left_tile = Tile::from_lnglat_zoom(
+                    upper_left_lnglat.lng(),
+                    upper_left_lnglat.lat(),
+                    zoom,
+                    Some(false),
+                );
+                let bottom_right_tile = Tile::from_lnglat_zoom(
+                    lower_right_lnglat.lng() - LL_EPSILON,
+                    lower_right_lnglat.lat() + LL_EPSILON,
+                    zoom,
+                    Some(false),
+                );
+                TileRange::new(
+                    top_left_tile.x,
+                    bottom_right_tile.x,
+                    top_left_tile.y,
+                    bottom_right_tile.y,
+                    zoom,
+                )
+            })
+        })
+        .collect();
+
+    TileRanges::from(ranges)
+}
+
+pub fn tiles_count(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> u64 {
+    let ranges = tile_ranges(bounds, zooms);
+    ranges.length()
+}
 
 pub fn tiles(
     bounds: (f64, f64, f64, f64),
@@ -1289,6 +1420,9 @@ mod tests {
         let tiles = tiles(bounds, 14.into());
         let expect = vec![Tile::new(3413, 6202, 14), Tile::new(3413, 6203, 14)];
         assert_eq!(tiles.collect::<Vec<Tile>>(), expect);
+
+        let ntiles = tiles_count(bounds, 14.into());
+        assert_eq!(ntiles, 2);
     }
 
     #[test]

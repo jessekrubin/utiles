@@ -429,6 +429,7 @@ impl From<PyZoomOrZooms> for ZoomOrZooms {
 #[pyclass]
 struct TilesGenerator {
     iter: Box<dyn Iterator<Item = PyTile> + Send>,
+    length: u64,
 }
 
 #[pymethods]
@@ -436,9 +437,29 @@ impl TilesGenerator {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
+
     fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<PyTile> {
         slf.iter.next()
     }
+
+    fn __len__(slf: PyRefMut<'_, Self>) -> PyResult<usize> {
+        Ok(slf.length as usize)
+    }
+}
+
+#[pyfunction]
+fn tiles_count(
+    west: f64,
+    south: f64,
+    east: f64,
+    north: f64,
+    zooms: PyZoomOrZooms,
+    truncate: Option<bool>,
+) -> u64 {
+    let (west, south, east, north) =
+        utiles::bbox_truncate(west, south, east, north, truncate);
+
+    utiles::tiles_count((west, south, east, north), ZoomOrZooms::from(zooms))
 }
 
 #[pyfunction]
@@ -452,11 +473,21 @@ fn tiles(
 ) -> TilesGenerator {
     let (west, south, east, north) =
         utiles::bbox_truncate(west, south, east, north, truncate);
-
-    let xyzs = utiles::tiles((west, south, east, north), ZoomOrZooms::from(zooms))
-        .map(PyTile::from);
+    let zooms_vec = match zooms {
+        PyZoomOrZooms::Zoom(z) => vec![z],
+        PyZoomOrZooms::Zooms(zs) => zs,
+    };
+    let zooms_vec_iter = zooms_vec.clone();
+    let ntiles =
+        utiles::tiles_count((west, south, east, north), ZoomOrZooms::from(zooms_vec));
+    let xyzs = utiles::tiles(
+        (west, south, east, north),
+        ZoomOrZooms::from(zooms_vec_iter),
+    )
+    .map(PyTile::from);
     TilesGenerator {
         iter: Box::new(xyzs),
+        length: ntiles,
     }
 }
 
@@ -760,6 +791,7 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(feature, m)?)?;
 
     // utiles functions
+    m.add_function(wrap_pyfunction!(tiles_count, m)?)?;
     m.add_function(wrap_pyfunction!(tiles_list, m)?)?;
     m.add_function(wrap_pyfunction!(xyz, m)?)?;
     m.add_function(wrap_pyfunction!(parse_tiles, m)?)?;

@@ -92,12 +92,12 @@ impl PyTile {
         Py::new(slf.py(), iter)
     }
 
-    pub fn fmt_zxy(&self) -> String {
-        self.xyz.fmt_zxy()
+    pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
+        self.xyz.fmt_zxy(sep)
     }
 
-    pub fn fmt_zxy_ext(&self, ext: &str) -> String {
-        self.xyz.fmt_zxy_ext(ext)
+    pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
+        self.xyz.fmt_zxy_ext(ext, sep)
     }
 
     #[classmethod]

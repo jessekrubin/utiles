@@ -269,3 +269,13 @@ def test_tile_feature() -> None:
 
     assert f == expected
     assert t.feature(props={"x": 1, "y": 2, "z": 3}) == expected
+
+
+def test_tiles_len() -> None:
+    tiles_list = list(utiles.tiles(-180, -90, 180, 90, [1]))
+    assert len(tiles_list) == 4
+
+    tiles_iter = utiles.tiles(-180, -90, 180, 90, [1])
+    assert len(tiles_iter) == 4
+    for t in tiles_iter:
+        assert isinstance(t, utiles.Tile)
