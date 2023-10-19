@@ -15,7 +15,7 @@ pip install utiles
 I use mercantile regularly and wished it were a bit more ergonomic, had type annotations, and was faster, but overall
 it's a great library.
 
-I used this as an excuse to learn some rust, and learned a ton!
+This was an excuse to learn some more rust as well as pyo3.
 
 **Do I/you REALLY need a rust-port of mercantile?**
 
@@ -42,6 +42,9 @@ x, y, z = t
 
 (x, y, z)
 # Out: (1, 2, 3)
+
+list(ut.tiles(*ut.bounds(1, 1, 1), 3)) # tiles is an ultra fast generator
+# Out: [Tile(x=4, y=4, z=3), Tile(x=4, y=5, z=3), Tile(x=4, y=6, z=3), Tile(x=4, y=7, z=3), Tile(x=5, y=4, z=3), Tile(x=5, y=5, z=3), Tile(x=5, y=6, z=3), Tile(x=5, y=7, z=3), Tile(x=6, y=4, z=3), Tile(x=6, y=5, z=3), Tile(x=6, y=6, z=3), Tile(x=6, y=7, z=3), Tile(x=7, y=4, z=3), Tile(x=7, y=5, z=3), Tile(x=7, y=6, z=3), Tile(x=7, y=7, z=3)]
 
 t
 # Out: Tile(x=1, y=2, z=3)
@@ -168,9 +171,9 @@ test_ul_bench[mercantile-(486, 332, 20)]     1,099.9938 (5.38)     107,300.0021 
 
 ## TODO:
  
- - [] benchmark against mercantile
+ - [X] benchmark against mercantile
  - **Maybe:**
-   - [] Split library into `utiles` (rust lib) and `utiles-python` (python/pip package)?
+   - [X] Split library into `utiles` (rust lib) and `utiles-python` (python/pip package)?
    - [] Mbtiles support??
    - [] Reading/writing mvt files?
    - [] Re-write cli in rust with clap?
