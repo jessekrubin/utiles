@@ -26,6 +26,7 @@ def test_tile_equality_tuple2tile(benchmark: BenchmarkFixture) -> None:
     tile_obj = utiles.from_tuple(t)
     benchmark(_equal, t, tile_obj)
 
+
 def test_tile_equality_tile2tuple(benchmark: BenchmarkFixture) -> None:
     t = (1, 2, 3)
     tile_obj = utiles.from_tuple(t)

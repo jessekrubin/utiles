@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "utiles"
-version = "0.0.2"
+version = "0.1.0"
 description = "utiles = (utils + tiles) * rust"
 requires-python = ">=3.8"
 classifiers = [
@@ -20,6 +20,10 @@ dependencies = [
 
 [project.scripts]
 utiles = "utiles.cli:cli"
+
+[project.entry-points."rasterio.rio_plugins"]
+utiles = "utiles.rio_plugin:rio_utiles"
+ut = "utiles.rio_plugin:rio_ut"
 
 [tool.maturin]
 python-source = "python"
