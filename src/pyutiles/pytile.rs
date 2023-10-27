@@ -41,6 +41,12 @@ pub struct PyTile {
     pub xyz: Tile,
 }
 
+#[derive(FromPyObject)]
+pub enum PyTileOrTuple {
+    Tile(PyTile),
+    Tuple(TileTuple),
+}
+
 #[pymethods]
 impl PyTile {
     #[new]
@@ -244,11 +250,11 @@ impl PyTile {
         hasher.finish()
     }
 
-    pub fn __eq__(&self, other: &Self) -> bool {
-        self.xyz.x == other.xyz.x
-            && self.xyz.y == other.xyz.y
-            && self.xyz.z == other.xyz.z
-    }
+    // pub fn __eq__(&self, other: &Self) -> bool {
+    //     self.xyz.x == other.xyz.x
+    //         && self.xyz.y == other.xyz.y
+    //         && self.xyz.z == other.xyz.z
+    // }
 
     pub fn __richcmp__(
         &self,
@@ -257,6 +263,7 @@ impl PyTile {
         py: Python<'_>,
     ) -> PyObject {
         // fn __richcmp__(&self, other: PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
+
         let maybetuple = other.extract::<(u32, u32, u8)>();
         if let Ok(tuple) = maybetuple {
             match op {
@@ -293,6 +300,7 @@ impl PyTile {
             }
         }
     }
+
     pub fn ul(&self) -> PyLngLat {
         self.xyz.ul().into()
     }

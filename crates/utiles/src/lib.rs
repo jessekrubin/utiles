@@ -1002,6 +1002,25 @@ impl Tile {
     pub fn siblings(&self) -> Vec<Self> {
         siblings(self.x, self.y, self.z)
     }
+
+    pub fn sql_where(&self, flip: Option<bool>) -> String {
+        // classic mbtiles sqlite query:
+        // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+
+        // flip y for tms (default for mbtiles)
+        match flip.unwrap_or(true) {
+            true => format!(
+                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+                self.z,
+                self.x,
+                flipy(self.y, self.z)
+            ),
+            false => format!(
+                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+                self.z, self.x, self.y
+            ),
+        }
+    }
 }
 
 impl From<Tile> for (u32, u32, u8) {
@@ -1081,6 +1100,24 @@ impl TileRange {
     pub fn length(&self) -> u64 {
         ((self.maxx - self.minx + 1) * (self.maxy - self.miny + 1)) as u64
     }
+
+    pub fn sql_where(&self, flip: Option<bool>) -> String {
+        // classic mbtiles sqlite query:
+        // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+
+        let miny = match flip.unwrap_or(true) {
+            true => flipy(self.miny, self.zoom),
+            false => self.miny,
+        };
+        let maxy = match flip.unwrap_or(true) {
+            true => flipy(self.maxy, self.zoom),
+            false => self.maxy,
+        };
+        format!(
+            "(zoom_level = {} AND tile_column >= {} AND tile_column <= {} AND tile_row >= {} AND tile_row <= {})",
+            self.zoom, self.minx, self.maxx, miny, maxy
+        )
+    }
 }
 
 impl Iterator for TileRange {
@@ -1118,6 +1155,14 @@ impl TileRanges {
 
     pub fn length(&self) -> u64 {
         self.ranges.iter().map(|r| r.length()).sum()
+    }
+
+    pub fn sql_where(&self, flip: Option<bool>) -> String {
+        self.ranges
+            .iter()
+            .map(|r| r.sql_where(flip))
+            .collect::<Vec<String>>()
+            .join(" OR ")
     }
 }
 
