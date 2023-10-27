@@ -244,11 +244,11 @@ impl PyTile {
         hasher.finish()
     }
 
-    pub fn __eq__(&self, other: &Self) -> bool {
-        self.xyz.x == other.xyz.x
-            && self.xyz.y == other.xyz.y
-            && self.xyz.z == other.xyz.z
-    }
+    // pub fn __eq__(&self, other: &Self) -> bool {
+    //     self.xyz.x == other.xyz.x
+    //         && self.xyz.y == other.xyz.y
+    //         && self.xyz.z == other.xyz.z
+    // }
 
     pub fn __richcmp__(
         &self,
