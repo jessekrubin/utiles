@@ -50,7 +50,7 @@ def iter_lines(lines: List[str]) -> Iterable[str]:
 
 
 # The CLI command group.
-@click.group(help="Command line interface for the utiles Python package.")
+@click.group(name="utiles", help="utiles cli (python)")
 @click.option("--verbose", "-v", count=True, help="Increase verbosity.")
 @click.option("--quiet", "-q", count=True, help="Decrease verbosity.")
 @click.version_option(version=utiles.__version__, message="%(version)s")
