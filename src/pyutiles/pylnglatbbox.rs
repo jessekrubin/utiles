@@ -7,7 +7,7 @@ use pyo3::{
     PyResult, Python,
 };
 use utiles;
-use utiles::BBox;
+use utiles::bbox::BBox;
 
 #[pyclass(name = "LngLatBbox")]
 #[derive(Clone)]

@@ -1,4 +1,4 @@
-use crate::Tile;
+use crate::tile::Tile;
 
 pub enum SiblingRelationship {
     UpperLeft = 0,

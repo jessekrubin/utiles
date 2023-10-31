@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use utiles::BBox;
+use utiles::bbox::BBox;
 
 use pyo3::exceptions::{self, PyValueError};
 
