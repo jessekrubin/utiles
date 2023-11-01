@@ -6,7 +6,7 @@ use pyo3::{
     Python,
 };
 use utiles;
-use utiles::BBox;
+use utiles::bbox::BBox;
 
 #[pyclass(name = "Bbox")]
 #[derive(Clone)]

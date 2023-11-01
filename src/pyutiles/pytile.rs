@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use crate::pyutiles::pyiters::IntIterator;
 use crate::pyutiles::tuple_slice;
 use crate::TileTuple;
-use utiles::{BBox, Tile};
+use utiles::tile::Tile;
 
 use utiles;
 
@@ -13,7 +13,7 @@ use pyo3::types::PyType;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::{
-    exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
+    exceptions, IntoPy, Py, PyAny, pyclass, PyErr, pymethods, PyObject, PyRef,
     PyResult, Python,
 };
 use serde::{Deserialize, Serialize};
@@ -22,6 +22,7 @@ use std::collections::hash_map::DefaultHasher;
 use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
 use std::hash::{Hash, Hasher};
+use utiles::bbox::BBox;
 
 /// `PyTile` macro to create a new tile.
 ///  - do you need this? probably not

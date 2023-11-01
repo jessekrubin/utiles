@@ -1,16 +1,25 @@
-use constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, EPSILON, LL_EPSILON};
-use geo_types::{coord, Coord};
-use serde::{Deserialize, Serialize};
-use sibling_relationship::SiblingRelationship;
-use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::num::FpCategory;
 use std::{error::Error, f64::consts::PI};
+
+use bbox::{BBox, WebMercatorBbox};
+use constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
+use geo_types::coord;
+
+pub use lnglat::LngLat;
+use sibling_relationship::SiblingRelationship;
+pub use tile::Tile;
+use tile_range::{TileRange, TileRanges};
 use zoom::ZoomOrZooms;
-mod constants;
+
+pub mod bbox;
+pub mod constants;
 pub mod libtiletype;
-mod pmtiles;
-mod sibling_relationship;
+pub mod lnglat;
+pub mod pmtiles;
+pub mod sibling_relationship;
+pub mod tile;
+pub mod tile_range;
 pub mod traits;
 pub mod zoom;
 
@@ -28,34 +37,24 @@ macro_rules! utile {
 #[allow(clippy::upper_case_acronyms)]
 pub struct XYZ(pub u32, pub u32, pub u8);
 
-impl traits::Utiles<LngLat, BBox> for Tile {
-    fn ul(&self) -> LngLat {
-        ul(self.x, self.y, self.z)
-    }
-
-    fn ur(&self) -> LngLat {
-        ur(self.x, self.y, self.z)
-    }
-
-    fn lr(&self) -> LngLat {
-        lr(self.x, self.y, self.z)
-    }
-
-    fn ll(&self) -> LngLat {
-        ll(self.x, self.y, self.z)
-    }
-
-    fn bbox(&self) -> BBox {
-        let (west, south, east, north) = bounds(self.x, self.y, self.z);
-        BBox {
-            north,
-            south,
-            east,
-            west,
-        }
+pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
+    let (lon_deg, lat_deg) = ult(x, y, z);
+    LngLat {
+        xy: coord! {x: lon_deg, y: lat_deg},
     }
 }
 
+pub fn ll(x: u32, y: u32, z: u8) -> LngLat {
+    ul(x, y + 1, z)
+}
+
+pub fn ur(x: u32, y: u32, z: u8) -> LngLat {
+    ul(x + 1, y, z)
+}
+
+pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
+    ul(x + 1, y + 1, z)
+}
 pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
     let z2 = f64::from(2_u32.pow(u32::from(z)));
     let lon_deg = (f64::from(x) / z2) * 360.0 - 180.0;
@@ -71,97 +70,7 @@ pub struct XY {
     pub y: u32,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Tile {
-    pub x: u32,
-    pub y: u32,
-    pub z: u8,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct LngLat {
-    pub xy: Coord,
-}
-
-impl From<Coord> for LngLat {
-    fn from(xy: Coord) -> Self {
-        LngLat::new(xy.x, xy.y)
-    }
-}
-
-impl From<(f64, f64)> for LngLat {
-    fn from(xy: (f64, f64)) -> Self {
-        LngLat::new(xy.0, xy.1)
-    }
-}
-
-impl LngLat {
-    pub fn new(lng: f64, lat: f64) -> Self {
-        LngLat {
-            xy: coord! { x: lng, y: lat},
-        }
-    }
-
-    pub fn lng(&self) -> f64 {
-        self.xy.x
-    }
-
-    pub fn lat(&self) -> f64 {
-        self.xy.y
-    }
-
-    pub fn lon(&self) -> f64 {
-        self.xy.x
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct BBox {
-    pub north: f64,
-    pub south: f64,
-    pub east: f64,
-    pub west: f64,
-}
-
-impl From<XYZ> for Tile {
-    fn from(xyz: XYZ) -> Self {
-        Tile {
-            x: xyz.0,
-            y: xyz.1,
-            z: xyz.2,
-        }
-    }
-}
-
-impl From<(f64, f64, f64, f64)> for BBox {
-    fn from(bbox: (f64, f64, f64, f64)) -> Self {
-        BBox {
-            north: bbox.0,
-            south: bbox.1,
-            east: bbox.2,
-            west: bbox.3,
-        }
-    }
-}
-
-impl From<(i32, i32, i32, i32)> for BBox {
-    fn from(bbox: (i32, i32, i32, i32)) -> Self {
-        // convert to f64
-        let bbox = (
-            f64::from(bbox.0),
-            f64::from(bbox.1),
-            f64::from(bbox.2),
-            f64::from(bbox.3),
-        );
-        BBox {
-            north: bbox.0,
-            south: bbox.1,
-            east: bbox.2,
-            west: bbox.3,
-        }
-    }
-}
-
+/// Truncate a bounding box to the valid range of longitude and latitude.
 pub fn bbox_truncate(
     west: f64,
     south: f64,
@@ -191,148 +100,6 @@ pub fn bbox_truncate(
     (west, south, east, north)
 }
 
-pub enum BBoxContainable {
-    LngLat(LngLat),
-    BBox(BBox),
-    Tile(Tile),
-}
-
-impl BBox {
-    pub fn crosses_antimeridian(&self) -> bool {
-        self.west > self.east
-    }
-
-    pub fn tuple(&self) -> (f64, f64, f64, f64) {
-        (self.north, self.south, self.east, self.west)
-    }
-
-    pub fn north(&self) -> f64 {
-        self.north
-    }
-    pub fn south(&self) -> f64 {
-        self.south
-    }
-    pub fn east(&self) -> f64 {
-        self.east
-    }
-    pub fn west(&self) -> f64 {
-        self.west
-    }
-    pub fn top(&self) -> f64 {
-        self.north
-    }
-    pub fn bottom(&self) -> f64 {
-        self.south
-    }
-    pub fn right(&self) -> f64 {
-        self.east
-    }
-    pub fn left(&self) -> f64 {
-        self.west
-    }
-
-    pub fn contains_lnglat(&self, lnglat: LngLat) -> bool {
-        let lng = lnglat.lng();
-        let lat = lnglat.lat();
-        if self.crosses_antimeridian() {
-            if (lng >= self.west || lng <= self.east)
-                && lat >= self.south
-                && lat <= self.north
-            {
-                return true;
-            }
-        } else if lng >= self.west
-            && lng <= self.east
-            && lat >= self.south
-            && lat <= self.north
-        {
-            return true;
-        }
-        false
-    }
-
-    pub fn contains_tile(&self, tile: Tile) -> bool {
-        let bbox = tile.bbox();
-        self.contains_bbox(bbox.into())
-    }
-
-    pub fn contains_bbox(&self, other: BBox) -> bool {
-        self.north >= other.north
-            && self.south <= other.south
-            && self.east >= other.east
-            && self.west <= other.west
-    }
-
-    pub fn contains(&self, other: BBoxContainable) -> bool {
-        match other {
-            BBoxContainable::LngLat(lnglat) => self.contains_lnglat(lnglat),
-            BBoxContainable::BBox(bbox) => self.contains_bbox(bbox),
-            BBoxContainable::Tile(tile) => self.contains_tile(tile),
-        }
-    }
-
-    pub fn is_within(&self, other: &BBox) -> bool {
-        self.north <= other.north
-            && self.south >= other.south
-            && self.east <= other.east
-            && self.west >= other.west
-    }
-
-    pub fn intersects(&self, other: &BBox) -> bool {
-        self.north >= other.south
-            && self.south <= other.north
-            && self.east >= other.west
-            && self.west <= other.east
-    }
-
-    pub fn bboxes(&self) -> Vec<BBox> {
-        if self.crosses_antimeridian() {
-            let mut bboxes = Vec::new();
-            let bbox1 = BBox {
-                north: self.north,
-                south: self.south,
-                east: 180.0,
-                west: self.west,
-            };
-            let bbox2 = BBox {
-                north: self.north,
-                south: self.south,
-                east: self.east,
-                west: -180.0,
-            };
-            bboxes.push(bbox1);
-            bboxes.push(bbox2);
-            bboxes
-        } else {
-            vec![*self]
-        }
-    }
-
-    pub fn ul(&self) -> LngLat {
-        LngLat::new(self.west, self.north)
-    }
-
-    pub fn ur(&self) -> LngLat {
-        LngLat::new(self.east, self.north)
-    }
-
-    pub fn lr(&self) -> LngLat {
-        LngLat::new(self.east, self.south)
-    }
-
-    pub fn ll(&self) -> LngLat {
-        LngLat::new(self.west, self.south)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct WebMercatorBbox {
-    pub left: f64,
-    pub bottom: f64,
-    pub right: f64,
-    pub top: f64,
-}
-
 pub fn minmax(zoom: u32) -> (u32, u32) {
     (0, 2_u32.pow(zoom) - 1)
 }
@@ -347,7 +114,7 @@ pub fn flipy(y: u32, z: u8) -> u32 {
     2_u32.pow(u32::from(z)) - 1 - y
 }
 
-pub fn get_bbox_zoom(bbox: (u32, u32, u32, u32)) -> u8 {
+pub fn bbox2zoom(bbox: (u32, u32, u32, u32)) -> u8 {
     let max_zoom = 28;
     let (west, south, east, north) = bbox;
     for z in 0..max_zoom {
@@ -357,13 +124,6 @@ pub fn get_bbox_zoom(bbox: (u32, u32, u32, u32)) -> u8 {
         }
     }
     max_zoom
-}
-
-pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
-    let (lon_deg, lat_deg) = ult(x, y, z);
-    LngLat {
-        xy: coord! {x: lon_deg, y: lat_deg},
-    }
 }
 
 pub fn bounds(x: u32, y: u32, z: u8) -> (f64, f64, f64, f64) {
@@ -402,6 +162,7 @@ pub fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
         xy: coord! {x: truncate_lng(lnglat.lng()), y: truncate_lat(lnglat.lat())},
     }
 }
+
 pub fn _xy(
     lng: f64,
     lat: f64,
@@ -427,6 +188,7 @@ pub fn _xy(
         }
     }
 }
+
 pub fn _xy_og(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
     let trunc = truncate.unwrap_or(false);
 
@@ -465,18 +227,6 @@ pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
         lat = truncate_lat(lat);
     }
     let x = EARTH_RADIUS * lng.to_radians();
-
-    // let y = match (1.0 + sinlat) / (1.0 - sinlat) {
-    //     y if y.is_infinite() => {
-    //         panic!("Invalid latitude: {:?}", lat);
-    //     }
-    //     y if y.is_nan() => {
-    //         panic!("Invalid latitude: {:?}", lat);
-    //     }
-    //     y => 0.5 - 0.25 * y.ln() / std::f64::consts::PI,
-    // };
-    // y = 0.5 - 0.25 * math.log((1.0 + sinlat) / (1.0 - sinlat)) / math.pi
-    // let y = 0.5 - 0.25 * ((1.0 + sinlat) / (1.0 - sinlat)).ln() / PI;
     let y = if lat == 90.0 {
         f64::INFINITY
     } else if lat == -90.0 {
@@ -485,11 +235,6 @@ pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
         // (1.0 + (lat.to_radians()).sin()) / (1.0 - (lat.to_radians()).sin())
         EARTH_RADIUS * (PI * 0.25 + 0.5 * lat.to_radians()).tan().ln()
     };
-
-    // let y = EARTH_RADIUS * (PI * 0.25 + 0.5 * lat.to_radians()).tan().ln();
-    // let x  = (lnglat.lng + 180.0) / 360.0;
-    // let sin_lat = lnglat.lat.to_radians().sin();
-    // let y = 0.5 - (0.5 * (1.0 + sin_lat) / (1.0 - sin_lat)).ln() / PI;
     (x, y)
 }
 
@@ -505,18 +250,6 @@ pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> LngLat {
     } else {
         LngLat::new(lng, lat)
     }
-}
-
-pub fn ll(x: u32, y: u32, z: u8) -> LngLat {
-    ul(x, y + 1, z)
-}
-
-pub fn ur(x: u32, y: u32, z: u8) -> LngLat {
-    ul(x + 1, y, z)
-}
-
-pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
-    ul(x + 1, y + 1, z)
 }
 
 pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
@@ -688,8 +421,15 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
     }
 }
 
-// tile = reptiles.Tile(486, 332, 10)
+// tile = ut.Tile(486, 332, 10)
 // expected = "0313102310"
+/// Return the quadkey for a tile as a string.
+/// # Examples
+/// ```
+/// use utiles::xyz2quadkey;
+/// let quadkey = xyz2quadkey(486, 332, 10);
+/// assert_eq!(quadkey, "0313102310");
+/// ```
 pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
     let mut quadkey = String::new();
     for i in (0..z).rev() {
@@ -702,7 +442,6 @@ pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
             digit += 2;
         }
         quadkey.push_str(&digit.to_string());
-        // write!(quadkey, "{}", digit).unwrap();
     }
     quadkey
 }
@@ -741,288 +480,6 @@ pub fn quadkey2tile(quadkey: &str) -> Result<Tile, Box<dyn Error>> {
     Ok(Tile::new(x, y, z))
 }
 
-impl std::fmt::Display for Tile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "x{}y{}z{}", self.x, self.y, self.z)
-    }
-}
-
-impl std::fmt::Display for LngLat {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({}, {})", self.xy.x, self.xy.y)
-    }
-}
-
-impl PartialOrd<Self> for Tile {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-
-    fn lt(&self, other: &Self) -> bool {
-        self.cmp(other) == Ordering::Less
-    }
-}
-
-impl Ord for Tile {
-    fn cmp(&self, other: &Self) -> Ordering {
-        if self.z != other.z {
-            return self.z.cmp(&other.z);
-        }
-        if self.y != other.y {
-            return self.y.cmp(&other.y);
-        }
-        self.x.cmp(&other.x)
-    }
-}
-
-impl Tile {
-    pub fn new(x: u32, y: u32, z: u8) -> Self {
-        Tile { x, y, z }
-    }
-
-    #[allow(dead_code)]
-    pub fn valid(&self) -> bool {
-        valid(self.x, self.y, self.z)
-    }
-
-    pub fn x(&self) -> u32 {
-        self.x
-    }
-
-    pub fn y(&self) -> u32 {
-        self.y
-    }
-
-    pub fn z(&self) -> u8 {
-        self.z
-    }
-
-    pub fn zoom(&self) -> u8 {
-        self.z
-    }
-
-    pub fn bounds(&self) -> (f64, f64, f64, f64) {
-        bounds(self.x, self.y, self.z)
-    }
-
-    pub fn pmtileid(&self) -> u64 {
-        pmtiles::xyz2id(self.x, self.y, self.z)
-    }
-
-    pub fn from_pmtileid(id: u64) -> Self {
-        let (x, y, z) = pmtiles::id2xyz(id);
-        Tile::new(x, y, z)
-    }
-
-    pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
-        match sep {
-            Some(sep) => format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y),
-            None => format!("{}/{}/{}", self.z, self.x, self.y),
-        }
-    }
-
-    pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
-        match sep {
-            Some(sep) => {
-                format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext)
-            }
-            None => format!("{}/{}/{}.{}", self.z, self.x, self.y, ext),
-        }
-    }
-
-    pub fn parent_id(&self) -> u64 {
-        pmtiles::parent_id(self.pmtileid())
-    }
-
-    pub fn from_quadkey(quadkey: &str) -> Result<Tile, Box<dyn Error>> {
-        quadkey2tile(quadkey)
-    }
-
-    pub fn from_qk(qk: &str) -> Self {
-        let res = quadkey2tile(qk);
-        match res {
-            Ok(tile) => tile,
-            Err(e) => {
-                panic!("Invalid quadkey: {e}");
-            }
-        }
-    }
-
-    pub fn quadkey(&self) -> String {
-        xyz2quadkey(self.x, self.y, self.z)
-    }
-
-    pub fn qk(&self) -> String {
-        xyz2quadkey(self.x, self.y, self.z)
-    }
-
-    pub fn from_lnglat_zoom(
-        lng: f64,
-        lat: f64,
-        zoom: u8,
-        truncate: Option<bool>,
-    ) -> Self {
-        let xy = _xy(lng, lat, truncate);
-        let (x, y) = match xy {
-            Ok(xy) => xy,
-            Err(e) => {
-                panic!("Invalid lnglat: {e}");
-            }
-        };
-        let z2 = 2.0_f64.powi(i32::from(zoom));
-        let z2f = z2;
-        let xtile = if x <= 0.0 {
-            0
-        } else if x >= 1.0 {
-            (z2f - 1.0) as u32
-        } else {
-            let xt = (x + EPSILON) * z2f;
-            (xt.floor()) as u32
-        };
-
-        let ytile = if y <= 0.0 {
-            0
-        } else if y >= 1.0 {
-            (z2f - 1.0) as u32
-        } else {
-            let yt = (y + EPSILON) * z2f;
-            (yt.floor()) as u32
-        };
-        Self {
-            x: xtile,
-            y: ytile,
-            z: zoom,
-        }
-    }
-
-    pub fn ul(&self) -> LngLat {
-        ul(self.x, self.y, self.z)
-    }
-
-    pub fn ll(&self) -> LngLat {
-        ll(self.x, self.y, self.z)
-    }
-
-    pub fn ur(&self) -> LngLat {
-        ur(self.x, self.y, self.z)
-    }
-
-    pub fn lr(&self) -> LngLat {
-        lr(self.x, self.y, self.z)
-    }
-
-    pub fn bbox(&self) -> (f64, f64, f64, f64) {
-        let ul = self.ul();
-        let lr = self.lr();
-        (ul.lng(), lr.lat(), lr.lng(), ul.lat())
-    }
-
-    pub fn center(&self) -> LngLat {
-        let ul = self.ul();
-        let lr = self.lr();
-        LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
-    }
-
-    pub fn up(&self) -> Self {
-        Self {
-            x: self.x + 1,
-            y: self.y,
-            z: self.z,
-        }
-    }
-
-    pub fn down(&self) -> Self {
-        Self {
-            x: self.x - 1,
-            y: self.y,
-            z: self.z,
-        }
-    }
-
-    pub fn left(&self) -> Self {
-        Self {
-            x: self.x,
-            y: self.y - 1,
-            z: self.z,
-        }
-    }
-
-    pub fn right(&self) -> Self {
-        Self {
-            x: self.x,
-            y: self.y + 1,
-            z: self.z,
-        }
-    }
-
-    pub fn up_left(&self) -> Self {
-        Self {
-            x: self.x + 1,
-            y: self.y - 1,
-            z: self.z,
-        }
-    }
-
-    pub fn up_right(&self) -> Self {
-        Self {
-            x: self.x + 1,
-            y: self.y + 1,
-            z: self.z,
-        }
-    }
-
-    pub fn down_left(&self) -> Self {
-        Self {
-            x: self.x - 1,
-            y: self.y - 1,
-            z: self.z,
-        }
-    }
-
-    pub fn down_right(&self) -> Self {
-        Self {
-            x: self.x - 1,
-            y: self.y + 1,
-            z: self.z,
-        }
-    }
-
-    pub fn neighbors(&self) -> Vec<Self> {
-        neighbors(self.x, self.y, self.z)
-    }
-
-    pub fn children(&self, zoom: Option<u8>) -> Vec<Tile> {
-        children(self.x, self.y, self.z, zoom)
-    }
-
-    pub fn parent(&self, zoom: Option<u8>) -> Self {
-        parent(self.x, self.y, self.z, zoom)
-    }
-
-    pub fn siblings(&self) -> Vec<Self> {
-        siblings(self.x, self.y, self.z)
-    }
-
-    pub fn sql_where(&self, flip: Option<bool>) -> String {
-        // classic mbtiles sqlite query:
-        // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
-
-        // flip y for tms (default for mbtiles)
-        match flip.unwrap_or(true) {
-            true => format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z,
-                self.x,
-                flipy(self.y, self.z)
-            ),
-            false => format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z, self.x, self.y
-            ),
-        }
-    }
-}
-
 impl From<Tile> for (u32, u32, u8) {
     fn from(tile: Tile) -> Self {
         (tile.x, tile.y, tile.z)
@@ -1043,156 +500,12 @@ pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
     }
 }
 
-impl From<Tile> for WebMercatorBbox {
-    fn from(tile: Tile) -> Self {
-        xyz2bbox(tile.x, tile.y, tile.z)
-    }
-}
-
 pub fn as_zooms(zoom_or_zooms: ZoomOrZooms) -> Vec<u8> {
     match zoom_or_zooms {
         ZoomOrZooms::Zoom(zoom) => {
             vec![zoom]
         }
         ZoomOrZooms::Zooms(zooms) => zooms,
-    }
-}
-
-pub struct TileRange {
-    curx: u32,
-    cury: u32,
-    minx: u32,
-    maxx: u32,
-    miny: u32,
-    maxy: u32,
-    zoom: u8,
-}
-
-impl TileRange {
-    pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
-        Self {
-            curx: minx,
-            cury: miny,
-            minx,
-            maxx,
-            miny,
-            maxy,
-            zoom,
-        }
-    }
-
-    pub fn minx(&self) -> u32 {
-        self.minx
-    }
-    pub fn maxx(&self) -> u32 {
-        self.maxx
-    }
-    pub fn miny(&self) -> u32 {
-        self.miny
-    }
-    pub fn maxy(&self) -> u32 {
-        self.maxy
-    }
-    pub fn zoom(&self) -> u8 {
-        self.zoom
-    }
-
-    pub fn length(&self) -> u64 {
-        ((self.maxx - self.minx + 1) * (self.maxy - self.miny + 1)) as u64
-    }
-
-    pub fn sql_where(&self, flip: Option<bool>) -> String {
-        // classic mbtiles sqlite query:
-        // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
-
-        let miny = match flip.unwrap_or(true) {
-            true => flipy(self.miny, self.zoom),
-            false => self.miny,
-        };
-        let maxy = match flip.unwrap_or(true) {
-            true => flipy(self.maxy, self.zoom),
-            false => self.maxy,
-        };
-        format!(
-            "(zoom_level = {} AND tile_column >= {} AND tile_column <= {} AND tile_row >= {} AND tile_row <= {})",
-            self.zoom, self.minx, self.maxx, miny, maxy
-        )
-    }
-}
-
-impl Iterator for TileRange {
-    type Item = (u32, u32, u8);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.curx > self.maxx {
-            self.curx = self.minx;
-            self.cury += 1;
-        }
-        if self.cury > self.maxy {
-            return None;
-        }
-        let tile = (self.curx, self.cury, self.zoom);
-        self.curx += 1;
-        Some(tile)
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let size = ((self.maxx - self.minx + 1) * (self.maxy - self.miny + 1)) as usize;
-        (size, Some(size))
-    }
-}
-
-pub struct TileRanges {
-    ranges: Vec<TileRange>,
-}
-
-impl TileRanges {
-    pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
-        Self {
-            ranges: vec![TileRange::new(minx, maxx, miny, maxy, zoom)],
-        }
-    }
-
-    pub fn length(&self) -> u64 {
-        self.ranges.iter().map(|r| r.length()).sum()
-    }
-
-    pub fn sql_where(&self, flip: Option<bool>) -> String {
-        self.ranges
-            .iter()
-            .map(|r| r.sql_where(flip))
-            .collect::<Vec<String>>()
-            .join(" OR ")
-    }
-}
-
-impl From<TileRange> for TileRanges {
-    fn from(range: TileRange) -> Self {
-        Self {
-            ranges: vec![range],
-        }
-    }
-}
-
-impl From<Vec<TileRange>> for TileRanges {
-    fn from(ranges: Vec<TileRange>) -> Self {
-        Self { ranges }
-    }
-}
-
-impl Iterator for TileRanges {
-    type Item = (u32, u32, u8);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.ranges.is_empty() {
-            return None;
-        }
-        let mut range = self.ranges.remove(0);
-        let tile = range.next();
-        if let Some((_, _, _)) = tile {
-            self.ranges.push(range);
-        }
-        tile
     }
 }
 
@@ -1217,7 +530,7 @@ pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
     let tmax = tile(east - LL_EPSILON, south + LL_EPSILON, 32, truncate);
 
     let cell = (tmin.x, tmin.y, tmax.x, tmax.y);
-    let z = get_bbox_zoom(cell);
+    let z = bbox2zoom(cell);
     if z == 0 {
         return Tile::new(0, 0, 0);
     }
@@ -1425,18 +738,6 @@ pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
         is_merging = changed;
     }
     root_set
-}
-
-impl Iterator for LngLat {
-    type Item = (f64, f64);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let lng = self.xy.x;
-        let lat = self.xy.y;
-        self.xy.x += 1.0;
-        self.xy.y += 1.0;
-        Some((lng, lat))
-    }
 }
 
 #[cfg(test)]
