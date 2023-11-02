@@ -1,26 +1,39 @@
 use clap::{Parser, Subcommand, ValueEnum};
 use std::io;
 use std::io::BufRead;
+use tracing::{debug, info};
+use tracing_subscriber;
+use tracing_subscriber::util::SubscriberInitExt;
 use utiles::bbox::BBox;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
 
-pub enum LineSource {
+pub enum StdInteratorSource {
     Single(String),
     Multiple(Box<dyn BufRead>),
 }
 
 pub struct StdInterator {
-    source: LineSource,
+    source: StdInteratorSource,
 }
 
 impl StdInterator {
     fn new(input: Option<String>) -> io::Result<Self> {
         let source = match input {
-            Some(file_content) => LineSource::Single(file_content),
+            Some(file_content) => {
+                if file_content == "-" {
+                    debug!("reading from stdin - got '-'");
+                    let reader = Box::new(io::BufReader::new(io::stdin()));
+                    StdInteratorSource::Multiple(reader)
+                } else {
+                    debug!("reading from args: {:?}", file_content);
+                    StdInteratorSource::Single(file_content)
+                }
+            }
             None => {
                 let reader = Box::new(io::BufReader::new(io::stdin()));
-                LineSource::Multiple(reader)
+                debug!("reading from stdin - no args");
+                StdInteratorSource::Multiple(reader)
             }
         };
         Ok(Self { source })
@@ -29,17 +42,16 @@ impl StdInterator {
 
 impl Iterator for StdInterator {
     type Item = io::Result<String>;
-
     fn next(&mut self) -> Option<Self::Item> {
         match &mut self.source {
-            LineSource::Single(content) => {
+            StdInteratorSource::Single(content) => {
                 if content.is_empty() {
                     None
                 } else {
                     Some(Ok(std::mem::take(content)))
                 }
             }
-            LineSource::Multiple(reader) => {
+            StdInteratorSource::Multiple(reader) => {
                 let mut line = String::new();
                 match reader.read_line(&mut line) {
                     Ok(0) => None, // EOF
@@ -51,56 +63,6 @@ impl Iterator for StdInterator {
     }
 }
 
-pub struct Stdinput {
-    pub arg: Option<String>,
-}
-
-// struct LineIterator {
-//     reader: Box<dyn BufRead>,
-// }
-//
-// impl LineIterator {
-//     fn new(input: Option<String>) -> io::Result<Self> {
-//         let reader: Box<dyn BufRead> = match input {
-//             Some(input) => {
-//             //     fake iterator
-//                 Box::new(io::BufReader::new(input.as_bytes()))
-//             },
-//             None => Box::new(io::BufReader::new(io::stdin()))
-//         };
-//         Ok(Self { reader })
-//     }
-// }
-//
-// impl Iterator for LineIterator {
-//     type Item = io::Result<String>;
-//
-//     fn next(&mut self) -> Option<Self::Item> {
-//         let mut line = String::new();
-//         match self.reader.read_line(&mut line) {
-//             Ok(0) => None, // EOF
-//             Ok(_) => Some(Ok(line.trim_end().to_string())),
-//             Err(e) => Some(Err(e)),
-//         }
-//     }
-// }
-impl Stdinput {
-    fn new(arg: Option<String>) -> Self {
-        Self { arg }
-    }
-}
-
-impl Iterator for Stdinput {
-    type Item = String;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut line = String::new();
-        let stdin = io::stdin();
-        let mut handle = stdin.lock();
-        handle.read_line(&mut line).ok().map(|_| line)
-    }
-}
-
 /// A fictional versioning CLI
 #[derive(Debug, Parser)] // requires `derive` feature
 #[command(name = "ut")]
@@ -108,6 +70,18 @@ impl Iterator for Stdinput {
 pub struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    // debug flag
+    #[arg(
+        long,
+        short,
+        global = true,
+        default_value = "false",
+        help = "debug mode"
+    )]
+    debug: bool,
+    // #[command(flatten , help="verbosity level (-v, -vv, -vvv, -vvvv)" )]
+    // verbose: Verbosity,
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -126,6 +100,7 @@ pub enum Commands {
     //     #[arg(required = true)]
     //     quadkey: String,
     // },
+    #[command(name = "quadkey", visible_alias= "qk", about = "convert xyz <-> quadkey", long_about = None)]
     Quadkey(QuadkeyArgs),
 
     /// tiles
@@ -196,21 +171,50 @@ impl std::fmt::Display for ColorWhen {
     }
 }
 
-pub fn cli_main() {
-    let args = Cli::parse();
+pub fn cli_main(argv: Option<Vec<String>>) {
+    // print args
+    let argv = match argv {
+        Some(argv) => argv,
+        None => std::env::args().collect::<Vec<_>>(),
+    };
+
+    let args = Cli::parse_from(&argv);
+
+    // level is info by default and debug if --debug is passed
+    let level = if args.debug {
+        tracing::Level::DEBUG
+    } else {
+        tracing::Level::WARN
+    };
+
+    // install global collector configured based on RUST_LOG env var.
+    // tracing_subscriber::fmt::init();
+    let subscriber = tracing_subscriber::fmt()
+        .with_max_level(level)
+        .with_writer(std::io::stderr)
+        .finish()
+        .init();
+    debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
+    debug!("argv: {:?}", argv);
+
+    debug!("args: {:?}", args);
 
     match args.command {
         Commands::Quadkey(quadkey) => {
             let thingy = StdInterator::new(quadkey.quadkey).unwrap();
             for line in thingy {
-                println!("Line from stdin: {}", line.unwrap());
+                println!("Line from stdin: `{}`", line.unwrap());
             }
         }
         Commands::Tiles { zoom, input } => {
             let thingy = StdInterator::new(input).unwrap();
-            for line in thingy {
+            println!("zoom: {}", zoom);
+            for line in thingy
+                .filter(|l| !l.is_err())
+                .filter(|l| !l.as_ref().unwrap().is_empty())
+            {
                 let lstr = line.unwrap();
-                // println!("Line from stdin: {}", lstr);
+                println!("Line from stdin: `{}`", lstr);
                 let thingy = BBox::from(lstr);
 
                 for tile in tiles(
@@ -219,113 +223,7 @@ pub fn cli_main() {
                 ) {
                     println!("{}", tile.json_arr());
                 }
-                // )
-                // let tr = tile_ranges((
-                //     thingy.west,
-                //     thingy.south,
-                //     thingy.east,
-                //     thingy.north,
-                //                          ), ZoomOrZooms::Zoom(zoom));
-                //
-                // println!("tr: {:?}", tr);
-                // for tile in tr {
-                //     println!("tile: {:?}", tile);
-                //     println!(tile.to_json());
-                // }
             }
-        } // Commands::External(args) => {
-          //     println!("Calling out to {:?} with {:?}", &args[0], &args[1..]);
+        }
     }
-
-    // let c_res = Connection::open(
-    //     "D:\\maps\\reptiles\\mbtiles\\osm\\planet_z0z14_2022_10_13.mbtiles"
-    // ).await;
-
-    let filepath = "D:\\maps\\reptiles\\mbtiles\\osm\\planet_z0z14_2022_10_13.mbtiles";
-    // "D:\\maps\\reptiles\\mbtiles\\osm\\planet_z0z14_2022_10_13.mbtiles",
-    // "D:\\maps\\reptiles\\mbtiles\\globallandcover.mbtiles",
-    // let mbt = MbtilesAsync::open(
-    //     "D:\\maps\\reptiles\\mbtiles\\osm\\planet_z0z14_2022_10_13.mbtiles",
-    // ).await?;
-    //
-    // let mdata = mbt.metadata().await?;
-    //
-    // let mut metadataMap: HashMap<String, Vec<String>> = HashMap::new();
-    //
-    // for thing in mdata {
-    //     println!("{}: {}", thing.name, thing.value);
-    //
-    //     //     if it does not exist, create empty vector
-    //     //     if it does exist, append to vector
-    //     let mut v = metadataMap.entry(thing.name).or_insert(Vec::new());
-    //     v.push(thing.value);
-    // }
-    //
-    // println!("metadataMap: {:?}", metadataMap);
-    //
-    // println!("metadata_has_unique_index_name: {}", mbt.metadata_has_unique_index_name().await?);
-    //
-    // let mut mbtiles_manager = MbtilesManager::new();
-    //
-    // // Open the database connection
-    // mbtiles_manager.open(
-    //     filepath
-    // ).unwrap();
-    //
-    // let mapfn = |row: &rusqlite::Row| -> rusqlite::Result<String> {
-    //     Ok(row.get(0)?)
-    // };
-    //
-    // let metadata = mbtiles_manager.metadata();
-    // // Execute a query
-    // let result= mbtiles_manager.query("SELECT name, value FROM metadata",
-    //     mapfn
-    // );
-    // match result {
-    //     Ok(rows) => {
-    //         for row in rows {
-    //             println!("{}", row);
-    //         }
-    //     }
-    //     Err(err) => eprintln!("Query failed: {}", err),
-    // }
-    //
-    // println!("metadata: {:?}", metadata);
-    // // Close the database connection
-    // mbtiles_manager.close().unwrap();
-    //
-    // // match c_res {
-    // //     Ok(c) => println!("Connection opened"),
-    // //     Err(e) => println!("Error opening connection: {}", e),
-    // // }
-    // let conn = match  c_res {
-    //     Ok(c) => c,
-    //     Err(e) => return Err(e),
-    // };
-    //
-    // let mdata = conn
-    //     .call(|conn| {
-    //         let mut stmt = conn.prepare("SELECT name, value FROM metadata")?;
-    //         let mdata = stmt
-    //             .query_map([], |row| {
-    //                 Ok(
-    //                     MetadataRow {
-    //                         name: row.get(0)?,
-    //                         value: row.get(1)?,
-    //                     }
-    //                 )
-    //             })?
-    //             .collect::<Result<Vec<MetadataRow>, rusqlite::Error>>()?;
-    //
-    //         Ok::<_, rusqlite::Error>(mdata)
-    //     })
-    //     .await?;
-    //
-    //
-    //
-    // for thing in mdata {
-    //     println!("{}: {}", thing.name, thing.value);
-    // }
-
-    // let mbt = Connection
 }

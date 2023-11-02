@@ -204,17 +204,19 @@ impl From<BBoxTuple> for BBox {
     }
 }
 
-impl From<String> for BBox {
-    fn from(s: String) -> Self {
-        let tuple: BBoxTuple = serde_json::from_str(&s).unwrap();
-        self::BBox::from(tuple)
-    }
-}
 
 impl From<&String> for BBox {
     fn from(s: &String) -> Self {
+        // remove leading and trailing quotes
+        let s = s.trim_matches('"');
         let tuple: BBoxTuple = serde_json::from_str(&s).unwrap();
+
         self::BBox::from(tuple)
+    }
+}
+impl From<String> for BBox {
+    fn from(s: String) -> Self {
+        self::BBox::from(&s)
     }
 }
 
