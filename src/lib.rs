@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
 use utiles::bbox::BBox;
-
 use pyo3::exceptions::{self, PyValueError};
 
 use pyo3::prelude::*;
@@ -16,7 +15,10 @@ use utiles::zoom::ZoomOrZooms;
 
 use utiles::libtiletype;
 
+use crate::pyutilesqlite::{PyMbtiles, query_db};
+
 mod pyutiles;
+mod pyutilesqlite;
 // mod utiles;
 
 #[derive(FromPyObject)]
@@ -817,5 +819,9 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyLngLat>()?;
     m.add_class::<PyLngLatBbox>()?;
     m.add_class::<PyBbox>()?;
+
+    // mbtiles...
+    m.add_class::<PyMbtiles>()?;
+    m.add_function(wrap_pyfunction!(query_db, m)?)?;
     Ok(())
 }

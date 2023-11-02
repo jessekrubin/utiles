@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import math
 from typing import List, Sequence, Tuple, Union
-
+from utiles import libutiles
 from utiles.libutiles import (
     TILETYPE_GIF,
     TILETYPE_JPG,
@@ -82,6 +82,7 @@ __all__ = (
     "from_pmtileid",
     "from_tuple",
     "geojson_bounds",
+    "libutiles",
     "lnglat",
     "minmax",
     "neighbors",
