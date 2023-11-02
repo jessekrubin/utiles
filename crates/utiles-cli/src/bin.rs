@@ -1,9 +1,3 @@
-use std::io::BufRead;
-
-use clap::{Args, Parser, Subcommand, ValueEnum};
-
-use tracing_subscriber;
-
 mod cli;
 
 #[tokio::main]

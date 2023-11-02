@@ -1,8 +1,8 @@
 use clap::{Parser, Subcommand, ValueEnum};
 use std::io;
 use std::io::BufRead;
-use tracing::{debug, info};
-use tracing_subscriber;
+use tracing::debug;
+
 use tracing_subscriber::util::SubscriberInitExt;
 use utiles::bbox::BBox;
 use utiles::tiles;

@@ -1,9 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::tiles;
 use crate::lnglat::LngLat;
 use crate::tile::Tile;
-use crate::zoom::ZoomOrZooms;
 
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct BBoxTuple(f64, f64, f64, f64);
@@ -214,6 +212,7 @@ impl From<&String> for BBox {
         self::BBox::from(tuple)
     }
 }
+
 impl From<String> for BBox {
     fn from(s: String) -> Self {
         self::BBox::from(&s)
