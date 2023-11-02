@@ -327,4 +327,16 @@ impl Tile {
             ),
         }
     }
+
+    pub fn json_arr_min(&self) -> String {
+        format!("[{},{},{}]", self.x, self.y, self.z)
+    }
+
+    pub fn json_arr(&self) -> String {
+        format!("[{}, {}, {}]", self.x, self.y, self.z)
+    }
+
+    pub fn json_obj(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
 }

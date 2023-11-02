@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct TileRange {
     curx: u32,
     cury: u32,
@@ -82,6 +83,7 @@ impl Iterator for TileRange {
     }
 }
 
+#[derive(Debug)]
 pub struct TileRanges {
     ranges: Vec<TileRange>,
 }

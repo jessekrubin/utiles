@@ -1,5 +1,13 @@
+use serde::{Deserialize, Serialize};
+
+use crate::tiles;
 use crate::lnglat::LngLat;
 use crate::tile::Tile;
+use crate::zoom::ZoomOrZooms;
+
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
+pub struct BBoxTuple(f64, f64, f64, f64);
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BBox {
     pub north: f64,
@@ -176,6 +184,37 @@ impl BBox {
 
     pub fn ll(&self) -> LngLat {
         LngLat::new(self.west, self.south)
+    }
+}
+
+impl From<BBox> for BBoxTuple {
+    fn from(bbox: BBox) -> Self {
+        BBoxTuple(bbox.west, bbox.south, bbox.east, bbox.north)
+    }
+}
+
+impl From<BBoxTuple> for BBox {
+    fn from(tuple: BBoxTuple) -> Self {
+        BBox {
+            north: tuple.3,
+            south: tuple.1,
+            east: tuple.2,
+            west: tuple.0,
+        }
+    }
+}
+
+impl From<String> for BBox {
+    fn from(s: String) -> Self {
+        let tuple: BBoxTuple = serde_json::from_str(&s).unwrap();
+        self::BBox::from(tuple)
+    }
+}
+
+impl From<&String> for BBox {
+    fn from(s: &String) -> Self {
+        let tuple: BBoxTuple = serde_json::from_str(&s).unwrap();
+        self::BBox::from(tuple)
     }
 }
 
