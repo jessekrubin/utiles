@@ -189,7 +189,7 @@ pub fn cli_main(argv: Option<Vec<String>>) {
 
     // install global collector configured based on RUST_LOG env var.
     // tracing_subscriber::fmt::init();
-    let subscriber = tracing_subscriber::fmt()
+    tracing_subscriber::fmt()
         .with_max_level(level)
         .with_writer(std::io::stderr)
         .finish()
