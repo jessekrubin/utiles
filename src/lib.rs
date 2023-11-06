@@ -15,7 +15,7 @@ use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
 
 mod pyutiles;
-mod pyutilesqlite;
+// mod pyutilesqlite;
 // mod utiles;
 
 #[derive(FromPyObject)]
