@@ -64,10 +64,10 @@ impl From<(i32, i32, i32, i32)> for BBox {
 impl BBox {
     pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         BBox {
-            west: west,
-            south: south,
-            east: east,
-            north: north,
+            west,
+            south,
+            east,
+            north,
         }
     }
 
@@ -215,7 +215,7 @@ impl From<&String> for BBox {
         // remove leading and trailing quotes
         let s = s.trim_matches('"');
         // let value: Value = serde_json::from_str(&s).unwrap();
-        let tuple: BBoxTuple = serde_json::from_str(&s).unwrap();
+        let tuple: BBoxTuple = serde_json::from_str(s).unwrap();
         self::BBox::from(tuple)
     }
 }
