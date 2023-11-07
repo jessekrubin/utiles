@@ -6,8 +6,6 @@ use pyo3::types::{PyDict, PyTuple};
 use utiles::bbox::BBox;
 use utiles::libtiletype;
 use utiles::zoom::ZoomOrZooms;
-use utiles_cli::cli::cli_main;
-
 use pyutiles::pybbox::PyBbox;
 use pyutiles::pyiters::CoordinateIterator;
 use pyutiles::pylnglat::PyLngLat;
@@ -15,6 +13,7 @@ use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
 
 mod pyutiles;
+mod cli;
 // mod pyutilesqlite;
 // mod utiles;
 
@@ -757,17 +756,6 @@ fn feature(
     Ok(f)
 }
 
-#[pyfunction]
-fn utcli(py: Python, args: Option<Vec<String>>) {
-    let argv = match args {
-        Some(args) => args,
-        None => std::env::args().collect(),
-    };
-    cli_main(
-        Option::Some(argv)
-    )
-}
-
 fn lib_constants(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
     m.add("__build_profile__", env!("PROFILE"))?;
@@ -839,7 +827,7 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     // m.add_function(wrap_pyfunction!(query_db, m)?)?;
 
     // rust-cli
-    m.add_function(wrap_pyfunction!(utcli, m)?)?;
+    m.add_function(wrap_pyfunction!(cli::utcli, m)?)?;
 
     Ok(())
 }

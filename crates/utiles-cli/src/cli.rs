@@ -73,11 +73,11 @@ pub struct Cli {
 
     // debug flag
     #[arg(
-        long,
-        short,
-        global = true,
-        default_value = "false",
-        help = "debug mode"
+    long,
+    short,
+    global = true,
+    default_value = "false",
+    help = "debug mode"
     )]
     debug: bool,
     // #[command(flatten , help="verbosity level (-v, -vv, -vvv, -vvvv)" )]
@@ -100,7 +100,7 @@ pub enum Commands {
     //     #[arg(required = true)]
     //     quadkey: String,
     // },
-    #[command(name = "quadkey", visible_alias= "qk", about = "convert xyz <-> quadkey", long_about = None)]
+    #[command(name = "quadkey", visible_alias = "qk", about = "convert xyz <-> quadkey", long_about = None)]
     Quadkey(QuadkeyArgs),
 
     /// tiles
@@ -174,7 +174,7 @@ impl std::fmt::Display for ColorWhen {
     }
 }
 
-pub fn cli_main(argv: Option<Vec<String>>) {
+pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
     // print args
     let argv = match argv {
         Some(argv) => argv,
@@ -209,15 +209,16 @@ pub fn cli_main(argv: Option<Vec<String>>) {
                 println!("Line from stdin: `{}`", line.unwrap());
             }
         }
-        Commands::Tiles { zoom, input , seq} => {
-            let thingy = StdInterator::new(input).unwrap();
-            println!("zoom: {}", zoom);
-            for line in thingy
+        Commands::Tiles { zoom, input, seq } => {
+            let input_lines = StdInterator::new(input).unwrap();
+            // println!("zoom: {}", zoom);
+            let mut niter = 0;
+            for line in input_lines
                 .filter(|l| !l.is_err())
                 .filter(|l| !l.as_ref().unwrap().is_empty())
             {
                 let lstr = line.unwrap();
-                println!("Line from stdin: `{}`", lstr);
+                // println!("Line from stdin: `{}`", lstr);
                 // let json: serde_json::Value = serde_json::from_str(the_file)l;
                 let thingy = BBox::from(lstr);
 
@@ -226,6 +227,17 @@ pub fn cli_main(argv: Option<Vec<String>>) {
                     ZoomOrZooms::Zoom(zoom),
                 ) {
                     println!("{}", tile.json_arr());
+
+                //     call loop_fn if it's defined
+                    niter += 1;
+
+                    // call fn every 1000 iterations
+                    if niter % 1000 == 0{
+
+                        if let Some(f) = loop_fn {
+                            f();
+                        }
+                    }
                 }
             }
         }
