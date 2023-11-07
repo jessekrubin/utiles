@@ -110,6 +110,9 @@ pub enum Commands {
 
         #[arg(required = false)]
         input: Option<String>,
+
+        #[arg(required = false, default_value = "false", long)]
+        seq: Option<bool>,
     },
     // /// Clones repos
     // #[command(arg_required_else_help = true)]
@@ -206,7 +209,7 @@ pub fn cli_main(argv: Option<Vec<String>>) {
                 println!("Line from stdin: `{}`", line.unwrap());
             }
         }
-        Commands::Tiles { zoom, input } => {
+        Commands::Tiles { zoom, input , seq} => {
             let thingy = StdInterator::new(input).unwrap();
             println!("zoom: {}", zoom);
             for line in thingy
@@ -215,6 +218,7 @@ pub fn cli_main(argv: Option<Vec<String>>) {
             {
                 let lstr = line.unwrap();
                 println!("Line from stdin: `{}`", lstr);
+                // let json: serde_json::Value = serde_json::from_str(the_file)l;
                 let thingy = BBox::from(lstr);
 
                 for tile in tiles(

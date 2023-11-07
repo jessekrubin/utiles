@@ -768,11 +768,17 @@ fn utcli(py: Python, args: Option<Vec<String>>) {
     )
 }
 
+fn lib_constants(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
+    m.add("__build_profile__", env!("PROFILE"))?;
+    Ok(())
+}
+
 /// Utiles python module
 #[pymodule]
 fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
-    m.add("__build_profile__", env!("PROFILE"))?;
+    // lib constants
+    lib_constants(_py, m)?;
 
     // mercantile functions
     m.add_function(wrap_pyfunction!(parse_tile_arg, m)?)?;
