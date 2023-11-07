@@ -16,6 +16,7 @@ pub mod bbox;
 pub mod constants;
 pub mod libtiletype;
 pub mod lnglat;
+mod parsing;
 pub mod pmtiles;
 pub mod sibling_relationship;
 pub mod tile;
