@@ -1,4 +1,5 @@
 use crate::lnglat::LngLat;
+use crate::parsing::parse_bbox;
 use crate::tile::Tile;
 use serde::{Deserialize, Serialize};
 
@@ -221,7 +222,7 @@ impl From<&String> for BBox {
 
 impl From<&str> for BBox {
     fn from(s: &str) -> Self {
-        self::BBox::from(&s.to_string())
+        parse_bbox(s).unwrap()
     }
 }
 

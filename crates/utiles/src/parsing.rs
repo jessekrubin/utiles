@@ -25,9 +25,7 @@ pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
             let bbox: (f64, f64, f64, f64) = serde_json::from_value(v)?;
             Ok(BBox::from(bbox))
         }
-        _ => Err(panic!(
-            "Expected a two-element array or a four-element array"
-        )),
+        _ => (panic!("Expected a two-element array or a four-element array")),
     }
 }
 
