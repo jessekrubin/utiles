@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 use std::hash::Hash;
-
+use serde_json;
 use rusqlite;
-use mbtiles::MbtilesManager;
+use utilesqlite::mbtiles::Mbtiles;
+// use mbtiles::MbtilesManager;
+// use crate::mbtiles::Mbtiles;
 
-mod mbtiles;
+// mod mbtiles;
 
 // impl From<tokio_rusqlite::Error> for Error {
 //     fn from(e: tokio_rusqlite::Error) -> Error {
@@ -43,34 +45,58 @@ async fn main() -> tokio_rusqlite::Result<()> {
     //
     // println!("metadata_has_unique_index_name: {}", mbt.metadata_has_unique_index_name().await?);
     //
-    let mut mbtiles_manager = MbtilesManager::new();
 
-    // Open the database connection
-    mbtiles_manager.open(
+
+    let conn = rusqlite::Connection::open(
         filepath
     ).unwrap();
 
-    let mapfn = |row: &rusqlite::Row| -> rusqlite::Result<String> {
-        Ok(row.get(0)?)
-    };
+    let mbtiles = Mbtiles::from_conn(conn);
 
-    let metadata = mbtiles_manager.metadata();
-    // Execute a query
-    let result= mbtiles_manager.query("SELECT name, value FROM metadata",
-        mapfn
-    );
-    match result {
-        Ok(rows) => {
-            for row in rows {
-                println!("{}", row);
-            }
-        }
-        Err(err) => eprintln!("Query failed: {}", err),
+    let mdata_arr  = mbtiles.metadata().unwrap();
+
+    // print it
+    for thing in mdata_arr {
+        println!("{}: {}", thing.name, thing.value);
     }
 
-    println!("metadata: {:?}", metadata);
-    // Close the database connection
-    mbtiles_manager.close().unwrap();
+
+    let tj = mbtiles.tilejson().unwrap();
+
+    let tj_str = serde_json::to_string_pretty(&tj).unwrap();
+    // serialized
+    println!( "{}", tj_str
+    );
+
+    //
+    // let mut mbtiles_manager = MbtilesManager::new();
+    //
+    // // Open the database connection
+    // mbtiles_manager.open(
+    //     filepath
+    // ).unwrap();
+    //
+    // let mapfn = |row: &rusqlite::Row| -> rusqlite::Result<String> {
+    //     Ok(row.get(0)?)
+    // };
+    //
+    // let metadata = mbtiles_manager.metadata();
+    // // Execute a query
+    // let result= mbtiles_manager.query("SELECT name, value FROM metadata",
+    //     mapfn
+    // );
+    // match result {
+    //     Ok(rows) => {
+    //         for row in rows {
+    //             println!("{}", row);
+    //         }
+    //     }
+    //     Err(err) => eprintln!("Query failed: {}", err),
+    // }
+    //
+    // println!("metadata: {:?}", metadata);
+    // // Close the database connection
+    // mbtiles_manager.close().unwrap();
     //
     // // match c_res {
     // //     Ok(c) => println!("Connection opened"),

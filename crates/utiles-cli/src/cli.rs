@@ -1,67 +1,16 @@
 use clap::{Parser, Subcommand, ValueEnum};
-use std::io;
-use std::io::BufRead;
 use tracing::debug;
 
 use tracing_subscriber::util::SubscriberInitExt;
-use utiles::bbox::BBox;
+use tracing_subscriber::EnvFilter;
+use utiles::parsing::parse_bbox;
+use utiles::tilejson::tilejson_stringify;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
+use crate::stdinterator::StdInterator;
+use utilesqlite::mbtiles::Mbtiles;
 
-pub enum StdInteratorSource {
-    Single(String),
-    Multiple(Box<dyn BufRead>),
-}
 
-pub struct StdInterator {
-    source: StdInteratorSource,
-}
-
-impl StdInterator {
-    fn new(input: Option<String>) -> io::Result<Self> {
-        let source = match input {
-            Some(file_content) => {
-                if file_content == "-" {
-                    debug!("reading from stdin - got '-'");
-                    let reader = Box::new(io::BufReader::new(io::stdin()));
-                    StdInteratorSource::Multiple(reader)
-                } else {
-                    debug!("reading from args: {:?}", file_content);
-                    StdInteratorSource::Single(file_content)
-                }
-            }
-            None => {
-                let reader = Box::new(io::BufReader::new(io::stdin()));
-                debug!("reading from stdin - no args");
-                StdInteratorSource::Multiple(reader)
-            }
-        };
-        Ok(Self { source })
-    }
-}
-
-impl Iterator for StdInterator {
-    type Item = io::Result<String>;
-    fn next(&mut self) -> Option<Self::Item> {
-        match &mut self.source {
-            StdInteratorSource::Single(content) => {
-                if content.is_empty() {
-                    None
-                } else {
-                    Some(Ok(std::mem::take(content)))
-                }
-            }
-            StdInteratorSource::Multiple(reader) => {
-                let mut line = String::new();
-                match reader.read_line(&mut line) {
-                    Ok(0) => None, // EOF
-                    Ok(_) => Some(Ok(line.trim_end().to_string())),
-                    Err(e) => Some(Err(e)),
-                }
-            }
-        }
-    }
-}
 
 /// A fictional versioning CLI
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -111,9 +60,26 @@ pub enum Commands {
         #[arg(required = false)]
         input: Option<String>,
 
-        #[arg(required = false, default_value = "false", long)]
-        seq: Option<bool>,
+        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+        seq: bool,
     },
+
+
+    #[command(name = "lint", about = "lint mbtiles file", long_about = None)]
+    Lint {
+        #[arg(required = true)]
+        filepath: String,
+
+        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+        fix: bool,
+    },
+
+    #[command(name = "tilejson", about = "output tilejson", long_about = None)]
+    Tilejson {
+        #[arg(required = true)]
+        filepath: String,
+    },
+
     // /// Clones repos
     // #[command(arg_required_else_help = true)]
     // Clone {
@@ -184,23 +150,37 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
     let args = Cli::parse_from(&argv);
 
     // level is info by default and debug if --debug is passed
-    let level = if args.debug {
-        tracing::Level::DEBUG
-    } else {
-        tracing::Level::WARN
-    };
+    // let level = if args.debug {
+    //     tracing::Level::DEBUG
+    // } else {
+    //     tracing::Level::WARN
+    // };
 
     // install global collector configured based on RUST_LOG env var.
-    // tracing_subscriber::fmt::init();
+    // tracing_subscriber::fmt()
+    //     .with_max_level(level)
+    //     .with_writer(std::io::stderr)
+    //     .finish()
+    //     .init();
+    // Configure the filter
+
+
+    let filter = if args.debug {
+        EnvFilter::new("DEBUG")
+    } else {
+        EnvFilter::from_default_env()
+    };
+
+    // Install the global collector configured based on the filter.
     tracing_subscriber::fmt()
-        .with_max_level(level)
+        .with_env_filter(filter)
         .with_writer(std::io::stderr)
-        .finish()
         .init();
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);
 
     debug!("args: {:?}", args);
+
 
     match args.command {
         Commands::Quadkey(quadkey) => {
@@ -220,7 +200,19 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 let lstr = line.unwrap();
                 // println!("Line from stdin: `{}`", lstr);
                 // let json: serde_json::Value = serde_json::from_str(the_file)l;
-                let thingy = BBox::from(lstr);
+
+                let thingy = parse_bbox(
+                    &lstr,
+                ).unwrap();
+
+                // match thingy {
+                //     Ok(thingy) => thingy,
+                //     Err(e) => {
+                //         println!("Error parsing bbox: {}", e);
+                //         continue;
+                //     }
+                // }
+                // let thingy = BBox::from(lstr);
 
                 for tile in tiles(
                     (thingy.west, thingy.south, thingy.east, thingy.north),
@@ -240,6 +232,29 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                     }
                 }
             }
+        }
+
+        Commands::Lint { filepath, fix } => {
+            println!("linting: {}", filepath);
+            println!("NOT IMPLEMENTED YET");
+        }
+
+        Commands::Tilejson { filepath } => {
+            println!("tilejson: {}", filepath);
+            println!("NOT IMPLEMENTED YET");
+            let mbtiles = Mbtiles::from_filepath(
+                &filepath
+            ).unwrap();
+            let tj = mbtiles.tilejson().unwrap();
+
+            let s =tilejson_stringify(&tj, None);
+
+            println!("{}", s);
+
+            // println!(
+            //     "{}",
+            //     serde_json::to_string_pretty(&tj).unwrap()
+            // );
         }
     }
 }

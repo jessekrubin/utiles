@@ -3,17 +3,17 @@ use std::collections::{HashMap, HashSet};
 use pyo3::exceptions::{self, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
-use utiles::bbox::BBox;
-use utiles::libtiletype;
-use utiles::zoom::ZoomOrZooms;
 use pyutiles::pybbox::PyBbox;
 use pyutiles::pyiters::CoordinateIterator;
 use pyutiles::pylnglat::PyLngLat;
 use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
+use utiles::bbox::BBox;
+use utiles::libtiletype;
+use utiles::zoom::ZoomOrZooms;
 
-mod pyutiles;
 mod cli;
+mod pyutiles;
 // mod pyutilesqlite;
 // mod utiles;
 
@@ -426,7 +426,7 @@ impl From<PyZoomOrZooms> for ZoomOrZooms {
 
 #[pyclass]
 struct TilesGenerator {
-    iter: Box<dyn Iterator<Item=PyTile> + Send>,
+    iter: Box<dyn Iterator<Item = PyTile> + Send>,
     length: u64,
 }
 
@@ -482,7 +482,7 @@ fn tiles(
         (west, south, east, north),
         ZoomOrZooms::from(zooms_vec_iter),
     )
-        .map(PyTile::from);
+    .map(PyTile::from);
     TilesGenerator {
         iter: Box::new(xyzs),
         length: ntiles,
@@ -827,7 +827,7 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     // m.add_function(wrap_pyfunction!(query_db, m)?)?;
 
     // rust-cli
-    m.add_function(wrap_pyfunction!(cli::utcli, m)?)?;
+    m.add_function(wrap_pyfunction!(cli::ut_cli, m)?)?;
 
     Ok(())
 }

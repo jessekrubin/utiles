@@ -16,13 +16,15 @@ pub mod bbox;
 pub mod constants;
 pub mod libtiletype;
 pub mod lnglat;
-mod parsing;
 pub mod pmtiles;
 pub mod sibling_relationship;
 pub mod tile;
 pub mod tile_range;
 pub mod traits;
 pub mod zoom;
+pub mod parsing;
+pub mod mbtiles;
+pub mod tilejson;
 
 /// Tile macro to create a new tile.
 ///  - do you need this? probably not

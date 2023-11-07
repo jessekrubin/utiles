@@ -2,7 +2,7 @@ use pyo3::{pyfunction, PyResult, Python};
 use utiles_cli::cli::cli_main;
 
 #[pyfunction]
-pub fn utcli(py: Python, args: Option<Vec<String>>) {
+pub fn ut_cli(py: Python, args: Option<Vec<String>>) {
     let argv = match args {
         Some(args) => args,
         None => std::env::args().collect(),
