@@ -11,7 +11,6 @@ use crate::stdinterator::StdInterator;
 use utilesqlite::mbtiles::Mbtiles;
 
 
-
 /// A fictional versioning CLI
 #[derive(Debug, Parser)] // requires `derive` feature
 #[command(name = "ut")]
@@ -49,10 +48,22 @@ pub enum Commands {
     //     #[arg(required = true)]
     //     quadkey: String,
     // },
-    #[command(name = "quadkey", visible_alias = "qk", about = "convert xyz <-> quadkey", long_about = None)]
-    Quadkey(QuadkeyArgs),
 
-    /// tiles
+    #[command(name = "lint", about = "lint mbtiles file", long_about = None)]
+    Lint {
+        #[arg(required = true)]
+        filepath: String,
+
+        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+        fix: bool,
+    },
+    #[command(name = "tilejson", visible_alias = "tj", about = "output tilejson", long_about = None)]
+    Tilejson {
+        #[arg(required = true)]
+        filepath: String,
+    },
+
+    // MERCANTILE CLIKE (cli+like)
     Tiles {
         #[arg(required = true)]
         zoom: u8,
@@ -65,20 +76,58 @@ pub enum Commands {
     },
 
 
-    #[command(name = "lint", about = "lint mbtiles file", long_about = None)]
-    Lint {
-        #[arg(required = true)]
-        filepath: String,
+    // ===================
+    // NOT IMPLEMENTED YET
+    // ===================
+    #[command(name = "quadkey", visible_alias = "qk", about = "convert xyz <-> quadkey", long_about = None)]
+    Quadkey(QuadkeyArgs),
 
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        fix: bool,
+    #[command(name = "bounding-tile", about = "output tilejson", long_about = None)]
+    BoundingTile {
+        #[arg(required = true)]
+        zoom: u8,
+
+        #[arg(required = true)]
+        input: String,
+
+        seq: bool,
     },
 
-    #[command(name = "tilejson", about = "output tilejson", long_about = None)]
-    Tilejson {
+    #[command(name = "children", about = "print children of tile(s)", long_about = None)]
+    Children {
         #[arg(required = true)]
-        filepath: String,
+        depth: u8,
+
+        #[arg(required = true)]
+        input: String,
+
+        seq: bool,
     },
+
+    #[command(name="neighbors", about="print neighbors of tile(s)", long_about=None)]
+    Neighbors {
+        #[arg(required = true)]
+        input: String,
+
+        seq: bool,
+    },
+
+    #[command(name="parent", about="print parent of tile(s)", long_about=None)]
+    Parent {
+        #[arg(required = true)]
+        input: String,
+
+        seq: bool,
+    },
+
+    #[command(name="shapes", about="print shapes of tiles as geojson", long_about=None)]
+    Shapes {
+        #[arg(required = true)]
+        input: String,
+
+        seq: bool,
+    },
+
 
     // /// Clones repos
     // #[command(arg_required_else_help = true)]
@@ -220,12 +269,11 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 ) {
                     println!("{}", tile.json_arr());
 
-                //     call loop_fn if it's defined
+                    //     call loop_fn if it's defined
                     niter += 1;
 
                     // call fn every 1000 iterations
-                    if niter % 1000 == 0{
-
+                    if niter % 1000 == 0 {
                         if let Some(f) = loop_fn {
                             f();
                         }
@@ -247,7 +295,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
             ).unwrap();
             let tj = mbtiles.tilejson().unwrap();
 
-            let s =tilejson_stringify(&tj, None);
+            let s = tilejson_stringify(&tj, None);
 
             println!("{}", s);
 
@@ -255,6 +303,10 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
             //     "{}",
             //     serde_json::to_string_pretty(&tj).unwrap()
             // );
+        }
+
+        _ => {
+            println!("NOT IMPLEMENTED YET");
         }
     }
 }
