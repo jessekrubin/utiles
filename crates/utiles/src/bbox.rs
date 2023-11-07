@@ -1,3 +1,4 @@
+use geo_types::Coord;
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
@@ -70,6 +71,25 @@ impl BBox {
             north,
         }
     }
+
+    pub fn world_planet() -> Self {
+        BBox {
+            west: -180.0,
+            south: -90.0,
+            east: 180.0,
+            north: 90.0,
+        }
+    }
+
+    pub fn world_web() -> Self {
+        BBox {
+            west: -180.0,
+            south: -85.051_129,
+            east: 180.0,
+            north: 85.051_129,
+        }
+    }
+
 
     pub fn crosses_antimeridian(&self) -> bool {
         self.west > self.east
@@ -196,6 +216,7 @@ impl BBox {
     pub fn ll(&self) -> LngLat {
         LngLat::new(self.west, self.south)
     }
+
 }
 
 impl From<BBox> for BBoxTuple {
@@ -203,6 +224,8 @@ impl From<BBox> for BBoxTuple {
         BBoxTuple(bbox.west, bbox.south, bbox.east, bbox.north)
     }
 }
+
+
 
 impl From<BBoxTuple> for BBox {
     fn from(tuple: BBoxTuple) -> Self {
@@ -235,5 +258,31 @@ impl From<String> for BBox {
 impl From<Tile> for WebMercatorBbox {
     fn from(tile: Tile) -> Self {
         crate::xyz2bbox(tile.x, tile.y, tile.z)
+    }
+}
+
+impl From<Vec<Coord>> for BBox{
+    fn from(coords: Vec<Coord>) -> Self {
+        let mut min_x = 180.0;
+        let mut min_y = 90.0;
+        let mut max_x = -180.0;
+        let mut max_y = -90.0;
+        for coord in coords {
+            let x = coord.x;
+            let y = coord.y;
+            if x < min_x {
+                min_x = x;
+            }
+            if y < min_y {
+                min_y = y;
+            }
+            if x > max_x {
+                max_x = x;
+            }
+            if y > max_y {
+                max_y = y;
+            }
+        }
+        BBox::new(min_x, min_y, max_x, max_y)
     }
 }

@@ -267,7 +267,11 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                     (thingy.west, thingy.south, thingy.east, thingy.north),
                     ZoomOrZooms::Zoom(zoom),
                 ) {
-                    println!("{}", tile.json_arr());
+                    let tstr =   tile.json_arr();
+                    // RS char if seq else ""
+                    let rs = if seq { "\x1e\n" } else { "" };
+                    println!("{}{}", rs, tstr);
+                    // println!("{}", tile.json_arr());
 
                     //     call loop_fn if it's defined
                     niter += 1;
