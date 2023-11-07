@@ -112,11 +112,11 @@ impl Tile {
     }
 
     pub fn pmtileid(&self) -> u64 {
-        pmtiles::xyz2id(self.x, self.y, self.z)
+        pmtiles::xyz2pmid(self.x, self.y, self.z)
     }
 
     pub fn from_pmtileid(id: u64) -> Self {
-        let (x, y, z) = pmtiles::id2xyz(id);
+        let (x, y, z) = pmtiles::pmid2xyz(id);
         Tile::new(x, y, z)
     }
 
