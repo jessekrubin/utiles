@@ -43,6 +43,20 @@ pub struct QuadkeyArgs {
     input: Option<String>,
 }
 
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct InputAndSequenceArgs {
+    /// The remote to clone
+    // #[arg(required = false, default_value = "-")]
+    // quadkey: MaybeStdin<String>,
+    // #[arg(required = false)]
+    // quadkey: Option<String>,
+    #[arg(required = false)]
+    input: Option<String>,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    seq: bool,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     /// quadkey
@@ -93,22 +107,11 @@ pub enum Commands {
         #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         seq: bool,
     },
-
-    #[command(name = "children", about = "print children of tile(s)", long_about = None)]
-    Children {
-        #[arg(required = true)]
-        depth: u8,
-
-        #[arg(required = true)]
-        input: String,
-
-        seq: bool,
-    },
-
     #[command(name = "neighbors", about = "print neighbors of tile(s)", long_about = None)]
-    Neighbors {
+    Neighbors
+    {
         #[arg(required = false)]
-        input: String,
+        input: Option<String>,
 
         #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         seq: bool,
@@ -116,12 +119,26 @@ pub enum Commands {
 
     #[command(name = "parent", about = "print parent of tile(s)", long_about = None)]
     Parent {
-        #[arg(required = true)]
-        input: String,
+        #[arg(required = false)]
+        input: Option<String>,
 
+        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         seq: bool,
-    },
 
+        #[arg(required = false, long, default_value = "1")]
+        depth: u8,
+    },
+    #[command(name = "children", about = "print children of tile(s)", long_about = None)]
+    Children {
+        #[arg(required = false)]
+        input: Option<String>,
+
+        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+        seq: bool,
+
+        #[arg(required = false, long, default_value = "1")]
+        depth: u8,
+    },
     #[command(name = "shapes", about = "print shapes of tiles as geojson", long_about = None)]
     Shapes {
         #[arg(required = true)]
@@ -232,6 +249,31 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
 
 
     match args.command {
+        Commands::Lint { filepath, fix } => {
+            println!("lint (fix -- {}): {}", fix, filepath);
+            // throw not implemented error
+            panic!("not implemented (yet)")
+        }
+        Commands::Tilejson { filepath } => {
+            println!("tilejson: {}", filepath);
+            println!("NOT IMPLEMENTED YET");
+            let mbtiles = Mbtiles::from_filepath(
+                &filepath
+            ).unwrap();
+            let tj = mbtiles.tilejson().unwrap();
+
+            let s = tilejson_stringify(&tj, None);
+
+            println!("{}", s);
+
+            // println!(
+            //     "{}",
+            //     serde_json::to_string_pretty(&tj).unwrap()
+            // );
+        }
+
+
+        // mercantile cli like
         Commands::Quadkey {
             input
         } => {
@@ -272,7 +314,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 }
             }
         }
-        Commands::BoundingTile{ input, seq } => {
+        Commands::BoundingTile { input, seq } => {
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
@@ -286,7 +328,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 parse_bbox(&s).unwrap()
             });
             for bbox in bboxes {
-                let tile = bounding_tile( bbox, None);
+                let tile = bounding_tile(bbox, None);
                 // let tile = Tile::from_bbox(&bbox, zoom);
                 let rs = if seq { "\x1e\n" } else { "" };
                 println!("{}{}", rs, tile.json_arr());
@@ -387,37 +429,63 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
         }
         Commands::Neighbors {
             input, seq
-        } =>{
+        } => {
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
                 .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
                 |l| l.as_ref().unwrap() != "\x1e"
             );
+            let tiles = lines.map(|l| {
+                Tile::from_json(&l.unwrap())
+            });
+            for tile in tiles {
+                let neighbors = tile.neighbors();
+                for neighbor in neighbors {
+                    let rs = if seq { "\x1e\n" } else { "" };
+                    println!("{}{}", rs, neighbor.json_arr());
+                }
+            }
         }
 
-        Commands::Lint { filepath, fix } => {
-            println!("lint (fix -- {}): {}", fix, filepath);
-            // throw not implemented error
-            panic!("not implemented (yet)")
+        Commands::Children{
+            input, seq, depth
+        } => {
+            let input_lines = StdInterator::new(input).unwrap();
+            let lines = input_lines
+                .filter(|l| !l.is_err())
+                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
+                |l| l.as_ref().unwrap() != "\x1e"
+            );
+            let tiles = lines.map(|l| {
+                Tile::from_json(&l.unwrap())
+            });
+            for tile in tiles {
+                let children = tile.children(Option::from(tile.z + depth as u8));
+                for child in children {
+                    let rs = if seq { "\x1e\n" } else { "" };
+                    println!("{}{}", rs, child.json_arr());
+                }
+            }
         }
 
-        Commands::Tilejson { filepath } => {
-            println!("tilejson: {}", filepath);
-            println!("NOT IMPLEMENTED YET");
-            let mbtiles = Mbtiles::from_filepath(
-                &filepath
-            ).unwrap();
-            let tj = mbtiles.tilejson().unwrap();
-
-            let s = tilejson_stringify(&tj, None);
-
-            println!("{}", s);
-
-            // println!(
-            //     "{}",
-            //     serde_json::to_string_pretty(&tj).unwrap()
-            // );
+        Commands::Parent{
+            input, seq, depth
+        } => {
+            let input_lines = StdInterator::new(input).unwrap();
+            let lines = input_lines
+                .filter(|l| !l.is_err())
+                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
+                |l| l.as_ref().unwrap() != "\x1e"
+            );
+            let tiles = lines.map(|l| {
+                Tile::from_json(&l.unwrap())
+            });
+            for tile in tiles {
+                let parent = tile.parent(Option::from(depth-1));
+                let rs = if seq { "\x1e\n" } else { "" };
+                println!("{}{}", rs, parent.json_arr());
+            }
         }
 
         _ => {

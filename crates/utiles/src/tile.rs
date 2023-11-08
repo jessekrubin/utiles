@@ -199,6 +199,13 @@ impl Tile {
         }
     }
 
+    pub fn from_json(json: &str) -> Self {
+        if json.starts_with('[') {
+            return Self::from_json_arr(json);
+        }
+        Self::from_json_obj(json)
+    }
+
     pub fn quadkey(&self) -> String {
         xyz2quadkey(self.x, self.y, self.z)
     }

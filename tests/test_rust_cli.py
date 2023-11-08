@@ -144,68 +144,7 @@ from utiles.ut import cli
 
 
 
-# def test_cli_parent_failure() -> None:
-#     """[0, 0, 0] has no parent"""
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["parent"], "[0, 0, 0]")
-#     assert result.exit_code == 2
 
-
-# def test_cli_parent() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["parent"], "[486, 332, 10]\n[486, 332, 10]")
-#     assert result.exit_code == 0
-#     assert result.output == "[243, 166, 9]\n[243, 166, 9]\n"
-
-
-# def test_cli_parent_depth() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["parent", "--depth", "2"], "[486, 332, 10]")
-#     assert result.exit_code == 0
-#     assert result.output == "[121, 83, 8]\n"
-
-
-# def test_cli_parent_multidepth() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(
-#         cli, ["parent", "--depth", "2"], "[486, 332, 10]\n[121, 83, 8]"
-#     )
-#     assert result.exit_code == 0
-#     assert result.output == "[121, 83, 8]\n[30, 20, 6]\n"
-
-
-# def test_cli_children() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["children"], "[243, 166, 9]")
-#     assert result.exit_code == 0
-#     assert (
-#         result.output
-#         == "[486, 332, 10]\n[487, 332, 10]\n[487, 333, 10]\n[486, 333, 10]\n"
-#     )
-
-
-# def test_cli_neighbors() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["neighbors"], "[243, 166, 9]")
-#     assert result.exit_code == 0
-
-#     tiles_lines = result.output.strip().split("\n")
-#     tiles = [tuple(json.loads(t)) for t in tiles_lines]
-#     assert len(tiles) == 8
-
-#     # We do not provide ordering guarantees
-#     # tiles = set([tuple(t) for t in tiles])
-#     tiles_set = set(tiles)
-#     assert (243, 166, 9) not in tiles_set, "input not in neighbors"
-
-#     assert (243 - 1, 166 - 1, 9) in tiles_set
-#     assert (243 - 1, 166 + 0, 9) in tiles_set
-#     assert (243 - 1, 166 + 1, 9) in tiles_set
-#     assert (243 + 0, 166 - 1, 9) in tiles_set
-#     assert (243 + 0, 166 + 1, 9) in tiles_set
-#     assert (243 + 1, 166 - 1, 9) in tiles_set
-#     assert (243 + 1, 166 + 0, 9) in tiles_set
-#     assert (243 + 1, 166 + 1, 9) in tiles_set
 
 
 def _run_cli(
@@ -439,4 +378,65 @@ class TestBoundingTile:
         assert result.returncode == 0
         assert result.stdout == "[26, 48, 7]\n"
 
+
+class TestNeighbors:
+
+    def test_cli_neighbors(self) -> None:
+        result = _run_cli( ["neighbors"], "[243, 166, 9]")
+        assert result.returncode== 0
+        print(result.stdout)
+
+        tiles_lines = result.stdout.strip().split("\n")
+        tiles = [tuple(json.loads(t)) for t in tiles_lines]
+        assert len(tiles) == 8
+
+        # We do not provide ordering guarantees
+        # tiles = set([tuple(t) for t in tiles])
+        tiles_set = set(tiles)
+        assert (243, 166, 9) not in tiles_set, "input not in neighbors"
+
+        assert (243 - 1, 166 - 1, 9) in tiles_set
+        assert (243 - 1, 166 + 0, 9) in tiles_set
+        assert (243 - 1, 166 + 1, 9) in tiles_set
+        assert (243 + 0, 166 - 1, 9) in tiles_set
+        assert (243 + 0, 166 + 1, 9) in tiles_set
+        assert (243 + 1, 166 - 1, 9) in tiles_set
+        assert (243 + 1, 166 + 0, 9) in tiles_set
+        assert (243 + 1, 166 + 1, 9) in tiles_set
+
+class TestParent:
+    def test_cli_parent_failure(self) -> None:
+        """[0, 0, 0] has no parent"""
+        result = _run_cli( ["parent"], "[0, 0, 0]")
+        assert result.returncode !=0
+
+
+    def test_cli_parent(self) -> None:
+        result = _run_cli( ["parent"], "[486, 332, 10]\n[486, 332, 10]")
+        assert result.returncode == 0
+        assert result.stdout == "[243, 166, 9]\n[243, 166, 9]\n"
+
+
+    def test_cli_parent_depth(self) -> None:
+        result = _run_cli( ["parent", "--depth", "2"], "[486, 332, 10]")
+        assert result.returncode == 0
+        assert result.stdout == "[121, 83, 8]\n"
+
+
+    def test_cli_parent_multidepth(self) -> None:
+        result = _run_cli(
+             ["parent", "--depth", "2"], "[486, 332, 10]\n[121, 83, 8]"
+        )
+        assert result.returncode == 0
+        assert result.stdout == "[121, 83, 8]\n[30, 20, 6]\n"
+
+class TestChildren:
+
+    def test_cli_children(self) -> None:
+        result = _run_cli( ["children"], "[243, 166, 9]")
+        assert result.returncode == 0
+        assert (
+            result.stdout
+            == "[486, 332, 10]\n[487, 332, 10]\n[487, 333, 10]\n[486, 333, 10]\n"
+        )
 
