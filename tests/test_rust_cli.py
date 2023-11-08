@@ -1,4 +1,5 @@
 """Utiles rust cli tests"""
+import sys
 from subprocess import run
 from json import dumps as stringify
 import json
@@ -147,8 +148,9 @@ def _run_cli(
     args: list[str] | None,
     input: str | None = None,
 ):
+    _python = sys.executable
     res = run(
-        ["python", "-m", "utiles.ut", *args],
+        [_python, "-m", "utiles.ut", *args],
         input=input,
         capture_output=True,
         text=True,
