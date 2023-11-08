@@ -1,7 +1,6 @@
 use clap::{Parser, Subcommand, ValueEnum};
 use tracing::debug;
 use tracing_subscriber::EnvFilter;
-use tracing_subscriber::util::SubscriberInitExt;
 use utiles::parsing::parse_bbox;
 use utiles::{bounding_tile, Tile};
 use utiles::tilejson::tilejson_stringify;
@@ -208,7 +207,7 @@ impl std::fmt::Display for ColorWhen {
     }
 }
 
-pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
+pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
     // print args
     let argv = match argv {
         Some(argv) => argv,
@@ -250,12 +249,12 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
 
     match args.command {
         Commands::Lint { filepath, fix } => {
-            println!("lint (fix -- {}): {}", fix, filepath);
+            println!("lint (fix -- {fix}): {filepath}");
             // throw not implemented error
             panic!("not implemented (yet)")
         }
         Commands::Tilejson { filepath } => {
-            println!("tilejson: {}", filepath);
+            println!("tilejson: {filepath}");
             println!("NOT IMPLEMENTED YET");
             let mbtiles = Mbtiles::from_filepath(
                 &filepath
@@ -264,7 +263,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
 
             let s = tilejson_stringify(&tj, None);
 
-            println!("{}", s);
+            println!("{s}");
 
             // println!(
             //     "{}",
@@ -304,7 +303,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                     let qk = lstr;
                     let tile = Tile::from_quadkey(&qk);
                     if tile.is_err() {
-                        println!("Invalid quadkey: {}", qk);
+                        println!("Invalid quadkey: {qk}");
                     } else {
                         println!("{}", tile.unwrap().json_arr());
                     }
@@ -461,7 +460,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 Tile::from_json(&l.unwrap())
             });
             for tile in tiles {
-                let children = tile.children(Option::from(tile.z + depth as u8));
+                let children = tile.children(Option::from(tile.z + depth));
                 for child in children {
                     let rs = if seq { "\x1e\n" } else { "" };
                     println!("{}{}", rs, child.json_arr());

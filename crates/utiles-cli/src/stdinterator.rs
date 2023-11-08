@@ -88,7 +88,7 @@ impl StdInterator {
                     debug!("reading from args");
                     let args = file_content
                         .lines() // This assumes that each line is separated by '\n'
-                        .map(|s| s.to_string())
+                        .map(std::string::ToString::to_string)
                         .collect::<VecDeque<String>>();
                     debug!("args: {:?}", args);
                     StdInteratorSource::Args(args)
