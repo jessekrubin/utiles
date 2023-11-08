@@ -195,9 +195,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
         Some(argv) => argv,
         None => std::env::args().collect::<Vec<_>>(),
     };
-
     let args = Cli::parse_from(&argv);
-
     // level is info by default and debug if --debug is passed
     // let level = if args.debug {
     //     tracing::Level::DEBUG
@@ -247,22 +245,9 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 .filter(|l| !l.as_ref().unwrap().is_empty())
             {
                 let lstr = line.unwrap();
-                // println!("Line from stdin: `{}`", lstr);
-                // let json: serde_json::Value = serde_json::from_str(the_file)l;
-
                 let thingy = parse_bbox(
                     &lstr,
                 ).unwrap();
-
-                // match thingy {
-                //     Ok(thingy) => thingy,
-                //     Err(e) => {
-                //         println!("Error parsing bbox: {}", e);
-                //         continue;
-                //     }
-                // }
-                // let thingy = BBox::from(lstr);
-
                 for tile in tiles(
                     (thingy.west, thingy.south, thingy.east, thingy.north),
                     ZoomOrZooms::Zoom(zoom),
