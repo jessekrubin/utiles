@@ -3,7 +3,7 @@ use tilejson::TileJSON;
 
 pub fn tilejson_stringify(tj: &TileJSON, fmt: Option<bool>) -> String {
     match fmt {
-        Some(true) => serde_json::to_string(&tj).unwrap(),
+        Some(false) => serde_json::to_string(&tj).unwrap(),
         _ => serde_json::to_string_pretty(&tj).unwrap(),
     }
 }

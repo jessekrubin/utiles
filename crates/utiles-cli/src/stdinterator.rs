@@ -62,9 +62,9 @@
 //         }
 //     }
 // }
+use std::collections::VecDeque;
 use std::io;
 use std::io::BufRead;
-use std::collections::VecDeque;
 use tracing::debug;
 
 pub enum StdInteratorSource {

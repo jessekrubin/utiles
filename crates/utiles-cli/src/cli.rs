@@ -1,11 +1,13 @@
+use std::io::{self, Write};
+
 use clap::{Parser, Subcommand, ValueEnum};
 use tracing::debug;
 use tracing_subscriber::EnvFilter;
 use utiles::parsing::parse_bbox;
-use utiles::{bounding_tile, Tile};
 use utiles::tilejson::tilejson_stringify;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
+use utiles::{bounding_tile, Tile};
 use utilesqlite::mbtiles::Mbtiles;
 
 use crate::stdinterator::StdInterator;
@@ -20,11 +22,11 @@ pub struct Cli {
 
     // debug flag
     #[arg(
-    long,
-    short,
-    global = true,
-    default_value = "false",
-    help = "debug mode"
+        long,
+        short,
+        global = true,
+        default_value = "false",
+        help = "debug mode"
     )]
     debug: bool,
     // #[command(flatten , help="verbosity level (-v, -vv, -vvv, -vvvv)" )]
@@ -32,23 +34,8 @@ pub struct Cli {
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
-pub struct QuadkeyArgs {
-    /// The remote to clone
-    // #[arg(required = false, default_value = "-")]
-    // quadkey: MaybeStdin<String>,
-    // #[arg(required = false)]
-    // quadkey: Option<String>,
-    #[arg(required = false)]
-    input: Option<String>,
-}
-
-#[derive(Debug, Parser)] // requires `derive` feature
 pub struct InputAndSequenceArgs {
     /// The remote to clone
-    // #[arg(required = false, default_value = "-")]
-    // quadkey: MaybeStdin<String>,
-    // #[arg(required = false)]
-    // quadkey: Option<String>,
     #[arg(required = false)]
     input: Option<String>,
 
@@ -58,11 +45,6 @@ pub struct InputAndSequenceArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    /// quadkey
-    // Quadkey {
-    //     #[arg(required = true)]
-    //     quadkey: String,
-    // },
     #[command(name = "lint", about = "lint mbtiles file", long_about = None)]
     Lint {
         #[arg(required = true)]
@@ -71,13 +53,21 @@ pub enum Commands {
         #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         fix: bool,
     },
-    #[command(name = "tilejson", visible_alias = "tj", about = "output tilejson", long_about = None)]
+    #[command(name = "tilejson", visible_alias = "tj", about = "echo tilejson", long_about = None)]
     Tilejson {
-        #[arg(required = true)]
+        #[arg(required = true, help = "mbtiles filepath")]
         filepath: String,
+
+        #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
+        min: bool,
     },
 
-    // MERCANTILE CLIKE (cli+like)
+
+    // ========================================================================
+    // TILE CLI UTILS - MERCANTILE LIKE CLI
+    // ========================================================================
+
+    #[command(name = "tiles", about = "echo tiles of bbox", long_about = None)]
     Tiles {
         #[arg(required = true)]
         zoom: u8,
@@ -106,9 +96,8 @@ pub enum Commands {
         #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         seq: bool,
     },
-    #[command(name = "neighbors", about = "print neighbors of tile(s)", long_about = None)]
-    Neighbors
-    {
+    #[command(name = "neighbors", about = "echo neighbors of tile(s)", long_about = None)]
+    Neighbors {
         #[arg(required = false)]
         input: Option<String>,
 
@@ -116,7 +105,7 @@ pub enum Commands {
         seq: bool,
     },
 
-    #[command(name = "parent", about = "print parent of tile(s)", long_about = None)]
+    #[command(name = "parent", about = "echo parent of tile(s)", long_about = None)]
     Parent {
         #[arg(required = false)]
         input: Option<String>,
@@ -127,7 +116,7 @@ pub enum Commands {
         #[arg(required = false, long, default_value = "1")]
         depth: u8,
     },
-    #[command(name = "children", about = "print children of tile(s)", long_about = None)]
+    #[command(name = "children", about = "echo children of tile(s)", long_about = None)]
     Children {
         #[arg(required = false)]
         input: Option<String>,
@@ -138,57 +127,13 @@ pub enum Commands {
         #[arg(required = false, long, default_value = "1")]
         depth: u8,
     },
-    #[command(name = "shapes", about = "print shapes of tiles as geojson", long_about = None)]
+    #[command(name = "shapes", about = "echo shapes of tiles as geojson", long_about = None)]
     Shapes {
         #[arg(required = true)]
         input: String,
 
         seq: bool,
     },
-
-
-    // /// Clones repos
-    // #[command(arg_required_else_help = true)]
-    // Clone {
-    //     /// The remote to clone
-    //     remote: String,
-    // },
-    // /// Compare two commits
-    // Diff {
-    //     #[arg(value_name = "COMMIT")]
-    //     base: Option<OsString>,
-    //     #[arg(value_name = "COMMIT")]
-    //     head: Option<OsString>,
-    //     #[arg(last = true)]
-    //     path: Option<OsString>,
-    //     #[arg(
-    //     long,
-    //     require_equals = true,
-    //     value_name = "WHEN",
-    //     num_args = 0..=1,
-    //     default_value_t = ColorWhen::Auto,
-    //     default_missing_value = "always",
-    //     value_enum
-    //     )]
-    //     color: ColorWhen,
-    // },
-    // /// pushes things
-    // #[command(arg_required_else_help = true)]
-    // Push {
-    //     /// The remote to target
-    //     remote: String,
-    // },
-    // /// adds things
-    // #[command(arg_required_else_help = true)]
-    // Add {
-    //     /// Stuff to add
-    //     #[arg(required = true)]
-    //     path: Vec<PathBuf>,
-    // },
-
-    // Stash(StashArgs),
-    // #[command(external_subcommand)]
-    // External(Vec<OsString>),
 }
 
 #[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
@@ -229,7 +174,6 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
     //     .init();
     // Configure the filter
 
-
     let filter = if args.debug {
         EnvFilter::new("DEBUG")
     } else {
@@ -246,36 +190,22 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
 
     debug!("args: {:?}", args);
 
-
     match args.command {
         Commands::Lint { filepath, fix } => {
             println!("lint (fix -- {fix}): {filepath}");
             // throw not implemented error
             panic!("not implemented (yet)")
         }
-        Commands::Tilejson { filepath } => {
-            println!("tilejson: {filepath}");
-            println!("NOT IMPLEMENTED YET");
-            let mbtiles = Mbtiles::from_filepath(
-                &filepath
-            ).unwrap();
+        Commands::Tilejson { filepath, min } => {
+            debug!("tilejson: {filepath}");
+            let mbtiles = Mbtiles::from_filepath(&filepath).unwrap();
             let tj = mbtiles.tilejson().unwrap();
-
-            let s = tilejson_stringify(&tj, None);
-
+            let s = tilejson_stringify(&tj, Option::from(!min));
             println!("{s}");
-
-            // println!(
-            //     "{}",
-            //     serde_json::to_string_pretty(&tj).unwrap()
-            // );
         }
 
-
         // mercantile cli like
-        Commands::Quadkey {
-            input
-        } => {
+        Commands::Quadkey { input } => {
             // let thingy = StdInterator::new(quadkey.quadkey).unwrap();
             // for line in thingy {
             //     println!("Line from stdin: `{}`", line.unwrap());
@@ -298,7 +228,6 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                     // let qk = utiles::xyz2quadkey(tile.west, tile.south, tile.zoom);
                     // println!("{}", qk);
                 } else {
-
                     // treat as quadkey
                     let qk = lstr;
                     let tile = Tile::from_quadkey(&qk);
@@ -317,9 +246,8 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
-                |l| l.as_ref().unwrap() != "\x1e"
-            );
+                .filter(|l| !l.as_ref().unwrap().is_empty())
+                .filter(|l| l.as_ref().unwrap() != "\x1e");
 
             let bboxes = lines.map(|l| {
                 let s = l.unwrap();
@@ -354,30 +282,34 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
-                |l| l.as_ref().unwrap() != "\x1e"
-            );
+                .filter(|l| !l.as_ref().unwrap().is_empty())
+                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let mut stdout = io::stdout();
 
-            let tiles = lines.map(|l| {
-                let s = l.unwrap();
-                debug!("l: {:?}", s);
-                parse_bbox(&s).unwrap()
-            })
-                .flat_map(|b| tiles(
-                    (b.west, b.south, b.east, b.north),
-                    ZoomOrZooms::Zoom(zoom),
-                )).enumerate();
+            let tiles = lines
+                .map(|l| {
+                    let s = l.unwrap();
+                    debug!("l: {:?}", s);
+                    parse_bbox(&s).unwrap()
+                })
+                .flat_map(|b| {
+                    tiles((b.west, b.south, b.east, b.north), ZoomOrZooms::Zoom(zoom))
+                })
+                .enumerate();
             // let bboxes = lines
             for (i, tile) in tiles {
                 let rs = if seq { "\x1e\n" } else { "" };
-                println!("{}{}", rs, tile.json_arr());
+                // println!("{}{}", rs, tile.json_arr());
+                writeln!(stdout, "{}{}", rs, tile.json_arr()).unwrap();
                 // call loop_fn if it's defined every 1000 iterations for signal break
                 if i % 1024 == 0 {
+                    stdout.flush().unwrap();
                     if let Some(f) = loop_fn {
                         f();
                     }
                 }
             }
+            stdout.flush().unwrap();
 
             // for tile in tiles {
             //     let tstr =   tile.json_arr();
@@ -426,18 +358,13 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             //     }
             // }
         }
-        Commands::Neighbors {
-            input, seq
-        } => {
+        Commands::Neighbors { input, seq } => {
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
-                |l| l.as_ref().unwrap() != "\x1e"
-            );
-            let tiles = lines.map(|l| {
-                Tile::from_json(&l.unwrap())
-            });
+                .filter(|l| !l.as_ref().unwrap().is_empty())
+                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
                 let neighbors = tile.neighbors();
                 for neighbor in neighbors {
@@ -447,18 +374,13 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             }
         }
 
-        Commands::Children{
-            input, seq, depth
-        } => {
+        Commands::Children { input, seq, depth } => {
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
-                |l| l.as_ref().unwrap() != "\x1e"
-            );
-            let tiles = lines.map(|l| {
-                Tile::from_json(&l.unwrap())
-            });
+                .filter(|l| !l.as_ref().unwrap().is_empty())
+                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
                 let children = tile.children(Option::from(tile.z + depth));
                 for child in children {
@@ -468,20 +390,15 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             }
         }
 
-        Commands::Parent{
-            input, seq, depth
-        } => {
+        Commands::Parent { input, seq, depth } => {
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
-                |l| l.as_ref().unwrap() != "\x1e"
-            );
-            let tiles = lines.map(|l| {
-                Tile::from_json(&l.unwrap())
-            });
+                .filter(|l| !l.as_ref().unwrap().is_empty())
+                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
-                let parent = tile.parent(Option::from(depth-1));
+                let parent = tile.parent(Option::from(depth - 1));
                 let rs = if seq { "\x1e\n" } else { "" };
                 println!("{}{}", rs, parent.json_arr());
             }
