@@ -1,16 +1,15 @@
-use serde_json::{Value as JSONValue, Value};
-use rusqlite::{Connection, Result as RusqliteResult};
-use tilejson::{Bounds, Center, tilejson, TileJSON};
 use std::error::Error;
-use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
+
+use rusqlite::{Connection, Result as RusqliteResult};
+use tilejson::TileJSON;
+use tracing::error;
 // use crate::metadata_row::MbtilesMetadataRow;
-use utiles::mbtiles::{metadata2tilejson};
+use utiles::mbtiles::metadata2tilejson;
+use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
 
 pub struct Mbtiles {
     conn: rusqlite::Connection,
 }
-
-use tracing::{debug, error, info, span, warn, Level};
 
 impl Mbtiles {
     pub fn from_conn(conn: rusqlite::Connection) -> Mbtiles {

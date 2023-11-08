@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::bbox::BBox;
 use crate::constants::EPSILON;
 use crate::lnglat::LngLat;
-use crate::{ll, lr, pmtiles, traits, ul, ur, XYZ};
+use crate::{bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile, siblings, traits, ul, ur, XYZ, xyz2quadkey};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Tile {
@@ -33,7 +33,7 @@ impl traits::Utiles<LngLat, BBox> for Tile {
     }
 
     fn bbox(&self) -> BBox {
-        let (west, south, east, north) = crate::bounds(self.x, self.y, self.z);
+        let (west, south, east, north) = bounds(self.x, self.y, self.z);
         BBox {
             north,
             south,
@@ -108,7 +108,7 @@ impl Tile {
     }
 
     pub fn bounds(&self) -> (f64, f64, f64, f64) {
-        crate::bounds(self.x, self.y, self.z)
+        bounds(self.x, self.y, self.z)
     }
 
     pub fn pmtileid(&self) -> u64 {
@@ -141,11 +141,11 @@ impl Tile {
     }
 
     pub fn from_quadkey(quadkey: &str) -> Result<Tile, Box<dyn Error>> {
-        crate::quadkey2tile(quadkey)
+        quadkey2tile(quadkey)
     }
 
     pub fn from_qk(qk: &str) -> Self {
-        let res = crate::quadkey2tile(qk);
+        let res = quadkey2tile(qk);
         match res {
             Ok(tile) => tile,
             Err(e) => {
@@ -155,11 +155,11 @@ impl Tile {
     }
 
     pub fn quadkey(&self) -> String {
-        crate::xyz2quadkey(self.x, self.y, self.z)
+        xyz2quadkey(self.x, self.y, self.z)
     }
 
     pub fn qk(&self) -> String {
-        crate::xyz2quadkey(self.x, self.y, self.z)
+        xyz2quadkey(self.x, self.y, self.z)
     }
 
     pub fn from_lnglat_zoom(
@@ -294,19 +294,19 @@ impl Tile {
     }
 
     pub fn neighbors(&self) -> Vec<Self> {
-        crate::neighbors(self.x, self.y, self.z)
+        neighbors(self.x, self.y, self.z)
     }
 
     pub fn children(&self, zoom: Option<u8>) -> Vec<Tile> {
-        crate::children(self.x, self.y, self.z, zoom)
+        children(self.x, self.y, self.z, zoom)
     }
 
     pub fn parent(&self, zoom: Option<u8>) -> Self {
-        crate::parent(self.x, self.y, self.z, zoom)
+        parent(self.x, self.y, self.z, zoom)
     }
 
     pub fn siblings(&self) -> Vec<Self> {
-        crate::siblings(self.x, self.y, self.z)
+        siblings(self.x, self.y, self.z)
     }
 
     pub fn sql_where(&self, flip: Option<bool>) -> String {
@@ -319,7 +319,7 @@ impl Tile {
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
                 self.z,
                 self.x,
-                crate::flipy(self.y, self.z)
+                flipy(self.y, self.z)
             ),
             false => format!(
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
