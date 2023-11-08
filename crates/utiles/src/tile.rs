@@ -6,7 +6,10 @@ use serde::{Deserialize, Serialize};
 use crate::bbox::BBox;
 use crate::constants::EPSILON;
 use crate::lnglat::LngLat;
-use crate::{bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile, siblings, traits, ul, ur, XYZ, xyz2quadkey};
+use crate::{
+    bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
+    siblings, traits, ul, ur, xyz2quadkey, XYZ,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Tile {

@@ -1,5 +1,5 @@
 use serde_json;
-use tilejson::{TileJSON};
+use tilejson::TileJSON;
 
 pub fn tilejson_stringify(tj: &TileJSON, fmt: Option<bool>) -> String {
     match fmt {

@@ -1,7 +1,7 @@
-use geo_types::Coord;
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
+use geo_types::Coord;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
@@ -89,7 +89,6 @@ impl BBox {
             north: 85.051_129,
         }
     }
-
 
     pub fn crosses_antimeridian(&self) -> bool {
         self.west > self.east
@@ -216,7 +215,6 @@ impl BBox {
     pub fn ll(&self) -> LngLat {
         LngLat::new(self.west, self.south)
     }
-
 }
 
 impl From<BBox> for BBoxTuple {
@@ -224,8 +222,6 @@ impl From<BBox> for BBoxTuple {
         BBoxTuple(bbox.west, bbox.south, bbox.east, bbox.north)
     }
 }
-
-
 
 impl From<BBoxTuple> for BBox {
     fn from(tuple: BBoxTuple) -> Self {
@@ -261,7 +257,7 @@ impl From<Tile> for WebMercatorBbox {
     }
 }
 
-impl From<Vec<Coord>> for BBox{
+impl From<Vec<Coord>> for BBox {
     fn from(coords: Vec<Coord>) -> Self {
         let mut min_x = 180.0;
         let mut min_y = 90.0;

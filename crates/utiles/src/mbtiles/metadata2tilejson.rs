@@ -4,9 +4,9 @@ use std::str::FromStr;
 
 use serde_json::{Value as JSONValue, Value};
 
-use tilejson::{Bounds, Center, tilejson, TileJSON};
-use tracing::{debug, error, info, Level, span, warn};
 use crate::mbtiles::metadata_row::MbtilesMetadataRow;
+use tilejson::{tilejson, Bounds, Center, TileJSON};
+use tracing::{debug, error, info, span, warn, Level};
 
 fn to_val<V, E: Display>(val: Result<V, E>, title: &str) -> Option<V> {
     match val {
@@ -19,11 +19,12 @@ fn to_val<V, E: Display>(val: Result<V, E>, title: &str) -> Option<V> {
     }
 }
 
-pub fn metadata2tilejson(metadata: Vec<MbtilesMetadataRow>) -> Result<TileJSON, Box<dyn Error>> {
+pub fn metadata2tilejson(
+    metadata: Vec<MbtilesMetadataRow>,
+) -> Result<TileJSON, Box<dyn Error>> {
     let mut tj = tilejson! {tiles : vec![]};
     let mut layer_type: Option<String> = None;
     let mut json: Option<JSONValue> = None;
-
 
     for row in metadata {
         let name = row.name;
@@ -59,10 +60,9 @@ pub fn metadata2tilejson(metadata: Vec<MbtilesMetadataRow>) -> Result<TileJSON, 
                 tj.vector_layers = Some(v);
             } else {
                 warn!(
-                        "Unable to parse metadata vector_layers value",
-                        // self.filename
-
-                    );
+                    "Unable to parse metadata vector_layers value",
+                    // self.filename
+                );
             }
         }
     }

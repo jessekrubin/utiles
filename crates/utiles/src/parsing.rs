@@ -1,7 +1,8 @@
-use geo_types::{Coord};
 use crate::bbox::BBox;
+use crate::geojson::geojson_geometry_points;
+use geo_types::Coord;
+use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};
 use serde_json::Value;
-use geojson::{GeoJson, Geometry, Value as GeoJsonValue, Feature};
 
 use geo_types::coord;
 
@@ -30,56 +31,16 @@ pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
     }
 }
 
-
-fn vec2coord(v: Vec<f64>) -> Coord {
-    coord! { x: v[0], y: v[1]}
-}
-
-fn geojson_geometry_points(g: Geometry) -> Vec<Vec<f64>> {
-    let value = g.value;
-    let coord_vecs = match value {
-        GeoJsonValue::Point(c) => {
-            vec![c]
-        }
-        GeoJsonValue::MultiPoint(c) => {
-            c.into_iter().collect()
-        }
-        GeoJsonValue::LineString(c) => {
-            c.into_iter().collect()
-        }
-        GeoJsonValue::MultiLineString(c) => {
-            c.into_iter().flatten().collect()
-        }
-        GeoJsonValue::Polygon(c) => {
-            c.into_iter().flatten().collect()
-        }
-        GeoJsonValue::MultiPolygon(c) => {
-            c.into_iter().flatten().flatten().collect()
-        }
-        GeoJsonValue::GeometryCollection(c) => {
-            let t = c.into_iter().map(|g| geojson_geometry_points(g)).flatten().collect();
-            t
-
-
-        }
-        _ => {
-            vec![]
-        }
-
-
-    };
-    coord_vecs
-
-
-    // convert from Vec<f64> to Vec<Coord>
-    // coord_vecs.into_iter().map(|v| vec2coord(v)).collect()
-
-}
 fn geojson_geometry_coords(g: Geometry) -> Vec<Coord> {
     let coord_vecs = geojson_geometry_points(g);
+    coord_vecs
+        .into_iter()
+        .map(|v| {
+            coord! { x: v[0], y: v[1]}
+        })
+        .collect()
     // convert from Vec<f64> to Vec<Coord>
-    coord_vecs.into_iter().map(|v| vec2coord(v)).collect()
-
+    // coord_vecs.into_iter().map(|v| vec2coord(v)).collect()
 }
 
 fn geojson_feature_coords(feature: Feature) -> Vec<Coord> {
@@ -109,9 +70,7 @@ pub fn geojson_coords(geojson_str: &str) -> Vec<Coord> {
             let geometry = feature.geometry.unwrap();
             geojson_geometry_coords(geometry)
         }
-        GeoJson::Geometry(geometry) => {
-            geojson_geometry_coords(geometry)
-        }
+        GeoJson::Geometry(geometry) => geojson_geometry_coords(geometry),
     }
 }
 
@@ -151,4 +110,3 @@ mod tests {
         assert!(bbox_result.is_err());
     }
 }
-
