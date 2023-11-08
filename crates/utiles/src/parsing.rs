@@ -6,7 +6,7 @@ use serde_json::Value;
 // pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
 pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
     // if the first char is "{" assume it is geojson-like
-    if s.chars().next().unwrap() == '{' {
+    if s.starts_with('{') {
         return Ok(geojson_bounds(s));
     }
 

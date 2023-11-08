@@ -6,12 +6,12 @@ use serde_json::{Value as JSONValue, Value};
 
 use crate::mbtiles::metadata_row::MbtilesMetadataRow;
 use tilejson::{tilejson, Bounds, Center, TileJSON};
-use tracing::{debug, error, info, span, warn, Level};
+use tracing::{info, warn};
 
 fn to_val<V, E: Display>(val: Result<V, E>, title: &str) -> Option<V> {
     match val {
         Ok(v) => Some(v),
-        Err(err) => {
+        Err(_err) => {
             // let name = &self.filename;
             warn!("Unable to parse metadata {title}");
             None

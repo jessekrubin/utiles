@@ -31,7 +31,8 @@ pub fn geojson_geometry_coords(g: Geometry) -> Box<dyn Iterator<Item = Coord>> {
 
 pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
     let value = g.value;
-    let coord_vecs = match value {
+
+    match value {
         GeoJsonValue::Point(c) => {
             vec![c]
         }
@@ -40,19 +41,11 @@ pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
         GeoJsonValue::MultiLineString(c) => c.into_iter().flatten().collect(),
         GeoJsonValue::Polygon(c) => c.into_iter().flatten().collect(),
         GeoJsonValue::MultiPolygon(c) => c.into_iter().flatten().flatten().collect(),
-        GeoJsonValue::GeometryCollection(c) => {
-            let t = c
-                .into_iter()
-                .map(|g| geojson_geometry_points_vec(g))
-                .flatten()
-                .collect();
-            t
-        }
-        _ => {
-            vec![]
-        }
-    };
-    coord_vecs
+        GeoJsonValue::GeometryCollection(c) => c
+            .into_iter()
+            .flat_map(geojson_geometry_points_vec)
+            .collect(),
+    }
 }
 
 pub fn geojson_feature_coords(feature: Feature) -> Box<dyn Iterator<Item = Coord>> {
@@ -64,7 +57,7 @@ pub fn geojson_coords(geojson_str: &str) -> Box<dyn Iterator<Item = Coord>> {
     let gj = geojson_str.parse::<GeoJson>().unwrap();
     match gj {
         GeoJson::FeatureCollection(fc) => {
-            let mut coords = fc.features.into_iter().flat_map(geojson_feature_coords);
+            let coords = fc.features.into_iter().flat_map(geojson_feature_coords);
             Box::new(coords)
             // let mut bbox = BBox::new(180.0, 90.0, -180.0, -90.0);
             // for feature in fc.features {
