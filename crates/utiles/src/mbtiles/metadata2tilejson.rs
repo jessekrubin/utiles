@@ -25,7 +25,7 @@ pub fn metadata2tilejson(
     metadata: Vec<MbtilesMetadataRow>,
 ) -> Result<TileJSON, Box<dyn Error>> {
     let mut tj = tilejson! {tiles : vec![]};
-    let mut layer_type: Option<String> = None;
+    // let mut layer_type: Option<String> = None;
     let mut json: Option<JSONValue> = None;
 
     for row in metadata {
@@ -40,7 +40,7 @@ pub fn metadata2tilejson(
             "maxzoom" => tj.maxzoom = to_val(value.parse(), &name),
             "description" => tj.description = Some(value),
             "attribution" => tj.attribution = Some(value),
-            "type" => layer_type = Some(value),
+            // "type" => layer_type = Some(value),
             "legend" => tj.legend = Some(value),
             "template" => tj.template = Some(value),
             "json" => json = to_val(serde_json::from_str(&value), &name),

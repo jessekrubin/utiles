@@ -107,9 +107,10 @@ pub enum Commands {
 
     #[command(name = "neighbors", about = "print neighbors of tile(s)", long_about = None)]
     Neighbors {
-        #[arg(required = true)]
+        #[arg(required = false)]
         input: String,
 
+        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         seq: bool,
     },
 
@@ -246,7 +247,6 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 // if the line bgins w '[' treat as tile
                 // otherwise treat as quadkey
                 let lstr = line.unwrap();
-
                 if lstr.starts_with('[') {
                     // treat as tile
                     let tile = Tile::from_json_arr(&lstr);
@@ -384,6 +384,16 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
             //         }
             //     }
             // }
+        }
+        Commands::Neighbors {
+            input, seq
+        } =>{
+            let input_lines = StdInterator::new(input).unwrap();
+            let lines = input_lines
+                .filter(|l| !l.is_err())
+                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
+                |l| l.as_ref().unwrap() != "\x1e"
+            );
         }
 
         Commands::Lint { filepath, fix } => {

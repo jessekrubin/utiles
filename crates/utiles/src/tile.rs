@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::error::Error;
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 
@@ -84,6 +85,27 @@ impl Ord for Tile {
     }
 }
 
+impl FromStr for Tile {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // if it starts with '{' assume json obj
+        if s.starts_with('{'){ // if '{' assume its an obj
+            return Ok(Tile::from_json_obj(s));
+        } else if s.starts_with('[') {
+            return Ok(Tile::from_json_arr(s));
+        }
+        // assume its a quadkey
+        let res = quadkey2tile(s);
+        match res {
+            Ok(tile) => Ok(tile),
+            Err(e) => {
+                panic!("Invalid quadkey: {e}");
+            }
+        }
+    }
+}
+
 impl Tile {
     pub fn new(x: u32, y: u32, z: u8) -> Self {
         Tile { x, y, z }
@@ -157,8 +179,18 @@ impl Tile {
         }
     }
 
-    pub fn from_json_arr(json_arr: &str) -> Self {
-        let res = serde_json::from_str(json_arr);
+    pub fn from_json_obj(json: &str) -> Self {
+        let res = serde_json::from_str(json);
+        match res {
+            Ok(tile) => tile,
+            Err(e) => {
+                panic!("Invalid json_arr: {e}");
+            }
+        }
+    }
+
+    pub fn from_json_arr(json: &str) -> Self {
+        let res = serde_json::from_str(json);
         match res {
             Ok(tile) => tile,
             Err(e) => {
@@ -351,5 +383,32 @@ impl Tile {
 
     pub fn json_obj(&self) -> String {
         serde_json::to_string(self).unwrap()
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_json_obj() {
+        let json_obj = r#"{"x": 1, "y": 2, "z": 3}"#;
+        let tile = Tile::from_json_obj(json_obj);
+        assert_eq!(tile, Tile::new(1, 2, 3));
+    }
+
+    #[test]
+    fn parse_json_arr() {
+        let json_arr = r#"[1, 2, 3]"#;
+        let tile = Tile::from_json_arr(json_arr);
+        assert_eq!(tile, Tile::new(1, 2, 3));
+    }
+
+    #[test]
+    fn parse_quadkey() {
+        let quadkey = "023010203";
+        let tile =  quadkey.parse::<Tile>();
+        assert_eq!(tile.unwrap(), Tile::new(81, 197, 9));
     }
 }
