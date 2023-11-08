@@ -157,6 +157,16 @@ impl Tile {
         }
     }
 
+    pub fn from_json_arr(json_arr: &str) -> Self {
+        let res = serde_json::from_str(json_arr);
+        match res {
+            Ok(tile) => tile,
+            Err(e) => {
+                panic!("Invalid json_arr: {e}");
+            }
+        }
+    }
+
     pub fn quadkey(&self) -> String {
         xyz2quadkey(self.x, self.y, self.z)
     }

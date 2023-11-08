@@ -1,3 +1,4 @@
+use std::error::Error;
 use clap::{Parser, Subcommand, ValueEnum};
 use tracing::debug;
 
@@ -6,6 +7,7 @@ use tracing_subscriber::EnvFilter;
 use utiles::parsing::parse_bbox;
 use utiles::tilejson::tilejson_stringify;
 use utiles::tiles;
+use utiles::Tile;
 use utiles::zoom::ZoomOrZooms;
 use crate::stdinterator::StdInterator;
 use utilesqlite::mbtiles::Mbtiles;
@@ -37,8 +39,10 @@ pub struct QuadkeyArgs {
     /// The remote to clone
     // #[arg(required = false, default_value = "-")]
     // quadkey: MaybeStdin<String>,
+    // #[arg(required = false)]
+    // quadkey: Option<String>,
     #[arg(required = false)]
-    quadkey: Option<String>,
+    input: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]
@@ -80,7 +84,10 @@ pub enum Commands {
     // NOT IMPLEMENTED YET
     // ===================
     #[command(name = "quadkey", visible_alias = "qk", about = "convert xyz <-> quadkey", long_about = None)]
-    Quadkey(QuadkeyArgs),
+    Quadkey{
+        #[arg(required = false)]
+        input: Option<String>,
+    },
 
     #[command(name = "bounding-tile", about = "output tilejson", long_about = None)]
     BoundingTile {
@@ -230,45 +237,116 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
 
 
     match args.command {
-        Commands::Quadkey(quadkey) => {
-            let thingy = StdInterator::new(quadkey.quadkey).unwrap();
-            for line in thingy {
-                println!("Line from stdin: `{}`", line.unwrap());
+        Commands::Quadkey{
+            input
+        } => {
+            // let thingy = StdInterator::new(quadkey.quadkey).unwrap();
+            // for line in thingy {
+            //     println!("Line from stdin: `{}`", line.unwrap());
+            // }
+            let input_lines = StdInterator::new(input).unwrap();
+            let lines = input_lines
+                .filter(|l| !l.is_err())
+                .filter(|l| !l.as_ref().unwrap().is_empty());
+            for line in lines {
+                // if the line bgins w '[' treat as tile
+                // otherwise treat as quadkey
+                let lstr = line.unwrap();
+
+                if lstr.starts_with('[') {
+                    // treat as tile
+                    let tile = Tile::from_json_arr(&lstr);
+                    println!("{}", tile.quadkey());
+                    // let qk = utiles::xyz2quadkey(t.west, t.south, t.zoom);
+                    // println!("{}", qk);
+                    // let tile = parse_bbox(&lstr).unwrap();
+                    // let qk = utiles::xyz2quadkey(tile.west, tile.south, tile.zoom);
+                    // println!("{}", qk);
+                } else {
+
+                    // treat as quadkey
+                    let qk = lstr;
+                    let tile = Tile::from_quadkey(&qk);
+                    if tile.is_err() {
+                        println!("Invalid quadkey: {}", qk);
+                    } else {
+                        println!("{}", tile.unwrap().json_arr());
+                    }
+
+                    // let (x, y, z) = utiles::quadkey2xyz(&qk);
+                    // println!("{} {} {}", x, y, z);
+                }
             }
         }
         Commands::Tiles { zoom, input, seq } => {
             let input_lines = StdInterator::new(input).unwrap();
-            // println!("zoom: {}", zoom);
             let mut niter = 0;
-            for line in input_lines
+            let tiles = input_lines
                 .filter(|l| !l.is_err())
                 .filter(|l| !l.as_ref().unwrap().is_empty())
-            {
-                let lstr = line.unwrap();
-                let thingy = parse_bbox(
-                    &lstr,
-                ).unwrap();
-                for tile in tiles(
-                    (thingy.west, thingy.south, thingy.east, thingy.north),
+                .map(|l| parse_bbox(&l.unwrap()).unwrap())
+                .flat_map(|b| tiles(
+                    (b.west, b.south, b.east, b.north),
                     ZoomOrZooms::Zoom(zoom),
-                ) {
-                    let tstr =   tile.json_arr();
-                    // RS char if seq else ""
-                    let rs = if seq { "\x1e\n" } else { "" };
-                    println!("{}{}", rs, tstr);
-                    // println!("{}", tile.json_arr());
-
-                    //     call loop_fn if it's defined
-                    niter += 1;
-
-                    // call fn every 1000 iterations
-                    if niter % 1000 == 0 {
-                        if let Some(f) = loop_fn {
-                            f();
-                        }
+                )).enumerate();
+            // let bboxes = lines
+            for (i, tile) in tiles {
+                let rs = if seq { "\x1e\n" } else { "" };
+                println!("{}{}", rs, tile.json_arr());
+                // call loop_fn if it's defined every 1000 iterations for signal break
+                if i % 1024 == 0 {
+                    if let Some(f) = loop_fn {
+                        f();
                     }
                 }
             }
+
+            // for tile in tiles {
+            //     let tstr =   tile.json_arr();
+            //     // RS char if seq else ""
+            //     let rs = if seq { "\x1e\n" } else { "" };
+            //     println!("{}{}", rs, tstr);
+            //     // println!("{}", tile.json_arr());
+            //
+            //     //     call loop_fn if it's defined
+            //     niter += 1;
+            //
+            //     // call fn every 1000 iterations
+            //     if niter % 1000 == 0 {
+            //         if let Some(f) = loop_fn {
+            //             f();
+            //         }
+            //     }
+            // }
+            // for line in input_lines
+            //     .filter(|l| !l.is_err())
+            //     .filter(|l| !l.as_ref().unwrap().is_empty())
+            // {
+            //     let lstr = line.unwrap();
+            //     let thingy = parse_bbox(
+            //         &lstr,
+            //     ).unwrap();
+            //     for tile in tiles(
+            //         (thingy.west, thingy.south, thingy.east, thingy.north),
+            //         ZoomOrZooms::Zoom(zoom),
+            //     ) {
+            //         let tstr =   tile.json_arr();
+            //         // RS char if seq else ""
+            //         let rs = if seq { "\x1e\n" } else { "" };
+            //         println!("{}{}", rs, tstr);
+            //         // println!("{}", tile.json_arr());
+            //
+            //         //     call loop_fn if it's defined
+            //         niter += 1;
+            //
+            //         // call fn every 1000 iterations
+            //         if niter % 1000 == 0 {
+            //             if let Some(f) = loop_fn {
+            //                 f();
+            //             }
+            //         }
+            //     }
+            // }
         }
 
         Commands::Lint { filepath, fix } => {

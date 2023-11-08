@@ -207,12 +207,12 @@ def tiles_list(
     truncate: bool = ...,
 ) -> list[Tile]: ...
 def tiles_count(
-        west: float,
-        south: float,
-        east: float,
-        north: float,
-        zooms: list[int] | tuple[int, ...] | int,
-        truncate: bool = ...,
+    west: float,
+    south: float,
+    east: float,
+    north: float,
+    zooms: list[int] | tuple[int, ...] | int,
+    truncate: bool = ...,
 ) -> int: ...
 def tiletype(buf: bytes) -> int: ...
 def tiletype2headers(tiletype_int: int) -> list[tuple[str, str]]: ...
