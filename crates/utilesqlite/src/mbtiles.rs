@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::path::Path;
 
 use rusqlite::{Connection, Result as RusqliteResult};
 use tilejson::TileJSON;
@@ -51,8 +52,24 @@ impl Mbtiles {
         let mbt = Mbtiles {
             conn: conn,
         };
-
         return Ok(mbt);
+    }
+
+    pub fn from_filepath_str(fspath: &str) -> Result<Mbtiles, Box<dyn Error>> {
+        let conn = rusqlite::Connection::open(fspath)?;
+        let mbt = Mbtiles {
+            conn: conn,
+        };
+        return Ok(mbt);
+    }
+}
+
+impl From<&Path> for Mbtiles {
+    fn from(path: &Path) -> Self {
+        let conn = rusqlite::Connection::open(path).unwrap();
+        Mbtiles {
+            conn: conn,
+        }
     }
 }
 

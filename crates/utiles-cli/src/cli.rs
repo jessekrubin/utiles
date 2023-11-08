@@ -1,4 +1,5 @@
 use std::io::{self, Write};
+use std::path::Path;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use tracing::debug;
@@ -198,7 +199,16 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
         }
         Commands::Tilejson { filepath, min } => {
             debug!("tilejson: {filepath}");
-            let mbtiles = Mbtiles::from_filepath(&filepath).unwrap();
+            // check that filepath exists and is file
+            let filepath = Path::new(&filepath);
+            if !filepath.exists() {
+                panic!("File does not exist: {}", filepath.display());
+            }
+            if !filepath.is_file() {
+                panic!("Not a file: {filepath}", filepath = filepath.display());
+            }
+            let mbtiles: Mbtiles = Mbtiles::from(filepath);
+            // let mbtiles = Mbtiles::from_filepath(&filepath).unwrap();
             let tj = mbtiles.tilejson().unwrap();
             let s = tilejson_stringify(&tj, Option::from(!min));
             println!("{s}");

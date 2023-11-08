@@ -3,19 +3,20 @@ from __future__ import annotations
 
 import math
 from typing import List, Sequence, Tuple, Union
+
 from utiles import libutiles
 from utiles.libutiles import (
+    TILETYPE_GIF,
+    TILETYPE_JPG,
+    TILETYPE_JSON,
+    TILETYPE_PBF,
+    TILETYPE_PBFGZ,
+    TILETYPE_PNG,
+    TILETYPE_UNKNOWN,
+    TILETYPE_WEBP,
     Bbox,
     LngLat,
     LngLatBbox,
-    TILETYPE_GIF,
-    TILETYPE_JPG,
-    TILETYPE_PBF,
-    TILETYPE_PNG,
-    TILETYPE_UNKNOWN,
-    TILETYPE_JSON,
-    TILETYPE_PBFGZ,
-    TILETYPE_WEBP,
     Tile,
     __build_profile__,
     __version_lib__,

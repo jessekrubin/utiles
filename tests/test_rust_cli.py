@@ -143,10 +143,6 @@ from utiles.ut import cli
 #     assert result2.output == "[2331, 1185, 12]\n"
 
 
-
-
-
-
 def _run_cli(
     args: list[str] | None,
     input: str | None = None,
@@ -301,33 +297,27 @@ class TestQuadkey:
         assert result.exit_code == 2
         assert "lolwut" in result.output
 
-class TestBoundingTile:
 
+class TestBoundingTile:
     def test_cli_bounding_tile_bad_bounds(self) -> None:
         """Bounds of len 3 are bad."""
         runner = CliRunner()
-        result = _run_cli( ["bounding-tile"], "[-105, 39.99, -104.99]")
+        result = _run_cli(["bounding-tile"], "[-105, 39.99, -104.99]")
         assert result.returncode != 0
 
-
     def test_cli_bounding_tile(self) -> None:
-        result = _run_cli( ["bounding-tile"], "[-105, 39.99, -104.99, 40]")
+        result = _run_cli(["bounding-tile"], "[-105, 39.99, -104.99, 40]")
         assert result.returncode == 0
         assert result.stdout == "[1706, 3101, 13]\n"
-
 
     def test_cli_bounding_tile_bbox(self) -> None:
-        result = _run_cli(
-             ["bounding-tile"], '{"bbox": [-105, 39.99, -104.99, 40]}'
-        )
+        result = _run_cli(["bounding-tile"], '{"bbox": [-105, 39.99, -104.99, 40]}')
         assert result.returncode == 0
         assert result.stdout == "[1706, 3101, 13]\n"
 
-
     def test_cli_bounding_tile2(self) -> None:
-        result = _run_cli( ["bounding-tile"], "[-105, 39.99]")
+        result = _run_cli(["bounding-tile"], "[-105, 39.99]")
         assert result.returncode == 0
-
 
     def test_cli_multi_bounding_tile(self) -> None:
         """A JSON text sequence can be used as input."""
@@ -336,7 +326,6 @@ class TestBoundingTile:
         )
         assert result.returncode == 0
         assert len(result.stdout.strip().split("\n")) == 2
-
 
     def test_cli_multi_bounding_tile_seq(self) -> None:
         """A JSON text sequence can be used as input."""
@@ -347,43 +336,51 @@ class TestBoundingTile:
         assert result.returncode == 0
         assert len(result.stdout.strip().split("\n")) == 2
 
-
     @pytest.mark.skip(reason="I dont think this is correct")
     def test_cli_tiles_bounding_tiles_z0(self) -> None:
-        result = _run_cli( ["bounding-tile"], "[-1, -1, 1, 1]")
+        result = _run_cli(["bounding-tile"], "[-1, -1, 1, 1]")
         assert result.returncode == 0
         assert result.stdout == "[0, 0, 0]\n"
 
-
     @pytest.mark.skip(reason="I dont think this is correct either")
     def test_cli_tiles_bounding_tiles_seq(self) -> None:
-        result = _run_cli( ["bounding-tile", "--seq"], "[-1, -1, 1, 1]")
+        result = _run_cli(["bounding-tile", "--seq"], "[-1, -1, 1, 1]")
         assert result.returncode == 0
         assert result.stdout == "\x1e\n[0, 0, 0]\n"
 
-
     def test_cli_bounding_tile_geosjon(self) -> None:
-        collection_dict = {'features': [{'geometry': {'coordinates': [[[-105.46875, 39.909736],
-                                                     [-105.46875, 40.446947],
-                                                     [-104.765625, 40.446947],
-                                                     [-104.765625, 39.909736],
-                                                     [-105.46875, 39.909736]]],
-                                    'type': 'Polygon'},
-                       'id': '(106, 193, 9)',
-                       'properties': {'title': 'XYZ tile (106, 193, 9)'},
-                       'type': 'Feature'}],
-         'type': 'FeatureCollection'}
+        collection_dict = {
+            "features": [
+                {
+                    "geometry": {
+                        "coordinates": [
+                            [
+                                [-105.46875, 39.909736],
+                                [-105.46875, 40.446947],
+                                [-104.765625, 40.446947],
+                                [-104.765625, 39.909736],
+                                [-105.46875, 39.909736],
+                            ]
+                        ],
+                        "type": "Polygon",
+                    },
+                    "id": "(106, 193, 9)",
+                    "properties": {"title": "XYZ tile (106, 193, 9)"},
+                    "type": "Feature",
+                }
+            ],
+            "type": "FeatureCollection",
+        }
         collection = json.dumps(collection_dict)
-        result = _run_cli( ["bounding-tile"], collection)
+        result = _run_cli(["bounding-tile"], collection)
         assert result.returncode == 0
         assert result.stdout == "[26, 48, 7]\n"
 
 
 class TestNeighbors:
-
     def test_cli_neighbors(self) -> None:
-        result = _run_cli( ["neighbors"], "[243, 166, 9]")
-        assert result.returncode== 0
+        result = _run_cli(["neighbors"], "[243, 166, 9]")
+        assert result.returncode == 0
         print(result.stdout)
 
         tiles_lines = result.stdout.strip().split("\n")
@@ -404,39 +401,34 @@ class TestNeighbors:
         assert (243 + 1, 166 + 0, 9) in tiles_set
         assert (243 + 1, 166 + 1, 9) in tiles_set
 
+
 class TestParent:
     def test_cli_parent_failure(self) -> None:
         """[0, 0, 0] has no parent"""
-        result = _run_cli( ["parent"], "[0, 0, 0]")
-        assert result.returncode !=0
-
+        result = _run_cli(["parent"], "[0, 0, 0]")
+        assert result.returncode != 0
 
     def test_cli_parent(self) -> None:
-        result = _run_cli( ["parent"], "[486, 332, 10]\n[486, 332, 10]")
+        result = _run_cli(["parent"], "[486, 332, 10]\n[486, 332, 10]")
         assert result.returncode == 0
         assert result.stdout == "[243, 166, 9]\n[243, 166, 9]\n"
 
-
     def test_cli_parent_depth(self) -> None:
-        result = _run_cli( ["parent", "--depth", "2"], "[486, 332, 10]")
+        result = _run_cli(["parent", "--depth", "2"], "[486, 332, 10]")
         assert result.returncode == 0
         assert result.stdout == "[121, 83, 8]\n"
 
-
     def test_cli_parent_multidepth(self) -> None:
-        result = _run_cli(
-             ["parent", "--depth", "2"], "[486, 332, 10]\n[121, 83, 8]"
-        )
+        result = _run_cli(["parent", "--depth", "2"], "[486, 332, 10]\n[121, 83, 8]")
         assert result.returncode == 0
         assert result.stdout == "[121, 83, 8]\n[30, 20, 6]\n"
 
-class TestChildren:
 
+class TestChildren:
     def test_cli_children(self) -> None:
-        result = _run_cli( ["children"], "[243, 166, 9]")
+        result = _run_cli(["children"], "[243, 166, 9]")
         assert result.returncode == 0
         assert (
             result.stdout
             == "[486, 332, 10]\n[487, 332, 10]\n[487, 333, 10]\n[486, 333, 10]\n"
         )
-
