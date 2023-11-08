@@ -33,8 +33,7 @@ module-name = "utiles.libutiles"
 
 [tool.pytest.ini_options]
 testpaths = [
-    "tests",
-#    "python"
+   "python"
 ]
 addopts = [
     "--doctest-modules",

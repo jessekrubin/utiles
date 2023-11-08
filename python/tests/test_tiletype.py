@@ -8,7 +8,7 @@ import utiles
 Extensions = Union[str, bool]
 
 PWD = Path(__file__).parent
-REPO_ROOT = PWD.parent
+REPO_ROOT = PWD.parent.parent
 
 
 def tiletype(buffer: bytes) -> Extensions:
