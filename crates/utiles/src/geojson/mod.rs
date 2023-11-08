@@ -1,9 +1,6 @@
 use geo_types::coord;
 use geo_types::Coord;
-use geojson::{Geometry, Value as GeoJsonValue};
-use std::iter::{Chain, Flatten, Once};
-use std::vec::IntoIter;
-use tracing::{warn, warn_span};
+use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};
 
 pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Vec<f64>>> {
     let value = g.value;
@@ -56,4 +53,31 @@ pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
         }
     };
     coord_vecs
+}
+
+pub fn geojson_feature_coords(feature: Feature) -> Box<dyn Iterator<Item = Coord>> {
+    let geometry = feature.geometry.unwrap();
+    geojson_geometry_coords(geometry)
+}
+
+pub fn geojson_coords(geojson_str: &str) -> Box<dyn Iterator<Item = Coord>> {
+    let gj = geojson_str.parse::<GeoJson>().unwrap();
+    match gj {
+        GeoJson::FeatureCollection(fc) => {
+            let mut coords = fc.features.into_iter().flat_map(geojson_feature_coords);
+            Box::new(coords)
+            // let mut bbox = BBox::new(180.0, 90.0, -180.0, -90.0);
+            // for feature in fc.features {
+            //     let feature_bbox = geojson_feature_bounds(feature);
+            //     bbox = bbox.union(feature_bbox);
+            // }
+            // bbox
+        }
+        GeoJson::Feature(feature) => {
+            // if it has a bbox
+            let geometry = feature.geometry.unwrap();
+            geojson_geometry_coords(geometry)
+        }
+        GeoJson::Geometry(geometry) => geojson_geometry_coords(geometry),
+    }
 }

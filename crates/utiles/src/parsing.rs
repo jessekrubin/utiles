@@ -1,17 +1,13 @@
 use crate::bbox::BBox;
-use crate::geojson::geojson_geometry_points;
+use crate::geojson::geojson_coords;
 use geo_types::Coord;
-use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};
 use serde_json::Value;
-
-use geo_types::coord;
 
 // pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
 pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
     // if the first char is "{" assume it is geojson-like
     if s.chars().next().unwrap() == '{' {
-        let coords = geojson_coords(s);
-        return Ok(BBox::from(coords));
+        return Ok(geojson_bounds(s));
     }
 
     let v: Value = serde_json::from_str(s)?;
@@ -31,53 +27,39 @@ pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
     }
 }
 
-fn geojson_geometry_coords(g: Geometry) -> Vec<Coord> {
-    let coord_vecs = geojson_geometry_points(g);
-    coord_vecs
-        .into_iter()
-        .map(|v| {
-            coord! { x: v[0], y: v[1]}
-        })
-        .collect()
-    // convert from Vec<f64> to Vec<Coord>
-    // coord_vecs.into_iter().map(|v| vec2coord(v)).collect()
-}
+pub fn coords2bounds<I>(mut coords: I) -> Option<(f64, f64, f64, f64)>
+where
+    I: Iterator<Item = Coord>,
+{
+    // Initialize the bounds with the first coordinate.
+    let first_coord = coords.next()?;
+    let mut min_x = first_coord.x;
+    let mut max_x = first_coord.x;
+    let mut min_y = first_coord.y;
+    let mut max_y = first_coord.y;
 
-fn geojson_feature_coords(feature: Feature) -> Vec<Coord> {
-    let geometry = feature.geometry.unwrap();
-    geojson_geometry_coords(geometry)
-}
-
-pub fn geojson_coords(geojson_str: &str) -> Vec<Coord> {
-    let gj = geojson_str.parse::<GeoJson>().unwrap();
-    match gj {
-        GeoJson::FeatureCollection(fc) => {
-            let mut coords = Vec::new();
-            for feature in fc.features {
-                let feature_coords = geojson_feature_coords(feature);
-                coords.extend(feature_coords);
-            }
-            coords
-            // let mut bbox = BBox::new(180.0, 90.0, -180.0, -90.0);
-            // for feature in fc.features {
-            //     let feature_bbox = geojson_feature_bounds(feature);
-            //     bbox = bbox.union(feature_bbox);
-            // }
-            // bbox
+    // Iterate through the coordinates to find the extremes.
+    for coord in coords {
+        if coord.x < min_x {
+            min_x = coord.x;
         }
-        GeoJson::Feature(feature) => {
-            // if it has a bbox
-            let geometry = feature.geometry.unwrap();
-            geojson_geometry_coords(geometry)
+        if coord.x > max_x {
+            max_x = coord.x;
         }
-        GeoJson::Geometry(geometry) => geojson_geometry_coords(geometry),
+        if coord.y < min_y {
+            min_y = coord.y;
+        }
+        if coord.y > max_y {
+            max_y = coord.y;
+        }
     }
-}
 
+    Some((min_x, min_y, max_x, max_y))
+}
 pub fn geojson_bounds(geojson_str: &str) -> BBox {
     let coords = geojson_coords(geojson_str);
-    // BBox::from(coords)
-    BBox::world_web()
+    let bounds = coords2bounds(coords).unwrap();
+    BBox::new(bounds.0, bounds.1, bounds.2, bounds.3)
 }
 
 #[cfg(test)]
