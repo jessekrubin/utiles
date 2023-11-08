@@ -36,9 +36,6 @@ jobs:
         shell: bash
         run: |
           set -e
-          which pip -a
-          which python -a
-          ls dist
           pip install utiles --find-links dist --force-reinstall -vvv
           pip install -r requirements/dev.txt
           pytest
