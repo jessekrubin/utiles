@@ -477,8 +477,6 @@ impl From<PyTile> for Tile {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utile;
-
     #[test]
     fn test_pytile_macro() {
         let tile = pytile!(0, 0, 0);
