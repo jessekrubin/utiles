@@ -2,19 +2,21 @@ pub enum TileType {
     Unknown = 0,
     Gif = 1,
     Jpg = 2,
-    Pbf = 3,
-    Pbfgz = 4,
-    Png = 5,
-    Webp = 6,
+    Json = 3,
+    Pbf = 4,
+    Pbfgz = 5,
+    Png = 6,
+    Webp = 7,
 }
 
 pub const TILETYPE_UNKNOWN: usize = 0;
 pub const TILETYPE_GIF: usize = 1;
 pub const TILETYPE_JPG: usize = 2;
-pub const TILETYPE_PBF: usize = 3;
-pub const TILETYPE_PBFGZ: usize = 4;
-pub const TILETYPE_PNG: usize = 5;
-pub const TILETYPE_WEBP: usize = 6;
+pub const TILETYPE_JSON: usize = 3;
+pub const TILETYPE_PBF: usize = 4;
+pub const TILETYPE_PBFGZ: usize = 5;
+pub const TILETYPE_PNG: usize = 6;
+pub const TILETYPE_WEBP: usize = 7;
 
 pub fn tiletype(buffer: &[u8]) -> TileType {
     if buffer.len() >= 8 {
@@ -56,6 +58,9 @@ pub fn tiletype(buffer: &[u8]) -> TileType {
             return TileType::Pbf;
         } else if buffer[0] == 0x1f && buffer[1] == 0x8b {
             return TileType::Pbfgz;
+            // if starts with '{' or '[' json
+        } else if  buffer[0] == 0x7b || buffer[0] == 0x5b {
+            return TileType::Json;
         }
     }
     TileType::Unknown
@@ -66,6 +71,7 @@ pub fn enum2const(tiletype: TileType) -> usize {
         TileType::Unknown => TILETYPE_UNKNOWN,
         TileType::Gif => TILETYPE_GIF,
         TileType::Jpg => TILETYPE_JPG,
+        TileType::Json => TILETYPE_JSON,
         TileType::Pbf => TILETYPE_PBF,
         TileType::Pbfgz => TILETYPE_PBFGZ,
         TileType::Png => TILETYPE_PNG,
@@ -78,6 +84,7 @@ pub fn const2enum(tiletype: usize) -> TileType {
         TILETYPE_UNKNOWN => TileType::Unknown,
         TILETYPE_GIF => TileType::Gif,
         TILETYPE_JPG => TileType::Jpg,
+        TILETYPE_JSON => TileType::Json,
         TILETYPE_PBF => TileType::Pbf,
         TILETYPE_PBFGZ => TileType::Pbfgz,
         TILETYPE_PNG => TileType::Png,
@@ -90,6 +97,7 @@ pub fn headers(tiletype: TileType) -> Vec<(&'static str, &'static str)> {
     match tiletype {
         TileType::Png => vec![("Content-Type", "image/png")],
         TileType::Jpg => vec![("Content-Type", "image/jpeg")],
+        TileType::Json => vec![("Content-Type", "application/json")],
         TileType::Gif => vec![("Content-Type", "image/gif")],
         TileType::Webp => vec![("Content-Type", "image/webp")],
         TileType::Pbf => vec![
@@ -110,6 +118,7 @@ pub fn tiletype_str(buffer: &[u8]) -> String {
         TileType::Unknown => "unknown".to_string(),
         TileType::Gif => "gif".to_string(),
         TileType::Jpg => "jpg".to_string(),
+        TileType::Json => "json".to_string(),
         TileType::Pbf => "pbf".to_string(),
         TileType::Pbfgz => "pbfgz".to_string(),
         TileType::Png => "png".to_string(),

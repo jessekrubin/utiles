@@ -56,6 +56,9 @@ def tiletype(buffer: bytes) -> Extensions:
     # gzip: recklessly assumes contents are PBF.
     elif buffer[0] == 0x1F and buffer[1] == 0x8B:
         return "pbfgz"
+    # if buffer starts with '{' or '[' assume JSON
+    elif buffer[0] == 0x7B or buffer[0] == 0x5B:
+        return "json"
     return False
 
 
@@ -77,6 +80,8 @@ TEST_TILE_NAME2TYPE = {
     "tux_alpha.webp": "webp",
     "unknown.txt": False,
     "webp-550x368.webp": "webp",
+    "tile-arr.json": "json",
+    "tile-obj.json": "json",
 }
 
 

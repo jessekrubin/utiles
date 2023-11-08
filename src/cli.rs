@@ -1,4 +1,4 @@
-use pyo3::{pyfunction, PyResult, Python};
+use pyo3::{pyfunction, Python};
 use utiles_cli::cli::cli_main;
 
 #[pyfunction]

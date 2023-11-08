@@ -809,12 +809,14 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tiletype, m)?)?;
     m.add_function(wrap_pyfunction!(tiletype_str, m)?)?;
     m.add_function(wrap_pyfunction!(tiletype2headers, m)?)?;
-    m.add("TILETYPE_UNKNOWN", libtiletype::TILETYPE_UNKNOWN)?; // 0
-    m.add("TILETYPE_GIF", libtiletype::TILETYPE_GIF)?; // 1
-    m.add("TILETYPE_JPG", libtiletype::TILETYPE_JPG)?; // 2
-    m.add("TILETYPE_PBF", libtiletype::TILETYPE_PBF)?; // 3
-    m.add("TILETYPE_PNG", libtiletype::TILETYPE_PNG)?; // 4
-    m.add("TILETYPE_WEBP", libtiletype::TILETYPE_WEBP)?; // 5
+    m.add("TILETYPE_UNKNOWN", libtiletype::TILETYPE_UNKNOWN)?;
+    m.add("TILETYPE_GIF", libtiletype::TILETYPE_GIF)?;
+    m.add("TILETYPE_JPG", libtiletype::TILETYPE_JPG)?;
+    m.add("TILETYPE_JSON", libtiletype::TILETYPE_JSON)?;
+    m.add("TILETYPE_PBF", libtiletype::TILETYPE_PBF)?;
+    m.add("TILETYPE_PBFGZ", libtiletype::TILETYPE_PBFGZ)?;
+    m.add("TILETYPE_PNG", libtiletype::TILETYPE_PNG)?;
+    m.add("TILETYPE_WEBP", libtiletype::TILETYPE_WEBP)?;
 
     // m.add_class::<TileTuple>()?;
     m.add_class::<PyTile>()?;

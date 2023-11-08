@@ -90,6 +90,7 @@ impl StdInterator {
                         .lines() // This assumes that each line is separated by '\n'
                         .map(|s| s.to_string())
                         .collect::<VecDeque<String>>();
+                    debug!("args: {:?}", args);
                     StdInteratorSource::Args(args)
                 }
             }

@@ -1,12 +1,21 @@
 use crate::bbox::BBox;
 use crate::geojson::geojson_coords;
 use geo_types::Coord;
+use tracing::debug;
 use serde_json::Value;
 
 // pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
 pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
     // if the first char is "{" assume it is geojson-like
+    debug!("parse_bbox: {}", s);
     if s.starts_with('{') {
+        // parse to serde_json::Value
+        let v: Value = serde_json::from_str(s)?;
+        // if it has a "bbox" key, use that
+        if v["bbox"].is_array() {
+            let bbox: (f64, f64, f64, f64) = serde_json::from_value(v["bbox"].clone())?;
+            return Ok(BBox::from(bbox));
+        }
         return Ok(geojson_bounds(s));
     }
 

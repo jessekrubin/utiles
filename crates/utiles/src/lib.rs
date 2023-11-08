@@ -193,34 +193,34 @@ pub fn _xy(
     }
 }
 
-pub fn _xy_og(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
-    let trunc = truncate.unwrap_or(false);
-
-    let mut lng = lng;
-    let mut lat = lat;
-    if trunc {
-        lng = truncate_lng(lng);
-        lat = truncate_lat(lat);
-    }
-    let x = (lng / 360.0) + 0.5;
-
-    let sinlat = lat.to_radians().sin();
-
-    let y_inner = (1.0 + sinlat) / (1.0 - sinlat);
-    let y = match (1.0 + sinlat) / (1.0 - sinlat) {
-        y if y.is_infinite() => {
-            panic!("Invalid latitude (inf): {lat:?}");
-        }
-        y if y.is_nan() => {
-            panic!("Invalid latitude (nan): {lat:?}");
-        }
-        // y => 0.5 - 0.25 * y.ln() / std::f64::consts::PI,
-        // y = 0.5 - 0.25 * math.log((1.0 + sinlat) / (1.0 - sinlat)) / math.pi
-        _y => 0.5 - 0.25 * y_inner.ln() / PI,
-    };
-    (x, y)
-    // y = 0.5 - 0.25 * math.log((1.0 + sinlat) / (1.0 - sinlat)) / math.pi
-}
+// pub fn _xy_og(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
+//     let trunc = truncate.unwrap_or(false);
+//
+//     let mut lng = lng;
+//     let mut lat = lat;
+//     if trunc {
+//         lng = truncate_lng(lng);
+//         lat = truncate_lat(lat);
+//     }
+//     let x = (lng / 360.0) + 0.5;
+//
+//     let sinlat = lat.to_radians().sin();
+//
+//     let y_inner = (1.0 + sinlat) / (1.0 - sinlat);
+//     let y = match (1.0 + sinlat) / (1.0 - sinlat) {
+//         y if y.is_infinite() => {
+//             panic!("Invalid latitude (inf): {lat:?}");
+//         }
+//         y if y.is_nan() => {
+//             panic!("Invalid latitude (nan): {lat:?}");
+//         }
+//         // y => 0.5 - 0.25 * y.ln() / std::f64::consts::PI,
+//         // y = 0.5 - 0.25 * math.log((1.0 + sinlat) / (1.0 - sinlat)) / math.pi
+//         _y => 0.5 - 0.25 * y_inner.ln() / PI,
+//     };
+//     (x, y)
+//     // y = 0.5 - 0.25 * math.log((1.0 + sinlat) / (1.0 - sinlat)) / math.pi
+// }
 
 pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
     let trunc = truncate.unwrap_or(false);

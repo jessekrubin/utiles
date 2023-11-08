@@ -22,7 +22,9 @@ TupleIntIntInt = Tuple[int, int, int]
 
 TILETYPE_GIF: int
 TILETYPE_JPG: int
+TILETYPE_JSON: int
 TILETYPE_PBF: int
+TILETYPE_PBFGZ: int
 TILETYPE_PNG: int
 TILETYPE_UNKNOWN: int
 TILETYPE_WEBP: int

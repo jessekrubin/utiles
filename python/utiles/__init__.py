@@ -13,6 +13,8 @@ from utiles.libutiles import (
     TILETYPE_PBF,
     TILETYPE_PNG,
     TILETYPE_UNKNOWN,
+    TILETYPE_JSON,
+    TILETYPE_PBFGZ,
     TILETYPE_WEBP,
     Tile,
     __build_profile__,
@@ -64,7 +66,9 @@ __all__ = (
     "LngLatBbox",
     "TILETYPE_GIF",
     "TILETYPE_JPG",
+    "TILETYPE_JSON",
     "TILETYPE_PBF",
+    "TILETYPE_PBFGZ",
     "TILETYPE_PNG",
     "TILETYPE_UNKNOWN",
     "TILETYPE_WEBP",
@@ -151,5 +155,9 @@ def tiletile_str(n: int) -> str:
         return "webp"
     elif n == TILETYPE_PBF:
         return "pbf"
+    elif n == TILETYPE_PBFGZ:
+        return "pbfgz"
+    elif n == TILETYPE_JSON:
+        return "json"
     else:
         return "unknown"

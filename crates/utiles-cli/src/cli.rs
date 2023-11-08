@@ -1,17 +1,15 @@
-use std::error::Error;
 use clap::{Parser, Subcommand, ValueEnum};
 use tracing::debug;
-
-use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::EnvFilter;
+use tracing_subscriber::util::SubscriberInitExt;
 use utiles::parsing::parse_bbox;
+use utiles::{bounding_tile, Tile};
 use utiles::tilejson::tilejson_stringify;
 use utiles::tiles;
-use utiles::Tile;
 use utiles::zoom::ZoomOrZooms;
-use crate::stdinterator::StdInterator;
 use utilesqlite::mbtiles::Mbtiles;
 
+use crate::stdinterator::StdInterator;
 
 /// A fictional versioning CLI
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -52,7 +50,6 @@ pub enum Commands {
     //     #[arg(required = true)]
     //     quadkey: String,
     // },
-
     #[command(name = "lint", about = "lint mbtiles file", long_about = None)]
     Lint {
         #[arg(required = true)]
@@ -79,24 +76,21 @@ pub enum Commands {
         seq: bool,
     },
 
-
     // ===================
     // NOT IMPLEMENTED YET
     // ===================
     #[command(name = "quadkey", visible_alias = "qk", about = "convert xyz <-> quadkey", long_about = None)]
-    Quadkey{
+    Quadkey {
         #[arg(required = false)]
         input: Option<String>,
     },
 
     #[command(name = "bounding-tile", about = "output tilejson", long_about = None)]
     BoundingTile {
-        #[arg(required = true)]
-        zoom: u8,
+        #[arg(required = false)]
+        input: Option<String>,
 
-        #[arg(required = true)]
-        input: String,
-
+        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         seq: bool,
     },
 
@@ -111,7 +105,7 @@ pub enum Commands {
         seq: bool,
     },
 
-    #[command(name="neighbors", about="print neighbors of tile(s)", long_about=None)]
+    #[command(name = "neighbors", about = "print neighbors of tile(s)", long_about = None)]
     Neighbors {
         #[arg(required = true)]
         input: String,
@@ -119,7 +113,7 @@ pub enum Commands {
         seq: bool,
     },
 
-    #[command(name="parent", about="print parent of tile(s)", long_about=None)]
+    #[command(name = "parent", about = "print parent of tile(s)", long_about = None)]
     Parent {
         #[arg(required = true)]
         input: String,
@@ -127,7 +121,7 @@ pub enum Commands {
         seq: bool,
     },
 
-    #[command(name="shapes", about="print shapes of tiles as geojson", long_about=None)]
+    #[command(name = "shapes", about = "print shapes of tiles as geojson", long_about = None)]
     Shapes {
         #[arg(required = true)]
         input: String,
@@ -237,7 +231,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
 
 
     match args.command {
-        Commands::Quadkey{
+        Commands::Quadkey {
             input
         } => {
             // let thingy = StdInterator::new(quadkey.quadkey).unwrap();
@@ -278,13 +272,56 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
                 }
             }
         }
+        Commands::BoundingTile{ input, seq } => {
+            let input_lines = StdInterator::new(input).unwrap();
+            let lines = input_lines
+                .filter(|l| !l.is_err())
+                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
+                |l| l.as_ref().unwrap() != "\x1e"
+            );
+
+            let bboxes = lines.map(|l| {
+                let s = l.unwrap();
+                debug!("l: {:?}", s);
+                parse_bbox(&s).unwrap()
+            });
+            for bbox in bboxes {
+                let tile = bounding_tile( bbox, None);
+                // let tile = Tile::from_bbox(&bbox, zoom);
+                let rs = if seq { "\x1e\n" } else { "" };
+                println!("{}{}", rs, tile.json_arr());
+            }
+            //
+            //
+            //     .flat_map(|b| tiles(
+            //         (b.west, b.south, b.east, b.north),
+            //         ZoomOrZooms::Zoom(zoom),
+            //     )).enumerate();
+            // // let bboxes = lines
+            // for (i, tile) in tiles {
+            //     let rs = if seq { "\x1e\n" } else { "" };
+            //     println!("{}{}", rs, tile.json_arr());
+            //     // call loop_fn if it's defined every 1000 iterations for signal break
+            //     if i % 1024 == 0 {
+            //         if let Some(f) = loop_fn {
+            //             f();
+            //         }
+            //     }
+            // }
+        }
         Commands::Tiles { zoom, input, seq } => {
             let input_lines = StdInterator::new(input).unwrap();
-            let mut niter = 0;
-            let tiles = input_lines
+            let lines = input_lines
                 .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty())
-                .map(|l| parse_bbox(&l.unwrap()).unwrap())
+                .filter(|l| !l.as_ref().unwrap().is_empty()).filter(
+                |l| l.as_ref().unwrap() != "\x1e"
+            );
+
+            let tiles = lines.map(|l| {
+                let s = l.unwrap();
+                debug!("l: {:?}", s);
+                parse_bbox(&s).unwrap()
+            })
                 .flat_map(|b| tiles(
                     (b.west, b.south, b.east, b.north),
                     ZoomOrZooms::Zoom(zoom),
@@ -350,8 +387,9 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn() -> ()>) {
         }
 
         Commands::Lint { filepath, fix } => {
-            println!("linting: {}", filepath);
-            println!("NOT IMPLEMENTED YET");
+            println!("lint (fix -- {}): {}", fix, filepath);
+            // throw not implemented error
+            panic!("not implemented (yet)")
         }
 
         Commands::Tilejson { filepath } => {

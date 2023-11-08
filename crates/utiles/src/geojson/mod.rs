@@ -18,7 +18,6 @@ pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Vec<f64>>
         GeoJsonValue::GeometryCollection(geometries) => {
             Box::new(geometries.into_iter().flat_map(geojson_geometry_points))
         }
-        _ => Box::new(std::iter::empty()), // For any other case, return an empty iterator
     }
 }
 
