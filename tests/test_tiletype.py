@@ -8,7 +8,18 @@ import utiles
 Extensions = Union[str, bool]
 
 PWD = Path(__file__).parent
-REPO_ROOT = PWD.parent.parent
+
+def _repo_root() -> Path:
+    _root = PWD
+    for _i in  range(5):
+        _root = _root.parent
+        if (_root / ".github").is_dir():
+            return _root
+    raise RuntimeError("Could not find repo root")
+
+REPO_ROOT = _repo_root()
+
+# go up and find dir with sub dir ".github"
 
 
 def tiletype(buffer: bytes) -> Extensions:
