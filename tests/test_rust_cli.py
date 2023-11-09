@@ -1,11 +1,10 @@
 """Utiles rust cli tests"""
-import sys
-from subprocess import run
-from json import dumps as stringify
 import json
+import sys
+from json import dumps as stringify
+from subprocess import run
 
 import pytest
-
 
 # def test_cli_shapes_failure() -> None:
 #     runner = CliRunner()
@@ -153,8 +152,6 @@ def _run_cli(
         text=True,
         shell=False,
     )
-    print(res.stdout)
-    print(res.stderr)
     return res
 
 
@@ -162,13 +159,6 @@ def test_rust_cli_help() -> None:
     res = _run_cli(["--help"])
     assert "(rust)" in res.stdout
 
-
-#
-# def test_rust_cli_help() -> None:
-#     runner = CliRunner()
-#     res = runner.invoke(cli, ["--help"])
-#     print(res)
-#     assert False
 
 
 class TestTiles:
@@ -197,14 +187,11 @@ class TestTiles:
             ["--debug", "tiles", "14"],
             "\x1e\n[-105, 39.99, -104.99, 40]\n\x1e\n[-105, 39.99, -104.99, 40]",
         )
-        print(result.stdout)
-        print(result.stderr)
         assert result.returncode == 0
         assert len(result.stdout.strip().split("\n")) == 4
 
     def test_rust_cli_tiles_seq(self) -> None:
         result = _run_cli(["tiles", "14", "--seq", "[14.0859, 5.798]"])
-        print(result)
         # runner = CliRunner()
         # result = runner.invoke(cli, ["tiles", "14", "--seq",
         #                              "[14.0859, 5.798]"
@@ -215,7 +202,6 @@ class TestTiles:
 
     def test_cli_tiles_points(self) -> None:
         result = _run_cli(["tiles", "14"], "[14.0859, 5.798]")
-        print(result)
         # j
         # runner = CliRunner()
         # result = runner.invoke(cli, ["tiles", "14"], "[14.0859, 5.798]")
@@ -379,7 +365,6 @@ class TestNeighbors:
     def test_cli_neighbors(self) -> None:
         result = _run_cli(["neighbors"], "[243, 166, 9]")
         assert result.returncode == 0
-        print(result.stdout)
 
         tiles_lines = result.stdout.strip().split("\n")
         tiles = [tuple(json.loads(t)) for t in tiles_lines]

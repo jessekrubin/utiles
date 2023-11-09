@@ -59,7 +59,8 @@ def _nbytes_str(nbytes: Union[int, float]) -> str:
             _str = f"{nbytes:3.1f} {x}"
             return _str
         nbytes /= 1024.0
-    raise ValueError(f"Invalid number of bytes: {nbytes}")  # pragma: no cover
+    msg = f"Invalid number of bytes: {nbytes}"
+    raise ValueError(msg)  # pragma: no cover
 
 
 def _utiles_ext_info() -> Dict[str, Union[str, int]]:

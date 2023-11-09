@@ -15,7 +15,8 @@ def _repo_root() -> Path:
         _root = _root.parent
         if (_root / ".github").is_dir():
             return _root
-    raise RuntimeError("Could not find repo root")
+    msg = "Could not find repo root"
+    raise RuntimeError(msg)
 
 REPO_ROOT = _repo_root()
 

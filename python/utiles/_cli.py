@@ -5,7 +5,8 @@ import logging
 import sys
 
 import click
-from utiles import ut_cli, __version__
+
+from utiles import __version__, ut_cli
 
 logger = logging.getLogger(__name__)
 

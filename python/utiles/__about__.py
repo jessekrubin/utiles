@@ -1,6 +1,6 @@
 """Package metadata/info"""
 
-from utiles._utiles import __version_lib__, __build_profile__  # noqa: TID252
+from utiles._utiles import __build_profile__, __version_lib__
 
 __all__ = (
     "__title__",

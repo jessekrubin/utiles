@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 from typing import List, Sequence, Tuple, Union
 
-from utiles._utiles import (  # noqa: TID252
+from utiles._utiles import (
     TILETYPE_GIF,
     TILETYPE_JPG,
     TILETYPE_JSON,
