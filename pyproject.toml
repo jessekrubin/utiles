@@ -30,7 +30,7 @@ ut = "utiles.rio_plugin:rio_ut"
 python-source = "python"
 features = ["pyo3/extension-module"]
 bindings = "pyo3"
-module-name = "utiles.libutiles"
+module-name = "utiles._utiles"
 
 [tool.pytest.ini_options]
 testpaths = [

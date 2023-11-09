@@ -5,7 +5,7 @@ import os
 import sys
 from typing import Dict, Union
 
-from utiles import libutiles
+from utiles import _utiles as libutiles
 from utiles.__about__ import __pkgroot__, __title__, __version__
 
 

@@ -1,6 +1,6 @@
 """Package metadata/info"""
 
-from .libutiles import __version_lib__  # noqa: TID252
+from ._utiles import __version_lib__  # noqa: TID252
 
 __all__ = ("__title__", "__description__", "__pkgroot__", "__version__")
 __title__ = "utiles"
