@@ -13,7 +13,7 @@ use pyo3::types::PyType;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::{
-    exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
+    exceptions, IntoPy, Py, PyAny, pyclass, PyErr, pymethods, PyObject, PyRef,
     PyResult, Python,
 };
 use serde::{Deserialize, Serialize};
