@@ -11,9 +11,8 @@ from typing import (
     Tuple,
     Union,
     overload,
+    Literal,
 )
-
-from typing_extensions import Literal, TypedDict
 
 __version_lib__: str
 __build_profile__: Literal["debug", "release"]
@@ -29,10 +28,6 @@ TILETYPE_PNG: int
 TILETYPE_UNKNOWN: int
 TILETYPE_WEBP: int
 
-class TileDict(TypedDict):
-    x: int
-    y: int
-    z: int
 
 class LngLat:
     lat: float

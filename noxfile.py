@@ -20,3 +20,14 @@ def test(session: nox.Session) -> None:
     session.install("pytest", "hypothesis", "pytest-cov", "pytest-benchmark")
     session.run("maturin", "develop", "--release", "--extras=test")
     session.run("pytest")
+
+@nox.session
+def test_wheel(session: nox.Session) -> None:
+    """Run the unit and regular tests."""
+    # install from dist...
+
+    session.install("utiles", )
+    session.install("maturin")
+    session.install("pytest", "hypothesis", "pytest-cov", "pytest-benchmark")
+    session.run("maturin", "build", "--release", "--extras=test")
+    session.run("pytest")

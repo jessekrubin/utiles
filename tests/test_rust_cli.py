@@ -5,9 +5,6 @@ from json import dumps as stringify
 import json
 
 import pytest
-from click.testing import CliRunner
-
-from utiles.ut import cli
 
 
 # def test_cli_shapes_failure() -> None:
@@ -150,7 +147,7 @@ def _run_cli(
 ):
     _python = sys.executable
     res = run(
-        [_python, "-m", "utiles.ut", *args],
+        [_python, "-m", "utiles._cli", *args],
         input=input,
         capture_output=True,
         text=True,
@@ -293,17 +290,14 @@ class TestQuadkey:
     @pytest.mark.skip(reason="not implemented")
     def test_cli_quadkey_failure(self) -> None:
         """Abort when an invalid quadkey is passed"""
-        runner = CliRunner()
-        with pytest.warns(DeprecationWarning):
-            result = runner.invoke(cli, ["quadkey", "lolwut"])
-        assert result.exit_code == 2
-        assert "lolwut" in result.output
+        result = _run_cli(["quadkey"], "lolwut")
+        assert result.returncode !=0
+        assert "lolwut" in result.stdout
 
 
 class TestBoundingTile:
     def test_cli_bounding_tile_bad_bounds(self) -> None:
         """Bounds of len 3 are bad."""
-        runner = CliRunner()
         result = _run_cli(["bounding-tile"], "[-105, 39.99, -104.99]")
         assert result.returncode != 0
 
