@@ -1,6 +1,5 @@
 """Utiles rust cli tests"""
 import json
-import os
 import sys
 from json import dumps as stringify
 from subprocess import CompletedProcess, run
