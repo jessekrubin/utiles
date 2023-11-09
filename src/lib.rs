@@ -764,7 +764,7 @@ fn lib_constants(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
 /// Utiles python module
 #[pymodule]
-#[pyo3(name="_utiles")]
+#[pyo3(name = "_utiles")]
 fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     // lib constants
     lib_constants(_py, m)?;
