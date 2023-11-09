@@ -7,7 +7,6 @@ use constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use geo_types::coord;
 
 pub use lnglat::LngLat;
-use serde::Deserialize;
 use sibling_relationship::SiblingRelationship;
 pub use tile::Tile;
 use tile_range::{TileRange, TileRanges};
@@ -21,6 +20,7 @@ pub mod lnglat;
 pub mod mbtiles;
 pub mod parsing;
 pub mod pmtiles;
+pub mod projection;
 pub mod sibling_relationship;
 pub mod tile;
 pub mod tile_range;

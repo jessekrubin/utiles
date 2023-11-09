@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Map;
-use serde_json::Value;
+use serde_json::{Map, Value};
 use std::cmp::Ordering;
 use std::error::Error;
 use std::str::FromStr;
@@ -10,11 +9,80 @@ use crate::utile;
 use crate::bbox::BBox;
 use crate::constants::EPSILON;
 use crate::lnglat::LngLat;
+use crate::projection::Projection;
 use crate::tile_tuple::XYZ;
 use crate::{
     bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
-    siblings, traits, ul, ur, xyz2quadkey,
+    siblings, traits, ul, ur, xy, xyz2quadkey,
 };
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TileFeatureGeometry {
+    #[serde(rename = "type")]
+    pub type_: String,
+    pub coordinates: Vec<Vec<Vec<f64>>>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FeatureOptions {
+    pub fid: Option<String>, // feature id
+    pub props: Option<Map<String, Value>>,
+    pub projection: Projection,
+    pub buffer: Option<f64>,
+    pub precision: Option<i32>,
+}
+
+impl Default for FeatureOptions {
+    fn default() -> Self {
+        FeatureOptions {
+            fid: None,
+            props: None,
+            projection: Projection::Geographic,
+            buffer: None,
+            precision: None,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TileFeature {
+    pub id: String,
+
+    #[serde(rename = "type")]
+    pub type_: String,
+
+    pub geometry: TileFeatureGeometry,
+    pub bbox: (f64, f64, f64, f64),
+    pub properties: Map<String, Value>,
+}
+
+impl TileFeature {
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    pub fn bbox_lons(&self) -> Vec<f64> {
+        vec![self.bbox.0, self.bbox.2]
+    }
+
+    pub fn bbox_lats(&self) -> Vec<f64> {
+        vec![self.bbox.1, self.bbox.3]
+    }
+
+    pub fn extents_string(&self) -> String {
+        format!(
+            "{} {} {} {}",
+            self.bbox.0, self.bbox.1, self.bbox.2, self.bbox.3
+        )
+    }
+
+    pub fn bbox_json(&self) -> String {
+        format!(
+            "[{},{},{},{}]",
+            self.bbox.0, self.bbox.1, self.bbox.2, self.bbox.3
+        )
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Tile {
@@ -211,6 +279,11 @@ impl Tile {
         Self::from_json_obj(json)
     }
 
+    pub fn from_json_loose(json: &str) -> Self {
+        let v = serde_json::from_str::<Value>(json).unwrap();
+        Self::from(v)
+    }
+
     pub fn quadkey(&self) -> String {
         xyz2quadkey(self.x, self.y, self.z)
     }
@@ -396,6 +469,148 @@ impl Tile {
     pub fn json_obj(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
+
+    pub fn tuple_string(&self) -> String {
+        format!("({}, {}, {})", self.x, self.y, self.z)
+    }
+
+    pub fn feature(
+        &self,
+        opts: &FeatureOptions,
+        // fid: Option<String>, // feature id
+        // props: Option<Map<String, Value>>,
+        // projected: Option<String>,
+        // buffer: Option<f64>,
+        // precision: Option<i32>,
+    ) -> Result<TileFeature, Box<dyn Error>> {
+        // Convert the arguments to Rust values
+        // let pytile: PyTile = tile.into();
+        // let tile = pytile.tuple();
+        // let opts = options.unwrap_or_default();
+
+        // let (x, y, z) = self.tuple();
+        // let fid = opts.fid.unwrap_or_default();
+        // let props = opts.props;
+        // let projection = opts.projection;
+        // .unwrap_or_else( Projection::Geographic);
+        // let projected = opts.projected.unwrap_or_else(|| "geographic".to_string());
+        let buffer = opts.buffer.unwrap_or(0.0);
+        let precision = opts.precision.unwrap_or(-1);
+
+        // Compute the bounds
+        let (west, south, east, north) = self.bbox();
+
+        // Handle projected coordinates
+        let (mut west, mut south, mut east, mut north) = match opts.projection {
+            // Projection::Geographic=> (west, south, east, north),
+            Projection::Mercator => {
+                // let (east_merc, north_merc) = utiles::xy(east, north, Some(false));
+                let (west_merc, south_merc) = xy(west, south, None);
+                let (east_merc, north_merc) = xy(east, north, None);
+                (west_merc, south_merc, east_merc, north_merc)
+            }
+            _ => (west, south, east, north),
+        };
+
+        // Apply buffer
+        west -= buffer;
+        south -= buffer;
+        east += buffer;
+        north += buffer;
+
+        // Apply precision
+        if precision >= 0 {
+            let precision_factor = 10_f64.powi(precision);
+            west = (west * precision_factor).round() / precision_factor;
+            south = (south * precision_factor).round() / precision_factor;
+            east = (east * precision_factor).round() / precision_factor;
+            north = (north * precision_factor).round() / precision_factor;
+        }
+
+        // Compute bbox and geometry
+        let bbox = (
+            west.min(east),
+            south.min(north),
+            west.max(east),
+            south.max(north),
+        );
+        // let bbox = [
+        //     west.min(east),
+        //     south.min(north),
+        //     west.max(east),
+        //     south.max(north),
+        // ];
+        let geometry_coordinates = vec![vec![
+            vec![west, south],
+            vec![west, north],
+            vec![east, north],
+            vec![east, south],
+            vec![west, south],
+        ]];
+        //
+        // let geometry_items = vec![
+        //     ("type".to_string(), "Polygon".to_object(py)),
+        //     (
+        //         "coordinates".to_string(),
+        //         geometry_coordinates.to_object(py),
+        //     ),
+        // ]
+        //     .into_iter()
+        //     .collect::<HashMap<String, PyObject>>();
+
+        let xyz = self.tuple_string();
+        // let properties_vec= vec![
+        //     ("title".to_string(), Value::from(format!("XYZ tile {xyz}"))),
+        //     // ("west".to_string(), west(py)),
+        //     // ("south".to_string(), south.into_py(py)),
+        //     // ("east".to_string(), east.into_py(py)),
+        //     // ("north".to_string(), north.into_py(py)),
+        // ];
+        let mut properties: Map<String, Value> = Map::new();
+        properties.insert("title".to_string(), Value::from(format!("XYZ tile {xyz}")));
+        properties.extend(opts.props.clone().unwrap_or_default());
+        let id = match opts.fid.clone() {
+            Some(fid) => fid,
+            None => xyz,
+        };
+        let tile_feature = TileFeature {
+            id: id,
+            type_: "Feature".to_string(),
+            geometry: TileFeatureGeometry {
+                type_: "Polygon".to_string(),
+                coordinates: geometry_coordinates,
+            },
+            bbox: bbox,
+            properties: properties,
+        };
+
+        // Create the feature dictionary
+        // let mut feature_dict = HashMap::new();
+        // feature_dict.insert("type".to_string(), "Feature".to_object(py));
+        // feature_dict.insert("bbox".to_string(), bbox.to_object(py));
+        // feature_dict.insert("id".to_string(), xyz.to_object(py));
+        // feature_dict.insert("geometry".to_string(), geometry_items.to_object(py));
+
+        // Create the properties dictionary
+        // let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
+        // properties_dict
+        //     .insert("title".to_string(), format!("XYZ tile {xyz}").into_py(py));
+        // if !props.is_empty() {
+        //     let props: PyResult<Vec<(String, Py<PyAny>)>> = props
+        //         .into_iter()
+        //         .map(|(k, v)| Ok((k, v.into_py(py))))
+        //         .collect();
+        //     properties_dict.extend(props?);
+        // }
+        // feature_dict.insert("properties".to_string(), properties_dict.to_object(py));
+
+        // Add the feature id if provided
+        // if !fid.is_empty() {
+        //     feature_dict.insert("id".to_string(), fid.to_object(py));
+        // }
+        // Ok(feature_dict)
+        Ok(tile_feature)
+    }
 }
 
 impl From<(u32, u32, u8)> for Tile {
@@ -404,8 +619,8 @@ impl From<(u32, u32, u8)> for Tile {
     }
 }
 
-impl From<Map<String, Value>> for Tile {
-    fn from(map: Map<String, Value>) -> Self {
+impl From<&Map<String, Value>> for Tile {
+    fn from(map: &Map<String, Value>) -> Self {
         let x = map["x"].as_u64().unwrap() as u32;
         let y = map["y"].as_u64().unwrap() as u32;
         let z = map["z"].as_u64().unwrap() as u8;
@@ -413,8 +628,8 @@ impl From<Map<String, Value>> for Tile {
     }
 }
 
-impl From<Vec<Value>> for Tile {
-    fn from(arr: Vec<Value>) -> Self {
+impl From<&Vec<Value>> for Tile {
+    fn from(arr: &Vec<Value>) -> Self {
         if arr.len() < 3 {
             panic!(
                 "Invalid json value: {}",
@@ -427,9 +642,25 @@ impl From<Vec<Value>> for Tile {
         Tile::from((x, y, z))
     }
 }
+impl From<Vec<Value>> for Tile {
+    fn from(arr: Vec<Value>) -> Self {
+        Tile::from(&arr)
+        //
+        // if arr.len() < 3 {
+        //     panic!(
+        //         "Invalid json value: {}",
+        //         serde_json::to_string(&arr).unwrap()
+        //     );
+        // }
+        // let x = arr[0].as_u64().unwrap() as u32;
+        // let y = arr[1].as_u64().unwrap() as u32;
+        // let z = arr[2].as_u64().unwrap() as u8;
+        // Tile::from((x, y, z))
+    }
+}
 
-impl From<Value> for Tile {
-    fn from(val: Value) -> Self {
+impl From<&Value> for Tile {
+    fn from(val: &Value) -> Self {
         // is array? [x, y, z]
         match val {
             Value::Array(v) => {
@@ -460,6 +691,18 @@ impl From<Value> for Tile {
                 panic!("Invalid json value: {val}");
             }
         }
+    }
+}
+
+impl From<Value> for Tile {
+    fn from(val: Value) -> Self {
+        Tile::from(&val)
+    }
+}
+
+impl From<&str> for Tile {
+    fn from(s: &str) -> Self {
+        Tile::from_json(s)
     }
 }
 

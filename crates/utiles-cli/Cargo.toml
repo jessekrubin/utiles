@@ -20,3 +20,5 @@ tracing = { version = "0.1.40", features = [] }
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
 utiles = { path = "../utiles" }
 utilesqlite = { path = "../utilesqlite" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.96"

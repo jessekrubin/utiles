@@ -1,6 +1,6 @@
 mod cli;
-mod stdinterator;
 mod shapes;
+mod stdinterator;
 
 #[tokio::main]
 async fn main() {

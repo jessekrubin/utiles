@@ -1,10 +1,14 @@
-use clap::{Args, Parser};
 use crate::stdinterator::StdInterator;
-use utiles::Tile;
+use clap::{Args, Parser};
+use serde_json::{Map, Value};
+use tracing::debug;
+use utiles::projection::Projection;
+use utiles::tile::FeatureOptions;
+use utiles::{tile, Tile};
 
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]
-#[group(required =false , multiple = false, id = "project")]
+#[group(required = false, multiple = false, id = "project")]
 pub struct ShapesProject {
     /// Output in geographic coordinates (the default).
     #[arg(long , default_value = "false", conflicts_with = "mercator", action = clap::ArgAction::SetTrue)]
@@ -25,8 +29,8 @@ impl Default for ShapesProject {
 }
 
 #[derive(Args, Debug)]
-#[group(required =false , multiple = false, id = "output-mode")]
-pub struct ShapesOutputMode{
+#[group(required = false, multiple = false, id = "output-mode")]
+pub struct ShapesOutputMode {
     #[arg(long , default_value = "false", conflicts_with = "bbox", action = clap::ArgAction::SetTrue)]
     feature: bool,
 
@@ -44,12 +48,9 @@ impl Default for ShapesOutputMode {
     }
 }
 
-
 #[derive(Debug, Parser)] // requires `derive` feature
 #[command(name = "shapes", about = "echo shapes of tile(s) as GeoJSON", long_about = None)]
 pub struct ShapesArgs {
-
-
     #[arg(required = false)]
     input: Option<String>,
 
@@ -59,15 +60,6 @@ pub struct ShapesArgs {
     /// Decimal precision of coordinates.
     #[arg(long, value_parser)]
     precision: Option<i32>,
-
-    /// Indentation level for JSON output.
-    #[arg(long, value_parser)]
-    indent: Option<i32>,
-
-    /// Use compact separators (',', ':').
-    #[arg(long, action)]
-    compact: bool,
-
 
     #[command(flatten)]
     project: Option<ShapesProject>,
@@ -94,10 +86,8 @@ impl Default for ShapesArgs {
             input: None,
             seq: false,
             precision: None,
-            indent: None,
-            compact: false,
             project: Option::Some(ShapesProject::default()),
-            output_mode:  Option::Some(ShapesOutputMode::default()),
+            output_mode: Option::Some(ShapesOutputMode::default()),
             collect: false,
             extents: false,
             buffer: None,
@@ -105,20 +95,134 @@ impl Default for ShapesArgs {
     }
 }
 
+struct TileWithProperties {
+    tile: Tile,
+    id: Option<String>,
+    properties: Option<Map<String, Value>>,
+}
+
 pub fn shapes_main(args: ShapesArgs) {
-    println!("{:?}", args);
+    debug!("{:?}", args);
     let input_lines = StdInterator::new(args.input).unwrap();
     let lines = input_lines
         .filter(|l| !l.is_err())
         .filter(|l| !l.as_ref().unwrap().is_empty())
         .filter(|l| l.as_ref().unwrap() != "\x1e");
-    let tiles = lines.map(|l| {
-        // Tile::from_json(&l.unwrap())
-        let val = l.unwrap();
+    let parsed_lines = lines.map(|l| {
+        let ln = l.unwrap();
+        let val: Value = serde_json::from_str::<Value>(&ln).unwrap();
+        let properties: Option<Map<String, Value>> = match val["properties"].is_object()
+        {
+            true => {
+                let properties = val["properties"].as_object().unwrap().clone();
+                Option::from(properties)
+            }
+            false => None,
+        };
+        let id: Option<String> = match val["id"].is_string() {
+            true => {
+                let id = val["id"].as_str().unwrap().to_string();
+                Option::from(id)
+            }
+            false => None,
+        };
+        let t = Tile::from(&val);
+        TileWithProperties {
+            tile: t,
+            id,
+            properties,
+        }
 
+        // Tile::from_json_loose(&ln)
     });
+    let feature_options: FeatureOptions = FeatureOptions {
+        fid: None,
+        projection: match args.project {
+            Some(project) => match project {
+                ShapesProject {
+                    geographic: true,
+                    mercator: false,
+                } => Projection::Geographic,
+                ShapesProject {
+                    geographic: false,
+                    mercator: true,
+                } => Projection::Mercator,
+                _ => Projection::Geographic,
+            },
+            None => Projection::Geographic,
+        },
+        props: None,
+        buffer: Option::from(args.buffer),
+        precision: args.precision,
+    };
 
-    for tile in tiles {
-        println!("{:?}", tile);
+    if args.collect {
+        println!("{{");
+        println!("\"type\": \"FeatureCollection\",");
+        println!("\"features\": [");
     }
+    let mut lons: Vec<f64> = Vec::new();
+    let mut lats: Vec<f64> = Vec::new();
+    let output_bbox = match args.output_mode {
+        Some(output_mode) => match output_mode {
+            ShapesOutputMode {
+                feature: true,
+                bbox: false,
+            } => false,
+            ShapesOutputMode {
+                feature: false,
+                bbox: true,
+            } => true,
+            _ => false,
+        },
+        None => false,
+    };
+
+    let mut first = true;
+
+    for tile_n_properties in parsed_lines {
+        let tile = tile_n_properties.tile;
+        let properties = tile_n_properties.properties;
+        let mut f = tile.feature(&feature_options).unwrap();
+
+        if let Some(properties) = properties {
+            f.properties.extend(properties);
+        }
+        if let Some(id) = tile_n_properties.id {
+            f.id = id;
+        }
+        lons.extend(f.bbox_lons());
+        lats.extend(f.bbox_lats());
+        if args.extents {
+            println!("{}", f.extents_string());
+        } else if args.collect {
+            if !first {
+                println!(",");
+            }
+            println!("{}", f.to_json());
+            first = false;
+        } else {
+            if args.seq {
+                println!("\x1e");
+            }
+            if output_bbox {
+                println!("{}", f.bbox_json());
+            } else {
+                println!("{}", f.to_json());
+            }
+        }
+    }
+    if args.collect {
+        println!("]");
+        println!("}}");
+    }
+    // for tile in tiles {
+    //     let f = tile.feature(
+    //         &feature_options
+    //     ).unwrap();
+    //     lons.extend(f.bbox_lons());
+    //     lats.extend(f.bbox_lats());
+    //
+    //     println!("{}", f.to_json());
+    // }
 }

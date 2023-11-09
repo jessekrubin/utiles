@@ -130,7 +130,7 @@ pub enum Commands {
     },
 
     #[command(name = "shapes", about = "echo shapes of tile(s) as GeoJSON", long_about = None)]
-    Shapes (ShapesArgs),
+    Shapes(ShapesArgs),
     // {
     //     #[arg(required = false)]
     //     input: Option<String>,
@@ -465,7 +465,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 println!("{}{}", rs, parent.json_arr());
             }
         }
-        Commands::Shapes( args) => {
+        Commands::Shapes(args) => {
             shapes_main(args);
         }
     }
