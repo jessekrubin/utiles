@@ -47,11 +47,11 @@ markers = [
 
 
 [tool.black]
-target-version = ["py37"]
+target-version = ["py38"]
 line-length = 88
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 88
 select = [
   "A",
