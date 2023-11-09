@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 from typing import List, Sequence, Tuple, Union
 
-from utiles import libutiles
+from . import libutiles
 from utiles.libutiles import (
     TILETYPE_GIF,
     TILETYPE_JPG,
