@@ -151,8 +151,10 @@ def _run_cli(
         input=input,
         capture_output=True,
         text=True,
-        shell=True,
+        shell=False,
     )
+    print(res.stdout)
+    print(res.stderr)
     return res
 
 
