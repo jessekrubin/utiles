@@ -9,14 +9,16 @@ Extensions = Union[str, bool]
 
 PWD = Path(__file__).parent
 
+
 def _repo_root() -> Path:
     _root = PWD
-    for _i in  range(5):
+    for _i in range(5):
         _root = _root.parent
         if (_root / ".github").is_dir():
             return _root
     msg = "Could not find repo root"
     raise RuntimeError(msg)
+
 
 REPO_ROOT = _repo_root()
 
@@ -95,6 +97,7 @@ TEST_TILE_NAME2TYPE = {
     "tile-arr.json": "json",
     "tile-obj.json": "json",
 }
+
 
 def test_found_test_files() -> None:
     assert len(TEST_TILES_BYTES) == len(TEST_TILE_NAME2TYPE)

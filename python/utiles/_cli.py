@@ -32,11 +32,10 @@ def cli() -> None:
     """Execute the main utiles command"""
     args = ["ut", *sys.argv[1:]]
     try:
-        res = ut_cli(args)
-        click.echo(res, err=True)
+        ut_cli(args)
     except Exception as e:
         logger.error(e)
-        raise click.BadParameter(str(e))
+        raise click.BadParameter(str(e)) from e
 
 
 if __name__ == "__main__":

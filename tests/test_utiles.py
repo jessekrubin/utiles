@@ -26,7 +26,6 @@ def test_version() -> None:
     assert utiles.__version__ == pyproject_version
 
 
-
 @pytest.mark.parametrize(
     "tile,quadkey",
     [

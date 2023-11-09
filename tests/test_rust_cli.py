@@ -2,155 +2,23 @@
 import json
 import sys
 from json import dumps as stringify
-from subprocess import run
+from subprocess import CompletedProcess, run
 
 import pytest
-
-# def test_cli_shapes_failure() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["shapes"], "0")
-#     assert result.exit_code == 2
-
-
-# def test_cli_shapes() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["shapes", "--precision", "6"], "[106, 193, 9]")
-#     assert result.exit_code == 0
-#     assert (
-#         result.output
-#         == '{"bbox": [-105.46875, 39.909736, -104.765625, 40.446947], "geometry": {"coordinates": [[[-105.46875, 39.909736], [-105.46875, 40.446947], [-104.765625, 40.446947], [-104.765625, 39.909736], [-105.46875, 39.909736]]], "type": "Polygon"}, "id": "(106, 193, 9)", "properties": {"title": "XYZ tile (106, 193, 9)"}, "type": "Feature"}\n'
-#     )
-
-# def test_cli_shapes_arg() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["shapes", "[106, 193, 9]", "--precision", "6"])
-#     assert result.exit_code == 0
-#     result_output_json = json.loads(result.output)
-
-#     # '{"bbox": [-105.46875, 39.909736, -104.765625, 40.446947], "geometry": {"coordinates": [[[-105.46875, 39.909736], [-105.46875, 40.446947], [-104.765625, 40.446947], [-104.765625, 39.909736], [-105.46875, 39.909736]]], "type": "Polygon"}, "id": "(106, 193, 9)", "properties": {"title": "XYZ tile (106, 193, 9)"}, "type": "Feature"}\n'
-#     expected_dict = {
-#         "bbox": [-105.46875, 39.909736, -104.765625, 40.446947],
-#         "geometry": {
-#             "coordinates": [
-#                 [
-#                     [-105.46875, 39.909736],
-#                     [-105.46875, 40.446947],
-#                     [-104.765625, 40.446947],
-#                     [-104.765625, 39.909736],
-#                     [-105.46875, 39.909736],
-#                 ]
-#             ],
-#             "type": "Polygon",
-#         },
-#         "id": "(106, 193, 9)",
-#         "properties": {"title": "XYZ tile (106, 193, 9)"},
-#         "type": "Feature",
-#     }
-
-#     assert result_output_json == expected_dict
-
-
-# def test_cli_shapes_buffer() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(
-#         cli, ["shapes", "[106, 193, 9]", "--buffer", "1.0", "--precision", "6"]
-#     )
-#     assert result.exit_code == 0
-#     assert (
-#         result.output
-#         == '{"bbox": [-106.46875, 38.909736, -103.765625, 41.446947], "geometry": {"coordinates": [[[-106.46875, 38.909736], [-106.46875, 41.446947], [-103.765625, 41.446947], [-103.765625, 38.909736], [-106.46875, 38.909736]]], "type": "Polygon"}, "id": "(106, 193, 9)", "properties": {"title": "XYZ tile (106, 193, 9)"}, "type": "Feature"}\n'
-#     )
-
-
-# def test_cli_shapes_compact() -> None:
-#     """Output is compact."""
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["shapes", "--compact"], "[106, 193, 9]")
-#     assert result.exit_code == 0
-#     assert '"type":"Feature"' in result.output.strip()
-
-
-# def test_cli_shapes_indentation() -> None:
-#     """Output is indented."""
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["shapes", "--indent", "8"], "[106, 193, 9]")
-#     assert result.exit_code == 0
-#     assert '        "type": "Feature"' in result.output.strip()
-
-
-# def test_cli_shapes_collect() -> None:
-#     """Shapes are collected into a feature collection."""
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["shapes", "--collect", "--feature"], "[106, 193, 9]")
-#     assert result.exit_code == 0
-#     assert "FeatureCollection" in result.output
-
-
-# def test_cli_shapes_extents() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(
-#         cli, ["shapes", "[106, 193, 9]", "--extents", "--mercator", "--precision", "3"]
-#     )
-#     assert result.exit_code == 0
-#     assert result.output == "-11740727.545 4852834.052 -11662456.028 4931105.569\n"
-
-
-# def test_cli_shapes_bbox() -> None:
-#     """JSON text sequences of bboxes are output."""
-#     runner = CliRunner()
-#     result = runner.invoke(
-#         cli,
-#         [
-#             "shapes",
-#             "[106, 193, 9]",
-#             "--seq",
-#             "--bbox",
-#             "--mercator",
-#             "--precision",
-#             "3",
-#         ],
-#     )
-#     assert result.exit_code == 0
-#     assert (
-#         result.output
-#         == "\x1e\n[-11740727.545, 4852834.052, -11662456.028, 4931105.569]\n"
-#     )
-
-
-# def test_cli_shapes_props_fid() -> None:
-#     runner = CliRunner()
-#     result = runner.invoke(
-#         cli,
-#         [
-#             "shapes",
-#             '{"tile": [106, 193, 9], "properties": {"title": "foo"}, "id": "42"}',
-#         ],
-#     )
-#     assert result.exit_code == 0
-#     assert '"title": "foo"' in result.output
-#     assert '"id": "42"' in result.output
-
-
-# def test_cli_strict_overlap_contain() -> None:
-#     runner = CliRunner()
-#     result1 = runner.invoke(cli, ["shapes"], "[2331,1185,12]")
-#     assert result1.exit_code == 0
-#     result2 = runner.invoke(cli, ["tiles", "12"], result1.output)
-#     assert result2.exit_code == 0
-#     assert result2.output == "[2331, 1185, 12]\n"
 
 
 def _run_cli(
     args: list[str] | None,
     input: str | None = None,
-):
+) -> CompletedProcess[str]:
     _python = sys.executable
+    _args = args or []
     res = run(
-        [_python, "-m", "utiles._cli", *args],
+        [_python, "-m", "utiles._cli", *_args],
         input=input,
         capture_output=True,
         text=True,
-        shell=False,
+        shell=False,  # noqa: S603
     )
     return res
 
@@ -158,7 +26,6 @@ def _run_cli(
 def test_rust_cli_help() -> None:
     res = _run_cli(["--help"])
     assert "(rust)" in res.stdout
-
 
 
 class TestTiles:
@@ -279,7 +146,7 @@ class TestQuadkey:
     def test_cli_quadkey_failure(self) -> None:
         """Abort when an invalid quadkey is passed"""
         result = _run_cli(["quadkey"], "lolwut")
-        assert result.returncode !=0
+        assert result.returncode != 0
         assert "lolwut" in result.stdout
 
 
@@ -415,3 +282,140 @@ class TestChildren:
             result.stdout
             == "[486, 332, 10]\n[487, 332, 10]\n[487, 333, 10]\n[486, 333, 10]\n"
         )
+
+# ===================
+# SHAPES TESTS (TODO)
+# ===================
+
+# def test_cli_shapes_failure() -> None:
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["shapes"], "0")
+#     assert result.exit_code == 2
+
+
+# def test_cli_shapes() -> None:
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["shapes", "--precision", "6"], "[106, 193, 9]")
+#     assert result.exit_code == 0
+#     assert (
+#         result.output
+#         == '{"bbox": [-105.46875, 39.909736, -104.765625, 40.446947], "geometry": {"coordinates": [[[-105.46875, 39.909736], [-105.46875, 40.446947], [-104.765625, 40.446947], [-104.765625, 39.909736], [-105.46875, 39.909736]]], "type": "Polygon"}, "id": "(106, 193, 9)", "properties": {"title": "XYZ tile (106, 193, 9)"}, "type": "Feature"}\n'
+#     )
+
+# def test_cli_shapes_arg() -> None:
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["shapes", "[106, 193, 9]", "--precision", "6"])
+#     assert result.exit_code == 0
+#     result_output_json = json.loads(result.output)
+
+#     # '{"bbox": [-105.46875, 39.909736, -104.765625, 40.446947], "geometry": {"coordinates": [[[-105.46875, 39.909736], [-105.46875, 40.446947], [-104.765625, 40.446947], [-104.765625, 39.909736], [-105.46875, 39.909736]]], "type": "Polygon"}, "id": "(106, 193, 9)", "properties": {"title": "XYZ tile (106, 193, 9)"}, "type": "Feature"}\n'
+#     expected_dict = {
+#         "bbox": [-105.46875, 39.909736, -104.765625, 40.446947],
+#         "geometry": {
+#             "coordinates": [
+#                 [
+#                     [-105.46875, 39.909736],
+#                     [-105.46875, 40.446947],
+#                     [-104.765625, 40.446947],
+#                     [-104.765625, 39.909736],
+#                     [-105.46875, 39.909736],
+#                 ]
+#             ],
+#             "type": "Polygon",
+#         },
+#         "id": "(106, 193, 9)",
+#         "properties": {"title": "XYZ tile (106, 193, 9)"},
+#         "type": "Feature",
+#     }
+
+#     assert result_output_json == expected_dict
+
+
+# def test_cli_shapes_buffer() -> None:
+#     runner = CliRunner()
+#     result = runner.invoke(
+#         cli, ["shapes", "[106, 193, 9]", "--buffer", "1.0", "--precision", "6"]
+#     )
+#     assert result.exit_code == 0
+#     assert (
+#         result.output
+#         == '{"bbox": [-106.46875, 38.909736, -103.765625, 41.446947], "geometry": {"coordinates": [[[-106.46875, 38.909736], [-106.46875, 41.446947], [-103.765625, 41.446947], [-103.765625, 38.909736], [-106.46875, 38.909736]]], "type": "Polygon"}, "id": "(106, 193, 9)", "properties": {"title": "XYZ tile (106, 193, 9)"}, "type": "Feature"}\n'
+#     )
+
+
+# def test_cli_shapes_compact() -> None:
+#     """Output is compact."""
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["shapes", "--compact"], "[106, 193, 9]")
+#     assert result.exit_code == 0
+#     assert '"type":"Feature"' in result.output.strip()
+
+
+# def test_cli_shapes_indentation() -> None:
+#     """Output is indented."""
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["shapes", "--indent", "8"], "[106, 193, 9]")
+#     assert result.exit_code == 0
+#     assert '        "type": "Feature"' in result.output.strip()
+
+
+# def test_cli_shapes_collect() -> None:
+#     """Shapes are collected into a feature collection."""
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["shapes", "--collect", "--feature"], "[106, 193, 9]")
+#     assert result.exit_code == 0
+#     assert "FeatureCollection" in result.output
+
+
+# def test_cli_shapes_extents() -> None:
+#     runner = CliRunner()
+#     result = runner.invoke(
+#         cli, ["shapes", "[106, 193, 9]", "--extents", "--mercator", "--precision", "3"]
+#     )
+#     assert result.exit_code == 0
+#     assert result.output == "-11740727.545 4852834.052 -11662456.028 4931105.569\n"
+
+
+# def test_cli_shapes_bbox() -> None:
+#     """JSON text sequences of bboxes are output."""
+#     runner = CliRunner()
+#     result = runner.invoke(
+#         cli,
+#         [
+#             "shapes",
+#             "[106, 193, 9]",
+#             "--seq",
+#             "--bbox",
+#             "--mercator",
+#             "--precision",
+#             "3",
+#         ],
+#     )
+#     assert result.exit_code == 0
+#     assert (
+#         result.output
+#         == "\x1e\n[-11740727.545, 4852834.052, -11662456.028, 4931105.569]\n"
+#     )
+
+
+# def test_cli_shapes_props_fid() -> None:
+#     runner = CliRunner()
+#     result = runner.invoke(
+#         cli,
+#         [
+#             "shapes",
+#             '{"tile": [106, 193, 9], "properties": {"title": "foo"}, "id": "42"}',
+#         ],
+#     )
+#     assert result.exit_code == 0
+#     assert '"title": "foo"' in result.output
+#     assert '"id": "42"' in result.output
+
+
+# def test_cli_strict_overlap_contain() -> None:
+#     runner = CliRunner()
+#     result1 = runner.invoke(cli, ["shapes"], "[2331,1185,12]")
+#     assert result1.exit_code == 0
+#     result2 = runner.invoke(cli, ["tiles", "12"], result1.output)
+#     assert result2.exit_code == 0
+#     assert result2.output == "[2331, 1185, 12]\n"
