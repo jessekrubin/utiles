@@ -27,7 +27,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter --verbose
           sccache: "true"
           manylinux: auto
 
@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          pip install utiles --find-links dist --force-reinstall -vvv
+          pip install utiles --no-index --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
 
@@ -54,6 +54,6 @@ jobs:
             pip3 install -r requirements/dev.txt
           run: |
             set -e
-            pip3 install utiles --find-links dist --force-reinstall
+            pip3 install utiles --no-index --find-links dist --force-reinstall
             pip3 install -r requirements/dev.txt
             pytest
