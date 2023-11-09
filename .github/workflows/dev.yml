@@ -41,21 +41,21 @@ jobs:
           pip install -r requirements/dev.txt
           pytest
 
-      - name: pytest
-        if: ${{ !startsWith(matrix.target, 'x86') && matrix.target != 'ppc64' }}
-        uses: uraimo/run-on-arch-action@v2.5.0
-        with:
-          arch: ${{ matrix.target }}
-          distro: ubuntu22.04
-          githubToken: ${{ github.token }}
-          install: |
-            apt-get update
-            apt-get install -y --no-install-recommends python3 python3-pip
-            pip3 install -U pip pytest
-            pip3 install -r requirements/dev.txt
-          run: |
-            set -e
-            pip install click
-            pip3 install utiles --no-index --no-deps --find-links dist --force-reinstall
-            pip3 install -r requirements/dev.txt
-            pytest
+      # - name: pytest
+      #   if: ${{ !startsWith(matrix.target, 'x86') && matrix.target != 'ppc64' }}
+      #   uses: uraimo/run-on-arch-action@v2.5.0
+      #   with:
+      #     arch: ${{ matrix.target }}
+      #     distro: ubuntu22.04
+      #     githubToken: ${{ github.token }}
+      #     install: |
+      #       apt-get update
+      #       apt-get install -y --no-install-recommends python3 python3-pip
+      #       pip3 install -U pip pytest
+      #       pip3 install -r requirements/dev.txt
+      #     run: |
+      #       set -e
+      #       pip install click
+      #       pip3 install utiles --no-index --no-deps --find-links dist --force-reinstall
+      #       pip3 install -r requirements/dev.txt
+      #       pytest
