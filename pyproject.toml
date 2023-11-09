@@ -34,7 +34,6 @@ module-name = "utiles._utiles"
 
 [tool.pytest.ini_options]
 testpaths = [
-   "python",
    "tests"
 ]
 addopts = [
