@@ -160,6 +160,7 @@ exclude = [
   "venv",
 ]
 ignore = [
+  "TID252",
   "A003",
   # Allow non-abstract empty methods in abstract base classes
   "B027",

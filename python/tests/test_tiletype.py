@@ -84,6 +84,9 @@ TEST_TILE_NAME2TYPE = {
     "tile-obj.json": "json",
 }
 
+def test_found_test_files() -> None:
+    assert len(TEST_TILES_BYTES) == len(TEST_TILE_NAME2TYPE)
+
 
 @pytest.mark.parametrize(
     "tile",
