@@ -2,8 +2,9 @@ use std::io::{self, Write};
 use std::path::Path;
 
 use clap::{Parser, Subcommand, ValueEnum};
-use tracing::debug;
+use tracing::{debug, error};
 use tracing_subscriber::EnvFilter;
+use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
 use utiles::parsing::parse_bbox;
 use utiles::tilejson::tilejson_stringify;
 use utiles::tiles;
@@ -65,6 +66,17 @@ pub enum Commands {
         min: bool,
     },
 
+    #[command(name = "meta", about = "echo metadata (table) as json", long_about = None)]
+    Meta {
+        #[arg(required = true, help = "mbtiles filepath")]
+        filepath: String,
+
+        #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
+        min: bool,
+        // #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
+        // raw: bool,
+    },
+
     // ========================================================================
     // TILE CLI UTILS - MERCANTILE LIKE CLI
     // ========================================================================
@@ -80,9 +92,6 @@ pub enum Commands {
         seq: bool,
     },
 
-    // ===================
-    // NOT IMPLEMENTED YET
-    // ===================
     #[command(name = "quadkey", visible_alias = "qk", about = "convert xyz <-> quadkey", long_about = None)]
     Quadkey {
         #[arg(required = false)]
@@ -244,6 +253,33 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             // throw not implemented error
             panic!("not implemented (yet)")
         }
+        Commands::Meta { filepath, min } => {
+            debug!("meta: {filepath}");
+            // check that filepath exists and is file
+            let filepath = Path::new(&filepath);
+            if !filepath.exists() {
+                panic!("File does not exist: {}", filepath.display());
+            }
+            if !filepath.is_file() {
+                panic!("Not a file: {filepath}", filepath = filepath.display());
+            }
+            let mbtiles: Mbtiles = Mbtiles::from(filepath);
+            // let mbtiles = Mbtiles::from_filepath(&filepath).unwrap();
+            let metadata_rows = mbtiles.metadata().unwrap();
+            if min {
+                let s =
+                    serde_json::to_string::<Vec<MbtilesMetadataRow>>(&metadata_rows)
+                        .unwrap();
+                println!("{s}");
+            } else {
+                let s = serde_json::to_string_pretty::<Vec<MbtilesMetadataRow>>(
+                    &metadata_rows,
+                )
+                .unwrap();
+                println!("{s}");
+            }
+        }
+
         Commands::Tilejson { filepath, min } => {
             debug!("tilejson: {filepath}");
             // check that filepath exists and is file
@@ -263,10 +299,6 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
 
         // mercantile cli like
         Commands::Quadkey { input } => {
-            // let thingy = StdInterator::new(quadkey.quadkey).unwrap();
-            // for line in thingy {
-            //     println!("Line from stdin: `{}`", line.unwrap());
-            // }
             let input_lines = StdInterator::new(input).unwrap();
             let lines = input_lines
                 .filter(|l| !l.is_err())
@@ -279,23 +311,16 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                     // treat as tile
                     let tile = Tile::from_json_arr(&lstr);
                     println!("{}", tile.quadkey());
-                    // let qk = utiles::xyz2quadkey(t.west, t.south, t.zoom);
-                    // println!("{}", qk);
-                    // let tile = parse_bbox(&lstr).unwrap();
-                    // let qk = utiles::xyz2quadkey(tile.west, tile.south, tile.zoom);
-                    // println!("{}", qk);
                 } else {
                     // treat as quadkey
                     let qk = lstr;
                     let tile = Tile::from_quadkey(&qk);
                     if tile.is_err() {
+                        error!("Invalid quadkey: {qk}");
                         println!("Invalid quadkey: {qk}");
                     } else {
                         println!("{}", tile.unwrap().json_arr());
                     }
-
-                    // let (x, y, z) = utiles::quadkey2xyz(&qk);
-                    // println!("{} {} {}", x, y, z);
                 }
             }
         }
@@ -317,23 +342,6 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 let rs = if seq { "\x1e\n" } else { "" };
                 println!("{}{}", rs, tile.json_arr());
             }
-            //
-            //
-            //     .flat_map(|b| tiles(
-            //         (b.west, b.south, b.east, b.north),
-            //         ZoomOrZooms::Zoom(zoom),
-            //     )).enumerate();
-            // // let bboxes = lines
-            // for (i, tile) in tiles {
-            //     let rs = if seq { "\x1e\n" } else { "" };
-            //     println!("{}{}", rs, tile.json_arr());
-            //     // call loop_fn if it's defined every 1000 iterations for signal break
-            //     if i % 1024 == 0 {
-            //         if let Some(f) = loop_fn {
-            //             f();
-            //         }
-            //     }
-            // }
         }
         Commands::Tiles { zoom, input, seq } => {
             let input_lines = StdInterator::new(input).unwrap();

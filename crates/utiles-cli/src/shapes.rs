@@ -4,7 +4,7 @@ use serde_json::{Map, Value};
 use tracing::debug;
 use utiles::projection::Projection;
 use utiles::tile::FeatureOptions;
-use utiles::{Tile};
+use utiles::Tile;
 
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]
