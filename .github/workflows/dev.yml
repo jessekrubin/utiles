@@ -37,7 +37,7 @@ jobs:
         run: |
           set -e
           pip install click
-          pip install utiles --no-index --find-links dist --force-reinstall
+          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
 
@@ -56,6 +56,6 @@ jobs:
           run: |
             set -e
             pip install click
-            pip3 install utiles --no-index --find-links dist --force-reinstall
+            pip3 install utiles --no-index --no-deps --find-links dist --force-reinstall
             pip3 install -r requirements/dev.txt
             pytest
