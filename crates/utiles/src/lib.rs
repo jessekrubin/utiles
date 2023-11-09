@@ -7,6 +7,7 @@ use constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use geo_types::coord;
 
 pub use lnglat::LngLat;
+use serde::Deserialize;
 use sibling_relationship::SiblingRelationship;
 pub use tile::Tile;
 use tile_range::{TileRange, TileRanges};
@@ -26,6 +27,7 @@ pub mod tile_range;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
+mod tile_tuple;
 
 /// Tile macro to create a new tile.
 ///  - do you need this? probably not
@@ -36,10 +38,6 @@ macro_rules! utile {
         Tile::new($x, $y, $z)
     };
 }
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[allow(clippy::upper_case_acronyms)]
-pub struct XYZ(pub u32, pub u32, pub u8);
 
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
     let (lon_deg, lat_deg) = ult(x, y, z);

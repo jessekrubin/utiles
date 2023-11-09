@@ -11,6 +11,7 @@ use utiles::zoom::ZoomOrZooms;
 use utiles::{bounding_tile, Tile};
 use utilesqlite::mbtiles::Mbtiles;
 
+use crate::shapes::{shapes_main, ShapesArgs};
 use crate::stdinterator::StdInterator;
 
 /// A fictional versioning CLI
@@ -43,6 +44,7 @@ pub struct InputAndSequenceArgs {
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     seq: bool,
 }
+// #[group(ArgGroup::new("projected").args(&["geographic", "mercator"]).required(false))]
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
@@ -63,11 +65,9 @@ pub enum Commands {
         min: bool,
     },
 
-
     // ========================================================================
     // TILE CLI UTILS - MERCANTILE LIKE CLI
     // ========================================================================
-
     #[command(name = "tiles", about = "echo tiles of bbox", long_about = None)]
     Tiles {
         #[arg(required = true)]
@@ -128,13 +128,60 @@ pub enum Commands {
         #[arg(required = false, long, default_value = "1")]
         depth: u8,
     },
-    #[command(name = "shapes", about = "echo shapes of tiles as geojson", long_about = None)]
-    Shapes {
-        #[arg(required = true)]
-        input: String,
 
-        seq: bool,
-    },
+    #[command(name = "shapes", about = "echo shapes of tile(s) as GeoJSON", long_about = None)]
+    Shapes (ShapesArgs),
+    // {
+    //     #[arg(required = false)]
+    //     input: Option<String>,
+
+    //     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    //     seq: bool,
+
+    //     /// Decimal precision of coordinates.
+    //     #[arg(long, value_parser)]
+    //     precision: Option<i32>,
+
+    //     /// Indentation level for JSON output.
+    //     #[arg(long, value_parser)]
+    //     indent: Option<i32>,
+
+    //     /// Use compact separators (',', ':').
+    //     #[arg(long, action)]
+    //     compact: bool,
+
+    //     /// Output in geographic coordinates (the default).
+    //     #[arg(long, group = "projected")]
+    //     geographic: bool,
+
+    //     /// Output in Web Mercator coordinates.
+    //     #[arg(long, group = "projected")]
+    //     mercator: bool,
+
+    //     // /// Write a RS-delimited JSON sequence (default is LF).
+    //     // #[clap(long, action)]
+    //     // seq: bool,
+    //     /// Output as sequence of GeoJSON features (the default).
+    //     // #[clap(long, group = "output_mode")]
+    //     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    //     feature: bool,
+
+    //     /// Output as sequence of GeoJSON bbox arrays.
+    //     #[arg(long, group = "output_mode")]
+    //     bbox: bool,
+
+    //     /// Output as a GeoJSON feature collections.
+    //     #[arg(long, action)]
+    //     collect: bool,
+
+    //     /// Write shape extents as ws-separated strings (default is False).
+    //     #[arg(long, action)]
+    //     extents: bool,
+
+    //     /// Shift shape x and y values by a constant number.
+    //     #[arg(long, value_parser)]
+    //     buffer: Option<f64>,
+    // },
 }
 
 #[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
@@ -408,7 +455,6 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 .filter(|l| l.as_ref().unwrap() != "\x1e");
             let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
-
                 let nup = tile.z as i32 - depth as i32;
                 if nup < 0 {
                     // error
@@ -419,9 +465,8 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 println!("{}{}", rs, parent.json_arr());
             }
         }
-
-        _ => {
-            println!("NOT IMPLEMENTED YET");
+        Commands::Shapes( args) => {
+            shapes_main(args);
         }
     }
 }

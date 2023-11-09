@@ -1,16 +1,18 @@
 use std::cmp::Ordering;
 use std::error::Error;
 use std::str::FromStr;
-
+use serde_json::Map;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::bbox::BBox;
 use crate::constants::EPSILON;
 use crate::lnglat::LngLat;
 use crate::{
     bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
-    siblings, traits, ul, ur, xyz2quadkey, XYZ,
+    siblings, traits, ul, ur, xyz2quadkey,
 };
+use crate::tile_tuple::XYZ;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Tile {
@@ -390,6 +392,60 @@ impl Tile {
 
     pub fn json_obj(&self) -> String {
         serde_json::to_string(self).unwrap()
+    }
+}
+
+impl From<Map<String, Value>> for Tile{
+    fn from(map: Map<String, Value>) -> Self {
+        let x = map["x"].as_u64().unwrap() as u32;
+        let y = map["y"].as_u64().unwrap() as u32;
+        let z = map["z"].as_u64().unwrap() as u8;
+        Tile::new(x, y, z)
+    }
+}
+
+impl From<Vec<Value>> for Tile {
+    fn from(arr: Vec<Value>) -> Self {
+        let x = arr[0].as_u64().unwrap() as u32;
+        let y = arr[1].as_u64().unwrap() as u32;
+        let z = arr[2].as_u64().unwrap() as u8;
+        Tile::new(x, y, z)
+    }
+}
+
+impl From<Value> for Tile {
+    fn from(val: Value) -> Self {
+        // is array? [x, y, z]
+        match val {
+            Value::Array(v) =>  {
+                if  v.len() < 3 {
+                    panic!("Invalid json value: {}", serde_json::to_string(&v).unwrap());
+                }
+                Tile::from(v)
+                // let tuple = serde_json::from_value::<XYZ>(val).unwrap();
+                // return Tile::from(tuple);
+            }
+            Value::Object(v) => {
+                // if it has a "tile" key, use that
+                if v["tile"].is_array() && v["tile"].as_array().unwrap().len() == 3 {
+                    let tuple = serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
+                    return Tile::from(tuple);
+                }
+                return Tile::from(v);
+            },
+            _ => {
+                panic!("Invalid json value: {val}");
+            }
+        }
+
+        // if val.is_array() {
+        //     return Self::from_json_arr(&val.to_string());
+        // }
+        // let arr = val.as_array().unwrap();
+        // let x = arr[0].as_u64().unwrap() as u32;
+        // let y = arr[1].as_u64().unwrap() as u32;
+        // let z = arr[2].as_u64().unwrap() as u8;
+        // Tile::new(x, y, z)
     }
 }
 
