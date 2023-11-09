@@ -1,18 +1,20 @@
+use serde::{Deserialize, Serialize};
+use serde_json::Map;
+use serde_json::Value;
 use std::cmp::Ordering;
 use std::error::Error;
 use std::str::FromStr;
-use serde_json::Map;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+
+use crate::utile;
 
 use crate::bbox::BBox;
 use crate::constants::EPSILON;
 use crate::lnglat::LngLat;
+use crate::tile_tuple::XYZ;
 use crate::{
     bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
     siblings, traits, ul, ur, xyz2quadkey,
 };
-use crate::tile_tuple::XYZ;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Tile {
@@ -92,7 +94,8 @@ impl FromStr for Tile {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // if it starts with '{' assume json obj
-        if s.starts_with('{'){ // if '{' assume its an obj
+        if s.starts_with('{') {
+            // if '{' assume its an obj
             return Ok(Tile::from_json_obj(s));
         } else if s.starts_with('[') {
             return Ok(Tile::from_json_arr(s));
@@ -395,21 +398,33 @@ impl Tile {
     }
 }
 
-impl From<Map<String, Value>> for Tile{
+impl From<(u32, u32, u8)> for Tile {
+    fn from(tuple: (u32, u32, u8)) -> Self {
+        XYZ::from(tuple).into()
+    }
+}
+
+impl From<Map<String, Value>> for Tile {
     fn from(map: Map<String, Value>) -> Self {
         let x = map["x"].as_u64().unwrap() as u32;
         let y = map["y"].as_u64().unwrap() as u32;
         let z = map["z"].as_u64().unwrap() as u8;
-        Tile::new(x, y, z)
+        utile!(x, y, z)
     }
 }
 
 impl From<Vec<Value>> for Tile {
     fn from(arr: Vec<Value>) -> Self {
+        if arr.len() < 3 {
+            panic!(
+                "Invalid json value: {}",
+                serde_json::to_string(&arr).unwrap()
+            );
+        }
         let x = arr[0].as_u64().unwrap() as u32;
         let y = arr[1].as_u64().unwrap() as u32;
         let z = arr[2].as_u64().unwrap() as u8;
-        Tile::new(x, y, z)
+        Tile::from((x, y, z))
     }
 }
 
@@ -417,9 +432,12 @@ impl From<Value> for Tile {
     fn from(val: Value) -> Self {
         // is array? [x, y, z]
         match val {
-            Value::Array(v) =>  {
-                if  v.len() < 3 {
-                    panic!("Invalid json value: {}", serde_json::to_string(&v).unwrap());
+            Value::Array(v) => {
+                if v.len() < 3 {
+                    panic!(
+                        "Invalid json value: {}",
+                        serde_json::to_string(&v).unwrap()
+                    );
                 }
                 Tile::from(v)
                 // let tuple = serde_json::from_value::<XYZ>(val).unwrap();
@@ -427,28 +445,23 @@ impl From<Value> for Tile {
             }
             Value::Object(v) => {
                 // if it has a "tile" key, use that
-                if v["tile"].is_array() && v["tile"].as_array().unwrap().len() == 3 {
-                    let tuple = serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
-                    return Tile::from(tuple);
+                // if has 'tile' key, use that
+                if v.contains_key("tile") {
+                    if v["tile"].is_array() && v["tile"].as_array().unwrap().len() == 3
+                    {
+                        let tuple =
+                            serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
+                        return Tile::from(tuple);
+                    }
                 }
                 return Tile::from(v);
-            },
+            }
             _ => {
                 panic!("Invalid json value: {val}");
             }
         }
-
-        // if val.is_array() {
-        //     return Self::from_json_arr(&val.to_string());
-        // }
-        // let arr = val.as_array().unwrap();
-        // let x = arr[0].as_u64().unwrap() as u32;
-        // let y = arr[1].as_u64().unwrap() as u32;
-        // let z = arr[2].as_u64().unwrap() as u8;
-        // Tile::new(x, y, z)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -471,7 +484,31 @@ mod tests {
     #[test]
     fn parse_quadkey() {
         let quadkey = "023010203";
-        let tile =  quadkey.parse::<Tile>();
+        let tile = quadkey.parse::<Tile>();
         assert_eq!(tile.unwrap(), Tile::new(81, 197, 9));
+    }
+
+    #[test]
+    fn tile_from_value_obj() {
+        let json_obj = r#"{"x": 1, "y": 2, "z": 3}"#;
+        let val_obj = serde_json::from_str::<Value>(json_obj).unwrap();
+        let tile_from_obj = Tile::from(val_obj);
+        assert_eq!(tile_from_obj, Tile::new(1, 2, 3));
+    }
+
+    #[test]
+    fn tile_from_value_arr() {
+        let json_arr = r#"[1, 2, 3]"#;
+        let val_arr = serde_json::from_str::<Value>(json_arr).unwrap();
+        let tile_from_arr = Tile::from(val_arr);
+        assert_eq!(tile_from_arr, Tile::new(1, 2, 3));
+    }
+    #[test]
+    fn tile_from_value_obj_with_array() {
+        let json_obj_with_tile_array = r#"{"tile": [1, 2, 3]}"#;
+        let val_obj_with_tile_array =
+            serde_json::from_str::<Value>(json_obj_with_tile_array).unwrap();
+        let tile_from_obj_with_tile_array = Tile::from(val_obj_with_tile_array);
+        assert_eq!(tile_from_obj_with_tile_array, Tile::new(1, 2, 3));
     }
 }

@@ -1,8 +1,8 @@
 use crate::bbox::BBox;
 use crate::geojson::geojson_coords;
 use geo_types::Coord;
-use tracing::debug;
 use serde_json::Value;
+use tracing::debug;
 
 // pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
 pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {

@@ -24,10 +24,10 @@ pub mod pmtiles;
 pub mod sibling_relationship;
 pub mod tile;
 pub mod tile_range;
+mod tile_tuple;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
-mod tile_tuple;
 
 /// Tile macro to create a new tile.
 ///  - do you need this? probably not

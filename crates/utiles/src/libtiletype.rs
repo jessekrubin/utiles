@@ -59,7 +59,7 @@ pub fn tiletype(buffer: &[u8]) -> TileType {
         } else if buffer[0] == 0x1f && buffer[1] == 0x8b {
             return TileType::Pbfgz;
             // if starts with '{' or '[' json
-        } else if  buffer[0] == 0x7b || buffer[0] == 0x5b {
+        } else if buffer[0] == 0x7b || buffer[0] == 0x5b {
             return TileType::Json;
         }
     }
