@@ -28,7 +28,6 @@ TILETYPE_PNG: int
 TILETYPE_UNKNOWN: int
 TILETYPE_WEBP: int
 
-
 class LngLat:
     lat: float
     lng: float

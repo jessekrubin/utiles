@@ -12,12 +12,14 @@ DIR = Path(__file__).parent.resolve()
 
 nox.options.sessions = ["test"]
 
+def _session_install_test_deps(session: nox.Session) -> None:
+    session.install("pytest", "hypothesis", "pytest-cov", "pytest-benchmark", "tomli")
 
 @nox.session
 def test(session: nox.Session) -> None:
     """Run the unit and regular tests."""
     session.install("maturin")
-    session.install("pytest", "hypothesis", "pytest-cov", "pytest-benchmark")
+    _session_install_test_deps(session)
     session.run("maturin", "develop", "--release", "--extras=test")
     session.run("pytest")
 
@@ -25,9 +27,8 @@ def test(session: nox.Session) -> None:
 def test_wheel(session: nox.Session) -> None:
     """Run the unit and regular tests."""
     # install from dist...
-
     session.install("utiles", )
     session.install("maturin")
-    session.install("pytest", "hypothesis", "pytest-cov", "pytest-benchmark")
+    _session_install_test_deps(session)
     session.run("maturin", "build", "--release", "--extras=test")
     session.run("pytest")

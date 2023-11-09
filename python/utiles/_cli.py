@@ -37,5 +37,6 @@ def cli() -> None:
         logger.error(e)
         raise click.BadParameter(str(e))
 
+
 if __name__ == "__main__":
     cli()

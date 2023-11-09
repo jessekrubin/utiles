@@ -408,6 +408,12 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 .filter(|l| l.as_ref().unwrap() != "\x1e");
             let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
+
+                let nup = tile.z as i32 - depth as i32;
+                if nup < 0 {
+                    // error
+                    panic!("depth must be less than or equal to tile zoom");
+                }
                 let parent = tile.parent(Option::from(depth - 1));
                 let rs = if seq { "\x1e\n" } else { "" };
                 println!("{}{}", rs, parent.json_arr());
