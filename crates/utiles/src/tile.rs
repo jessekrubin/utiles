@@ -15,6 +15,7 @@ use crate::{
     bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
     siblings, traits, ul, ur, xy, xyz2quadkey,
 };
+use crate::tile_feature::TileFeature;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -41,46 +42,6 @@ impl Default for FeatureOptions {
             buffer: None,
             precision: None,
         }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TileFeature {
-    pub id: String,
-
-    #[serde(rename = "type")]
-    pub type_: String,
-
-    pub geometry: TileFeatureGeometry,
-    pub bbox: (f64, f64, f64, f64),
-    pub properties: Map<String, Value>,
-}
-
-impl TileFeature {
-    pub fn to_json(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    pub fn bbox_lons(&self) -> Vec<f64> {
-        vec![self.bbox.0, self.bbox.2]
-    }
-
-    pub fn bbox_lats(&self) -> Vec<f64> {
-        vec![self.bbox.1, self.bbox.3]
-    }
-
-    pub fn extents_string(&self) -> String {
-        format!(
-            "{} {} {} {}",
-            self.bbox.0, self.bbox.1, self.bbox.2, self.bbox.3
-        )
-    }
-
-    pub fn bbox_json(&self) -> String {
-        format!(
-            "[{},{},{},{}]",
-            self.bbox.0, self.bbox.1, self.bbox.2, self.bbox.3
-        )
     }
 }
 
@@ -477,29 +438,11 @@ impl Tile {
     pub fn feature(
         &self,
         opts: &FeatureOptions,
-        // fid: Option<String>, // feature id
-        // props: Option<Map<String, Value>>,
-        // projected: Option<String>,
-        // buffer: Option<f64>,
-        // precision: Option<i32>,
     ) -> Result<TileFeature, Box<dyn Error>> {
-        // Convert the arguments to Rust values
-        // let pytile: PyTile = tile.into();
-        // let tile = pytile.tuple();
-        // let opts = options.unwrap_or_default();
-
-        // let (x, y, z) = self.tuple();
-        // let fid = opts.fid.unwrap_or_default();
-        // let props = opts.props;
-        // let projection = opts.projection;
-        // .unwrap_or_else( Projection::Geographic);
-        // let projected = opts.projected.unwrap_or_else(|| "geographic".to_string());
         let buffer = opts.buffer.unwrap_or(0.0);
         let precision = opts.precision.unwrap_or(-1);
-
         // Compute the bounds
         let (west, south, east, north) = self.bbox();
-
         // Handle projected coordinates
         let (mut west, mut south, mut east, mut north) = match opts.projection {
             // Projection::Geographic=> (west, south, east, north),
@@ -534,12 +477,7 @@ impl Tile {
             west.max(east),
             south.max(north),
         );
-        // let bbox = [
-        //     west.min(east),
-        //     south.min(north),
-        //     west.max(east),
-        //     south.max(north),
-        // ];
+        let xyz = self.tuple_string();
         let geometry_coordinates = vec![vec![
             vec![west, south],
             vec![west, north],
@@ -547,25 +485,6 @@ impl Tile {
             vec![east, south],
             vec![west, south],
         ]];
-        //
-        // let geometry_items = vec![
-        //     ("type".to_string(), "Polygon".to_object(py)),
-        //     (
-        //         "coordinates".to_string(),
-        //         geometry_coordinates.to_object(py),
-        //     ),
-        // ]
-        //     .into_iter()
-        //     .collect::<HashMap<String, PyObject>>();
-
-        let xyz = self.tuple_string();
-        // let properties_vec= vec![
-        //     ("title".to_string(), Value::from(format!("XYZ tile {xyz}"))),
-        //     // ("west".to_string(), west(py)),
-        //     // ("south".to_string(), south.into_py(py)),
-        //     // ("east".to_string(), east.into_py(py)),
-        //     // ("north".to_string(), north.into_py(py)),
-        // ];
         let mut properties: Map<String, Value> = Map::new();
         properties.insert("title".to_string(), Value::from(format!("XYZ tile {xyz}")));
         properties.extend(opts.props.clone().unwrap_or_default());
@@ -583,32 +502,6 @@ impl Tile {
             bbox: bbox,
             properties: properties,
         };
-
-        // Create the feature dictionary
-        // let mut feature_dict = HashMap::new();
-        // feature_dict.insert("type".to_string(), "Feature".to_object(py));
-        // feature_dict.insert("bbox".to_string(), bbox.to_object(py));
-        // feature_dict.insert("id".to_string(), xyz.to_object(py));
-        // feature_dict.insert("geometry".to_string(), geometry_items.to_object(py));
-
-        // Create the properties dictionary
-        // let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
-        // properties_dict
-        //     .insert("title".to_string(), format!("XYZ tile {xyz}").into_py(py));
-        // if !props.is_empty() {
-        //     let props: PyResult<Vec<(String, Py<PyAny>)>> = props
-        //         .into_iter()
-        //         .map(|(k, v)| Ok((k, v.into_py(py))))
-        //         .collect();
-        //     properties_dict.extend(props?);
-        // }
-        // feature_dict.insert("properties".to_string(), properties_dict.to_object(py));
-
-        // Add the feature id if provided
-        // if !fid.is_empty() {
-        //     feature_dict.insert("id".to_string(), fid.to_object(py));
-        // }
-        // Ok(feature_dict)
         Ok(tile_feature)
     }
 }

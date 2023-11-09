@@ -28,6 +28,7 @@ mod tile_tuple;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
+mod tile_feature;
 
 /// Tile macro to create a new tile.
 ///  - do you need this? probably not
