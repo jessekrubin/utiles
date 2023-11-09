@@ -29,6 +29,7 @@ ut = "utiles.rio_plugin:rio_ut"
 [tool.maturin]
 python-source = "python"
 features = ["pyo3/extension-module"]
+bindings = "pyo3"
 module-name = "utiles.libutiles"
 
 [tool.pytest.ini_options]
