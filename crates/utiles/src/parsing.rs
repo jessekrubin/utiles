@@ -65,6 +65,7 @@ where
 
     Some((min_x, min_y, max_x, max_y))
 }
+#[must_use]
 pub fn geojson_bounds(geojson_str: &str) -> BBox {
     let coords = geojson_coords(geojson_str);
     let bounds = coords2bounds(coords).unwrap();

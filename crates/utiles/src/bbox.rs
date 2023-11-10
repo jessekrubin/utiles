@@ -63,6 +63,7 @@ impl From<(i32, i32, i32, i32)> for BBox {
 }
 
 impl BBox {
+    #[must_use]
     pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         BBox {
             west,
@@ -72,6 +73,7 @@ impl BBox {
         }
     }
 
+    #[must_use]
     pub fn world_planet() -> Self {
         BBox {
             west: -180.0,
@@ -81,6 +83,7 @@ impl BBox {
         }
     }
 
+    #[must_use]
     pub fn world_web() -> Self {
         BBox {
             west: -180.0,
@@ -90,39 +93,50 @@ impl BBox {
         }
     }
 
+    #[must_use]
     pub fn crosses_antimeridian(&self) -> bool {
         self.west > self.east
     }
 
+    #[must_use]
     pub fn tuple(&self) -> (f64, f64, f64, f64) {
         (self.north, self.south, self.east, self.west)
     }
 
+    #[must_use]
     pub fn north(&self) -> f64 {
         self.north
     }
+    #[must_use]
     pub fn south(&self) -> f64 {
         self.south
     }
+    #[must_use]
     pub fn east(&self) -> f64 {
         self.east
     }
+    #[must_use]
     pub fn west(&self) -> f64 {
         self.west
     }
+    #[must_use]
     pub fn top(&self) -> f64 {
         self.north
     }
+    #[must_use]
     pub fn bottom(&self) -> f64 {
         self.south
     }
+    #[must_use]
     pub fn right(&self) -> f64 {
         self.east
     }
+    #[must_use]
     pub fn left(&self) -> f64 {
         self.west
     }
 
+    #[must_use]
     pub fn contains_lnglat(&self, lnglat: LngLat) -> bool {
         let lng = lnglat.lng();
         let lat = lnglat.lat();
@@ -143,11 +157,13 @@ impl BBox {
         false
     }
 
+    #[must_use]
     pub fn contains_tile(&self, tile: Tile) -> bool {
         let bbox = tile.bbox();
         self.contains_bbox(bbox.into())
     }
 
+    #[must_use]
     pub fn contains_bbox(&self, other: BBox) -> bool {
         self.north >= other.north
             && self.south <= other.south
@@ -155,6 +171,7 @@ impl BBox {
             && self.west <= other.west
     }
 
+    #[must_use]
     pub fn contains(&self, other: BBoxContainable) -> bool {
         match other {
             BBoxContainable::LngLat(lnglat) => self.contains_lnglat(lnglat),
@@ -163,6 +180,7 @@ impl BBox {
         }
     }
 
+    #[must_use]
     pub fn is_within(&self, other: &BBox) -> bool {
         self.north <= other.north
             && self.south >= other.south
@@ -170,6 +188,7 @@ impl BBox {
             && self.west >= other.west
     }
 
+    #[must_use]
     pub fn intersects(&self, other: &BBox) -> bool {
         self.north >= other.south
             && self.south <= other.north
@@ -177,6 +196,7 @@ impl BBox {
             && self.west <= other.east
     }
 
+    #[must_use]
     pub fn bboxes(&self) -> Vec<BBox> {
         if self.crosses_antimeridian() {
             let mut bboxes = Vec::new();
@@ -200,18 +220,22 @@ impl BBox {
         }
     }
 
+    #[must_use]
     pub fn ul(&self) -> LngLat {
         LngLat::new(self.west, self.north)
     }
 
+    #[must_use]
     pub fn ur(&self) -> LngLat {
         LngLat::new(self.east, self.north)
     }
 
+    #[must_use]
     pub fn lr(&self) -> LngLat {
         LngLat::new(self.east, self.south)
     }
 
+    #[must_use]
     pub fn ll(&self) -> LngLat {
         LngLat::new(self.west, self.south)
     }

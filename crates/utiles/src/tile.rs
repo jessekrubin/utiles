@@ -10,12 +10,12 @@ use crate::bbox::BBox;
 use crate::constants::EPSILON;
 use crate::lnglat::LngLat;
 use crate::projection::Projection;
+use crate::tile_feature::TileFeature;
 use crate::tile_tuple::XYZ;
 use crate::{
     bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
     siblings, traits, ul, ur, xy, xyz2quadkey,
 };
-use crate::tile_feature::TileFeature;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -141,44 +141,54 @@ impl FromStr for Tile {
 }
 
 impl Tile {
+    #[must_use]
     pub fn new(x: u32, y: u32, z: u8) -> Self {
         Tile { x, y, z }
     }
 
     #[allow(dead_code)]
+    #[must_use]
     pub fn valid(&self) -> bool {
         crate::valid(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn x(&self) -> u32 {
         self.x
     }
 
+    #[must_use]
     pub fn y(&self) -> u32 {
         self.y
     }
 
+    #[must_use]
     pub fn z(&self) -> u8 {
         self.z
     }
 
+    #[must_use]
     pub fn zoom(&self) -> u8 {
         self.z
     }
 
+    #[must_use]
     pub fn bounds(&self) -> (f64, f64, f64, f64) {
         bounds(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn pmtileid(&self) -> u64 {
         pmtiles::xyz2pmid(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn from_pmtileid(id: u64) -> Self {
         let (x, y, z) = pmtiles::pmid2xyz(id);
         Tile::new(x, y, z)
     }
 
+    #[must_use]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
         match sep {
             Some(sep) => format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y),
@@ -186,6 +196,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
         match sep {
             Some(sep) => {
@@ -195,6 +206,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn parent_id(&self) -> u64 {
         pmtiles::parent_id(self.pmtileid())
     }
@@ -203,6 +215,7 @@ impl Tile {
         quadkey2tile(quadkey)
     }
 
+    #[must_use]
     pub fn from_qk(qk: &str) -> Self {
         let res = quadkey2tile(qk);
         match res {
@@ -213,6 +226,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn from_json_obj(json: &str) -> Self {
         let res = serde_json::from_str(json);
         match res {
@@ -223,6 +237,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn from_json_arr(json: &str) -> Self {
         let res = serde_json::from_str(json);
         match res {
@@ -233,6 +248,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn from_json(json: &str) -> Self {
         if json.starts_with('[') {
             return Self::from_json_arr(json);
@@ -240,19 +256,23 @@ impl Tile {
         Self::from_json_obj(json)
     }
 
+    #[must_use]
     pub fn from_json_loose(json: &str) -> Self {
         let v = serde_json::from_str::<Value>(json).unwrap();
         Self::from(v)
     }
 
+    #[must_use]
     pub fn quadkey(&self) -> String {
         xyz2quadkey(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn qk(&self) -> String {
         xyz2quadkey(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn from_lnglat_zoom(
         lng: f64,
         lat: f64,
@@ -292,34 +312,41 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn ul(&self) -> LngLat {
         ul(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn ll(&self) -> LngLat {
         ll(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn ur(&self) -> LngLat {
         ur(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn lr(&self) -> LngLat {
         lr(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn bbox(&self) -> (f64, f64, f64, f64) {
         let ul = self.ul();
         let lr = self.lr();
         (ul.lng(), lr.lat(), lr.lng(), ul.lat())
     }
 
+    #[must_use]
     pub fn center(&self) -> LngLat {
         let ul = self.ul();
         let lr = self.lr();
         LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
     }
 
+    #[must_use]
     pub fn up(&self) -> Self {
         Self {
             x: self.x + 1,
@@ -328,6 +355,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn down(&self) -> Self {
         Self {
             x: self.x - 1,
@@ -336,6 +364,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn left(&self) -> Self {
         Self {
             x: self.x,
@@ -344,6 +373,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn right(&self) -> Self {
         Self {
             x: self.x,
@@ -352,6 +382,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn up_left(&self) -> Self {
         Self {
             x: self.x + 1,
@@ -360,6 +391,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn up_right(&self) -> Self {
         Self {
             x: self.x + 1,
@@ -368,6 +400,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn down_left(&self) -> Self {
         Self {
             x: self.x - 1,
@@ -376,6 +409,7 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn down_right(&self) -> Self {
         Self {
             x: self.x - 1,
@@ -384,22 +418,27 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn neighbors(&self) -> Vec<Self> {
         neighbors(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn children(&self, zoom: Option<u8>) -> Vec<Tile> {
         children(self.x, self.y, self.z, zoom)
     }
 
+    #[must_use]
     pub fn parent(&self, zoom: Option<u8>) -> Self {
         parent(self.x, self.y, self.z, zoom)
     }
 
+    #[must_use]
     pub fn siblings(&self) -> Vec<Self> {
         siblings(self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn sql_where(&self, flip: Option<bool>) -> String {
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
@@ -419,18 +458,22 @@ impl Tile {
         }
     }
 
+    #[must_use]
     pub fn json_arr_min(&self) -> String {
         format!("[{},{},{}]", self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn json_arr(&self) -> String {
         format!("[{}, {}, {}]", self.x, self.y, self.z)
     }
 
+    #[must_use]
     pub fn json_obj(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 
+    #[must_use]
     pub fn tuple_string(&self) -> String {
         format!("({}, {}, {})", self.x, self.y, self.z)
     }
@@ -570,7 +613,10 @@ impl From<&Value> for Tile {
             Value::Object(v) => {
                 // if it has a "tile" key, use that
                 // if has 'tile' key, use that
-                if v.contains_key("tile") && v["tile"].is_array() && v["tile"].as_array().unwrap().len() == 3 {
+                if v.contains_key("tile")
+                    && v["tile"].is_array()
+                    && v["tile"].as_array().unwrap().len() == 3
+                {
                     let tuple =
                         serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
                     return Tile::from(tuple);

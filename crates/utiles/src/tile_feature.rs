@@ -1,6 +1,6 @@
+use crate::tile::TileFeatureGeometry;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use crate::tile::TileFeatureGeometry;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeature {

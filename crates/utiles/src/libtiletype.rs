@@ -18,6 +18,7 @@ pub const TILETYPE_PBFGZ: usize = 5;
 pub const TILETYPE_PNG: usize = 6;
 pub const TILETYPE_WEBP: usize = 7;
 
+#[must_use]
 pub fn tiletype(buffer: &[u8]) -> TileType {
     if buffer.len() >= 8 {
         if buffer[0] == 0x89
@@ -66,6 +67,7 @@ pub fn tiletype(buffer: &[u8]) -> TileType {
     TileType::Unknown
 }
 
+#[must_use]
 pub fn enum2const(tiletype: TileType) -> usize {
     match tiletype {
         TileType::Unknown => TILETYPE_UNKNOWN,
@@ -79,6 +81,7 @@ pub fn enum2const(tiletype: TileType) -> usize {
     }
 }
 
+#[must_use]
 pub fn const2enum(tiletype: usize) -> TileType {
     match tiletype {
         TILETYPE_UNKNOWN => TileType::Unknown,
@@ -93,6 +96,7 @@ pub fn const2enum(tiletype: usize) -> TileType {
     }
 }
 
+#[must_use]
 pub fn headers(tiletype: TileType) -> Vec<(&'static str, &'static str)> {
     match tiletype {
         TileType::Png => vec![("Content-Type", "image/png")],
@@ -112,6 +116,7 @@ pub fn headers(tiletype: TileType) -> Vec<(&'static str, &'static str)> {
     }
 }
 
+#[must_use]
 pub fn tiletype_str(buffer: &[u8]) -> String {
     let tiletype = tiletype(buffer);
     match tiletype {

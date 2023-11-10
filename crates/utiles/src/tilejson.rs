@@ -1,6 +1,7 @@
 use serde_json;
 use tilejson::TileJSON;
 
+#[must_use]
 pub fn tilejson_stringify(tj: &TileJSON, fmt: Option<bool>) -> String {
     match fmt {
         Some(false) => serde_json::to_string(&tj).unwrap(),

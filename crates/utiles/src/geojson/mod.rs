@@ -21,6 +21,7 @@ pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Vec<f64>>
     }
 }
 
+#[must_use]
 pub fn geojson_geometry_coords(g: Geometry) -> Box<dyn Iterator<Item = Coord>> {
     let coord_vecs = geojson_geometry_points(g);
     Box::new(coord_vecs.into_iter().map(|v| {
@@ -47,6 +48,7 @@ pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
     }
 }
 
+#[must_use]
 pub fn geojson_feature_coords(feature: Feature) -> Box<dyn Iterator<Item = Coord>> {
     let geometry = feature.geometry.unwrap();
     geojson_geometry_coords(geometry)

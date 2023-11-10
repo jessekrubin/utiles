@@ -27,12 +27,12 @@ pub mod pmtiles;
 pub mod projection;
 pub mod sibling_relationship;
 pub mod tile;
+mod tile_feature;
 pub mod tile_range;
 mod tile_tuple;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
-mod tile_feature;
 
 /// Tile macro to create a new tile.
 ///  - do you need this? probably not
@@ -44,6 +44,7 @@ macro_rules! utile {
     };
 }
 
+#[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
     let (lon_deg, lat_deg) = ult(x, y, z);
     LngLat {
@@ -51,17 +52,21 @@ pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
     }
 }
 
+#[must_use]
 pub fn ll(x: u32, y: u32, z: u8) -> LngLat {
     ul(x, y + 1, z)
 }
 
+#[must_use]
 pub fn ur(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y, z)
 }
 
+#[must_use]
 pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y + 1, z)
 }
+#[must_use]
 pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
     let z2 = f64::from(2_u32.pow(u32::from(z)));
     let lon_deg = (f64::from(x) / z2) * 360.0 - 180.0;
@@ -78,6 +83,7 @@ pub struct XY {
 }
 
 /// Truncate a bounding box to the valid range of longitude and latitude.
+#[must_use]
 pub fn bbox_truncate(
     west: f64,
     south: f64,
@@ -107,20 +113,24 @@ pub fn bbox_truncate(
     (west, south, east, north)
 }
 
+#[must_use]
 pub fn minmax(zoom: u32) -> (u32, u32) {
     (0, 2_u32.pow(zoom) - 1)
 }
 
+#[must_use]
 pub fn valid(x: u32, y: u32, z: u8) -> bool {
     let (minx, maxx) = minmax(u32::from(z));
     let (miny, maxy) = minmax(u32::from(z));
     x >= minx && x <= maxx && y >= miny && y <= maxy
 }
 
+#[must_use]
 pub fn flipy(y: u32, z: u8) -> u32 {
     2_u32.pow(u32::from(z)) - 1 - y
 }
 
+#[must_use]
 pub fn bbox2zoom(bbox: (u32, u32, u32, u32)) -> u8 {
     let max_zoom = 28;
     let (west, south, east, north) = bbox;
@@ -133,6 +143,7 @@ pub fn bbox2zoom(bbox: (u32, u32, u32, u32)) -> u8 {
     max_zoom
 }
 
+#[must_use]
 pub fn bounds(x: u32, y: u32, z: u8) -> (f64, f64, f64, f64) {
     let ul_corner = ul(x, y, z);
     let lr_corner = ul(x + 1, y + 1, z);
@@ -144,6 +155,7 @@ pub fn bounds(x: u32, y: u32, z: u8) -> (f64, f64, f64, f64) {
     )
 }
 
+#[must_use]
 pub fn truncate_lng(lng: f64) -> f64 {
     if lng > 180.0 {
         180.0
@@ -154,6 +166,7 @@ pub fn truncate_lng(lng: f64) -> f64 {
     }
 }
 
+#[must_use]
 pub fn truncate_lat(lat: f64) -> f64 {
     if lat > 90.0 {
         90.0
@@ -164,6 +177,7 @@ pub fn truncate_lat(lat: f64) -> f64 {
     }
 }
 
+#[must_use]
 pub fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
     LngLat {
         xy: coord! {x: truncate_lng(lnglat.lng()), y: truncate_lat(lnglat.lat())},
@@ -225,6 +239,7 @@ pub fn _xy(
 //     // y = 0.5 - 0.25 * math.log((1.0 + sinlat) / (1.0 - sinlat)) / math.pi
 // }
 
+#[must_use]
 pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
     let trunc = truncate.unwrap_or(false);
     let mut lng = lng;
@@ -245,6 +260,7 @@ pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
     (x, y)
 }
 
+#[must_use]
 pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> LngLat {
     let lng = x / EARTH_RADIUS * 180.0 / PI;
     let lat = (2.0 * (y / EARTH_RADIUS).exp().atan() - PI * 0.5) * 180.0 / PI;
@@ -259,6 +275,7 @@ pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> LngLat {
     }
 }
 
+#[must_use]
 pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
     let n = n.unwrap_or(0);
     if n == 0 {
@@ -272,6 +289,7 @@ pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
     }
 }
 
+#[must_use]
 pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
     let zoom = zoom.unwrap_or(z + 1);
     let tile = Tile { x, y, z };
@@ -289,6 +307,7 @@ pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
     tiles
 }
 
+#[must_use]
 pub fn siblings(x: u32, y: u32, z: u8) -> Vec<Tile> {
     let sibrel = SiblingRelationship::from((x, y));
     match sibrel {
@@ -370,6 +389,7 @@ fn _neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
     ]
 }
 
+#[must_use]
 pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
     if z == 0 {
         return Vec::new();
@@ -437,6 +457,7 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
 /// let quadkey = xyz2quadkey(486, 332, 10);
 /// assert_eq!(quadkey, "0313102310");
 /// ```
+#[must_use]
 pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
     let mut quadkey = String::new();
     for i in (0..z).rev() {
@@ -493,6 +514,7 @@ impl From<Tile> for (u32, u32, u8) {
     }
 }
 
+#[must_use]
 pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
     let tile_size = EARTH_CIRCUMFERENCE / 2.0_f64.powi(i32::from(z));
     let left = f64::from(x) * tile_size - EARTH_CIRCUMFERENCE / 2.0;
@@ -507,6 +529,7 @@ pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
     }
 }
 
+#[must_use]
 pub fn as_zooms(zoom_or_zooms: ZoomOrZooms) -> Vec<u8> {
     match zoom_or_zooms {
         ZoomOrZooms::Zoom(zoom) => {
@@ -526,10 +549,12 @@ fn tiles_range_zoom(
     (minx..=maxx).flat_map(move |i| (miny..=maxy).map(move |j| (i, j, zoom)))
 }
 
+#[must_use]
 pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> Tile {
     Tile::from_lnglat_zoom(lng, lat, zoom, truncate)
 }
 
+#[must_use]
 pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
     let (west, south, east, north) =
         bbox_truncate(bbox.west, bbox.south, bbox.east, bbox.north, truncate);
@@ -570,6 +595,7 @@ pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
 //     (minx, miny, maxx, maxy)
 // }
 
+#[must_use]
 pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRanges {
     let zooms = as_zooms(zooms);
     let bboxthing = BBox {
@@ -628,6 +654,7 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
     TileRanges::from(ranges)
 }
 
+#[must_use]
 pub fn tiles_count(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> u64 {
     let ranges = tile_ranges(bounds, zooms);
     ranges.length()
@@ -714,6 +741,7 @@ fn merge(merge_set: &HashSet<Tile>) -> (HashSet<Tile>, bool) {
 }
 
 #[allow(dead_code)]
+#[must_use]
 pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
     // Parse tiles from the input sequence
     let mut _tiles = tiles.into_iter().collect::<Vec<Tile>>();
