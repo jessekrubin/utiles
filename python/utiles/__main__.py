@@ -69,6 +69,7 @@ def _utiles_ext_info() -> Dict[str, Union[str, int]]:
         "abspath": os.path.abspath(libutiles.__file__),
         "fsize": size,
         "fsize_str": _nbytes_str(size),
+        "build_profile": libutiles.__build_profile__,
     }
 
 

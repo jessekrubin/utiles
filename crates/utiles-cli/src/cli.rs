@@ -1,15 +1,15 @@
 use std::io::{self, Write};
 use std::path::Path;
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand};
 use tracing::{debug, error};
 use tracing_subscriber::EnvFilter;
+use utiles::{bounding_tile, Tile};
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
 use utiles::parsing::parse_bbox;
 use utiles::tilejson::tilejson_stringify;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
-use utiles::{bounding_tile, Tile};
 use utilesqlite::mbtiles::Mbtiles;
 
 use crate::shapes::{shapes_main, ShapesArgs};
@@ -25,11 +25,11 @@ pub struct Cli {
 
     // debug flag
     #[arg(
-        long,
-        short,
-        global = true,
-        default_value = "false",
-        help = "debug mode"
+    long,
+    short,
+    global = true,
+    default_value = "false",
+    help = "debug mode"
     )]
     debug: bool,
     // #[command(flatten , help="verbosity level (-v, -vv, -vvv, -vvvv)" )]
@@ -62,7 +62,7 @@ pub enum Commands {
         #[arg(required = true, help = "mbtiles filepath")]
         filepath: String,
 
-        #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
+        #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
         min: bool,
     },
 
@@ -71,7 +71,7 @@ pub enum Commands {
         #[arg(required = true, help = "mbtiles filepath")]
         filepath: String,
 
-        #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
+        #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
         min: bool,
         // #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
         // raw: bool,
@@ -140,73 +140,16 @@ pub enum Commands {
 
     #[command(name = "shapes", about = "echo shapes of tile(s) as GeoJSON", long_about = None)]
     Shapes(ShapesArgs),
-    // {
-    //     #[arg(required = false)]
-    //     input: Option<String>,
-
-    //     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    //     seq: bool,
-
-    //     /// Decimal precision of coordinates.
-    //     #[arg(long, value_parser)]
-    //     precision: Option<i32>,
-
-    //     /// Indentation level for JSON output.
-    //     #[arg(long, value_parser)]
-    //     indent: Option<i32>,
-
-    //     /// Use compact separators (',', ':').
-    //     #[arg(long, action)]
-    //     compact: bool,
-
-    //     /// Output in geographic coordinates (the default).
-    //     #[arg(long, group = "projected")]
-    //     geographic: bool,
-
-    //     /// Output in Web Mercator coordinates.
-    //     #[arg(long, group = "projected")]
-    //     mercator: bool,
-
-    //     // /// Write a RS-delimited JSON sequence (default is LF).
-    //     // #[clap(long, action)]
-    //     // seq: bool,
-    //     /// Output as sequence of GeoJSON features (the default).
-    //     // #[clap(long, group = "output_mode")]
-    //     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    //     feature: bool,
-
-    //     /// Output as sequence of GeoJSON bbox arrays.
-    //     #[arg(long, group = "output_mode")]
-    //     bbox: bool,
-
-    //     /// Output as a GeoJSON feature collections.
-    //     #[arg(long, action)]
-    //     collect: bool,
-
-    //     /// Write shape extents as ws-separated strings (default is False).
-    //     #[arg(long, action)]
-    //     extents: bool,
-
-    //     /// Shift shape x and y values by a constant number.
-    //     #[arg(long, value_parser)]
-    //     buffer: Option<f64>,
-    // },
 }
 
-#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
-pub enum ColorWhen {
-    Always,
-    Auto,
-    Never,
-}
-
-impl std::fmt::Display for ColorWhen {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.to_possible_value()
-            .expect("no values are skipped")
-            .get_name()
-            .fmt(f)
-    }
+fn stdin_filtered(input: Option<String>) -> Box<dyn Iterator<Item=io::Result<String>>> {
+    let input_lines = StdInterator::new(input).unwrap();
+    let filtered_lines = input_lines
+        .filter(|l| !l.is_err())
+        .filter(|l| !l.as_ref().unwrap().is_empty())
+        .filter(|l| l.as_ref().unwrap() != "\x1e");
+    let boxed = Box::new(filtered_lines);
+    boxed
 }
 
 pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
@@ -216,32 +159,17 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
         None => std::env::args().collect::<Vec<_>>(),
     };
     let args = Cli::parse_from(&argv);
-    // level is info by default and debug if --debug is passed
-    // let level = if args.debug {
-    //     tracing::Level::DEBUG
-    // } else {
-    //     tracing::Level::WARN
-    // };
-
-    // install global collector configured based on RUST_LOG env var.
-    // tracing_subscriber::fmt()
-    //     .with_max_level(level)
-    //     .with_writer(std::io::stderr)
-    //     .finish()
-    //     .init();
-    // Configure the filter
-
     let filter = if args.debug {
         EnvFilter::new("DEBUG")
     } else {
         EnvFilter::from_default_env()
     };
-
     // Install the global collector configured based on the filter.
     tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_writer(std::io::stderr)
         .init();
+
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);
 
@@ -275,7 +203,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 let s = serde_json::to_string_pretty::<Vec<MbtilesMetadataRow>>(
                     &metadata_rows,
                 )
-                .unwrap();
+                    .unwrap();
                 println!("{s}");
             }
         }
@@ -299,10 +227,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
 
         // mercantile cli like
         Commands::Quadkey { input } => {
-            let input_lines = StdInterator::new(input).unwrap();
-            let lines = input_lines
-                .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty());
+            let lines = stdin_filtered(input);
             for line in lines {
                 // if the line bgins w '[' treat as tile
                 // otherwise treat as quadkey
@@ -325,12 +250,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             }
         }
         Commands::BoundingTile { input, seq } => {
-            let input_lines = StdInterator::new(input).unwrap();
-            let lines = input_lines
-                .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty())
-                .filter(|l| l.as_ref().unwrap() != "\x1e");
-
+            let lines = stdin_filtered(input);
             let bboxes = lines.map(|l| {
                 let s = l.unwrap();
                 debug!("l: {:?}", s);
@@ -344,13 +264,8 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             }
         }
         Commands::Tiles { zoom, input, seq } => {
-            let input_lines = StdInterator::new(input).unwrap();
-            let lines = input_lines
-                .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty())
-                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let lines = stdin_filtered(input);
             let mut stdout = io::stdout();
-
             let tiles = lines
                 .map(|l| {
                     let s = l.unwrap();
@@ -375,60 +290,10 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 }
             }
             stdout.flush().unwrap();
-
-            // for tile in tiles {
-            //     let tstr =   tile.json_arr();
-            //     // RS char if seq else ""
-            //     let rs = if seq { "\x1e\n" } else { "" };
-            //     println!("{}{}", rs, tstr);
-            //     // println!("{}", tile.json_arr());
-            //
-            //     //     call loop_fn if it's defined
-            //     niter += 1;
-            //
-            //     // call fn every 1000 iterations
-            //     if niter % 1000 == 0 {
-            //         if let Some(f) = loop_fn {
-            //             f();
-            //         }
-            //     }
-            // }
-            // for line in input_lines
-            //     .filter(|l| !l.is_err())
-            //     .filter(|l| !l.as_ref().unwrap().is_empty())
-            // {
-            //     let lstr = line.unwrap();
-            //     let thingy = parse_bbox(
-            //         &lstr,
-            //     ).unwrap();
-            //     for tile in tiles(
-            //         (thingy.west, thingy.south, thingy.east, thingy.north),
-            //         ZoomOrZooms::Zoom(zoom),
-            //     ) {
-            //         let tstr =   tile.json_arr();
-            //         // RS char if seq else ""
-            //         let rs = if seq { "\x1e\n" } else { "" };
-            //         println!("{}{}", rs, tstr);
-            //         // println!("{}", tile.json_arr());
-            //
-            //         //     call loop_fn if it's defined
-            //         niter += 1;
-            //
-            //         // call fn every 1000 iterations
-            //         if niter % 1000 == 0 {
-            //             if let Some(f) = loop_fn {
-            //                 f();
-            //             }
-            //         }
-            //     }
-            // }
         }
+
         Commands::Neighbors { input, seq } => {
-            let input_lines = StdInterator::new(input).unwrap();
-            let lines = input_lines
-                .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty())
-                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let lines = stdin_filtered(input);
             let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
                 let neighbors = tile.neighbors();
@@ -440,11 +305,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
         }
 
         Commands::Children { input, seq, depth } => {
-            let input_lines = StdInterator::new(input).unwrap();
-            let lines = input_lines
-                .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty())
-                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let lines = stdin_filtered(input);
             let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
                 let children = tile.children(Option::from(tile.z + depth));
@@ -456,11 +317,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
         }
 
         Commands::Parent { input, seq, depth } => {
-            let input_lines = StdInterator::new(input).unwrap();
-            let lines = input_lines
-                .filter(|l| !l.is_err())
-                .filter(|l| !l.as_ref().unwrap().is_empty())
-                .filter(|l| l.as_ref().unwrap() != "\x1e");
+            let lines = stdin_filtered(input);
             let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
             for tile in tiles {
                 let nup = tile.z as i32 - depth as i32;

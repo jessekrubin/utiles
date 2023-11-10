@@ -288,13 +288,11 @@ class TestChildren:
 # SHAPES TESTS (TODO)
 # ===================
 
+
 class TestShapes:
-
-
     def test_cli_shapes_failure(self) -> None:
         result = _run_cli(["shapes"], "0")
         assert result.returncode != 0
-
 
     def test_cli_shapes(self) -> None:
         result = _run_cli(["shapes", "--precision", "6"], "[106, 193, 9]")
@@ -318,7 +316,6 @@ class TestShapes:
             "type": "Feature",
         }
         assert json.loads(result.stdout) == expected
-
 
     def test_cli_shapes_arg(self) -> None:
         # runner = CliRunner()
@@ -348,7 +345,6 @@ class TestShapes:
 
         assert result_output_json == expected_dict
 
-
     def test_cli_shapes_buffer(self) -> None:
         result = _run_cli(
             ["shapes", "[106, 193, 9]", "--buffer", "1.0", "--precision", "6"]
@@ -374,14 +370,12 @@ class TestShapes:
         }
         assert json.loads(result.stdout) == expected
 
-
     @pytest.mark.skip(reason="not implemented")
     def test_cli_shapes_compact(self) -> None:
         """Output is compact."""
         result = _run_cli(["shapes", "--compact"], "[106, 193, 9]")
         assert result.returncode == 0
         assert '"type":"Feature"' in result.stdout.strip()
-
 
     @pytest.mark.skip(reason="not implemented b/c why would I/anyone ever need that...")
     def test_cli_shapes_indentation(self) -> None:
@@ -390,13 +384,11 @@ class TestShapes:
         assert result.returncode == 0
         assert '        "type": "Feature"' in result.stdout.strip()
 
-
     def test_cli_shapes_collect(self) -> None:
         """Shapes are collected into a feature collection."""
         result = _run_cli(["shapes", "--collect", "--feature"], "[106, 193, 9]")
         assert result.returncode == 0
         assert "FeatureCollection" in result.stdout
-
 
     def test_cli_shapes_extents(self) -> None:
         result = _run_cli(
@@ -404,7 +396,6 @@ class TestShapes:
         )
         assert result.returncode == 0
         assert result.stdout == "-11740727.545 4852834.052 -11662456.028 4931105.569\n"
-
 
     def test_cli_shapes_bbox(self) -> None:
         """JSON text sequences of bboxes are output."""
@@ -421,9 +412,9 @@ class TestShapes:
         )
         assert result.returncode == 0
         assert (
-            result.stdout == "\x1e\n[-11740727.545,4852834.052,-11662456.028,4931105.569]\n"
+            result.stdout
+            == "\x1e\n[-11740727.545,4852834.052,-11662456.028,4931105.569]\n"
         )
-
 
     def test_cli_shapes_props_fid(self) -> None:
         result = _run_cli(
@@ -435,7 +426,6 @@ class TestShapes:
         assert result.returncode == 0
         assert '"title":"foo"' in result.stdout
         assert '"id":"42"' in result.stdout
-
 
     def test_cli_strict_overlap_contain(self) -> None:
         result1 = _run_cli(["shapes"], "[2331,1185,12]")
