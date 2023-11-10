@@ -493,14 +493,14 @@ impl Tile {
             None => xyz,
         };
         let tile_feature = TileFeature {
-            id: id,
+            id,
             type_: "Feature".to_string(),
             geometry: TileFeatureGeometry {
                 type_: "Polygon".to_string(),
                 coordinates: geometry_coordinates,
             },
-            bbox: bbox,
-            properties: properties,
+            bbox,
+            properties,
         };
         Ok(tile_feature)
     }

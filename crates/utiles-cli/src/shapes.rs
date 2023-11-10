@@ -86,8 +86,8 @@ impl Default for ShapesArgs {
             input: None,
             seq: false,
             precision: None,
-            project: Option::Some(ShapesProject::default()),
-            output_mode: Option::Some(ShapesOutputMode::default()),
+            project: Some(ShapesProject::default()),
+            output_mode: Some(ShapesOutputMode::default()),
             collect: false,
             extents: false,
             buffer: None,
@@ -152,7 +152,7 @@ pub fn shapes_main(args: ShapesArgs) {
             None => Projection::Geographic,
         },
         props: None,
-        buffer: Option::from(args.buffer),
+        buffer: args.buffer,
         precision: args.precision,
     };
 

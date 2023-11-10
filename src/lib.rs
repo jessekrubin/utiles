@@ -1,5 +1,4 @@
 use std::collections::{HashMap, HashSet};
-
 use pyo3::exceptions::{self, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
@@ -14,8 +13,6 @@ use utiles::zoom::ZoomOrZooms;
 
 mod cli;
 mod pyutiles;
-// mod pyutilesqlite;
-// mod utiles;
 
 #[derive(FromPyObject)]
 pub struct TileTuple(u32, u32, u8);

@@ -9,13 +9,13 @@ use utiles::mbtiles::metadata2tilejson;
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
 
 pub struct Mbtiles {
-    conn: rusqlite::Connection,
+    conn: Connection,
 }
 
 impl Mbtiles {
-    pub fn from_conn(conn: rusqlite::Connection) -> Mbtiles {
+    pub fn from_conn(conn: Connection) -> Mbtiles {
         Mbtiles {
-            conn: conn,
+            conn,
         }
     }
 
@@ -37,10 +37,10 @@ impl Mbtiles {
         let metadata = self.metadata()?;
         let tj = metadata2tilejson(metadata);
         match tj {
-            Ok(t) => return Ok(t),
+            Ok(t) => Ok(t),
             Err(e) => {
                 error!("Error parsing metadata to TileJSON: {}", e);
-                return Err(e.into());
+                Err(e.into())
             }
         }
         // return Ok(tj);
@@ -48,17 +48,17 @@ impl Mbtiles {
 
 
     pub fn from_filepath(fspath: &str) -> RusqliteResult<Mbtiles> {
-        let conn = rusqlite::Connection::open(fspath)?;
+        let conn = Connection::open(fspath)?;
         let mbt = Mbtiles {
-            conn: conn,
+            conn,
         };
         return Ok(mbt);
     }
 
     pub fn from_filepath_str(fspath: &str) -> Result<Mbtiles, Box<dyn Error>> {
-        let conn = rusqlite::Connection::open(fspath)?;
+        let conn = Connection::open(fspath)?;
         let mbt = Mbtiles {
-            conn: conn,
+            conn,
         };
         return Ok(mbt);
     }
@@ -66,9 +66,9 @@ impl Mbtiles {
 
 impl From<&Path> for Mbtiles {
     fn from(path: &Path) -> Self {
-        let conn = rusqlite::Connection::open(path).unwrap();
+        let conn = Connection::open(path).unwrap();
         Mbtiles {
-            conn: conn,
+            conn,
         }
     }
 }
@@ -79,7 +79,7 @@ pub struct MbtilesManager {
 }
 
 
-pub fn mbtiles_metadata(conn: &rusqlite::Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
+pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
     let mut stmt = conn.prepare("SELECT name, value FROM metadata")?;
     let mdata = stmt
         .query_map([], |row| {

@@ -167,7 +167,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
     // Install the global collector configured based on the filter.
     tracing_subscriber::fmt()
         .with_env_filter(filter)
-        .with_writer(std::io::stderr)
+        .with_writer(io::stderr)
         .init();
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());

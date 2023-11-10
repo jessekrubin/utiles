@@ -8,8 +8,8 @@ pub fn ut_cli(py: Python, args: Option<Vec<String>>) {
         None => std::env::args().collect(),
     };
     cli_main(
-        Option::Some(argv),
-        Option::Some(&|| {
+        Some(argv),
+        Some(&|| {
             py.check_signals().unwrap();
         }),
     )
