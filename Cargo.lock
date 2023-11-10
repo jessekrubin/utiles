@@ -976,7 +976,6 @@ dependencies = [
  "fast_hilbert",
  "geo-types",
  "geojson",
- "log",
  "serde",
  "serde_json",
  "thiserror",
