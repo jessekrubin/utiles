@@ -1,3 +1,7 @@
+#![deny(clippy::all)]
+#![deny(clippy::perf)]
+#![deny(clippy::style)]
+
 use std::collections::{HashMap, HashSet};
 use std::num::FpCategory;
 use std::{error::Error, f64::consts::PI};

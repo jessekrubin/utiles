@@ -570,15 +570,12 @@ impl From<&Value> for Tile {
             Value::Object(v) => {
                 // if it has a "tile" key, use that
                 // if has 'tile' key, use that
-                if v.contains_key("tile") {
-                    if v["tile"].is_array() && v["tile"].as_array().unwrap().len() == 3
-                    {
-                        let tuple =
-                            serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
-                        return Tile::from(tuple);
-                    }
+                if v.contains_key("tile") && v["tile"].is_array() && v["tile"].as_array().unwrap().len() == 3 {
+                    let tuple =
+                        serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
+                    return Tile::from(tuple);
                 }
-                return Tile::from(v);
+                Tile::from(v)
             }
             _ => {
                 panic!("Invalid json value: {val}");

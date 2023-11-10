@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 use std::io;
 use std::io::BufRead;
-use tracing::debug;
 use std::str::FromStr;
+use tracing::debug;
 
 pub enum StdInteratorSource {
     Args(VecDeque<String>),

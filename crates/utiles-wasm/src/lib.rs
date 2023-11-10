@@ -1,6 +1,6 @@
-use wasm_bindgen::prelude::*;
-use utiles::pmtiles::xyz2pmid as _xyz2pmid ;
+use utiles::pmtiles::xyz2pmid as _xyz2pmid;
 use utiles::xyz2quadkey as uxyz2qk;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn add(left: usize, right: usize) -> usize {
@@ -13,8 +13,7 @@ pub fn pmtileid(x: u32, y: u32, z: u8) -> u64 {
 }
 
 #[wasm_bindgen]
-pub fn xyz2qk(x: u32, y: u32, z: u8) -> String{
-
+pub fn xyz2qk(x: u32, y: u32, z: u8) -> String {
     uxyz2qk(x, y, z)
 }
 

@@ -1,18 +1,10 @@
+use std::fmt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Projection {
     Geographic,
     Mercator,
-}
-
-impl Projection {
-    pub fn to_string(&self) -> String {
-        match self {
-            Projection::Geographic => "geographic".to_string(),
-            Projection::Mercator => "mercator".to_string(),
-        }
-    }
 }
 
 impl From<String> for Projection {
@@ -23,6 +15,15 @@ impl From<String> for Projection {
             _ => {
                 panic!("Invalid projection: {s}");
             }
+        }
+    }
+}
+
+impl fmt::Display for Projection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Projection::Geographic => write!(f, "geographic"),
+            Projection::Mercator => write!(f, "mercator"),
         }
     }
 }

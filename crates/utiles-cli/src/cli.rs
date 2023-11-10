@@ -4,12 +4,12 @@ use std::path::Path;
 use clap::{Parser, Subcommand};
 use tracing::{debug, error};
 use tracing_subscriber::EnvFilter;
-use utiles::{bounding_tile, Tile};
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
 use utiles::parsing::parse_bbox;
 use utiles::tilejson::tilejson_stringify;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
+use utiles::{bounding_tile, Tile};
 use utilesqlite::mbtiles::Mbtiles;
 
 use crate::shapes::{shapes_main, ShapesArgs};
@@ -25,11 +25,11 @@ pub struct Cli {
 
     // debug flag
     #[arg(
-    long,
-    short,
-    global = true,
-    default_value = "false",
-    help = "debug mode"
+        long,
+        short,
+        global = true,
+        default_value = "false",
+        help = "debug mode"
     )]
     debug: bool,
     // #[command(flatten , help="verbosity level (-v, -vv, -vvv, -vvvv)" )]
@@ -142,14 +142,16 @@ pub enum Commands {
     Shapes(ShapesArgs),
 }
 
-fn stdin_filtered(input: Option<String>) -> Box<dyn Iterator<Item=io::Result<String>>> {
+fn stdin_filtered(
+    input: Option<String>,
+) -> Box<dyn Iterator<Item = io::Result<String>>> {
     let input_lines = StdInterator::new(input).unwrap();
     let filtered_lines = input_lines
         .filter(|l| !l.is_err())
         .filter(|l| !l.as_ref().unwrap().is_empty())
         .filter(|l| l.as_ref().unwrap() != "\x1e");
-    let boxed = Box::new(filtered_lines);
-    boxed
+
+    Box::new(filtered_lines) as _
 }
 
 pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
@@ -203,7 +205,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 let s = serde_json::to_string_pretty::<Vec<MbtilesMetadataRow>>(
                     &metadata_rows,
                 )
-                    .unwrap();
+                .unwrap();
                 println!("{s}");
             }
         }
