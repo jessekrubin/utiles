@@ -14,7 +14,7 @@ def _run_cli(
     _python = sys.executable
     _args = args or []
     res = run(
-        [_python, "-m", "utiles._cli", *_args],
+        [_python, "-m", "utiles.cli", *_args],
         input=input,
         capture_output=True,
         text=True,

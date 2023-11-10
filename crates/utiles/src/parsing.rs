@@ -21,11 +21,12 @@ pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
 
     let v: Value = serde_json::from_str(s)?;
 
+    debug!("{}", v);
     // Assume a single pair of coordinates represents a CoordTuple
     // and a four-element array represents a BBoxTuple
-    match v.as_array().map(|arr| arr.len()) {
+    let bbox = match v.as_array().map(|arr| arr.len()) {
         Some(2) => {
-            let coord: (f64, f64) = serde_json::from_value(v)?;
+            let coord: (f64, f64) = serde_json::from_value::<(f64, f64)>(v)?;
             Ok(BBox::new(coord.0, coord.1, coord.0, coord.1))
         }
         Some(4) => {
@@ -33,7 +34,9 @@ pub fn parse_bbox(s: &str) -> serde_json::Result<BBox> {
             Ok(BBox::from(bbox))
         }
         _ => panic!("Expected a two-element array or a four-element array"),
-    }
+    };
+    debug!("bbox: {:?}", bbox);
+    bbox
 }
 
 pub fn coords2bounds<I>(mut coords: I) -> Option<(f64, f64, f64, f64)>

@@ -20,7 +20,8 @@ dependencies = [
 
 [project.scripts]
 utiles = "utiles.cli:cli"
-ut = "utiles._cli:cli"
+ut = "utiles.cli:cli"
+utilesv1 = "utiles._legacy.cli:cli"
 
 [project.entry-points."rasterio.rio_plugins"]
 utiles = "utiles.rio_plugin:rio_utiles"

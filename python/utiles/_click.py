@@ -6,7 +6,7 @@ import logging
 import click
 
 from utiles import __version__
-from utiles._cli import cli
+from utiles.cli import cli
 
 logger = logging.getLogger(__name__)
 
@@ -17,25 +17,31 @@ class NoHelpCommand(click.Command):
 
 
 # The CLI command group.
-@click.command(
-    name="utiles",
-    cls=NoHelpCommand,
-    help="utiles cli (python-rust)",
-    no_args_is_help=False,
-    context_settings={
-        "ignore_unknown_options": True,
-        "allow_extra_args": True,
-    },
-)
-@click.version_option(version=__version__, message="%(version)s")
-def cli_click() -> None:
-    """Execute the main utiles command"""
-    try:
-        cli()
-    except Exception as e:
-        logger.error(e)
-        raise click.BadParameter(str(e)) from e
+def _click_cli(name: str) -> NoHelpCommand:
+    @click.command(
+        name=name,
+        cls=NoHelpCommand,
+        help="utiles cli (python-rust)",
+        no_args_is_help=False,
+        context_settings={
+            "ignore_unknown_options": True,
+            "allow_extra_args": True,
+        },
+    )
+    @click.version_option(version=__version__, message="%(version)s")
+    def _cli_fn() -> None:
+        """Execute the main utiles command"""
+        try:
+            cli()
+        except Exception as e:
+            logger.error(e)
+            raise click.BadParameter(str(e)) from e
 
+    return _cli_fn
+
+
+utiles_click = _click_cli("utiles")
+ut_click = _click_cli("ut")
 
 if __name__ == "__main__":
-    cli_click()
+    utiles_click()

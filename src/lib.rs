@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 use pyo3::exceptions::{self, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
@@ -7,6 +6,7 @@ use pyutiles::pyiters::CoordinateIterator;
 use pyutiles::pylnglat::PyLngLat;
 use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
+use std::collections::{HashMap, HashSet};
 use utiles::bbox::BBox;
 use utiles::libtiletype;
 use utiles::zoom::ZoomOrZooms;
