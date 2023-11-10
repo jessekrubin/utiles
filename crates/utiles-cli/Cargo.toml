@@ -1,0 +1,24 @@
+[package]
+name = "utiles-cli"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+name = "utiles_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ut"
+path = "src/bin.rs"
+
+[dependencies]
+clap = { version = "4.4.7", features = ["derive"] }
+clap-verbosity-flag = "2.1.0"
+rusqlite = { version = "0.29.0", features = ["bundled", "vtab", "blob"] }
+tokio = { version = "1.33.0", features = ["full"] }
+tracing = { version = "0.1.40", features = [] }
+tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
+utiles = { path = "../utiles" }
+utilesqlite = { path = "../utilesqlite" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.96"

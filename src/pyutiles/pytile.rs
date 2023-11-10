@@ -13,7 +13,7 @@ use pyo3::types::PyType;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::{
-    exceptions, IntoPy, Py, PyAny, pyclass, PyErr, pymethods, PyObject, PyRef,
+    exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
     PyResult, Python,
 };
 use serde::{Deserialize, Serialize};
@@ -477,8 +477,6 @@ impl From<PyTile> for Tile {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utile;
-
     #[test]
     fn test_pytile_macro() {
         let tile = pytile!(0, 0, 0);

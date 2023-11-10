@@ -5,7 +5,7 @@ import json
 import pytest
 from click.testing import CliRunner
 
-from utiles.cli import cli
+from utiles._legacy.cli import cli
 
 
 def test_cli_shapes_failure() -> None:

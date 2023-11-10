@@ -8,7 +8,21 @@ import utiles
 Extensions = Union[str, bool]
 
 PWD = Path(__file__).parent
-REPO_ROOT = PWD.parent
+
+
+def _repo_root() -> Path:
+    _root = PWD
+    for _i in range(5):
+        _root = _root.parent
+        if (_root / ".github").is_dir():
+            return _root
+    msg = "Could not find repo root"
+    raise RuntimeError(msg)
+
+
+REPO_ROOT = _repo_root()
+
+# go up and find dir with sub dir ".github"
 
 
 def tiletype(buffer: bytes) -> Extensions:
@@ -56,6 +70,9 @@ def tiletype(buffer: bytes) -> Extensions:
     # gzip: recklessly assumes contents are PBF.
     elif buffer[0] == 0x1F and buffer[1] == 0x8B:
         return "pbfgz"
+    # if buffer starts with '{' or '[' assume JSON
+    elif buffer[0] == 0x7B or buffer[0] == 0x5B:
+        return "json"
     return False
 
 
@@ -77,7 +94,13 @@ TEST_TILE_NAME2TYPE = {
     "tux_alpha.webp": "webp",
     "unknown.txt": False,
     "webp-550x368.webp": "webp",
+    "tile-arr.json": "json",
+    "tile-obj.json": "json",
 }
+
+
+def test_found_test_files() -> None:
+    assert len(TEST_TILES_BYTES) == len(TEST_TILE_NAME2TYPE)
 
 
 @pytest.mark.parametrize(

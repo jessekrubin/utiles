@@ -1,7 +1,7 @@
 from collections import Counter
 
 import utiles
-from utiles import libutiles
+from utiles import _utiles as libutiles
 
 
 def test_import() -> None:

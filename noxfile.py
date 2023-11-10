@@ -1,0 +1,34 @@
+"""Nox sessions for linting, docs, and testing."""
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+from pathlib import Path
+
+import nox
+
+DIR = Path(__file__).parent.resolve()
+
+nox.options.sessions = ["test"]
+
+def _session_install_test_deps(session: nox.Session) -> None:
+    session.install("pytest", "hypothesis", "pytest-cov", "pytest-benchmark", "tomli")
+
+@nox.session
+def test(session: nox.Session) -> None:
+    """Run the unit and regular tests."""
+    session.install("maturin")
+    _session_install_test_deps(session)
+    session.run("maturin", "develop", "--release", "--extras=test")
+    session.run("pytest")
+
+@nox.session
+def test_wheel(session: nox.Session) -> None:
+    """Run the unit and regular tests."""
+    # install from dist...
+    session.install("utiles", )
+    session.install("maturin")
+    _session_install_test_deps(session)
+    session.run("maturin", "build", "--release", "--extras=test")
+    session.run("pytest")

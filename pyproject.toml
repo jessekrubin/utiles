@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin>=0.14,<0.15"]
+requires = ["maturin>=0.15"]
 build-backend = "maturin"
 
 [project]
@@ -20,6 +20,8 @@ dependencies = [
 
 [project.scripts]
 utiles = "utiles.cli:cli"
+ut = "utiles.cli:cli"
+utilesv1 = "utiles._legacy.cli:cli"
 
 [project.entry-points."rasterio.rio_plugins"]
 utiles = "utiles.rio_plugin:rio_utiles"
@@ -28,80 +30,29 @@ ut = "utiles.rio_plugin:rio_ut"
 [tool.maturin]
 python-source = "python"
 features = ["pyo3/extension-module"]
-module-name = "utiles.libutiles"
+bindings = "pyo3"
+module-name = "utiles._utiles"
 
 [tool.pytest.ini_options]
 testpaths = [
-    "tests",
-#    "python"
+   "tests"
 ]
 addopts = [
-    "--doctest-modules"
+    "--doctest-modules",
+    "-v"
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "bench"
 ]
 
-# =============================================================================
-[tool.hatch.envs.default]
-dependencies = [
-  "coverage[toml]>=6.5",
-  "mercantile",
-  "click",
-  "typing_extensions",
-  "tomli",
-  "hypothesis",
-  "maturin",
-  "pytest",
-  "pytest-benchmark",
-  "pytest-cov",
-]
-
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
-cov-report = [
-  "- coverage combine",
-  "coverage report",
-]
-cov = [
-  "test-cov",
-  "cov-report",
-]
-
-[[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
-
-[tool.hatch.envs.lint]
-detached = true
-dependencies = [
-  "black>=23.1.0",
-  "mypy>=1.0.0",
-  "ruff>=0.0.265",
-]
-[tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:utiles tests}"
-style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
-]
-fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
-]
 
 [tool.black]
-target-version = ["py37"]
+target-version = ["py38"]
 line-length = 88
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 88
 select = [
   "A",
@@ -159,6 +110,7 @@ exclude = [
   "venv",
 ]
 ignore = [
+  "TID252",
   "A003",
   # Allow non-abstract empty methods in abstract base classes
   "B027",
@@ -219,3 +171,56 @@ exclude_lines = [
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
+
+# =============================================================================
+# [tool.hatch.envs.default]
+# dependencies = [
+#   "coverage[toml]>=6.5",
+#   "mercantile",
+#   "click",
+#   "typing_extensions",
+#   "tomli",
+#   "hypothesis",
+#   "maturin",
+#   "pytest",
+#   "pytest-benchmark",
+#   "pytest-cov",
+# ]
+
+# [tool.hatch.envs.default.scripts]
+# test = "pytest {args:tests}"
+# test-cov = "coverage run -m pytest {args:tests}"
+# cov-report = [
+#   "- coverage combine",
+#   "coverage report",
+# ]
+# cov = [
+#   "test-cov",
+#   "cov-report",
+# ]
+
+# [[tool.hatch.envs.all.matrix]]
+# python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+# [tool.hatch.envs.lint]
+# detached = true
+# dependencies = [
+#   "black>=23.1.0",
+#   "mypy>=1.0.0",
+#   "ruff>=0.0.265",
+# ]
+# [tool.hatch.envs.lint.scripts]
+# typing = "mypy --install-types --non-interactive {args:utiles tests}"
+# style = [
+#   "ruff {args:.}",
+#   "black --check --diff {args:.}",
+# ]
+# fmt = [
+#   "black {args:.}",
+#   "ruff --fix {args:.}",
+#   "style",
+# ]
+# all = [
+#   "style",
+#   "typing",
+# ]

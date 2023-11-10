@@ -18,28 +18,34 @@ impl From<(f64, f64)> for LngLat {
 }
 
 impl LngLat {
+    #[must_use]
     pub fn new(lng: f64, lat: f64) -> Self {
         LngLat {
             xy: coord! { x: lng, y: lat},
         }
     }
 
+    #[must_use]
     pub fn lng(&self) -> f64 {
         self.xy.x
     }
 
+    #[must_use]
     pub fn lat(&self) -> f64 {
         self.xy.y
     }
 
+    #[must_use]
     pub fn lon(&self) -> f64 {
         self.xy.x
     }
 
+    #[must_use]
     pub fn x(&self) -> f64 {
         self.xy.x
     }
 
+    #[must_use]
     pub fn y(&self) -> f64 {
         self.xy.y
     }

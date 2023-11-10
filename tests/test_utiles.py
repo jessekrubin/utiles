@@ -5,7 +5,6 @@ from typing import Any, List, Tuple, Union
 
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
-from typing_extensions import TypedDict
 
 import utiles
 from utiles import Tile
@@ -25,12 +24,6 @@ def test_version() -> None:
         "version"
     ]
     assert utiles.__version__ == pyproject_version
-
-
-class TileDict(TypedDict):
-    x: int
-    y: int
-    z: int
 
 
 @pytest.mark.parametrize(

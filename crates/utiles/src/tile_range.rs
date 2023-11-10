@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct TileRange {
     curx: u32,
     cury: u32,
@@ -9,6 +10,7 @@ pub struct TileRange {
 }
 
 impl TileRange {
+    #[must_use]
     pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
         Self {
             curx: minx,
@@ -21,26 +23,33 @@ impl TileRange {
         }
     }
 
+    #[must_use]
     pub fn minx(&self) -> u32 {
         self.minx
     }
+    #[must_use]
     pub fn maxx(&self) -> u32 {
         self.maxx
     }
+    #[must_use]
     pub fn miny(&self) -> u32 {
         self.miny
     }
+    #[must_use]
     pub fn maxy(&self) -> u32 {
         self.maxy
     }
+    #[must_use]
     pub fn zoom(&self) -> u8 {
         self.zoom
     }
 
+    #[must_use]
     pub fn length(&self) -> u64 {
         ((self.maxx - self.minx + 1) * (self.maxy - self.miny + 1)) as u64
     }
 
+    #[must_use]
     pub fn sql_where(&self, flip: Option<bool>) -> String {
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
@@ -82,21 +91,25 @@ impl Iterator for TileRange {
     }
 }
 
+#[derive(Debug)]
 pub struct TileRanges {
     ranges: Vec<TileRange>,
 }
 
 impl TileRanges {
+    #[must_use]
     pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
         Self {
             ranges: vec![TileRange::new(minx, maxx, miny, maxy, zoom)],
         }
     }
 
+    #[must_use]
     pub fn length(&self) -> u64 {
         self.ranges.iter().map(|r| r.length()).sum()
     }
 
+    #[must_use]
     pub fn sql_where(&self, flip: Option<bool>) -> String {
         self.ranges
             .iter()

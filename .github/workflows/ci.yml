@@ -39,7 +39,8 @@ jobs:
         shell: bash
         run: |
           set -e
-          pip install utiles --find-links dist --force-reinstall
+          pip install click
+          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
       # - name: pytest
@@ -86,10 +87,10 @@ jobs:
         shell: bash
         run: |
           set -e
-          pip install utiles --find-links dist --force-reinstall
+          pip install click
+          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
-
   macos:
     runs-on: macos-latest
     strategy:
@@ -116,7 +117,8 @@ jobs:
         shell: bash
         run: |
           set -e
-          pip install utiles --find-links dist --force-reinstall
+          pip install click
+          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
 

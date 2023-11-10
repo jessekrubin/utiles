@@ -4,10 +4,12 @@ from __future__ import annotations
 import math
 from typing import List, Sequence, Tuple, Union
 
-from utiles.libutiles import (
+from utiles._utiles import (
     TILETYPE_GIF,
     TILETYPE_JPG,
+    TILETYPE_JSON,
     TILETYPE_PBF,
+    TILETYPE_PBFGZ,
     TILETYPE_PNG,
     TILETYPE_UNKNOWN,
     TILETYPE_WEBP,
@@ -47,6 +49,7 @@ from utiles.libutiles import (
     tiletype_str,
     truncate_lnglat,
     ul,
+    ut_cli,
     xy,
     xy_bounds,
     xyz,
@@ -63,7 +66,9 @@ __all__ = (
     "LngLatBbox",
     "TILETYPE_GIF",
     "TILETYPE_JPG",
+    "TILETYPE_JSON",
     "TILETYPE_PBF",
+    "TILETYPE_PBFGZ",
     "TILETYPE_PNG",
     "TILETYPE_UNKNOWN",
     "TILETYPE_WEBP",
@@ -102,6 +107,7 @@ __all__ = (
     "tiletype_str",
     "truncate_lnglat",
     "ul",
+    "ut_cli",
     "xy",
     "xy_bounds",
     "xyz",
@@ -148,5 +154,9 @@ def tiletile_str(n: int) -> str:
         return "webp"
     elif n == TILETYPE_PBF:
         return "pbf"
+    elif n == TILETYPE_PBFGZ:
+        return "pbfgz"
+    elif n == TILETYPE_JSON:
+        return "json"
     else:
         return "unknown"

@@ -1,9 +1,4 @@
-use std::collections::{HashMap, HashSet};
-
-use utiles::bbox::BBox;
-
 use pyo3::exceptions::{self, PyValueError};
-
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
 use pyutiles::pybbox::PyBbox;
@@ -11,13 +6,13 @@ use pyutiles::pyiters::CoordinateIterator;
 use pyutiles::pylnglat::PyLngLat;
 use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
-
+use std::collections::{HashMap, HashSet};
+use utiles::bbox::BBox;
+use utiles::libtiletype;
 use utiles::zoom::ZoomOrZooms;
 
-use utiles::libtiletype;
-
+mod cli;
 mod pyutiles;
-// mod utiles;
 
 #[derive(FromPyObject)]
 pub struct TileTuple(u32, u32, u8);
@@ -758,11 +753,18 @@ fn feature(
     Ok(f)
 }
 
-/// Utiles python module
-#[pymodule]
-fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn lib_constants(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
     m.add("__build_profile__", env!("PROFILE"))?;
+    Ok(())
+}
+
+/// Utiles python module
+#[pymodule]
+#[pyo3(name = "_utiles")]
+fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    // lib constants
+    lib_constants(_py, m)?;
 
     // mercantile functions
     m.add_function(wrap_pyfunction!(parse_tile_arg, m)?)?;
@@ -805,17 +807,27 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tiletype, m)?)?;
     m.add_function(wrap_pyfunction!(tiletype_str, m)?)?;
     m.add_function(wrap_pyfunction!(tiletype2headers, m)?)?;
-    m.add("TILETYPE_UNKNOWN", libtiletype::TILETYPE_UNKNOWN)?; // 0
-    m.add("TILETYPE_GIF", libtiletype::TILETYPE_GIF)?; // 1
-    m.add("TILETYPE_JPG", libtiletype::TILETYPE_JPG)?; // 2
-    m.add("TILETYPE_PBF", libtiletype::TILETYPE_PBF)?; // 3
-    m.add("TILETYPE_PNG", libtiletype::TILETYPE_PNG)?; // 4
-    m.add("TILETYPE_WEBP", libtiletype::TILETYPE_WEBP)?; // 5
+    m.add("TILETYPE_UNKNOWN", libtiletype::TILETYPE_UNKNOWN)?;
+    m.add("TILETYPE_GIF", libtiletype::TILETYPE_GIF)?;
+    m.add("TILETYPE_JPG", libtiletype::TILETYPE_JPG)?;
+    m.add("TILETYPE_JSON", libtiletype::TILETYPE_JSON)?;
+    m.add("TILETYPE_PBF", libtiletype::TILETYPE_PBF)?;
+    m.add("TILETYPE_PBFGZ", libtiletype::TILETYPE_PBFGZ)?;
+    m.add("TILETYPE_PNG", libtiletype::TILETYPE_PNG)?;
+    m.add("TILETYPE_WEBP", libtiletype::TILETYPE_WEBP)?;
 
     // m.add_class::<TileTuple>()?;
     m.add_class::<PyTile>()?;
     m.add_class::<PyLngLat>()?;
     m.add_class::<PyLngLatBbox>()?;
     m.add_class::<PyBbox>()?;
+
+    // mbtiles...
+    // m.add_class::<PyMbtiles>()?;
+    // m.add_function(wrap_pyfunction!(query_db, m)?)?;
+
+    // rust-cli
+    m.add_function(wrap_pyfunction!(cli::ut_cli, m)?)?;
+
     Ok(())
 }

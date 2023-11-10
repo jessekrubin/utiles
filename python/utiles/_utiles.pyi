@@ -5,15 +5,15 @@ from typing import (
     Collection,
     Iterable,
     Iterator,
+    Literal,
     Optional,
     Sequence,
     Set,
     Tuple,
+    TypedDict,
     Union,
     overload,
 )
-
-from typing_extensions import Literal, TypedDict
 
 __version_lib__: str
 __build_profile__: Literal["debug", "release"]
@@ -22,7 +22,9 @@ TupleIntIntInt = Tuple[int, int, int]
 
 TILETYPE_GIF: int
 TILETYPE_JPG: int
+TILETYPE_JSON: int
 TILETYPE_PBF: int
+TILETYPE_PBFGZ: int
 TILETYPE_PNG: int
 TILETYPE_UNKNOWN: int
 TILETYPE_WEBP: int
@@ -206,6 +208,14 @@ def tiles_list(
     zooms: list[int] | tuple[int, ...] | int,
     truncate: bool = ...,
 ) -> list[Tile]: ...
+def tiles_count(
+    west: float,
+    south: float,
+    east: float,
+    north: float,
+    zooms: list[int] | tuple[int, ...] | int,
+    truncate: bool = ...,
+) -> int: ...
 def tiletype(buf: bytes) -> int: ...
 def tiletype2headers(tiletype_int: int) -> list[tuple[str, str]]: ...
 def tiletype_str(buf: bytes) -> str: ...
@@ -224,3 +234,6 @@ def _coords(obj: Any) -> Iterable[Tuple[float, float]]: ...
 def geojson_bounds(obj: Any) -> LngLatBbox: ...
 def pmtileid(*tile: TileLike) -> int: ...
 def from_pmtileid(pmtileid: int) -> Tile: ...
+
+# CLI
+def ut_cli(args: list[str]) -> None: ...
