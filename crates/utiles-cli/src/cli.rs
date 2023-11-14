@@ -1,6 +1,9 @@
 use std::io::{self, Write};
 use std::path::Path;
 
+use crate::lint::lint_main;
+use crate::shapes::{shapes_main, ShapesArgs};
+use crate::stdinterator::StdInterator;
 use clap::{Parser, Subcommand};
 use tracing::{debug, error};
 use tracing_subscriber::EnvFilter;
@@ -11,9 +14,6 @@ use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
 use utiles::{bounding_tile, Tile};
 use utilesqlite::mbtiles::Mbtiles;
-use crate::lint::lint_main;
-use crate::shapes::{shapes_main, ShapesArgs};
-use crate::stdinterator::StdInterator;
 
 /// A fictional versioning CLI
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -184,9 +184,6 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             let _res = lint_main(filepath, fix);
 
             panic!("not implemented (yet)")
-
-
-
         }
         Commands::Meta { filepath, min } => {
             debug!("meta: {filepath}");
