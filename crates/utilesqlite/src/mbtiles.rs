@@ -67,8 +67,6 @@ impl From<&Path> for Mbtiles {
         let conn = Connection::open(path).unwrap();
         Mbtiles { conn }
     }
-
-
 }
 
 pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
@@ -156,4 +154,11 @@ pub fn has_metadata_table_or_view(connection: &Connection) -> RusqliteResult<boo
     let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE name='metadata' AND (type='table' OR type='view')")?;
     let nrows = stmt.query([]).iter().count();
     Ok(nrows == 1)
+}
+
+pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool>{
+    // check for both metadata table/view and tiles table/view
+    let has_metadata = has_metadata_table_or_view(connection)?;
+    let has_tiles = has_tiles_table_or_view(connection)?;
+    Ok(has_metadata && has_tiles)
 }

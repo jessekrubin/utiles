@@ -1,4 +1,4 @@
-use std::cmp::Ord;
+
 use std::io::{self, Write};
 use std::path::Path;
 
@@ -188,7 +188,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
             println!("{}", string_msg);
             // debug!("{}", string_msg);
             // throw not implemented error
-            let _res = lint_main(filepath, fix);
+            lint_main(filepath, fix);
 
             panic!("not implemented (yet)")
         }

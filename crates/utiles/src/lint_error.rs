@@ -1,13 +1,19 @@
-use thiserror::__private::AsDisplay;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum UtilesLintError {
+
+    #[error("invalid path: {0}")]
+    InvalidPath(String),
+
     #[error("unable to open: {0}")]
     UnableToOpen(String),
 
     #[error("not a sqlite database error: {0}")]
     NotASqliteDb(String),
+
+    #[error("not a mbtiles database error: {0}")]
+    NotAMbtilesDb(String),
 
     #[error("no tiles table/view")]
     MbtMissingTiles,
