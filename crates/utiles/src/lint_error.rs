@@ -1,28 +1,34 @@
+use thiserror::__private::AsDisplay;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum UtilesLintError {
+    #[error("unable to open: {0}")]
+    UnableToOpen(String),
+
     #[error("not a sqlite database error: {0}")]
     NotASqliteDb(String),
 
-    #[error("unknown data store error")]
+    #[error("no tiles table/view")]
+    MbtMissingTiles,
+
+    #[error("no metadata table/view")]
+    MbtMissingMetadata,
+
+    #[error("missing index: {0}")]
+    MissingUniqueIndex(String),
+
+    #[error("duplicate metadata key: {0}")]
+    DuplicateMetadataKey(String),
+
+    #[error("metadata k/v missing: {0}")]
+    MbtMissingMetadataKv(String),
+
+    #[error("unknown error")]
     Unknown,
+
+    #[error("lint errors {0:?}")]
+    LintErrors(Vec<UtilesLintError>),
 }
-// use thiserror::Error;
-//
-// #[derive(Error, Debug)]
-// pub enum DataStoreError {
-//     #[error("data store disconnected")]
-//     Disconnect(#[from] io::Error),
-//     #[error("the data for key `{0}` is not available")]
-//     Redaction(String),
-//     #[error("invalid header (expected {expected:?}, found {found:?})")]
-//     InvalidHeader {
-//         expected: String,
-//         found: String,
-//     },
-//     #[error("unknown data store error")]
-//     Unknown,
-// }
 
 pub type UtilesLintResult<T> = Result<T, UtilesLintError>;

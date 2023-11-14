@@ -1,3 +1,4 @@
+use std::cmp::Ord;
 use std::io::{self, Write};
 use std::path::Path;
 
@@ -51,8 +52,8 @@ pub struct InputAndSequenceArgs {
 pub enum Commands {
     #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
     Lint {
-        #[arg(required = true)]
-        filepath: String,
+        #[arg(required = true, help = "filepath(s) or dirpath(s)", num_args(1..))]
+        fspaths: Vec<String>,
 
         #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
         fix: bool,
@@ -164,7 +165,7 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
     let filter = if args.debug {
         EnvFilter::new("DEBUG")
     } else {
-        EnvFilter::from_default_env()
+        EnvFilter::new("WARN")
     };
     // Install the global collector configured based on the filter.
     tracing_subscriber::fmt()
@@ -178,8 +179,14 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
     debug!("args: {:?}", args);
 
     match args.command {
-        Commands::Lint { filepath, fix } => {
-            println!("lint (fix -- {fix}): {filepath}");
+        Commands::Lint {
+            fspaths: filepath,
+            fix,
+        } => {
+            let fspaths_str = serde_json::to_string::<Vec<String>>(&filepath).unwrap();
+            let string_msg = format!("lint (fix -- {}): {}", fix, fspaths_str);
+            println!("{}", string_msg);
+            // debug!("{}", string_msg);
             // throw not implemented error
             let _res = lint_main(filepath, fix);
 
