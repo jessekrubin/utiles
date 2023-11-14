@@ -22,3 +22,6 @@ utiles = { path = "../utiles" }
 utilesqlite = { path = "../utilesqlite" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.96"
+ignore = "0.4.20"
+globset = "0.4.13"
+thiserror = "1.0.50"

@@ -20,6 +20,7 @@ pub mod bbox;
 pub mod constants;
 pub mod geojson;
 pub mod libtiletype;
+pub mod lint_error;
 pub mod lnglat;
 pub mod mbtiles;
 pub mod parsing;

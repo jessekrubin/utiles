@@ -44,6 +44,12 @@ impl Mbtiles {
         let mbt = Mbtiles { conn };
         Ok(mbt)
     }
+
+
+    // check that 'metadata' table exists and has a unique index on 'name'
+    pub fn has_unique_index_on_metadata(&self) ->  RusqliteResult<bool>{
+        has_unique_index_on_metadata(& self.conn)
+    }
 }
 
 impl From<&Path> for Mbtiles {
@@ -64,4 +70,16 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadata
         })?
         .collect::<RusqliteResult<Vec<MbtilesMetadataRow>, rusqlite::Error>>()?;
     Ok(mdata)
+}
+
+// check that 'metadata' table exists and has a unique index on 'name'
+pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = conn.prepare("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='metadata' AND name='name'")?;
+    let mut rows = stmt.query([])?;
+    let mut count = 0;
+    while let Some(_row) = rows.next()? {
+        count += 1;
+    }
+    let res = count == 1;
+    Ok(res)
 }

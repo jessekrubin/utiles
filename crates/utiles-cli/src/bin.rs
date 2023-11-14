@@ -1,4 +1,5 @@
 mod cli;
+mod lint;
 mod shapes;
 mod stdinterator;
 

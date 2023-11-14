@@ -11,7 +11,7 @@ use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
 use utiles::{bounding_tile, Tile};
 use utilesqlite::mbtiles::Mbtiles;
-
+use crate::lint::lint_main;
 use crate::shapes::{shapes_main, ShapesArgs};
 use crate::stdinterator::StdInterator;
 
@@ -181,7 +181,12 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
         Commands::Lint { filepath, fix } => {
             println!("lint (fix -- {fix}): {filepath}");
             // throw not implemented error
+            let _res = lint_main(filepath, fix);
+
             panic!("not implemented (yet)")
+
+
+
         }
         Commands::Meta { filepath, min } => {
             debug!("meta: {filepath}");
