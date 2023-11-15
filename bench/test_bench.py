@@ -4,6 +4,7 @@ from typing import Any, Callable, List, Tuple, Union
 import mercantile
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
+from pmtiles.tile import zxy_to_tileid, tileid_to_zxy
 
 import utiles
 
@@ -175,3 +176,79 @@ def test_feature(
 ) -> None:
     """Get feature of tile"""
     benchmark(func, mercantile.Tile(1, 2, 3))
+
+# ===================================================================
+# PMTILES ~ PMTILES ~ PMTILES ~ PMTILES ~ PMTILES ~ PMTILES ~ PMTILES
+# ===================================================================
+def _ut_xyz2pmtileid(x: int, y: int, z: int) -> int:
+    return utiles.pmtileid(x, y, z)
+
+def _pm_xyz2pmtileid(x: int, y: int, z: int) -> int:
+    return zxy_to_tileid(z, x, y)
+
+def _ut_pmtileid2xyz(tileid: int) -> Tuple[int, int, int]:
+    return utiles.from_pmtileid(tileid)
+
+def _pm_pmtileid2xyz(tileid: int) -> Tuple[int, int, int]:
+    return tileid_to_zxy(tileid)
+
+def test_xyz2pmtileid_eq():
+    for tile in TEST_TILES:
+        x, y, z = tile
+        pmtileid_from_pmtiles = zxy_to_tileid(
+            z,
+            x,
+            y,
+        )
+        pmtileid_from_utiles = utiles.pmtileid(
+            x, y, z
+        )
+        assert pmtileid_from_pmtiles == pmtileid_from_utiles
+
+        # round trip
+        (x, y, z) = _ut_pmtileid2xyz(pmtileid_from_utiles)
+        zxy_from_pmtiles = tileid_to_zxy(pmtileid_from_pmtiles)
+        assert (z, x, y) == zxy_from_pmtiles
+
+@pytest.mark.benchmark(
+    group="xyz2pmtile",
+)
+@pytest.mark.parametrize(
+    "tile",
+    [pytest.param(t, id=str(t)) for t in TEST_TILES],
+)
+@pytest.mark.parametrize(
+    "func",
+    [
+        pytest.param(_pm_xyz2pmtileid, id="pmtiles"),
+        pytest.param(_ut_xyz2pmtileid, id="utiles"),
+    ],
+)
+def test_xyz2pmtileid(
+        tile: Tuple[int, int, int],
+    func: Callable[[int, int, int], List[str]], benchmark: BenchmarkFixture
+) -> None:
+    """Get feature of tile"""
+    benchmark(func, *tile)
+
+@pytest.mark.benchmark(
+    group="pmtile2xyz",
+)
+@pytest.mark.parametrize(
+    "tile",
+    [pytest.param(t, id=str(t)) for t in TEST_TILES],
+)
+@pytest.mark.parametrize(
+    "func",
+    [
+        pytest.param(zxy_to_tileid, id="pmtiles"),
+        pytest.param(utiles.pmtileid2xyz, id="utiles"),
+    ],
+)
+def test_pmtileid2xyz(
+        tile: Tuple[int, int, int],
+        func: Callable[[int, int, int], List[str]], benchmark: BenchmarkFixture
+) -> None:
+    """Get feature of tile"""
+    pmid = utiles.pmtileid(*tile)
+    benchmark(func, pmid)

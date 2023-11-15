@@ -1,3 +1,5 @@
+use self::pyutiles::pytilelike::PyTileLike;
+use self::pyutiles::zoom::PyZoomOrZooms;
 use pyo3::exceptions::{self, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
@@ -57,6 +59,11 @@ fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
         Ok(xyz) => Ok(PyTile::from(xyz)),
         Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
     }
+}
+
+#[pyfunction]
+fn qk2xyz(quadkey: &str) -> PyResult<PyTile> {
+    quadkey2xyz(quadkey)
 }
 
 #[pyfunction]
@@ -278,6 +285,12 @@ fn pmtileid(args: &PyTuple) -> PyResult<u64> {
 }
 
 #[pyfunction]
+fn pmtileid2xyz(pmtileid: u64) -> PyResult<PyTile> {
+    let xyz = utiles::Tile::from_pmtileid(pmtileid);
+    Ok(PyTile::from(xyz))
+}
+
+#[pyfunction]
 fn from_pmtileid(pmtileid: u64) -> PyResult<PyTile> {
     let xyz = utiles::Tile::from_pmtileid(pmtileid);
     Ok(PyTile::from(xyz))
@@ -352,12 +365,6 @@ fn children(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
 fn neighbors(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
     let tile = parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z);
-    // if zoom < 0 {
-    //     return Err(PyErr::new::<PyValueError, _>(format!(
-    //         "zoom must be greater than or equal to tile zoom: {}",
-    //         tile.z
-    //     )))?;
-    // }
     if zoom < tile.xyz.z {
         return Err(PyErr::new::<PyValueError, _>(format!(
             "zoom must be greater than or equal to tile zoom: {}",
@@ -384,41 +391,6 @@ fn truncate_lnglat(lng: f64, lat: f64) -> PyResult<(f64, f64)> {
     let ll = utiles::LngLat::new(lng, lat);
     let truncated = utiles::truncate_lnglat(&ll);
     Ok((truncated.lng(), truncated.lat()))
-}
-
-#[derive(FromPyObject)]
-enum PyTileLike {
-    #[pyo3(transparent, annotation = "tuple[int, int, int]")]
-    Tuple3d((u32, u32, u8)),
-
-    #[pyo3(transparent, annotation = "Tile")]
-    PyTile(PyTile),
-}
-
-impl From<PyTileLike> for PyTile {
-    fn from(val: PyTileLike) -> Self {
-        match val {
-            PyTileLike::Tuple3d((x, y, z)) => PyTile::from(utiles::Tile::new(x, y, z)),
-            PyTileLike::PyTile(t) => t,
-        }
-    }
-}
-
-#[derive(FromPyObject)]
-enum PyZoomOrZooms {
-    #[pyo3(transparent, annotation = "int")]
-    Zoom(u8),
-    #[pyo3(transparent, annotation = "list[int]")]
-    Zooms(Vec<u8>),
-}
-
-impl From<PyZoomOrZooms> for ZoomOrZooms {
-    fn from(val: PyZoomOrZooms) -> Self {
-        match val {
-            PyZoomOrZooms::Zoom(z) => ZoomOrZooms::Zoom(z),
-            PyZoomOrZooms::Zooms(zs) => ZoomOrZooms::Zooms(zs),
-        }
-    }
 }
 
 #[pyclass]
@@ -801,6 +773,8 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(quadkey2xyz, m)?)?;
     m.add_function(wrap_pyfunction!(from_tuple, m)?)?;
     m.add_function(wrap_pyfunction!(pmtileid, m)?)?;
+    m.add_function(wrap_pyfunction!(pmtileid2xyz, m)?)?;
+    m.add_function(wrap_pyfunction!(qk2xyz, m)?)?;
     m.add_function(wrap_pyfunction!(from_pmtileid, m)?)?;
 
     // tiletype

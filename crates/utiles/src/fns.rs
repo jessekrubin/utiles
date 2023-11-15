@@ -2,6 +2,7 @@ use std::f64::consts::PI;
 use geo_types::coord;
 use std::num::FpCategory;
 use std::collections::{HashMap, HashSet};
+use crate::utile;
 use crate::{LngLat, Tile};
 use crate::bbox::{BBox, WebMercatorBbox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
@@ -135,10 +136,10 @@ pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
     while tiles[0].z < zoom {
         let (xtile, ytile, ztile) = (tiles[0].x, tiles[0].y, tiles[0].z);
         tiles.append(&mut vec![
-            Tile::new(xtile * 2, ytile * 2, ztile + 1),
-            Tile::new(xtile * 2 + 1, ytile * 2, ztile + 1),
-            Tile::new(xtile * 2 + 1, ytile * 2 + 1, ztile + 1),
-            Tile::new(xtile * 2, ytile * 2 + 1, ztile + 1),
+            utile!(xtile * 2, ytile * 2, ztile + 1),
+            utile!(xtile * 2 + 1, ytile * 2, ztile + 1),
+            utile!(xtile * 2 + 1, ytile * 2 + 1, ztile + 1),
+            utile!(xtile * 2, ytile * 2 + 1, ztile + 1),
         ]);
         tiles.remove(0);
     }
@@ -150,24 +151,24 @@ pub fn siblings(x: u32, y: u32, z: u8) -> Vec<Tile> {
     let sibrel = SiblingRelationship::from((x, y));
     match sibrel {
         SiblingRelationship::UpperLeft => vec![
-            Tile::new(x + 1, y, z),
-            Tile::new(x, y + 1, z),
-            Tile::new(x + 1, y + 1, z),
+            utile!(x + 1, y, z),
+            utile!(x, y + 1, z),
+            utile!(x + 1, y + 1, z),
         ],
         SiblingRelationship::UpperRight => vec![
-            Tile::new(x - 1, y, z),
-            Tile::new(x, y + 1, z),
-            Tile::new(x - 1, y + 1, z),
+            utile!(x - 1, y, z),
+            utile!(x, y + 1, z),
+            utile!(x - 1, y + 1, z),
         ],
         SiblingRelationship::LowerLeft => vec![
-            Tile::new(x + 1, y, z),
-            Tile::new(x, y - 1, z),
-            Tile::new(x + 1, y - 1, z),
+            utile!(x + 1, y, z),
+            utile!(x, y - 1, z),
+            utile!(x + 1, y - 1, z),
         ],
         SiblingRelationship::LowerRight => vec![
-            Tile::new(x - 1, y, z),
-            Tile::new(x, y - 1, z),
-            Tile::new(x - 1, y - 1, z),
+            utile!(x - 1, y, z),
+            utile!(x, y - 1, z),
+            utile!(x - 1, y - 1, z),
         ],
     }
 }
@@ -309,14 +310,14 @@ fn _tile_edge_info(x: u32, y: u32, z: u8) -> TileEdgeInfo {
 
 fn _neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
     vec![
-        Tile::new(x + 1, y, z),
-        Tile::new(x, y + 1, z),
-        Tile::new(x + 1, y + 1, z),
-        Tile::new(x - 1, y, z),
-        Tile::new(x, y - 1, z),
-        Tile::new(x - 1, y - 1, z),
-        Tile::new(x + 1, y - 1, z),
-        Tile::new(x - 1, y + 1, z),
+        utile!(x + 1, y, z),
+        utile!(x, y + 1, z),
+        utile!(x + 1, y + 1, z),
+        utile!(x - 1, y, z),
+        utile!(x, y - 1, z),
+        utile!(x - 1, y - 1, z),
+        utile!(x + 1, y - 1, z),
+        utile!(x - 1, y + 1, z),
     ]
 }
 
@@ -329,52 +330,52 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
     match edge_info {
         TileEdgeInfo::Middle => _neighbors_middle_tile(x, y, z),
         TileEdgeInfo::TopLeft => vec![
-            Tile::new(x + 1, y, z),
-            Tile::new(x, y + 1, z),
-            Tile::new(x + 1, y + 1, z),
+            utile!(x + 1, y, z),
+            utile!(x, y + 1, z),
+            utile!(x + 1, y + 1, z),
         ],
         TileEdgeInfo::TopRight => vec![
-            Tile::new(x - 1, y, z),
-            Tile::new(x, y + 1, z),
-            Tile::new(x - 1, y + 1, z),
+            utile!(x - 1, y, z),
+            utile!(x, y + 1, z),
+            utile!(x - 1, y + 1, z),
         ],
         TileEdgeInfo::BottomLeft => vec![
-            Tile::new(x + 1, y, z),
-            Tile::new(x, y - 1, z),
-            Tile::new(x + 1, y - 1, z),
+            utile!(x + 1, y, z),
+            utile!(x, y - 1, z),
+            utile!(x + 1, y - 1, z),
         ],
         TileEdgeInfo::BottomRight => vec![
-            Tile::new(x - 1, y, z),
-            Tile::new(x, y - 1, z),
-            Tile::new(x - 1, y - 1, z),
+            utile!(x - 1, y, z),
+            utile!(x, y - 1, z),
+            utile!(x - 1, y - 1, z),
         ],
         TileEdgeInfo::Left => vec![
-            Tile::new(x + 1, y, z),
-            Tile::new(x, y + 1, z),
-            Tile::new(x + 1, y + 1, z),
-            Tile::new(x, y - 1, z),
-            Tile::new(x + 1, y - 1, z),
+            utile!(x + 1, y, z),
+            utile!(x, y + 1, z),
+            utile!(x + 1, y + 1, z),
+            utile!(x, y - 1, z),
+            utile!(x + 1, y - 1, z),
         ],
         TileEdgeInfo::Right => vec![
-            Tile::new(x - 1, y, z),
-            Tile::new(x, y + 1, z),
-            Tile::new(x - 1, y + 1, z),
-            Tile::new(x, y - 1, z),
-            Tile::new(x - 1, y - 1, z),
+            utile!(x - 1, y, z),
+            utile!(x, y + 1, z),
+            utile!(x - 1, y + 1, z),
+            utile!(x, y - 1, z),
+            utile!(x - 1, y - 1, z),
         ],
         TileEdgeInfo::Top => vec![
-            Tile::new(x + 1, y, z),
-            Tile::new(x, y + 1, z),
-            Tile::new(x + 1, y + 1, z),
-            Tile::new(x - 1, y, z),
-            Tile::new(x - 1, y + 1, z),
+            utile!(x + 1, y, z),
+            utile!(x, y + 1, z),
+            utile!(x + 1, y + 1, z),
+            utile!(x - 1, y, z),
+            utile!(x - 1, y + 1, z),
         ],
         TileEdgeInfo::Bottom => vec![
-            Tile::new(x + 1, y, z),
-            Tile::new(x, y - 1, z),
-            Tile::new(x + 1, y - 1, z),
-            Tile::new(x - 1, y, z),
-            Tile::new(x - 1, y - 1, z),
+            utile!(x + 1, y, z),
+            utile!(x, y - 1, z),
+            utile!(x + 1, y - 1, z),
+            utile!(x - 1, y, z),
+            utile!(x - 1, y - 1, z),
         ],
     }
 }
@@ -394,12 +395,12 @@ pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
     let cell = (tmin.x, tmin.y, tmax.x, tmax.y);
     let z = bbox2zoom(cell);
     if z == 0 {
-        return Tile::new(0, 0, 0);
+        return utile!(0, 0, 0);
     }
 
     let x = cell.0 >> (32 - z);
     let y = cell.1 >> (32 - z);
-    Tile::new(x, y, z)
+    utile!(x, y, z)
 }
 
 #[must_use]
