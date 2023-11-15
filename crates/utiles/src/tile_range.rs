@@ -55,11 +55,11 @@ impl TileRange {
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
 
         let miny = match flip.unwrap_or(true) {
-            true => crate::flipy(self.miny, self.zoom),
+            true => crate::fns::flipy(self.miny, self.zoom),
             false => self.miny,
         };
         let maxy = match flip.unwrap_or(true) {
-            true => crate::flipy(self.maxy, self.zoom),
+            true => crate::fns::flipy(self.maxy, self.zoom),
             false => self.maxy,
         };
         format!(
