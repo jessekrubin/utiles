@@ -39,36 +39,6 @@ macro_rules! utile {
     };
 }
 
-impl From<Tile> for (u32, u32, u8) {
-    fn from(tile: Tile) -> Self {
-        (tile.x, tile.y, tile.z)
-    }
-}
-
-// fn tile_tupless_range(
-//     minx: i32,
-//     maxx: i32,
-//     miny: i32,
-//     maxy: i32,
-//     zoom_or_zooms: ZoomOrZooms,
-// ) -> impl Iterator<Item = (i32, i32, i32)> {
-//     let zooms = as_zooms(zoom_or_zooms);
-//     zooms
-//         .into_iter()
-//         .flat_map(move |zoom| tiles_range_zoom(minx, maxx, miny, maxy, zoom))
-// }
-
-// fn bounds2xy(bounds: (f64, f64, f64, f64), zoom: i32) -> (i32, i32, i32, i32) {
-//     let (minx, miny) = xy(bounds.0, bounds.1, None);
-//     let (maxx, maxy) = xy(bounds.2, bounds.3, None);
-//     let z2 = 2.0_f64.powi(zoom);
-//     let minx = (minx * z2).floor() as i32;
-//     let miny = (miny * z2).floor() as i32;
-//     let maxx = (maxx * z2).floor() as i32;
-//     let maxy = (maxy * z2).floor() as i32;
-//     (minx, miny, maxx, maxy)
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;

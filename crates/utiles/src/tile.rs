@@ -692,3 +692,9 @@ mod tests {
         assert_eq!(tile_from_obj_with_tile_array, Tile::new(1, 2, 3));
     }
 }
+
+impl From<Tile> for (u32, u32, u8) {
+    fn from(tile: Tile) -> Self {
+        (tile.x, tile.y, tile.z)
+    }
+}
