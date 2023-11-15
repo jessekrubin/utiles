@@ -13,9 +13,10 @@ use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_tuple::XYZ;
 use crate::{
-    bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
-    siblings, traits, ul, ur, xy, xyz2quadkey,
+    pmtiles, quadkey2tile,
+    traits, xyz2quadkey,
 };
+use crate::fns::{bounds, children, flipy, ll, lr, neighbors, parent, siblings, ul, ur, xy};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -149,7 +150,7 @@ impl Tile {
     #[allow(dead_code)]
     #[must_use]
     pub fn valid(&self) -> bool {
-        crate::valid(self.x, self.y, self.z)
+        crate::fns::valid(self.x, self.y, self.z)
     }
 
     #[must_use]
