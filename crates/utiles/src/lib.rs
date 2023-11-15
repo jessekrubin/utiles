@@ -1,7 +1,6 @@
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
-
 use std::error::Error;
 use std::collections::HashSet;
 pub use lnglat::LngLat;
@@ -28,6 +27,8 @@ pub mod traits;
 pub mod zoom;
 pub mod fns;
 pub mod quadkey;
+
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Tile macro to create a new tile.
 ///  - do you need this? probably not
