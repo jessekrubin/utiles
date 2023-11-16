@@ -221,9 +221,10 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
 // not sure why this is needed... cargo thinks it's unused???
 #[allow(dead_code)]
 pub fn cli_main_sync(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> u8 {
-    tokio::runtime::Builder::new_multi_thread()
+    let r = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
         .unwrap()
-        .block_on(async { cli_main(argv, loop_fn).await })
+        .block_on(async { cli_main(argv, loop_fn).await });
+    r
 }
