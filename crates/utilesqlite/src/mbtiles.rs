@@ -60,6 +60,19 @@ impl Mbtiles {
     pub fn minzoom_maxzoom(&self) -> RusqliteResult<MinZoomMaxZoom> {
         minzoom_maxzoom(&self.conn)
     }
+
+    pub fn application_id (&self) -> RusqliteResult<u32> {
+        // PRAGMA application_id
+        let mut stmt = self.conn.prepare("PRAGMA application_id")?;
+        let mut rows = stmt.query([])?;
+        let row = rows.next()?.unwrap();
+        let app_id: u32 = row.get(0)?;
+        Ok(app_id)
+    }
+
+    pub fn magic_number(&self) -> RusqliteResult<u32> {
+        self.application_id()
+    }
 }
 
 impl From<&Path> for Mbtiles {

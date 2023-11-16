@@ -5,7 +5,7 @@ use globset::{Glob, GlobSetBuilder};
 use ignore::WalkBuilder;
 use tracing::{debug, info, warn};
 use utiles::lint_error::{UtilesLintError, UtilesLintResult};
-use utiles::mbtiles::{metadata2duplicates, metadata2map};
+use utiles::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
 use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 
 use utilesqlite::squealite;
@@ -30,18 +30,25 @@ pub fn lint_mbtiles_file(mbtiles: Mbtiles, fix: bool) -> Vec<UtilesLintError> {
     // throw not implemented error
     // println!("{}", fspath.display());
     warn!("lint (fix -- {fix}) not implemented yet");
-
-    // let mbtiles_result =
-    //     utilesqlite::mbtiles::Mbtiles::from_filepath_str(fspath.to_str().unwrap());
-
-    // if mbtiles_result.is_err() {
-    //     println!("ERROR: {}", mbtiles_result.err().unwrap());
-    //     return vec![UtilesLintError::UnableToOpen(
-    //         fspath.to_str().unwrap().to_string(),
-    //     )];
-    // }
-
     let mut errors = Vec::new();
+    match mbtiles.magic_number() {
+        Ok(magic_number) => {
+            match magic_number {
+                MBTILES_MAGIC_NUMBER => {}
+                // zero
+                0 => {
+                    errors.push(UtilesLintError::MbtMissingMagicNumber);
+                }
+                _ => {
+                    errors.push(UtilesLintError::MbtUnknownMagicNumber(magic_number));
+                }
+            }
+        }
+        Err(e) => {
+            errors.push(UtilesLintError::Unknown(e.to_string()));
+        }
+    }
+
     // let mbtiles = mbtiles_result.unwrap();
     let has_unique_index_on_metadata_name =
         mbtiles.has_unique_index_on_metadata().unwrap();
@@ -56,7 +63,9 @@ pub fn lint_mbtiles_file(mbtiles: Mbtiles, fix: bool) -> Vec<UtilesLintError> {
         let duplicate_rows = metadata2duplicates(rows.clone());
         if !duplicate_rows.is_empty() {
             errors.extend(
-                duplicate_rows.keys().map(|k| UtilesLintError::DuplicateMetadataKey(k.clone()))
+                duplicate_rows
+                    .keys()
+                    .map(|k| UtilesLintError::DuplicateMetadataKey(k.clone()))
                     .collect::<Vec<UtilesLintError>>(),
             );
         }
@@ -69,10 +78,17 @@ pub fn lint_mbtiles_file(mbtiles: Mbtiles, fix: bool) -> Vec<UtilesLintError> {
     errors
 }
 
-pub fn lint_filepath(fspath: &Path, fix: bool) -> UtilesLintResult<Vec<UtilesLintError>> {
+pub fn lint_filepath(
+    fspath: &Path,
+    fix: bool,
+) -> UtilesLintResult<Vec<UtilesLintError>> {
     let fspath_str = match fspath.to_str() {
         Some(s) => s,
-        None => return Err(UtilesLintError::InvalidPath (fspath.to_str().unwrap().to_string())),
+        None => {
+            return Err(UtilesLintError::InvalidPath(
+                fspath.to_str().unwrap().to_string(),
+            ))
+        }
     };
 
     if !fspath_str.ends_with(".mbtiles") {
@@ -189,7 +205,6 @@ pub fn lint_main(fspaths: Vec<String>, fix: bool) {
         warn!("No files found");
         return;
     }
-
     lint_filepaths(filepaths, fix)
 }
 

@@ -1,8 +1,6 @@
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
-use std::error::Error;
-use std::collections::HashSet;
 pub use lnglat::LngLat;
 pub use tile::Tile;
 pub use crate::fns::*;

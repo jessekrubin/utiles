@@ -21,6 +21,12 @@ pub enum UtilesLintError {
     #[error("no metadata table/view")]
     MbtMissingMetadata,
 
+    #[error("missing mbtiles magic-number/application_id")]
+    MbtMissingMagicNumber,
+
+    #[error("Unrecognized mbtiles magic-number/application_id: {0} != 0x4d504258")]
+    MbtUnknownMagicNumber(u32),
+
     #[error("missing index: {0}")]
     MissingUniqueIndex(String),
 
@@ -30,8 +36,8 @@ pub enum UtilesLintError {
     #[error("metadata k/v missing: {0}")]
     MbtMissingMetadataKv(String),
 
-    #[error("unknown error")]
-    Unknown,
+    #[error("unknown error: {0}")]
+    Unknown(String),
 
     #[error("lint errors {0:?}")]
     LintErrors(Vec<UtilesLintError>),
