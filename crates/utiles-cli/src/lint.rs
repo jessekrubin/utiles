@@ -24,7 +24,7 @@ fn is_file(path: &str) -> bool {
     path.is_file()
 }
 
-pub fn lint_mbtiles_file(mbtiles: Mbtiles, fix: bool) -> Vec<UtilesLintError> {
+pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
     // println!("_________ lint_filepath _________");
     // println!("lint (fix -- {fix})");
     // throw not implemented error
@@ -55,11 +55,7 @@ pub fn lint_mbtiles_file(mbtiles: Mbtiles, fix: bool) -> Vec<UtilesLintError> {
 
     let rows = mbtiles.metadata().unwrap();
 
-    if !has_unique_index_on_metadata_name {
-        errors.push(UtilesLintError::MissingUniqueIndex(
-            "metadata.name".to_string(),
-        ));
-    } else {
+    if has_unique_index_on_metadata_name {
         let duplicate_rows = metadata2duplicates(rows.clone());
         if !duplicate_rows.is_empty() {
             errors.extend(
@@ -69,6 +65,10 @@ pub fn lint_mbtiles_file(mbtiles: Mbtiles, fix: bool) -> Vec<UtilesLintError> {
                     .collect::<Vec<UtilesLintError>>(),
             );
         }
+    } else {
+        errors.push(UtilesLintError::MissingUniqueIndex(
+            "metadata.name".to_string(),
+        ));
     }
     let map = metadata2map(rows);
     let map_errs = lint_metadata_map(&map);
@@ -82,14 +82,19 @@ pub fn lint_filepath(
     fspath: &Path,
     fix: bool,
 ) -> UtilesLintResult<Vec<UtilesLintError>> {
-    let fspath_str = match fspath.to_str() {
-        Some(s) => s,
-        None => {
-            return Err(UtilesLintError::InvalidPath(
-                fspath.to_str().unwrap().to_string(),
-            ))
-        }
+    let Some(fspath_str) = fspath.to_str() else {
+        return Err(UtilesLintError::InvalidPath(
+            fspath.to_str().unwrap().to_string(),
+        ));
     };
+    // let fspath_str = match fspath.to_str() {
+    //     Some(s) => s,
+    //     None => {
+    //         return Err(UtilesLintError::InvalidPath(
+    //             fspath.to_str().unwrap().to_string(),
+    //         ))
+    //     }
+    // };
 
     if !fspath_str.ends_with(".mbtiles") {
         let conn = match squealite::open(fspath_str) {
@@ -104,7 +109,7 @@ pub fn lint_filepath(
             Ok(false) => return Ok(vec![]),
             Ok(true) => {
                 let mbtiles = Mbtiles::from_conn(conn);
-                return Ok(lint_mbtiles_file(mbtiles, fix));
+                return Ok(lint_mbtiles_file(&mbtiles, fix));
             }
             Err(e) => {
                 warn!("Unable to determine if file is mbtiles: {}", e);
@@ -114,7 +119,7 @@ pub fn lint_filepath(
     }
 
     match utilesqlite::mbtiles::Mbtiles::from_filepath_str(fspath_str) {
-        Ok(mbtiles) => Ok(lint_mbtiles_file(mbtiles, fix)),
+        Ok(mbtiles) => Ok(lint_mbtiles_file(&mbtiles, fix)),
         Err(e) => {
             warn!("ERROR: {}", e);
             Err(UtilesLintError::UnableToOpen(fspath_str.to_string()))
@@ -160,7 +165,7 @@ fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
     }
 }
 
-pub fn find_filepaths(fspaths: Vec<String>) -> Vec<PathBuf> {
+pub fn find_filepaths(fspaths: &[String]) -> Vec<PathBuf> {
     let fspath = fspaths[0].clone();
 
     let mut glob_builder = GlobSetBuilder::new();
@@ -176,7 +181,7 @@ pub fn find_filepaths(fspaths: Vec<String>) -> Vec<PathBuf> {
     } else if is_dir(&fspath) {
         let dirpath = PathBuf::from(fspath).canonicalize().unwrap();
         let walk_builder = WalkBuilder::new(dirpath);
-        for result in walk_builder.build().filter_map(|e| e.ok()) {
+        for result in walk_builder.build().filter_map(std::result::Result::ok) {
             if !result.file_type().unwrap().is_file() {
                 continue;
             }
@@ -195,7 +200,7 @@ pub fn find_filepaths(fspaths: Vec<String>) -> Vec<PathBuf> {
     filepaths
 }
 
-pub fn lint_main(fspaths: Vec<String>, fix: bool) {
+pub fn lint_main(fspaths: &[String], fix: bool) {
     let filepaths = find_filepaths(fspaths);
     if fix {
         warn!("lint fix is not implemented yet");
@@ -205,14 +210,14 @@ pub fn lint_main(fspaths: Vec<String>, fix: bool) {
         warn!("No files found");
         return;
     }
-    lint_filepaths(filepaths, fix)
+    lint_filepaths(filepaths, fix);
 }
 
 pub fn lint_metadata_map(map: &HashMap<String, String>) -> Vec<UtilesLintError> {
     let errs = REQUIRED_METADATA_FIELDS
         .iter()
-        .filter(|key| !map.contains_key(&key.to_string()))
-        .map(|key| UtilesLintError::MbtMissingMetadataKv(key.to_string()))
+        .filter(|key| !map.contains_key(&(**key).to_string()))
+        .map(|key| UtilesLintError::MbtMissingMetadataKv((*key).to_string()))
         .collect::<Vec<UtilesLintError>>();
     errs
 }

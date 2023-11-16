@@ -32,6 +32,19 @@ pub struct InputAndSequenceArgs {
     seq: bool,
 }
 
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TilesArgs {
+    /// The remote to clone
+    #[arg(required = true)]
+    pub zoom: u8,
+
+    #[arg(required = false)]
+    pub input: Option<String>,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub seq: bool,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
@@ -66,17 +79,17 @@ pub enum Commands {
     // TILE CLI UTILS - MERCANTILE LIKE CLI
     // ========================================================================
     #[command(name = "tiles", about = "Echo tiles of bbox", long_about = None)]
-    Tiles {
-        #[arg(required = true)]
-        zoom: u8,
-
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-    },
-
+    Tiles(TilesArgs),
+    // {
+    //     #[arg(required = true)]
+    //     zoom: u8,
+    //
+    //     #[arg(required = false)]
+    //     input: Option<String>,
+    //
+    //     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    //     seq: bool,
+    // },
     #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
     Quadkey {
         #[arg(required = false)]

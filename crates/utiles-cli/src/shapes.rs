@@ -103,7 +103,7 @@ struct TileWithProperties {
 
 pub fn shapes_main(args: ShapesArgs) {
     debug!("{:?}", args);
-    let input_lines = StdInterator::new(args.input).unwrap();
+    let input_lines = StdInterator::new(args.input);
     let lines = input_lines
         .filter(|l| !l.is_err())
         .filter(|l| !l.as_ref().unwrap().is_empty())
@@ -111,20 +111,26 @@ pub fn shapes_main(args: ShapesArgs) {
     let parsed_lines = lines.map(|l| {
         let ln = l.unwrap();
         let val: Value = serde_json::from_str::<Value>(&ln).unwrap();
-        let properties: Option<Map<String, Value>> = match val["properties"].is_object()
-        {
-            true => {
-                let properties = val["properties"].as_object().unwrap().clone();
-                Option::from(properties)
-            }
-            false => None,
+        let properties: Option<Map<String, Value>> = if val["properties"].is_object() {
+            let properties = val["properties"].as_object().unwrap().clone();
+            Option::from(properties)
+        } else {
+            None
         };
-        let id: Option<String> = match val["id"].is_string() {
-            true => {
-                let id = val["id"].as_str().unwrap().to_string();
-                Option::from(id)
-            }
-            false => None,
+        // let properties: Option<Map<String, Value>> = match val["properties"].is_object()
+        // {
+        //     true => {
+        //         let properties = val["properties"].as_object().unwrap().clone();
+        //         Option::from(properties)
+        //     }
+        //     false => None,
+        // };
+
+        let id = if val["id"].is_string() {
+            let id = val["id"].as_str().unwrap().to_string();
+            Option::from(id)
+        } else {
+            None
         };
         let t = Tile::from(&val);
         TileWithProperties {
@@ -138,18 +144,15 @@ pub fn shapes_main(args: ShapesArgs) {
     let feature_options: FeatureOptions = FeatureOptions {
         fid: None,
         projection: match args.project {
-            Some(project) => match project {
-                ShapesProject {
-                    geographic: true,
-                    mercator: false,
-                } => Projection::Geographic,
-                ShapesProject {
-                    geographic: false,
-                    mercator: true,
-                } => Projection::Mercator,
-                _ => Projection::Geographic,
-            },
-            None => Projection::Geographic,
+            Some(ShapesProject {
+                geographic: false,
+                mercator: true,
+            }) => Projection::Mercator,
+            // ShapesProject {
+            //     geographic: false,
+            //     mercator: true,
+            // } => Projection::Mercator,
+            _ => Projection::Geographic,
         },
         props: None,
         buffer: args.buffer,
@@ -164,17 +167,20 @@ pub fn shapes_main(args: ShapesArgs) {
     let mut lons: Vec<f64> = Vec::new();
     let mut lats: Vec<f64> = Vec::new();
     let output_bbox = match args.output_mode {
-        Some(output_mode) => match output_mode {
-            ShapesOutputMode {
-                feature: true,
-                bbox: false,
-            } => false,
+        Some(output_mode) => matches!(
+            output_mode,
             ShapesOutputMode {
                 feature: false,
                 bbox: true,
-            } => true,
-            _ => false,
-        },
+            }
+        ),
+        // Some(output_mode) => match output_mode {
+        //     ShapesOutputMode {
+        //         feature: false,
+        //         bbox: true,
+        //     } => true,
+        //     _ => false,
+        // },
         None => false,
     };
 

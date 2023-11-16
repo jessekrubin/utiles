@@ -14,30 +14,49 @@ pub struct StdInterator {
 }
 
 impl StdInterator {
-    pub fn new(input: Option<String>) -> io::Result<Self> {
-        let source = match input {
-            Some(file_content) => {
-                if file_content == "-" {
-                    debug!("reading from stdin - got '-'");
-                    let reader = Box::new(io::BufReader::new(io::stdin()));
-                    StdInteratorSource::StdinRead(reader)
-                } else {
-                    debug!("reading from args");
-                    let args = file_content
-                        .lines() // This assumes that each line is separated by '\n'
-                        .map(std::string::ToString::to_string)
-                        .collect::<VecDeque<String>>();
-                    debug!("args: {:?}", args);
-                    StdInteratorSource::Args(args)
-                }
-            }
-            None => {
+    pub fn new(input: Option<String>) -> Self {
+        // let source = match input {
+        //     Some(file_content) => {
+        //         if file_content == "-" {
+        //             debug!("reading from stdin - got '-'");
+        //             let reader = Box::new(io::BufReader::new(io::stdin()));
+        //             StdInteratorSource::StdinRead(reader)
+        //         } else {
+        //             debug!("reading from args");
+        //             let args = file_content
+        //                 .lines() // This assumes that each line is separated by '\n'
+        //                 .map(std::string::ToString::to_string)
+        //                 .collect::<VecDeque<String>>();
+        //             debug!("args: {:?}", args);
+        //             StdInteratorSource::Args(args)
+        //         }
+        //     }
+        //     None => {
+        //         let reader = Box::new(io::BufReader::new(io::stdin()));
+        //         debug!("reading from stdin - no args");
+        //         StdInteratorSource::StdinRead(reader)
+        //     }
+        // };
+        let source = if let Some(file_content) = input {
+            if file_content == "-" {
+                debug!("reading from stdin - got '-'");
                 let reader = Box::new(io::BufReader::new(io::stdin()));
-                debug!("reading from stdin - no args");
                 StdInteratorSource::StdinRead(reader)
+            } else {
+                debug!("reading from args");
+                let args = file_content
+                    .lines() // This assumes that each line is separated by '\n'
+                    .map(std::string::ToString::to_string)
+                    .collect::<VecDeque<String>>();
+                debug!("args: {:?}", args);
+                StdInteratorSource::Args(args)
             }
+        } else {
+            let reader = Box::new(io::BufReader::new(io::stdin()));
+            debug!("reading from stdin - no args");
+            StdInteratorSource::StdinRead(reader)
         };
-        Ok(Self { source })
+        Self { source }
     }
 }
 
@@ -45,7 +64,21 @@ impl FromStr for StdInterator {
     type Err = io::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::new(Some(s.to_string()))
+        Ok(StdInterator::new(Some(s.to_string())))
+        // let source = if s == "-" {
+        //     debug!("reading from stdin - got '-'");
+        //     let reader = Box::new(io::BufReader::new(io::stdin()));
+        //     StdInteratorSource::StdinRead(reader)
+        // } else {
+        //     debug!("reading from args");
+        //     let args = s
+        //         .lines() // This assumes that each line is separated by '\n'
+        //         .map(std::string::ToString::to_string)
+        //         .collect::<VecDeque<String>>();
+        //     debug!("args: {:?}", args);
+        //     StdInteratorSource::Args(args)
+        // };
+        // Ok(Self { source })
     }
 }
 
