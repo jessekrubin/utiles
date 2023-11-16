@@ -1,5 +1,5 @@
 use pyo3::{pyfunction, Python};
-use utiles_cli::cli::cli_main_sync;
+use utiles_cli::cli_main_sync;
 
 #[pyfunction]
 pub fn ut_cli(py: Python, args: Option<Vec<String>>) -> u8 {
