@@ -38,6 +38,8 @@ pub struct TilesArgs {
     #[arg(required = true)]
     pub zoom: u8,
 
+    // #[command(flatten)]
+    // pub shared: InputAndSequenceArgs,
     #[arg(required = false)]
     pub input: Option<String>,
 

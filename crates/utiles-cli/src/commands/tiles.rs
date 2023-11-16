@@ -1,12 +1,11 @@
-use std::io::{self, Write};
-
+use crate::args::TilesArgs;
+use crate::stdinterator_filter::stdin_filtered;
+use std::io;
+use std::io::Write;
 use tracing::debug;
 use utiles::parsing::parse_bbox;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
-
-use crate::args::TilesArgs;
-use crate::stdinterator_filter::stdin_filtered;
 
 pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) {
     let lines = stdin_filtered(args.input);

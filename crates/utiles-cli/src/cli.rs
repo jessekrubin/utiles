@@ -2,7 +2,7 @@ use std::io::{self};
 use std::path::Path;
 
 use crate::args::{Cli, Commands};
-use crate::commands::tiles_main;
+use crate::commands::tiles::tiles_main;
 use crate::lint::lint_main;
 use crate::shapes::shapes_main;
 use crate::stdinterator_filter;
@@ -140,36 +140,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
                 println!("{}{}", rs, tile.json_arr());
             }
         }
-        // Commands::Tiles{ zoom, input, seq } => {
-        //     let lines = stdin_filtered(input);
-        //     let mut stdout = io::stdout();
-        //     let tiles = lines
-        //         .map(|l| {
-        //             let s = l.unwrap();
-        //             debug!("l: {:?}", s);
-        //             parse_bbox(&s).unwrap()
-        //         })
-        //         .flat_map(|b| {
-        //             tiles((b.west, b.south, b.east, b.north), ZoomOrZooms::Zoom(zoom))
-        //         })
-        //         .enumerate();
-        //     // let bboxes = lines
-        //     for (i, tile) in tiles {
-        //         let rs = if seq { "\x1e\n" } else { "" };
-        //         // println!("{}{}", rs, tile.json_arr());
-        //         writeln!(stdout, "{}{}", rs, tile.json_arr()).unwrap();
-        //         // call loop_fn if it's defined every 1000 iterations for signal break
-        //         if i % 1024 == 0 {
-        //             stdout.flush().unwrap();
-        //             if let Some(f) = loop_fn {
-        //                 f();
-        //             }
-        //         }
-        //     }
-        //     stdout.flush().unwrap();
-        // }
         Commands::Tiles(args) => tiles_main(args, loop_fn),
-
         Commands::Neighbors { input, seq } => {
             let lines = stdinterator_filter::stdin_filtered(input);
             let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
