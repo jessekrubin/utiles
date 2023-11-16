@@ -6,6 +6,7 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::similar_names)]
+#![allow(clippy::too_many_lines)]
 mod args;
 mod cli;
 mod commands;
