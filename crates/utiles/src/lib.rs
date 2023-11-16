@@ -1,6 +1,9 @@
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
+#![deny(clippy::correctness)]
+#![deny(clippy::pedantic)]
+
 pub use lnglat::LngLat;
 pub use tile::Tile;
 pub use crate::fns::*;
@@ -41,6 +44,8 @@ macro_rules! utile {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use std::collections::HashSet;
 
     #[test]
     fn zoom_or_zooms() {
