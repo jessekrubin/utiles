@@ -51,10 +51,10 @@ pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
     let parts: Vec<f64> = s.split(',').filter_map(|p| p.parse::<f64>().ok()).collect();
 
     if parts.len() == 4 {
-        return Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]));
+        Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
     } else {
         let msg = format!("Invalid bbox: {}", s);
-        return Err(msg.into());
+        Err(msg.into())
     }
 }
 
