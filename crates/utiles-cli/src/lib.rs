@@ -1,3 +1,6 @@
+#![deny(clippy::all)]
+#![deny(clippy::perf)]
+#![deny(clippy::style)]
 mod args;
 pub mod cli;
 pub mod lint;
