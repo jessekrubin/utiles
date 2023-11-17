@@ -585,16 +585,18 @@ fn merge(merge_set: &HashSet<Tile>) -> (HashSet<Tile>, bool) {
 
 #[allow(dead_code)]
 #[must_use]
-pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
+pub fn simplify<S: ::std::hash::BuildHasher + Default>(tiles: HashSet<Tile, S>) -> HashSet<Tile> {
+// pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
     // Parse tiles from the input sequence
-    let mut _tiles = tiles.into_iter().collect::<Vec<Tile>>();
+    let mut tilesv = tiles.into_iter().collect::<Vec<Tile>>();
 
-    _tiles.sort_by_key(|t| t.z);
+    tilesv.sort_by_key(|t| t.z);
     // Check to see if a tile and its parent both already exist.
     // Ensure that tiles are sorted by zoom so parents are encountered first.
     // If so, discard the child (it's covered in the parent)
-    let mut root_set: HashSet<Tile> = HashSet::new();
-    for tile in &_tiles {
+    // let mut root_set: HashSet<Tile> = HashSet::new();
+    let mut root_set: HashSet<Tile> = HashSet::default();
+    for tile in &tilesv {
         let mut is_new_tile = true;
         for i in 0..tile.z {
             let supertile = tile.parent(Some(i));

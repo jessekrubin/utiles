@@ -2,7 +2,8 @@
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
 #![deny(clippy::correctness)]
-#![deny(clippy::pedantic)]
+#![warn(clippy::pedantic)]
+#![allow(clippy::module_name_repetitions)]
 
 pub use lnglat::LngLat;
 pub use tile::Tile;

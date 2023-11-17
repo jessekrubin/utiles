@@ -106,7 +106,9 @@ impl TileRanges {
 
     #[must_use]
     pub fn length(&self) -> u64 {
-        self.ranges.iter().map(|r| r.length()).sum()
+        self.ranges.iter().map(
+            TileRange::length,
+        ).sum()
     }
 
     #[must_use]
