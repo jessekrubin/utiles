@@ -12,6 +12,7 @@ use std::collections::{HashMap, HashSet};
 use utiles::bbox::BBox;
 use utiles::libtiletype;
 use utiles::zoom::ZoomOrZooms;
+use utiles::VERSION;
 
 mod cli;
 mod pyutiles;
@@ -727,6 +728,7 @@ fn feature(
 
 fn lib_constants(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
+    m.add("__version__", VERSION)?;
     m.add("__build_profile__", env!("PROFILE"))?;
     Ok(())
 }

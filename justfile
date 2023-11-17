@@ -1,7 +1,7 @@
 dev: develop test
 
 develop:
-    maturin develop
+    maturin develop -m utiles-pyo3/Cargo.toml
 
 cargo-test:
     cargo test
@@ -16,10 +16,10 @@ dev-rel:
     maturin develop --release
 
 test:
-    pytest --benchmark-skip
+    cd utiles-pyo3 && pytest --benchmark-skip
 
 test-release: build-release
-    pytest
+    cd utiles-pyo3 && pytest --benchmark-skip
 
 bench: build-release
     pytest -vv
@@ -28,15 +28,15 @@ cargo-fmt:
     cargo fmt
 
 sort-all:
-    sort-all python/utiles/__init__.py
+    sort-all utiles-pyo3/python/utiles/__init__.py
 
 black:
-    black python tests
+    black utiles-pyo3
 
 fmt: cargo-fmt black
 
 mypy:
-    mypy python/utiles tests
+    mypy utiles-pyo3/python/utiles utiles-pyo3/tests
 
 ruff:
     ruff .
@@ -52,5 +52,5 @@ lintpy: ruff mypy
 lintrs: clippy
 
 lint: lintpy lintrs
-    
-    
+
+

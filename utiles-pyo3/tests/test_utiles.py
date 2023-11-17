@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import tomli
 from pathlib import Path
 from typing import Any, List, Tuple, Union
 
@@ -10,15 +10,36 @@ import utiles
 from utiles import Tile
 
 PWD = Path(__file__).parent
-REPO_ROOT = PWD.parent
 
+def _repo_root () -> Path:
+    _pwd = Path(__file__).parent
+    for i in range(5):
+        if (_pwd / ".git").exists():
+            return _pwd
+        _pwd = _pwd.parent
+    raise RuntimeError("Could not find repo root")
+
+REPO_ROOT = _repo_root()
+
+def _version_from_cargo_toml():
+    Path("Cargo.toml").read_text()
+    cargo_version = tomli.loads(Path("Cargo.toml").read_text())["package"]["version"]
+    return cargo_version
+
+def _version_from_workspace_package():
+    root_cargo_toml_filepath = REPO_ROOT / "Cargo.toml"
+    s = root_cargo_toml_filepath.read_text()
+    print(
+        tomli.loads(s)
+    )
+    return tomli.loads(s)['workspace']["package"]["version"]
 
 def test_version() -> None:
     assert utiles.__version__ is not None
-    import tomli
 
-    Path("Cargo.toml").read_text()
-    cargo_version = tomli.loads(Path("Cargo.toml").read_text())["package"]["version"]
+
+
+    cargo_version = _version_from_workspace_package()
     assert utiles.__version__ == cargo_version
     pyproject_version = tomli.loads(Path("pyproject.toml").read_text())["project"][
         "version"
