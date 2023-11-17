@@ -38,8 +38,9 @@ jobs:
         shell: bash
         run: |
           set -e
+          cd utiles-pyo3
           pip install click
-          pip install utiles --no-index --no-deps --find-links utiles-pyo3/dist --force-reinstall
+          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
 
