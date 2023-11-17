@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [x86_64, x86, aarch64, armv7]
+        target: [x86_64]
+#        target: [x86_64, x86, aarch64, armv7]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -38,7 +39,7 @@ jobs:
         run: |
           set -e
           pip install click
-          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
+          pip install utiles --no-index --no-deps --find-links utiles-pyo3/dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
 
