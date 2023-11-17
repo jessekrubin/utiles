@@ -1,5 +1,4 @@
 #[tokio::main]
-async fn main() -> tokio_rusqlite::Result<()> {
+async fn main() {
     println!("utilesqlite::main() ~ TBD");
-    Ok(())
 }
