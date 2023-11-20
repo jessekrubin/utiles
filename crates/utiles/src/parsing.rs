@@ -25,7 +25,7 @@ pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
     debug!("{}", v);
     // Assume a single pair of coordinates represents a CoordTuple
     // and a four-element array represents a BBoxTuple
-    let bbox = match v.as_array().map(|arr| arr.len()) {
+    let bbox = match v.as_array().map(std::vec::Vec::len) {
         Some(2) => {
             let coord: (f64, f64) = serde_json::from_value::<(f64, f64)>(v)?;
             Ok(BBox::new(coord.0, coord.1, coord.0, coord.1))
@@ -46,14 +46,14 @@ pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
     // if the first char is "{" assume it is geojson-like
     debug!("parse_bbox: {}", s);
     if s.starts_with('{') || s.starts_with('[') {
-        return parse_bbox_json(s).map_err(|e| e.into());
+        return parse_bbox_json(s).map_err(std::convert::Into::into);
     }
     let parts: Vec<f64> = s.split(',').filter_map(|p| p.parse::<f64>().ok()).collect();
 
     if parts.len() == 4 {
         Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
     } else {
-        let msg = format!("Invalid bbox: {}", s);
+        let msg = format!("Invalid bbox: {s}");
         Err(msg.into())
     }
 }
@@ -132,7 +132,7 @@ mod tests {
         let bbox = bbox.unwrap();
         assert_eq!(
             bbox,
-            BBox::new(-176.696694, -14.373776, 145.830505, 71.341324)
+            BBox::new(-176.696_694, -14.373_776, 145.830_505, 71.341_324)
         );
     }
 }

@@ -6,7 +6,7 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::missing_errors_doc)]
-
+#![allow(clippy::similar_names)]
 pub use crate::fns::*;
 pub use crate::quadkey::*;
 pub use lnglat::LngLat;

@@ -66,10 +66,10 @@ impl BBox {
     #[must_use]
     pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         BBox {
-            west,
+            north,
             south,
             east,
-            north,
+            west,
         }
     }
 
@@ -261,7 +261,7 @@ impl From<&String> for BBox {
         let result = match parse_bbox(s) {
             Ok(bbox) => bbox,
             Err(e) => {
-                println!("ERROR: {}", e);
+                println!("ERROR: {e}");
                 BBox::world_planet()
             }
         };

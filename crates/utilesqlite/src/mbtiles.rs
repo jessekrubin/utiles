@@ -4,8 +4,8 @@ use std::path::Path;
 use rusqlite::{Connection, Result as RusqliteResult};
 use tilejson::TileJSON;
 use tracing::error;
-use utiles::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
+use utiles::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
 
 pub struct Mbtiles {
     conn: Connection,
@@ -32,7 +32,7 @@ impl Mbtiles {
         }
     }
 
-    pub fn tj (&self) -> Result<TileJSON, Box<dyn Error>> {
+    pub fn tj(&self) -> Result<TileJSON, Box<dyn Error>> {
         self.tilejson()
     }
 
@@ -49,8 +49,8 @@ impl Mbtiles {
     }
 
     // check that 'metadata' table exists and has a unique index on 'name'
-    pub fn has_unique_index_on_metadata(&self) ->  RusqliteResult<bool>{
-        has_unique_index_on_metadata(& self.conn)
+    pub fn has_unique_index_on_metadata(&self) -> RusqliteResult<bool> {
+        has_unique_index_on_metadata(&self.conn)
     }
 
     pub fn zoom_levels(&self) -> RusqliteResult<Vec<u32>> {
@@ -61,7 +61,7 @@ impl Mbtiles {
         minzoom_maxzoom(&self.conn)
     }
 
-    pub fn application_id (&self) -> RusqliteResult<u32> {
+    pub fn application_id(&self) -> RusqliteResult<u32> {
         // PRAGMA application_id
         let mut stmt = self.conn.prepare("PRAGMA application_id")?;
         let mut rows = stmt.query([])?;
@@ -93,7 +93,6 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadata
         })?
         .collect::<RusqliteResult<Vec<MbtilesMetadataRow>, rusqlite::Error>>()?;
     Ok(mdata)
-
 }
 
 // check that 'metadata' table exists and has a unique index on 'name'
@@ -108,29 +107,29 @@ pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
     Ok(res)
 }
 
-pub fn zoom_levels (conn: &Connection) -> RusqliteResult<Vec<u32>> {
+pub fn zoom_levels(conn: &Connection) -> RusqliteResult<Vec<u32>> {
     let mut stmt = conn.prepare("SELECT DISTINCT zoom_level FROM tiles")?;
     let zoom_levels = stmt
-        .query_map([], |row| {
-            Ok(row.get(0)?)
-        })?
+        .query_map([], |row| Ok(row.get(0)?))?
         .collect::<RusqliteResult<Vec<u32>, rusqlite::Error>>()?;
     Ok(zoom_levels)
 }
 
-pub fn minzoom_maxzoom (conn: &Connection) -> RusqliteResult<MinZoomMaxZoom> {
+pub fn minzoom_maxzoom(conn: &Connection) -> RusqliteResult<MinZoomMaxZoom> {
     let mut stmt = conn.prepare("SELECT MIN(zoom_level), MAX(zoom_level) FROM (SELECT DISTINCT zoom_level FROM tiles)")?;
     let mut rows = stmt.query([])?;
     let row = rows.next()?.unwrap();
     let minzoom: u32 = row.get(0)?;
     let maxzoom: u32 = row.get(1)?;
-    let mm = MinZoomMaxZoom::new(minzoom.try_into().unwrap(), maxzoom.try_into().unwrap()
-    );
+    let mm =
+        MinZoomMaxZoom::new(minzoom.try_into().unwrap(), maxzoom.try_into().unwrap());
     Ok(mm)
 }
 
-pub fn has_tiles_table_or_view(connection: &Connection) -> RusqliteResult<bool>{
-    let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='tiles'") ?;
+pub fn has_tiles_table_or_view(connection: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = connection.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='tiles'",
+    )?;
     let mut rows = stmt.query([])?;
     let mut count = 0;
     while let Some(_row) = rows.next().unwrap() {
@@ -139,37 +138,44 @@ pub fn has_tiles_table_or_view(connection: &Connection) -> RusqliteResult<bool>{
     Ok(count == 1)
 }
 
-pub fn has_tiles_view(connection: &Connection) ->  RusqliteResult<bool>{
-    let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE type='view' AND name='tiles'") ?;
+pub fn has_tiles_view(connection: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = connection
+        .prepare("SELECT name FROM sqlite_master WHERE type='view' AND name='tiles'")?;
     let nrows = stmt.query([]).iter().count();
     Ok(nrows == 1)
 }
 
-pub fn has_tiles_table(connection: &Connection) -> RusqliteResult<bool>{
-    let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='tiles'")?;
+pub fn has_tiles_table(connection: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = connection.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='tiles'",
+    )?;
     let nrows = stmt.query([]).iter().count();
     Ok(nrows == 1)
 }
 
-pub fn has_metadata_table(connection: &Connection) -> RusqliteResult<bool>{
-    let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'")?;
+pub fn has_metadata_table(connection: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = connection.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'",
+    )?;
     let nrows = stmt.query([]).iter().count();
     Ok(nrows == 1)
 }
 
-pub fn has_metadata_view(connection: &Connection) -> RusqliteResult<bool>{
-    let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE type='view' AND name='metadata'")?;
+pub fn has_metadata_view(connection: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = connection.prepare(
+        "SELECT name FROM sqlite_master WHERE type='view' AND name='metadata'",
+    )?;
     let nrows = stmt.query([]).iter().count();
     Ok(nrows == 1)
 }
 
-pub fn has_metadata_table_or_view(connection: &Connection) -> RusqliteResult<bool>{
+pub fn has_metadata_table_or_view(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE name='metadata' AND (type='table' OR type='view')")?;
     let nrows = stmt.query([]).iter().count();
     Ok(nrows == 1)
 }
 
-pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool>{
+pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool> {
     // check for both metadata table/view and tiles table/view
     let has_metadata = has_metadata_table_or_view(connection)?;
     let has_tiles = has_tiles_table_or_view(connection)?;

@@ -46,21 +46,22 @@ impl TileRange {
 
     #[must_use]
     pub fn length(&self) -> u64 {
-        ((self.maxx - self.minx + 1) * (self.maxy - self.miny + 1)) as u64
+        u64::from((self.maxx - self.minx + 1) * (self.maxy - self.miny + 1))
     }
 
     #[must_use]
     pub fn sql_where(&self, flip: Option<bool>) -> String {
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
-
-        let miny = match flip.unwrap_or(true) {
-            true => crate::fns::flipy(self.miny, self.zoom),
-            false => self.miny,
+        let miny = if flip.unwrap_or(true) {
+            crate::fns::flipy(self.miny, self.zoom)
+        } else {
+            self.miny
         };
-        let maxy = match flip.unwrap_or(true) {
-            true => crate::fns::flipy(self.maxy, self.zoom),
-            false => self.maxy,
+        let maxy = if flip.unwrap_or(true) {
+            crate::fns::flipy(self.maxy, self.zoom)
+        } else {
+            self.maxy
         };
         format!(
             "(zoom_level = {} AND tile_column >= {} AND tile_column <= {} AND tile_row >= {} AND tile_row <= {})",

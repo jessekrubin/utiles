@@ -198,11 +198,10 @@ impl Tile {
 
     #[must_use]
     pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
-        match sep {
-            Some(sep) => {
-                format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext)
-            }
-            None => format!("{}/{}/{}.{}", self.z, self.x, self.y, ext),
+        if let Some(sep) = sep {
+            format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext)
+        } else {
+            format!("{}/{}/{}.{}", self.z, self.x, self.y, ext)
         }
     }
 
@@ -566,12 +565,11 @@ impl From<&Map<String, Value>> for Tile {
 
 impl From<&Vec<Value>> for Tile {
     fn from(arr: &Vec<Value>) -> Self {
-        if arr.len() < 3 {
-            panic!(
-                "Invalid json value: {}",
-                serde_json::to_string(&arr).unwrap()
-            );
-        }
+        assert!(
+            arr.len() >= 3,
+            "Invalid json value: {}",
+            serde_json::to_string(&arr).unwrap()
+        );
         let x = arr[0].as_u64().unwrap() as u32;
         let y = arr[1].as_u64().unwrap() as u32;
         let z = arr[2].as_u64().unwrap() as u8;
@@ -600,12 +598,11 @@ impl From<&Value> for Tile {
         // is array? [x, y, z]
         match val {
             Value::Array(v) => {
-                if v.len() < 3 {
-                    panic!(
-                        "Invalid json value: {}",
-                        serde_json::to_string(&v).unwrap()
-                    );
-                }
+                assert!(
+                    v.len() >= 3,
+                    "Invalid json value: {}",
+                    serde_json::to_string(&v).unwrap()
+                );
                 Tile::from(v)
                 // let tuple = serde_json::from_value::<XYZ>(val).unwrap();
                 // return Tile::from(tuple);

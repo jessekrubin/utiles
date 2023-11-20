@@ -17,7 +17,9 @@ def test_version() -> None:
     assert utiles.__version__ is not None
     import tomli
 
-    cargo_version = tomli.loads(Path("Cargo.toml").read_text())['workspace']["package"]["version"]
+    cargo_version = tomli.loads(Path("Cargo.toml").read_text())["workspace"]["package"][
+        "version"
+    ]
     assert utiles.__version__ == cargo_version
     pyproject_version = tomli.loads(Path("pyproject.toml").read_text())["project"][
         "version"
