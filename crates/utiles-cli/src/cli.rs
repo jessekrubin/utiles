@@ -98,6 +98,12 @@ pub enum Commands {
         input: Option<String>,
     },
 
+    #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
+    PMTileID {
+        #[arg(required = false)]
+        input: Option<String>,
+    },
+
     #[command(name = "bounding-tile", about = "Echo the bounding tile of a lonlat/bbox/GeoJSON", long_about = None)]
     BoundingTile {
         #[arg(required = false)]
@@ -251,6 +257,31 @@ pub fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) {
                 }
             }
         }
+
+        // Convert between tile id (xyz) and pmtileid
+        Commands::PMTileID { input } => {
+            let lines = stdin_filtered(input);
+            for line in lines {
+                // if the line bgins w '[' treat as tile
+                let lstr = line.unwrap();
+                if lstr.starts_with('[') {
+                    // treat as tile
+                    let tile = Tile::from_json_arr(&lstr);
+                    println!("{}", tile.pmtileid());
+                } else {
+                    // treat as pmtileid
+                    let pmid: u64 = lstr.parse().unwrap();
+                    let tile = Tile::from_pmtileid(pmid);
+                    if tile.is_err() {
+                        error!("Invalid pmtileid: {pmid}");
+                        println!("Invalid pmtileid: {pmid}");
+                    } else {
+                        println!("{}", tile.unwrap().json_arr());
+                    }
+                }
+            }
+        }
+
         Commands::BoundingTile { input, seq } => {
             let lines = stdin_filtered(input);
             let bboxes = lines.map(|l| {

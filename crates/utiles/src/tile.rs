@@ -183,9 +183,9 @@ impl Tile {
     }
 
     #[must_use]
-    pub fn from_pmtileid(id: u64) -> Self {
+    pub fn from_pmtileid(id: u64) -> Result<Tile, Box<dyn Error>> {
         let (x, y, z) = pmtiles::pmid2xyz(id);
-        Tile::new(x, y, z)
+        Ok(Tile::new(x, y, z))
     }
 
     #[must_use]
