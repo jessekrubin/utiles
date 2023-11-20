@@ -98,6 +98,12 @@ pub enum Commands {
         input: Option<String>,
     },
 
+    #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
+    PMTileID {
+        #[arg(required = false)]
+        input: Option<String>,
+    },
+
     #[command(name = "bounding-tile", about = "Echo the bounding tile of a lonlat/bbox/GeoJSON", long_about = None)]
     BoundingTile {
         #[arg(required = false)]
