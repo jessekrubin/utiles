@@ -190,9 +190,10 @@ impl Tile {
 
     #[must_use]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
-        match sep {
-            Some(sep) => format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y),
-            None => format!("{}/{}/{}", self.z, self.x, self.y),
+        if let Some(sep) = sep {
+            format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y)
+        } else {
+            format!("{}/{}/{}", self.z, self.x, self.y)
         }
     }
 
@@ -443,17 +444,18 @@ impl Tile {
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
 
         // flip y for tms (default for mbtiles)
-        match flip.unwrap_or(true) {
-            true => format!(
+        if flip.unwrap_or(true) {
+            format!(
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
                 self.z,
                 self.x,
                 flipy(self.y, self.z)
-            ),
-            false => format!(
+            )
+        } else {
+            format!(
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
                 self.z, self.x, self.y
-            ),
+            )
         }
     }
 

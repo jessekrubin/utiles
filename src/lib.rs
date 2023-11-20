@@ -83,7 +83,7 @@ fn tiletype_str(buffer: &[u8]) -> String {
 
 #[pyfunction]
 fn tiletype2headers(tiletype: usize) -> Vec<(&'static str, &'static str)> {
-    let headers = libtiletype::headers(libtiletype::const2enum(tiletype));
+    let headers = libtiletype::headers(&libtiletype::const2enum(tiletype));
     headers
 }
 

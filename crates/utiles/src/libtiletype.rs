@@ -84,7 +84,6 @@ pub fn enum2const(tiletype: TileType) -> usize {
 #[must_use]
 pub fn const2enum(tiletype: usize) -> TileType {
     match tiletype {
-        TILETYPE_UNKNOWN => TileType::Unknown,
         TILETYPE_GIF => TileType::Gif,
         TILETYPE_JPG => TileType::Jpg,
         TILETYPE_JSON => TileType::Json,
@@ -97,18 +96,14 @@ pub fn const2enum(tiletype: usize) -> TileType {
 }
 
 #[must_use]
-pub fn headers(tiletype: TileType) -> Vec<(&'static str, &'static str)> {
+pub fn headers(tiletype: &TileType) -> Vec<(&'static str, &'static str)> {
     match tiletype {
         TileType::Png => vec![("Content-Type", "image/png")],
         TileType::Jpg => vec![("Content-Type", "image/jpeg")],
         TileType::Json => vec![("Content-Type", "application/json")],
         TileType::Gif => vec![("Content-Type", "image/gif")],
         TileType::Webp => vec![("Content-Type", "image/webp")],
-        TileType::Pbf => vec![
-            ("Content-Type", "application/x-protobuf"),
-            ("Content-Encoding", "gzip"),
-        ],
-        TileType::Pbfgz => vec![
+        TileType::Pbf | TileType::Pbfgz => vec![
             ("Content-Type", "application/x-protobuf"),
             ("Content-Encoding", "gzip"),
         ],
