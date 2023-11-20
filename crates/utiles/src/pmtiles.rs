@@ -90,7 +90,7 @@ mod tests {
         assert_eq!(1, z);
         assert_eq!(0, x);
         assert_eq!(0, y);
-        let (z, x, y) = pmid2zxy(19078479);
+        let (z, x, y) = pmid2zxy(19_078_479);
         assert_eq!(12, z);
         assert_eq!(3423, x);
         assert_eq!(1763, y);

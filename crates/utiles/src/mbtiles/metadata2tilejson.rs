@@ -19,7 +19,7 @@ fn to_val<V, E: Display>(val: Result<V, E>, title: &str) -> Option<V> {
     }
 }
 
-/// Convert metadata rows to a TileJSON object
+/// Convert metadata rows to a `TileJSON` object
 /// (ripped from martin-mbtiles thank y'all very much)
 pub fn metadata2tilejson(
     metadata: Vec<MbtilesMetadataRow>,

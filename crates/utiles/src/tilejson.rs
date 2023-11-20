@@ -1,6 +1,9 @@
 use serde_json;
 use tilejson::TileJSON;
 
+/// # Panics
+///
+/// Panics from `serde_json::to_string_pretty` or `serde_json::to_string`
 #[must_use]
 pub fn tilejson_stringify(tj: &TileJSON, fmt: Option<bool>) -> String {
     match fmt {

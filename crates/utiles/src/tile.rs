@@ -8,14 +8,14 @@ use crate::utile;
 
 use crate::bbox::BBox;
 use crate::constants::EPSILON;
+use crate::fns::{
+    bounds, children, flipy, ll, lr, neighbors, parent, siblings, ul, ur, xy,
+};
 use crate::lnglat::LngLat;
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_tuple::XYZ;
-use crate::{
-    bounds, children, flipy, ll, lr, neighbors, parent, pmtiles, quadkey2tile,
-    siblings, traits, ul, ur, xy, xyz2quadkey,
-};
+use crate::{pmtiles, quadkey2tile, traits, xyz2quadkey};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -149,7 +149,7 @@ impl Tile {
     #[allow(dead_code)]
     #[must_use]
     pub fn valid(&self) -> bool {
-        crate::valid(self.x, self.y, self.z)
+        crate::fns::valid(self.x, self.y, self.z)
     }
 
     #[must_use]
@@ -190,19 +190,19 @@ impl Tile {
 
     #[must_use]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
-        match sep {
-            Some(sep) => format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y),
-            None => format!("{}/{}/{}", self.z, self.x, self.y),
+        if let Some(sep) = sep {
+            format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y)
+        } else {
+            format!("{}/{}/{}", self.z, self.x, self.y)
         }
     }
 
     #[must_use]
     pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
-        match sep {
-            Some(sep) => {
-                format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext)
-            }
-            None => format!("{}/{}/{}.{}", self.z, self.x, self.y, ext),
+        if let Some(sep) = sep {
+            format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext)
+        } else {
+            format!("{}/{}/{}.{}", self.z, self.x, self.y, ext)
         }
     }
 
@@ -444,17 +444,18 @@ impl Tile {
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
 
         // flip y for tms (default for mbtiles)
-        match flip.unwrap_or(true) {
-            true => format!(
+        if flip.unwrap_or(true) {
+            format!(
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
                 self.z,
                 self.x,
                 flipy(self.y, self.z)
-            ),
-            false => format!(
+            )
+        } else {
+            format!(
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
                 self.z, self.x, self.y
-            ),
+            )
         }
     }
 
@@ -566,12 +567,11 @@ impl From<&Map<String, Value>> for Tile {
 
 impl From<&Vec<Value>> for Tile {
     fn from(arr: &Vec<Value>) -> Self {
-        if arr.len() < 3 {
-            panic!(
-                "Invalid json value: {}",
-                serde_json::to_string(&arr).unwrap()
-            );
-        }
+        assert!(
+            arr.len() >= 3,
+            "Invalid json value: {}",
+            serde_json::to_string(&arr).unwrap()
+        );
         let x = arr[0].as_u64().unwrap() as u32;
         let y = arr[1].as_u64().unwrap() as u32;
         let z = arr[2].as_u64().unwrap() as u8;
@@ -600,12 +600,11 @@ impl From<&Value> for Tile {
         // is array? [x, y, z]
         match val {
             Value::Array(v) => {
-                if v.len() < 3 {
-                    panic!(
-                        "Invalid json value: {}",
-                        serde_json::to_string(&v).unwrap()
-                    );
-                }
+                assert!(
+                    v.len() >= 3,
+                    "Invalid json value: {}",
+                    serde_json::to_string(&v).unwrap()
+                );
                 Tile::from(v)
                 // let tuple = serde_json::from_value::<XYZ>(val).unwrap();
                 // return Tile::from(tuple);
@@ -689,5 +688,11 @@ mod tests {
             serde_json::from_str::<Value>(json_obj_with_tile_array).unwrap();
         let tile_from_obj_with_tile_array = Tile::from(val_obj_with_tile_array);
         assert_eq!(tile_from_obj_with_tile_array, Tile::new(1, 2, 3));
+    }
+}
+
+impl From<Tile> for (u32, u32, u8) {
+    fn from(tile: Tile) -> Self {
+        (tile.x, tile.y, tile.z)
     }
 }
