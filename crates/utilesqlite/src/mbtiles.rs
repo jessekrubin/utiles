@@ -110,7 +110,7 @@ pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
 pub fn zoom_levels(conn: &Connection) -> RusqliteResult<Vec<u32>> {
     let mut stmt = conn.prepare("SELECT DISTINCT zoom_level FROM tiles")?;
     let zoom_levels = stmt
-        .query_map([], |row| Ok(row.get(0)?))?
+        .query_map([], |row| row.get(0))?
         .collect::<RusqliteResult<Vec<u32>, rusqlite::Error>>()?;
     Ok(zoom_levels)
 }
