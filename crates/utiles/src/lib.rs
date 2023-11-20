@@ -4,13 +4,16 @@
 #![deny(clippy::correctness)]
 #![warn(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::missing_errors_doc)]
 
-pub use lnglat::LngLat;
-pub use tile::Tile;
 pub use crate::fns::*;
 pub use crate::quadkey::*;
+pub use lnglat::LngLat;
+pub use tile::Tile;
 pub mod bbox;
 pub mod constants;
+pub mod fns;
 pub mod geojson;
 pub mod libtiletype;
 pub mod lint_error;
@@ -19,6 +22,7 @@ pub mod mbtiles;
 pub mod parsing;
 pub mod pmtiles;
 pub mod projection;
+pub mod quadkey;
 pub mod sibling_relationship;
 pub mod tile;
 mod tile_feature;
@@ -27,8 +31,6 @@ mod tile_tuple;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
-pub mod fns;
-pub mod quadkey;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

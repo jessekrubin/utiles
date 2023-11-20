@@ -1,14 +1,14 @@
-use std::f64::consts::PI;
-use geo_types::coord;
-use std::num::FpCategory;
-use std::collections::{HashMap, HashSet};
-use crate::utile;
-use crate::{LngLat, Tile};
 use crate::bbox::{BBox, WebMercatorBbox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::sibling_relationship::SiblingRelationship;
 use crate::tile_range::{TileRange, TileRanges};
+use crate::utile;
 use crate::zoom::ZoomOrZooms;
+use crate::{LngLat, Tile};
+use geo_types::coord;
+use std::collections::{HashMap, HashSet};
+use std::f64::consts::PI;
+use std::num::FpCategory;
 
 #[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
@@ -434,7 +434,7 @@ fn tiles_range_zoom(
     miny: u32,
     maxy: u32,
     zoom: u8,
-) -> impl Iterator<Item=(u32, u32, u8)> {
+) -> impl Iterator<Item = (u32, u32, u8)> {
     (minx..=maxx).flat_map(move |i| (miny..=maxy).map(move |j| (i, j, zoom)))
 }
 
@@ -506,7 +506,7 @@ pub fn tiles_count(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> u64 {
 pub fn tiles(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,
-) -> impl Iterator<Item=Tile> {
+) -> impl Iterator<Item = Tile> {
     let zooms = as_zooms(zooms);
     let bboxthing = BBox {
         north: bounds.3,
@@ -555,7 +555,7 @@ pub fn tiles(
                 bottom_right_tile.y,
                 zoom,
             )
-                .map(move |(x, y, z)| Tile { x, y, z })
+            .map(move |(x, y, z)| Tile { x, y, z })
         })
     })
 }
@@ -585,8 +585,10 @@ fn merge(merge_set: &HashSet<Tile>) -> (HashSet<Tile>, bool) {
 
 #[allow(dead_code)]
 #[must_use]
-pub fn simplify<S: ::std::hash::BuildHasher + Default>(tiles: HashSet<Tile, S>) -> HashSet<Tile> {
-// pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
+pub fn simplify<S: ::std::hash::BuildHasher + Default>(
+    tiles: HashSet<Tile, S>,
+) -> HashSet<Tile> {
+    // pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
     // Parse tiles from the input sequence
     let mut tilesv = tiles.into_iter().collect::<Vec<Tile>>();
 

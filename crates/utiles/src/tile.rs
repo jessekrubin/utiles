@@ -8,15 +8,14 @@ use crate::utile;
 
 use crate::bbox::BBox;
 use crate::constants::EPSILON;
+use crate::fns::{
+    bounds, children, flipy, ll, lr, neighbors, parent, siblings, ul, ur, xy,
+};
 use crate::lnglat::LngLat;
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_tuple::XYZ;
-use crate::{
-    pmtiles, quadkey2tile,
-    traits, xyz2quadkey,
-};
-use crate::fns::{bounds, children, flipy, ll, lr, neighbors, parent, siblings, ul, ur, xy};
+use crate::{pmtiles, quadkey2tile, traits, xyz2quadkey};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {

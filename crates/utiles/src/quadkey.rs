@@ -1,5 +1,5 @@
-use std::error::Error;
 use crate::Tile;
+use std::error::Error;
 
 // tile = ut.Tile(486, 332, 10)
 // expected = "0313102310"

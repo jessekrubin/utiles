@@ -2,7 +2,6 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum UtilesLintError {
-
     #[error("invalid path: {0}")]
     InvalidPath(String),
 

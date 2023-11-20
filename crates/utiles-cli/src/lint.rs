@@ -70,7 +70,7 @@ pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
             "metadata.name".to_string(),
         ));
     }
-    let map = metadata2map(rows);
+    let map = metadata2map(&rows);
     let map_errs = lint_metadata_map(&map);
     if !map_errs.is_empty() {
         errors.extend(map_errs);

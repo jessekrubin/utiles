@@ -6,10 +6,7 @@ pub struct MinZoomMaxZoom {
 
 impl MinZoomMaxZoom {
     pub fn new(minzoom: u8, maxzoom: u8) -> Self {
-        MinZoomMaxZoom {
-            minzoom,
-            maxzoom,
-        }
+        MinZoomMaxZoom { minzoom, maxzoom }
     }
 }
 
