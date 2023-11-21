@@ -102,6 +102,30 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             println!("{s}");
         }
 
+        Commands::Contains { filepath, lnglat } => {
+            debug!("contains: {filepath}");
+            // check that filepath exists and is file
+            let filepath = Path::new(&filepath);
+            assert!(
+                filepath.exists(),
+                "File does not exist: {}",
+                filepath.display()
+            );
+            assert!(
+                filepath.is_file(),
+                "Not a file: {filepath}",
+                filepath = filepath.display()
+            );
+            let mbtiles: Mbtiles = Mbtiles::from(filepath);
+            let contains = mbtiles.contains(lnglat);
+            if contains.is_err() {
+                error!("contains error: {:?}", contains);
+                println!("contains error: {:?}", contains);
+            } else {
+                println!("{}", contains.unwrap());
+            }
+        }
+
         // mercantile cli like
         Commands::Quadkey { input } => {
             let lines = stdinterator_filter::stdin_filtered(input);
