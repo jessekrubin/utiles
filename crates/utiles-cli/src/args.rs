@@ -1,5 +1,6 @@
 use crate::shapes::ShapesArgs;
 use clap::{Parser, Subcommand};
+use utiles::LngLat;
 
 /// A fictional versioning CLI
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -64,6 +65,15 @@ pub enum Commands {
 
         #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
         min: bool,
+    },
+
+    #[command(name = "contains", about = "Determine if mbtiles contains a latlong", long_about = None)]
+    Contains {
+        #[arg(required = true, help = "mbtiles filepath")]
+        filepath: String,
+
+        #[arg(required = true, help = "lat/long")]
+        lnglat: LngLat,
     },
 
     #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]

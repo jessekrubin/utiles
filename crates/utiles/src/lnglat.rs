@@ -1,4 +1,5 @@
 use geo_types::{coord, Coord};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LngLat {
@@ -17,6 +18,18 @@ impl From<(f64, f64)> for LngLat {
     }
 }
 
+impl FromStr for LngLat {
+    type Err = std::num::ParseFloatError; // Change this to your correct Error type
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // Split the string, parse the parts into float and return LngLat.
+        let parts: Vec<&str> = s.split(',').collect();
+        // parse parts to float
+        let x = parts[0].parse::<f64>()?;
+        let y = parts[1].parse::<f64>()?;
+        Ok(LngLat::new(x, y))
+    }
+}
 impl LngLat {
     #[must_use]
     pub fn new(lng: f64, lat: f64) -> Self {
