@@ -3,6 +3,8 @@ use std::path::Path;
 
 use crate::args::{Cli, Commands};
 use crate::commands::tiles::tiles_main;
+use crate::commands::copy::copy_main;
+use crate::commands::dev::dev_main;
 use crate::lint::lint_main;
 use crate::shapes::shapes_main;
 use crate::stdinterator_filter;
@@ -204,6 +206,14 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         }
         Commands::Shapes(args) => {
             shapes_main(args);
+        }
+        Commands::Copy(args) => {
+            // copy_main(args);
+            warn!("copy not implemented");
+            copy_main().await;
+        }
+        Commands::Dev {} => {
+            dev_main().await;
         }
     }
     0

@@ -146,4 +146,25 @@ pub enum Commands {
 
     #[command(name = "shapes", about = "Echo shapes of tile(s) as GeoJSON", long_about = None)]
     Shapes(ShapesArgs),
+
+    #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None)]
+    Copy(CopyArgs),
+
+    #[command(name = "dev", about = "dev command", long_about = None, hide = true)]
+    Dev {
+    },
+
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+#[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None)]
+pub struct CopyArgs {
+    // #[arg(required = true, help = "src mbtiles filepath")]
+    // src: String,
+    //
+    // #[arg(required = true, help = "dst mbtiles filepath")]
+    // dst: String,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    overwrite: bool,
 }
