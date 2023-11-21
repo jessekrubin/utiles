@@ -1,6 +1,7 @@
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![warn(clippy::style)]
+// #![warn(clippy::pedantic)]
 #![warn(clippy::unnecessary_wraps)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_errors_doc)]

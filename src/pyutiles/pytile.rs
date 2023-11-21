@@ -134,7 +134,7 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_pmtileid(_cls: &PyType, tileid: u64) ->Self {
+    pub fn from_pmtileid(_cls: &PyType, tileid: u64) -> Self {
         let xyz = Tile::from_pmtileid(tileid);
         PyTile::from(xyz)
     }
