@@ -189,6 +189,12 @@ impl Tile {
     }
 
     #[must_use]
+    pub fn from_pmid(id: u64) -> Result<Tile, Box<dyn Error>> {
+        let (x, y, z) = pmtiles::pmid2xyz(id);
+        Ok(Tile::new(x, y, z))
+    }
+
+    #[must_use]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
         if let Some(sep) = sep {
             format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y)
