@@ -1,3 +1,12 @@
+#![deny(clippy::all)]
+#![deny(clippy::perf)]
+#![warn(clippy::style)]
+#![warn(clippy::unnecessary_wraps)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::similar_names)]
+#![allow(clippy::too_many_lines)]
 use self::pyutiles::pytilelike::PyTileLike;
 use self::pyutiles::zoom::PyZoomOrZooms;
 use pyo3::exceptions::{self, PyValueError};
@@ -40,7 +49,7 @@ impl From<PyLngLatBbox> for BBox {
 #[pyfunction]
 fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
     if !(0..=32).contains(&zoom) {
-        return Err(PyErr::new::<PyValueError, _>(format!(
+        Err(PyErr::new::<PyValueError, _>(format!(
             "zoom must be between 0 and 32: {zoom}"
         )))?;
     }
@@ -83,8 +92,7 @@ fn tiletype_str(buffer: &[u8]) -> String {
 
 #[pyfunction]
 fn tiletype2headers(tiletype: usize) -> Vec<(&'static str, &'static str)> {
-    let headers = libtiletype::headers(&libtiletype::const2enum(tiletype));
-    headers
+    libtiletype::headers(&libtiletype::const2enum(tiletype))
 }
 
 #[pyfunction]
@@ -216,16 +224,15 @@ fn ul(args: &PyTuple) -> PyResult<PyLngLat> {
 }
 
 #[pyfunction]
-fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
-    let xy = utiles::xy(lng, lat, truncate);
-    Ok(xy)
+fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
+    utiles::xy(lng, lat, truncate)
 }
 
 #[pyfunction]
 fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
     let trunc = truncate.unwrap_or(false);
     if !trunc && (lat <= -90.0 || lat >= 90.0) {
-        return Err(PyErr::new::<PyValueError, _>(format!(
+        Err(PyErr::new::<PyValueError, _>(format!(
             "Invalid latitude: {lat}"
         )))?;
     }
@@ -239,10 +246,10 @@ fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
 }
 
 #[pyfunction]
-fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyResult<PyLngLat> {
+fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
     // let trunc = truncate.unwrap_or(false);
     let lnglat = utiles::lnglat(x, y, truncate);
-    Ok(PyLngLat::new(lnglat.lng(), lnglat.lat()))
+    PyLngLat::new(lnglat.lng(), lnglat.lat())
 }
 
 #[pyfunction]
@@ -269,7 +276,7 @@ fn xy_bounds(args: &PyTuple) -> PyResult<PyBbox> {
 #[pyfunction]
 fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<PyTile> {
     if lat <= -90.0 || lat >= 90.0 {
-        return Err(PyErr::new::<PyValueError, _>(format!(
+        Err(PyErr::new::<PyValueError, _>(format!(
             "Invalid latitude: {lat}"
         )))?;
     }
@@ -285,15 +292,15 @@ fn pmtileid(args: &PyTuple) -> PyResult<u64> {
 }
 
 #[pyfunction]
-fn pmtileid2xyz(pmtileid: u64) -> PyResult<PyTile> {
+fn pmtileid2xyz(pmtileid: u64) -> PyTile {
     let xyz = utiles::Tile::from_pmtileid(pmtileid);
-    Ok(PyTile::from(xyz))
+    PyTile::from(xyz)
 }
 
 #[pyfunction]
-fn from_pmtileid(pmtileid: u64) -> PyResult<PyTile> {
+fn from_pmtileid(pmtileid: u64) -> PyTile {
     let xyz = utiles::Tile::from_pmtileid(pmtileid);
-    Ok(PyTile::from(xyz))
+    PyTile::from(xyz)
 }
 
 #[pyfunction]
@@ -329,7 +336,7 @@ fn parent(args: &PyTuple, zoom: Option<u8>) -> PyResult<Option<PyTile>> {
 
     // Check that the zoom level is valid
     if zoom >= tile.xyz.z {
-        return Err(PyErr::new::<PyValueError, _>(format!(
+        Err(PyErr::new::<PyValueError, _>(format!(
             "zoom level {} is invalid for tile with zoom {}",
             zoom, tile.xyz.z
         )))?;
@@ -351,7 +358,7 @@ fn children(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
     let tile = parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z + 1);
     if zoom < tile.xyz.z {
-        return Err(PyErr::new::<PyValueError, _>(format!(
+        Err(PyErr::new::<PyValueError, _>(format!(
             "zoom must be greater than or equal to tile zoom: {}",
             tile.xyz.z
         )))?;
@@ -366,7 +373,7 @@ fn neighbors(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
     let tile = parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z);
     if zoom < tile.xyz.z {
-        return Err(PyErr::new::<PyValueError, _>(format!(
+        Err(PyErr::new::<PyValueError, _>(format!(
             "zoom must be greater than or equal to tile zoom: {}",
             tile.xyz.z
         )))?;
@@ -387,10 +394,10 @@ fn bounding_tile(args: &PyTuple, truncate: Option<bool>) -> PyResult<PyTile> {
 }
 
 #[pyfunction]
-fn truncate_lnglat(lng: f64, lat: f64) -> PyResult<(f64, f64)> {
+fn truncate_lnglat(lng: f64, lat: f64) -> (f64, f64) {
     let ll = utiles::LngLat::new(lng, lat);
     let truncated = utiles::truncate_lnglat(&ll);
-    Ok((truncated.lng(), truncated.lat()))
+    (truncated.lng(), truncated.lat())
 }
 
 #[pyclass]
@@ -409,8 +416,8 @@ impl TilesGenerator {
         slf.iter.next()
     }
 
-    fn __len__(slf: PyRefMut<'_, Self>) -> PyResult<usize> {
-        Ok(slf.length as usize)
+    fn __len__(slf: PyRefMut<'_, Self>) -> usize {
+        slf.length as usize
     }
 }
 
@@ -601,9 +608,7 @@ fn merge(merge_set: &HashSet<PyTile>) -> (HashSet<PyTile>, bool) {
     let mut upwards_merge: HashMap<PyTile, HashSet<PyTile>> = HashMap::new();
     for tile in merge_set {
         let tile_parent = tile.parent(None);
-        let children_set = upwards_merge
-            .entry(tile_parent)
-            .or_insert_with(HashSet::new);
+        let children_set = upwards_merge.entry(tile_parent).or_default();
         children_set.insert(*tile);
     }
     let mut current_tileset: Vec<PyTile> = Vec::new();
@@ -691,7 +696,7 @@ fn geojson_bounds(py: Python, obj: &PyAny) -> PyResult<PyLngLatBbox> {
 
             for (lng, lat) in coordsvec {
                 if lat <= -90.0 || lat >= 90.0 {
-                    return Err(PyErr::new::<PyValueError, _>(format!(
+                    Err(PyErr::new::<PyValueError, _>(format!(
                         "Invalid latitude: {lat}"
                     )))?;
                 }

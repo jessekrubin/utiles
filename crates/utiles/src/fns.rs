@@ -565,9 +565,7 @@ fn merge(merge_set: &HashSet<Tile>) -> (HashSet<Tile>, bool) {
     let mut upwards_merge: HashMap<Tile, HashSet<Tile>> = HashMap::new();
     for tile in merge_set {
         let tile_parent = tile.parent(None);
-        let children_set = upwards_merge
-            .entry(tile_parent)
-            .or_insert_with(HashSet::new);
+        let children_set = upwards_merge.entry(tile_parent).or_default();
         children_set.insert(*tile);
     }
     let mut current_tileset: Vec<Tile> = Vec::new();

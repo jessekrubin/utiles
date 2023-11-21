@@ -20,9 +20,9 @@ impl PyLngLat {
     }
 
     #[classmethod]
-    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> PyResult<Self> {
+    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> Self {
         let ll = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Ok(Self::new(ll.lng(), ll.lat()))
+        Self::new(ll.lng(), ll.lat())
     }
 
     pub fn __repr__(&self) -> String {
@@ -38,13 +38,13 @@ impl PyLngLat {
     }
 
     #[getter]
-    pub fn lng(&self) -> PyResult<f64> {
-        Ok(self._lng())
+    pub fn lng(&self) -> f64 {
+        self._lng()
     }
 
     #[getter]
-    pub fn lat(&self) -> PyResult<f64> {
-        Ok(self._lat())
+    pub fn lat(&self) -> f64 {
+        self._lat()
     }
 
     pub fn __str__(&self) -> String {

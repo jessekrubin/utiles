@@ -29,10 +29,10 @@ impl PyBbox {
     }
 
     #[classmethod]
-    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> PyResult<Self> {
+    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> Self {
         let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Ok(Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat()))
+        Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
     }
 
     pub fn __str__(&self) -> String {
@@ -50,23 +50,23 @@ impl PyBbox {
     }
 
     #[getter]
-    pub fn left(&self) -> PyResult<f64> {
-        Ok(self.bbox.left())
+    pub fn left(&self) -> f64 {
+        self.bbox.left()
     }
 
     #[getter]
-    pub fn bottom(&self) -> PyResult<f64> {
-        Ok(self.bbox.bottom())
+    pub fn bottom(&self) -> f64 {
+        self.bbox.bottom()
     }
 
     #[getter]
-    pub fn right(&self) -> PyResult<f64> {
-        Ok(self.bbox.right())
+    pub fn right(&self) -> f64 {
+        self.bbox.right()
     }
 
     #[getter]
-    pub fn top(&self) -> PyResult<f64> {
-        Ok(self.bbox.top())
+    pub fn top(&self) -> f64 {
+        self.bbox.top()
     }
 
     #[getter]

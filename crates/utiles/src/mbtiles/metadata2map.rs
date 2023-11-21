@@ -7,12 +7,17 @@ pub fn metadata2duplicates(
     rows: Vec<MbtilesMetadataRow>,
 ) -> HashMap<String, Vec<MbtilesMetadataRow>> {
     rows.into_iter()
-        .fold(HashMap::new(), |mut acc, row| {
-            acc.entry(row.name.clone())
-                .or_insert_with(Vec::new)
-                .push(row);
-            acc
-        })
+        .fold(
+            HashMap::new(),
+            |mut acc: std::collections::HashMap<
+                std::string::String,
+                Vec<MbtilesMetadataRow>,
+            >,
+             row| {
+                acc.entry(row.name.clone()).or_default().push(row);
+                acc
+            },
+        )
         .into_iter()
         .filter(|(_k, v)| v.len() > 1)
         .collect()
