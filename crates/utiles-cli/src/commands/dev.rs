@@ -1,13 +1,9 @@
-use utilesqlite::{MbtilesAsync, squealite};
-use utiles::Tile;
-use rusqlite::{Connection, Error};
-use tracing::{warn, error, warn_span};
+use rusqlite::Error;
+use tracing::warn;
 
-#[derive(Debug)]
-struct TileData {
-    pub xyz: Tile,
-    data: Vec<u8>,
-}
+use utiles::Tile;
+use utiles::tile_data_row::TileData;
+use utilesqlite::MbtilesAsync;
 
 pub async fn dev_main() {
     warn!("__DEV_MAIN__");
@@ -60,5 +56,4 @@ pub async fn dev_main() {
         }
     ).await.expect("TODO: panic message");
     println!("r: {:?}", r.len());
-    // println!("r: {:?}", r);
 }

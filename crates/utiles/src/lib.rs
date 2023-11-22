@@ -2,6 +2,7 @@
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
 #![deny(clippy::correctness)]
+#![warn(clippy::must_use_candidate)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::missing_errors_doc)]
@@ -12,6 +13,7 @@ pub use crate::fns::*;
 pub use crate::quadkey::*;
 pub use lnglat::LngLat;
 pub use tile::Tile;
+pub use traits::{TileLike};
 pub mod bbox;
 pub mod constants;
 pub mod fns;
@@ -24,6 +26,7 @@ pub mod parsing;
 pub mod pmtiles;
 pub mod projection;
 pub mod quadkey;
+pub mod tile_data_row;
 pub mod sibling_relationship;
 pub mod tile;
 mod tile_feature;
@@ -32,6 +35,8 @@ mod tile_tuple;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
+mod geostats;
+
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

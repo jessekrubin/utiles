@@ -83,7 +83,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             }
         }
 
-        Commands::Tilejson { filepath, min } => {
+        Commands::Tilejson { filepath, min, tilestats } => {
             debug!("tilejson: {filepath}");
             // check that filepath exists and is file
             let filepath = Path::new(&filepath);
@@ -98,8 +98,10 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
                 filepath = filepath.display()
             );
             let mbtiles: Mbtiles = Mbtiles::from(filepath);
-            // let mbtiles = Mbtiles::from_filepath(&filepath).unwrap();
-            let tj = mbtiles.tilejson().unwrap();
+            let mut tj = mbtiles.tilejson().unwrap();
+            if !tilestats {
+                tj.other.remove("tilestats");
+            }
             let s = tilejson_stringify(&tj, Option::from(!min));
             println!("{s}");
         }

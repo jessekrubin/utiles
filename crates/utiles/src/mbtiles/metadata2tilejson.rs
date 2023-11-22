@@ -1,8 +1,10 @@
 use std::error::Error;
+use std::f32::consts::E;
 use std::fmt::Display;
 use std::str::FromStr;
 
 use serde_json::{Value as JSONValue, Value};
+use crate::geostats::TileStats;
 
 use crate::mbtiles::metadata_row::MbtilesMetadataRow;
 use tilejson::{tilejson, Bounds, Center, TileJSON};
@@ -63,6 +65,16 @@ pub fn metadata2tilejson(
             } else {
                 warn!(
                     "Unable to parse metadata vector_layers value",
+                    // self.filename
+                );
+            }
+        }
+        if let Some(value) = obj.remove("tilestats") {
+            if let Ok(v) = serde_json::from_value::<TileStats>(value) {
+                tj.other.insert("tilestats".parse().unwrap(), serde_json::to_value(v).unwrap());
+            } else {
+                warn!(
+                    "Unable to parse metadata json.tilestats value",
                     // self.filename
                 );
             }

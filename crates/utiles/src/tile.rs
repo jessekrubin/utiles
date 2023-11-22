@@ -1,21 +1,20 @@
-use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
 use std::cmp::Ordering;
 use std::error::Error;
 use std::str::FromStr;
 
-use crate::utile;
+use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 
-use crate::bbox::BBox;
+use crate::{pmtiles, quadkey2tile, xyz2quadkey};
 use crate::constants::EPSILON;
 use crate::fns::{
-    bounds, children, flipy, ll, lr, neighbors, parent, siblings, ul, ur, xy,
+    bounds, children, flipy, neighbors, parent, siblings, xy,
 };
-use crate::lnglat::LngLat;
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
-use crate::tile_tuple::XYZ;
-use crate::{pmtiles, quadkey2tile, traits, xyz2quadkey};
+use crate::tile_tuple::TileTuple;
+use crate::traits::TileLike;
+use crate::utile;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -26,7 +25,8 @@ pub struct TileFeatureGeometry {
 
 #[derive(Debug, Serialize)]
 pub struct FeatureOptions {
-    pub fid: Option<String>, // feature id
+    pub fid: Option<String>,
+    // feature id
     pub props: Option<Map<String, Value>>,
     pub projection: Projection,
     pub buffer: Option<f64>,
@@ -52,36 +52,36 @@ pub struct Tile {
     pub z: u8,
 }
 
-impl traits::Utiles<LngLat, BBox> for Tile {
-    fn ul(&self) -> LngLat {
-        ul(self.x, self.y, self.z)
-    }
+// impl traits::Utiles<LngLat, BBox> for Tile {
+//     // fn ul(&self) -> LngLat {
+//     //     ul(self.x, self.y, self.z)
+//     // }
+//
+//     fn ur(&self) -> LngLat {
+//         ur(self.x, self.y, self.z)
+//     }
+//
+//     fn lr(&self) -> LngLat {
+//         lr(self.x, self.y, self.z)
+//     }
+//
+//     fn ll(&self) -> LngLat {
+//         ll(self.x, self.y, self.z)
+//     }
+//
+//     fn bbox(&self) -> BBox {
+//         let (west, south, east, north) = bounds(self.x, self.y, self.z);
+//         BBox {
+//             north,
+//             south,
+//             east,
+//             west,
+//         }
+//     }
+// }
 
-    fn ur(&self) -> LngLat {
-        ur(self.x, self.y, self.z)
-    }
-
-    fn lr(&self) -> LngLat {
-        lr(self.x, self.y, self.z)
-    }
-
-    fn ll(&self) -> LngLat {
-        ll(self.x, self.y, self.z)
-    }
-
-    fn bbox(&self) -> BBox {
-        let (west, south, east, north) = bounds(self.x, self.y, self.z);
-        BBox {
-            north,
-            south,
-            east,
-            west,
-        }
-    }
-}
-
-impl From<XYZ> for Tile {
-    fn from(xyz: XYZ) -> Self {
+impl From<TileTuple> for Tile {
+    fn from(xyz: TileTuple) -> Self {
         Tile {
             x: xyz.0,
             y: xyz.1,
@@ -140,6 +140,25 @@ impl FromStr for Tile {
     }
 }
 
+impl TileLike for Tile {
+    fn new(x: u32, y: u32, z: u8) -> Self {
+        Self { x, y, z }
+    }
+
+    fn x(&self) -> u32 {
+        self.x
+    }
+
+    fn y(&self) -> u32 {
+        self.y
+    }
+
+    fn z(&self) -> u8 {
+        self.z
+    }
+}
+
+// impl Tile {
 impl Tile {
     #[must_use]
     pub fn new(x: u32, y: u32, z: u8) -> Self {
@@ -152,20 +171,20 @@ impl Tile {
         crate::fns::valid(self.x, self.y, self.z)
     }
 
-    #[must_use]
-    pub fn x(&self) -> u32 {
-        self.x
-    }
-
-    #[must_use]
-    pub fn y(&self) -> u32 {
-        self.y
-    }
-
-    #[must_use]
-    pub fn z(&self) -> u8 {
-        self.z
-    }
+    // #[must_use]
+    // pub fn x(&self) -> u32 {
+    //     self.x
+    // }
+    //
+    // #[must_use]
+    // pub fn y(&self) -> u32 {
+    //     self.y
+    // }
+    //
+    // #[must_use]
+    // pub fn z(&self) -> u8 {
+    //     self.z
+    // }
 
     #[must_use]
     pub fn zoom(&self) -> u8 {
@@ -188,7 +207,6 @@ impl Tile {
         Tile::new(x, y, z)
     }
 
-    #[must_use]
     pub fn from_pmid(id: u64) -> Result<Tile, Box<dyn Error>> {
         let (x, y, z) = pmtiles::pmid2xyz(id);
         Ok(Tile::new(x, y, z))
@@ -318,40 +336,40 @@ impl Tile {
         }
     }
 
-    #[must_use]
-    pub fn ul(&self) -> LngLat {
-        ul(self.x, self.y, self.z)
-    }
+    // #[must_use]
+    // pub fn ul(&self) -> LngLat {
+    //     ul(self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn ll(&self) -> LngLat {
+    //     ll(self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn ur(&self) -> LngLat {
+    //     ur(self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn lr(&self) -> LngLat {
+    //     lr(self.x, self.y, self.z)
+    // }
 
-    #[must_use]
-    pub fn ll(&self) -> LngLat {
-        ll(self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn ur(&self) -> LngLat {
-        ur(self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn lr(&self) -> LngLat {
-        lr(self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn bbox(&self) -> (f64, f64, f64, f64) {
-        let ul = self.ul();
-        let lr = self.lr();
-        (ul.lng(), lr.lat(), lr.lng(), ul.lat())
-    }
-
-    #[must_use]
-    pub fn center(&self) -> LngLat {
-        let ul = self.ul();
-        let lr = self.lr();
-        LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
-    }
-
+    // #[must_use]
+    // pub fn bbox(&self) -> (f64, f64, f64, f64) {
+    //     let ul = self.ul();
+    //     let lr = self.lr();
+    //     (ul.lng(), lr.lat(), lr.lng(), ul.lat())
+    // }
+    //
+    // #[must_use]
+    // pub fn center(&self) -> LngLat {
+    //     let ul = self.ul();
+    //     let lr = self.lr();
+    //     LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
+    // }
+    //
     #[must_use]
     pub fn up(&self) -> Self {
         Self {
@@ -558,7 +576,7 @@ impl Tile {
 
 impl From<(u32, u32, u8)> for Tile {
     fn from(tuple: (u32, u32, u8)) -> Self {
-        XYZ::from(tuple).into()
+        TileTuple::from(tuple).into()
     }
 }
 
@@ -584,6 +602,7 @@ impl From<&Vec<Value>> for Tile {
         Tile::from((x, y, z))
     }
 }
+
 impl From<Vec<Value>> for Tile {
     fn from(arr: Vec<Value>) -> Self {
         Tile::from(&arr)
@@ -623,7 +642,7 @@ impl From<&Value> for Tile {
                     && v["tile"].as_array().unwrap().len() == 3
                 {
                     let tuple =
-                        serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
+                        serde_json::from_value::<TileTuple>(v["tile"].clone()).unwrap();
                     return Tile::from(tuple);
                 }
                 Tile::from(v)
@@ -687,6 +706,7 @@ mod tests {
         let tile_from_arr = Tile::from(val_arr);
         assert_eq!(tile_from_arr, Tile::new(1, 2, 3));
     }
+
     #[test]
     fn tile_from_value_obj_with_array() {
         let json_obj_with_tile_array = r#"{"tile": [1, 2, 3]}"#;

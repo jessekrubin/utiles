@@ -1,28 +1,17 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use globset::{Glob, GlobSetBuilder};
-use ignore::WalkBuilder;
 use tracing::{debug, info, warn};
 use utiles::lint_error::{UtilesLintError, UtilesLintResult};
-use utiles::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
+use utiles::mbtiles::{MBTILES_MAGIC_NUMBER, metadata2duplicates, metadata2map};
 use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 
 use utilesqlite::squealite;
+use crate::find;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
     "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
 ];
-
-fn is_dir(path: &str) -> bool {
-    let path = std::path::Path::new(path);
-    path.is_dir()
-}
-
-fn is_file(path: &str) -> bool {
-    let path = std::path::Path::new(path);
-    path.is_file()
-}
 
 pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
     // println!("_________ lint_filepath _________");
@@ -149,59 +138,11 @@ fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
                 warn!("Error: {}", e);
             }
         }
-        // let r = lint_mbtiles_file(&path, fix);
-        // debug!("r: {:?}", r);
-        // // print each err....
-        // if r.is_empty() {
-        //     info!("No errors found");
-        // } else {
-        //     warn!("{} - {} errors found", path.display(), r.len());
-        //
-        //     // let agg_err = UtilesLintError::LintErrors(r);
-        //     for err in r {
-        //         warn!("{}", err.to_string());
-        //     }
-        // }
     }
-}
-
-pub fn find_filepaths(fspaths: &[String]) -> Vec<PathBuf> {
-    let fspath = fspaths[0].clone();
-
-    let mut glob_builder = GlobSetBuilder::new();
-    let glob = Glob::new("**/*.{mbtiles,sqlite,sqlite3}").unwrap();
-    glob_builder.add(glob);
-    let globset = glob_builder.build().unwrap();
-
-    // filepaths
-    let mut filepaths: Vec<PathBuf> = vec![];
-
-    if is_file(&fspath) {
-        filepaths.push(PathBuf::from(fspath));
-    } else if is_dir(&fspath) {
-        let dirpath = PathBuf::from(fspath).canonicalize().unwrap();
-        let walk_builder = WalkBuilder::new(dirpath);
-        for result in walk_builder.build().filter_map(std::result::Result::ok) {
-            if !result.file_type().unwrap().is_file() {
-                continue;
-            }
-            match result.path().to_str() {
-                Some(path) => {
-                    if globset.is_match(path) {
-                        filepaths.push(path.into());
-                    }
-                }
-                None => {
-                    warn!("Unable to convert path to string: {:?}", result.path());
-                }
-            }
-        }
-    }
-    filepaths
 }
 
 pub fn lint_main(fspaths: &[String], fix: bool) {
-    let filepaths = find_filepaths(fspaths);
+    let filepaths = find::find_filepaths(fspaths);
     if fix {
         warn!("lint fix is not implemented yet");
     }

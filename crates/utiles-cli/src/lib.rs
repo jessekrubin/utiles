@@ -14,5 +14,6 @@ mod lint;
 mod shapes;
 mod stdinterator;
 mod stdinterator_filter;
+mod find;
 
 pub use crate::cli::{cli_main, cli_main_sync};

@@ -64,6 +64,9 @@ pub enum Commands {
 
         #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
         min: bool,
+
+        #[arg(required = false, short, long, help = "include tilestats", action = clap::ArgAction::SetTrue)]
+        tilestats: bool,
     },
 
     #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]

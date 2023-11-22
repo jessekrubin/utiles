@@ -39,7 +39,6 @@ impl MbtilesAsync {
             }
         }
     }
-
     // pub async fn tilejson(&self) -> Result<TileJSON, Box<dyn Error>>{
     //     // let metadata = self.metadata()?;
     //     let mdrows = self.client.conn(

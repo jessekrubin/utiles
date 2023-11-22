@@ -1,6 +1,7 @@
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
+use crate::traits::{TileLike};
 use geo_types::Coord;
 use serde::{Deserialize, Serialize};
 
