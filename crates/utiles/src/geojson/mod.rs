@@ -1,5 +1,3 @@
-mod dev;
-
 use geo_types::coord;
 use geo_types::Coord;
 use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};

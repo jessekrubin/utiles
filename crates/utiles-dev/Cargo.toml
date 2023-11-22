@@ -9,8 +9,24 @@ authors.workspace = true
 license.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "utiles_dev"
+path = "src/lib.rs"
+
+[[bin]]
+name = "utdev"
+path = "src/main.rs"
 
 [dependencies]
 utiles = { path = "../utiles" }
 utilesqlite = { path = "../utilesqlite" }
 utiles-cli = { path = "../utiles-cli" }
+anyhow.workspace = true
+fast_hilbert.workspace = true
+geo-types.workspace = true
+geojson.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tilejson.workspace = true
+tracing.workspace = true
