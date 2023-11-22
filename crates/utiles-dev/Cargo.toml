@@ -1,0 +1,16 @@
+[package]
+name = "utiles-dev"
+edition.workspace = true
+version.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+utiles = { path = "../utiles" }
+utilesqlite = { path = "../utilesqlite" }
+utiles-cli = { path = "../utiles-cli" }

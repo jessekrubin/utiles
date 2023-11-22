@@ -5,16 +5,14 @@ use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use crate::{pmtiles, quadkey2tile, xyz2quadkey};
 use crate::constants::EPSILON;
-use crate::fns::{
-    bounds, children, flipy, neighbors, parent, siblings, xy,
-};
+use crate::fns::{bounds, children, flipy, neighbors, parent, siblings, xy};
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_tuple::TileTuple;
 use crate::traits::TileLike;
 use crate::utile;
+use crate::{pmtiles, quadkey2tile, xyz2quadkey};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {

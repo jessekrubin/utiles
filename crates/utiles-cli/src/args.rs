@@ -154,9 +154,7 @@ pub enum Commands {
     Copy(CopyArgs),
 
     #[command(name = "dev", about = "dev command", long_about = None, hide = true)]
-    Dev {
-    },
-
+    Dev {},
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -167,7 +165,6 @@ pub struct CopyArgs {
     //
     // #[arg(required = true, help = "dst mbtiles filepath")]
     // dst: String,
-
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     overwrite: bool,
 }

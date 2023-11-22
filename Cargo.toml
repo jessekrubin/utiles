@@ -43,7 +43,8 @@ resolver = "2"
 members = [
     "crates/utiles",
     "crates/utilesqlite",
-    "crates/utiles-cli"
+    "crates/utiles-cli",
+    "crates/utiles-dev"
 ]
 
 [workspace.package]

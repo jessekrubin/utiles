@@ -13,11 +13,13 @@ pub use crate::fns::*;
 pub use crate::quadkey::*;
 pub use lnglat::LngLat;
 pub use tile::Tile;
-pub use traits::{TileLike};
+pub use traits::TileLike;
 pub mod bbox;
 pub mod constants;
 pub mod fns;
+mod gdal;
 pub mod geojson;
+mod geostats;
 pub mod libtiletype;
 pub mod lint_error;
 pub mod lnglat;
@@ -26,17 +28,17 @@ pub mod parsing;
 pub mod pmtiles;
 pub mod projection;
 pub mod quadkey;
-pub mod tile_data_row;
 pub mod sibling_relationship;
 pub mod tile;
+pub mod tile_data_row;
 mod tile_feature;
 pub mod tile_range;
 mod tile_tuple;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
-mod geostats;
 
+pub use gdal::geotransform2optzoom;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

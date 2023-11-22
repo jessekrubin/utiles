@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use crate::TileLike;
+use serde::Deserialize;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
 #[allow(clippy::upper_case_acronyms)]
 pub struct TileTuple(pub u32, pub u32, pub u8);
@@ -9,7 +9,6 @@ impl From<(u32, u32, u8)> for TileTuple {
         TileTuple(xyz.0, xyz.1, xyz.2)
     }
 }
-
 
 impl TileLike for TileTuple {
     #[must_use]

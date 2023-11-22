@@ -1329,6 +1329,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "utiles-dev"
+version = "0.2.0"
+dependencies = [
+ "utiles",
+ "utiles-cli",
+ "utilesqlite",
+]
+
+[[package]]
 name = "utilesqlite"
 version = "0.2.0"
 dependencies = [

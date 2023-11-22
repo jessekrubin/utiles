@@ -2,9 +2,9 @@ use std::io::{self};
 use std::path::Path;
 
 use crate::args::{Cli, Commands};
-use crate::commands::tiles::tiles_main;
 use crate::commands::copy::copy_main;
 use crate::commands::dev::dev_main;
+use crate::commands::tiles::tiles_main;
 use crate::lint::lint_main;
 use crate::shapes::shapes_main;
 use crate::stdinterator_filter;
@@ -83,7 +83,11 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             }
         }
 
-        Commands::Tilejson { filepath, min, tilestats } => {
+        Commands::Tilejson {
+            filepath,
+            min,
+            tilestats,
+        } => {
             debug!("tilejson: {filepath}");
             // check that filepath exists and is file
             let filepath = Path::new(&filepath);

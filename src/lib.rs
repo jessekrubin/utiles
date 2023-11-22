@@ -687,6 +687,13 @@ fn coords(py: Python, obj: &PyAny) -> PyResult<Vec<(f64, f64)>> {
 // }
 
 #[pyfunction]
+fn geotransform2optzoom(
+    geotransform: (f64, f64, f64, f64, f64, f64),
+) -> u8 {
+    utiles::geotransform2optzoom(geotransform)
+}
+
+#[pyfunction]
 fn geojson_bounds(py: Python, obj: &PyAny) -> PyResult<PyLngLatBbox> {
     let coordsvec = _coords(py, obj);
     match coordsvec {
@@ -782,6 +789,7 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(pmtileid2xyz, m)?)?;
     m.add_function(wrap_pyfunction!(qk2xyz, m)?)?;
     m.add_function(wrap_pyfunction!(from_pmtileid, m)?)?;
+    m.add_function(wrap_pyfunction!(geotransform2optzoom, m)?)?;
 
     // tiletype
     m.add_function(wrap_pyfunction!(tiletype, m)?)?;

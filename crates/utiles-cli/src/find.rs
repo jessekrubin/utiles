@@ -14,7 +14,6 @@ fn is_file(path: &str) -> bool {
     path.is_file()
 }
 
-
 pub fn find_filepaths(fspaths: &[String]) -> Vec<PathBuf> {
     let fspath = fspaths[0].clone();
 

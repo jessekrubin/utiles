@@ -81,6 +81,21 @@ pub trait TileLike {
         let lr = self.lr();
         LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
     }
+
+    #[must_use]
+    fn json_arr(&self) -> String {
+        format!("[{}, {}, {}]", self.x(), self.y(), self.z())
+    }
+
+    #[must_use]
+    fn json(&self) -> String {
+        format!(
+            "{{\"x\":{}, \"y\":{}, \"z\":{}}}",
+            self.x(),
+            self.y(),
+            self.z()
+        )
+    }
 }
 
 pub trait BoundingBoxLike {
