@@ -687,9 +687,7 @@ fn coords(py: Python, obj: &PyAny) -> PyResult<Vec<(f64, f64)>> {
 // }
 
 #[pyfunction]
-fn geotransform2optzoom(
-    geotransform: (f64, f64, f64, f64, f64, f64),
-) -> u8 {
+fn geotransform2optzoom(geotransform: (f64, f64, f64, f64, f64, f64)) -> u8 {
     utiles::geotransform2optzoom(geotransform)
 }
 

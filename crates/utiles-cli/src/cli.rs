@@ -213,7 +213,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         Commands::Shapes(args) => {
             shapes_main(args);
         }
-        Commands::Copy(args) => {
+        Commands::Copy(_args) => {
             // copy_main(args);
             warn!("copy not implemented");
             copy_main().await;

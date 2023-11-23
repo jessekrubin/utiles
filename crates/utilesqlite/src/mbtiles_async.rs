@@ -1,10 +1,10 @@
+use crate::mbtiles::mbtiles_metadata;
 use async_sqlite::{Client, ClientBuilder};
-use crate::mbtiles::{mbtiles_metadata};
-use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
-use utiles::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
 use std::error::Error;
-use tracing::{error};
 use tilejson::TileJSON;
+use tracing::error;
+use utiles::mbtiles::metadata2tilejson;
+use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
 
 pub struct MbtilesAsync {
     pub client: Client,
@@ -16,14 +16,10 @@ impl MbtilesAsync {
         Ok(Self { client: c })
     }
 
-
-    pub async fn metadata_rows(&self) -> Result<Vec<MbtilesMetadataRow>, Box<dyn Error>> {
-        let mdrows = self.client.conn(
-            |conn| {
-                let r = mbtiles_metadata(conn);
-                r
-            }
-        ).await?;
+    pub async fn metadata_rows(
+        &self,
+    ) -> Result<Vec<MbtilesMetadataRow>, Box<dyn Error>> {
+        let mdrows = self.client.conn(|conn| mbtiles_metadata(conn)).await?;
         println!("mdrows: {:?}", mdrows);
         Ok(mdrows)
     }

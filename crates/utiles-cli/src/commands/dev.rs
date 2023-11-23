@@ -11,9 +11,9 @@ pub async fn dev_main() {
     let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles";
     let mbta = MbtilesAsync::open(file).await.unwrap();
     let r = mbta.metadata_rows().await;
-    println!("r: {:?}", r);
+    println!("r: {r:?}");
     let tj = mbta.tilejson().await;
-    println!("tj: {:?}", tj);
+    println!("tj: {tj:?}");
 
     let r = mbta
         .client
@@ -22,7 +22,7 @@ pub async fn dev_main() {
             let total_tiles: u32 = conn
                 .query_row("SELECT count(*) FROM tiles", [], |row| row.get(0))
                 .unwrap();
-            println!("total_tiles: {:?}", total_tiles);
+            println!("total_tiles: {total_tiles:?}");
 
             let mut prog = 0;
             conn.progress_handler(
@@ -30,11 +30,11 @@ pub async fn dev_main() {
                 Some(move || {
                     // println!("progress: {:?}", p);
                     prog += 2000;
-                    println!("prog: {:?}", prog);
+                    println!("prog: {prog:?}");
                     false
                 }),
             );
-            println!("prog: {:?}", prog);
+            println!("prog: {prog:?}");
             let mut stmt = conn
                 .prepare(
                     "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles",
@@ -49,8 +49,8 @@ pub async fn dev_main() {
                     let xyz = Tile::new(x, y, z);
 
                     let r = TileData { xyz, data };
-                    let returns = Ok(r);
-                    returns
+
+                    Ok(r)
                 })?
                 .collect::<Result<Vec<TileData>, Error>>()?;
             Ok(tiles_iter)

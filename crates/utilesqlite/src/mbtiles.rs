@@ -110,7 +110,7 @@ pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
 pub fn zoom_levels(conn: &Connection) -> RusqliteResult<Vec<u32>> {
     let mut stmt = conn.prepare("SELECT DISTINCT zoom_level FROM tiles")?;
     let zoom_levels = stmt
-        .query_map([], |row| Ok(row.get(0)?))?
+        .query_map([], |row| row.get(0))?
         .collect::<RusqliteResult<Vec<u32>, rusqlite::Error>>()?;
     Ok(zoom_levels)
 }
@@ -146,40 +146,40 @@ pub fn has_tiles_view(connection: &Connection) -> RusqliteResult<bool> {
         let count: i64 = row.get(0)?;
         Ok(count)
     })?;
-    Ok(nrows == 1 as i64)
+    Ok(nrows == 1_i64)
 }
 
 pub fn has_tiles_table(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='tiles'"
+        "SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='tiles'",
     )?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
     })?;
-    Ok(nrows == 1 as i64)
+    Ok(nrows == 1_i64)
 }
 
 pub fn has_metadata_table(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='metadata'"
+        "SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='metadata'",
     )?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
     })?;
-    Ok(nrows == 1 as i64)
+    Ok(nrows == 1_i64)
 }
 
 pub fn has_metadata_view(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT COUNT(name) FROM sqlite_master WHERE type='view' AND name='metadata'"
+        "SELECT COUNT(name) FROM sqlite_master WHERE type='view' AND name='metadata'",
     )?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
     })?;
-    Ok(nrows == 1 as i64)
+    Ok(nrows == 1_i64)
 }
 
 pub fn has_metadata_table_or_view(connection: &Connection) -> RusqliteResult<bool> {

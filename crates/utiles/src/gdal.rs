@@ -52,6 +52,7 @@ impl From<(f64, f64, f64, f64, f64, f64)> for GeoTransform {
     }
 }
 
+#[must_use]
 pub fn geotransform2optzoom(geotransform: (f64, f64, f64, f64, f64, f64)) -> u8 {
     let gt = GeoTransform::from(geotransform);
     gt.optzoom()

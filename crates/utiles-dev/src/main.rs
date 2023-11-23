@@ -1,7 +1,7 @@
-use std::fmt::Pointer;
-use sqlx::sqlite::{SqlitePoolOptions, SqliteConnectOptions};
-use sqlx::{ConnectOptions, query, query_as_unchecked, Statement, query_as, FromRow};
 use futures::TryStreamExt;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sqlx::{query, query_as, query_as_unchecked, ConnectOptions, FromRow, Statement};
+use std::fmt::Pointer;
 
 // #[derive(Debug, FromRow)]
 // struct MetadataRow {
@@ -28,7 +28,8 @@ async fn main() {
 
     let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles";
 
-    let copts =SqliteConnectOptions::new().filename( file )
+    let copts = SqliteConnectOptions::new()
+        .filename(file)
         .create_if_missing(true);
     let mut c = copts.connect().await.unwrap();
 
@@ -38,13 +39,10 @@ async fn main() {
         .await
         .unwrap();
 
-
-
-
     // timing
     // start
     let start = std::time::Instant::now();
-    let mut r = query_as::<_, MetadataRow>( "SELECT * FROM tiles").fetch(&pool);
+    let mut r = query_as::<_, MetadataRow>("SELECT * FROM tiles").fetch(&pool);
     while let Some(row) = r.try_next().await.unwrap() {
         // println!("row: {:?}", row);
     }
@@ -55,7 +53,10 @@ async fn main() {
 
     // as uno fetch
     let start2 = std::time::Instant::now();
-    let r2 = query_as::<_, MetadataRow2>( "SELECT tile_row FROM tiles").fetch_all(&pool).await.unwrap();
+    let r2 = query_as::<_, MetadataRow2>("SELECT tile_row FROM tiles")
+        .fetch_all(&pool)
+        .await
+        .unwrap();
     let end2 = std::time::Instant::now();
     println!("r2: {:?}", r2.len());
     println!("time: {:?}", end2.duration_since(start2));

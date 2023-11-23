@@ -1,5 +1,5 @@
 pub mod mbtiles;
-pub mod squealite;
 pub mod mbtiles_async;
+pub mod squealite;
 
 pub use mbtiles_async::MbtilesAsync;
