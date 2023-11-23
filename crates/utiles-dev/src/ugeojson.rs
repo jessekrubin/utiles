@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+#[allow(dead_code)]
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Coordinate2d(f64, f64);
 #[derive(Debug, PartialEq, Serialize, Deserialize)]

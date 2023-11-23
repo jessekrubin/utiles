@@ -25,8 +25,13 @@ anyhow.workspace = true
 fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
+rusqlite.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-thiserror.workspace = true
+thiserror.workspace= true
 tilejson.workspace = true
+tokio.workspace = true
+tracing-subscriber.workspace = true
 tracing.workspace = true
+sqlx = { version = "0.7.2", features = ["sqlite", "runtime-tokio", "macros"] }
+futures = "0.3.29"
