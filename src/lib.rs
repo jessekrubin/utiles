@@ -24,6 +24,7 @@ use utiles::libtiletype;
 use utiles::zoom::ZoomOrZooms;
 
 mod cli;
+mod pyfns;
 mod pyutiles;
 
 #[derive(FromPyObject)]
@@ -212,58 +213,13 @@ fn parse_tiles(args: &PyTuple) -> PyResult<Vec<PyTile>> {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn _parse_tile_arg(args: &PyTuple) -> PyResult<PyTile> {
+pub fn _parse_tile_arg(args: &PyTuple) -> PyResult<PyTile> {
     parse_tile_arg(args)
 }
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn ul(args: &PyTuple) -> PyResult<PyLngLat> {
-    let tile = parse_tile_arg(args)?;
-    let lnglat = tile.ul();
-    Ok(lnglat)
-}
-
-#[pyfunction]
-fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
-    utiles::xy(lng, lat, truncate)
-}
-
-#[pyfunction]
-fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
-    let trunc = truncate.unwrap_or(false);
-    if !trunc && (lat <= -90.0 || lat >= 90.0) {
-        Err(PyErr::new::<PyValueError, _>(format!(
-            "Invalid latitude: {lat}"
-        )))?;
-    }
-    let xy = utiles::_xy(lng, lat, truncate);
-    match xy {
-        Ok(xy) => Ok(xy),
-        Err(_e) => Err(PyErr::new::<PyValueError, _>(format!(
-            "Invalid latitude: {lat}"
-        )))?,
-    }
-}
-
-#[pyfunction]
-fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
-    // let trunc = truncate.unwrap_or(false);
-    let lnglat = utiles::lnglat(x, y, truncate);
-    PyLngLat::new(lnglat.lng(), lnglat.lat())
-}
-
-#[pyfunction]
-#[pyo3(signature = (* args))]
-fn bounds(args: &PyTuple) -> PyResult<PyLngLatBbox> {
-    let tile = parse_tile_arg(args)?;
-    let bbox = tile.bounds();
-    Ok(bbox)
-}
-
-#[pyfunction]
-#[pyo3(signature = (* args))]
-fn xy_bounds(args: &PyTuple) -> PyResult<PyBbox> {
+pub fn xy_bounds(args: &PyTuple) -> PyResult<PyBbox> {
     let tile = parse_tile_arg(args)?;
     let pybbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
     Ok(PyBbox::new(
@@ -275,7 +231,7 @@ fn xy_bounds(args: &PyTuple) -> PyResult<PyBbox> {
 }
 
 #[pyfunction]
-fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<PyTile> {
+pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<PyTile> {
     if lat <= -90.0 || lat >= 90.0 {
         Err(PyErr::new::<PyValueError, _>(format!(
             "Invalid latitude: {lat}"
@@ -480,11 +436,6 @@ fn tiles_list(
     utiles::tiles((west, south, east, north), ZoomOrZooms::from(zooms))
         .map(PyTile::from)
         .collect::<Vec<_>>()
-}
-
-#[pyfunction]
-fn xyz(x: u32, y: u32, z: u8) -> PyTile {
-    PyTile::new(x, y, z)
 }
 
 #[derive(FromPyObject, Debug)]
@@ -753,11 +704,11 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(parse_tile_arg, m)?)?;
     m.add_function(wrap_pyfunction!(_parse_tile_arg, m)?)?;
     m.add_function(wrap_pyfunction!(minmax, m)?)?;
-    m.add_function(wrap_pyfunction!(ul, m)?)?;
-    m.add_function(wrap_pyfunction!(bounds, m)?)?;
-    m.add_function(wrap_pyfunction!(xy, m)?)?;
-    m.add_function(wrap_pyfunction!(_xy, m)?)?;
-    m.add_function(wrap_pyfunction!(lnglat, m)?)?;
+    m.add_function(wrap_pyfunction!(pyfns::ul, m)?)?;
+    m.add_function(wrap_pyfunction!(pyfns::bounds, m)?)?;
+    m.add_function(wrap_pyfunction!(pyfns::xy, m)?)?;
+    m.add_function(wrap_pyfunction!(pyfns::_xy, m)?)?;
+    m.add_function(wrap_pyfunction!(pyfns::lnglat, m)?)?;
     m.add_function(wrap_pyfunction!(xy_bounds, m)?)?;
     m.add_function(wrap_pyfunction!(tile, m)?)?;
     m.add_function(wrap_pyfunction!(parent, m)?)?;
@@ -778,7 +729,7 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     // utiles functions
     m.add_function(wrap_pyfunction!(tiles_count, m)?)?;
     m.add_function(wrap_pyfunction!(tiles_list, m)?)?;
-    m.add_function(wrap_pyfunction!(xyz, m)?)?;
+    m.add_function(wrap_pyfunction!(pyfns::xyz, m)?)?;
     m.add_function(wrap_pyfunction!(parse_tiles, m)?)?;
     m.add_function(wrap_pyfunction!(xyz2quadkey, m)?)?;
     m.add_function(wrap_pyfunction!(quadkey2xyz, m)?)?;
