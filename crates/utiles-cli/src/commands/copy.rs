@@ -53,12 +53,10 @@ impl TilesFsWriter {
     }
 
     pub async fn write_tile(&self, tile: MbtTile) {
-        let dirpath = self.dirpath(tile.zoom_level, tile.tile_column);
         let filepath = self.filepath(tile.zoom_level, tile.tile_column, tile.tile_row);
         debug!("filepath: {:?}", filepath);
-        // fs::create_dir_all(dirpath).await.unwrap();
         fs::write(filepath, tile.tile_data).await.unwrap();
-        //     increment stats
+        // increment stats
         self.inc_nwritten();
     }
 
@@ -158,14 +156,4 @@ pub async fn copy_main() {
         })
         .await;
 
-    // for tile in tiles_iter {
-    //     let tile = tile.unwrap();
-    //     println!("tile: {:?}", tile);
-    // }
-    //
-    // let mbta = MbtilesAsync::open(file).await.unwrap();
-    // let r = mbta.metadata_rows().await;
-    // println!("r: {r:?}");
-    // let tj = mbta.tilejson().await;
-    // println!("tj: {tj:?}");
 }
