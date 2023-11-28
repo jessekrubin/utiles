@@ -35,7 +35,6 @@ impl TilesFsWriter {
         }
     }
 
-
     fn dirpath(&self, z: u8, x: u32) -> PathBuf {
         Path::new(&self.root_dirpath)
             .join(format!("{}", z))
@@ -81,7 +80,6 @@ pub async fn copy_main() {
     println!("total_tiles: {total_tiles:?}");
     let c = mbt.conn();
 
-
     let mut stmt_zx_distinct = c
         .prepare("SELECT DISTINCT zoom_level, tile_column FROM tiles")
         .unwrap();
@@ -95,26 +93,23 @@ pub async fn copy_main() {
         })
         .unwrap();
 
-
     let mut twriter = TilesFsWriter::new(
         "D:\\utiles\\crates\\utiles-cli\\blue-marble-tiles".to_string(),
     );
 
     let zx_stream = stream::iter(zx_iter);
-    zx_stream.for_each_concurrent(
-        10,
-        |zx| async {
+    zx_stream
+        .for_each_concurrent(10, |zx| async {
             let zx = zx.unwrap();
             let z = zx.0;
             let x = zx.1;
             twriter.mkdirpath(z, x).await;
-        },
-    ).await;
+        })
+        .await;
 
     let mut stmt = c
         .prepare("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles")
         .unwrap();
-
 
     let tiles_iter = stmt
         .query_map([], |row| {
@@ -155,5 +150,4 @@ pub async fn copy_main() {
             }
         })
         .await;
-
 }

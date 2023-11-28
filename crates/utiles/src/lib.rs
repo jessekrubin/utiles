@@ -13,7 +13,7 @@ pub use crate::fns::*;
 pub use crate::quadkey::*;
 pub use lnglat::LngLat;
 pub use tile::Tile;
-pub use traits::TileLike;
+pub use tile_like::TileLike;
 pub mod bbox;
 pub mod constants;
 pub mod fns;
@@ -32,12 +32,13 @@ pub mod sibling_relationship;
 pub mod tile;
 pub mod tile_data_row;
 mod tile_feature;
+mod tile_like;
 pub mod tile_range;
 mod tile_tuple;
+mod tilecrz;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
-mod mbtile;
 
 pub use gdal::geotransform2optzoom;
 

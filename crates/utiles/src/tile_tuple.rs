@@ -1,4 +1,4 @@
-use crate::TileLike;
+use crate::tile_like::TileLike;
 use serde::Deserialize;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
 #[allow(clippy::upper_case_acronyms)]

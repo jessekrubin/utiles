@@ -9,8 +9,8 @@ use crate::constants::EPSILON;
 use crate::fns::{bounds, children, flipy, neighbors, parent, siblings, xy};
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
+use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
-use crate::traits::TileLike;
 use crate::utile;
 use crate::{pmtiles, quadkey2tile, xyz2quadkey};
 
@@ -49,34 +49,6 @@ pub struct Tile {
     pub y: u32,
     pub z: u8,
 }
-
-// impl traits::Utiles<LngLat, BBox> for Tile {
-//     // fn ul(&self) -> LngLat {
-//     //     ul(self.x, self.y, self.z)
-//     // }
-//
-//     fn ur(&self) -> LngLat {
-//         ur(self.x, self.y, self.z)
-//     }
-//
-//     fn lr(&self) -> LngLat {
-//         lr(self.x, self.y, self.z)
-//     }
-//
-//     fn ll(&self) -> LngLat {
-//         ll(self.x, self.y, self.z)
-//     }
-//
-//     fn bbox(&self) -> BBox {
-//         let (west, south, east, north) = bounds(self.x, self.y, self.z);
-//         BBox {
-//             north,
-//             south,
-//             east,
-//             west,
-//         }
-//     }
-// }
 
 impl From<TileTuple> for Tile {
     fn from(xyz: TileTuple) -> Self {
@@ -156,7 +128,6 @@ impl TileLike for Tile {
     }
 }
 
-// impl Tile {
 impl Tile {
     #[must_use]
     pub fn new(x: u32, y: u32, z: u8) -> Self {
@@ -168,21 +139,6 @@ impl Tile {
     pub fn valid(&self) -> bool {
         crate::fns::valid(self.x, self.y, self.z)
     }
-
-    // #[must_use]
-    // pub fn x(&self) -> u32 {
-    //     self.x
-    // }
-    //
-    // #[must_use]
-    // pub fn y(&self) -> u32 {
-    //     self.y
-    // }
-    //
-    // #[must_use]
-    // pub fn z(&self) -> u8 {
-    //     self.z
-    // }
 
     #[must_use]
     pub fn zoom(&self) -> u8 {
@@ -604,17 +560,6 @@ impl From<&Vec<Value>> for Tile {
 impl From<Vec<Value>> for Tile {
     fn from(arr: Vec<Value>) -> Self {
         Tile::from(&arr)
-        //
-        // if arr.len() < 3 {
-        //     panic!(
-        //         "Invalid json value: {}",
-        //         serde_json::to_string(&arr).unwrap()
-        //     );
-        // }
-        // let x = arr[0].as_u64().unwrap() as u32;
-        // let y = arr[1].as_u64().unwrap() as u32;
-        // let z = arr[2].as_u64().unwrap() as u8;
-        // Tile::from((x, y, z))
     }
 }
 
@@ -629,8 +574,6 @@ impl From<&Value> for Tile {
                     serde_json::to_string(&v).unwrap()
                 );
                 Tile::from(v)
-                // let tuple = serde_json::from_value::<XYZ>(val).unwrap();
-                // return Tile::from(tuple);
             }
             Value::Object(v) => {
                 // if it has a "tile" key, use that
@@ -661,6 +604,12 @@ impl From<Value> for Tile {
 impl From<&str> for Tile {
     fn from(s: &str) -> Self {
         Tile::from_json(s)
+    }
+}
+
+impl From<Tile> for (u32, u32, u8) {
+    fn from(tile: Tile) -> Self {
+        (tile.x, tile.y, tile.z)
     }
 }
 
@@ -712,11 +661,5 @@ mod tests {
             serde_json::from_str::<Value>(json_obj_with_tile_array).unwrap();
         let tile_from_obj_with_tile_array = Tile::from(val_obj_with_tile_array);
         assert_eq!(tile_from_obj_with_tile_array, Tile::new(1, 2, 3));
-    }
-}
-
-impl From<Tile> for (u32, u32, u8) {
-    fn from(tile: Tile) -> Self {
-        (tile.x, tile.y, tile.z)
     }
 }
