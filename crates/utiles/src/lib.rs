@@ -37,6 +37,7 @@ mod tile_tuple;
 pub mod tilejson;
 pub mod traits;
 pub mod zoom;
+mod mbtile;
 
 pub use gdal::geotransform2optzoom;
 

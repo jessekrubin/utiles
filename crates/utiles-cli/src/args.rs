@@ -153,8 +153,24 @@ pub enum Commands {
     #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None)]
     Copy(CopyArgs),
 
+    #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None)]
+    Rimraf(RimrafArgs),
+
     #[command(name = "dev", about = "dev command", long_about = None, hide = true)]
     Dev {},
+}
+
+#[derive(Debug, Parser, Clone)] // requires `derive` feature
+#[command(name = "rimraf", about = "rm-rf dirpath", long_about = None)]
+pub struct RimrafArgs {
+    #[arg(required = true, help = "dirpath to rm")]
+    pub dirpath: String,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub(crate) size: bool,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    verbose: bool,
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature

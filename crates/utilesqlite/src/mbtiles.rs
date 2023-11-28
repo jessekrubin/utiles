@@ -16,6 +16,10 @@ impl Mbtiles {
         Mbtiles { conn }
     }
 
+    pub fn conn(&self) -> &Connection {
+        &self.conn
+    }
+
     pub fn metadata(&self) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
         mbtiles_metadata(&self.conn)
     }

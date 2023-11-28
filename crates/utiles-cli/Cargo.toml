@@ -15,7 +15,7 @@ path = "src/bin.rs"
 
 [dependencies]
 rusqlite.workspace = true
-tokio.workspace = true
+tokio = { workspace = true, features = ["fs"] }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 serde.workspace = true
@@ -27,3 +27,6 @@ globset = "0.4.13"
 ignore = "0.4.20"
 utiles = { path = "../utiles" }
 utilesqlite = { path = "../utilesqlite" }
+tokio-stream = "0.1.14"
+futures = "0.3.29"
+walkdir = "2.4.0"

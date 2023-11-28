@@ -4,6 +4,7 @@ use std::path::Path;
 use crate::args::{Cli, Commands};
 use crate::commands::copy::copy_main;
 use crate::commands::dev::dev_main;
+use crate::commands::rimraf::rimraf_main;
 use crate::commands::tiles::tiles_main;
 use crate::lint::lint_main;
 use crate::shapes::shapes_main;
@@ -220,6 +221,10 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         }
         Commands::Dev {} => {
             dev_main().await;
+        }
+
+        Commands::Rimraf(args) => {
+            rimraf_main(args).await;
         }
     }
     0
