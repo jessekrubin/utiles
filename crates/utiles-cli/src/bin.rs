@@ -2,8 +2,6 @@ mod args;
 mod cli;
 mod commands;
 mod find;
-mod lint;
-mod shapes;
 mod stdinterator;
 mod stdinterator_filter;
 

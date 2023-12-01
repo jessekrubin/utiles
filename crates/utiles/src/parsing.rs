@@ -49,13 +49,20 @@ pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
         return parse_bbox_json(s).map_err(std::convert::Into::into);
     }
     let parts: Vec<f64> = s.split(',').filter_map(|p| p.parse::<f64>().ok()).collect();
-
     if parts.len() == 4 {
         Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
     } else {
         let msg = format!("Invalid bbox: {s}");
         Err(msg.into())
     }
+}
+
+pub fn parse_bbox_ext(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
+    // match 'world' or 'planet'
+    if string == "world" || string == "planet" {
+        return Ok(BBox::new(-180.0, -90.0, 180.0, 90.0));
+    }
+    parse_bbox(string)
 }
 
 pub fn coords2bounds<I>(mut coords: I) -> Option<(f64, f64, f64, f64)>

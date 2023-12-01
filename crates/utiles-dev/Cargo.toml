@@ -36,3 +36,4 @@ tracing.workspace = true
 sqlx = { version = "0.7.2", features = ["sqlite", "runtime-tokio", "macros"] }
 futures = "0.3.29"
 geozero = { version = "0.11.0", features = ["with-mvt", "with-wkb"] }
+deadpool-sqlite = { version = "0.7.0", features = ["tracing"] }

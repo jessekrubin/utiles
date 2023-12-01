@@ -1,10 +1,12 @@
-use utilesqlite::{Mbtiles, MbtilesAsync};
-// use tokio_stream::{self as stream, Stream};
-use futures::stream::{self, StreamExt};
 use std::cell::Cell;
 use std::path::{Path, PathBuf};
+
+// use tokio_stream::{self as stream, Stream};
+use futures::stream::{self, StreamExt};
 use tokio::fs;
-use tracing::{debug, info, warn};
+use tracing::debug;
+
+use utilesqlite::Mbtiles;
 
 #[derive(Debug)]
 pub struct MbtTile {
@@ -93,7 +95,7 @@ pub async fn copy_main() {
         })
         .unwrap();
 
-    let mut twriter = TilesFsWriter::new(
+    let twriter = TilesFsWriter::new(
         "D:\\utiles\\crates\\utiles-cli\\blue-marble-tiles".to_string(),
     );
 

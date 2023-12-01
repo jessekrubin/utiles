@@ -1,50 +1,77 @@
-use crate::shapes::ShapesArgs;
 use clap::{Parser, Subcommand};
 
-/// A fictional versioning CLI
-#[derive(Debug, Parser)] // requires `derive` feature
-#[command(name = "ut")]
-#[command(about = "utiles cli (rust)", long_about = None)]
-pub struct Cli {
-    #[command(subcommand)]
-    pub command: Commands,
+use utiles::VERSION;
 
-    // debug flag
-    #[arg(
-        long,
-        short,
-        global = true,
-        default_value = "false",
-        help = "debug mode"
-    )]
-    pub debug: bool,
-    // #[command(flatten , help="verbosity level (-v, -vv, -vvv, -vvvv)" )]
-    // verbose: Verbosity,
+use crate::commands::shapes::ShapesArgs;
+
+fn about() -> String {
+    format!("utiles cli (rust) ~ v{}", VERSION)
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
-pub struct InputAndSequenceArgs {
-    /// The remote to clone
+#[command(name = "ut", about = about(), version = VERSION, long_about = None, author)]
+pub struct Cli {
+    /// debug mode (print/log a lot of stuff)
+    #[arg(
+    long,
+    short,
+    global = true,
+    default_value = "false",
+    help = "debug mode",
+    action = clap::ArgAction::SetTrue,
+    )]
+    pub debug: bool,
+
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TileInputStreamArgs {
     #[arg(required = false)]
-    input: Option<String>,
+    pub input: Option<String>,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TileFmtOptions {
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub seq: bool,
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    seq: bool,
+    pub obj: bool,
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
 pub struct TilesArgs {
-    /// The remote to clone
     #[arg(required = true)]
     pub zoom: u8,
 
-    // #[command(flatten)]
-    // pub shared: InputAndSequenceArgs,
-    #[arg(required = false)]
-    pub input: Option<String>,
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
 
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    pub seq: bool,
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TileFmtArgs {
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
+
+#[derive(Debug, Parser)]
+pub struct ParentChildrenArgs {
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+
+    #[arg(required = false, long, default_value = "1")]
+    pub depth: u8,
 }
 
 #[derive(Debug, Subcommand)]
@@ -85,67 +112,36 @@ pub enum Commands {
     // ========================================================================
     #[command(name = "tiles", about = "Echo tiles of bbox", long_about = None)]
     Tiles(TilesArgs),
-    // {
-    //     #[arg(required = true)]
-    //     zoom: u8,
-    //
+
+    #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
+    Quadkey (TileFmtArgs),
+    // Quadkey {
+    //     #[arg(required = false)]
+    //     input: Option<String>,
+    // },
+
+    #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
+    Pmtileid (TileFmtArgs),
+
+    #[command(name = "bounding-tile", about = "Echo the bounding tile of a lonlat/bbox/GeoJSON", long_about = None)]
+    BoundingTile (TileFmtArgs),
+    #[command(name = "neighbors", about = "Echo neighbors of tile(s)", long_about = None)]
+    Neighbors(TileFmtArgs),
+
+    #[command(name = "parent", about = "Echo parent of tile(s)", long_about = None)]
+    Parent(ParentChildrenArgs),
+    // Parent {
     //     #[arg(required = false)]
     //     input: Option<String>,
     //
     //     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     //     seq: bool,
+    //
+    //     #[arg(required = false, long, default_value = "1")]
+    //     depth: u8,
     // },
-    #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
-    Quadkey {
-        #[arg(required = false)]
-        input: Option<String>,
-    },
-
-    #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
-    PMTileID {
-        #[arg(required = false)]
-        input: Option<String>,
-    },
-
-    #[command(name = "bounding-tile", about = "Echo the bounding tile of a lonlat/bbox/GeoJSON", long_about = None)]
-    BoundingTile {
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-    },
-    #[command(name = "neighbors", about = "Echo neighbors of tile(s)", long_about = None)]
-    Neighbors {
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-    },
-
-    #[command(name = "parent", about = "Echo parent of tile(s)", long_about = None)]
-    Parent {
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-
-        #[arg(required = false, long, default_value = "1")]
-        depth: u8,
-    },
     #[command(name = "children", about = "Echo children of tile(s)", long_about = None)]
-    Children {
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-
-        #[arg(required = false, long, default_value = "1")]
-        depth: u8,
-    },
+    Children(ParentChildrenArgs),
 
     #[command(name = "shapes", about = "Echo shapes of tile(s) as GeoJSON", long_about = None)]
     Shapes(ShapesArgs),

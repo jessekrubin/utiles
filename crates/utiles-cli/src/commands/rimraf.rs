@@ -27,9 +27,9 @@ impl RimrafStats {
         self.nfiles.set(self.nfiles.get() + 1);
     }
 
-    pub fn inc_ndirs(&self) {
-        self.ndirs.set(self.ndirs.get() + 1);
-    }
+    // pub fn inc_ndirs(&self) {
+    //     self.ndirs.set(self.ndirs.get() + 1);
+    // }
 
     pub fn inc_nbytes(&self, nbytes: u64) {
         self.nbytes.set(self.nbytes.get() + nbytes);
@@ -69,11 +69,11 @@ impl Rimrafer {
         self.print_stats_1000();
     }
 
-    pub async fn rm_dir(&self, dir: DirEntry) {
-        let path = dir.path();
-        fs::remove_dir_all(path).await.unwrap();
-        self.stats.inc_ndirs();
-    }
+    // pub async fn rm_dir(&self, dir: DirEntry) {
+    //     let path = dir.path();
+    //     fs::remove_dir_all(path).await.unwrap();
+    //     self.stats.inc_ndirs();
+    // }
 
     pub fn stats_str(&self) -> String {
         format!(
@@ -102,7 +102,7 @@ pub async fn rimraf_main(args: RimrafArgs) {
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file());
 
-    let mut rmrfer = Rimrafer::new(args);
+    let rmrfer = Rimrafer::new(args);
 
     let s = stream::iter(files_iter);
     s.for_each_concurrent(10, |file| async {

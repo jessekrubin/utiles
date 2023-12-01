@@ -1,10 +1,12 @@
 use futures::TryStreamExt;
-use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use sqlx::{query, query_as, query_as_unchecked, ConnectOptions, FromRow, Statement};
-use std::fmt::Pointer;
 use geozero;
-use geozero::mvt::{self, Message, Tile, tile};
-use geozero::{ToJson,ProcessToJson};
+use geozero::mvt::{self, tile, Message, Tile};
+use geozero::{ProcessToJson, ToJson};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sqlx::{
+    query, query_as, query_as_unchecked, ConnectOptions, Executor, FromRow, Statement,
+};
+use std::fmt::Pointer;
 
 // #[derive(Debug, FromRow)]
 // struct MetadataRow {
@@ -26,16 +28,17 @@ struct MetadataRow {
     tile_data: Vec<u8>,
 }
 
-fn mvt_dev(){
+fn mvt_dev() {
     let filepath = "D:\\utiles\\crates\\utiles-dev\\12665.vector.pbf";
     //     read to vec of bytes
-    let bytes: &[u8] = std::fs::read(filepath).unwrap().as_slice();
+    let bytes = std::fs::read(filepath).unwrap();
+
     println!("bytes: {:?}", bytes.len());
-    let buf = bytes.as_slice();
+    // let buf = bytes.as_slice();
 
-    // let mut cursor = std::io::Cursor::new(buf);
+    let mut cursor = std::io::Cursor::new(bytes.as_slice());
 
-    let mt = Tile::decode(&bytes).unwrap();
+    let mt = Tile::decode(cursor).unwrap();
 
     println!("mt: {:?}", mt);
     // let t =
@@ -56,7 +59,6 @@ fn mvt_dev(){
     //     }
     // ).collect::<Vec<()>>();
 
-
     // println!("gj: {:?}", gj);
     // number of layers in tile
     // let mtjson = serde_json::to_string(&mt).unwrap();
@@ -65,47 +67,69 @@ fn mvt_dev(){
     // println!("mtjson: {:?}", mtjson);
 }
 
+async fn sqlite_deadpool_test() {
+    println!("sqlite_deadpool_test");
+    let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles.NOPE";
+    let mbta = utilesqlite::MbtilesAsync::open(file).await.unwrap();
+
+    let tj = mbta.tilejson().await;
+
+    match tj {
+        Ok(t) => {
+            println!("tj: {t:?}");
+        }
+        Err(e) => {
+            println!("e: {:?}", e);
+        }
+    }
+}
+
+async fn sqlxing() {
+    let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles";
+
+    let copts = SqliteConnectOptions::new()
+        .filename(file)
+        .create_if_missing(true);
+    let mut c = copts.connect().await.unwrap();
+
+    let pool = SqlitePoolOptions::new()
+        .max_connections(5)
+        .connect_with(copts)
+        .await
+        .unwrap();
+
+    // timing
+    // start
+    let start = std::time::Instant::now();
+    // let tthingydickr = query_as::<_, MetadataRow>("SELECT * FROM tiles");
+    let mut r = query_as::<_, MetadataRow>("SELECT * FROM tiles").fetch(&pool);
+    while let Some(row) = r.try_next().await.unwrap() {
+        // println!("row: {:?}", row);
+    }
+
+    // end
+    let end = std::time::Instant::now();
+    println!("time: {:?}", end.duration_since(start));
+
+    // as uno fetch
+    let start2 = std::time::Instant::now();
+    let r2 = query_as::<_, MetadataRow2>("SELECT tile_row FROM tiles")
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+    let end2 = std::time::Instant::now();
+    println!("r2: {:?}", r2.len());
+    println!("time: {:?}", end2.duration_since(start2));
+}
 #[tokio::main]
 async fn main() {
     println!("utiles ~ dev");
 
-
-    // let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles";
-    //
-    // let copts = SqliteConnectOptions::new()
-    //     .filename(file)
-    //     .create_if_missing(true);
-    // let mut c = copts.connect().await.unwrap();
-    //
-    // let pool = SqlitePoolOptions::new()
-    //     .max_connections(5)
-    //     .connect_with(copts)
-    //     .await
-    //     .unwrap();
-    //
-    // // timing
-    // // start
-    // let start = std::time::Instant::now();
-    // let mut r = query_as::<_, MetadataRow>("SELECT * FROM tiles").fetch(&pool);
-    // while let Some(row) = r.try_next().await.unwrap() {
-    //     // println!("row: {:?}", row);
-    // }
-    //
-    // // end
-    // let end = std::time::Instant::now();
-    // println!("time: {:?}", end.duration_since(start));
-    //
-    // // as uno fetch
-    // let start2 = std::time::Instant::now();
-    // let r2 = query_as::<_, MetadataRow2>("SELECT tile_row FROM tiles")
-    //     .fetch_all(&pool)
-    //     .await
-    //     .unwrap();
-    // let end2 = std::time::Instant::now();
-    // println!("r2: {:?}", r2.len());
-    // println!("time: {:?}", end2.duration_since(start2));
-
     mvt_dev();
+
+    sqlite_deadpool_test().await;
+
+    sqlxing().await;
 
     // let res = r.iter().map(|row| {
     //     println!("row:j");

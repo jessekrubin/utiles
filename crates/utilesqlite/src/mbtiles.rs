@@ -87,7 +87,7 @@ impl From<&Path> for Mbtiles {
 }
 
 pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
-    let mut stmt = conn.prepare("SELECT name, value FROM metadata")?;
+    let mut stmt = conn.prepare_cached("SELECT name, value FROM metadata")?;
     let mdata = stmt
         .query_map([], |row| {
             Ok(MbtilesMetadataRow {
