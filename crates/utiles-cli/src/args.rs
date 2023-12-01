@@ -74,6 +74,24 @@ pub struct ParentChildrenArgs {
     pub depth: u8,
 }
 
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct SqliteDbCommonArgs {
+    #[arg(required = true, help = "mbtiles filepath")]
+    pub filepath: String,
+
+    #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
+    pub min: bool,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TilejsonArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = false, short, long, help = "include tilestats", action = clap::ArgAction::SetTrue)]
+    pub tilestats: bool,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
@@ -85,28 +103,10 @@ pub enum Commands {
         fix: bool,
     },
     #[command(name = "tilejson", visible_alias = "tj", about = "Echo tileson for mbtiles file(s)", long_about = None)]
-    Tilejson {
-        #[arg(required = true, help = "mbtiles filepath")]
-        filepath: String,
-
-        #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
-        min: bool,
-
-        #[arg(required = false, short, long, help = "include tilestats", action = clap::ArgAction::SetTrue)]
-        tilestats: bool,
-    },
+    Tilejson  (TilejsonArgs),
 
     #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
-    Meta {
-        #[arg(required = true, help = "mbtiles filepath")]
-        filepath: String,
-
-        #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
-        min: bool,
-        // #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
-        // raw: bool,
-    },
-
+    Meta (SqliteDbCommonArgs),
     // ========================================================================
     // TILE CLI UTILS - MERCANTILE LIKE CLI
     // ========================================================================

@@ -1,4 +1,5 @@
-use utiles::Tile;
+use utiles::{Tile, TileLike};
+
 use crate::args::ParentChildrenArgs;
 use crate::stdinterator_filter;
 

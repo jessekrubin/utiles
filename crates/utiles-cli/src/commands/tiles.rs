@@ -3,7 +3,7 @@ use std::io::Write;
 
 use tracing::debug;
 
-use utiles::Tile;
+use utiles::{Tile, TileLike};
 use utiles::parsing::parse_bbox_ext;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;

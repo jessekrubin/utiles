@@ -5,17 +5,18 @@ use std::path::{Path, PathBuf};
 use futures::stream::{self, StreamExt};
 use tokio::fs;
 use tracing::debug;
+use utiles::mbtiles::MbtTileRow;
 
 use utilesqlite::Mbtiles;
 
-#[derive(Debug)]
-pub struct MbtTile {
-    zoom_level: u8,
-    tile_column: u32,
-    tile_row: u32,
-    tile_data: Vec<u8>,
-}
-
+// #[derive(Debug)]
+// pub struct MbtTileRow {
+//     zoom_level: u8,
+//     tile_column: u32,
+//     tile_row: u32,
+//     tile_data: Vec<u8>,
+// }
+//
 #[derive(Debug)]
 pub struct WriterStats {
     pub nwritten: Cell<u32>,
@@ -44,6 +45,7 @@ impl TilesFsWriter {
     }
 
     fn filepath(&self, z: u8, x: u32, y: u32) -> PathBuf {
+
         self.dirpath(z, x).join(format!("{}.png", y))
     }
 
@@ -53,8 +55,9 @@ impl TilesFsWriter {
         fs::create_dir_all(dp).await.unwrap();
     }
 
-    pub async fn write_tile(&self, tile: MbtTile) {
+    pub async fn write_tile(&self, tile: MbtTileRow) {
         let filepath = self.filepath(tile.zoom_level, tile.tile_column, tile.tile_row);
+
         debug!("filepath: {:?}", filepath);
         fs::write(filepath, tile.tile_data).await.unwrap();
         // increment stats
@@ -72,7 +75,8 @@ impl TilesFsWriter {
 }
 
 pub async fn copy_main() {
-    let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles";
+    let file = "D:\\utiles\\blue-marble\\blue-marble.z0z4.normal.mbtiles";
+
     let mbt = Mbtiles::from_filepath(file).unwrap();
 
     let total_tiles: u32 = mbt
@@ -121,13 +125,14 @@ pub async fn copy_main() {
             let tile_row: u32 = row.get(2)?;
             let tile_data: Vec<u8> = row.get(3)?;
 
-            let r = MbtTile {
+            let r = MbtTileRow::new(
                 zoom_level,
                 tile_column,
                 tile_row,
                 tile_data,
-            };
+            );
             Ok(r)
+
         })
         .unwrap();
 

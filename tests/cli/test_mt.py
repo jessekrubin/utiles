@@ -6,8 +6,10 @@ from subprocess import CompletedProcess, run
 
 import pytest
 
+from utiles.dev.testing import run_cli as _run_cli
 
-def _run_cli(
+
+def _run_cli_old(
     args: list[str] | None,
     input: str | None = None,
 ) -> CompletedProcess[str]:
@@ -96,7 +98,7 @@ class TestTiles:
         assert result.returncode == 0
         assert result.stdout == "[3413, 6202, 14]\n[3413, 6203, 14]\n"
 
-    def test_cli_tiles_geosjon(self) -> None:
+    def test_cli_tiles_geojson(self) -> None:
         collection = stringify(
             {
                 "features": [
@@ -199,7 +201,7 @@ class TestBoundingTile:
         assert result.returncode == 0
         assert result.stdout == "\x1e\n[0, 0, 0]\n"
 
-    def test_cli_bounding_tile_geosjon(self) -> None:
+    def test_cli_bounding_tile_geojson(self) -> None:
         collection_dict = {
             "features": [
                 {

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Union
 
 import pytest
+from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
 
@@ -141,8 +142,8 @@ def test_tiletype_rs(
 )
 def test_benchmark_tiletype_py(
     tile: tuple[str, bytes],
-    benchmark,
-):
+    benchmark: BenchmarkFixture,
+) -> None:
     filename, buffer = tile
     benchmark(tiletype, buffer)
 
@@ -153,7 +154,7 @@ def test_benchmark_tiletype_py(
 )
 def test_benchmark_tiletype_rs(
     tile: tuple[str, bytes],
-    benchmark,
-):
+    benchmark: BenchmarkFixture,
+) -> None:
     filename, buffer = tile
     benchmark(utiles.tiletype_str, buffer)

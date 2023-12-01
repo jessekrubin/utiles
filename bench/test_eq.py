@@ -8,7 +8,7 @@ import utiles
 def test_tile_equality() -> None:
     t = (1, 2, 3)
     tile_obj = utiles.from_tuple(t)
-    assert tile_obj == t  # noqa: S101
+    assert tile_obj == t
 
 
 def _equal(a: Any, b: Any) -> bool:

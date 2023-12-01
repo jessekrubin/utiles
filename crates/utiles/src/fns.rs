@@ -59,6 +59,7 @@ pub fn valid(x: u32, y: u32, z: u8) -> bool {
 }
 
 #[must_use]
+#[inline]
 pub fn flipy(y: u32, z: u8) -> u32 {
     2_u32.pow(u32::from(z)) - 1 - y
 }

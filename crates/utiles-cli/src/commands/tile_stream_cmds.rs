@@ -1,6 +1,7 @@
 use tracing::{debug, error};
+use utiles::{bounding_tile, Tile, TileLike};
 use utiles::parsing::parse_bbox;
-use utiles::{bounding_tile, Tile};
+
 use crate::args::TileFmtArgs;
 use crate::stdinterator_filter;
 

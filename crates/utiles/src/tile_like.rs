@@ -1,4 +1,4 @@
-use crate::{pmtiles, LngLat};
+use crate::{pmtiles, LngLat, Tile, flipy};
 
 pub trait TileLike {
     #[must_use]
@@ -11,6 +11,20 @@ pub trait TileLike {
     #[must_use]
     fn zoom(&self) -> u8 {
         self.z()
+    }
+
+    fn yflip(&self) -> u32 {
+       flipy(self.y(), self.z())
+    }
+
+    #[must_use]
+    fn tile(&self) ->  Tile{
+        Tile::new(self.x(), self.y(), self.z())
+    }
+
+    /// both bc I keep forgetting which is which
+    fn flipy(&self) -> u32 {
+       flipy(self.y(), self.z())
     }
 
     #[must_use]
@@ -78,6 +92,11 @@ pub trait TileLike {
     }
 
     #[must_use]
+    fn json_arr_min(&self) -> String {
+        format!("[{},{},{}]", self.x(), self.y(), self.z())
+    }
+
+    #[must_use]
     fn json(&self) -> String {
         format!(
             "{{\"x\":{}, \"y\":{}, \"z\":{}}}",
@@ -85,5 +104,36 @@ pub trait TileLike {
             self.y(),
             self.z()
         )
+    }
+
+    #[must_use]
+    fn json_obj(&self) -> String {
+        self.tile().json_obj()
+    }
+
+    #[must_use]
+    fn tuple_string(&self) -> String {
+        format!("({}, {}, {})", self.x(), self.y(), self.z())
+    }
+
+    #[must_use]
+    fn sql_where(&self, flip: Option<bool>) -> String {
+        // classic mbtiles sqlite query:
+        // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+
+        // flip y for tms (default for mbtiles)
+        if flip.unwrap_or(true) {
+            format!(
+                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+                self.z(),
+                self.x(),
+                flipy(self.y(), self.z())
+            )
+        } else {
+            format!(
+                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+                self.z(), self.x(), self.y()
+            )
+        }
     }
 }

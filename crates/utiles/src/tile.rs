@@ -184,6 +184,7 @@ impl Tile {
         }
     }
 
+
     #[must_use]
     pub fn parent_id(&self) -> u64 {
         pmtiles::parent_id(self.pmtileid())
@@ -416,47 +417,47 @@ impl Tile {
         siblings(self.x, self.y, self.z)
     }
 
-    #[must_use]
-    pub fn sql_where(&self, flip: Option<bool>) -> String {
-        // classic mbtiles sqlite query:
-        // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+    // #[must_use]
+    // pub fn sql_where(&self, flip: Option<bool>) -> String {
+    //     // classic mbtiles sqlite query:
+    //     // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+    //
+    //     // flip y for tms (default for mbtiles)
+    //     if flip.unwrap_or(true) {
+    //         format!(
+    //             "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+    //             self.z,
+    //             self.x,
+    //             flipy(self.y, self.z)
+    //         )
+    //     } else {
+    //         format!(
+    //             "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+    //             self.z, self.x, self.y
+    //         )
+    //     }
+    // }
 
-        // flip y for tms (default for mbtiles)
-        if flip.unwrap_or(true) {
-            format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z,
-                self.x,
-                flipy(self.y, self.z)
-            )
-        } else {
-            format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z, self.x, self.y
-            )
-        }
-    }
-
-    #[must_use]
-    pub fn json_arr_min(&self) -> String {
-        format!("[{},{},{}]", self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn json_arr(&self) -> String {
-        format!("[{}, {}, {}]", self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn json_obj(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    #[must_use]
-    pub fn tuple_string(&self) -> String {
-        format!("({}, {}, {})", self.x, self.y, self.z)
-    }
-
+    // #[must_use]
+    // pub fn json_arr_min(&self) -> String {
+    //     format!("[{},{},{}]", self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn json_arr(&self) -> String {
+    //     format!("[{}, {}, {}]", self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn json_obj(&self) -> String {
+    //     serde_json::to_string(self).unwrap()
+    // }
+    //
+    // #[must_use]
+    // pub fn tuple_string(&self) -> String {
+    //     format!("({}, {}, {})", self.x, self.y, self.z)
+    // }
+    //
     pub fn feature(
         &self,
         opts: &FeatureOptions,
