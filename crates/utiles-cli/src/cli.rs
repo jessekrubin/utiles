@@ -2,8 +2,8 @@ use std::io::{self};
 
 use clap::Parser;
 use tracing::{debug, error, warn};
-use tracing_subscriber::fmt::{self, format};
-use tracing_subscriber::{EnvFilter, FmtSubscriber};
+use tracing_subscriber::fmt::{self};
+use tracing_subscriber::EnvFilter;
 
 use crate::args::{Cli, Commands};
 use crate::commands::copy::copy_main;
@@ -25,7 +25,7 @@ fn init_tracing(debug: bool) {
         EnvFilter::new("INFO")
     };
     let subscriber = fmt::Subscriber::builder()
-        .json()
+        .compact()
         .with_target(true)
         .with_line_number(false)
         .with_thread_ids(true)
@@ -50,6 +50,12 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     debug!("argv: {:?}", argv);
     debug!("args: {:?}", args);
 
+    match args.command{
+        _ => {
+            println!("shitfuck");
+        }
+    }
+
     match args.command {
         Commands::Lint {
             fspaths: filepath,
@@ -60,17 +66,16 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             }
             lint_main(&filepath, fix);
         }
-        Commands::Meta(args) => metadata_main(args),
-        Commands::Tilejson(args) => tilejson_main(args),
+        Commands::Meta(args) => metadata_main(&args),
+        Commands::Tilejson(args) => tilejson_main(&args),
         Commands::Copy(_args) => {
             // copy_main(args);
-            warn!("copy not implemented");
             copy_main().await;
         }
         Commands::Dev {} => {
             let r = dev_main().await;
             match r {
-                Ok(_) => {}
+                Ok(()) => {}
                 Err(e) => {
                     error!("dev_main error: {:?}", e);
                 }
@@ -114,6 +119,6 @@ mod tests {
     #[test]
     fn verify_cli() {
         use clap::CommandFactory;
-        Cli::command().debug_assert()
+        Cli::command().debug_assert();
     }
 }

@@ -7,7 +7,7 @@ use utilesqlite::Mbtiles;
 
 use crate::args::SqliteDbCommonArgs;
 
-pub fn metadata_main(args: SqliteDbCommonArgs) {
+pub fn metadata_main(args: &SqliteDbCommonArgs) {
     debug!("meta: {}", args.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.filepath);

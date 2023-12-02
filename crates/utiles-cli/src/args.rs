@@ -5,7 +5,7 @@ use utiles::VERSION;
 use crate::commands::shapes::ShapesArgs;
 
 fn about() -> String {
-    format!("utiles cli (rust) ~ v{}", VERSION)
+    format!("utiles cli (rust) ~ v{VERSION}")
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -145,7 +145,7 @@ pub enum Commands {
     #[command(name = "shapes", about = "Echo shapes of tile(s) as GeoJSON", long_about = None)]
     Shapes(ShapesArgs),
 
-    #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None)]
+    #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None, visible_alias = "cp")]
     Copy(CopyArgs),
 
     #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None)]

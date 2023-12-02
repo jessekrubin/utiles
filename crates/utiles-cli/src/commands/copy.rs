@@ -1,6 +1,5 @@
 use std::cell::Cell;
 use std::path::{Path, PathBuf};
-use tokio::time::{self, Duration, Instant};
 
 // use tokio_stream::{self as stream, Stream};
 use futures::stream::{self, StreamExt};
@@ -42,8 +41,8 @@ impl TilesFsWriter {
 
     fn dirpath(&self, z: u8, x: u32) -> PathBuf {
         Path::new(&self.root_dirpath)
-            .join(format!("{}", z))
-            .join(format!("{}", x))
+            .join(format!("{z}"))
+            .join(format!("{x}"))
     }
 
     fn filepath(&self, z: u8, x: u32, y: u32) -> PathBuf {
@@ -58,7 +57,6 @@ impl TilesFsWriter {
 
     pub async fn write_tile(&self, tile: MbtTileRow) {
         let filepath = self.filepath(tile.zoom_level, tile.tile_column, tile.tile_row);
-
         debug!("filepath: {:?}", filepath);
         fs::write(filepath, tile.tile_data).await.unwrap();
         // increment stats
@@ -75,16 +73,26 @@ impl TilesFsWriter {
     }
 }
 
-pub async fn copy_main() {
-    let file = "D:\\utiles\\blue-marble\\blue-marble.z0z4.normal.mbtiles";
+pub enum Source {
+    Mbtiles(String),
+}
 
-    let mbt = Mbtiles::from_filepath(file).unwrap();
+pub enum Destination {
+    // Mbtiles(String),
+    Fs(String),
+}
 
+async fn copy_mbtiles2fs(
+    mbtiles: String,
+    output_dir: String,
+){
+    let mbt = Mbtiles::from(mbtiles.as_ref());
+    let start_time = std::time::Instant::now();
     let total_tiles: u32 = mbt
         .conn()
         .query_row("SELECT count(*) FROM tiles", [], |row| row.get(0))
         .unwrap();
-    println!("total_tiles: {total_tiles:?}");
+    info!("finna write {total_tiles:?} from {mbtiles:?} to {output_dir:?}");
     let c = mbt.conn();
 
     let mut stmt_zx_distinct = c
@@ -100,9 +108,10 @@ pub async fn copy_main() {
         })
         .unwrap();
 
-    let twriter = TilesFsWriter::new(
-        "D:\\utiles\\crates\\utiles-cli\\blue-marble-tiles".to_string(),
-    );
+    let twriter =
+        TilesFsWriter::new(
+            output_dir.to_string()
+        );
 
     let zx_stream = stream::iter(zx_iter);
 
@@ -136,7 +145,7 @@ pub async fn copy_main() {
 
     // let count = 0;
     tiles_stream
-        .for_each_concurrent(8, |tile| async {
+        .for_each_concurrent(0, |tile| async {
             // print smaller rep
             // println!("tile: {} {} {} {}"
             // , tile.tile_column, tile.tile_row, tile.zoom_level, tile.tile_data.len());
@@ -144,15 +153,16 @@ pub async fn copy_main() {
             match tile {
                 Ok(tile) => {
                     let t = Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
-                    // let dur = Duration::from_millis(1000);
-                    // time::sleep(dur).await;
                     twriter.write_tile(tile).await;
-                    debug!("Wrote tile: {}", t);
+                    debug!("Wrote tile: {}",
+                        t
+                    );
+
                     // let dur2 = Duration::from_millis(1000);
                     // time::sleep(dur2).await;
                 }
                 Err(e) => {
-                    println!("tile error: {:?}", e);
+                    println!("tile error: {e:?}");
                     warn!("tile error: {:?}", e);
                 }
             }
@@ -177,4 +187,47 @@ pub async fn copy_main() {
             // println!("DONE tile: {:?}", tile_msg);
         })
         .await;
+
+    let end_time = std::time::Instant::now();
+    let elapsed = end_time - start_time;
+    let elapsed_secs = elapsed.as_secs();
+    println!("elapsed_secs: {:?}", elapsed_secs);
+
+
+}
+
+pub struct CopyConfig {
+    pub src: Source,
+    pub dst: Destination,
+}
+
+impl CopyConfig {
+    pub fn new(src: Source, dst: Destination) -> Self {
+        Self { src, dst }
+    }
+
+}
+
+
+pub async fn copy_main() {
+
+    warn!("experimental command: copy/cp");
+
+    //let file = "D:\\utiles\\blue-marble\\blue-marble.z0z4.normal.mbtiles";
+    let file = "D:\\utiles\\blue-marble\\blue-marble.mbtiles";
+    let output_dir = "D:\\blue-marble-tiles";
+
+    let src = Source::Mbtiles(file.to_string());
+    let dst = Destination::Fs(output_dir.to_string());
+    let cfg = CopyConfig::new(src, dst);
+
+    match cfg.src {
+        Source::Mbtiles(filepath) => {
+            match cfg.dst {
+                Destination::Fs(output_dir) => {
+                    copy_mbtiles2fs(filepath, output_dir).await;
+                }
+            }
+        }
+    }
 }

@@ -98,7 +98,7 @@ impl Rimrafer {
 }
 
 pub async fn rimraf_main(args: RimrafArgs) {
-    println!("rimraf_main: args: {:?}", args);
+    println!("rimraf_main: args: {args:?}");
     // check that dirpath exists
     let dirpath = Path::new(&args.dirpath);
     if !dirpath.exists() {
@@ -109,7 +109,7 @@ pub async fn rimraf_main(args: RimrafArgs) {
     let files_iter = WalkDir::new(args.clone().dirpath.clone())
         .contents_first(true)
         .into_iter()
-        .filter_map(|e| e.ok())
+        .filter_map(std::result::Result::ok)
         .filter(|e| e.file_type().is_file());
 
     let rmrfer = Rimrafer::new(args);
