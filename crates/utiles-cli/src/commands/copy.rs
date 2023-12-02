@@ -82,10 +82,7 @@ pub enum Destination {
     Fs(String),
 }
 
-async fn copy_mbtiles2fs(
-    mbtiles: String,
-    output_dir: String,
-){
+async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
     let mbt = Mbtiles::from(mbtiles.as_ref());
     let start_time = std::time::Instant::now();
     let total_tiles: u32 = mbt
@@ -108,10 +105,7 @@ async fn copy_mbtiles2fs(
         })
         .unwrap();
 
-    let twriter =
-        TilesFsWriter::new(
-            output_dir.to_string()
-        );
+    let twriter = TilesFsWriter::new(output_dir.to_string());
 
     let zx_stream = stream::iter(zx_iter);
 
@@ -154,9 +148,7 @@ async fn copy_mbtiles2fs(
                 Ok(tile) => {
                     let t = Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
                     twriter.write_tile(tile).await;
-                    debug!("Wrote tile: {}",
-                        t
-                    );
+                    debug!("Wrote tile: {}", t);
 
                     // let dur2 = Duration::from_millis(1000);
                     // time::sleep(dur2).await;
@@ -191,9 +183,7 @@ async fn copy_mbtiles2fs(
     let end_time = std::time::Instant::now();
     let elapsed = end_time - start_time;
     let elapsed_secs = elapsed.as_secs();
-    println!("elapsed_secs: {:?}", elapsed_secs);
-
-
+    println!("elapsed_secs: {elapsed_secs:?}");
 }
 
 pub struct CopyConfig {
@@ -205,12 +195,9 @@ impl CopyConfig {
     pub fn new(src: Source, dst: Destination) -> Self {
         Self { src, dst }
     }
-
 }
 
-
 pub async fn copy_main() {
-
     warn!("experimental command: copy/cp");
 
     //let file = "D:\\utiles\\blue-marble\\blue-marble.z0z4.normal.mbtiles";
@@ -222,12 +209,10 @@ pub async fn copy_main() {
     let cfg = CopyConfig::new(src, dst);
 
     match cfg.src {
-        Source::Mbtiles(filepath) => {
-            match cfg.dst {
-                Destination::Fs(output_dir) => {
-                    copy_mbtiles2fs(filepath, output_dir).await;
-                }
+        Source::Mbtiles(filepath) => match cfg.dst {
+            Destination::Fs(output_dir) => {
+                copy_mbtiles2fs(filepath, output_dir).await;
             }
-        }
+        },
     }
 }

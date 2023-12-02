@@ -50,12 +50,6 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     debug!("argv: {:?}", argv);
     debug!("args: {:?}", args);
 
-    match args.command{
-        _ => {
-            println!("shitfuck");
-        }
-    }
-
     match args.command {
         Commands::Lint {
             fspaths: filepath,
