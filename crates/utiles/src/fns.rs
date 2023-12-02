@@ -65,6 +65,12 @@ pub fn flipy(y: u32, z: u8) -> u32 {
 }
 
 #[must_use]
+#[inline]
+pub fn yflip(y: u32, z: u8) -> u32 {
+    flipy(y, z)
+}
+
+#[must_use]
 pub fn bbox2zoom(bbox: (u32, u32, u32, u32)) -> u8 {
     let max_zoom = 28;
     let (west, south, east, north) = bbox;

@@ -3,10 +3,10 @@ use std::io::Write;
 
 use tracing::debug;
 
-use utiles::{Tile, TileLike};
 use utiles::parsing::parse_bbox_ext;
 use utiles::tiles;
 use utiles::zoom::ZoomOrZooms;
+use utiles::{Tile, TileLike};
 
 use crate::args::TilesArgs;
 use crate::stdinterator_filter::stdin_filtered;
@@ -14,7 +14,6 @@ use crate::stdinterator_filter::stdin_filtered;
 pub enum TileFmt {
     Arr,
     Obj,
-
     // Tms,
     // Pmtileid,
     // Quadkey,
@@ -32,7 +31,6 @@ impl TileStringFormatter for TileFmt {
         }
     }
 }
-
 
 pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) {
     let lines = stdin_filtered(args.inargs.input);

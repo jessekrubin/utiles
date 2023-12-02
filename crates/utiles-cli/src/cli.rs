@@ -2,17 +2,39 @@ use std::io::{self};
 
 use clap::Parser;
 use tracing::{debug, error, warn};
-use tracing_subscriber::EnvFilter;
+use tracing_subscriber::fmt::{self, format};
+use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 use crate::args::{Cli, Commands};
-use crate::commands::{bounding_tile_main, metadata_main, neighbors_main, pmtileid_main, quadkey_main, tilejson_main};
-use crate::commands::{children_main, parent_main};
 use crate::commands::copy::copy_main;
 use crate::commands::dev::dev_main;
 use crate::commands::lint::lint_main;
 use crate::commands::rimraf::rimraf_main;
 use crate::commands::shapes::shapes_main;
 use crate::commands::tiles::tiles_main;
+use crate::commands::{
+    bounding_tile_main, metadata_main, neighbors_main, pmtileid_main, quadkey_main,
+    tilejson_main,
+};
+use crate::commands::{children_main, parent_main};
+
+fn init_tracing(debug: bool) {
+    let filter = if debug {
+        EnvFilter::new("DEBUG")
+    } else {
+        EnvFilter::new("INFO")
+    };
+    let subscriber = fmt::Subscriber::builder()
+        .json()
+        .with_target(true)
+        .with_line_number(false)
+        .with_thread_ids(true)
+        .with_env_filter(filter)
+        .with_writer(io::stderr)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("tracing::subscriber::set_global_default(...) failed.");
+}
 
 #[allow(clippy::unused_async)]
 pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> u8 {
@@ -22,20 +44,10 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         None => std::env::args().collect::<Vec<_>>(),
     };
     let args = Cli::parse_from(&argv);
-    let filter = if args.debug {
-        EnvFilter::new("DEBUG")
-    } else {
-        EnvFilter::new("WARN")
-    };
-    // Install the global collector configured based on the filter.
-    tracing_subscriber::fmt()
-        .with_env_filter(filter)
-        .with_writer(io::stderr)
-        .init();
+    init_tracing(args.debug);
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);
-
     debug!("args: {:?}", args);
 
     match args.command {

@@ -1,5 +1,5 @@
 use crate::{TileLike, flipy};
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MbtTileRow {
     pub zoom_level: u8,
     pub tile_column: u32,

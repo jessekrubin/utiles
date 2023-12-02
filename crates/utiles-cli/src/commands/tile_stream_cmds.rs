@@ -1,14 +1,12 @@
 use tracing::{debug, error};
-use utiles::{bounding_tile, Tile, TileLike};
 use utiles::parsing::parse_bbox;
+use utiles::{bounding_tile, Tile, TileLike};
 
 use crate::args::TileFmtArgs;
 use crate::stdinterator_filter;
 
 pub fn neighbors_main(args: TileFmtArgs) {
-    let lines = stdinterator_filter::stdin_filtered(
-        args.inargs.input,
-    );
+    let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
     for tile in tiles {
         let neighbors = tile.neighbors();
@@ -19,9 +17,7 @@ pub fn neighbors_main(args: TileFmtArgs) {
     }
 }
 
-pub fn bounding_tile_main(
-    args: TileFmtArgs,
-) {
+pub fn bounding_tile_main(args: TileFmtArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let bboxes = lines.map(|l| {
         let s = l.unwrap();
@@ -36,9 +32,7 @@ pub fn bounding_tile_main(
     }
 }
 
-pub fn pmtileid_main(
-    args: TileFmtArgs,
-) {
+pub fn pmtileid_main(args: TileFmtArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     for line in lines {
         // if the line bgins w '[' treat as tile

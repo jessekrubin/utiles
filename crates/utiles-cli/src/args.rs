@@ -103,10 +103,10 @@ pub enum Commands {
         fix: bool,
     },
     #[command(name = "tilejson", visible_alias = "tj", about = "Echo tileson for mbtiles file(s)", long_about = None)]
-    Tilejson  (TilejsonArgs),
+    Tilejson(TilejsonArgs),
 
     #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
-    Meta (SqliteDbCommonArgs),
+    Meta(SqliteDbCommonArgs),
     // ========================================================================
     // TILE CLI UTILS - MERCANTILE LIKE CLI
     // ========================================================================
@@ -114,17 +114,16 @@ pub enum Commands {
     Tiles(TilesArgs),
 
     #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
-    Quadkey (TileFmtArgs),
+    Quadkey(TileFmtArgs),
     // Quadkey {
     //     #[arg(required = false)]
     //     input: Option<String>,
     // },
-
     #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
-    Pmtileid (TileFmtArgs),
+    Pmtileid(TileFmtArgs),
 
     #[command(name = "bounding-tile", about = "Echo the bounding tile of a lonlat/bbox/GeoJSON", long_about = None)]
-    BoundingTile (TileFmtArgs),
+    BoundingTile(TileFmtArgs),
     #[command(name = "neighbors", about = "Echo neighbors of tile(s)", long_about = None)]
     Neighbors(TileFmtArgs),
 
@@ -175,8 +174,9 @@ pub struct CopyArgs {
     // #[arg(required = true, help = "src mbtiles filepath")]
     // src: String,
     //
-    // #[arg(required = true, help = "dst mbtiles filepath")]
+    // #[arg(required = true, help = "dst fspath")]
     // dst: String,
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    overwrite: bool,
+    /// force overwrite dst
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    force: bool,
 }

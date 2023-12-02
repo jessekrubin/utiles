@@ -17,9 +17,7 @@ pub fn parent_main(args: ParentChildrenArgs) {
 }
 
 pub fn children_main(args: ParentChildrenArgs) {
-    let lines = stdinterator_filter::stdin_filtered(
-        args.inargs.input,
-    );
+    let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
     for tile in tiles {
         let children = tile.children(Option::from(tile.z + args.depth));

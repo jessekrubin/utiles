@@ -8,7 +8,7 @@ use utilesqlite::Mbtiles;
 use crate::args::SqliteDbCommonArgs;
 
 pub fn metadata_main(args: SqliteDbCommonArgs) {
-    debug!("meta: {}" , args.filepath);
+    debug!("meta: {}", args.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.filepath);
     assert!(
@@ -26,13 +26,10 @@ pub fn metadata_main(args: SqliteDbCommonArgs) {
     let metadata_rows = mbtiles.metadata().unwrap();
     if args.min {
         let s =
-            serde_json::to_string::<Vec<MbtilesMetadataRow>>(&metadata_rows)
-                .unwrap();
+            serde_json::to_string::<Vec<MbtilesMetadataRow>>(&metadata_rows).unwrap();
         println!("{s}");
     } else {
-        let s = serde_json::to_string_pretty::<Vec<MbtilesMetadataRow>>(
-            &metadata_rows,
-        )
+        let s = serde_json::to_string_pretty::<Vec<MbtilesMetadataRow>>(&metadata_rows)
             .unwrap();
         println!("{s}");
     }

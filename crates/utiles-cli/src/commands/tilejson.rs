@@ -7,9 +7,7 @@ use utilesqlite::Mbtiles;
 
 use crate::args::TilejsonArgs;
 
-pub fn tilejson_main(
-    args: TilejsonArgs,
-) {
+pub fn tilejson_main(args: TilejsonArgs) {
     debug!("tilejson: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);

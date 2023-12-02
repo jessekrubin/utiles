@@ -1,7 +1,9 @@
 use std::cell::Cell;
+use std::path::Path;
 
 use futures::stream::{self, StreamExt};
 use tokio::fs;
+use tracing::error;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::args::RimrafArgs;
@@ -97,7 +99,15 @@ impl Rimrafer {
 
 pub async fn rimraf_main(args: RimrafArgs) {
     println!("rimraf_main: args: {:?}", args);
+    // check that dirpath exists
+    let dirpath = Path::new(&args.dirpath);
+    if !dirpath.exists() {
+        error!("dirpath does not exist: {:?}", dirpath);
+        return;
+    }
+
     let files_iter = WalkDir::new(args.clone().dirpath.clone())
+        .contents_first(true)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file());
