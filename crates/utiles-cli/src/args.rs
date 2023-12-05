@@ -111,7 +111,7 @@ pub enum Commands {
     #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
     Meta(SqliteDbCommonArgs),
 
-    #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None)]
+    #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
     Rimraf(RimrafArgs),
 
     // ========================================================================
