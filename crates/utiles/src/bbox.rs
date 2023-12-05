@@ -4,7 +4,7 @@ use crate::tile::Tile;
 use crate::tile_like::TileLike;
 use geo_types::Coord;
 use serde::{Deserialize, Serialize};
-
+use tilejson::Bounds;
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct BBoxTuple(f64, f64, f64, f64);
 
@@ -245,6 +245,12 @@ impl BBox {
 impl From<BBox> for BBoxTuple {
     fn from(bbox: BBox) -> Self {
         BBoxTuple(bbox.west, bbox.south, bbox.east, bbox.north)
+    }
+}
+
+impl From<&Bounds> for BBox {
+    fn from(bounds: &Bounds) -> Self {
+        BBox::new(bounds.left, bounds.bottom, bounds.right, bounds.top)
     }
 }
 

@@ -1,4 +1,3 @@
-
 use std::io::{self};
 
 use clap::Parser;
@@ -14,8 +13,8 @@ use crate::commands::rimraf::rimraf_main;
 use crate::commands::shapes::shapes_main;
 use crate::commands::tiles::tiles_main;
 use crate::commands::{
-    bounding_tile_main, metadata_main, neighbors_main, pmtileid_main, quadkey_main,
-    tilejson_main,
+    bounding_tile_main, contains_main, metadata_main, neighbors_main, pmtileid_main,
+    quadkey_main, tilejson_main,
 };
 use crate::commands::{children_main, parent_main};
 
@@ -57,8 +56,8 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     debug!("args: {:?}", args);
 
     match args.command {
-        Commands::Lint (args) => {
-            if args.fix{
+        Commands::Lint(args) => {
+            if args.fix {
                 warn!("fix not implemented");
             }
             lint_main(&args);
@@ -69,13 +68,13 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             // copy_main(args);
             copy_main(args).await;
         }
-        Commands::Dev (args) => {
+        Commands::Dev(args) => {
             let _r = dev_main(args).await;
         }
         Commands::Rimraf(args) => {
             rimraf_main(args).await;
         }
-
+        Commands::Contains { filepath, lnglat } => contains_main(&filepath, lnglat),
         // mercantile cli like
         Commands::Quadkey(args) => quadkey_main(args),
         Commands::Pmtileid(args) => pmtileid_main(args),

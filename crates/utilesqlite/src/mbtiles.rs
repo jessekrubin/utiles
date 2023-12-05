@@ -4,9 +4,10 @@ use std::path::Path;
 use rusqlite::{Connection, Result as RusqliteResult};
 use tilejson::TileJSON;
 use tracing::error;
+use utiles::bbox::BBox;
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
 use utiles::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
-
+use utiles::LngLat;
 pub struct Mbtiles {
     conn: Connection,
 }
@@ -34,6 +35,25 @@ impl Mbtiles {
                 Err(e)
             }
         }
+    }
+
+    pub fn bbox(&self) -> Result<BBox, Box<dyn Error>> {
+        let bounding = self.tilejson()?.bounds;
+        match bounding {
+            Some(bounding) => {
+                let bbox = BBox::from(&bounding);
+                Ok(bbox)
+            }
+            None => Err("Error parsing metadata to TileJSON: no data available".into()),
+        }
+        // convert boundsd to BBox
+    }
+
+    pub fn contains(&self, lnglat: LngLat) -> Result<bool, Box<dyn Error>> {
+        let bbox = self.bbox()?;
+        let contains = bbox.contains_lnglat(lnglat);
+        // return false if not ok
+        Ok(contains)
     }
 
     pub fn tj(&self) -> Result<TileJSON, Box<dyn Error>> {

@@ -1,7 +1,8 @@
 use clap::{Parser, Subcommand};
+use utiles::LngLat;
 
-use utiles::VERSION;
 use crate::commands::dev::DevArgs;
+use utiles::VERSION;
 
 use crate::commands::shapes::ShapesArgs;
 
@@ -95,7 +96,6 @@ pub struct LintArgs {
     pub(crate) fix: bool,
 }
 
-
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes", about = "Echo tilejson for mbtiles file(s)", long_about = None)]
@@ -108,11 +108,21 @@ pub enum Commands {
     Lint(LintArgs),
 
     /// metadata
+
     #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
     Meta(SqliteDbCommonArgs),
 
     #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
     Rimraf(RimrafArgs),
+
+    #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
+    Contains {
+        #[arg(required = true, help = "mbtiles filepath")]
+        filepath: String,
+
+        #[arg(required = true, help = "lat/long")]
+        lnglat: LngLat,
+    },
 
     // ========================================================================
     // TILE CLI UTILS - MERCANTILE LIKE CLI
@@ -143,7 +153,7 @@ pub enum Commands {
 
     /// Development/Playground command (hidden)
     #[command(name = "dev", about = "dev command", long_about = None, hide = true, hide = true)]
-    Dev (DevArgs),
+    Dev(DevArgs),
 }
 
 #[derive(Debug, Parser, Clone)] // requires `derive` feature

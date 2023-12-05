@@ -14,9 +14,7 @@ pub struct DevArgs {
     fspath: Option<String>,
 }
 #[allow(clippy::unused_async)]
-async fn dev(
-    args: DevArgs,
-) -> Result<(), Box<dyn std::error::Error>> {
+async fn dev(args: DevArgs) -> Result<(), Box<dyn std::error::Error>> {
     // DEV START
     debug!("args: {:?}", args);
     // DEV END

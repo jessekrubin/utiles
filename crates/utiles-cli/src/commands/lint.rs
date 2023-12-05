@@ -6,9 +6,9 @@ use utiles::lint_error::{UtilesLintError, UtilesLintResult};
 use utiles::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
 use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 
+use crate::args::LintArgs;
 use crate::find;
 use utilesqlite::squealite;
-use crate::args::LintArgs;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
     "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
