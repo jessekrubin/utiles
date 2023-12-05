@@ -21,47 +21,15 @@ pub const TILETYPE_WEBP: usize = 7;
 #[must_use]
 pub fn tiletype(buffer: &[u8]) -> TileType {
     if buffer.len() >= 8 {
-        if buffer[0] == 0x89
-            && buffer[1] == 0x50
-            && buffer[2] == 0x4e
-            && buffer[3] == 0x47
-            && buffer[4] == 0x0d
-            && buffer[5] == 0x0a
-            && buffer[6] == 0x1a
-            && buffer[7] == 0x0a
-        {
-            return TileType::Png;
-        } else if buffer[0] == 0xff
-            && buffer[1] == 0xd8
-            && buffer[buffer.len() - 2] == 0xff
-            && buffer[buffer.len() - 1] == 0xd9
-        {
-            return TileType::Jpg;
-        } else if buffer[0] == 0x47
-            && buffer[1] == 0x49
-            && buffer[2] == 0x46
-            && buffer[3] == 0x38
-            && (buffer[4] == 0x39 || buffer[4] == 0x37)
-            && buffer[5] == 0x61
-        {
-            return TileType::Gif;
-        } else if buffer[0] == 0x52
-            && buffer[1] == 0x49
-            && buffer[2] == 0x46
-            && buffer[3] == 0x46
-            && buffer[8] == 0x57
-            && buffer[9] == 0x45
-            && buffer[10] == 0x42
-            && buffer[11] == 0x50
-        {
-            return TileType::Webp;
-        } else if buffer[0] == 0x78 && buffer[1] == 0x9c {
-            return TileType::Pbf;
-        } else if buffer[0] == 0x1f && buffer[1] == 0x8b {
-            return TileType::Pbfgz;
-            // if starts with '{' or '[' json
-        } else if buffer[0] == 0x7b || buffer[0] == 0x5b {
-            return TileType::Json;
+        match buffer {
+            v if v.starts_with(b"\x89PNG\r\n\x1a\n") => return TileType::Png,
+            v if v.starts_with(b"\xff\xd8") => return TileType::Jpg,
+            v if v.starts_with(b"GIF87a") || v.starts_with(b"GIF89a") => return TileType::Gif,
+            v if v.starts_with(b"RIFF") && &v[8..12] == b"WEBP" => return TileType::Webp,
+            v if v.starts_with(b"\x1f\x8b") => return TileType::Pbfgz,
+            v if v.starts_with(b"\x78\x9c") => return TileType::Pbf,
+            v if v.starts_with(b"{") || v.starts_with(b"[") => return TileType::Json,
+            _ => {}
         }
     }
     TileType::Unknown

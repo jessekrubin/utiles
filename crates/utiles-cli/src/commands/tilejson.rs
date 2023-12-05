@@ -2,7 +2,7 @@ use std::path::Path;
 
 use tracing::debug;
 
-use utiles::tilejson::tilejson_stringify;
+use utilejson::tilejson_stringify;
 use utilesqlite::Mbtiles;
 
 use crate::args::TilejsonArgs;

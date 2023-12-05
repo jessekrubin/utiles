@@ -26,6 +26,7 @@ clap-verbosity-flag = "2.1.0"
 globset = "0.4.13"
 ignore = "0.4.20"
 utiles = { path = "../utiles" }
+utilejson = { path = "../utilejson" }
 utilesqlite = { path = "../utilesqlite" }
 tokio-stream = "0.1.14"
 futures = "0.3.29"

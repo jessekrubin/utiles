@@ -2285,6 +2285,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
+name = "utilejson"
+version = "0.2.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tilejson",
+ "utiles",
+]
+
+[[package]]
 name = "utiles"
 version = "0.2.0"
 dependencies = [
@@ -2295,7 +2305,6 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tilejson",
- "tracing",
 ]
 
 [[package]]
@@ -2316,6 +2325,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "tracing-subscriber",
+ "utilejson",
  "utiles",
  "utilesqlite",
  "walkdir",

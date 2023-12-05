@@ -2,19 +2,16 @@ use std::error::Error;
 use std::fmt::Display;
 use std::str::FromStr;
 
-use crate::geostats::TileStats;
 use serde_json::{Value as JSONValue, Value};
+use tilejson::{Bounds, Center, tilejson, TileJSON};
 
+use crate::geostats::TileStats;
 use crate::mbtiles::metadata_row::MbtilesMetadataRow;
-use tilejson::{tilejson, Bounds, Center, TileJSON};
-use tracing::{info, warn};
 
-fn to_val<V, E: Display>(val: Result<V, E>, title: &str) -> Option<V> {
+fn to_val<V, E: Display>(val: Result<V, E>) -> Option<V> {
     match val {
         Ok(v) => Some(v),
         Err(_err) => {
-            // let name = &self.filename;
-            warn!("Unable to parse metadata {title}");
             None
         }
     }
@@ -26,7 +23,6 @@ pub fn metadata2tilejson(
     metadata: Vec<MbtilesMetadataRow>,
 ) -> Result<TileJSON, Box<dyn Error>> {
     let mut tj = tilejson! {tiles : vec![]};
-    // let mut layer_type: Option<String> = None;
     let mut json: Option<JSONValue> = None;
 
     for row in metadata {
@@ -35,23 +31,20 @@ pub fn metadata2tilejson(
         match name.as_ref() {
             "name" => tj.name = Some(value),
             "version" => tj.version = Some(value),
-            "bounds" => tj.bounds = to_val(Bounds::from_str(value.as_str()), &name),
-            "center" => tj.center = to_val(Center::from_str(value.as_str()), &name),
-            "minzoom" => tj.minzoom = to_val(value.parse(), &name),
-            "maxzoom" => tj.maxzoom = to_val(value.parse(), &name),
+            "bounds" => tj.bounds = to_val(Bounds::from_str(value.as_str())),
+            "center" => tj.center = to_val(Center::from_str(value.as_str())),
+            "minzoom" => tj.minzoom = to_val(value.parse()),
+            "maxzoom" => tj.maxzoom = to_val(value.parse()),
             "description" => tj.description = Some(value),
             "attribution" => tj.attribution = Some(value),
             // "type" => layer_type = Some(value),
             "legend" => tj.legend = Some(value),
             "template" => tj.template = Some(value),
-            "json" => json = to_val(serde_json::from_str(&value), &name),
+            "json" => json = to_val(serde_json::from_str(&value)),
             "format" | "generator" => {
                 tj.other.insert(name, Value::String(value));
             }
             _ => {
-                // let file = &filename;
-                // info!("{file} has an unrecognized metadata value {name}={value}");
-                info!("unrecognized metadata value {name}={value}");
                 tj.other.insert(name, Value::String(value));
             }
         }
@@ -61,11 +54,6 @@ pub fn metadata2tilejson(
         if let Some(value) = obj.remove("vector_layers") {
             if let Ok(v) = serde_json::from_value(value) {
                 tj.vector_layers = Some(v);
-            } else {
-                warn!(
-                    "Unable to parse metadata vector_layers value",
-                    // self.filename
-                );
             }
         }
         if let Some(value) = obj.remove("tilestats") {
@@ -73,11 +61,6 @@ pub fn metadata2tilejson(
                 tj.other.insert(
                     "tilestats".parse().unwrap(),
                     serde_json::to_value(v).unwrap(),
-                );
-            } else {
-                warn!(
-                    "Unable to parse metadata json.tilestats value",
-                    // self.filename
                 );
             }
         }
