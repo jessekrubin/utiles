@@ -104,10 +104,10 @@ pub enum Commands {
     #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None, visible_alias = "cp")]
     Copy(CopyArgs),
 
-    #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None, subcommand_help_heading = "herm")]
+    #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
     Lint(LintArgs),
 
-    /// Stuff!
+    /// metadata
     #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
     Meta(SqliteDbCommonArgs),
 
