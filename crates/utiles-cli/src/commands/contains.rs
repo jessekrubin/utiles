@@ -6,7 +6,7 @@ use utilesqlite::Mbtiles;
 
 /// Check if an mbtiles file contains a lnglat
 ///
-/// Added by @dan-costello (https://github.com/dan-costello)
+/// Added by [dan-costello](https://github.com/dan-costello)
 pub fn contains_main(filepath: &str, lnglat: LngLat) {
     debug!("contains: {filepath}");
     // check that filepath exists and is file
