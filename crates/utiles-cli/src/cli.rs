@@ -1,8 +1,8 @@
-use std::fmt::Debug;
+
 use std::io::{self};
 
 use clap::Parser;
-use tracing::{debug, error, warn};
+use tracing::{debug, warn};
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 

@@ -195,3 +195,6 @@ target/
 .hypothesis/ 
 file.py 
 *.so
+
+# testing data
+blue-marble/

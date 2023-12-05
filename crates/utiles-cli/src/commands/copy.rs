@@ -68,9 +68,9 @@ impl TilesFsWriter {
         self.stats.nwritten.set(n + 1);
     }
 
-    pub fn nwritten(&self) -> u32 {
-        self.stats.nwritten.get()
-    }
+    // pub fn nwritten(&self) -> u32 {
+    //     self.stats.nwritten.get()
+    // }
 }
 
 pub enum Source {
@@ -94,7 +94,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
 
     let metadata_vec = mbt.metadata().unwrap();
     let metadata_str = serde_json::to_string_pretty(&metadata_vec).unwrap();
-    println!("{}", metadata_str);
+    println!("{metadata_str}");
     // ensure output_dir exists
     fs::create_dir_all(&output_dir).await.unwrap();
     // write metadata-json to output_dir/metadata.json
