@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::io::{self};
 
 use clap::Parser;
@@ -28,7 +29,6 @@ fn init_tracing(debug: bool) {
         .compact()
         .with_target(true)
         .with_line_number(false)
-        .with_thread_ids(true)
         .with_env_filter(filter)
         .with_writer(io::stderr)
         .finish();
@@ -44,36 +44,33 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         None => std::env::args().collect::<Vec<_>>(),
     };
     let args = Cli::parse_from(&argv);
-    init_tracing(args.debug);
+
+    // if the command is "dev" init tracing w/ debug
+    if let Commands::Dev(_) = args.command {
+        init_tracing(true);
+    } else {
+        init_tracing(args.debug);
+    }
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);
     debug!("args: {:?}", args);
 
     match args.command {
-        Commands::Lint {
-            fspaths: filepath,
-            fix,
-        } => {
-            if fix {
+        Commands::Lint (args) => {
+            if args.fix{
                 warn!("fix not implemented");
             }
-            lint_main(&filepath, fix);
+            lint_main(args);
         }
         Commands::Meta(args) => metadata_main(&args),
         Commands::Tilejson(args) => tilejson_main(&args),
-        Commands::Copy(_args) => {
+        Commands::Copy(args) => {
             // copy_main(args);
-            copy_main().await;
+            copy_main(args).await;
         }
-        Commands::Dev {} => {
-            let r = dev_main().await;
-            match r {
-                Ok(()) => {}
-                Err(e) => {
-                    error!("dev_main error: {:?}", e);
-                }
-            }
+        Commands::Dev (args) => {
+            let _r = dev_main(args).await;
         }
         Commands::Rimraf(args) => {
             rimraf_main(args).await;

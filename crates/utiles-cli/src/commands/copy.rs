@@ -8,6 +8,7 @@ use tracing::{debug, info, warn};
 use utiles::mbtiles::MbtTileRow;
 use utiles::{flipy, Tile, TileLike};
 
+use crate::args::CopyArgs;
 use utilesqlite::Mbtiles;
 
 // #[derive(Debug)]
@@ -56,10 +57,13 @@ impl TilesFsWriter {
     }
 
     pub async fn write_tile(&self, tile: MbtTileRow) {
-        let filepath = self.filepath(tile.zoom_level, tile.tile_column, tile.tile_row);
+        let filepath = self.dirpath(tile.z(), tile.x()).join(format!(
+            "{}.{}",
+            flipy(tile.y(), tile.z()),
+            tile.extension()
+        ));
         debug!("filepath: {:?}", filepath);
         fs::write(filepath, tile.tile_data).await.unwrap();
-        // increment stats
         self.inc_nwritten();
     }
 
@@ -197,15 +201,36 @@ impl CopyConfig {
     }
 }
 
-pub async fn copy_main() {
+pub async fn copy_main(args: CopyArgs) {
     warn!("experimental command: copy/cp");
 
     //let file = "D:\\utiles\\blue-marble\\blue-marble.z0z4.normal.mbtiles";
-    let file = "D:\\utiles\\blue-marble\\blue-marble.mbtiles";
-    let output_dir = "D:\\blue-marble-tiles";
+    // make sure input file exists and is file...
+    let src_path = Path::new(&args.src);
+    assert!(
+        src_path.exists(),
+        "File does not exist: {}",
+        src_path.display()
+    );
+    assert!(
+        src_path.is_file(),
+        "Not a file: {filepath}",
+        filepath = src_path.display()
+    );
 
-    let src = Source::Mbtiles(file.to_string());
-    let dst = Destination::Fs(output_dir.to_string());
+    // make sure output dir does not exist
+    let dst_path = Path::new(&args.dst);
+    let dst_path_exists = dst_path.exists();
+    if dst_path_exists {
+        if args.force {
+            warn!("dst_path exists: {:?}, but force is true", dst_path);
+        } else {
+            assert!(!dst_path_exists, "File exists: {}", dst_path.display());
+        }
+    }
+    let src = Source::Mbtiles(src_path.to_str().unwrap().to_string());
+    let dst = Destination::Fs(dst_path.to_str().unwrap().to_string());
+
     let cfg = CopyConfig::new(src, dst);
 
     match cfg.src {

@@ -8,6 +8,7 @@ use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 
 use crate::find;
 use utilesqlite::squealite;
+use crate::args::LintArgs;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
     "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
@@ -115,7 +116,9 @@ pub fn lint_filepath(
         }
     }
 }
-fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
+fn lint_filepaths(
+    fspaths: Vec<PathBuf>, fix: bool
+) {
     for path in fspaths {
         let r = lint_filepath(&path, fix);
         match r {
@@ -141,9 +144,9 @@ fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
     }
 }
 
-pub fn lint_main(fspaths: &[String], fix: bool) {
-    let filepaths = find::find_filepaths(fspaths);
-    if fix {
+pub fn lint_main(args: LintArgs) {
+    let filepaths = find::find_filepaths(&args.fspaths);
+    if args.fix {
         warn!("lint fix is not implemented yet");
     }
     debug!("filepaths: {:?}", filepaths);
@@ -151,7 +154,7 @@ pub fn lint_main(fspaths: &[String], fix: bool) {
         warn!("No files found");
         return;
     }
-    lint_filepaths(filepaths, fix);
+    lint_filepaths(filepaths, args.fix);
 }
 
 pub fn lint_metadata_map(map: &HashMap<String, String>) -> Vec<UtilesLintError> {
