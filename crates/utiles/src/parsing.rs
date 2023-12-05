@@ -2,13 +2,11 @@ use crate::bbox::BBox;
 use crate::geojson::geojson_coords;
 use geo_types::Coord;
 use serde_json::Value;
-use tracing::debug;
 
 pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
-    debug!("parse_bbox: {}", s);
     if s.starts_with('{') {
         // parse to serde_json::Value
         let v: Value = serde_json::from_str(s)?;
@@ -22,7 +20,6 @@ pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
 
     let v: Value = serde_json::from_str(s)?;
 
-    debug!("{}", v);
     // Assume a single pair of coordinates represents a CoordTuple
     // and a four-element array represents a BBoxTuple
     let bbox = match v.as_array().map(std::vec::Vec::len) {
@@ -36,7 +33,6 @@ pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
         }
         _ => panic!("Expected a two-element array or a four-element array"),
     };
-    debug!("bbox: {:?}", bbox);
     bbox
 }
 
@@ -44,7 +40,6 @@ pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
-    debug!("parse_bbox: {}", s);
     if s.starts_with('{') || s.starts_with('[') {
         return parse_bbox_json(s).map_err(std::convert::Into::into);
     }

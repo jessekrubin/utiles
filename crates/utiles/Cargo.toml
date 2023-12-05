@@ -12,7 +12,6 @@ homepage = "https://github.com/jessekrubin/utiles"
 repository = "https://github.com/jessekrubin/utiles"
 
 [dependencies]
-anyhow.workspace = true
 fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
