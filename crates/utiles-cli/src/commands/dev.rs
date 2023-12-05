@@ -13,7 +13,7 @@ pub struct DevArgs {
     #[arg(required = false)]
     fspath: Option<String>,
 }
-
+#[allow(clippy::unused_async)]
 async fn dev(
     args: DevArgs,
 ) -> Result<(), Box<dyn std::error::Error>> {

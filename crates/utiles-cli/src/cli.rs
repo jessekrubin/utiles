@@ -61,7 +61,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             if args.fix{
                 warn!("fix not implemented");
             }
-            lint_main(args);
+            lint_main(&args);
         }
         Commands::Meta(args) => metadata_main(&args),
         Commands::Tilejson(args) => tilejson_main(&args),

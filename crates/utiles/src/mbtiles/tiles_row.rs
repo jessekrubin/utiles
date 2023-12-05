@@ -1,5 +1,5 @@
-use crate::{TileLike, flipy};
-use crate::libtiletype::{tiletype_str};
+use crate::libtiletype::tiletype_str;
+use crate::{flipy, TileLike};
 #[derive(Debug, Clone)]
 pub struct MbtTileRow {
     pub zoom_level: u8,
@@ -9,7 +9,13 @@ pub struct MbtTileRow {
 }
 
 impl MbtTileRow {
-    pub fn new(zoom_level: u8, tile_column: u32, tile_row: u32, tile_data: Vec<u8>) -> Self {
+    #[must_use]
+    pub fn new(
+        zoom_level: u8,
+        tile_column: u32,
+        tile_row: u32,
+        tile_data: Vec<u8>,
+    ) -> Self {
         Self {
             zoom_level,
             tile_column,
@@ -18,7 +24,6 @@ impl MbtTileRow {
         }
     }
 }
-
 
 impl TileLike for MbtTileRow {
     fn new(x: u32, y: u32, z: u8) -> Self {
@@ -39,6 +44,7 @@ impl TileLike for MbtTileRow {
 }
 
 impl MbtTileRow {
+    #[must_use]
     pub fn extension(&self) -> String {
         tiletype_str(&self.tile_data)
     }

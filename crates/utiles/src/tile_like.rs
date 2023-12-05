@@ -1,4 +1,4 @@
-use crate::{pmtiles, LngLat, Tile, flipy};
+use crate::{flipy, pmtiles, LngLat, Tile};
 
 pub trait TileLike {
     #[must_use]
@@ -14,17 +14,17 @@ pub trait TileLike {
     }
 
     fn yflip(&self) -> u32 {
-       flipy(self.y(), self.z())
+        flipy(self.y(), self.z())
     }
 
     #[must_use]
-    fn tile(&self) ->  Tile{
+    fn tile(&self) -> Tile {
         Tile::new(self.x(), self.y(), self.z())
     }
 
     /// both bc I keep forgetting which is which
     fn flipy(&self) -> u32 {
-       flipy(self.y(), self.z())
+        flipy(self.y(), self.z())
     }
 
     #[must_use]
@@ -132,7 +132,9 @@ pub trait TileLike {
         } else {
             format!(
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z(), self.x(), self.y()
+                self.z(),
+                self.x(),
+                self.y()
             )
         }
     }

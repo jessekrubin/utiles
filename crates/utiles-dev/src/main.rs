@@ -69,7 +69,7 @@ fn mvt_dev() {
 
 async fn sqlite_deadpool_test() {
     println!("sqlite_deadpool_test");
-    let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles.NOPE";
+    let file = "D:\\blue-marble\\blue-marble.mbtiles.NOPE";
     let mbta = utilesqlite::MbtilesAsync::open(file).await.unwrap();
 
     let tj = mbta.tilejson().await;
@@ -85,7 +85,7 @@ async fn sqlite_deadpool_test() {
 }
 
 async fn sqlxing() {
-    let file = "D:\\maps\\reptiles\\mbtiles\\blue-marble\\blue-marble.mbtiles";
+    let file = "D:\\blue-marble\\blue-marble.mbtiles";
 
     let copts = SqliteConnectOptions::new()
         .filename(file)

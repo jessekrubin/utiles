@@ -7,7 +7,7 @@ use tokio::fs;
 use tracing::{debug, info, warn};
 use utiles::mbtiles::MbtTileRow;
 use utiles::{flipy, Tile, TileLike};
-
+use serde_json;
 use crate::args::CopyArgs;
 use utilesqlite::Mbtiles;
 
@@ -44,10 +44,6 @@ impl TilesFsWriter {
         Path::new(&self.root_dirpath)
             .join(format!("{z}"))
             .join(format!("{x}"))
-    }
-
-    fn filepath(&self, z: u8, x: u32, y: u32) -> PathBuf {
-        self.dirpath(z, x).join(format!("{}.png", flipy(y, z)))
     }
 
     pub async fn mkdirpath(&self, z: u8, x: u32) {
@@ -95,6 +91,16 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
         .unwrap();
     info!("finna write {total_tiles:?} from {mbtiles:?} to {output_dir:?}");
     let c = mbt.conn();
+
+    let metadata_vec = mbt.metadata().unwrap();
+    let metadata_str = serde_json::to_string_pretty(&metadata_vec).unwrap();
+    println!("{}", metadata_str);
+    // ensure output_dir exists
+    fs::create_dir_all(&output_dir).await.unwrap();
+    // write metadata-json to output_dir/metadata.json
+    let metadata_path = Path::new(&output_dir).join("metadata.json");
+    fs::write(metadata_path, metadata_str).await.unwrap();
+    debug!("wrote metadata.json to {:?}", output_dir);
 
     let mut stmt_zx_distinct = c
         .prepare("SELECT DISTINCT zoom_level, tile_column FROM tiles")

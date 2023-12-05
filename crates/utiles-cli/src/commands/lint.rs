@@ -116,9 +116,7 @@ pub fn lint_filepath(
         }
     }
 }
-fn lint_filepaths(
-    fspaths: Vec<PathBuf>, fix: bool
-) {
+fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
     for path in fspaths {
         let r = lint_filepath(&path, fix);
         match r {
@@ -144,7 +142,7 @@ fn lint_filepaths(
     }
 }
 
-pub fn lint_main(args: LintArgs) {
+pub fn lint_main(args: &LintArgs) {
     let filepaths = find::find_filepaths(&args.fspaths);
     if args.fix {
         warn!("lint fix is not implemented yet");
