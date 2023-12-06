@@ -2,21 +2,27 @@ use std::io::{self};
 
 use clap::Parser;
 use tracing::{debug, warn};
-use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
+use tracing_subscriber::fmt::{self};
 
 use crate::args::{Cli, Commands};
-use crate::commands::copy::copy_main;
-use crate::commands::dev::dev_main;
-use crate::commands::lint::lint_main;
-use crate::commands::rimraf::rimraf_main;
-use crate::commands::shapes::shapes_main;
-use crate::commands::tiles::tiles_main;
 use crate::commands::{
-    bounding_tile_main, contains_main, metadata_main, neighbors_main, pmtileid_main,
-    quadkey_main, tilejson_main,
+    bounding_tile_main,
+    children_main,
+    contains_main,
+    copy_main,
+    dev_main,
+    lint_main,
+    metadata_main,
+    neighbors_main,
+    parent_main,
+    pmtileid_main,
+    quadkey_main,
+    rimraf_main,
+    shapes_main,
+    tilejson_main,
+    tiles_main,
 };
-use crate::commands::{children_main, parent_main};
 
 fn init_tracing(debug: bool) {
     let filter = if debug {
