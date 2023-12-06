@@ -12,7 +12,7 @@ use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
-use crate::UtilesError::TileParseError;
+
 use crate::{pmtiles, quadkey2tile, xyz2quadkey};
 use crate::{utile, UtilesError};
 
@@ -100,7 +100,7 @@ impl FromStr for Tile {
             let r = Tile::from_json_obj(s);
             match r {
                 Ok(tile) => return Ok(tile),
-                Err(e) => {
+                Err(_e) => {
                     return Err(Box::try_from(UtilesError::TileParseError(
                         s.to_string(),
                     ))
@@ -112,7 +112,7 @@ impl FromStr for Tile {
             let r = Tile::from_json_arr(s);
             match r {
                 Ok(tile) => return Ok(tile),
-                Err(e) => {
+                Err(_e) => {
                     return Err(Box::try_from(UtilesError::TileParseError(
                         s.to_string(),
                     ))
@@ -126,7 +126,7 @@ impl FromStr for Tile {
         // if ok return tile but not tile parse error
         match res {
             Ok(tile) => Ok(tile),
-            Err(e) => {
+            Err(_e) => {
                 Err(Box::try_from(UtilesError::TileParseError(s.to_string())).unwrap())
             }
         }
@@ -213,7 +213,7 @@ impl Tile {
         let res = serde_json::from_str::<Tile>(json);
         match res {
             Ok(tile) => Ok(tile),
-            Err(e) => {
+            Err(_e) => {
                 Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
                     .unwrap())
             }
@@ -240,7 +240,7 @@ impl Tile {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
             Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
-            Err(e) => {
+            Err(_e) => {
                 Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
                     .unwrap())
             }

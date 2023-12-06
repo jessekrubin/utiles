@@ -1,4 +1,4 @@
-use serde_json;
+
 use tilejson::TileJSON;
 
 /// # Panics
