@@ -1,6 +1,7 @@
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
+use crate::tile_like::TileLike;
 use geo_types::Coord;
 use serde::{Deserialize, Serialize};
 use tilejson::Bounds;
@@ -264,16 +265,13 @@ impl From<&String> for BBox {
         // remove leading and trailing quotes
         let s = s.trim_matches('"');
         // let value: Value = serde_json::from_str(&s).unwrap();
-        let result = match parse_bbox(s) {
+        match parse_bbox(s) {
             Ok(bbox) => bbox,
             Err(e) => {
                 println!("ERROR: {e}");
                 BBox::world_planet()
             }
-        };
-        result
-        // let tuple: BBoxTuple = serde_json::from_str(s).unwrap();
-        // self::BBox::from(tuple)
+        }
     }
 }
 

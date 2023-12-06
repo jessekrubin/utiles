@@ -1,8 +1,7 @@
 """utiles"""
 from __future__ import annotations
 
-import math
-from typing import List, Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union
 
 from utiles._utiles import (
     TILETYPE_GIF,
@@ -30,6 +29,7 @@ from utiles._utiles import (
     from_pmtileid,
     from_tuple,
     geojson_bounds,
+    geotransform2optzoom,
     lnglat,
     minmax,
     neighbors,
@@ -37,6 +37,8 @@ from utiles._utiles import (
     parse_tile_arg,
     parse_tiles,
     pmtileid,
+    pmtileid2xyz,
+    qk2xyz,
     quadkey,
     quadkey2xyz,
     quadkey_to_tile,
@@ -44,8 +46,6 @@ from utiles._utiles import (
     tile,
     tiles,
     tiles_count,
-    qk2xyz,
-    pmtileid2xyz,
     tiles_list,
     tiletype,
     tiletype2headers,
@@ -90,6 +90,7 @@ __all__ = (
     "from_pmtileid",
     "from_tuple",
     "geojson_bounds",
+    "geotransform2optzoom",
     "lnglat",
     "minmax",
     "neighbors",
@@ -118,50 +119,3 @@ __all__ = (
     "xyz",
     "xyz2quadkey",
 )
-
-
-def optzoom(
-    geo_transform: Union[
-        Tuple[float, float, float, float, float, float],
-        List[float],
-    ],
-    pixel_size: int = 256,
-) -> int:
-    """Return the optimal zoom level for a given geo_transform
-
-    Args:
-        geo_transform (Sequence[float]): Geo transform array
-
-    Returns:
-        int: Optimal zoom level
-
-    Example:
-        >>> gt = [-77.000138, 0.000278, 0.0, 26.0001389, 0.0, -0.000278]
-        >>> optzoom(gt)
-        12
-
-    """
-    degrees_per_pixel = geo_transform[1]
-    equator = 2 * math.pi * 6378137  # 2 * pi * radius of earth in meters
-    resolution = degrees_per_pixel * (equator / 360)
-    zoom_level = math.log((equator / pixel_size) / resolution, 2)
-    return min(math.floor(zoom_level), 20)
-
-
-def tiletile_str(n: int) -> str:
-    if n == TILETYPE_PNG:
-        return "png"
-    elif n == TILETYPE_JPG:
-        return "jpg"
-    elif n == TILETYPE_GIF:
-        return "gif"
-    elif n == TILETYPE_WEBP:
-        return "webp"
-    elif n == TILETYPE_PBF:
-        return "pbf"
-    elif n == TILETYPE_PBFGZ:
-        return "pbfgz"
-    elif n == TILETYPE_JSON:
-        return "json"
-    else:
-        return "unknown"

@@ -1,73 +1,121 @@
-use crate::shapes::ShapesArgs;
 use clap::{Parser, Subcommand};
 use utiles::LngLat;
 
-/// A fictional versioning CLI
-#[derive(Debug, Parser)] // requires `derive` feature
-#[command(name = "ut")]
-#[command(about = "utiles cli (rust)", long_about = None)]
-pub struct Cli {
-    #[command(subcommand)]
-    pub command: Commands,
+use crate::commands::dev::DevArgs;
+use utiles::VERSION;
 
-    // debug flag
-    #[arg(
-        long,
-        short,
-        global = true,
-        default_value = "false",
-        help = "debug mode"
-    )]
-    pub debug: bool,
-    // #[command(flatten , help="verbosity level (-v, -vv, -vvv, -vvvv)" )]
-    // verbose: Verbosity,
+use crate::commands::shapes::ShapesArgs;
+
+fn about() -> String {
+    format!("utiles cli (rust) ~ v{VERSION}")
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
-pub struct InputAndSequenceArgs {
-    /// The remote to clone
+#[command(name = "ut", about = about(), version = VERSION, long_about = None, author)]
+pub struct Cli {
+    /// debug mode (print/log a lot of stuff)
+    #[arg(long, short, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
+    pub debug: bool,
+
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TileInputStreamArgs {
     #[arg(required = false)]
-    input: Option<String>,
+    pub input: Option<String>,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TileFmtOptions {
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub seq: bool,
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    seq: bool,
+    pub obj: bool,
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
 pub struct TilesArgs {
-    /// The remote to clone
     #[arg(required = true)]
     pub zoom: u8,
 
-    // #[command(flatten)]
-    // pub shared: InputAndSequenceArgs,
-    #[arg(required = false)]
-    pub input: Option<String>,
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
 
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    pub seq: bool,
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TileFmtArgs {
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
+
+#[derive(Debug, Parser)]
+pub struct ParentChildrenArgs {
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+
+    #[arg(required = false, long, default_value = "1")]
+    pub depth: u8,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct SqliteDbCommonArgs {
+    #[arg(required = true, help = "mbtiles filepath")]
+    pub filepath: String,
+
+    #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
+    pub min: bool,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct TilejsonArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = false, short, long, help = "include tilestats", action = clap::ArgAction::SetTrue)]
+    pub tilestats: bool,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct LintArgs {
+    #[arg(required = true, help = "filepath(s) or dirpath(s)", num_args(1..))]
+    pub(crate) fspaths: Vec<String>,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue, default_value = "false")]
+    pub(crate) fix: bool,
 }
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes", about = "Echo tilejson for mbtiles file(s)", long_about = None)]
+    Tilejson(TilejsonArgs),
+
+    #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None, visible_alias = "cp")]
+    Copy(CopyArgs),
+
     #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
-    Lint {
-        #[arg(required = true, help = "filepath(s) or dirpath(s)", num_args(1..))]
-        fspaths: Vec<String>,
+    Lint(LintArgs),
 
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        fix: bool,
-    },
-    #[command(name = "tilejson", visible_alias = "tj", about = "Echo tileson for mbtiles file(s)", long_about = None)]
-    Tilejson {
-        #[arg(required = true, help = "mbtiles filepath")]
-        filepath: String,
+    /// metadata
 
-        #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
-        min: bool,
-    },
+    #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
+    Meta(SqliteDbCommonArgs),
 
-    #[command(name = "contains", about = "Determine if mbtiles contains a latlong", long_about = None)]
+    #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
+    Rimraf(RimrafArgs),
+
+    #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
     Contains {
         #[arg(required = true, help = "mbtiles filepath")]
         filepath: String,
@@ -76,84 +124,61 @@ pub enum Commands {
         lnglat: LngLat,
     },
 
-    #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
-    Meta {
-        #[arg(required = true, help = "mbtiles filepath")]
-        filepath: String,
-
-        #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
-        min: bool,
-        // #[arg(required = false, short, long, help= "compact json", action = clap::ArgAction::SetTrue)]
-        // raw: bool,
-    },
-
     // ========================================================================
     // TILE CLI UTILS - MERCANTILE LIKE CLI
     // ========================================================================
+    #[command(name = "bounding-tile", about = "Echo the bounding tile of a lonlat/bbox/GeoJSON", long_about = None)]
+    BoundingTile(TileFmtArgs),
+
+    #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
+    Quadkey(TileFmtArgs),
+
     #[command(name = "tiles", about = "Echo tiles of bbox", long_about = None)]
     Tiles(TilesArgs),
-    // {
-    //     #[arg(required = true)]
-    //     zoom: u8,
-    //
-    //     #[arg(required = false)]
-    //     input: Option<String>,
-    //
-    //     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    //     seq: bool,
-    // },
-    #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
-    Quadkey {
-        #[arg(required = false)]
-        input: Option<String>,
-    },
 
     #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
-    PMTileID {
-        #[arg(required = false)]
-        input: Option<String>,
-    },
+    Pmtileid(TileFmtArgs),
 
-    #[command(name = "bounding-tile", about = "Echo the bounding tile of a lonlat/bbox/GeoJSON", long_about = None)]
-    BoundingTile {
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-    },
     #[command(name = "neighbors", about = "Echo neighbors of tile(s)", long_about = None)]
-    Neighbors {
-        #[arg(required = false)]
-        input: Option<String>,
+    Neighbors(TileFmtArgs),
 
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-    },
+    #[command(name = "children", about = "Echo children of tile(s)", long_about = None)]
+    Children(ParentChildrenArgs),
 
     #[command(name = "parent", about = "Echo parent of tile(s)", long_about = None)]
-    Parent {
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-
-        #[arg(required = false, long, default_value = "1")]
-        depth: u8,
-    },
-    #[command(name = "children", about = "Echo children of tile(s)", long_about = None)]
-    Children {
-        #[arg(required = false)]
-        input: Option<String>,
-
-        #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-        seq: bool,
-
-        #[arg(required = false, long, default_value = "1")]
-        depth: u8,
-    },
+    Parent(ParentChildrenArgs),
 
     #[command(name = "shapes", about = "Echo shapes of tile(s) as GeoJSON", long_about = None)]
     Shapes(ShapesArgs),
+
+    /// Development/Playground command (hidden)
+    #[command(name = "dev", about = "dev command", long_about = None, hide = true, hide = true)]
+    Dev(DevArgs),
+}
+
+#[derive(Debug, Parser, Clone)] // requires `derive` feature
+#[command(name = "rimraf", about = "rm-rf dirpath", long_about = None)]
+pub struct RimrafArgs {
+    #[arg(required = true, help = "dirpath to rm")]
+    pub dirpath: String,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub(crate) size: bool,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    verbose: bool,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+#[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None)]
+pub struct CopyArgs {
+    #[arg(required = true, help = "src dataset fspath")]
+    pub src: String,
+
+    #[arg(required = true, help = "dst dataset fspath")]
+    pub dst: String,
+
+    /// force overwrite dst
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub force: bool,
 }

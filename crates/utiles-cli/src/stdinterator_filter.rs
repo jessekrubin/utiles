@@ -9,6 +9,5 @@ pub fn stdin_filtered(
         .filter(|l| !l.is_err())
         .filter(|l| !l.as_ref().unwrap().is_empty())
         .filter(|l| l.as_ref().unwrap() != "\x1e");
-
-    Box::new(filtered_lines) as _
+    Box::new(filtered_lines)
 }

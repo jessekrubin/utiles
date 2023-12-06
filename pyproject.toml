@@ -39,6 +39,7 @@ testpaths = [
 ]
 addopts = [
     "--doctest-modules",
+    "--benchmark-skip",
     "-v"
 ]
 markers = [
@@ -145,6 +146,7 @@ ban-relative-imports = "all"
 [tool.ruff.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+"bench/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.ruff.pydocstyle]
 convention = "google"

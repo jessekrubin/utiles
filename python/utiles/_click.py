@@ -17,7 +17,7 @@ class NoHelpCommand(click.Command):
 
 
 # The CLI command group.
-def _click_cli(name: str) -> NoHelpCommand:
+def _click_cli(name: str) -> click.Command:
     @click.command(
         name=name,
         cls=NoHelpCommand,

@@ -1,11 +1,30 @@
+use crate::tile_like::TileLike;
 use serde::Deserialize;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
 #[allow(clippy::upper_case_acronyms)]
-pub struct XYZ(pub u32, pub u32, pub u8);
+pub struct TileTuple(pub u32, pub u32, pub u8);
 
-impl From<(u32, u32, u8)> for XYZ {
+impl From<(u32, u32, u8)> for TileTuple {
     fn from(xyz: (u32, u32, u8)) -> Self {
-        XYZ(xyz.0, xyz.1, xyz.2)
+        TileTuple(xyz.0, xyz.1, xyz.2)
+    }
+}
+
+impl TileLike for TileTuple {
+    #[must_use]
+    fn new(x: u32, y: u32, z: u8) -> Self {
+        Self(x, y, z)
+    }
+
+    fn x(&self) -> u32 {
+        self.0
+    }
+
+    fn y(&self) -> u32 {
+        self.1
+    }
+
+    fn z(&self) -> u8 {
+        self.2
     }
 }

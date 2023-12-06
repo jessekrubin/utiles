@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Union
 
 import pytest
+from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
 
@@ -135,25 +136,25 @@ def test_tiletype_rs(
         assert ttype == expected
 
 
-# @pytest.mark.parametrize(
-#     "tile",
-#     TEST_TILES_BYTES,
-# )
-# def test_benchmark_tiletype_py(
-#     tile: tuple[str, bytes],
-#     benchmark,
-# ):
-#     filename, buffer = tile
-#     benchmark(tiletype, buffer)
-#
-#
-# @pytest.mark.parametrize(
-#     "tile",
-#     TEST_TILES_BYTES,
-# )
-# def test_benchmark_tiletype_rs(
-#     tile: tuple[str, bytes],
-#     benchmark,
-# ):
-#     filename, buffer = tile
-#     benchmark(utiles.tiletype_str, buffer)
+@pytest.mark.parametrize(
+    "tile",
+    TEST_TILES_BYTES,
+)
+def test_benchmark_tiletype_py(
+    tile: tuple[str, bytes],
+    benchmark: BenchmarkFixture,
+) -> None:
+    filename, buffer = tile
+    benchmark(tiletype, buffer)
+
+
+@pytest.mark.parametrize(
+    "tile",
+    TEST_TILES_BYTES,
+)
+def test_benchmark_tiletype_rs(
+    tile: tuple[str, bytes],
+    benchmark: BenchmarkFixture,
+) -> None:
+    filename, buffer = tile
+    benchmark(utiles.tiletype_str, buffer)

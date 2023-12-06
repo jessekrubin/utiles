@@ -10,8 +10,7 @@
 mod args;
 mod cli;
 mod commands;
-mod lint;
-mod shapes;
+mod find;
 mod stdinterator;
 mod stdinterator_filter;
 

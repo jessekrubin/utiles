@@ -1,21 +1,18 @@
-use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
 use std::cmp::Ordering;
 use std::error::Error;
 use std::str::FromStr;
 
-use crate::utile;
+use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 
-use crate::bbox::BBox;
 use crate::constants::EPSILON;
-use crate::fns::{
-    bounds, children, flipy, ll, lr, neighbors, parent, siblings, ul, ur, xy,
-};
-use crate::lnglat::LngLat;
+use crate::fns::{bounds, children, neighbors, parent, siblings, xy};
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
-use crate::tile_tuple::XYZ;
-use crate::{pmtiles, quadkey2tile, traits, xyz2quadkey};
+use crate::tile_like::TileLike;
+use crate::tile_tuple::TileTuple;
+use crate::utile;
+use crate::{pmtiles, quadkey2tile, xyz2quadkey};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -26,7 +23,8 @@ pub struct TileFeatureGeometry {
 
 #[derive(Debug, Serialize)]
 pub struct FeatureOptions {
-    pub fid: Option<String>, // feature id
+    pub fid: Option<String>,
+    // feature id
     pub props: Option<Map<String, Value>>,
     pub projection: Projection,
     pub buffer: Option<f64>,
@@ -52,36 +50,8 @@ pub struct Tile {
     pub z: u8,
 }
 
-impl traits::Utiles<LngLat, BBox> for Tile {
-    fn ul(&self) -> LngLat {
-        ul(self.x, self.y, self.z)
-    }
-
-    fn ur(&self) -> LngLat {
-        ur(self.x, self.y, self.z)
-    }
-
-    fn lr(&self) -> LngLat {
-        lr(self.x, self.y, self.z)
-    }
-
-    fn ll(&self) -> LngLat {
-        ll(self.x, self.y, self.z)
-    }
-
-    fn bbox(&self) -> BBox {
-        let (west, south, east, north) = bounds(self.x, self.y, self.z);
-        BBox {
-            north,
-            south,
-            east,
-            west,
-        }
-    }
-}
-
-impl From<XYZ> for Tile {
-    fn from(xyz: XYZ) -> Self {
+impl From<TileTuple> for Tile {
+    fn from(xyz: TileTuple) -> Self {
         Tile {
             x: xyz.0,
             y: xyz.1,
@@ -140,37 +110,40 @@ impl FromStr for Tile {
     }
 }
 
+impl TileLike for Tile {
+    fn new(x: u32, y: u32, z: u8) -> Self {
+        Self { x, y, z }
+    }
+
+    fn x(&self) -> u32 {
+        self.x
+    }
+
+    fn y(&self) -> u32 {
+        self.y
+    }
+
+    fn z(&self) -> u8 {
+        self.z
+    }
+}
+
 impl Tile {
     #[must_use]
     pub fn new(x: u32, y: u32, z: u8) -> Self {
         Tile { x, y, z }
     }
 
-    #[allow(dead_code)]
-    #[must_use]
-    pub fn valid(&self) -> bool {
-        crate::fns::valid(self.x, self.y, self.z)
-    }
+    // #[allow(dead_code)]
+    // #[must_use]
+    // pub fn valid(&self) -> bool {
+    //     crate::fns::valid(self.x, self.y, self.z)
+    // }
 
-    #[must_use]
-    pub fn x(&self) -> u32 {
-        self.x
-    }
-
-    #[must_use]
-    pub fn y(&self) -> u32 {
-        self.y
-    }
-
-    #[must_use]
-    pub fn z(&self) -> u8 {
-        self.z
-    }
-
-    #[must_use]
-    pub fn zoom(&self) -> u8 {
-        self.z
-    }
+    // #[must_use]
+    // pub fn zoom(&self) -> u8 {
+    //     self.z
+    // }
 
     #[must_use]
     pub fn bounds(&self) -> (f64, f64, f64, f64) {
@@ -188,7 +161,6 @@ impl Tile {
         Tile::new(x, y, z)
     }
 
-    #[must_use]
     pub fn from_pmid(id: u64) -> Result<Tile, Box<dyn Error>> {
         let (x, y, z) = pmtiles::pmid2xyz(id);
         Ok(Tile::new(x, y, z))
@@ -318,40 +290,40 @@ impl Tile {
         }
     }
 
-    #[must_use]
-    pub fn ul(&self) -> LngLat {
-        ul(self.x, self.y, self.z)
-    }
+    // #[must_use]
+    // pub fn ul(&self) -> LngLat {
+    //     ul(self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn ll(&self) -> LngLat {
+    //     ll(self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn ur(&self) -> LngLat {
+    //     ur(self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn lr(&self) -> LngLat {
+    //     lr(self.x, self.y, self.z)
+    // }
 
-    #[must_use]
-    pub fn ll(&self) -> LngLat {
-        ll(self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn ur(&self) -> LngLat {
-        ur(self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn lr(&self) -> LngLat {
-        lr(self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn bbox(&self) -> (f64, f64, f64, f64) {
-        let ul = self.ul();
-        let lr = self.lr();
-        (ul.lng(), lr.lat(), lr.lng(), ul.lat())
-    }
-
-    #[must_use]
-    pub fn center(&self) -> LngLat {
-        let ul = self.ul();
-        let lr = self.lr();
-        LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
-    }
-
+    // #[must_use]
+    // pub fn bbox(&self) -> (f64, f64, f64, f64) {
+    //     let ul = self.ul();
+    //     let lr = self.lr();
+    //     (ul.lng(), lr.lat(), lr.lng(), ul.lat())
+    // }
+    //
+    // #[must_use]
+    // pub fn center(&self) -> LngLat {
+    //     let ul = self.ul();
+    //     let lr = self.lr();
+    //     LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
+    // }
+    //
     #[must_use]
     pub fn up(&self) -> Self {
         Self {
@@ -444,47 +416,47 @@ impl Tile {
         siblings(self.x, self.y, self.z)
     }
 
-    #[must_use]
-    pub fn sql_where(&self, flip: Option<bool>) -> String {
-        // classic mbtiles sqlite query:
-        // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+    // #[must_use]
+    // pub fn sql_where(&self, flip: Option<bool>) -> String {
+    //     // classic mbtiles sqlite query:
+    //     // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+    //
+    //     // flip y for tms (default for mbtiles)
+    //     if flip.unwrap_or(true) {
+    //         format!(
+    //             "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+    //             self.z,
+    //             self.x,
+    //             flipy(self.y, self.z)
+    //         )
+    //     } else {
+    //         format!(
+    //             "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+    //             self.z, self.x, self.y
+    //         )
+    //     }
+    // }
 
-        // flip y for tms (default for mbtiles)
-        if flip.unwrap_or(true) {
-            format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z,
-                self.x,
-                flipy(self.y, self.z)
-            )
-        } else {
-            format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z, self.x, self.y
-            )
-        }
-    }
-
-    #[must_use]
-    pub fn json_arr_min(&self) -> String {
-        format!("[{},{},{}]", self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn json_arr(&self) -> String {
-        format!("[{}, {}, {}]", self.x, self.y, self.z)
-    }
-
-    #[must_use]
-    pub fn json_obj(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    #[must_use]
-    pub fn tuple_string(&self) -> String {
-        format!("({}, {}, {})", self.x, self.y, self.z)
-    }
-
+    // #[must_use]
+    // pub fn json_arr_min(&self) -> String {
+    //     format!("[{},{},{}]", self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn json_arr(&self) -> String {
+    //     format!("[{}, {}, {}]", self.x, self.y, self.z)
+    // }
+    //
+    // #[must_use]
+    // pub fn json_obj(&self) -> String {
+    //     serde_json::to_string(self).unwrap()
+    // }
+    //
+    // #[must_use]
+    // pub fn tuple_string(&self) -> String {
+    //     format!("({}, {}, {})", self.x, self.y, self.z)
+    // }
+    //
     pub fn feature(
         &self,
         opts: &FeatureOptions,
@@ -558,7 +530,7 @@ impl Tile {
 
 impl From<(u32, u32, u8)> for Tile {
     fn from(tuple: (u32, u32, u8)) -> Self {
-        XYZ::from(tuple).into()
+        TileTuple::from(tuple).into()
     }
 }
 
@@ -584,20 +556,10 @@ impl From<&Vec<Value>> for Tile {
         Tile::from((x, y, z))
     }
 }
+
 impl From<Vec<Value>> for Tile {
     fn from(arr: Vec<Value>) -> Self {
         Tile::from(&arr)
-        //
-        // if arr.len() < 3 {
-        //     panic!(
-        //         "Invalid json value: {}",
-        //         serde_json::to_string(&arr).unwrap()
-        //     );
-        // }
-        // let x = arr[0].as_u64().unwrap() as u32;
-        // let y = arr[1].as_u64().unwrap() as u32;
-        // let z = arr[2].as_u64().unwrap() as u8;
-        // Tile::from((x, y, z))
     }
 }
 
@@ -612,8 +574,6 @@ impl From<&Value> for Tile {
                     serde_json::to_string(&v).unwrap()
                 );
                 Tile::from(v)
-                // let tuple = serde_json::from_value::<XYZ>(val).unwrap();
-                // return Tile::from(tuple);
             }
             Value::Object(v) => {
                 // if it has a "tile" key, use that
@@ -623,7 +583,7 @@ impl From<&Value> for Tile {
                     && v["tile"].as_array().unwrap().len() == 3
                 {
                     let tuple =
-                        serde_json::from_value::<XYZ>(v["tile"].clone()).unwrap();
+                        serde_json::from_value::<TileTuple>(v["tile"].clone()).unwrap();
                     return Tile::from(tuple);
                 }
                 Tile::from(v)
@@ -644,6 +604,12 @@ impl From<Value> for Tile {
 impl From<&str> for Tile {
     fn from(s: &str) -> Self {
         Tile::from_json(s)
+    }
+}
+
+impl From<Tile> for (u32, u32, u8) {
+    fn from(tile: Tile) -> Self {
+        (tile.x, tile.y, tile.z)
     }
 }
 
@@ -687,6 +653,7 @@ mod tests {
         let tile_from_arr = Tile::from(val_arr);
         assert_eq!(tile_from_arr, Tile::new(1, 2, 3));
     }
+
     #[test]
     fn tile_from_value_obj_with_array() {
         let json_obj_with_tile_array = r#"{"tile": [1, 2, 3]}"#;
@@ -694,11 +661,5 @@ mod tests {
             serde_json::from_str::<Value>(json_obj_with_tile_array).unwrap();
         let tile_from_obj_with_tile_array = Tile::from(val_obj_with_tile_array);
         assert_eq!(tile_from_obj_with_tile_array, Tile::new(1, 2, 3));
-    }
-}
-
-impl From<Tile> for (u32, u32, u8) {
-    fn from(tile: Tile) -> Self {
-        (tile.x, tile.y, tile.z)
     }
 }

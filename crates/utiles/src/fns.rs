@@ -1,14 +1,17 @@
+use std::collections::{HashMap, HashSet};
+use std::f64::consts::PI;
+use std::num::FpCategory;
+
+use geo_types::coord;
+
 use crate::bbox::{BBox, WebMercatorBbox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::sibling_relationship::SiblingRelationship;
 use crate::tile_range::{TileRange, TileRanges};
+use crate::{LngLat, Tile};
+// use crate::TileLike;
 use crate::utile;
 use crate::zoom::ZoomOrZooms;
-use crate::{LngLat, Tile};
-use geo_types::coord;
-use std::collections::{HashMap, HashSet};
-use std::f64::consts::PI;
-use std::num::FpCategory;
 
 #[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
@@ -56,8 +59,15 @@ pub fn valid(x: u32, y: u32, z: u8) -> bool {
 }
 
 #[must_use]
+#[inline]
 pub fn flipy(y: u32, z: u8) -> u32 {
     2_u32.pow(u32::from(z)) - 1 - y
+}
+
+#[must_use]
+#[inline]
+pub fn yflip(y: u32, z: u8) -> u32 {
+    flipy(y, z)
 }
 
 #[must_use]
@@ -565,9 +575,7 @@ fn merge(merge_set: &HashSet<Tile>) -> (HashSet<Tile>, bool) {
     let mut upwards_merge: HashMap<Tile, HashSet<Tile>> = HashMap::new();
     for tile in merge_set {
         let tile_parent = tile.parent(None);
-        let children_set = upwards_merge
-            .entry(tile_parent)
-            .or_insert_with(HashSet::new);
+        let children_set = upwards_merge.entry(tile_parent).or_default();
         children_set.insert(*tile);
     }
     let mut current_tileset: Vec<Tile> = Vec::new();

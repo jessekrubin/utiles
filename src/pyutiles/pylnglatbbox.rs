@@ -59,30 +59,30 @@ impl PyLngLatBbox {
     }
 
     #[classmethod]
-    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> PyResult<Self> {
+    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> Self {
         let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Ok(Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat()))
+        Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
     }
 
     #[getter]
-    pub fn west(&self) -> PyResult<f64> {
-        Ok(self.bbox.west())
+    pub fn west(&self) -> f64 {
+        self.bbox.west()
     }
 
     #[getter]
-    pub fn south(&self) -> PyResult<f64> {
-        Ok(self.bbox.south())
+    pub fn south(&self) -> f64 {
+        self.bbox.south()
     }
 
     #[getter]
-    pub fn east(&self) -> PyResult<f64> {
-        Ok(self.bbox.east())
+    pub fn east(&self) -> f64 {
+        self.bbox.east()
     }
 
     #[getter]
-    pub fn north(&self) -> PyResult<f64> {
-        Ok(self.bbox.north())
+    pub fn north(&self) -> f64 {
+        self.bbox.north()
     }
 
     pub fn members(&self) -> (f64, f64, f64, f64) {

@@ -205,7 +205,7 @@ pub fn shapes_main(args: ShapesArgs) {
             if !first {
                 println!(",");
             }
-            println!("{}", f.to_json());
+            println!("  {}", f.to_json());
             first = false;
         } else {
             if args.seq {
@@ -222,13 +222,4 @@ pub fn shapes_main(args: ShapesArgs) {
         println!("]");
         println!("}}");
     }
-    // for tile in tiles {
-    //     let f = tile.feature(
-    //         &feature_options
-    //     ).unwrap();
-    //     lons.extend(f.bbox_lons());
-    //     lats.extend(f.bbox_lats());
-    //
-    //     println!("{}", f.to_json());
-    // }
 }

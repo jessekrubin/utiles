@@ -3,8 +3,8 @@ from typing import Any, Callable, List, Tuple, Union
 
 import mercantile
 import pytest
+from pmtiles.tile import tileid_to_zxy, zxy_to_tileid
 from pytest_benchmark.fixture import BenchmarkFixture
-from pmtiles.tile import zxy_to_tileid, tileid_to_zxy
 
 import utiles
 
@@ -118,11 +118,11 @@ def test_tiles_gen_bench(func: Callable[[], None], benchmark: BenchmarkFixture) 
 # COORDS BENCH ~ COORDS BENCH ~ COORDS BENCH ~ COORDS BENCH ~ COORDS BENCH
 # ========================================================================
 def mercantile_coords(obj: Any) -> None:
-    assert list(mercantile._coords(obj)) == [(1, 2)]  # noqa: S101
+    assert list(mercantile._coords(obj)) == [(1, 2)]
 
 
 def utiles_coords(obj: Any) -> None:
-    assert list(utiles._coords(obj)) == [(1, 2)]  # noqa: S101
+    assert list(utiles._coords(obj)) == [(1, 2)]
 
 
 @pytest.mark.benchmark(

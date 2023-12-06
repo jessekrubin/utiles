@@ -14,16 +14,21 @@ name = "ut"
 path = "src/bin.rs"
 
 [dependencies]
-rusqlite.workspace = true
-tokio.workspace = true
+rusqlite = {  workspace=true, features = ["bundled", "hooks"] }
+tokio = { workspace = true, features = ["fs"] }
 tracing.workspace = true
-tracing-subscriber.workspace = true
+tracing-subscriber= {workspace= true, features = ["fmt", "json", "env-filter", "chrono"]}
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace= true
-clap = { version = "4.4.7", features = ["derive"] }
+clap = { version = "4.4.7", features = ["derive", "color"] }
 clap-verbosity-flag = "2.1.0"
 globset = "0.4.13"
 ignore = "0.4.20"
 utiles = { path = "../utiles" }
+utilejson = { path = "../utilejson" }
 utilesqlite = { path = "../utilesqlite" }
+tokio-stream = "0.1.14"
+futures = "0.3.29"
+walkdir = "2.4.0"
+time = "0.3.30"

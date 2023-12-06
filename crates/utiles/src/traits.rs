@@ -23,7 +23,7 @@ pub trait TGeoBbox {
 }
 
 pub trait Utiles<TLngLat, TGeoBbox> {
-    fn ul(&self) -> TLngLat;
+    // fn ul(&self) -> TLngLat;
     fn ur(&self) -> TLngLat;
     fn lr(&self) -> TLngLat;
     fn ll(&self) -> TLngLat;

@@ -23,6 +23,7 @@ use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
 use std::hash::{Hash, Hasher};
 use utiles::bbox::BBox;
+use utiles::TileLike;
 
 /// `PyTile` macro to create a new tile.
 ///  - do you need this? probably not
@@ -134,9 +135,9 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_pmtileid(_cls: &PyType, tileid: u64) -> PyResult<Self> {
+    pub fn from_pmtileid(_cls: &PyType, tileid: u64) -> Self {
         let xyz = Tile::from_pmtileid(tileid);
-        Ok(PyTile::from(xyz))
+        PyTile::from(xyz)
     }
 
     pub fn pmtileid(&self) -> u64 {
@@ -154,9 +155,9 @@ impl PyTile {
         lat: f64,
         zoom: u8,
         truncate: Option<bool>,
-    ) -> PyResult<Self> {
+    ) -> Self {
         let xyz = Tile::from_lnglat_zoom(lng, lat, zoom, truncate);
-        Ok(PyTile::from(xyz))
+        PyTile::from(xyz)
     }
 
     pub fn __repr__(&self) -> String {
@@ -164,18 +165,18 @@ impl PyTile {
     }
 
     #[getter]
-    pub fn x(&self) -> PyResult<u32> {
-        Ok(self.xyz.x)
+    pub fn x(&self) -> u32 {
+        self.xyz.x
     }
 
     #[getter]
-    pub fn y(&self) -> PyResult<u32> {
-        Ok(self.xyz.y)
+    pub fn y(&self) -> u32 {
+        self.xyz.y
     }
 
     #[getter]
-    pub fn z(&self) -> PyResult<u8> {
-        Ok(self.xyz.z)
+    pub fn z(&self) -> u8 {
+        self.xyz.z
     }
 
     pub fn __str__(&self) -> String {
@@ -305,6 +306,7 @@ impl PyTile {
     pub fn ul(&self) -> PyLngLat {
         self.xyz.ul().into()
     }
+
     pub fn ll(&self) -> PyLngLat {
         self.xyz.ll().into()
     }
