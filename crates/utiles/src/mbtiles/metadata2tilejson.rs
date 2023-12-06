@@ -3,7 +3,7 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 use serde_json::{Value as JSONValue, Value};
-use tilejson::{Bounds, Center, tilejson, TileJSON};
+use tilejson::{tilejson, Bounds, Center, TileJSON};
 
 use crate::geostats::TileStats;
 use crate::mbtiles::metadata_row::MbtilesMetadataRow;
@@ -11,9 +11,7 @@ use crate::mbtiles::metadata_row::MbtilesMetadataRow;
 fn to_val<V, E: Display>(val: Result<V, E>) -> Option<V> {
     match val {
         Ok(v) => Some(v),
-        Err(_err) => {
-            None
-        }
+        Err(_err) => None,
     }
 }
 

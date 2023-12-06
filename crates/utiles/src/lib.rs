@@ -9,6 +9,9 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::cast_possible_truncation)]
 
+pub mod errors;
+pub use crate::errors::UtilesError;
+
 pub use crate::fns::*;
 pub use crate::quadkey::*;
 pub use lnglat::LngLat;

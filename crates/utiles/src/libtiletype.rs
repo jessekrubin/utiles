@@ -24,8 +24,12 @@ pub fn tiletype(buffer: &[u8]) -> TileType {
         match buffer {
             v if v.starts_with(b"\x89PNG\r\n\x1a\n") => return TileType::Png,
             v if v.starts_with(b"\xff\xd8") => return TileType::Jpg,
-            v if v.starts_with(b"GIF87a") || v.starts_with(b"GIF89a") => return TileType::Gif,
-            v if v.starts_with(b"RIFF") && &v[8..12] == b"WEBP" => return TileType::Webp,
+            v if v.starts_with(b"GIF87a") || v.starts_with(b"GIF89a") => {
+                return TileType::Gif
+            }
+            v if v.starts_with(b"RIFF") && &v[8..12] == b"WEBP" => {
+                return TileType::Webp
+            }
             v if v.starts_with(b"\x1f\x8b") => return TileType::Pbfgz,
             v if v.starts_with(b"\x78\x9c") => return TileType::Pbf,
             v if v.starts_with(b"{") || v.starts_with(b"[") => return TileType::Json,

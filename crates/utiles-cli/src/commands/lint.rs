@@ -2,13 +2,14 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use tracing::{debug, info, warn};
+
 use utiles::lint_error::{UtilesLintError, UtilesLintResult};
-use utiles::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
+use utiles::mbtiles::{MBTILES_MAGIC_NUMBER, metadata2duplicates, metadata2map};
 use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
+use utilesqlite::squealite;
 
 use crate::args::LintArgs;
 use crate::find;
-use utilesqlite::squealite;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
     "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
@@ -42,10 +43,12 @@ pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
     // let mbtiles = mbtiles_result.unwrap();
     let has_unique_index_on_metadata_name =
         mbtiles.has_unique_index_on_metadata().unwrap();
+    let metadata_name_is_primary_key =
+        mbtiles.metadata_table_name_is_primary_key().unwrap();
 
     let rows = mbtiles.metadata().unwrap();
 
-    if has_unique_index_on_metadata_name {
+    if has_unique_index_on_metadata_name || metadata_name_is_primary_key{
         let duplicate_rows = metadata2duplicates(rows.clone());
         if !duplicate_rows.is_empty() {
             errors.extend(

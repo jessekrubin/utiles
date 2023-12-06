@@ -1,9 +1,11 @@
 use crate::bbox::BBox;
+use crate::errors::UtilesResult;
 use crate::geojson::geojson_coords;
+use crate::UtilesError;
 use geo_types::Coord;
 use serde_json::Value;
 
-pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
+pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
@@ -31,7 +33,7 @@ pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
             let bbox: (f64, f64, f64, f64) = serde_json::from_value(v)?;
             Ok(BBox::from(bbox))
         }
-        _ => panic!("Expected a two-element array or a four-element array"),
+        _ => Err(UtilesError::InvalidBbox("Invalid bbox: ".to_string() + s)),
     };
     bbox
 }
@@ -89,6 +91,7 @@ where
 
     Some((min_x, min_y, max_x, max_y))
 }
+
 #[must_use]
 pub fn geojson_bounds(geojson_str: &str) -> BBox {
     let coords = geojson_coords(geojson_str);

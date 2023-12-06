@@ -65,7 +65,10 @@ fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
 
 #[pyfunction]
 fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
+    println!("quadkey: {:?}", quadkey);
     let xyz = utiles::quadkey2tile(quadkey);
+    println!("{:?}", xyz);
+    println!("res: {:?}", xyz);
     match xyz {
         Ok(xyz) => Ok(PyTile::from(xyz)),
         Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
@@ -269,14 +272,15 @@ fn quadkey(args: &PyTuple) -> PyResult<String> {
 
 #[pyfunction]
 fn quadkey_to_tile(quadkey: &str) -> PyResult<PyTile> {
-    let res = utiles::quadkey2tile(quadkey);
-    let xyz = match res {
-        Ok(xyz) => xyz,
-        Err(_e) => Err(PyErr::new::<PyValueError, _>(format!(
-            "Invalid quadkey: {quadkey}"
-        )))?,
-    };
-    Ok(PyTile::from(xyz))
+    quadkey2xyz(quadkey)
+
+    // let xyz = match res {
+    //     Ok(xyz) => xyz,
+    //     Err(_e) => Err(PyErr::new::<PyValueError, _>(format!(
+    //         "Invalid quadkey: {quadkey}"
+    //     )))?,
+    // };
+    // Ok(PyTile::from(xyz))
 }
 
 #[pyfunction]

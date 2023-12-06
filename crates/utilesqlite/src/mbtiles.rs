@@ -77,6 +77,15 @@ impl Mbtiles {
         has_unique_index_on_metadata(&self.conn)
     }
 
+    pub fn metadata_table_name_is_primary_key(&self) -> RusqliteResult<bool> {
+        let mut stmt = self.conn.prepare("SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='metadata' AND sql LIKE '%PRIMARY KEY%'")?;
+        let nrows = stmt.query_row([], |row| {
+            let count: i64 = row.get(0)?;
+            Ok(count)
+        })?;
+        Ok(nrows == 1_i64)
+    }
+
     pub fn zoom_levels(&self) -> RusqliteResult<Vec<u32>> {
         zoom_levels(&self.conn)
     }

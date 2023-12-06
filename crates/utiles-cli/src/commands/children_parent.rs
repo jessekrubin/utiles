@@ -5,7 +5,7 @@ use crate::stdinterator_filter;
 
 pub fn parent_main(args: ParentChildrenArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
+    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
     for tile in tiles {
         let nup = i32::from(tile.z) - i32::from(args.depth);
         // error
@@ -18,7 +18,7 @@ pub fn parent_main(args: ParentChildrenArgs) {
 
 pub fn children_main(args: ParentChildrenArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
+    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
     for tile in tiles {
         let children = tile.children(Option::from(tile.z + args.depth));
         for child in children {

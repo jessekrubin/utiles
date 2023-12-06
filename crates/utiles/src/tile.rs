@@ -6,13 +6,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::constants::EPSILON;
+use crate::errors::UtilesResult;
 use crate::fns::{bounds, children, neighbors, parent, siblings, xy};
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
-use crate::utile;
+use crate::UtilesError::TileParseError;
 use crate::{pmtiles, quadkey2tile, xyz2quadkey};
+use crate::{utile, UtilesError};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -95,16 +97,37 @@ impl FromStr for Tile {
         // if it starts with '{' assume json obj
         if s.starts_with('{') {
             // if '{' assume its an obj
-            return Ok(Tile::from_json_obj(s));
+            let r = Tile::from_json_obj(s);
+            match r {
+                Ok(tile) => return Ok(tile),
+                Err(e) => {
+                    return Err(Box::try_from(UtilesError::TileParseError(
+                        s.to_string(),
+                    ))
+                    .unwrap())
+                }
+            }
         } else if s.starts_with('[') {
-            return Ok(Tile::from_json_arr(s));
+            // if '[' assume its an arr
+            let r = Tile::from_json_arr(s);
+            match r {
+                Ok(tile) => return Ok(tile),
+                Err(e) => {
+                    return Err(Box::try_from(UtilesError::TileParseError(
+                        s.to_string(),
+                    ))
+                    .unwrap())
+                }
+            }
         }
+
         // assume its a quadkey
         let res = quadkey2tile(s);
+        // if ok return tile but not tile parse error
         match res {
             Ok(tile) => Ok(tile),
             Err(e) => {
-                panic!("Invalid quadkey: {e}");
+                Err(Box::try_from(UtilesError::TileParseError(s.to_string())).unwrap())
             }
         }
     }
@@ -133,17 +156,6 @@ impl Tile {
     pub fn new(x: u32, y: u32, z: u8) -> Self {
         Tile { x, y, z }
     }
-
-    // #[allow(dead_code)]
-    // #[must_use]
-    // pub fn valid(&self) -> bool {
-    //     crate::fns::valid(self.x, self.y, self.z)
-    // }
-
-    // #[must_use]
-    // pub fn zoom(&self) -> u8 {
-    //     self.z
-    // }
 
     #[must_use]
     pub fn bounds(&self) -> (f64, f64, f64, f64) {
@@ -189,49 +201,58 @@ impl Tile {
         pmtiles::parent_id(self.pmtileid())
     }
 
-    pub fn from_quadkey(quadkey: &str) -> Result<Tile, Box<dyn Error>> {
+    pub fn from_quadkey(quadkey: &str) -> UtilesResult<Self> {
         quadkey2tile(quadkey)
     }
 
-    #[must_use]
-    pub fn from_qk(qk: &str) -> Self {
-        let res = quadkey2tile(qk);
+    pub fn from_qk(qk: &str) -> UtilesResult<Self> {
+        quadkey2tile(qk)
+    }
+
+    pub fn from_json_obj(json: &str) -> Result<Self, Box<dyn Error>> {
+        let res = serde_json::from_str::<Tile>(json);
         match res {
-            Ok(tile) => tile,
+            Ok(tile) => Ok(tile),
             Err(e) => {
-                panic!("Invalid quadkey: {e}");
+                Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
+                    .unwrap())
+            }
+        }
+    }
+    // > {
+    //     let res = serde_json::from_str::<Tile>(json);
+    //     match res {
+    //         Ok(tile) => tile,
+    //         Err(e) => {
+    //         //     raise parse error
+    //             UtilesError::TileParseError(json.to_string())
+    //         }
+    //     }
+    //     // match res {
+    //     //     Ok(tile) => tile,
+    //     //     Err(e) => {
+    //     //         panic!("Invalid json_arr: {e}");
+    //     //     }
+    //     // }
+    // }
+
+    pub fn from_json_arr(json: &str) -> Result<Self, Box<dyn Error>> {
+        let res = serde_json::from_str::<(u32, u32, u8)>(json);
+        match res {
+            Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
+            Err(e) => {
+                Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
+                    .unwrap())
             }
         }
     }
 
-    #[must_use]
-    pub fn from_json_obj(json: &str) -> Self {
-        let res = serde_json::from_str(json);
-        match res {
-            Ok(tile) => tile,
-            Err(e) => {
-                panic!("Invalid json_arr: {e}");
-            }
+    pub fn from_json(json: &str) -> Result<Self, Box<dyn Error>> {
+        if json.starts_with('{') {
+            Self::from_json_obj(json)
+        } else {
+            Self::from_json_arr(json)
         }
-    }
-
-    #[must_use]
-    pub fn from_json_arr(json: &str) -> Self {
-        let res = serde_json::from_str(json);
-        match res {
-            Ok(tile) => tile,
-            Err(e) => {
-                panic!("Invalid json_arr: {e}");
-            }
-        }
-    }
-
-    #[must_use]
-    pub fn from_json(json: &str) -> Self {
-        if json.starts_with('[') {
-            return Self::from_json_arr(json);
-        }
-        Self::from_json_obj(json)
     }
 
     #[must_use]
@@ -290,40 +311,6 @@ impl Tile {
         }
     }
 
-    // #[must_use]
-    // pub fn ul(&self) -> LngLat {
-    //     ul(self.x, self.y, self.z)
-    // }
-    //
-    // #[must_use]
-    // pub fn ll(&self) -> LngLat {
-    //     ll(self.x, self.y, self.z)
-    // }
-    //
-    // #[must_use]
-    // pub fn ur(&self) -> LngLat {
-    //     ur(self.x, self.y, self.z)
-    // }
-    //
-    // #[must_use]
-    // pub fn lr(&self) -> LngLat {
-    //     lr(self.x, self.y, self.z)
-    // }
-
-    // #[must_use]
-    // pub fn bbox(&self) -> (f64, f64, f64, f64) {
-    //     let ul = self.ul();
-    //     let lr = self.lr();
-    //     (ul.lng(), lr.lat(), lr.lng(), ul.lat())
-    // }
-    //
-    // #[must_use]
-    // pub fn center(&self) -> LngLat {
-    //     let ul = self.ul();
-    //     let lr = self.lr();
-    //     LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
-    // }
-    //
     #[must_use]
     pub fn up(&self) -> Self {
         Self {
@@ -603,7 +590,13 @@ impl From<Value> for Tile {
 
 impl From<&str> for Tile {
     fn from(s: &str) -> Self {
-        Tile::from_json(s)
+        let res = Tile::from_json(s);
+        match res {
+            Ok(tile) => tile,
+            Err(e) => {
+                panic!("Invalid json value: {e}");
+            }
+        }
     }
 }
 
@@ -620,14 +613,14 @@ mod tests {
     #[test]
     fn parse_json_obj() {
         let json_obj = r#"{"x": 1, "y": 2, "z": 3}"#;
-        let tile = Tile::from_json_obj(json_obj);
+        let tile = Tile::from_json_obj(json_obj).unwrap();
         assert_eq!(tile, Tile::new(1, 2, 3));
     }
 
     #[test]
     fn parse_json_arr() {
         let json_arr = r#"[1, 2, 3]"#;
-        let tile = Tile::from_json_arr(json_arr);
+        let tile = Tile::from_json_arr(json_arr).unwrap();
         assert_eq!(tile, Tile::new(1, 2, 3));
     }
 
