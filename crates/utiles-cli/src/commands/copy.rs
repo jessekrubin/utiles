@@ -7,11 +7,11 @@ use tokio::fs;
 use tracing::{debug, info, warn};
 use walkdir::WalkDir;
 
-use utiles::mbtiles::{MbtilesMetadataRow, MbtTileRow};
+use crate::args::CopyArgs;
+use utiles::mbtiles::{MbtTileRow, MbtilesMetadataRow};
 use utiles::tile_data_row::TileData;
 use utiles::{flipy, Tile, TileLike};
-use utilesqlite::{Mbtiles};
-use crate::args::CopyArgs;
+use utilesqlite::Mbtiles;
 
 // #[derive(Debug)]
 // pub struct MbtTileRow {
@@ -84,6 +84,30 @@ pub enum Destination {
     Mbtiles(String),
     Fs(String),
 }
+
+pub struct CopyConfig {
+    pub src: Source,
+    pub dst: Destination,
+}
+
+pub enum CopySrcDest {
+    Mbtiles2Fs,
+    Fs2Mbtiles,
+}
+
+impl CopyConfig {
+    pub fn new(src: Source, dst: Destination) -> Self {
+        Self { src, dst }
+    }
+}
+
+// pub fn thingy (c: CopyConfig){
+//     match (c.src, c.dst) {
+//         (Source::Mbtiles(src), Destination::Fs(dst)) => CopySrcDest::Mbtiles2Fs,
+//         (Source::Fs(src), Destination::Mbtiles(dst)) => CopySrcDest::Fs2Mbtiles,
+//         _ => panic!("src/dst combo not supported"),
+//     };
+// }
 
 async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
     let mbt = Mbtiles::from(mbtiles.as_ref());
@@ -197,22 +221,6 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
     let elapsed = end_time - start_time;
     let elapsed_secs = elapsed.as_secs();
     println!("elapsed_secs: {elapsed_secs:?}");
-}
-
-pub struct CopyConfig {
-    pub src: Source,
-    pub dst: Destination,
-}
-
-pub enum CopySrcDest {
-    Mbtiles2Fs,
-    Fs2Mbtiles,
-}
-
-impl CopyConfig {
-    pub fn new(src: Source, dst: Destination) -> Self {
-        Self { src, dst }
-    }
 }
 
 // fn fspath2tile(fspath: &Path) -> Option<Tile> {
@@ -417,15 +425,13 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String) {
         tiles = vec![];
     }
 
-   // if DIR/metadata.json exists we set the metadata from it
-    if let Ok(metadata_str) = fs::read_to_string(
-        metadata_path
-    ).await {
-        let metadata_vec: Vec<MbtilesMetadataRow> = serde_json::from_str(&metadata_str).unwrap();
+    // if DIR/metadata.json exists we set the metadata from it
+    if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
+        let metadata_vec: Vec<MbtilesMetadataRow> =
+            serde_json::from_str(&metadata_str).unwrap();
         dst_mbt.metadata_set_from_vec(&metadata_vec).unwrap();
     }
 }
-
 
 fn get_tile_src(src: &str) -> Source {
     let src_path = Path::new(src);
@@ -454,8 +460,6 @@ fn get_tile_dst(dst: &str) -> Destination {
 
 pub async fn copy_main(args: CopyArgs) {
     warn!("experimental command: copy/cp");
-
-    //let file = "D:\\utiles\\blue-marble\\blue-marble.z0z4.normal.mbtiles";
     // make sure input file exists and is file...
     let src = get_tile_src(&args.src);
     let dst = get_tile_dst(&args.dst);

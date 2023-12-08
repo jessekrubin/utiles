@@ -135,7 +135,7 @@ pub async fn rimraf_main2(args: RimrafArgs) {
     s.for_each_concurrent(10, |file| async {
         let filesize = rmthing(file).await;
     })
-        .await;
+    .await;
     // remove the dirpath
 
     fs::remove_dir_all(&args.dirpath).await.unwrap();
@@ -250,7 +250,7 @@ pub async fn rimraf_main(args: RimrafArgs) {
     s.for_each_concurrent(10, |file| async {
         rmrfer.rm_file(file).await;
     })
-        .await;
+    .await;
     fs::remove_dir_all(&rmrfer.cfg.dirpath).await.unwrap();
     rmrfer.print_stats();
 }

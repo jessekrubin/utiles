@@ -6,7 +6,11 @@ use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
 use crate::args::{Cli, Commands};
-use crate::commands::{bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main, metadata_main, metadata_set_main, neighbors_main, parent_main, pmtileid_main, quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main};
+use crate::commands::{
+    bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main,
+    metadata_main, metadata_set_main, neighbors_main, parent_main, pmtileid_main,
+    quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main,
+};
 
 fn init_tracing(debug: bool) {
     let filter = if debug {

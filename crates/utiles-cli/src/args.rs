@@ -69,7 +69,6 @@ pub struct ParentChildrenArgs {
     pub depth: u8,
 }
 
-
 #[derive(Debug, Parser)] // requires `derive` feature
 pub struct SqliteDbCommonArgs {
     #[arg(required = true, help = "mbtiles filepath")]
@@ -79,7 +78,7 @@ pub struct SqliteDbCommonArgs {
     pub min: bool,
 }
 #[derive(Debug, Parser)] // requires `derive` feature
-pub struct  MetadataArgs{
+pub struct MetadataArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
