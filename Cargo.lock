@@ -2316,6 +2316,7 @@ dependencies = [
  "futures",
  "globset",
  "ignore",
+ "itertools 0.12.0",
  "rusqlite",
  "serde",
  "serde_json",

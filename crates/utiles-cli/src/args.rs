@@ -69,6 +69,7 @@ pub struct ParentChildrenArgs {
     pub depth: u8,
 }
 
+
 #[derive(Debug, Parser)] // requires `derive` feature
 pub struct SqliteDbCommonArgs {
     #[arg(required = true, help = "mbtiles filepath")]
@@ -76,6 +77,26 @@ pub struct SqliteDbCommonArgs {
 
     #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
     pub min: bool,
+}
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct  MetadataArgs{
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = false, long, help = "output as json object not array", action = clap::ArgAction::SetTrue)]
+    pub obj: bool,
+}
+
+#[derive(Debug, Parser)] // requires `derive` feature
+pub struct MetadataSetArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = true, help = "key")]
+    pub key: String,
+
+    #[arg(required = true, help = "value")]
+    pub value: String,
 }
 
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -109,8 +130,11 @@ pub enum Commands {
 
     /// metadata
 
-    #[command(name = "metadata", visible_alias = "md", about = "Echo metadata (table) as json", long_about = None)]
-    Meta(SqliteDbCommonArgs),
+    #[command(name = "metadata", visible_aliases = ["meta", "md"], about = "Echo metadata (table) as json", long_about = None)]
+    Metadata(MetadataArgs),
+
+    #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"], about = "Set metadata key/value", long_about = None)]
+    MetadataSet(MetadataSetArgs),
 
     #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
     Rimraf(RimrafArgs),
@@ -164,6 +188,10 @@ pub struct RimrafArgs {
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub(crate) size: bool,
+
+    /// dryrun (don't actually rm)
+    #[arg(required = false, short = 'n', long, action = clap::ArgAction::SetTrue)]
+    pub(crate) dryrun: bool,
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     verbose: bool,

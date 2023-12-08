@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use tracing::{debug, info, warn};
 
 use utiles::lint_error::{UtilesLintError, UtilesLintResult};
-use utiles::mbtiles::{MBTILES_MAGIC_NUMBER, metadata2duplicates, metadata2map};
+use utiles::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
 use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 use utilesqlite::squealite;
 
@@ -48,7 +48,7 @@ pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
 
     let rows = mbtiles.metadata().unwrap();
 
-    if has_unique_index_on_metadata_name || metadata_name_is_primary_key{
+    if has_unique_index_on_metadata_name || metadata_name_is_primary_key {
         let duplicate_rows = metadata2duplicates(rows.clone());
         if !duplicate_rows.is_empty() {
             errors.extend(
