@@ -127,13 +127,13 @@ pub async fn rimraf_main2(args: RimrafArgs) {
         let filesize = fs::metadata(file.path()).await.unwrap().len();
         // remove the file
         fs::remove_file(file.path()).await.unwrap();
-        return filesize;
+        filesize
     };
 
     let s = stream::iter(files_iter);
 
     s.for_each_concurrent(10, |file| async {
-        let filesize = rmthing(file).await;
+        let _filesize = rmthing(file).await;
     })
     .await;
     // remove the dirpath

@@ -404,13 +404,13 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String) {
                     let naff = dst_mbt
                         .insert_tiles_flat(tiles)
                         .expect("insert tiles flat failed");
-                    println!("naff: {:?}", naff);
+                    println!("naff: {naff:?}");
                     // dst_mbt.insert_tiles_flat(tiles).await.unwrap();
                     tiles = vec![];
                 }
             }
             Err(e) => {
-                println!("e: {:?}", e);
+                println!("e: {e:?}");
             }
         }
     }
@@ -420,9 +420,7 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String) {
         let naff = dst_mbt
             .insert_tiles_flat(tiles)
             .expect("insert tiles flat failed");
-        println!("naff: {:?}", naff);
-        // dst_mbt.insert_tiles_flat(tiles).await.unwrap();
-        tiles = vec![];
+        println!("naff: {naff:?}");
     }
 
     // if DIR/metadata.json exists we set the metadata from it
@@ -441,10 +439,10 @@ fn get_tile_src(src: &str) -> Source {
         } else if src_path.is_dir() {
             Source::Fs(src.to_string())
         } else {
-            panic!("src is not file or dir: {:?}", src_path);
+            panic!("src is not file or dir: {src_path:?}");
         }
     } else {
-        panic!("src does not exist: {:?}", src_path);
+        panic!("src does not exist: {src_path:?}");
     }
 }
 
@@ -465,8 +463,8 @@ pub async fn copy_main(args: CopyArgs) {
     let dst = get_tile_dst(&args.dst);
 
     let srcdst = match (src, dst) {
-        (Source::Mbtiles(src), Destination::Fs(dst)) => CopySrcDest::Mbtiles2Fs,
-        (Source::Fs(src), Destination::Mbtiles(dst)) => CopySrcDest::Fs2Mbtiles,
+        (Source::Mbtiles(_src), Destination::Fs(_dst)) => CopySrcDest::Mbtiles2Fs,
+        (Source::Fs(_src), Destination::Mbtiles(_dst)) => CopySrcDest::Fs2Mbtiles,
         _ => panic!("src/dst combo not supported"),
     };
     match srcdst {

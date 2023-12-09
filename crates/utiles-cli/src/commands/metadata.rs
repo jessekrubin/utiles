@@ -27,7 +27,7 @@ pub fn metadata_main(args: &MetadataArgs) {
 
     let json_val = if args.obj {
         let m = metadata2map(&metadata_rows);
-        serde_json::to_value(&m).unwrap()
+        serde_json::to_value(m).unwrap()
 
         // serde_json::to_value(&metadata_rows).unwrap()
     } else {
@@ -65,18 +65,27 @@ pub fn metadata_set_main(args: &MetadataSetArgs) {
     );
     let mbtiles: Mbtiles = Mbtiles::from(filepath);
     let current_value = mbtiles.metadata_get(&args.key).unwrap();
-    match current_value {
-        Some(v) => {
-            if args.value != v {
-                let r = mbtiles.metadata_set(&args.key, &args.value).unwrap();
-                debug!("metadata rows updated: {:?}", r);
-            }
-        }
-        None => {
+    if let Some(v) = current_value {
+        if args.value != v {
             let r = mbtiles.metadata_set(&args.key, &args.value).unwrap();
             debug!("metadata rows updated: {:?}", r);
         }
+    } else {
+        let r = mbtiles.metadata_set(&args.key, &args.value).unwrap();
+        debug!("metadata rows updated: {:?}", r);
     }
+    // match current_value {
+    //     Some(v) => {
+    //         if args.value != v {
+    //             let r = mbtiles.metadata_set(&args.key, &args.value).unwrap();
+    //             debug!("metadata rows updated: {:?}", r);
+    //         }
+    //     }
+    //     None => {
+    //         let r = mbtiles.metadata_set(&args.key, &args.value).unwrap();
+    //         debug!("metadata rows updated: {:?}", r);
+    //     }
+    // }
 
     let c = MetadataChangeFromTo {
         name: args.key.clone(),
@@ -84,5 +93,5 @@ pub fn metadata_set_main(args: &MetadataSetArgs) {
         to: None,
     };
     let str = serde_json::to_string(&c).unwrap();
-    println!("{}", str);
+    println!("{str}");
 }
