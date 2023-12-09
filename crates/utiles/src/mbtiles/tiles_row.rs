@@ -26,10 +26,6 @@ impl MbtTileRow {
 }
 
 impl TileLike for MbtTileRow {
-    fn new(x: u32, y: u32, z: u8) -> Self {
-        Self::new(z, x, y, vec![])
-    }
-
     fn x(&self) -> u32 {
         self.tile_column
     }

@@ -2,10 +2,11 @@ use std::error::Error;
 use std::path::Path;
 
 use rusqlite::{Connection, OptionalExtension, params, Result as RusqliteResult};
+use serde::Serialize;
 use tilejson::TileJSON;
 use tracing::error;
 
-use utiles::{LngLat, Tile, TileLike};
+use utiles::{LngLat, Tile, TileLike, yflip};
 use utiles::bbox::BBox;
 use utiles::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
@@ -172,6 +173,10 @@ impl Mbtiles {
     pub fn magic_number(&self) -> RusqliteResult<u32> {
         self.application_id()
     }
+
+    pub fn zoom_stats(&self) -> RusqliteResult<Vec<MbtilesZoomStats>> {
+        zoom_stats(&self.conn)
+    }
 }
 
 impl From<&Path> for Mbtiles {
@@ -181,6 +186,12 @@ impl From<&Path> for Mbtiles {
     }
 }
 
+
+// =====================================================================
+// QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS
+// =====================================================================
+
+/// return a vector of MbtilesMetadataRow structs
 pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
     let mut stmt = conn.prepare_cached("SELECT name, value FROM metadata")?;
     let mdata = stmt
@@ -194,16 +205,24 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadata
     Ok(mdata)
 }
 
-// check that 'metadata' table exists and has a unique index on 'name'
+/// Return true/false if metadata table has a unique index on 'name'
 pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = conn.prepare("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='metadata' AND name='name'")?;
-    let mut rows = stmt.query([])?;
-    let mut count = 0;
-    while let Some(_row) = rows.next()? {
-        count += 1;
-    }
-    let res = count == 1;
-    Ok(res)
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND tbl_name='metadata' AND name='name'")?;
+    let nrows = stmt.query_row([], |row| {
+        let count: i64 = row.get(0)?;
+        Ok(count)
+    })?;
+    Ok(nrows == 1_i64)
+}
+
+
+pub fn metadata_table_name_is_primary_key(conn: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = conn.prepare("SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='metadata' AND sql LIKE '%PRIMARY KEY%'")?;
+    let nrows = stmt.query_row([], |row| {
+        let count: i64 = row.get(0)?;
+        Ok(count)
+    })?;
+    Ok(nrows == 1_i64)
 }
 
 pub fn zoom_levels(conn: &Connection) -> RusqliteResult<Vec<u32>> {
@@ -332,6 +351,15 @@ pub fn tile_exists(connection: &Connection, tile: Tile) -> RusqliteResult<bool> 
         Ok(count)
     })?;
     Ok(rows == 1_i64)
+}
+
+pub fn tiles_count(connection: &Connection) -> RusqliteResult<usize> {
+    let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles")?;
+    let rows = stmt.query_row([], |row| {
+        let count: i64 = row.get(0)?;
+        Ok(count)
+    })?;
+    Ok(rows as usize)
 }
 
 pub fn is_empty_db(connection: &Connection) -> RusqliteResult<bool> {
@@ -525,4 +553,48 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(conn: &Connection) -> Rusqlite
             Ok(0)
         }
     }
+}
+
+
+#[derive(Debug, Serialize)]
+pub struct MbtilesZoomStats {
+    pub zoom: u32,
+    pub ntiles: i64,
+    pub xmin: u32,
+    pub xmax: u32,
+    pub ymin: u32,
+    pub ymax: u32,
+}
+
+pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
+    // total tiles
+    let mut stmt = conn.prepare_cached(
+        "SELECT zoom_level, COUNT(*), MIN(tile_row), MAX(tile_row), MIN(tile_column), MAX(tile_column)
+         FROM tiles
+         GROUP BY zoom_level"
+    ).unwrap();
+
+    let rows = stmt.query_map([], |row| {
+        let zoom: u32 = row.get(0)?;
+
+        let ntiles: i64 = row.get(1)?;
+        let min_tile_column: i64 = row.get(4)?;
+        let max_tile_column: i64 = row.get(5)?;
+        let min_tile_row: i64 = row.get(2)?;
+        let max_tile_row: i64 = row.get(3)?;
+        // flip the stuff
+        let ymin = yflip(max_tile_row as u32, zoom.try_into().unwrap());
+        let ymax = yflip(min_tile_row as u32, zoom.try_into().unwrap());
+        Ok(
+            MbtilesZoomStats {
+                zoom,
+                ntiles,
+                xmin: min_tile_column as u32,
+                xmax: max_tile_column as u32,
+                ymin,
+                ymax,
+            }
+        )
+    })?.collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>().unwrap();
+    Ok(rows)
 }

@@ -6,11 +6,7 @@ use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
 use crate::args::{Cli, Commands};
-use crate::commands::{
-    bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main,
-    metadata_main, metadata_set_main, neighbors_main, parent_main, pmtileid_main,
-    quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main,
-};
+use crate::commands::{bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main, mbtiles_stat_main, metadata_main, metadata_set_main, neighbors_main, parent_main, pmtileid_main, quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main};
 
 fn init_tracing(debug: bool) {
     let filter = if debug {
@@ -57,6 +53,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         Commands::Copy(args) => {
             copy_main(args).await;
         }
+        Commands::Mbstat(args) => mbtiles_stat_main(&args),
         Commands::Dev(args) => {
             let _r = dev_main(args).await;
         }
@@ -73,6 +70,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),
         Commands::Shapes(args) => shapes_main(args),
+
     }
     0
 }

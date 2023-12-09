@@ -38,6 +38,33 @@ pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
     bbox
 }
 
+/// Parse a string into a BBox
+///
+/// # Examples
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("-180,-85,180,85").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("-180.0, -85.0, 180.0, 85.0").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("-180.0 -85.0 180.0 85.0").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("[-180.0, -85.0, 180.0, 85.0]").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
 pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
     // strip leading/trailing  whitespace
     let s = string.trim();
@@ -45,7 +72,13 @@ pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
     if s.starts_with('{') || s.starts_with('[') {
         return parse_bbox_json(s).map_err(std::convert::Into::into);
     }
-    let parts: Vec<f64> = s.split(',').filter_map(|p| p.parse::<f64>().ok()).collect();
+    let parts: Vec<f64> =  if s.contains(',') {
+        s.split(',').map(|p| p.trim()).filter_map(|p| p.parse::<f64>().ok()).collect()
+    } else if s.contains(' ') {
+        s.split(' ').map(|p| p.trim()).filter_map(|p| p.parse::<f64>().ok()).collect()
+    } else {
+        vec![]
+    };
     if parts.len() == 4 {
         Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
     } else {
@@ -107,6 +140,24 @@ mod tests {
     #[test]
     fn parse_bbox_simple() {
         let string = r#"[-180.0, -85.0, 180.0, 85.0]"#;
+        let bbox_result = parse_bbox(string);
+        // assert!(bbox_result.is_ok());
+        let bbox = bbox_result.unwrap();
+        assert_eq!(bbox, BBox::new(-180.0, -85.0, 180.0, 85.0));
+    }
+
+    #[test]
+    fn parse_bbox_str_commas() {
+        let string = r#"-180.0, -85.0, 180.0, 85.0"#;
+        let bbox_result = parse_bbox(string);
+        // assert!(bbox_result.is_ok());
+        let bbox = bbox_result.unwrap();
+        assert_eq!(bbox, BBox::new(-180.0, -85.0, 180.0, 85.0));
+    }
+
+    #[test]
+    fn parse_bbox_str_spaces() {
+        let string = r#"-180.0 -85.0 180.0 85.0"#;
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();

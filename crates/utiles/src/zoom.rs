@@ -50,6 +50,47 @@ pub fn zvec2zset(zvec: Zooms) -> ZoomsSetInt {
     zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
 }
 
+/// parse a string of zoom levels to a vector of zoom levels
+/// # Examples
+/// ```
+/// use utiles::zoom::parse_zooms;
+/// let zvec = parse_zooms("0,1,2,3,4,5,6,7");
+/// assert_eq!(zvec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
+/// ```
+///
+/// ```
+/// use utiles::zoom::parse_zooms;
+/// let zvec = parse_zooms("0-7");
+/// assert_eq!(zvec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
+/// ```
+///
+/// ```
+/// use utiles::zoom::parse_zooms;
+/// let zvec = parse_zooms("0-2,4-7");
+/// assert_eq!(zvec, vec![0, 1, 2, 4, 5, 6, 7]);
+/// ```
+#[must_use]
+pub fn parse_zooms(zstr: &str) -> Vec<u8> {
+    let mut zvec: Vec<u8> = vec![];
+    for z in zstr.split(',') {
+        if z.contains('-') {
+            let zrange: Vec<u8> = z
+                .split('-')
+                .map(|z| z.parse::<u8>().unwrap())
+                .collect::<Vec<u8>>();
+            let zrange = match zrange.len() {
+                1 => vec![zrange[0]],
+                2 => (zrange[0]..=zrange[1]).collect(),
+                _ => vec![],
+            };
+            zvec.extend(zrange);
+        } else {
+            zvec.push(z.parse::<u8>().unwrap());
+        }
+    }
+    zvec
+}
+
 pub enum ZoomOrZooms {
     Zoom(u8),
     Zooms(Vec<u8>),

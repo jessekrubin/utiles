@@ -134,10 +134,6 @@ impl FromStr for Tile {
 }
 
 impl TileLike for Tile {
-    fn new(x: u32, y: u32, z: u8) -> Self {
-        Self { x, y, z }
-    }
-
     fn x(&self) -> u32 {
         self.x
     }

@@ -10,24 +10,25 @@ fn about() -> String {
     format!("utiles cli (rust) ~ v{VERSION}")
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 #[command(name = "ut", about = about(), version = VERSION, long_about = None, author)]
 pub struct Cli {
     /// debug mode (print/log a lot of stuff)
     #[arg(long, short, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
     pub debug: bool,
 
+    /// CLI subcommands
     #[command(subcommand)]
     pub command: Commands,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct TileInputStreamArgs {
     #[arg(required = false)]
     pub input: Option<String>,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct TileFmtOptions {
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub seq: bool,
@@ -36,7 +37,7 @@ pub struct TileFmtOptions {
     pub obj: bool,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct TilesArgs {
     #[arg(required = true)]
     pub zoom: u8,
@@ -48,7 +49,7 @@ pub struct TilesArgs {
     pub fmtopts: TileFmtOptions,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct TileFmtArgs {
     #[command(flatten)]
     pub inargs: TileInputStreamArgs,
@@ -69,7 +70,7 @@ pub struct ParentChildrenArgs {
     pub depth: u8,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct SqliteDbCommonArgs {
     #[arg(required = true, help = "mbtiles filepath")]
     pub filepath: String,
@@ -77,7 +78,7 @@ pub struct SqliteDbCommonArgs {
     #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
     pub min: bool,
 }
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct MetadataArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -86,7 +87,7 @@ pub struct MetadataArgs {
     pub obj: bool,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct MetadataSetArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -98,7 +99,7 @@ pub struct MetadataSetArgs {
     pub value: String,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct TilejsonArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -107,13 +108,22 @@ pub struct TilejsonArgs {
     pub tilestats: bool,
 }
 
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser)]
 pub struct LintArgs {
     #[arg(required = true, help = "filepath(s) or dirpath(s)", num_args(1..))]
     pub(crate) fspaths: Vec<String>,
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue, default_value = "false")]
     pub(crate) fix: bool,
+}
+
+#[derive(Debug, Parser)]
+pub struct MbtilesStatsArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub(crate) full: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -137,6 +147,9 @@ pub enum Commands {
 
     #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
     Rimraf(RimrafArgs),
+
+    #[command(name = "mbstat", about = "Echo basic stats on mbtiles file", long_about = None)]
+    Mbstat(MbtilesStatsArgs),
 
     #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
     Contains {
