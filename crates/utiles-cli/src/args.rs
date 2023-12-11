@@ -151,6 +151,9 @@ pub enum Commands {
     #[command(name = "mbstat", about = "Echo basic stats on mbtiles file", long_about = None)]
     Mbstat(MbtilesStatsArgs),
 
+    // #[command(name = "geojsonio", about = "Open mbtiles in geojson.io", long_about = None)]
+    // Geojsonio(SqliteDbCommonArgs),
+
     #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
     Contains {
         #[arg(required = true, help = "mbtiles filepath")]
