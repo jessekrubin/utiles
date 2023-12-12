@@ -72,14 +72,14 @@ impl Mbtiles {
 
     pub fn metadata_get(&self, name: &str) -> RusqliteResult<Option<String>> {
         let rows = metadata_get(&self.conn, name)?;
-        if rows.len() == 0 {
+        if rows.is_empty() {
             return Ok(None);
         }
         if rows.len() > 1 {
             error!("metadata has more than one row for name: {} - {}", name, serde_json::to_string(&rows).unwrap());
             // return the first one
             let row = rows.get(0).unwrap();
-            return Ok(Some(row.value.clone()));
+            Ok(Some(row.value.clone()))
         } else {
             let row = rows.get(0).unwrap();
             Ok(Some(row.value.clone()))

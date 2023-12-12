@@ -86,8 +86,8 @@ impl MbtilesAsync {
         let c = self.pool.get().await.unwrap();
         let interaction_res = c.interact(move |conn| {
             // Assuming insert_tile_flat_mbtiles is a synchronous function
-            let r = insert_tiles_flat_mbtiles(conn, tiles, None);
-            r
+            
+            insert_tiles_flat_mbtiles(conn, tiles, None)
         }).await?;
         println!("interaction_res: {:?}", interaction_res);
         Ok(())
