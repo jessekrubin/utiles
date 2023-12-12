@@ -147,7 +147,7 @@ impl Mbtiles {
         Ok(nrows == 1_i64)
     }
 
-    pub fn zoom_levels(&self) -> RusqliteResult<Vec<u32>> {
+    pub fn zoom_levels(&self) -> RusqliteResult<Vec<u8>> {
         zoom_levels(&self.conn)
     }
 
@@ -225,11 +225,13 @@ pub fn metadata_table_name_is_primary_key(conn: &Connection) -> RusqliteResult<b
     Ok(nrows == 1_i64)
 }
 
-pub fn zoom_levels(conn: &Connection) -> RusqliteResult<Vec<u32>> {
+pub fn zoom_levels(conn: &Connection) -> RusqliteResult<Vec<u8>> {
     let mut stmt = conn.prepare_cached("SELECT DISTINCT zoom_level FROM tiles ORDER BY zoom_level ASC")?;
     let zoom_levels = stmt
         .query_map([], |row| row.get(0))?
         .collect::<RusqliteResult<Vec<u32>, rusqlite::Error>>()?;
+    // convert to u8
+    let zoom_levels = zoom_levels.iter().map(|z| *z as u8).collect::<Vec<u8>>();
     Ok(zoom_levels)
 }
 

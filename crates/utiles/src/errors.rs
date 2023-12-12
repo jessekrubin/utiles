@@ -11,6 +11,9 @@ pub enum UtilesError {
     #[error("invalid bbox: {0}")]
     InvalidBbox(String),
 
+    #[error("invalid zoom(s): {0}")]
+    InvalidZoom(String),
+
     #[error("Coversion error: {0}")]
     ConversionError(String),
 

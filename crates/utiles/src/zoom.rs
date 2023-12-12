@@ -1,3 +1,8 @@
+use std::num::ParseIntError;
+use crate::errors::UtilesResult;
+
+use crate::UtilesError::InvalidZoom;
+
 type Zooms = Vec<u8>;
 type ZoomsSetInt = u32;
 
@@ -55,40 +60,63 @@ pub fn zvec2zset(zvec: Zooms) -> ZoomsSetInt {
 /// ```
 /// use utiles::zoom::parse_zooms;
 /// let zvec = parse_zooms("0,1,2,3,4,5,6,7");
-/// assert_eq!(zvec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
+/// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
 /// ```
 ///
 /// ```
 /// use utiles::zoom::parse_zooms;
 /// let zvec = parse_zooms("0-7");
-/// assert_eq!(zvec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
+/// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
 /// ```
 ///
 /// ```
 /// use utiles::zoom::parse_zooms;
 /// let zvec = parse_zooms("0-2,4-7");
-/// assert_eq!(zvec, vec![0, 1, 2, 4, 5, 6, 7]);
+/// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 4, 5, 6, 7]);
 /// ```
-#[must_use]
-pub fn parse_zooms(zstr: &str) -> Vec<u8> {
+///
+/// ```
+/// use utiles::zoom::parse_zooms;
+/// let zvec = parse_zooms("1,2,3,4,4,4,4,4");
+/// assert_eq!(zvec.unwrap(), vec![1, 2, 3, 4]);
+/// ```
+pub fn parse_zooms(zstr: &str) -> UtilesResult<Vec<u8>> {
     let mut zvec: Vec<u8> = vec![];
     for z in zstr.split(',') {
         if z.contains('-') {
-            let zrange: Vec<u8> = z
+            let zrange: Result<Vec<u8>, ParseIntError> = z
                 .split('-')
-                .map(|z| z.parse::<u8>().unwrap())
-                .collect::<Vec<u8>>();
-            let zrange = match zrange.len() {
-                1 => vec![zrange[0]],
-                2 => (zrange[0]..=zrange[1]).collect(),
-                _ => vec![],
+                .map(|z| z.parse::<u8>())
+                .collect::<Result<Vec<_>, _>>();
+
+            let zrange = match zrange {
+                Ok(zrange) => {
+                    match zrange.len() {
+                        1 => vec![zrange[0]],
+                        2 => (zrange[0]..=zrange[1]).collect(),
+                        _ => vec![],
+                    }
+                }
+                Err(_) => return Err(InvalidZoom(z.to_string())),
             };
             zvec.extend(zrange);
         } else {
-            zvec.push(z.parse::<u8>().unwrap());
+            match z.parse::<u8>() {
+                Ok(num) => zvec.push(num),
+                Err(_) => return Err(InvalidZoom(z.to_string())),
+            }
         }
     }
-    zvec
+    // make sure zooms are between 0 and 32
+    for z in &zvec {
+        if *z > 32 {
+            return Err(InvalidZoom((*z).to_string()));
+        }
+    }
+    // unique and sort zooms
+    zvec.sort();
+    zvec.dedup();
+    Ok(zvec)
 }
 
 pub enum ZoomOrZooms {
@@ -138,6 +166,7 @@ mod tests {
         let zvec: Vec<u8> = vec![];
         assert_eq!(zset2zvec(zset), zvec);
     }
+
     #[test]
     fn zset2zvec_0_1_2() {
         let zset: u32 = 0b11100000_00000000_00000000_00000000; // Example, zoom levels 2 and 4 are set
@@ -145,6 +174,7 @@ mod tests {
 
         assert_eq!(zset2zvec(zset), zvec);
     }
+
     #[test]
     fn zset2zvec_all() {
         let zset: u32 = 0b11111111_11111111_11111111_11111111; // Example, zoom levels 2 and 4 are set

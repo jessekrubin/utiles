@@ -4,14 +4,19 @@ use std::path::{Path, PathBuf};
 use futures::stream::{self, StreamExt};
 use serde_json;
 use tokio::fs;
+use tokio::sync::mpsc;
+use tokio::task;
+use tokio::time::{sleep, Duration};
 use tracing::{debug, info, warn};
 use walkdir::WalkDir;
 
-use crate::args::CopyArgs;
+use utiles::bbox::BBox;
 use utiles::mbtiles::{MbtTileRow, MbtilesMetadataRow};
 use utiles::tile_data_row::TileData;
-use utiles::{flipy, Tile, TileLike};
+use utiles::{flipy, tile_ranges, Tile, TileLike};
 use utilesqlite::Mbtiles;
+
+use crate::args::CopyArgs;
 
 // #[derive(Debug)]
 // pub struct MbtTileRow {
@@ -75,19 +80,25 @@ impl TilesFsWriter {
     // }
 }
 
+#[derive(Debug)]
 pub enum Source {
     Mbtiles(String),
     Fs(String),
 }
 
+#[derive(Debug)]
 pub enum Destination {
     Mbtiles(String),
     Fs(String),
 }
 
+#[derive(Debug)]
 pub struct CopyConfig {
     pub src: Source,
     pub dst: Destination,
+
+    pub zooms: Option<Vec<u8>>,
+    pub bbox: Option<BBox>,
 }
 
 pub enum CopySrcDest {
@@ -96,8 +107,85 @@ pub enum CopySrcDest {
 }
 
 impl CopyConfig {
-    pub fn new(src: Source, dst: Destination) -> Self {
-        Self { src, dst }
+    pub fn new(
+        src: Source,
+        dst: Destination,
+        zooms: Option<Vec<u8>>,
+        bbox: Option<BBox>,
+    ) -> Self {
+        Self {
+            src,
+            dst,
+            zooms,
+            bbox,
+        }
+    }
+
+    pub fn zooms_str(&self) -> String {
+        match &self.zooms {
+            Some(zooms) => zooms
+                .iter()
+                .map(|z| z.to_string())
+                .collect::<Vec<String>>()
+                .join(","),
+            None => "0,1,2,3,4,5,6,7,8,9,10,11,12,13".to_string(),
+        }
+    }
+
+    pub fn sql_where_for_zoom(&self, zoom: u8) -> String {
+        let pred = match &self.bbox {
+            Some(bbox) => {
+                let trange = tile_ranges(bbox.tuple(), vec![zoom].into());
+                trange.sql_where(None)
+            }
+            None => {
+                format!("zoom_level = {zoom}", zoom = zoom)
+            }
+        };
+        // attach 'WHERE'
+        if pred.is_empty() {
+            pred
+        } else {
+            format!("WHERE {pred}", pred = pred)
+        }
+    }
+
+    pub fn sql_where(&self, zoom_levels: Option<Vec<u8>>) -> String {
+        let pred = match (&self.bbox, &self.zooms) {
+            (Some(bbox), Some(zooms)) => {
+                let trange = tile_ranges(
+                    bbox.tuple(),
+                    zoom_levels.unwrap_or(zooms.clone()).into(),
+                );
+                trange.sql_where(None)
+            }
+            (Some(bbox), None) => {
+                let trange = tile_ranges(
+                    bbox.tuple(),
+                    zoom_levels
+                        .unwrap_or((0..32).map(|z| z as u8).collect::<Vec<u8>>())
+                        .into(),
+                );
+                trange.sql_where(None)
+            }
+            (None, Some(zooms)) => {
+                format!(
+                    "zoom_level IN ({zooms})",
+                    zooms = zooms
+                        .iter()
+                        .map(|z| z.to_string())
+                        .collect::<Vec<String>>()
+                        .join(",")
+                )
+            }
+            (None, None) => "".to_string(),
+        };
+        // attach 'WHERE'
+        if pred.is_empty() {
+            pred
+        } else {
+            format!("WHERE {pred}", pred = pred)
+        }
     }
 }
 
@@ -109,13 +197,24 @@ impl CopyConfig {
 //     };
 // }
 
-async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
+async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let mbt = Mbtiles::from(mbtiles.as_ref());
+    let zoom_levels_for_where: Vec<u8> = mbt.zoom_levels().unwrap();
+    let where_clause = cfg.sql_where(Some(zoom_levels_for_where));
     let start_time = std::time::Instant::now();
+
     let total_tiles: u32 = mbt
         .conn()
-        .query_row("SELECT count(*) FROM tiles", [], |row| row.get(0))
+        .query_row(
+            &format!(
+                "SELECT count(*) FROM tiles {where_clause}",
+                where_clause = where_clause
+            ),
+            [],
+            |row| row.get(0),
+        )
         .unwrap();
+
     info!("finna write {total_tiles:?} from {mbtiles:?} to {output_dir:?}");
     let c = mbt.conn();
 
@@ -130,7 +229,13 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
     debug!("wrote metadata.json to {:?}", output_dir);
 
     let mut stmt_zx_distinct = c
-        .prepare("SELECT DISTINCT zoom_level, tile_column FROM tiles")
+        .prepare(
+            format!(
+                "SELECT DISTINCT zoom_level, tile_column FROM tiles {where_clause}",
+                where_clause = where_clause
+            )
+            .as_str(),
+        )
         .unwrap();
 
     let zx_iter = stmt_zx_distinct
@@ -155,9 +260,16 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
         })
         .await;
 
-    let mut stmt = c
-        .prepare("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles")
-        .unwrap();
+    // let mut stmt = c
+    //     .prepare("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles")
+    //     .unwrap();
+    let tiles_query = format!(
+        "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause}",
+        where_clause = where_clause
+    );
+
+    debug!("tiles_query: {:?}", tiles_query);
+    let mut stmt = c.prepare(tiles_query.as_str()).unwrap();
 
     let tiles_iter = stmt
         .query_map([], |row| {
@@ -223,40 +335,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String) {
     println!("elapsed_secs: {elapsed_secs:?}");
 }
 
-// fn fspath2tile(fspath: &Path) -> Option<Tile> {
-//     let parts = fspath.
-//     let parts: Vec<&str> = fspath.split('/').collect();
-//     if parts.len() <3 {
-//         return None;
-//     }
-//
-//     let z =  match parts[parts.len()- 3].parse::<u8>() {
-//         Ok(z) => z,
-//         Err(e) => {
-//             println!("e: {:?}", e);
-//             return None;
-//         }
-//     };
-//     let x = match parts[parts.len() - 2].parse::<u32>() {
-//         Ok(x) => x,
-//         Err(e) => {
-//             println!("e: {:?}", e);
-//             return None;
-//         }
-//     };
-//     let y = match parts[parts.len() - 1].split('.').next().unwrap().parse::<u32>() {
-//         Ok(y) => y,
-//         Err(e) => {
-//             println!("e: {:?}", e);
-//             return None;
-//         }
-//     };
-//     Some(Tile::new(x, y, z))
-// }
-
-fn extract_xyz_from_path(
-    path: &Path,
-) -> Result<(u32, u32, u8), std::num::ParseIntError> {
+fn fspath2xyz(path: &Path) -> Result<(u32, u32, u8), std::num::ParseIntError> {
     let path = Path::new(path);
     let mut components = path.components().rev();
 
@@ -280,141 +359,124 @@ fn extract_xyz_from_path(
     Ok((x, y, z))
 }
 
-// async fn copy_fs2mbtiles2(dirpath: String, mbtiles: String) {
-//     let new_mbta = MbtilesAsync::new_flat_mbtiles(&mbtiles).await.unwrap();
-//     let batch_size = 1000; // Define your batch size
-//
-//     // Create an async channel
-//     let (tx, mut rx) = mpsc::channel(32); // Adjust the channel size as needed
-//
-//     // Database insertion task
-//     let db_task = tokio::spawn(async move {
-//         let mut tiles_batch = Vec::with_capacity(batch_size);
-//         while let Some(tile_data) = rx.recv().await {
-//             tiles_batch.push(tile_data);
-//             if tiles_batch.len() >= batch_size {
-//                 new_mbta.insert_tiles_flat(tiles_batch.clone()).await.unwrap();
-//                 tiles_batch.clear();
-//             }
-//         }
-//         // Insert any remaining tiles in the batch
-//         if !tiles_batch.is_empty() {
-//             new_mbta.insert_tiles_flat(tiles_batch).await.unwrap();
-//         }
-//     });
-//
-//     // File processing tasks
-//     let walker_stream = stream::iter(
-//         WalkDir::new(dirpath)
-//             .min_depth(3)
-//             .max_depth(3)
-//             .into_iter()
-//             .filter_map(|e| {
-//                 let e = e.ok()?;
-//                 if e.file_type().is_file() {
-//                     Some(e)
-//                 } else {
-//                     None
-//                 }
-//             })
-//             .map(|entry| entry.path().to_owned())
-//     );
-//
-//
-//     walker_stream
-//         .for_each_concurrent(/* limit parallelism here */2, move |path| {
-//             let tx = tx.clone(); // Clone the sender for each task
-//             async move {
-//                 if let Ok(t2) = extract_xyz_from_path(&path) {
-//                     if let Ok(data) = fs::read(&path).await {
-//                         let tile = Tile::new(t2.0, t2.1, t2.2);
-//                         let tdata = TileData::new(tile, data);
-//                         tx.send(tdata).await.unwrap(); // Send to the channel
-//                     }
-//                 }
-//             }
-//         })
-//         .await;
-//
-//     let futures = walker_stream.map(|path| {
-//         let tx = tx.clone();
-//         async move {
-//             if let Ok(t2) = extract_xyz_from_path(&path) {
-//                 if let Ok(data) = fs::read(&path).await {
-//                     let tile = Tile::new(t2.0, t2.1, t2.2);
-//                     let tdata = TileData::new(tile, data);
-//                     tx.send(tdata).await.unwrap();
-//                 }
-//             }
-//         }
-//     }).collect::<Vec<_>>();
-//
-//     // Wait for all file processing tasks to complete
-//     join_all(futures).await;
-//
-//     // Close the channel
-//     drop(tx);
-//
-//     // Await the database task to complete
-//     db_task.await.unwrap();
-// }
+async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, cfg: CopyConfig) {
+    let metadata_path = Path::new(&dirpath).join("metadata.json");
+    let walker = WalkDir::new(&dirpath).min_depth(3).max_depth(3);
+    let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();
+    dst_mbt
+        .init_flat_mbtiles()
+        .expect("init_flat_mbtiles failed");
+    // Write metadata to db if exists...
 
-async fn copy_fs2mbtiles(dirpath: String, mbtiles: String) {
+    if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
+        let metadata_vec: Vec<MbtilesMetadataRow> =
+            serde_json::from_str(&metadata_str).unwrap();
+        dst_mbt.metadata_set_from_vec(&metadata_vec).unwrap();
+    }
+
+    let (tx, mut rx) = mpsc::channel(64);
+
+    // Database insertion task
+    let db_task = task::spawn(async move {
+        let mut tiles = Vec::with_capacity(2048);
+        let mut nwritten = 0;
+        while let Some(tile_data) = rx.recv().await {
+            tiles.push(tile_data);
+            if tiles.len() >= 2048 {
+                debug!("inserting tiles: {:?}", tiles.len());
+                let n_affected = dst_mbt
+                    .insert_tiles_flat(tiles.clone())
+                    .expect("insert tiles flat failed");
+                nwritten += n_affected;
+                tiles.clear();
+            }
+        }
+        // Insert any remaining tiles
+        if !tiles.is_empty() {
+            let n_affected = dst_mbt
+                .insert_tiles_flat(tiles)
+                .expect("insert tiles flat failed");
+            nwritten += n_affected;
+        }
+        debug!("nwritten: {:?}", nwritten);
+    });
+
+    // File processing tasks
+    for entry in walker {
+        let entry = entry.unwrap();
+        let path = entry.path().to_owned();
+        let tx_clone = tx.clone();
+        let tile_xyz = fspath2xyz(&path);
+        match tile_xyz {
+            Ok(tile_xyz) => {
+                task::spawn(async move {
+                    let data = fs::read(&path).await.unwrap();
+                    let tile_data = TileData::new(
+                        Tile::new(tile_xyz.0, tile_xyz.1, tile_xyz.2),
+                        data,
+                    );
+                    tx_clone.send(tile_data).await.unwrap();
+                    debug!("sent tile: {:?}", tile_xyz);
+                });
+            }
+            Err(e) => {
+                warn!("e: {e:?}");
+            }
+        }
+    }
+    debug!("dropping tx");
+    // drop tx to close the channel
+    drop(tx);
+    // Wait for the database task to complete
+    db_task.await.unwrap();
+}
+
+#[allow(dead_code)]
+async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let batch_size = 2048; // Define your batch size
                            // get all files...
     let walker = WalkDir::new(dirpath).min_depth(3).max_depth(3);
-    // let dst_mbt = MbtilesAsync::new_flat_mbtiles(&mbtiles).await.unwrap();
     let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();
 
     dst_mbt
         .init_flat_mbtiles()
         .expect("init_flat_mbtiles failed");
-
-    // {
-    //
-    //     let c = new_mbta.pool.get().await.unwrap();
-    //     let r = c
-    //         .interact(|conn| {
-    //         //     get the current config
-    //         })
-    //         .await;
-    // }
-    //
     let mut tiles: Vec<TileData> = vec![];
     for entry in walker {
         let entry = entry.unwrap();
         let path = entry.path();
         let path_str = path.to_str().unwrap();
         debug!("path_str: {:?}", path_str);
-        // println!("path_str: {:?}", path_str);
-        // println!("tiles len: {:?}", tiles.len());
-        let t2 = extract_xyz_from_path(path);
+        let t2 = fspath2xyz(path);
         match t2 {
             Ok(t2) => {
                 debug!("t2: {:?}", t2);
-
                 let data = fs::read(path).await.unwrap();
                 let tile = Tile::new(t2.0, t2.1, t2.2);
+
+                // sleep for a 0.1 second
+                let dur = Duration::from_millis(100);
+                sleep(dur).await;
+
                 // insert tile
                 let tdata = TileData::new(tile, data);
                 tiles.push(tdata);
                 if tiles.len() > batch_size {
-                    println!("inserting tiles: {:?}", tiles.len());
+                    debug!("inserting tiles: {:?}", tiles.len());
                     let naff = dst_mbt
                         .insert_tiles_flat(tiles)
                         .expect("insert tiles flat failed");
-                    println!("naff: {naff:?}");
+                    debug!("naff: {naff:?}");
                     // dst_mbt.insert_tiles_flat(tiles).await.unwrap();
                     tiles = vec![];
                 }
             }
             Err(e) => {
-                println!("e: {e:?}");
+                warn!("e: {e:?}");
             }
         }
     }
-
     if !tiles.is_empty() {
         println!("inserting tiles: {:?}", tiles.len());
         let naff = dst_mbt
@@ -458,6 +520,31 @@ fn get_tile_dst(dst: &str) -> Destination {
 
 pub async fn copy_main(args: CopyArgs) {
     warn!("experimental command: copy/cp");
+
+    // match args.zoom {
+    //     Some(zoom) => {
+    //         info!("zoom: {:?}", zoom);
+    //     }
+    //     None => {
+    //         info!("no zoom");
+    //     }
+    // }
+
+    let zooms: Option<Vec<u8>> = match args.zoom {
+        Some(zoom) => zoom.zooms(),
+        None => None,
+    };
+    let bbox = args.bbox;
+
+    let cfg = CopyConfig::new(
+        get_tile_src(&args.src),
+        get_tile_dst(&args.dst),
+        zooms,
+        bbox.into(),
+    );
+
+    // log it out
+    debug!("cfg: {:?}", cfg);
     // make sure input file exists and is file...
     let src = get_tile_src(&args.src);
     let dst = get_tile_dst(&args.dst);
@@ -469,47 +556,10 @@ pub async fn copy_main(args: CopyArgs) {
     };
     match srcdst {
         CopySrcDest::Mbtiles2Fs => {
-            copy_mbtiles2fs(args.src, args.dst).await;
+            copy_mbtiles2fs(args.src, args.dst, cfg).await;
         }
         CopySrcDest::Fs2Mbtiles => {
-            copy_fs2mbtiles(args.src, args.dst).await;
+            copy_fs2mbtiles(args.src, args.dst, cfg).await;
         }
     }
-
-    // let src_path = Path::new(&args.src);
-    // assert!(
-    //     src_path.exists(),
-    //     "src does not exist: {}",
-    //     src_path.display()
-    // );
-    // assert!(
-    //     src_path.is_file(),
-    //     "Not a file: {filepath}",
-    //     filepath = src_path.display()
-    // );
-    //
-    // // make sure output dir does not exist
-    // let dst_path = Path::new(&args.dst);
-    // let dst_path_exists = dst_path.exists();
-    // if dst_path_exists {
-    //     if args.force {
-    //         warn!("dst_path exists: {:?}, but force is true", dst_path);
-    //     } else {
-    //         assert!(!dst_path_exists, "File exists: {}", dst_path.display());
-    //     }
-    // }
-    // let src = Source::Mbtiles(src_path.to_str().unwrap().to_string());
-    // let dst = Destination::Fs(dst_path.to_str().unwrap().to_string());
-    //
-    //
-
-    // let cfg = CopyConfig::new(src, dst);
-
-    // match cfg.src {
-    //     Source::Mbtiles(filepath) => match cfg.dst {
-    //         Destination::Fs(output_dir) => {
-    //             copy_mbtiles2fs(filepath, output_dir).await;
-    //         }
-    //     },
-    // }
 }

@@ -16,10 +16,6 @@ pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
 ];
 
 pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
-    // println!("_________ lint_filepath _________");
-    // println!("lint (fix -- {fix})");
-    // throw not implemented error
-    // println!("{}", fspath.display());
     warn!("lint (fix -- {fix}) not implemented yet");
     let mut errors = Vec::new();
     match mbtiles.magic_number() {
@@ -111,7 +107,7 @@ pub fn lint_filepath(
         }
     }
 
-    match utilesqlite::mbtiles::Mbtiles::from_filepath_str(fspath_str) {
+    match Mbtiles::from_filepath_str(fspath_str) {
         Ok(mbtiles) => Ok(lint_mbtiles_file(&mbtiles, fix)),
         Err(e) => {
             warn!("ERROR: {}", e);

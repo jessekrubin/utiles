@@ -65,12 +65,13 @@ pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
 /// let bbox = parse_bbox("[-180.0, -85.0, 180.0, 85.0]").unwrap();
 /// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
-pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
+pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
     if s.starts_with('{') || s.starts_with('[') {
-        return parse_bbox_json(s).map_err(std::convert::Into::into);
+        let bbox = parse_bbox_json(s);
+        return bbox.map_err(|e| e.to_string());
     }
     let parts: Vec<f64> =  if s.contains(',') {
         s.split(',').map(|p| p.trim()).filter_map(|p| p.parse::<f64>().ok()).collect()
@@ -87,11 +88,13 @@ pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
     }
 }
 
-pub fn parse_bbox_ext(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
+pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
     // match 'world' or 'planet'
     if string == "world" || string == "planet" {
         return Ok(BBox::new(-180.0, -90.0, 180.0, 90.0));
     }
+    // trim leading/trailing single/double quotes
+    let string = string.trim_matches(|c| c == '\'' || c == '"');
     parse_bbox(string)
 }
 

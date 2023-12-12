@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use serde::Serialize;
+use tracing::debug;
 
 use utilesqlite::mbtiles::MbtilesZoomStats;
 use utilesqlite::Mbtiles;
@@ -9,15 +10,15 @@ use crate::args::MbtilesStatsArgs;
 
 #[derive(Debug, Serialize)]
 struct MbtilesStats {
-    ntiles: u64,
     filesize: u64,
+    ntiles: u64,
+    nzooms: u32,
     minzoom: Option<u8>,
     maxzoom: Option<u8>,
-    nzooms: u32,
     zooms: Vec<MbtilesZoomStats>,
 }
 
-fn mbtiles_stats(filepath: &str) -> Result<MbtilesStats, Box<dyn std::error::Error>> {
+fn mbinfo(filepath: &str) -> Result<MbtilesStats, Box<dyn std::error::Error>> {
     let filepath = Path::new(filepath);
     assert!(
         filepath.exists(),
@@ -32,7 +33,12 @@ fn mbtiles_stats(filepath: &str) -> Result<MbtilesStats, Box<dyn std::error::Err
 
     let filesize = filepath.metadata().unwrap().len();
     let mbtiles: Mbtiles = Mbtiles::from(filepath);
+
+    let query_ti = std::time::Instant::now();
+    debug!("Started zoom_stats query");
     let zoom_stats = mbtiles.zoom_stats().expect("zoom_stats query failed");
+    let query_dt = query_ti.elapsed();
+    debug!("Finished zoom_stats query in {:?}", query_dt);
 
     if zoom_stats.is_empty() {
         return Ok(MbtilesStats {
@@ -60,8 +66,8 @@ fn mbtiles_stats(filepath: &str) -> Result<MbtilesStats, Box<dyn std::error::Err
     })
 }
 
-pub fn mbtiles_stat_main(args: &MbtilesStatsArgs) {
-    let stats = mbtiles_stats(&args.common.filepath);
+pub fn mbtiles_info_main(args: &MbtilesStatsArgs) {
+    let stats = mbinfo(&args.common.filepath);
     match stats {
         Ok(stats) => {
             let str = match args.common.min {

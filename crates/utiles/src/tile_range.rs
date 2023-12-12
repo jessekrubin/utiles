@@ -1,3 +1,5 @@
+use crate::bbox::BBox;
+
 #[derive(Debug)]
 pub struct TileRange {
     curx: u32,
@@ -118,6 +120,8 @@ impl TileRanges {
             .collect::<Vec<String>>()
             .join(" OR ")
     }
+
+
 }
 
 impl From<TileRange> for TileRanges {
