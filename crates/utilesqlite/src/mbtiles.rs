@@ -4,7 +4,7 @@ use std::path::Path;
 use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use serde::Serialize;
 use tilejson::TileJSON;
-use tracing::error;
+use tracing::{debug, error};
 
 use utiles::bbox::BBox;
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
@@ -413,9 +413,9 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
     match tx {
         Ok(tx) => {
             let script_res = tx.execute_batch(script);
-            println!("init_flat_mbtiles: script_res: {:?}", script_res);
+            debug!("init_flat_mbtiles: script_res: {:?}", script_res);
             let r = tx.commit();
-            println!("init_flat_mbtiles: r: {:?}", r);
+            debug!("init_flat_mbtiles: r: {:?}", r);
             Ok(())
         }
         Err(e) => {
@@ -423,9 +423,6 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
             Err(e)
         }
     }
-    // let r = conn.execute_batch(script);
-    // println!("init_flat_mbtiles: r: {:?}", r);
-    // Ok(())
 }
 
 pub fn insert_tile_flat_mbtiles(
@@ -478,7 +475,6 @@ pub fn insert_tiles_flat_mbtiles(
             let r =
                 stmt.execute(params![tile.xyz.z, tile.xyz.x, tile.xyz.y, tile.data])?;
             naff += r;
-            // println!("insert_tiles_flat_mbtiles: r: {:?}", r);
         }
     }
     tx.commit().expect("Error committing transaction");

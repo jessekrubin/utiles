@@ -3,8 +3,6 @@ use rusqlite::{Connection, Result};
 
 use utiles::libtiletype::tiletype_str;
 
-type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;
-
 pub fn add_function_ut_tiletype(db: &Connection) -> Result<()> {
     db.create_scalar_function(
         "ut_tiletype",
@@ -27,8 +25,9 @@ pub fn add_ut_functions(db: &Connection) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::fns::BoxError;
     use rusqlite::params;
+
+    type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
     fn repo_root() -> std::path::PathBuf {
         // recurse up until we find a dir called "test-data"

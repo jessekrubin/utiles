@@ -267,10 +267,7 @@ impl From<&String> for BBox {
         // let value: Value = serde_json::from_str(&s).unwrap();
         match parse_bbox(s) {
             Ok(bbox) => bbox,
-            Err(e) => {
-                println!("ERROR: {e}");
-                BBox::world_planet()
-            }
+            Err(_e) => BBox::world_planet(),
         }
     }
 }
