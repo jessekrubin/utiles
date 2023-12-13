@@ -84,7 +84,7 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
         Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
     } else {
         let msg = format!("Invalid bbox: {s}");
-        Err(msg.into())
+        Err(msg)
     }
 }
 
