@@ -121,24 +121,23 @@ impl CopyConfig {
         }
     }
 
-
-    pub fn sql_where_for_zoom(&self, zoom: u8) -> String {
-        let pred = match &self.bbox {
-            Some(bbox) => {
-                let trange = tile_ranges(bbox.tuple(), vec![zoom].into());
-                trange.sql_where(Some(true))
-            }
-            None => {
-                format!("zoom_level = {zoom}")
-            }
-        };
-        // attach 'WHERE'
-        if pred.is_empty() {
-            pred
-        } else {
-            format!("WHERE {pred}")
-        }
-    }
+    // pub fn sql_where_for_zoom(&self, zoom: u8) -> String {
+    //     let pred = match &self.bbox {
+    //         Some(bbox) => {
+    //             let trange = tile_ranges(bbox.tuple(), vec![zoom].into());
+    //             trange.sql_where(Some(true))
+    //         }
+    //         None => {
+    //             format!("zoom_level = {zoom}")
+    //         }
+    //     };
+    //     // attach 'WHERE'
+    //     if pred.is_empty() {
+    //         pred
+    //     } else {
+    //         format!("WHERE {pred}")
+    //     }
+    // }
 
     pub fn sql_where(&self, zoom_levels: Option<Vec<u8>>) -> String {
         let pred = match (&self.bbox, &self.zooms) {
@@ -147,11 +146,7 @@ impl CopyConfig {
                     bbox.tuple(),
                     zoom_levels.unwrap_or(zooms.clone()).into(),
                 );
-                // trange.sql_where(Some(true))
-                // trange.sql_where(Some(true))
-                trange.sql_where(
-                    Some(true)
-                )
+                trange.sql_where(Some(true))
             }
             (Some(bbox), None) => {
                 let trange = tile_ranges(
@@ -160,10 +155,7 @@ impl CopyConfig {
                         .unwrap_or((0..28).map(|z| z as u8).collect::<Vec<u8>>())
                         .into(),
                 );
-                // trange.sql_where(Some(true))
-                trange.sql_where(
-Some(true)
-                )
+                trange.sql_where(Some(true))
             }
             (None, Some(zooms)) => {
                 format!(
@@ -186,37 +178,19 @@ Some(true)
     }
 }
 
-// pub fn thingy (c: CopyConfig){
-//     match (c.src, c.dst) {
-//         (Source::Mbtiles(src), Destination::Fs(dst)) => CopySrcDest::Mbtiles2Fs,
-//         (Source::Fs(src), Destination::Mbtiles(dst)) => CopySrcDest::Fs2Mbtiles,
-//         _ => panic!("src/dst combo not supported"),
-//     };
-// }
-
 async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let mbt = Mbtiles::from(mbtiles.as_ref());
 
-    // let zoom_levels_for_where: Vec<u8> = match cfg.zooms {
-    //     Some(zooms) => zooms,
-    //     None => {
-    //         mbt.zoom_levels().unwrap()
-    //     }
-    // };
-
-
     let where_clause = cfg.sql_where(
         // Some(zoom_levels_for_where)
-        None
+        None,
     );
     let start_time = std::time::Instant::now();
 
     let total_tiles: u32 = mbt
         .conn()
         .query_row(
-            &format!(
-                "SELECT count(*) FROM tiles {where_clause}"
-            ),
+            &format!("SELECT count(*) FROM tiles {where_clause}"),
             [],
             |row| row.get(0),
         )
@@ -227,7 +201,6 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
 
     let metadata_vec = mbt.metadata().unwrap();
     let metadata_str = serde_json::to_string_pretty(&metadata_vec).unwrap();
-    println!("{metadata_str}");
     // ensure output_dir exists
     fs::create_dir_all(&output_dir).await.unwrap();
     // write metadata-json to output_dir/metadata.json
@@ -294,51 +267,23 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     // let count = 0;
     tiles_stream
         .for_each_concurrent(0, |tile| async {
-            // print smaller rep
-            // println!("tile: {} {} {} {}"
-            // , tile.tile_column, tile.tile_row, tile.zoom_level, tile.tile_data.len());
-            // sleep for .1 seconds
             match tile {
                 Ok(tile) => {
-                    let _t = Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
+                    let _t =
+                        Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
                     twriter.write_tile(tile).await;
-                    // debug!("Wrote tile: {}", t);
-
-
-                    // let dur2 = Duration::from_millis(1000);
-                    // time::sleep(dur2).await;
                 }
                 Err(e) => {
-                    println!("tile error: {e:?}");
                     warn!("tile error: {:?}", e);
                 }
             }
-            // let tile_msg = tile.json_obj();
-            // let dur = Duration::from_millis(100);
-
-            // time::sleep(dur).await;
-            // twriter.write_tile(tile).await;
-            //
-            // if twriter.nwritten() % 1000 == 0 {
-            //     println!("nwritten: {:?}", twriter.nwritten());
-            //     let percent = (twriter.nwritten() as f32 / total_tiles as f32) * 100.0;
-            //     // "nwritten: {:?} [{:?}]"
-            //     let msg = format!("nwritten: {:?} [{:?}]", twriter.nwritten(), percent);
-            //     // println!("percent: {:?}", percent);
-            //     println!("{}", msg);
-            // }
-
-            // sleep for .1 seconds
-            // let dur = Duration::from_millis(100);
-            // time::sleep(dur).await;
-            // println!("DONE tile: {:?}", tile_msg);
         })
         .await;
 
     let end_time = std::time::Instant::now();
     let elapsed = end_time - start_time;
     let elapsed_secs = elapsed.as_secs();
-    println!("elapsed_secs: {elapsed_secs:?}");
+    debug!("elapsed_secs: {elapsed_secs:?}");
 }
 
 fn fspath2xyz(path: &Path) -> Result<(u32, u32, u8), std::num::ParseIntError> {
@@ -484,11 +429,10 @@ async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
         }
     }
     if !tiles.is_empty() {
-        println!("inserting tiles: {:?}", tiles.len());
         let naff = dst_mbt
             .insert_tiles_flat(tiles)
             .expect("insert tiles flat failed");
-        println!("naff: {naff:?}");
+        debug!("Number of inserts: {naff:?}");
     }
 
     // if DIR/metadata.json exists we set the metadata from it
@@ -536,10 +480,7 @@ pub async fn copy_main(args: CopyArgs) {
     //     }
     // }
 
-    let zooms: Option<Vec<u8>> = match args.zoom {
-        Some(zoom) => zoom.zooms(),
-        None => None,
-    };
+    let zooms: Option<Vec<u8>> = args.zooms();
     let bbox = args.bbox;
 
     let cfg = CopyConfig::new(

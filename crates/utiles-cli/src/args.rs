@@ -27,6 +27,9 @@ pub struct Cli {
     #[arg(long, short, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
     pub debug: bool,
 
+    #[arg(long, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
+    pub log_json: bool,
+
     /// CLI subcommands
     #[command(subcommand)]
     pub command: Commands,
@@ -191,8 +194,8 @@ pub enum Commands {
     /// echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
     /// [426, 775, 11]
     #[command(
-    name = "bounding-tile",
-    about = "Echo the bounding tile of a lonlat/bbox/GeoJSON"
+        name = "bounding-tile",
+        about = "Echo the bounding tile of a lonlat/bbox/GeoJSON"
     )]
     BoundingTile(TileFmtArgs),
 
@@ -250,7 +253,6 @@ pub struct MinMaxZoom {
     #[arg(long)]
     maxzoom: Option<u8>,
 }
-
 
 // #[group(required = false, multiple = false, id = "zooms")]
 #[derive(Debug, Parser)]

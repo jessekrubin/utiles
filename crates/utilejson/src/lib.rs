@@ -1,4 +1,3 @@
-
 use tilejson::TileJSON;
 
 /// # Panics

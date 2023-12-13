@@ -1,16 +1,16 @@
 use std::error::Error;
 use std::path::Path;
 
-use rusqlite::{Connection, OptionalExtension, params, Result as RusqliteResult};
+use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use serde::Serialize;
 use tilejson::TileJSON;
 use tracing::error;
 
-use utiles::{LngLat, Tile, TileLike, yflip};
 use utiles::bbox::BBox;
-use utiles::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
+use utiles::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
 use utiles::tile_data_row::TileData;
+use utiles::{yflip, LngLat, Tile, TileLike};
 
 pub struct Mbtiles {
     conn: Connection,
@@ -25,17 +25,15 @@ impl Mbtiles {
         let path = path.as_ref().to_owned();
         let conn_res = Connection::open(path);
         match conn_res {
-            Ok(c) => {
-                Ok(Mbtiles { conn: c })
-            }
-            Err(e) => {
-                Err(e)
-            }
+            Ok(c) => Ok(Mbtiles { conn: c }),
+            Err(e) => Err(e),
         }
     }
 
-
-    pub fn open_with_flags<P: AsRef<Path>>(path: P, flags: rusqlite::OpenFlags) -> Self {
+    pub fn open_with_flags<P: AsRef<Path>>(
+        path: P,
+        flags: rusqlite::OpenFlags,
+    ) -> Self {
         let path = path.as_ref().to_owned();
         let conn = Connection::open_with_flags(path, flags).unwrap();
         Mbtiles { conn }
@@ -66,7 +64,10 @@ impl Mbtiles {
         metadata_set(&self.conn, name, value)
     }
 
-    pub fn metadata_set_from_vec(&self, metadata: &Vec<MbtilesMetadataRow>) -> RusqliteResult<usize> {
+    pub fn metadata_set_from_vec(
+        &self,
+        metadata: &Vec<MbtilesMetadataRow>,
+    ) -> RusqliteResult<usize> {
         metadata_set_many(&self.conn, metadata)
     }
 
@@ -76,7 +77,11 @@ impl Mbtiles {
             return Ok(None);
         }
         if rows.len() > 1 {
-            error!("metadata has more than one row for name: {} - {}", name, serde_json::to_string(&rows).unwrap());
+            error!(
+                "metadata has more than one row for name: {} - {}",
+                name,
+                serde_json::to_string(&rows).unwrap()
+            );
             // return the first one
             let row = rows.get(0).unwrap();
             Ok(Some(row.value.clone()))
@@ -164,10 +169,7 @@ impl Mbtiles {
         Ok(app_id)
     }
 
-    pub fn insert_tiles_flat(
-        &mut self,
-        tiles: Vec<TileData>,
-    ) -> RusqliteResult<usize> {
+    pub fn insert_tiles_flat(&mut self, tiles: Vec<TileData>) -> RusqliteResult<usize> {
         insert_tiles_flat_mbtiles(&mut self.conn, tiles, Some(InsertStrategy::Ignore))
     }
     pub fn magic_number(&self) -> RusqliteResult<u32> {
@@ -177,7 +179,6 @@ impl Mbtiles {
     pub fn zoom_stats(&self) -> RusqliteResult<Vec<MbtilesZoomStats>> {
         zoom_stats(&self.conn)
     }
-
 
     pub fn tiles_count(&self) -> RusqliteResult<usize> {
         tiles_count(&self.conn)
@@ -194,7 +195,6 @@ impl From<&Path> for Mbtiles {
         Mbtiles { conn }
     }
 }
-
 
 // =====================================================================
 // QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS
@@ -224,7 +224,6 @@ pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
     Ok(nrows == 1_i64)
 }
 
-
 pub fn metadata_table_name_is_primary_key(conn: &Connection) -> RusqliteResult<bool> {
     let mut stmt = conn.prepare("SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='metadata' AND sql LIKE '%PRIMARY KEY%'")?;
     let nrows = stmt.query_row([], |row| {
@@ -235,7 +234,9 @@ pub fn metadata_table_name_is_primary_key(conn: &Connection) -> RusqliteResult<b
 }
 
 pub fn zoom_levels(conn: &Connection) -> RusqliteResult<Vec<u8>> {
-    let mut stmt = conn.prepare_cached("SELECT DISTINCT zoom_level FROM tiles ORDER BY zoom_level ASC")?;
+    let mut stmt = conn.prepare_cached(
+        "SELECT DISTINCT zoom_level FROM tiles ORDER BY zoom_level ASC",
+    )?;
     let zoom_levels = stmt
         .query_map([], |row| row.get(0))?
         .collect::<RusqliteResult<Vec<u32>, rusqlite::Error>>()?;
@@ -258,30 +259,26 @@ pub fn maxzoom(conn: &Connection) -> RusqliteResult<Option<u32>> {
 
 pub fn minzoom_maxzoom(conn: &Connection) -> RusqliteResult<Option<MinZoomMaxZoom>> {
     let mut stmt = conn.prepare("SELECT MIN(zoom_level), MAX(zoom_level) FROM (SELECT DISTINCT zoom_level FROM tiles)")?;
-    let minmax: Option<(Option<u32>, Option<u32>)> = stmt.query_row([], |row| {
-        let minzoom: Option<u32> = row.get(0)?;
-        let maxzoom: Option<u32> = row.get(1)?;
-        Ok((minzoom, maxzoom))
-    }).optional()?;
+    let minmax: Option<(Option<u32>, Option<u32>)> = stmt
+        .query_row([], |row| {
+            let minzoom: Option<u32> = row.get(0)?;
+            let maxzoom: Option<u32> = row.get(1)?;
+            Ok((minzoom, maxzoom))
+        })
+        .optional()?;
     match minmax {
-        Some((minzoom, maxzoom)) => {
-            match (minzoom, maxzoom) {
-                (Some(minzoom), Some(maxzoom)) => {
-                    let minzoom_u8 = minzoom as u8;
-                    let maxzoom_u8 = maxzoom as u8;
-                    Ok(Some(MinZoomMaxZoom {
-                        minzoom: minzoom_u8,
-                        maxzoom: maxzoom_u8,
-                    }))
-                }
-                _ => {
-                    Ok(None)
-                }
+        Some((minzoom, maxzoom)) => match (minzoom, maxzoom) {
+            (Some(minzoom), Some(maxzoom)) => {
+                let minzoom_u8 = minzoom as u8;
+                let maxzoom_u8 = maxzoom as u8;
+                Ok(Some(MinZoomMaxZoom {
+                    minzoom: minzoom_u8,
+                    maxzoom: maxzoom_u8,
+                }))
             }
-        }
-        None => {
-            Ok(None)
-        }
+            _ => Ok(None),
+        },
+        None => Ok(None),
     }
 }
 
@@ -354,7 +351,6 @@ pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool> {
     Ok(has_metadata && has_tiles)
 }
 
-
 pub fn tile_exists(connection: &Connection, tile: Tile) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3")?;
     let rows = stmt.query_row(params![tile.z, tile.x, tile.flipy()], |row| {
@@ -374,7 +370,8 @@ pub fn tiles_count(connection: &Connection) -> RusqliteResult<usize> {
 }
 
 pub fn tiles_count_at_zoom(connection: &Connection, zoom: u8) -> RusqliteResult<usize> {
-    let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1")?;
+    let mut stmt =
+        connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1")?;
     let rows = stmt.query_row(params![zoom], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
@@ -431,7 +428,11 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
     // Ok(())
 }
 
-pub fn insert_tile_flat_mbtiles(conn: &mut Connection, tile: Tile, data: Vec<u8>) -> RusqliteResult<usize> {
+pub fn insert_tile_flat_mbtiles(
+    conn: &mut Connection,
+    tile: Tile,
+    data: Vec<u8>,
+) -> RusqliteResult<usize> {
     let mut stmt = conn.prepare_cached("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
     let r = stmt.execute(params![tile.z, tile.x, tile.y, data])?;
     Ok(r)
@@ -474,7 +475,8 @@ pub fn insert_tiles_flat_mbtiles(
         };
         let mut stmt = tx.prepare_cached(&statement)?;
         for tile in tiles {
-            let r = stmt.execute(params![tile.xyz.z, tile.xyz.x, tile.xyz.y, tile.data])?;
+            let r =
+                stmt.execute(params![tile.xyz.z, tile.xyz.x, tile.xyz.y, tile.data])?;
             naff += r;
             // println!("insert_tiles_flat_mbtiles: r: {:?}", r);
         }
@@ -492,8 +494,12 @@ pub fn insert_tiles_flat_mbtiles(
     // }
 }
 
-pub fn metadata_get(conn: &Connection, name: &str) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
-    let mut stmt = conn.prepare_cached("SELECT name, value FROM metadata WHERE name=?1")?;
+pub fn metadata_get(
+    conn: &Connection,
+    name: &str,
+) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
+    let mut stmt =
+        conn.prepare_cached("SELECT name, value FROM metadata WHERE name=?1")?;
     let mdata = stmt
         .query_map(params![name], |row| {
             Ok(MbtilesMetadataRow {
@@ -505,7 +511,11 @@ pub fn metadata_get(conn: &Connection, name: &str) -> RusqliteResult<Vec<Mbtiles
     Ok(mdata)
 }
 
-pub fn metadata_set(conn: &Connection, name: &str, value: &str) -> RusqliteResult<usize> {
+pub fn metadata_set(
+    conn: &Connection,
+    name: &str,
+    value: &str,
+) -> RusqliteResult<usize> {
     // Use an UPSERT statement to insert or update as necessary
     let sql = "INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)";
     let mut stmt = conn.prepare_cached(sql)?;
@@ -513,7 +523,10 @@ pub fn metadata_set(conn: &Connection, name: &str, value: &str) -> RusqliteResul
     Ok(r)
 }
 
-pub fn metadata_set_many(conn: &Connection, metadata: &Vec<MbtilesMetadataRow>) -> RusqliteResult<usize> {
+pub fn metadata_set_many(
+    conn: &Connection,
+    metadata: &Vec<MbtilesMetadataRow>,
+) -> RusqliteResult<usize> {
     // Use an UPSERT statement to insert or update as necessary
     let sql = "INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)";
     let mut stmt = conn.prepare_cached(sql)?;
@@ -525,18 +538,17 @@ pub fn metadata_set_many(conn: &Connection, metadata: &Vec<MbtilesMetadataRow>) 
     Ok(naff)
 }
 
-
 pub fn update_metadata_minzoom_from_tiles(conn: &Connection) -> RusqliteResult<usize> {
     let minzoom = minzoom(conn)?;
     match minzoom {
         Some(minzoom) => {
-            let mut stmt = conn.prepare_cached("INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)")?;
+            let mut stmt = conn.prepare_cached(
+                "INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)",
+            )?;
             let r = stmt.execute(params!["minzoom", minzoom])?;
             Ok(r)
         }
-        None => {
-            Ok(0)
-        }
+        None => Ok(0),
     }
 }
 
@@ -544,21 +556,24 @@ pub fn update_metadata_maxzoom_from_tiles(conn: &Connection) -> RusqliteResult<u
     let maxzoom = maxzoom(conn)?;
     match maxzoom {
         Some(maxzoom) => {
-            let mut stmt = conn.prepare_cached("INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)")?;
+            let mut stmt = conn.prepare_cached(
+                "INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)",
+            )?;
             let r = stmt.execute(params!["maxzoom", maxzoom])?;
             Ok(r)
         }
-        None => {
-            Ok(0)
-        }
+        None => Ok(0),
     }
 }
 
-pub fn update_metadata_minzoom_maxzoom_from_tiles(conn: &Connection) -> RusqliteResult<usize> {
+pub fn update_metadata_minzoom_maxzoom_from_tiles(
+    conn: &Connection,
+) -> RusqliteResult<usize> {
     let minmax = minzoom_maxzoom(conn)?;
     match minmax {
-        Some(minmax) => {
-            metadata_set_many(conn, &vec![
+        Some(minmax) => metadata_set_many(
+            conn,
+            &vec![
                 MbtilesMetadataRow {
                     name: "minzoom".to_string(),
                     value: minmax.minzoom.to_string(),
@@ -567,14 +582,11 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(conn: &Connection) -> Rusqlite
                     name: "maxzoom".to_string(),
                     value: minmax.maxzoom.to_string(),
                 },
-            ])
-        }
-        None => {
-            Ok(0)
-        }
+            ],
+        ),
+        None => Ok(0),
     }
 }
-
 
 #[derive(Debug, Serialize)]
 pub struct MbtilesZoomStats {
@@ -594,27 +606,28 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
          GROUP BY zoom_level"
     ).unwrap();
 
-    let rows = stmt.query_map([], |row| {
-        let zoom: u32 = row.get(0)?;
+    let rows = stmt
+        .query_map([], |row| {
+            let zoom: u32 = row.get(0)?;
 
-        let ntiles: i64 = row.get(1)?;
-        let min_tile_column: i64 = row.get(4)?;
-        let max_tile_column: i64 = row.get(5)?;
-        let min_tile_row: i64 = row.get(2)?;
-        let max_tile_row: i64 = row.get(3)?;
-        // flip the stuff
-        let ymin = yflip(max_tile_row as u32, zoom.try_into().unwrap());
-        let ymax = yflip(min_tile_row as u32, zoom.try_into().unwrap());
-        Ok(
-            MbtilesZoomStats {
+            let ntiles: i64 = row.get(1)?;
+            let min_tile_column: i64 = row.get(4)?;
+            let max_tile_column: i64 = row.get(5)?;
+            let min_tile_row: i64 = row.get(2)?;
+            let max_tile_row: i64 = row.get(3)?;
+            // flip the stuff
+            let ymin = yflip(max_tile_row as u32, zoom.try_into().unwrap());
+            let ymax = yflip(min_tile_row as u32, zoom.try_into().unwrap());
+            Ok(MbtilesZoomStats {
                 zoom,
                 ntiles,
                 xmin: min_tile_column as u32,
                 xmax: max_tile_column as u32,
                 ymin,
                 ymax,
-            }
-        )
-    })?.collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>().unwrap();
+            })
+        })?
+        .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()
+        .unwrap();
     Ok(rows)
 }

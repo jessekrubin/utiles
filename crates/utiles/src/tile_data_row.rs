@@ -15,7 +15,6 @@ impl TileData {
 }
 
 impl TileLike for TileData {
-
     fn x(&self) -> u32 {
         self.xyz.x
     }

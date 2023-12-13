@@ -1,5 +1,3 @@
-
-
 use crate::errors::{UtilesError, UtilesResult};
 use crate::Tile;
 

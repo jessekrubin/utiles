@@ -1,7 +1,6 @@
 use crate::{flipy, pmtiles, LngLat, Tile};
 
 pub trait TileLike {
-
     fn x(&self) -> u32;
     fn y(&self) -> u32;
     fn z(&self) -> u8;

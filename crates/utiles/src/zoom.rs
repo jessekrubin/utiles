@@ -1,5 +1,5 @@
-use std::num::ParseIntError;
 use crate::errors::UtilesResult;
+use std::num::ParseIntError;
 
 use crate::UtilesError::InvalidZoom;
 
@@ -90,13 +90,11 @@ pub fn parse_zooms(zstr: &str) -> UtilesResult<Vec<u8>> {
                 .collect::<Result<Vec<_>, _>>();
 
             let zrange = match zrange {
-                Ok(zrange) => {
-                    match zrange.len() {
-                        1 => vec![zrange[0]],
-                        2 => (zrange[0]..=zrange[1]).collect(),
-                        _ => vec![],
-                    }
-                }
+                Ok(zrange) => match zrange.len() {
+                    1 => vec![zrange[0]],
+                    2 => (zrange[0]..=zrange[1]).collect(),
+                    _ => vec![],
+                },
                 Err(_) => return Err(InvalidZoom(z.to_string())),
             };
             zvec.extend(zrange);

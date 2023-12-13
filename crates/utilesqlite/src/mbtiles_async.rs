@@ -6,10 +6,12 @@ use tracing::error;
 
 use utiles::mbtiles::metadata2tilejson;
 use utiles::mbtiles::metadata_row::MbtilesMetadataRow;
-use utiles::Tile;
 use utiles::tile_data_row::TileData;
+use utiles::Tile;
 
-use crate::mbtiles::{insert_tile_flat_mbtiles, insert_tiles_flat_mbtiles, mbtiles_metadata};
+use crate::mbtiles::{
+    insert_tile_flat_mbtiles, insert_tiles_flat_mbtiles, mbtiles_metadata,
+};
 
 pub struct MbtilesAsync {
     // pub client: Client,
@@ -67,14 +69,15 @@ impl MbtilesAsync {
         data: Vec<u8>,
     ) -> Result<(), Box<dyn Error>> {
         let c = self.pool.get().await.unwrap();
-        let _interaction_res = c.interact(move |conn| {
-            // Assuming insert_tile_flat_mbtiles is a synchronous function
-            insert_tile_flat_mbtiles(conn, tile, data)
-                .map_err(|e| {
+        let _interaction_res = c
+            .interact(move |conn| {
+                // Assuming insert_tile_flat_mbtiles is a synchronous function
+                insert_tile_flat_mbtiles(conn, tile, data).map_err(|e| {
                     error!("Error inserting tile: {}", e);
                     e
                 })
-        }).await?;
+            })
+            .await?;
 
         Ok(())
     }
@@ -84,11 +87,13 @@ impl MbtilesAsync {
         tiles: Vec<TileData>,
     ) -> Result<(), Box<dyn Error>> {
         let c = self.pool.get().await.unwrap();
-        let interaction_res = c.interact(move |conn| {
-            // Assuming insert_tile_flat_mbtiles is a synchronous function
-            
-            insert_tiles_flat_mbtiles(conn, tiles, None)
-        }).await?;
+        let interaction_res = c
+            .interact(move |conn| {
+                // Assuming insert_tile_flat_mbtiles is a synchronous function
+
+                insert_tiles_flat_mbtiles(conn, tiles, None)
+            })
+            .await?;
         println!("interaction_res: {:?}", interaction_res);
         Ok(())
     }

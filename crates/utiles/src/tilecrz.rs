@@ -1,6 +1,6 @@
 use crate::fns::flipy;
-use crate::Tile;
 use crate::tile_like::TileLike;
+use crate::Tile;
 
 #[derive(Debug)]
 struct TileCrz {
@@ -23,11 +23,19 @@ impl TileCrz {
 }
 
 impl From<Tile> for TileCrz {
-    fn from(tile: Tile) -> Self { Self::new(tile.x, flipy(tile.y, tile.z), tile.z) }
+    fn from(tile: Tile) -> Self {
+        Self::new(tile.x, flipy(tile.y, tile.z), tile.z)
+    }
 }
 
 impl From<TileCrz> for Tile {
-    fn from(tile: TileCrz) -> Self { Self::new(tile.tile_column, flipy(tile.tile_row, tile.zoom_level), tile.zoom_level) }
+    fn from(tile: TileCrz) -> Self {
+        Self::new(
+            tile.tile_column,
+            flipy(tile.tile_row, tile.zoom_level),
+            tile.zoom_level,
+        )
+    }
 }
 
 impl TileLike for TileCrz {

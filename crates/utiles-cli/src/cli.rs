@@ -12,21 +12,36 @@ use crate::commands::{
     pmtileid_main, quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main,
 };
 
-fn init_tracing(debug: bool) {
-    let filter = if debug {
+struct LogConfig {
+    pub debug: bool,
+    pub json: bool,
+}
+
+fn init_tracing(log_config: LogConfig) {
+    let filter = if log_config.debug {
         EnvFilter::new("DEBUG")
     } else {
         EnvFilter::new("INFO")
     };
-    let subscriber = fmt::Subscriber::builder()
-        .compact()
-        .with_target(true)
-        .with_line_number(false)
-        .with_env_filter(filter)
-        .with_writer(io::stderr)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("tracing::subscriber::set_global_default(...) failed.");
+    match log_config.json {
+        true => {
+            let subscriber = fmt::Subscriber::builder()
+                .json()
+                .with_env_filter(filter)
+                .with_writer(io::stderr)
+                .finish();
+            tracing::subscriber::set_global_default(subscriber)
+                .expect("tracing::subscriber::set_global_default(...) failed.");
+        }
+        false => {
+            let subscriber = fmt::Subscriber::builder()
+                .with_env_filter(filter)
+                .with_writer(io::stderr)
+                .finish();
+            tracing::subscriber::set_global_default(subscriber)
+                .expect("tracing::subscriber::set_global_default(...) failed.");
+        }
+    }
 }
 
 #[allow(clippy::unused_async)]
@@ -40,9 +55,16 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
 
     // if the command is "dev" init tracing w/ debug
     if let Commands::Dev(_) = args.command {
-        init_tracing(true);
+        init_tracing(LogConfig {
+            debug: true,
+            json: args.log_json,
+        });
     } else {
-        init_tracing(args.debug);
+        let log_config = LogConfig {
+            debug: args.debug,
+            json: args.log_json,
+        };
+        init_tracing(log_config);
     }
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());

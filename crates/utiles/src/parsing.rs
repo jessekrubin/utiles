@@ -73,10 +73,16 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
         let bbox = parse_bbox_json(s);
         return bbox.map_err(|e| e.to_string());
     }
-    let parts: Vec<f64> =  if s.contains(',') {
-        s.split(',').map(|p| p.trim()).filter_map(|p| p.parse::<f64>().ok()).collect()
+    let parts: Vec<f64> = if s.contains(',') {
+        s.split(',')
+            .map(|p| p.trim())
+            .filter_map(|p| p.parse::<f64>().ok())
+            .collect()
     } else if s.contains(' ') {
-        s.split(' ').map(|p| p.trim()).filter_map(|p| p.parse::<f64>().ok()).collect()
+        s.split(' ')
+            .map(|p| p.trim())
+            .filter_map(|p| p.parse::<f64>().ok())
+            .collect()
     } else {
         vec![]
     };

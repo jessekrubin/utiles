@@ -66,7 +66,6 @@ impl TileRange {
         println!("self.maxy: {:?}", self.maxy);
         println!("self.zoom: {:?}", self.zoom);
 
-
         let miny = if flip.unwrap_or(true) {
             crate::fns::flipy(self.miny, self.zoom)
         } else {
@@ -88,13 +87,7 @@ impl TileRange {
 
 impl TileRangeIterator {
     #[must_use]
-    pub fn new(
-        minx: u32,
-        maxx: u32,
-        miny: u32,
-        maxy: u32,
-        zoom: u8,
-    ) -> Self {
+    pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
         Self {
             range: TileRange::new(minx, maxx, miny, maxy, zoom),
             curx: minx,
@@ -105,7 +98,13 @@ impl TileRangeIterator {
 
 impl From<TileRange> for TileRangeIterator {
     fn from(range: TileRange) -> Self {
-        Self::new(range.minx(), range.maxx(), range.miny(), range.maxy(), range.zoom())
+        Self::new(
+            range.minx(),
+            range.maxx(),
+            range.miny(),
+            range.maxy(),
+            range.zoom(),
+        )
     }
 }
 
@@ -126,7 +125,8 @@ impl Iterator for TileRangeIterator {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let size = ((self.range.maxx - self.range.minx + 1) * (self.range.maxy - self.range.miny + 1)) as usize;
+        let size = ((self.range.maxx - self.range.minx + 1)
+            * (self.range.maxy - self.range.miny + 1)) as usize;
         (size, Some(size))
     }
 }
@@ -145,7 +145,11 @@ impl IntoIterator for TileRanges {
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.ranges.into_iter().flat_map(|r| r.into_iter()).collect::<Vec<Self::Item>>().into_iter()
+        self.ranges
+            .into_iter()
+            .flat_map(|r| r.into_iter())
+            .collect::<Vec<Self::Item>>()
+            .into_iter()
     }
 }
 
