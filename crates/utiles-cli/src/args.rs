@@ -17,18 +17,7 @@ use crate::commands::shapes::ShapesArgs;
 ///  ╚═════╝    ╚═╝   ╚═╝╚══════╝╚══════╝╚══════╝
 
 fn about() -> String {
-    let thingy = format!("utiles cli (rust) ~ v{VERSION}");
-    let banner = format!(
-        "
-  ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
-  ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝
-  ██║   ██║   ██║   ██║██║     █████╗  ███████╗
-  ██║   ██║   ██║   ██║██║     ██╔══╝  ╚════██║
-  ╚██████╔╝   ██║   ██║███████╗███████╗███████║
-   ╚═════╝    ╚═╝   ╚═╝╚══════╝╚══════╝╚══════╝
-"
-    );
-    format!("{}\n{}", banner, thingy)
+    format!("utiles cli (rust) ~ v{VERSION}")
 }
 
 #[derive(Debug, Parser)]
@@ -262,15 +251,6 @@ pub struct MinMaxZoom {
     maxzoom: Option<u8>,
 }
 
-fn parse_zooms(s: &str) -> Result<Option<Vec<u8>>, String> {
-    // let r = zoom::parse_zooms(s).unwrap();
-    // println!("parse_zooms({:?}) -> {:?}", s, r);
-    // Some(r)
-    match zoom::parse_zooms(s) {
-        Ok(r) => Ok(Some(r)),
-        Err(e) => Err(format!("{}", e)),
-    }
-}
 
 // #[group(required = false, multiple = false, id = "zooms")]
 #[derive(Debug, Parser)]

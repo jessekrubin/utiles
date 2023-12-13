@@ -125,7 +125,7 @@ impl CopyConfig {
     pub fn sql_where_for_zoom(&self, zoom: u8) -> String {
         let pred = match &self.bbox {
             Some(bbox) => {
-                let trange = tile_ranges(bbox.wsen(), vec![zoom].into());
+                let trange = tile_ranges(bbox.tuple(), vec![zoom].into());
                 trange.sql_where(Some(true))
             }
             None => {
@@ -144,7 +144,7 @@ impl CopyConfig {
         let pred = match (&self.bbox, &self.zooms) {
             (Some(bbox), Some(zooms)) => {
                 let trange = tile_ranges(
-                    bbox.wsen(),
+                    bbox.tuple(),
                     zoom_levels.unwrap_or(zooms.clone()).into(),
                 );
                 // trange.sql_where(Some(true))
@@ -155,7 +155,7 @@ impl CopyConfig {
             }
             (Some(bbox), None) => {
                 let trange = tile_ranges(
-                    bbox.wsen(),
+                    bbox.tuple(),
                     zoom_levels
                         .unwrap_or((0..28).map(|z| z as u8).collect::<Vec<u8>>())
                         .into(),

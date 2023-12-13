@@ -88,6 +88,27 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     }
 }
 
+/// Parse a string into a BBox with special handling of 'world' and 'planet'
+///
+/// # Examples
+///
+/// ```
+/// use utiles::parsing::parse_bbox_ext;
+/// let bbox = parse_bbox_ext("world").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox_ext;
+/// let bbox = parse_bbox_ext("planet").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox_ext;
+/// let bbox = parse_bbox_ext("-180,-85,180,85").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
 pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
     // match 'world' or 'planet'
     if string == "world" || string == "planet" {

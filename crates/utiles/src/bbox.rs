@@ -19,10 +19,10 @@ pub enum BBoxParseAble {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BBox {
-    pub north: f64,
+    pub west: f64,
     pub south: f64,
     pub east: f64,
-    pub west: f64,
+    pub north: f64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -101,11 +101,6 @@ impl BBox {
 
     #[must_use]
     pub fn tuple(&self) -> (f64, f64, f64, f64) {
-        (self.north, self.south, self.east, self.west)
-    }
-
-    #[must_use]
-    pub fn wsen(&self) -> (f64, f64, f64, f64) {
         (self.west(), self.south(), self.east(), self.north())
     }
 
