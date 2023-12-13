@@ -129,14 +129,14 @@ impl CopyConfig {
                 trange.sql_where(Some(true))
             }
             None => {
-                format!("zoom_level = {zoom}", zoom = zoom)
+                format!("zoom_level = {zoom}")
             }
         };
         // attach 'WHERE'
         if pred.is_empty() {
             pred
         } else {
-            format!("WHERE {pred}", pred = pred)
+            format!("WHERE {pred}")
         }
     }
 
@@ -170,18 +170,18 @@ Some(true)
                     "zoom_level IN ({zooms})",
                     zooms = zooms
                         .iter()
-                        .map(|z| z.to_string())
+                        .map(std::string::ToString::to_string)
                         .collect::<Vec<String>>()
                         .join(",")
                 )
             }
-            (None, None) => "".to_string(),
+            (None, None) => String::new(),
         };
         // attach 'WHERE'
         if pred.is_empty() {
             pred
         } else {
-            format!("WHERE {pred}", pred = pred)
+            format!("WHERE {pred}")
         }
     }
 }
@@ -215,8 +215,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
         .conn()
         .query_row(
             &format!(
-                "SELECT count(*) FROM tiles {where_clause}",
-                where_clause = where_clause
+                "SELECT count(*) FROM tiles {where_clause}"
             ),
             [],
             |row| row.get(0),
@@ -239,8 +238,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let mut stmt_zx_distinct = c
         .prepare(
             format!(
-                "SELECT DISTINCT zoom_level, tile_column FROM tiles {where_clause}",
-                where_clause = where_clause
+                "SELECT DISTINCT zoom_level, tile_column FROM tiles {where_clause}"
             )
             .as_str(),
         )
@@ -272,8 +270,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     //     .prepare("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles")
     //     .unwrap();
     let tiles_query = format!(
-        "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause}",
-        where_clause = where_clause
+        "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause}"
     );
 
     debug!("tiles_query: {:?}", tiles_query);
@@ -303,7 +300,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
             // sleep for .1 seconds
             match tile {
                 Ok(tile) => {
-                    let t = Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
+                    let _t = Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
                     twriter.write_tile(tile).await;
                     // debug!("Wrote tile: {}", t);
 
@@ -368,7 +365,7 @@ fn fspath2xyz(path: &Path) -> Result<(u32, u32, u8), std::num::ParseIntError> {
     Ok((x, y, z))
 }
 
-async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, cfg: CopyConfig) {
+async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let walker = WalkDir::new(&dirpath).min_depth(3).max_depth(3);
     let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();
@@ -549,7 +546,7 @@ pub async fn copy_main(args: CopyArgs) {
         get_tile_src(&args.src),
         get_tile_dst(&args.dst),
         zooms,
-        bbox.into(),
+        bbox,
     );
 
     // log it out

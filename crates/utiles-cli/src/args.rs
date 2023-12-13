@@ -270,13 +270,13 @@ pub struct ZoomArgGroup {
 impl ZoomArgGroup {
     pub fn zooms(&self) -> Option<Vec<u8>> {
         match &self.zoom {
-            Some(zooms) => Some(zooms.iter().flatten().map(|z| *z).collect()),
+            Some(zooms) => Some(zooms.iter().flatten().copied().collect()),
             None => match (self.minzoom, self.maxzoom) {
                 (Some(minzoom), Some(maxzoom)) => Some((minzoom..=maxzoom).collect()),
                 (Some(minzoom), None) => Some((minzoom..=31).collect()),
                 (None, Some(maxzoom)) => {
                     let thingy: Vec<u8> = (0..=maxzoom).collect();
-                    println!("thingy: {:?}", thingy);
+                    println!("thingy: {thingy:?}");
                     Some((0..=maxzoom).collect())
                 }
                 (None, None) => None,
