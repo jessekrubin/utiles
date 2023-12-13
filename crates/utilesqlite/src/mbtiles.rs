@@ -177,6 +177,15 @@ impl Mbtiles {
     pub fn zoom_stats(&self) -> RusqliteResult<Vec<MbtilesZoomStats>> {
         zoom_stats(&self.conn)
     }
+
+
+    pub fn tiles_count(&self) -> RusqliteResult<usize> {
+        tiles_count(&self.conn)
+    }
+
+    pub fn tiles_count_at_zoom(&self, zoom: u8) -> RusqliteResult<usize> {
+        tiles_count_at_zoom(&self.conn, zoom)
+    }
 }
 
 impl From<&Path> for Mbtiles {
@@ -358,6 +367,15 @@ pub fn tile_exists(connection: &Connection, tile: Tile) -> RusqliteResult<bool> 
 pub fn tiles_count(connection: &Connection) -> RusqliteResult<usize> {
     let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles")?;
     let rows = stmt.query_row([], |row| {
+        let count: i64 = row.get(0)?;
+        Ok(count)
+    })?;
+    Ok(rows as usize)
+}
+
+pub fn tiles_count_at_zoom(connection: &Connection, zoom: u8) -> RusqliteResult<usize> {
+    let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1")?;
+    let rows = stmt.query_row(params![zoom], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
     })?;

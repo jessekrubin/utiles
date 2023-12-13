@@ -105,6 +105,11 @@ impl BBox {
     }
 
     #[must_use]
+    pub fn wsen(&self) -> (f64, f64, f64, f64) {
+        (self.west(), self.south(), self.east(), self.north())
+    }
+
+    #[must_use]
     pub fn north(&self) -> f64 {
         self.north
     }

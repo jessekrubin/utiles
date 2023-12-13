@@ -65,7 +65,7 @@ impl TilesFsWriter {
             flipy(tile.y(), tile.z()),
             tile.extension()
         ));
-        debug!("filepath: {:?}", filepath);
+        // debug!("filepath: {:?}", filepath);
         fs::write(filepath, tile.tile_data).await.unwrap();
         self.inc_nwritten();
     }
@@ -121,22 +121,12 @@ impl CopyConfig {
         }
     }
 
-    pub fn zooms_str(&self) -> String {
-        match &self.zooms {
-            Some(zooms) => zooms
-                .iter()
-                .map(|z| z.to_string())
-                .collect::<Vec<String>>()
-                .join(","),
-            None => "0,1,2,3,4,5,6,7,8,9,10,11,12,13".to_string(),
-        }
-    }
 
     pub fn sql_where_for_zoom(&self, zoom: u8) -> String {
         let pred = match &self.bbox {
             Some(bbox) => {
-                let trange = tile_ranges(bbox.tuple(), vec![zoom].into());
-                trange.sql_where(None)
+                let trange = tile_ranges(bbox.wsen(), vec![zoom].into());
+                trange.sql_where(Some(true))
             }
             None => {
                 format!("zoom_level = {zoom}", zoom = zoom)
@@ -154,19 +144,26 @@ impl CopyConfig {
         let pred = match (&self.bbox, &self.zooms) {
             (Some(bbox), Some(zooms)) => {
                 let trange = tile_ranges(
-                    bbox.tuple(),
+                    bbox.wsen(),
                     zoom_levels.unwrap_or(zooms.clone()).into(),
                 );
-                trange.sql_where(None)
+                // trange.sql_where(Some(true))
+                // trange.sql_where(Some(true))
+                trange.sql_where(
+                    Some(true)
+                )
             }
             (Some(bbox), None) => {
                 let trange = tile_ranges(
-                    bbox.tuple(),
+                    bbox.wsen(),
                     zoom_levels
-                        .unwrap_or((0..32).map(|z| z as u8).collect::<Vec<u8>>())
+                        .unwrap_or((0..28).map(|z| z as u8).collect::<Vec<u8>>())
                         .into(),
                 );
-                trange.sql_where(None)
+                // trange.sql_where(Some(true))
+                trange.sql_where(
+Some(true)
+                )
             }
             (None, Some(zooms)) => {
                 format!(
@@ -199,8 +196,19 @@ impl CopyConfig {
 
 async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let mbt = Mbtiles::from(mbtiles.as_ref());
-    let zoom_levels_for_where: Vec<u8> = mbt.zoom_levels().unwrap();
-    let where_clause = cfg.sql_where(Some(zoom_levels_for_where));
+
+    // let zoom_levels_for_where: Vec<u8> = match cfg.zooms {
+    //     Some(zooms) => zooms,
+    //     None => {
+    //         mbt.zoom_levels().unwrap()
+    //     }
+    // };
+
+
+    let where_clause = cfg.sql_where(
+        // Some(zoom_levels_for_where)
+        None
+    );
     let start_time = std::time::Instant::now();
 
     let total_tiles: u32 = mbt
@@ -297,7 +305,8 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
                 Ok(tile) => {
                     let t = Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
                     twriter.write_tile(tile).await;
-                    debug!("Wrote tile: {}", t);
+                    // debug!("Wrote tile: {}", t);
+
 
                     // let dur2 = Duration::from_millis(1000);
                     // time::sleep(dur2).await;

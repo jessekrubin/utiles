@@ -202,8 +202,8 @@ pub enum Commands {
     /// echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
     /// [426, 775, 11]
     #[command(
-        name = "bounding-tile",
-        about = "Echo the bounding tile of a lonlat/bbox/GeoJSON"
+    name = "bounding-tile",
+    about = "Echo the bounding tile of a lonlat/bbox/GeoJSON"
     )]
     BoundingTile(TileFmtArgs),
 
@@ -271,6 +271,7 @@ fn parse_zooms(s: &str) -> Result<Option<Vec<u8>>, String> {
         Err(e) => Err(format!("{}", e)),
     }
 }
+
 // #[group(required = false, multiple = false, id = "zooms")]
 #[derive(Debug, Parser)]
 pub struct ZoomArgGroup {
@@ -292,8 +293,12 @@ impl ZoomArgGroup {
             Some(zooms) => Some(zooms.iter().flatten().map(|z| *z).collect()),
             None => match (self.minzoom, self.maxzoom) {
                 (Some(minzoom), Some(maxzoom)) => Some((minzoom..=maxzoom).collect()),
-                (Some(minzoom), None) => Some((minzoom..=32).collect()),
-                (None, Some(maxzoom)) => Some((0..=maxzoom).collect()),
+                (Some(minzoom), None) => Some((minzoom..=31).collect()),
+                (None, Some(maxzoom)) => {
+                    let thingy: Vec<u8> = (0..=maxzoom).collect();
+                    println!("thingy: {:?}", thingy);
+                    Some((0..=maxzoom).collect())
+                }
                 (None, None) => None,
             },
         }
