@@ -178,9 +178,11 @@ pub enum Commands {
         lnglat: LngLat,
     },
 
-    // ========================================================================
-    // TILE CLI UTILS - MERCANTILE LIKE CLI
-    // ========================================================================
+    /*
+    ========================================================================
+    TILE CLI UTILS - MERCANTILE LIKE CLI
+    ========================================================================
+    */
     /// Echo the Web Mercator tile at ZOOM level bounding GeoJSON [west, south,
     /// east, north] bounding boxes, features, or collections read from stdin.
     ///
@@ -202,7 +204,25 @@ pub enum Commands {
     #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
     Quadkey(TileFmtArgs),
 
-    #[command(name = "tiles", about = "Echo tiles of bbox", long_about = None)]
+    /// Echos web-mercator tiles at zoom level intersecting given geojson-bbox [west, south,
+    /// east, north], geojson-features, or geojson-collections read from stdin.
+    ///
+    /// Output format is a JSON `[x, y, z]` array by default; use --obj to output a
+    /// JSON object `{x: x, y: y, z: z}`.
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Example:
+    ///
+    /// $ echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
+    /// [852, 1550, 12]
+    /// [852, 1551, 12]
+    /// [853, 1550, 12]
+    /// [853, 1551, 12]
+    #[command(name = "tiles", about = "Echo tiles of bbox")]
     Tiles(TilesArgs),
 
     #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]

@@ -101,10 +101,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::try_from(UtilesError::TileParseError(
-                        s.to_string(),
-                    ))
-                    .unwrap())
+                    return Err(Box::from(UtilesError::TileParseError(s.to_string())))
                 }
             }
         } else if s.starts_with('[') {
@@ -113,10 +110,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::try_from(UtilesError::TileParseError(
-                        s.to_string(),
-                    ))
-                    .unwrap())
+                    return Err(Box::from(UtilesError::TileParseError(s.to_string())))
                 }
             }
         }
@@ -126,9 +120,7 @@ impl FromStr for Tile {
         // if ok return tile but not tile parse error
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => {
-                Err(Box::try_from(UtilesError::TileParseError(s.to_string())).unwrap())
-            }
+            Err(_e) => Err(Box::from(UtilesError::TileParseError(s.to_string()))),
         }
     }
 }
@@ -209,10 +201,7 @@ impl Tile {
         let res = serde_json::from_str::<Tile>(json);
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => {
-                Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
-                    .unwrap())
-            }
+            Err(_e) => Err(Box::from(UtilesError::TileParseError(json.to_string()))),
         }
     }
     // > {
@@ -236,10 +225,7 @@ impl Tile {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
             Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
-            Err(_e) => {
-                Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
-                    .unwrap())
-            }
+            Err(_e) => Err(Box::from(UtilesError::TileParseError(json.to_string()))),
         }
     }
 

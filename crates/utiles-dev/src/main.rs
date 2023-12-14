@@ -101,7 +101,6 @@ async fn sqlxing() {
     // timing
     // start
     let start = std::time::Instant::now();
-    // let tthingydickr = query_as::<_, MetadataRow>("SELECT * FROM tiles");
     let mut r = query_as::<_, MetadataRow>("SELECT * FROM tiles").fetch(&pool);
     while let Some(row) = r.try_next().await.unwrap() {
         // println!("row: {:?}", row);
