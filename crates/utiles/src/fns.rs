@@ -6,9 +6,10 @@ use geo_types::coord;
 
 use crate::bbox::{BBox, WebMercatorBbox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
+use crate::errors::UtilesResult;
 use crate::sibling_relationship::SiblingRelationship;
 use crate::tile_range::{TileRange, TileRanges};
-use crate::{LngLat, Tile};
+use crate::{LngLat, Tile, UtilesError};
 // use crate::TileLike;
 use crate::utile;
 use crate::zoom::ZoomOrZooms;
@@ -214,11 +215,7 @@ pub fn bbox_truncate(
     (west, south, east, north)
 }
 
-pub fn _xy(
-    lng: f64,
-    lat: f64,
-    truncate: Option<bool>,
-) -> Result<(f64, f64), &'static str> {
+pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesResult<(f64, f64)> {
     let (lng, lat) = if truncate.unwrap_or(false) {
         (truncate_lng(lng), truncate_lat(lat))
     } else {
@@ -231,7 +228,10 @@ pub fn _xy(
     let temp = (1.0 + sinlat) / (1.0 - sinlat);
     match temp.classify() {
         FpCategory::Infinite | FpCategory::Nan => {
-            Err("Y can not be computed: lat={lat}")
+            Err(UtilesError::ConversionError(
+                "X can not be computed: lat={lat}".to_string(),
+            ))
+            // Err("Y can not be computed: lat={lat}")
         }
         _ => {
             let y = 0.5 - 0.25 * (temp.ln()) / PI;

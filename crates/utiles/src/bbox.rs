@@ -19,10 +19,10 @@ pub enum BBoxParseAble {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BBox {
-    pub north: f64,
+    pub west: f64,
     pub south: f64,
     pub east: f64,
-    pub west: f64,
+    pub north: f64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -101,7 +101,7 @@ impl BBox {
 
     #[must_use]
     pub fn tuple(&self) -> (f64, f64, f64, f64) {
-        (self.north, self.south, self.east, self.west)
+        (self.west(), self.south(), self.east(), self.north())
     }
 
     #[must_use]
@@ -267,10 +267,7 @@ impl From<&String> for BBox {
         // let value: Value = serde_json::from_str(&s).unwrap();
         match parse_bbox(s) {
             Ok(bbox) => bbox,
-            Err(e) => {
-                println!("ERROR: {e}");
-                BBox::world_planet()
-            }
+            Err(_e) => BBox::world_planet(),
         }
     }
 }

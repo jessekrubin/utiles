@@ -1,4 +1,5 @@
 use std::cell::Cell;
+
 use std::path::Path;
 
 use futures::stream::{self, StreamExt};
@@ -8,6 +9,37 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::args::RimrafArgs;
 
+#[allow(dead_code)]
+pub async fn rimraf_main2(args: RimrafArgs) {
+    println!("rimraf_main: args: {args:?}");
+    // check that dirpath exists
+    let dirpath = Path::new(&args.dirpath);
+    if !dirpath.exists() {
+        error!("dirpath does not exist: {:?}", dirpath);
+        return;
+    }
+    let files_iter = WalkDir::new(args.clone().dirpath.clone())
+        .contents_first(true)
+        .into_iter()
+        .filter_map(std::result::Result::ok)
+        .filter(|e| e.file_type().is_file());
+    let rm_fn = |file: DirEntry| async move {
+        let filesize = fs::metadata(file.path()).await.unwrap().len();
+        // remove the file
+        fs::remove_file(file.path()).await.unwrap();
+        filesize
+    };
+
+    let s = stream::iter(files_iter);
+
+    s.for_each_concurrent(10, |file| async {
+        let _filesize = rm_fn(file).await;
+    })
+    .await;
+    // remove the dirpath
+
+    fs::remove_dir_all(&args.dirpath).await.unwrap();
+}
 // iter files...
 
 #[derive(Debug)]

@@ -3,8 +3,7 @@ use geo_types::Coord;
 use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};
 
 pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Vec<f64>>> {
-    let value = g.value;
-    match value {
+    match g.value {
         GeoJsonValue::Point(c) => Box::new(std::iter::once(c)),
         GeoJsonValue::MultiPoint(points) => Box::new(points.into_iter()),
         GeoJsonValue::LineString(line_string) => Box::new(line_string.into_iter()),
@@ -30,12 +29,8 @@ pub fn geojson_geometry_coords(g: Geometry) -> Box<dyn Iterator<Item = Coord>> {
 }
 
 pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
-    let value = g.value;
-
-    match value {
-        GeoJsonValue::Point(c) => {
-            vec![c]
-        }
+    match g.value {
+        GeoJsonValue::Point(c) => vec![c],
         GeoJsonValue::MultiPoint(c) => c.into_iter().collect(),
         GeoJsonValue::LineString(c) => c.into_iter().collect(),
         GeoJsonValue::MultiLineString(c) => c.into_iter().flatten().collect(),
@@ -58,19 +53,11 @@ pub fn geojson_coords(geojson_str: &str) -> Box<dyn Iterator<Item = Coord>> {
     let gj = geojson_str.parse::<GeoJson>().unwrap();
     match gj {
         GeoJson::FeatureCollection(fc) => {
-            let coords = fc.features.into_iter().flat_map(geojson_feature_coords);
-            Box::new(coords)
-            // let mut bbox = BBox::new(180.0, 90.0, -180.0, -90.0);
-            // for feature in fc.features {
-            //     let feature_bbox = geojson_feature_bounds(feature);
-            //     bbox = bbox.union(feature_bbox);
-            // }
-            // bbox
+            Box::new(fc.features.into_iter().flat_map(geojson_feature_coords))
         }
         GeoJson::Feature(feature) => {
             // if it has a bbox
-            let geometry = feature.geometry.unwrap();
-            geojson_geometry_coords(geometry)
+            geojson_geometry_coords(feature.geometry.unwrap())
         }
         GeoJson::Geometry(geometry) => geojson_geometry_coords(geometry),
     }

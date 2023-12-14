@@ -1,38 +1,47 @@
 use std::io::{self};
 
 use clap::Parser;
-use tracing::{debug, warn};
+use tracing::debug;
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
 use crate::args::{Cli, Commands};
-use crate::commands::copy::copy_main;
-use crate::commands::dev::dev_main;
-use crate::commands::lint::lint_main;
-use crate::commands::rimraf::rimraf_main;
-use crate::commands::shapes::shapes_main;
-use crate::commands::tiles::tiles_main;
 use crate::commands::{
-    bounding_tile_main, contains_main, metadata_main, neighbors_main, pmtileid_main,
-    quadkey_main, tilejson_main,
+    bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main,
+    mbtiles_info_main, metadata_main, metadata_set_main, neighbors_main, parent_main,
+    pmtileid_main, quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main,
 };
-use crate::commands::{children_main, parent_main};
 
-fn init_tracing(debug: bool) {
-    let filter = if debug {
+struct LogConfig {
+    pub debug: bool,
+    pub json: bool,
+}
+
+fn init_tracing(log_config: LogConfig) {
+    let filter = if log_config.debug {
         EnvFilter::new("DEBUG")
     } else {
         EnvFilter::new("INFO")
     };
-    let subscriber = fmt::Subscriber::builder()
-        .compact()
-        .with_target(true)
-        .with_line_number(false)
-        .with_env_filter(filter)
-        .with_writer(io::stderr)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("tracing::subscriber::set_global_default(...) failed.");
+    match log_config.json {
+        true => {
+            let subscriber = fmt::Subscriber::builder()
+                .json()
+                .with_env_filter(filter)
+                .with_writer(io::stderr)
+                .finish();
+            tracing::subscriber::set_global_default(subscriber)
+                .expect("tracing::subscriber::set_global_default(...) failed.");
+        }
+        false => {
+            let subscriber = fmt::Subscriber::builder()
+                .with_env_filter(filter)
+                .with_writer(io::stderr)
+                .finish();
+            tracing::subscriber::set_global_default(subscriber)
+                .expect("tracing::subscriber::set_global_default(...) failed.");
+        }
+    }
 }
 
 #[allow(clippy::unused_async)]
@@ -46,9 +55,16 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
 
     // if the command is "dev" init tracing w/ debug
     if let Commands::Dev(_) = args.command {
-        init_tracing(true);
+        init_tracing(LogConfig {
+            debug: true,
+            json: args.log_json,
+        });
     } else {
-        init_tracing(args.debug);
+        let log_config = LogConfig {
+            debug: args.debug,
+            json: args.log_json,
+        };
+        init_tracing(log_config);
     }
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
@@ -56,18 +72,14 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     debug!("args: {:?}", args);
 
     match args.command {
-        Commands::Lint(args) => {
-            if args.fix {
-                warn!("fix not implemented");
-            }
-            lint_main(&args);
-        }
-        Commands::Meta(args) => metadata_main(&args),
+        Commands::Lint(args) => lint_main(&args),
+        Commands::Metadata(args) => metadata_main(&args),
+        Commands::MetadataSet(args) => metadata_set_main(&args),
         Commands::Tilejson(args) => tilejson_main(&args),
         Commands::Copy(args) => {
-            // copy_main(args);
             copy_main(args).await;
         }
+        Commands::Mbinfo(args) => mbtiles_info_main(&args),
         Commands::Dev(args) => {
             let _r = dev_main(args).await;
         }
@@ -83,9 +95,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         Commands::Neighbors(args) => neighbors_main(args),
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),
-        Commands::Shapes(args) => {
-            shapes_main(args);
-        }
+        Commands::Shapes(args) => shapes_main(args),
     }
     0
 }

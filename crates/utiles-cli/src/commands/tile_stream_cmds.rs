@@ -7,7 +7,7 @@ use crate::stdinterator_filter;
 
 pub fn neighbors_main(args: TileFmtArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()));
+    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
     for tile in tiles {
         let neighbors = tile.neighbors();
         for neighbor in neighbors {
@@ -39,7 +39,7 @@ pub fn pmtileid_main(args: TileFmtArgs) {
         let lstr = line.unwrap();
         if lstr.starts_with('[') {
             // treat as tile
-            let tile = Tile::from_json_arr(&lstr);
+            let tile = Tile::from_json_arr(&lstr).unwrap();
             println!("{}", tile.pmtileid());
         } else {
             // treat as pmtileid
@@ -65,7 +65,7 @@ pub fn quadkey_main(args: TileFmtArgs) {
         match first_char {
             '[' | '{' => {
                 // treat as tile
-                let tile = Tile::from_json_arr(&lstr);
+                let tile = Tile::from_json_arr(&lstr).unwrap();
                 println!("{}", tile.quadkey());
             }
             _ => {

@@ -1,9 +1,11 @@
 use crate::bbox::BBox;
+use crate::errors::UtilesResult;
 use crate::geojson::geojson_coords;
+use crate::UtilesError;
 use geo_types::Coord;
 use serde_json::Value;
 
-pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
+pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
@@ -31,32 +33,95 @@ pub fn parse_bbox_json(string: &str) -> serde_json::Result<BBox> {
             let bbox: (f64, f64, f64, f64) = serde_json::from_value(v)?;
             Ok(BBox::from(bbox))
         }
-        _ => panic!("Expected a two-element array or a four-element array"),
+        _ => Err(UtilesError::InvalidBbox("Invalid bbox: ".to_string() + s)),
     };
     bbox
 }
 
-pub fn parse_bbox(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
+/// Parse a string into a BBox
+///
+/// # Examples
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("-180,-85,180,85").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("-180.0, -85.0, 180.0, 85.0").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("-180.0 -85.0 180.0 85.0").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox;
+/// let bbox = parse_bbox("[-180.0, -85.0, 180.0, 85.0]").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
     if s.starts_with('{') || s.starts_with('[') {
-        return parse_bbox_json(s).map_err(std::convert::Into::into);
+        let bbox = parse_bbox_json(s);
+        return bbox.map_err(|e| e.to_string());
     }
-    let parts: Vec<f64> = s.split(',').filter_map(|p| p.parse::<f64>().ok()).collect();
+    let parts: Vec<f64> = if s.contains(',') {
+        s.split(',')
+            .map(|p| p.trim())
+            .filter_map(|p| p.parse::<f64>().ok())
+            .collect()
+    } else if s.contains(' ') {
+        s.split(' ')
+            .map(|p| p.trim())
+            .filter_map(|p| p.parse::<f64>().ok())
+            .collect()
+    } else {
+        vec![]
+    };
     if parts.len() == 4 {
         Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
     } else {
         let msg = format!("Invalid bbox: {s}");
-        Err(msg.into())
+        Err(msg)
     }
 }
 
-pub fn parse_bbox_ext(string: &str) -> Result<BBox, Box<dyn std::error::Error>> {
+/// Parse a string into a BBox with special handling of 'world' and 'planet'
+///
+/// # Examples
+///
+/// ```
+/// use utiles::parsing::parse_bbox_ext;
+/// let bbox = parse_bbox_ext("world").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox_ext;
+/// let bbox = parse_bbox_ext("planet").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_bbox_ext;
+/// let bbox = parse_bbox_ext("-180,-85,180,85").unwrap();
+/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// ```
+pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
     // match 'world' or 'planet'
     if string == "world" || string == "planet" {
         return Ok(BBox::new(-180.0, -90.0, 180.0, 90.0));
     }
+    // trim leading/trailing single/double quotes
+    let string = string.trim_matches(|c| c == '\'' || c == '"');
     parse_bbox(string)
 }
 
@@ -89,6 +154,7 @@ where
 
     Some((min_x, min_y, max_x, max_y))
 }
+
 #[must_use]
 pub fn geojson_bounds(geojson_str: &str) -> BBox {
     let coords = geojson_coords(geojson_str);
@@ -104,6 +170,24 @@ mod tests {
     #[test]
     fn parse_bbox_simple() {
         let string = r#"[-180.0, -85.0, 180.0, 85.0]"#;
+        let bbox_result = parse_bbox(string);
+        // assert!(bbox_result.is_ok());
+        let bbox = bbox_result.unwrap();
+        assert_eq!(bbox, BBox::new(-180.0, -85.0, 180.0, 85.0));
+    }
+
+    #[test]
+    fn parse_bbox_str_commas() {
+        let string = r#"-180.0, -85.0, 180.0, 85.0"#;
+        let bbox_result = parse_bbox(string);
+        // assert!(bbox_result.is_ok());
+        let bbox = bbox_result.unwrap();
+        assert_eq!(bbox, BBox::new(-180.0, -85.0, 180.0, 85.0));
+    }
+
+    #[test]
+    fn parse_bbox_str_spaces() {
+        let string = r#"-180.0 -85.0 180.0 85.0"#;
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
