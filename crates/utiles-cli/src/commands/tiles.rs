@@ -60,7 +60,7 @@ pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) {
     let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
     for (i, tile) in tiles {
         let tile_str = tile_fmt.format_tile(&tile);
-        let out_str = format!("{}{}\n", rs, tile_str);
+        let out_str = format!("{rs}{tile_str}\n");
         buf.write_all(out_str.as_bytes()).unwrap();
         // writeln!(stdout, "{}{}", rs, tile_fmt.format_tile(&tile)).unwrap();
         // call loop_fn if it's defined every 1000 iterations for signal break
