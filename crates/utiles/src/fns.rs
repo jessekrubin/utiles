@@ -2,24 +2,21 @@ use std::collections::{HashMap, HashSet};
 use std::f64::consts::PI;
 use std::num::FpCategory;
 
-use geo_types::coord;
-
 use crate::bbox::{BBox, WebMercatorBbox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesResult;
+use crate::point2d;
 use crate::sibling_relationship::SiblingRelationship;
 use crate::tile_range::{TileRange, TileRanges};
-use crate::{LngLat, Tile, UtilesError};
-// use crate::TileLike;
 use crate::utile;
 use crate::zoom::ZoomOrZooms;
+use crate::Point2d;
+use crate::{LngLat, Tile, UtilesError};
 
 #[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
     let (lon_deg, lat_deg) = ult(x, y, z);
-    LngLat {
-        xy: coord! {x: lon_deg, y: lat_deg},
-    }
+    LngLat::new(lon_deg, lat_deg)
 }
 
 #[must_use]
@@ -120,9 +117,7 @@ pub fn truncate_lat(lat: f64) -> f64 {
 
 #[must_use]
 pub fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
-    LngLat {
-        xy: coord! {x: truncate_lng(lnglat.lng()), y: truncate_lat(lnglat.lat())},
-    }
+    LngLat::new(truncate_lng(lnglat.lng()), truncate_lat(lnglat.lat()))
 }
 
 #[must_use]
@@ -476,10 +471,10 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
             let zooms = zooms.clone();
             zooms.into_iter().map(move |zoom| {
                 let upper_left_lnglat = LngLat {
-                    xy: coord! { x: bbox.west, y: bbox.north },
+                    xy: point2d! { x: bbox.west, y: bbox.north },
                 };
                 let lower_right_lnglat = LngLat {
-                    xy: coord! { x: bbox.east, y: bbox.south },
+                    xy: point2d! { x: bbox.east, y: bbox.south },
                 };
                 let top_left_tile = Tile::from_lnglat_zoom(
                     upper_left_lnglat.lng(),
@@ -541,10 +536,10 @@ pub fn tiles(
         let zooms = zooms.clone();
         zooms.into_iter().flat_map(move |zoom| {
             let upper_left_lnglat = LngLat {
-                xy: coord! { x: bbox.west, y: bbox.north },
+                xy: point2d! { x: bbox.west, y: bbox.north },
             };
             let lower_right_lnglat = LngLat {
-                xy: coord! { x: bbox.east, y: bbox.south },
+                xy: point2d! { x: bbox.east, y: bbox.south },
             };
             let top_left_tile = Tile::from_lnglat_zoom(
                 upper_left_lnglat.lng(),
