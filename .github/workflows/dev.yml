@@ -31,16 +31,35 @@ jobs:
           args: --release --out dist --find-interpreter --verbose
           sccache: "true"
           manylinux: auto
+          working-directory: ./utiles-pyo3
 
       - name: pytest
         if: ${{ startsWith(matrix.target, 'x86_64') }}
         shell: bash
         run: |
           set -e
+          cd utiles-pyo3
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
           pytest
+#      - name: Build wheels
+#        uses: PyO3/maturin-action@v1
+#        with:
+#          target: ${{ matrix.target }}
+#          args: --release --out dist --find-interpreter --verbose
+#          sccache: "true"
+#          manylinux: auto
+#
+#      - name: pytest
+#        if: ${{ startsWith(matrix.target, 'x86_64') }}
+#        shell: bash
+#        run: |
+#          set -e
+#          pip install click
+#          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
+#          pip install -r requirements/dev.txt
+#          pytest
 
       # - name: pytest
       #   if: ${{ !startsWith(matrix.target, 'x86') && matrix.target != 'ppc64' }}

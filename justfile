@@ -1,42 +1,54 @@
+pyut := "utiles-pyo3"
+pyut_manifest := pyut / "Cargo.toml"
+pyut_pyproject_toml := pyut / "pyproject.toml"
+
 dev: develop test
 
 develop:
-    maturin develop
+    cd {{pyut}}
+    maturin develop -m {{pyut_manifest}}
 
 cargo-test:
     cargo test
 
 build: cargo-test
-    maturin build
+    cd {{pyut}}
+    maturin build -m {{pyut_manifest}}
 
 build-release:
-    maturin build --release
+    cd {{pyut}}
+    maturin build --release  -m {{pyut_manifest}}
 
 dev-rel:
-    maturin develop --release
+    cd {{pyut}}
+    maturin develop --release -m {{pyut_manifest}}
 
 test:
-    pytest --benchmark-skip
+    cd {{pyut}}
+    pytest --config-file={{pyut_pyproject_toml}} {{pyut}}
 
 test-release: build-release
-    pytest
+    cd {{pyut}}
+    pytest --benchmark-disable --config-file={{pyut_pyproject_toml}} {{pyut}}
 
 bench: build-release
-    pytest -vv
+    cd {{pyut}}
+    pytest -vv --benchmark-only --config-file={{pyut_pyproject_toml}} {{pyut}}
 
 cargo-fmt:
     cargo fmt
 
 sort-all:
-    sort-all python/utiles/__init__.py
+    sort-all {{pyut}}/python/utiles/__init__.py
 
 black:
+    black {{pyut}}/python {{pyut}}/tests
     black python tests
 
 fmt: cargo-fmt black
 
 mypy:
-    mypy python/utiles tests
+    mypy {{pyut}}/python {{pyut}}/tests
 
 ruff:
     ruff .
@@ -52,5 +64,5 @@ lintpy: ruff mypy
 lintrs: clippy
 
 lint: lintpy lintrs
-    
-    
+
+

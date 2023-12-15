@@ -1491,7 +1491,6 @@ name = "pyutiles"
 version = "0.2.0"
 dependencies = [
  "fast_hilbert",
- "geo-types",
  "pyo3",
  "pyo3-build-config",
  "rusqlite",

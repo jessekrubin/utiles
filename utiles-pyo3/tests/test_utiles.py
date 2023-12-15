@@ -4,28 +4,64 @@ from pathlib import Path
 from typing import Any, List, Tuple, Union
 
 import pytest
+import tomli
 from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
 from utiles import Tile
 
 PWD = Path(__file__).parent
-REPO_ROOT = PWD.parent
+PYPROJECT_TOML = PWD.parent / "pyproject.toml"
 
+def _repo_root () -> Path:
+    _pwd = Path(__file__).parent
+    for _i in range(5):
+        if (_pwd / ".git").exists():
+            return _pwd
+        _pwd = _pwd.parent
+    msg = "Could not find repo root"
+    raise RuntimeError(msg)
+
+REPO_ROOT = _repo_root()
+
+def _version_from_cargo_toml():
+    Path("Cargo.toml").read_text()
+    cargo_version = tomli.loads(Path("Cargo.toml").read_text())["package"]["version"]
+    return cargo_version
+
+def _version_from_workspace_package():
+    root_cargo_toml_filepath = REPO_ROOT / "Cargo.toml"
+    s = root_cargo_toml_filepath.read_text()
+    print(
+        tomli.loads(s)
+    )
+    return tomli.loads(s)["workspace"]["package"]["version"]
+
+# def test_version() -> None:
+#     assert utiles.__version__ is not None
+#     import tomli
+
+#     cargo_version = tomli.loads(Path("Cargo.toml").read_text())["workspace"]["package"][
+#         "version"
+#     ]
+#     assert utiles.__version__ == cargo_version
+#     pyproject_version = tomli.loads(Path("pyproject.toml").read_text())["project"][
+#         "version"
+#     ]
+#     assert utiles.__version__ == pyproject_version
 
 def test_version() -> None:
     assert utiles.__version__ is not None
-    import tomli
 
-    cargo_version = tomli.loads(Path("Cargo.toml").read_text())["workspace"]["package"][
-        "version"
-    ]
+
+
+    cargo_version = _version_from_workspace_package()
     assert utiles.__version__ == cargo_version
-    pyproject_version = tomli.loads(Path("pyproject.toml").read_text())["project"][
+
+    pyproject_version = tomli.loads(Path(PYPROJECT_TOML).read_text())["project"][
         "version"
     ]
     assert utiles.__version__ == pyproject_version
-
 
 @pytest.mark.parametrize(
     "tile,quadkey",

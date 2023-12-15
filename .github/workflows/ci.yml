@@ -29,6 +29,7 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: "true"
           manylinux: auto
+          working-directory: ./utiles-pyo3
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
@@ -39,6 +40,7 @@ jobs:
         shell: bash
         run: |
           set -e
+          cd utiles-pyo3
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
@@ -77,16 +79,18 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: "true"
+          working-directory: ./utiles-pyo3
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: utiles-pyo3/dist
       - name: pytest
         if: ${{ !startsWith(matrix.target, 'aarch64') }}
         shell: bash
         run: |
           set -e
+          cd utiles-pyo3
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
@@ -107,16 +111,19 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: "true"
+          working-directory: ./utiles-pyo3
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: utiles-pyo3/dist
+
       - name: pytest
         if: ${{ !startsWith(matrix.target, 'aarch64') }}
         shell: bash
         run: |
           set -e
+          cd utiles-pyo3
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
@@ -131,11 +138,12 @@ jobs:
         with:
           command: sdist
           args: --out dist
+          working-directory: ./utiles-pyo3
       - name: Upload sdist
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: utiles-pyo3/dist
 
   release:
     name: Release
@@ -153,3 +161,4 @@ jobs:
         with:
           command: upload
           args: --skip-existing *
+          working-directory: ./utiles-pyo3
