@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: utiles-pyo3/dist
       - name: pytest
         if: ${{ startsWith(matrix.target, 'x86_64') }}
         shell: bash
