@@ -156,7 +156,7 @@ jobs:
           name: wheels
       - name: debugging
         run: |
-        find . -name "*.whl"
+          find . -name "*.whl"
 
 #      - name: Publish to PyPI
 #        uses: PyO3/maturin-action@v1
