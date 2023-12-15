@@ -93,6 +93,6 @@ if __name__ == "__main__":
     if sys.argv[-1].endswith("__main__.py"):
         main()
     else:
-        from utiles._cli import cli
+        from utiles.cli import cli
 
         cli()

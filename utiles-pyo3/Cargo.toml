@@ -1,0 +1,35 @@
+[package]
+name = "pyutiles"
+include = ["src/**/*", "Cargo.toml", "LICENSE", "README.md"]
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[lib]
+name = "libutiles"
+crate-type = ["cdylib"]
+
+[dependencies]
+fast_hilbert.workspace = true
+pyo3.workspace = true
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+utiles = { path = "../crates/utiles" }
+utilesqlite = { path = "../crates/utilesqlite" }
+utiles-cli = { path = "../crates/utiles-cli" }
+
+[dev-dependencies]
+pyo3 = { workspace = true, features = ["auto-initialize"] }
+
+[build-dependencies]
+pyo3-build-config.workspace = true
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+strip = true
+lto = true

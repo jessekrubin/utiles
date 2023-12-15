@@ -35,12 +35,29 @@ module-name = "utiles._utiles"
 
 [tool.pytest.ini_options]
 testpaths = [
-   "tests"
+    "tests",
 ]
 addopts = [
     "--doctest-modules",
-    "--benchmark-skip",
+    "--benchmark-disable",
     "-v"
+]
+norecursedirs = [
+    ".git",
+    ".nox",
+    ".pytest_cache",
+    ".venv",
+    "build",
+    "dist",
+    "scratch",
+    "node_modules",
+    "venv",
+    "*.bak",
+    "*.egg-info",
+    "*.egg",
+    ".*",
+    "target",
+    "utiles-cli", # in testing I write out a bunch of stuff to this dir...
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -56,85 +73,85 @@ line-length = 88
 target-version = "py38"
 line-length = 88
 select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-#  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
+    "A",
+    "ARG",
+    "B",
+    "C",
+    "DTZ",
+    "E",
+    "EM",
+    "F",
+    #  "FBT",
+    "I",
+    "ICN",
+    "ISC",
+    "N",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "Q",
+    "RUF",
+    "S",
+    "T",
+    "TID",
+    "UP",
+    "W",
+    "YTT",
 ]
 include = [
-  "python/utiles/**/*.{py,pyi}",
-  "tests/**/*.{py,pyi}",
-  "bench/**/*.{py,pyi}"
+    "python/utiles/**/*.{py,pyi}",
+    "tests/**/*.{py,pyi}",
+    "bench/**/*.{py,pyi}"
 ]
 exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".git-rewrite",
-  ".hg",
-  ".mypy_cache",
-  ".nox",
-  ".pants.d",
-  ".pytype",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "venv",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
 ]
 ignore = [
-  "TID252",
-  "A003",
-  # Allow non-abstract empty methods in abstract base classes
-  "B027",
-  # Allow boolean positional values in function calls, like `dict.get(... True)`
-  "FBT003",
-  # Ignore checks for possible passwords
-  "S105", "S106", "S107",
-  # Ignore complexity
-  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
-  #  shadowing builtins
-  "A002",
-  "E501", # line length
-  # type annotations union
-  "UP007",
-  # todo figure out if this is needed
-  "UP006",
-  # magic value cmp super annoying
-  "PLR2004",
-  "PLW0120",
+    "TID252",
+    "A003",
+    # Allow non-abstract empty methods in abstract base classes
+    "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    "FBT003",
+    # Ignore checks for possible passwords
+    "S105", "S106", "S107",
+    # Ignore complexity
+    "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+    #  shadowing builtins
+    "A002",
+    "E501", # line length
+    # type annotations union
+    "UP007",
+    # todo figure out if this is needed
+    "UP006",
+    # magic value cmp super annoying
+    "PLR2004",
+    "PLW0120",
 ]
 unfixable = [
-  # Don't touch unused imports
-  "F401",
+    # Don't touch unused imports
+    "F401",
 ]
 
 [tool.ruff.isort]
@@ -156,7 +173,7 @@ source_pkgs = ["utiles", "tests"]
 branch = true
 parallel = true
 omit = [
-  "python/utiles/__about__.py",
+    "python/utiles/__about__.py",
 ]
 
 [tool.coverage.paths]
@@ -165,9 +182,9 @@ tests = ["tests", "*/utiles/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
 ]
 
 [tool.mypy]
