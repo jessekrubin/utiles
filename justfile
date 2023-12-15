@@ -48,7 +48,7 @@ black:
 fmt: cargo-fmt black
 
 mypy:
-    mypy {{pyut}}/python {{pyut}}/tests
+    mypy --config-file {{pyut}}/pyproject.toml {{pyut}}/python {{pyut}}/tests
 
 ruff:
     ruff .
