@@ -60,9 +60,11 @@ impl TilesFsWriter {
     }
 
     pub async fn write_tile(&self, tile: MbtTileRow) {
+        // HERE YOU NEED TO FLIP THE THING JESSE
         let filepath = self.dirpath(tile.z(), tile.x()).join(format!(
             "{}.{}",
-            flipy(tile.y(), tile.z()),
+            // flipy(tile.y(), tile.z()),
+            tile.y(),
             tile.extension()
         ));
         // debug!("filepath: {:?}", filepath);
@@ -183,6 +185,8 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
 
     let where_clause = cfg.sql_where(
         // Some(zoom_levels_for_where)
+        // flip happens here maybe
+
         None,
     );
     let start_time = std::time::Instant::now();
@@ -253,10 +257,8 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
         .query_map([], |row| {
             let zoom_level: u8 = row.get(0)?;
             let tile_column: u32 = row.get(1)?;
-
             let tile_row: u32 = row.get(2)?;
             let tile_data: Vec<u8> = row.get(3)?;
-
             let r = MbtTileRow::new(zoom_level, tile_column, tile_row, tile_data);
             Ok(r)
         })
@@ -269,8 +271,6 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
         .for_each_concurrent(0, |tile| async {
             match tile {
                 Ok(tile) => {
-                    let _t =
-                        Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
                     twriter.write_tile(tile).await;
                 }
                 Err(e) => {
