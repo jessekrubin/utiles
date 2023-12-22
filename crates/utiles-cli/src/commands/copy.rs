@@ -191,16 +191,19 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     );
     let start_time = std::time::Instant::now();
 
+    let count_query = &format!("SELECT count(*) FROM tiles");
     let total_tiles: u32 = mbt
         .conn()
         .query_row(
-            &format!("SELECT count(*) FROM tiles {where_clause}"),
+            count_query,
             [],
             |row| row.get(0),
         )
         .unwrap();
 
-    info!("finna write {total_tiles:?} from {mbtiles:?} to {output_dir:?}");
+    debug!("total_tiles: {:?}", total_tiles);
+
+    info!("# tiles: {total_tiles:?} ~ {mbtiles:?} => {output_dir:?}");
     let c = mbt.conn();
 
     let metadata_vec = mbt.metadata().unwrap();

@@ -13,9 +13,9 @@ use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 
+use crate::mbtiles::MbtTileRow;
 use crate::{flipy, pmtiles, quadkey2tile, xyz2quadkey};
 use crate::{utile, UtilesError};
-use crate::mbtiles::MbtTileRow;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -516,10 +516,13 @@ impl From<&Map<String, Value>> for Tile {
 impl From<MbtTileRow> for Tile {
     fn from(row: MbtTileRow) -> Self {
         // flip the y
-        Self::new(row.tile_column, flipy(row.tile_row, row.zoom_level), row.zoom_level)
+        Self::new(
+            row.tile_column,
+            flipy(row.tile_row, row.zoom_level),
+            row.zoom_level,
+        )
     }
 }
-
 
 impl From<&Vec<Value>> for Tile {
     fn from(arr: &Vec<Value>) -> Self {

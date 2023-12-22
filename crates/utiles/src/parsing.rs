@@ -25,6 +25,10 @@ pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
     // Assume a single pair of coordinates represents a CoordTuple
     // and a four-element array represents a BBoxTuple
     let bbox = match v.as_array().map(std::vec::Vec::len) {
+        // match len 0, 1, 3
+        Some(0) | Some(1) | Some(3) => {
+            Err(UtilesError::InvalidBbox("Invalid bbox: ".to_string() + s))
+        }
         Some(2) => {
             let coord: (f64, f64) = serde_json::from_value::<(f64, f64)>(v)?;
             Ok(BBox::new(coord.0, coord.1, coord.0, coord.1))
@@ -33,7 +37,19 @@ pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
             let bbox: (f64, f64, f64, f64) = serde_json::from_value(v)?;
             Ok(BBox::from(bbox))
         }
-        _ => Err(UtilesError::InvalidBbox("Invalid bbox: ".to_string() + s)),
+        _ => {
+            // take first four elements
+            let bbox_vec = v
+                .as_array()
+                .unwrap()
+                .iter()
+                .take(4)
+                .cloned()
+                .collect::<Vec<Value>>();
+            Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
+                Value::Array(bbox_vec),
+            )?))
+        }
     };
     bbox
 }
@@ -170,6 +186,24 @@ mod tests {
     #[test]
     fn parse_bbox_simple() {
         let string = r#"[-180.0, -85.0, 180.0, 85.0]"#;
+        let bbox_result = parse_bbox(string);
+        // assert!(bbox_result.is_ok());
+        let bbox = bbox_result.unwrap();
+        assert_eq!(bbox, BBox::new(-180.0, -85.0, 180.0, 85.0));
+    }
+
+    #[test]
+    fn parse_bbox_simple_len_5() {
+        let string = r#"[-180.0, -85.0, 180.0, 85.0, "uhhhhh"]"#;
+        let bbox_result = parse_bbox(string);
+        // assert!(bbox_result.is_ok());
+        let bbox = bbox_result.unwrap();
+        assert_eq!(bbox, BBox::new(-180.0, -85.0, 180.0, 85.0));
+    }
+
+    #[test]
+    fn parse_bbox_simple_len_6() {
+        let string = r#"[-180.0, -85.0, 180.0, 85.0, 0, 10]"#;
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
