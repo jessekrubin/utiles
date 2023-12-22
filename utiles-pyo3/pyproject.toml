@@ -14,9 +14,7 @@ classifiers = [
 ]
 authors = [{ name = "Jesse Rubin", email = "jessekrubin@gmail.com" }]
 maintainers = [{ name = "Jesse Rubin", email = "jessekrubin@gmail.com" }]
-dependencies = [
-    'click>=7.1.2',
-]
+dependencies = []
 
 [project.scripts]
 utiles = "utiles.cli:cli"
