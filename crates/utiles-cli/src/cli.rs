@@ -47,10 +47,9 @@ fn init_tracing(log_config: LogConfig) {
 #[allow(clippy::unused_async)]
 pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> u8 {
     // print args
-    let argv = match argv {
-        Some(argv) => argv,
-        None => std::env::args().collect::<Vec<_>>(),
-    };
+    let argv = argv.unwrap_or_else(|| std::env::args().collect::<Vec<_>>());
+
+    // set caller if provided
     let args = Cli::parse_from(&argv);
 
     // if the command is "dev" init tracing w/ debug
@@ -60,11 +59,10 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             json: args.log_json,
         });
     } else {
-        let log_config = LogConfig {
+        init_tracing(LogConfig {
             debug: args.debug,
             json: args.log_json,
-        };
-        init_tracing(log_config);
+        });
     }
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
