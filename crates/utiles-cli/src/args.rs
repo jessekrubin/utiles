@@ -201,6 +201,20 @@ pub enum Commands {
     )]
     BoundingTile(TileFmtArgs),
 
+    ///  Converts tiles given as [x, y, z] and/or quadkeys to/from the other format
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Examples:
+    ///
+    /// echo "[486, 332, 10]" | utiles quadkey
+    /// 0313102310
+    ///
+    /// echo "0313102310" | utiles quadkey
+    /// [486, 332, 10]
     #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
     Quadkey(TileFmtArgs),
 
@@ -225,15 +239,38 @@ pub enum Commands {
     #[command(name = "tiles", about = "Echo tiles of bbox")]
     Tiles(TilesArgs),
 
+    /// Converts tiles to/from xyz ([x, y, z]) and/or pmtile-id format(s)
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Examples:
+    ///
+    /// echo "[486, 332, 10]" | utiles pmtileid
+    /// 506307
+    ///
+    /// echo "506307" | utiles pmtileid
+    /// [486, 332, 10]
     #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
     Pmtileid(TileFmtArgs),
 
+    /// Echo the neighbor tiles for input tiles
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
     #[command(name = "neighbors", about = "Echo neighbors of tile(s)", long_about = None)]
     Neighbors(TileFmtArgs),
 
+    /// Echo children tiles of input tiles
     #[command(name = "children", about = "Echo children of tile(s)", long_about = None)]
     Children(ParentChildrenArgs),
 
+    /// Echo parent tile of input tiles
     #[command(name = "parent", about = "Echo parent of tile(s)", long_about = None)]
     Parent(ParentChildrenArgs),
 

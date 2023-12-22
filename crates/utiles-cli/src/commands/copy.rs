@@ -6,14 +6,14 @@ use serde_json;
 use tokio::fs;
 use tokio::sync::mpsc;
 use tokio::task;
-use tokio::time::{Duration, sleep};
+use tokio::time::{sleep, Duration};
 use tracing::{debug, info, warn};
 use walkdir::WalkDir;
 
-use utiles::{Tile, tile_ranges, TileLike};
 use utiles::bbox::BBox;
-use utiles::mbtiles::{MbtilesMetadataRow, MbtTileRow};
+use utiles::mbtiles::{MbtTileRow, MbtilesMetadataRow};
 use utiles::tile_data_row::TileData;
+use utiles::{tile_ranges, Tile, TileLike};
 use utilesqlite::Mbtiles;
 
 use crate::args::CopyArgs;
@@ -186,7 +186,6 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let where_clause = cfg.sql_where(
         // Some(zoom_levels_for_where)
         // flip happens here maybe
-
         None,
     );
     let start_time = std::time::Instant::now();
@@ -194,11 +193,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let count_query = &format!("SELECT count(*) FROM tiles");
     let total_tiles: u32 = mbt
         .conn()
-        .query_row(
-            count_query,
-            [],
-            |row| row.get(0),
-        )
+        .query_row(count_query, [], |row| row.get(0))
         .unwrap();
 
     debug!("total_tiles: {:?}", total_tiles);
@@ -220,7 +215,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
             format!(
                 "SELECT DISTINCT zoom_level, tile_column FROM tiles {where_clause}"
             )
-                .as_str(),
+            .as_str(),
         )
         .unwrap();
 
@@ -389,7 +384,7 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
 async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let batch_size = 2048; // Define your batch size
-    // get all files...
+                           // get all files...
     let walker = WalkDir::new(dirpath).min_depth(3).max_depth(3);
     let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();
 

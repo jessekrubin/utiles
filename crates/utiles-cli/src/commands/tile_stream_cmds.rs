@@ -36,10 +36,13 @@ pub fn pmtileid_main(args: TileFmtArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     for line in lines {
         // if the line bgins w '[' treat as tile
-        let lstr = line.unwrap();
+        let lstr = line
+            .unwrap() // remove the `"` and `'` chars from the beginning and end of the line
+            .trim_matches(|c| c == '"' || c == '\'')
+            .to_string();
         if lstr.starts_with('[') {
             // treat as tile
-            let tile = Tile::from_json_arr(&lstr).unwrap();
+            let tile = Tile::from_json(&lstr).unwrap();
             println!("{}", tile.pmtileid());
         } else {
             // treat as pmtileid
@@ -65,7 +68,7 @@ pub fn quadkey_main(args: TileFmtArgs) {
         match first_char {
             '[' | '{' => {
                 // treat as tile
-                let tile = Tile::from_json_arr(&lstr).unwrap();
+                let tile = Tile::from_json(&lstr).unwrap();
                 println!("{}", tile.quadkey());
             }
             _ => {
