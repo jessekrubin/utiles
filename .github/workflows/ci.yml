@@ -31,7 +31,7 @@ jobs:
           manylinux: auto
           working-directory: ./utiles-pyo3
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: utiles-pyo3/dist
@@ -81,7 +81,7 @@ jobs:
           sccache: "true"
           working-directory: ./utiles-pyo3
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: utiles-pyo3/dist
@@ -113,7 +113,7 @@ jobs:
           sccache: "true"
           working-directory: ./utiles-pyo3
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: utiles-pyo3/dist
@@ -140,7 +140,7 @@ jobs:
           args: --out dist
           working-directory: ./utiles-pyo3
       - name: Upload sdist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: utiles-pyo3/dist
