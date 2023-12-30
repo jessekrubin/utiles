@@ -1,6 +1,22 @@
 use crate::errors::{UtilesError, UtilesResult};
 use crate::Tile;
-
+#[must_use]
+pub fn xyz2quadkey_vec(x: u32, y: u32, z: u8) -> Vec<u8> {
+    let mut qk_arr = Vec::with_capacity(z as usize);
+    // let mut quadkey = String::new();
+    for i in (0..z).rev() {
+        let mut digit: u8 = 0;
+        let mask = 1 << i;
+        if (x & mask) != 0 {
+            digit += 1;
+        }
+        if (y & mask) != 0 {
+            digit += 2;
+        }
+        qk_arr.push(digit);
+    }
+    qk_arr
+}
 // tile = ut.Tile(486, 332, 10)
 // expected = "0313102310"
 /// Return the quadkey for a tile as a string.
@@ -12,19 +28,10 @@ use crate::Tile;
 /// ```
 #[must_use]
 pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
-    let mut quadkey = String::new();
-    for i in (0..z).rev() {
-        let mut digit = 0;
-        let mask = 1 << i;
-        if (x & mask) != 0 {
-            digit += 1;
-        }
-        if (y & mask) != 0 {
-            digit += 2;
-        }
-        quadkey.push_str(&digit.to_string());
-    }
-    quadkey
+    xyz2quadkey_vec(x, y, z)
+        .iter()
+        .map(|&c| (c + b'0') as char)
+        .collect()
 }
 
 /// Return (x, y, z) for a quadkey as a tuple.
@@ -78,10 +85,15 @@ pub fn quadkey2xyz(quadkey: &str) -> UtilesResult<(u32, u32, u8)> {
     Ok((x, y, z))
 }
 
+/// Return Tile struct from quadkey string
+///
+/// # Examples
+/// ```
+/// use utiles::{Tile, quadkey2tile};
+/// let tile = quadkey2tile("0313102310").unwrap();
+/// assert_eq!(tile, Tile::new(486, 332, 10));
+/// ```
 pub fn quadkey2tile(quadkey: &str) -> UtilesResult<Tile> {
-    let xyz = quadkey2xyz(quadkey);
-    match xyz {
-        Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
-        Err(e) => Err(e),
-    }
+    let xyz = quadkey2xyz(quadkey)?;
+    Ok(Tile::new(xyz.0, xyz.1, xyz.2))
 }

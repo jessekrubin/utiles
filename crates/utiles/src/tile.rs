@@ -81,13 +81,7 @@ impl PartialOrd<Self> for Tile {
 
 impl Ord for Tile {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.z != other.z {
-            return self.z.cmp(&other.z);
-        }
-        if self.y != other.y {
-            return self.y.cmp(&other.y);
-        }
-        self.x.cmp(&other.x)
+        (self.z, self.x, self.y).cmp(&(other.z, other.x, other.y))
     }
 }
 
@@ -102,7 +96,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::from(UtilesError::TileParseError(s.to_string())))
+                    return Err(Box::from(UtilesError::TileParseError(s.to_string())));
                 }
             }
         } else if s.starts_with('[') {
@@ -111,7 +105,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::from(UtilesError::TileParseError(s.to_string())))
+                    return Err(Box::from(UtilesError::TileParseError(s.to_string())));
                 }
             }
         }
