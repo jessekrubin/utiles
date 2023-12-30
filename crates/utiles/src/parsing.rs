@@ -141,8 +141,9 @@ pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
     parse_bbox(string)
 }
 
+#[must_use]
 pub fn string_is_digits(string: &str) -> bool {
-    string.chars().all(|c| c.is_digit(10))
+    string.chars().all(|c| c.is_ascii_digit())
 }
 
 /// Parse a string into vector of integer strings
@@ -171,11 +172,12 @@ pub fn string_is_digits(string: &str) -> bool {
 /// let ints = parse_uint_strings("http://example.com/tiles/3/2/1.png");
 /// assert_eq!(ints, vec!["3", "2", "1"]);
 /// ```
+#[must_use]
 pub fn parse_uint_strings(input: &str) -> Vec<&str> {
     let mut blocks = Vec::new();
     let mut start = None;
     for (i, c) in input.char_indices() {
-        if c.is_digit(10) {
+        if c.is_ascii_digit() {
             if start.is_none() {
                 start = Some(i);
             }
@@ -216,6 +218,7 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
 /// let ints = parse_int_strings("http://example.com/tiles/-3/2/1.png");
 /// assert_eq!(ints, vec!["-3", "2", "1"]);
 /// ```
+#[must_use]
 pub fn parse_int_strings(input: &str) -> Vec<&str> {
     let mut blocks = Vec::new();
     let mut start = None;
@@ -289,6 +292,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 /// let ints = parse_ints("as;ldfkjas;ldfkj");
 /// assert_eq!(ints, Vec::<i64>::new());
 /// ```
+#[must_use]
 pub fn parse_ints(input: &str) -> Vec<i64> {
     parse_uint_strings(input)
         .iter()
@@ -306,6 +310,7 @@ pub fn parse_ints(input: &str) -> Vec<i64> {
 /// assert_eq!(blocks, vec!["-123.45", ".6", "-7.8", ".9"]);
 /// ```
 ///
+#[must_use]
 pub fn parse_float_blocks(input: &str) -> Vec<&str> {
     let mut blocks = Vec::new();
     let mut start = None; // Start index of the current number block
