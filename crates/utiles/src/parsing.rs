@@ -192,6 +192,34 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
     blocks
 }
 
+/// Parse a string into vector of integers
+///
+/// # Examples
+/// ```
+/// use utiles::parsing::parse_uints;
+/// let ints = parse_uints("1,2,3,4,5");
+/// assert_eq!(ints, vec![1, 2, 3, 4, 5]);
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_uints;
+/// let ints = parse_uints("x1y2z3");
+/// assert_eq!(ints, vec![1, 2, 3]);
+/// ```
+///
+/// ```
+/// use utiles::parsing::parse_uints;
+/// let ints = parse_uints("as;ldfkjas;ldfkj");
+/// assert_eq!(ints, Vec::<u64>::new());
+/// ```
+#[must_use]
+pub fn parse_uints(input: &str) -> Vec<u64> {
+    parse_uint_strings(input)
+        .iter()
+        .map(|s| s.parse::<u64>().unwrap())
+        .collect()
+}
+
 /// Parse a string into a vector of signed integer strings
 ///
 /// # Examples
@@ -241,7 +269,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
                     is_negative = true;
                 }
             }
-            '0'..='9' => {
+            '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
                 if start.is_none() || is_negative {
                     // Start of a new number block (potentially negative)
                     start = Some(i - is_negative as usize); // Include '-' in block if negative
@@ -272,29 +300,16 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
     blocks
 }
 
-/// Parse a string into vector of integers
+/// Parse a string into a vector of signed integers
 ///
 /// # Examples
 /// ```
 /// use utiles::parsing::parse_ints;
-/// let ints = parse_ints("1,2,3,4,5");
-/// assert_eq!(ints, vec![1, 2, 3, 4, 5]);
+/// let ints = parse_ints("-1,2,---3,4,-5");
+/// assert_eq!(ints, vec![-1, 2, -3, 4, -5]);
 /// ```
-///
-/// ```
-/// use utiles::parsing::parse_ints;
-/// let ints = parse_ints("x1y2z3");
-/// assert_eq!(ints, vec![1, 2, 3]);
-/// ```
-///
-/// ```
-/// use utiles::parsing::parse_ints;
-/// let ints = parse_ints("as;ldfkjas;ldfkj");
-/// assert_eq!(ints, Vec::<i64>::new());
-/// ```
-#[must_use]
 pub fn parse_ints(input: &str) -> Vec<i64> {
-    parse_uint_strings(input)
+    parse_int_strings(input)
         .iter()
         .map(|s| s.parse::<i64>().unwrap())
         .collect()
