@@ -55,9 +55,7 @@ fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
             "zoom must be between 0 and 32: {zoom}"
         )))?;
     }
-    let r = utiles::minmax(
-        zoom as u8,
-    );
+    let r = utiles::minmax(zoom as u8);
     Ok(r)
 }
 

@@ -308,6 +308,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 /// let ints = parse_ints("-1,2,---3,4,-5");
 /// assert_eq!(ints, vec![-1, 2, -3, 4, -5]);
 /// ```
+#[must_use]
 pub fn parse_ints(input: &str) -> Vec<i64> {
     parse_int_strings(input)
         .iter()

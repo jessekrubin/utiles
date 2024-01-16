@@ -137,6 +137,7 @@ pub fn int_2_offset_zoom(i: u64) -> (u64, u8) {
 /// let last_tile_in_z12 = xyz2rmid(4095, 4095, 12);
 /// assert_eq!(last_tile_in_z12, 22369621 - 1); // total tiles thru z12 - 1
 /// ```
+#[must_use]
 pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
     if z == 0 {
         return x as u64 + y as u64 * 2u64.pow(u32::from(z));
@@ -189,14 +190,15 @@ pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
 /// let last_tile_in_z12 = rmid2xyz(22369621 - 1); // total tiles thru z12 - 1
 /// assert_eq!(last_tile_in_z12, (4095, 4095, 12));
 /// ```
+#[must_use]
 pub fn rmid2xyz(i: u64) -> (u32, u32, u8) {
     if i == 0 {
         return (0, 0, 0);
     }
     let (i_o, z) = int_2_offset_zoom(i);
     let pow_z = 2u64.pow(u32::from(z));
-    let x = (i_o % pow_z);
-    let y = (i_o / pow_z);
+    let x = i_o % pow_z;
+    let y = i_o / pow_z;
     (x as u32, y as u32, z)
 }
 

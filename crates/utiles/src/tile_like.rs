@@ -1,4 +1,4 @@
-use crate::{flipy, pmtiles, LngLat, Tile};
+use crate::{flipy, pmtiles, xyz2rmid, LngLat, Tile};
 
 pub trait TileLike {
     fn x(&self) -> u32;
@@ -67,6 +67,16 @@ pub trait TileLike {
     #[must_use]
     fn pmid(&self) -> u64 {
         self.pmtileid()
+    }
+
+    #[must_use]
+    fn row_major_id(&self) -> u64 {
+        xyz2rmid(self.x(), self.y(), self.z())
+    }
+
+    #[must_use]
+    fn rmid(&self) -> u64 {
+        self.row_major_id()
     }
 
     #[must_use]

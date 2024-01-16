@@ -14,7 +14,7 @@ use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 
 use crate::mbtiles::MbtTileRow;
-use crate::{flipy, pmtiles, quadkey2tile, xyz2quadkey};
+use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
 use crate::{utile, UtilesError};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -159,6 +159,16 @@ impl Tile {
     pub fn from_pmid(id: u64) -> Result<Tile, Box<dyn Error>> {
         let (x, y, z) = pmtiles::pmid2xyz(id);
         Ok(Tile::new(x, y, z))
+    }
+
+    #[must_use]
+    pub fn from_row_major_id(id: u64) -> Self {
+        Tile::from(rmid2xyz(id))
+    }
+
+    #[must_use]
+    pub fn from_rmid(id: u64) -> Self {
+        Tile::from_row_major_id(id)
     }
 
     #[must_use]
