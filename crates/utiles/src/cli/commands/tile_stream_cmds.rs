@@ -1,9 +1,9 @@
 use tracing::{debug, error};
-use utiles::parsing::parse_bbox;
-use utiles::{bounding_tile, Tile, TileLike};
+use utiles_core::parsing::parse_bbox;
+use utiles_core::{bounding_tile, Tile, TileLike};
 
-use crate::args::TileFmtArgs;
-use crate::stdinterator_filter;
+use crate::cli::args::TileFmtArgs;
+use crate::cli::stdinterator_filter;
 
 pub fn neighbors_main(args: TileFmtArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);

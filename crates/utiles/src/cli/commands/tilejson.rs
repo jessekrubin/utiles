@@ -2,10 +2,10 @@ use std::path::Path;
 
 use tracing::debug;
 
-use utilejson::tilejson_stringify;
+use crate::utilejson::tilejson_stringify;
 use utilesqlite::Mbtiles;
 
-use crate::args::TilejsonArgs;
+use crate::cli::args::TilejsonArgs;
 
 pub fn tilejson_main(args: &TilejsonArgs) {
     debug!("tilejson: {}", args.common.filepath);

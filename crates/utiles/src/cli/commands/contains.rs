@@ -1,7 +1,7 @@
 use std::path::Path;
 use tracing::{debug, error};
 
-use utiles::LngLat;
+use utiles_core::LngLat;
 use utilesqlite::Mbtiles;
 
 /// Check if an mbtiles file contains a lnglat

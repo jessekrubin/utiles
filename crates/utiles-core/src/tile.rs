@@ -443,7 +443,7 @@ impl Tile {
         let (mut west, mut south, mut east, mut north) = match opts.projection {
             // Projection::Geographic=> (west, south, east, north),
             Projection::Mercator => {
-                // let (east_merc, north_merc) = utiles::xy(east, north, Some(false));
+                // let (east_merc, north_merc) = utiles_core::xy(east, north, Some(false));
                 let (west_merc, south_merc) = xy(west, south, None);
                 let (east_merc, north_merc) = xy(east, north, None);
                 (west_merc, south_merc, east_merc, north_merc)

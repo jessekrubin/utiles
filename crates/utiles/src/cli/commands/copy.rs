@@ -10,13 +10,13 @@ use tokio::time::{sleep, Duration};
 use tracing::{debug, info, warn};
 use walkdir::WalkDir;
 
-use utiles::bbox::BBox;
-use utiles::mbtiles::{MbtTileRow, MbtilesMetadataRow};
-use utiles::tile_data_row::TileData;
-use utiles::{tile_ranges, Tile, TileLike};
+use utiles_core::bbox::BBox;
+use utiles_core::mbtiles::{MbtTileRow, MbtilesMetadataRow};
+use utiles_core::tile_data_row::TileData;
+use utiles_core::{tile_ranges, Tile, TileLike};
 use utilesqlite::Mbtiles;
 
-use crate::args::CopyArgs;
+use crate::cli::args::CopyArgs;
 
 // #[derive(Debug)]
 // pub struct MbtTileRow {

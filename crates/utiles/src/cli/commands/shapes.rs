@@ -1,10 +1,10 @@
-use crate::stdinterator::StdInterator;
+use crate::cli::stdinterator::StdInterator;
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
 use tracing::debug;
-use utiles::projection::Projection;
-use utiles::tile::FeatureOptions;
-use utiles::Tile;
+use utiles_core::projection::Projection;
+use utiles_core::tile::FeatureOptions;
+use utiles_core::Tile;
 
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]

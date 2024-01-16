@@ -6,7 +6,7 @@ use tracing::debug;
 use utilesqlite::mbtiles::MbtilesZoomStats;
 use utilesqlite::Mbtiles;
 
-use crate::args::MbtilesStatsArgs;
+use crate::cli::args::MbtilesStatsArgs;
 
 #[derive(Debug, Serialize)]
 struct MbtilesStats {

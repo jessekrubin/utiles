@@ -59,27 +59,27 @@ pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
 /// # Examples
 ///
 /// ```
-/// use utiles::parsing::parse_bbox;
+/// use utiles_core::parsing::parse_bbox;
 /// let bbox = parse_bbox("-180,-85,180,85").unwrap();
-/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_bbox;
+/// use utiles_core::parsing::parse_bbox;
 /// let bbox = parse_bbox("-180.0, -85.0, 180.0, 85.0").unwrap();
-/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_bbox;
+/// use utiles_core::parsing::parse_bbox;
 /// let bbox = parse_bbox("-180.0 -85.0 180.0 85.0").unwrap();
-/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_bbox;
+/// use utiles_core::parsing::parse_bbox;
 /// let bbox = parse_bbox("[-180.0, -85.0, 180.0, 85.0]").unwrap();
-/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
 pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     // strip leading/trailing  whitespace
@@ -115,21 +115,21 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
 /// # Examples
 ///
 /// ```
-/// use utiles::parsing::parse_bbox_ext;
+/// use utiles_core::parsing::parse_bbox_ext;
 /// let bbox = parse_bbox_ext("world").unwrap();
-/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
+/// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_bbox_ext;
+/// use utiles_core::parsing::parse_bbox_ext;
 /// let bbox = parse_bbox_ext("planet").unwrap();
-/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
+/// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -90.0, 180.0, 90.0));
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_bbox_ext;
+/// use utiles_core::parsing::parse_bbox_ext;
 /// let bbox = parse_bbox_ext("-180,-85,180,85").unwrap();
-/// assert_eq!(bbox, utiles::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
+/// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
 pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
     // match 'world' or 'planet'
@@ -150,25 +150,25 @@ pub fn string_is_digits(string: &str) -> bool {
 ///
 /// # Examples
 /// ```
-/// use utiles::parsing::parse_uint_strings;
+/// use utiles_core::parsing::parse_uint_strings;
 /// let ints = parse_uint_strings("1,2,3,4,5");
 /// assert_eq!(ints, vec!["1", "2", "3", "4", "5"]);
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_uint_strings;
+/// use utiles_core::parsing::parse_uint_strings;
 /// let ints = parse_uint_strings("x1y2z3");
 /// assert_eq!(ints, vec!["1", "2", "3"]);
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_uint_strings;
+/// use utiles_core::parsing::parse_uint_strings;
 /// let ints = parse_uint_strings("as;ldfkjas;ldfkj");
 /// assert_eq!(ints, Vec::<String>::new());
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_uint_strings;
+/// use utiles_core::parsing::parse_uint_strings;
 /// let ints = parse_uint_strings("http://example.com/tiles/3/2/1.png");
 /// assert_eq!(ints, vec!["3", "2", "1"]);
 /// ```
@@ -196,19 +196,19 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
 ///
 /// # Examples
 /// ```
-/// use utiles::parsing::parse_uints;
+/// use utiles_core::parsing::parse_uints;
 /// let ints = parse_uints("1,2,3,4,5");
 /// assert_eq!(ints, vec![1, 2, 3, 4, 5]);
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_uints;
+/// use utiles_core::parsing::parse_uints;
 /// let ints = parse_uints("x1y2z3");
 /// assert_eq!(ints, vec![1, 2, 3]);
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_uints;
+/// use utiles_core::parsing::parse_uints;
 /// let ints = parse_uints("as;ldfkjas;ldfkj");
 /// assert_eq!(ints, Vec::<u64>::new());
 /// ```
@@ -224,25 +224,25 @@ pub fn parse_uints(input: &str) -> Vec<u64> {
 ///
 /// # Examples
 /// ```
-/// use utiles::parsing::parse_int_strings;
+/// use utiles_core::parsing::parse_int_strings;
 /// let ints = parse_int_strings("-1,2,---3,4,-5");
 /// assert_eq!(ints, vec!["-1", "2", "-3", "4", "-5"]);
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_int_strings;
+/// use utiles_core::parsing::parse_int_strings;
 /// let ints = parse_int_strings("x-1y2z-3");
 /// assert_eq!(ints, vec!["-1", "2", "-3"]);
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_int_strings;
+/// use utiles_core::parsing::parse_int_strings;
 /// let ints = parse_int_strings("as;ldfkjas;ldfkj");
 /// assert_eq!(ints, Vec::<&str>::new());
 /// ```
 ///
 /// ```
-/// use utiles::parsing::parse_int_strings;
+/// use utiles_core::parsing::parse_int_strings;
 /// let ints = parse_int_strings("http://example.com/tiles/-3/2/1.png");
 /// assert_eq!(ints, vec!["-3", "2", "1"]);
 /// ```
@@ -304,7 +304,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 ///
 /// # Examples
 /// ```
-/// use utiles::parsing::parse_ints;
+/// use utiles_core::parsing::parse_ints;
 /// let ints = parse_ints("-1,2,---3,4,-5");
 /// assert_eq!(ints, vec![-1, 2, -3, 4, -5]);
 /// ```
@@ -320,7 +320,7 @@ pub fn parse_ints(input: &str) -> Vec<i64> {
 ///
 /// # Examples
 /// ```
-/// use utiles::parsing::parse_float_blocks;
+/// use utiles_core::parsing::parse_float_blocks;
 /// let input = "-123.45..6abc--7.8.9";
 /// let blocks = parse_float_blocks(input);
 /// assert_eq!(blocks, vec!["-123.45", ".6", "-7.8", ".9"]);

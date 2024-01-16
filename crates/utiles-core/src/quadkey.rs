@@ -22,7 +22,7 @@ pub fn xyz2quadkey_vec(x: u32, y: u32, z: u8) -> Vec<u8> {
 /// Return the quadkey for a tile as a string.
 /// # Examples
 /// ```
-/// use utiles::xyz2quadkey;
+/// use utiles_core::xyz2quadkey;
 /// let quadkey = xyz2quadkey(486, 332, 10);
 /// assert_eq!(quadkey, "0313102310");
 /// ```
@@ -38,7 +38,7 @@ pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
 ///
 /// # Examples
 /// ```
-/// use utiles::quadkey2xyz;
+/// use utiles_core::quadkey2xyz;
 /// let one_two_three = quadkey2xyz("123").unwrap();
 /// assert_eq!(one_two_three, (5, 3, 3));
 /// let xyz = quadkey2xyz("0313102310").unwrap();
@@ -89,7 +89,7 @@ pub fn quadkey2xyz(quadkey: &str) -> UtilesResult<(u32, u32, u8)> {
 ///
 /// # Examples
 /// ```
-/// use utiles::{Tile, quadkey2tile};
+/// use utiles_core::{Tile, quadkey2tile};
 /// let tile = quadkey2tile("0313102310").unwrap();
 /// assert_eq!(tile, Tile::new(486, 332, 10));
 /// ```

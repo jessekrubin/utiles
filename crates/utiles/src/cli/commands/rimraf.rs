@@ -7,7 +7,7 @@ use tokio::fs;
 use tracing::error;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::args::RimrafArgs;
+use crate::cli::args::RimrafArgs;
 
 #[allow(dead_code)]
 pub async fn rimraf_main2(args: RimrafArgs) {

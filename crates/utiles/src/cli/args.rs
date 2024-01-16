@@ -1,13 +1,13 @@
 use clap::{Args, Parser, Subcommand};
-use utiles::bbox::BBox;
-use utiles::parsing::parse_bbox_ext;
-use utiles::zoom;
-use utiles::LngLat;
+use utiles_core::bbox::BBox;
+use utiles_core::parsing::parse_bbox_ext;
+use utiles_core::zoom;
+use utiles_core::LngLat;
 
-use crate::commands::dev::DevArgs;
-use utiles::VERSION;
+use crate::cli::commands::dev::DevArgs;
+use utiles_core::VERSION;
 
-use crate::commands::shapes::ShapesArgs;
+use crate::cli::commands::shapes::ShapesArgs;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
 /// ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝

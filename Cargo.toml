@@ -1,11 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/utiles-core",
     "crates/utiles",
-    "crates/utilejson",
     "crates/utilesqlite",
-    "crates/utiles-cli",
-    "crates/utiles-dev",
     "utiles-pyo3"
 ]
 

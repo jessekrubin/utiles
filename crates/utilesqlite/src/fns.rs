@@ -1,7 +1,7 @@
 use rusqlite::functions::FunctionFlags;
 use rusqlite::{Connection, Result};
 
-use utiles::libtiletype::tiletype_str;
+use utiles_core::libtiletype::tiletype_str;
 
 pub fn add_function_ut_tiletype(db: &Connection) -> Result<()> {
     db.create_scalar_function(

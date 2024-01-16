@@ -58,25 +58,25 @@ pub fn zvec2zset(zvec: Zooms) -> ZoomsSetInt {
 /// parse a string of zoom levels to a vector of zoom levels
 /// # Examples
 /// ```
-/// use utiles::zoom::parse_zooms;
+/// use utiles_core::zoom::parse_zooms;
 /// let zvec = parse_zooms("0,1,2,3,4,5,6,7");
 /// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
 /// ```
 ///
 /// ```
-/// use utiles::zoom::parse_zooms;
+/// use utiles_core::zoom::parse_zooms;
 /// let zvec = parse_zooms("0-7");
 /// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
 /// ```
 ///
 /// ```
-/// use utiles::zoom::parse_zooms;
+/// use utiles_core::zoom::parse_zooms;
 /// let zvec = parse_zooms("0-2,4-7");
 /// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 4, 5, 6, 7]);
 /// ```
 ///
 /// ```
-/// use utiles::zoom::parse_zooms;
+/// use utiles_core::zoom::parse_zooms;
 /// let zvec = parse_zooms("1,2,3,4,4,4,4,4");
 /// assert_eq!(zvec.unwrap(), vec![1, 2, 3, 4]);
 /// ```

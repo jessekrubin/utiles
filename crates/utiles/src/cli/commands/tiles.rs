@@ -3,13 +3,13 @@ use std::io::Write;
 
 use tracing::debug;
 
-use utiles::parsing::parse_bbox_ext;
-use utiles::tiles;
-use utiles::zoom::ZoomOrZooms;
-use utiles::{Tile, TileLike};
+use utiles_core::parsing::parse_bbox_ext;
+use utiles_core::tiles;
+use utiles_core::zoom::ZoomOrZooms;
+use utiles_core::{Tile, TileLike};
 
-use crate::args::TilesArgs;
-use crate::stdinterator_filter::stdin_filtered;
+use crate::cli::args::TilesArgs;
+use crate::cli::stdinterator_filter::stdin_filtered;
 
 pub enum TileFmt {
     Arr,

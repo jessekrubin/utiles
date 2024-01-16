@@ -1,4 +1,4 @@
-use crate::stdinterator::StdInterator;
+use crate::cli::stdinterator::StdInterator;
 use std::io;
 
 pub fn stdin_filtered(

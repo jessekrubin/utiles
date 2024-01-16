@@ -97,43 +97,43 @@ pub fn int_2_offset_zoom(i: u64) -> (u64, u8) {
 ///
 /// # Examples
 /// ```
-/// use utiles::xyz2rmid;
+/// use utiles_core::xyz2rmid;
 /// let zzz = xyz2rmid(0, 0, 0);
 /// assert_eq!(zzz, 0);
 /// ```
 ///
 /// ```
-/// use utiles::xyz2rmid;
+/// use utiles_core::xyz2rmid;
 /// let xyz_0_0_1 = xyz2rmid(0, 0, 1);
 /// assert_eq!(xyz_0_0_1, 1);
 /// ```
 ///
 /// ```
-/// use utiles::xyz2rmid;
+/// use utiles_core::xyz2rmid;
 /// let xyz_0_1_1 = xyz2rmid(1, 0, 1);
 /// assert_eq!(xyz_0_1_1, 2);
 /// ```
 ///
 /// ```
-/// use utiles::xyz2rmid;
+/// use utiles_core::xyz2rmid;
 /// let xyz_1_0_1 = xyz2rmid(0, 1, 1);
 /// assert_eq!(xyz_1_0_1, 3);
 /// ```
 ///
 /// ```
-/// use utiles::xyz2rmid;
+/// use utiles_core::xyz2rmid;
 /// let xyz_1_1_1 = xyz2rmid(1, 1, 1);
 /// assert_eq!(xyz_1_1_1, 4);
 /// ```
 ///
 /// ```
-/// use utiles::xyz2rmid;
+/// use utiles_core::xyz2rmid;
 /// let one_two_three = xyz2rmid(1, 2, 3);
 /// assert_eq!(one_two_three, 38);
 /// ```
 ///
 /// ```
-/// use utiles::xyz2rmid;
+/// use utiles_core::xyz2rmid;
 /// let last_tile_in_z12 = xyz2rmid(4095, 4095, 12);
 /// assert_eq!(last_tile_in_z12, 22369621 - 1); // total tiles thru z12 - 1
 /// ```
@@ -150,43 +150,43 @@ pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
 ///
 /// # Examples
 /// ```
-/// use utiles::rmid2xyz;
+/// use utiles_core::rmid2xyz;
 /// let zzz = rmid2xyz(0);
 /// assert_eq!(zzz, (0, 0, 0));
 /// ```
 ///
 /// ```
-/// use utiles::rmid2xyz;
+/// use utiles_core::rmid2xyz;
 /// let xyz_0_0_1 = rmid2xyz(1);
 /// assert_eq!(xyz_0_0_1, (0, 0, 1));
 /// ```
 ///
 /// ```
-/// use utiles::rmid2xyz;
+/// use utiles_core::rmid2xyz;
 /// let xyz_0_1_1 = rmid2xyz(2);
 /// assert_eq!(xyz_0_1_1, (1, 0, 1));
 /// ```
 ///
 /// ```
-/// use utiles::rmid2xyz;
+/// use utiles_core::rmid2xyz;
 /// let xyz_1_0_1 = rmid2xyz(3);
 /// assert_eq!(xyz_1_0_1, (0, 1, 1));
 /// ```
 ///
 /// ```
-/// use utiles::rmid2xyz;
+/// use utiles_core::rmid2xyz;
 /// let xyz_1_1_1 = rmid2xyz(4);
 /// assert_eq!(xyz_1_1_1, (1, 1, 1));
 /// ```
 ///
 /// ```
-/// use utiles::rmid2xyz;
+/// use utiles_core::rmid2xyz;
 /// let one_two_three = rmid2xyz(38);
 /// assert_eq!(one_two_three, (1, 2, 3));
 /// ```
 ///
 /// ```
-/// use utiles::rmid2xyz;
+/// use utiles_core::rmid2xyz;
 /// let last_tile_in_z12 = rmid2xyz(22369621 - 1); // total tiles thru z12 - 1
 /// assert_eq!(last_tile_in_z12, (4095, 4095, 12));
 /// ```

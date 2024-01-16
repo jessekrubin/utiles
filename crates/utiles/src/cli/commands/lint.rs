@@ -3,13 +3,13 @@ use std::path::{Path, PathBuf};
 
 use tracing::{debug, info, warn};
 
-use utiles::lint_error::{UtilesLintError, UtilesLintResult};
-use utiles::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
+use utiles_core::lint_error::{UtilesLintError, UtilesLintResult};
+use utiles_core::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
 use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 use utilesqlite::squealite;
 
-use crate::args::LintArgs;
-use crate::find;
+use crate::cli::args::LintArgs;
+use crate::cli::find;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
     "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",

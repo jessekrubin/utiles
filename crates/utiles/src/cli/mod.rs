@@ -14,4 +14,5 @@ mod find;
 mod stdinterator;
 mod stdinterator_filter;
 
-pub use crate::cli::{cli_main, cli_main_sync};
+pub use crate::cli::cli::cli_main;
+pub use crate::cli::cli::cli_main_sync;

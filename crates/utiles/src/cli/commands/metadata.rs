@@ -3,10 +3,10 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::debug;
 
-use utiles::mbtiles::metadata2map;
+use utiles_core::mbtiles::metadata2map;
 use utilesqlite::Mbtiles;
 
-use crate::args::{MetadataArgs, MetadataSetArgs};
+use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 
 pub fn metadata_main(args: &MetadataArgs) {
     debug!("meta: {}", args.common.filepath);

@@ -1,7 +1,7 @@
-use utiles::{Tile, TileLike};
+use utiles_core::{Tile, TileLike};
 
-use crate::args::ParentChildrenArgs;
-use crate::stdinterator_filter;
+use crate::cli::args::ParentChildrenArgs;
+use crate::cli::stdinterator_filter;
 
 pub fn parent_main(args: ParentChildrenArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);

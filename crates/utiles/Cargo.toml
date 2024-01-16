@@ -11,7 +11,17 @@ keywords = ["map", "geo", "mercator", "tile"]
 homepage = "https://github.com/jessekrubin/utiles"
 repository = "https://github.com/jessekrubin/utiles"
 
+[lib]
+name = "utiles"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ut"
+path = "src/bin.rs"
+
+
 [dependencies]
+utiles-core = { path = "../utiles-core" }
 fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
@@ -19,3 +29,21 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 tilejson.workspace = true
+
+# CLI dependencies
+tracing.workspace = true
+rusqlite = { workspace = true, features = ["bundled", "hooks"] }
+tokio = { workspace = true, features = ["fs"] }
+tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
+clap = { version = "4.4.7", features = ["derive", "color", "wrap_help"] }
+clap-verbosity-flag = "2.1.0"
+globset = "0.4.13"
+ignore = "0.4.20"
+#utilejson = { path = "../utilejson" }
+utilesqlite = { path = "../utilesqlite" }
+tokio-stream = "0.1.14"
+futures = "0.3.29"
+walkdir = "2.4.0"
+time = "0.3.30"
+itertools = "0.12.0"
+webbrowser = "0.8.12"
