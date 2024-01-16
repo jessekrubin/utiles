@@ -190,7 +190,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     );
     let start_time = std::time::Instant::now();
 
-    let count_query = &format!("SELECT count(*) FROM tiles");
+    let count_query = &"SELECT count(*) FROM tiles".to_string();
     let total_tiles: u32 = mbt
         .conn()
         .query_row(count_query, [], |row| row.get(0))
