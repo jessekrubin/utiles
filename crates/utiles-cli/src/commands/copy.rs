@@ -201,7 +201,11 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     info!("# tiles: {total_tiles:?} ~ {mbtiles:?} => {output_dir:?}");
     let c = mbt.conn();
 
-    let metadata_vec = mbt.metadata().unwrap();
+    let res_metadata_vec = mbt.metadata();
+    let metadata_vec = res_metadata_vec.unwrap_or_else(|e| {
+        warn!("e: {e:?}");
+        vec![]
+    });
     let metadata_str = serde_json::to_string_pretty(&metadata_vec).unwrap();
     // ensure output_dir exists
     fs::create_dir_all(&output_dir).await.unwrap();

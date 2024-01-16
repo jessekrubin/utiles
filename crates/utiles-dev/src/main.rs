@@ -3,10 +3,7 @@ use futures::TryStreamExt;
 use geozero::mvt::{Message, Tile};
 
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use sqlx::{
-    query_as, ConnectOptions, Executor, FromRow,
-};
-
+use sqlx::{query_as, ConnectOptions, Executor, FromRow};
 
 // #[derive(Debug, FromRow)]
 // struct MetadataRow {
