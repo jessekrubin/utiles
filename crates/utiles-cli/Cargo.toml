@@ -31,6 +31,6 @@ utilesqlite = { path = "../utilesqlite" }
 tokio-stream = "0.1.14"
 futures = "0.3.29"
 walkdir = "2.4.0"
-time = "0.3.30"
+time = "0.3.31"
 itertools = "0.12.0"
 webbrowser = "0.8.12"
