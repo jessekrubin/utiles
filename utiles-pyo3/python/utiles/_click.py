@@ -8,9 +8,9 @@ from utiles.cli import cli
 
 try:
     import click
-except ImportError:
+except ImportError as ie:
     msg = "click not installed for rio/legacy utiles cli: `pip install click`"
-    raise ImportError(msg)
+    raise ImportError(msg) from ie
 
 logger = logging.getLogger(__name__)
 
