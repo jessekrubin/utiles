@@ -22,7 +22,7 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace= true
 clap = { version = "4.4.7", features = ["derive", "color", "wrap_help"] }
-clap-verbosity-flag = "2.1.0"
+clap-verbosity-flag = "2.1.1"
 globset = "0.4.13"
 ignore = "0.4.20"
 utiles = { path = "../utiles" }
