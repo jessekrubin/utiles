@@ -24,7 +24,7 @@ fast_hilbert = "2.0.0"
 geo-types = "0.7.9"
 geojson = "0.24.1"
 pyo3 = "0.20.0"
-pyo3-build-config = "0.20.0"
+pyo3-build-config = "0.20.2"
 rusqlite = { version = "^0.30.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.96"
