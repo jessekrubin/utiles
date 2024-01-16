@@ -45,14 +45,14 @@ pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
 }
 
 #[must_use]
-pub fn minmax(zoom: u32) -> (u32, u32) {
-    (0, 2_u32.pow(zoom) - 1)
+pub fn minmax(zoom: u8) -> (u32, u32) {
+    (0, 2_u32.pow(zoom as u32) - 1)
 }
 
 #[must_use]
 pub fn valid(x: u32, y: u32, z: u8) -> bool {
-    let (minx, maxx) = minmax(u32::from(z));
-    let (miny, maxy) = minmax(u32::from(z));
+    let (minx, maxx) = minmax(z);
+    let (miny, maxy) = minmax(z);
     x >= minx && x <= maxx && y >= miny && y <= maxy
 }
 
@@ -67,6 +67,140 @@ pub fn flipy(y: u32, z: u8) -> u32 {
 pub fn yflip(y: u32, z: u8) -> u32 {
     flipy(y, z)
 }
+
+#[must_use]
+#[inline]
+pub fn int_2_offset_zoom(i: u64) -> (u64, u8) {
+    if i == 0 {
+        return (0, 0);
+    }
+    let mut acc: u64 = 0;
+    let mut z: u8 = 0;
+    loop {
+        let num_tiles: u64 = (1 << z) * (1 << z);
+        if acc + num_tiles > i {
+            return (i - acc, z);
+        }
+        acc += num_tiles;
+        z += 1;
+    }
+}
+
+/// Calculate the row-major-id for a tile which is the
+/// index of the tile for the zoom level PLUS the total number of tiles
+/// in all zoom levels below it for the zoom level.
+///
+/// (x, y, z) => x + y * 2^z + 1 + 2^z * 2^z
+/// (0,0,0) is 0
+/// (0,0,1) is 1
+/// (0,1,1) is 2
+///
+/// # Examples
+/// ```
+/// use utiles::xyz2rmid;
+/// let zzz = xyz2rmid(0, 0, 0);
+/// assert_eq!(zzz, 0);
+/// ```
+///
+/// ```
+/// use utiles::xyz2rmid;
+/// let xyz_0_0_1 = xyz2rmid(0, 0, 1);
+/// assert_eq!(xyz_0_0_1, 1);
+/// ```
+///
+/// ```
+/// use utiles::xyz2rmid;
+/// let xyz_0_1_1 = xyz2rmid(1, 0, 1);
+/// assert_eq!(xyz_0_1_1, 2);
+/// ```
+///
+/// ```
+/// use utiles::xyz2rmid;
+/// let xyz_1_0_1 = xyz2rmid(0, 1, 1);
+/// assert_eq!(xyz_1_0_1, 3);
+/// ```
+///
+/// ```
+/// use utiles::xyz2rmid;
+/// let xyz_1_1_1 = xyz2rmid(1, 1, 1);
+/// assert_eq!(xyz_1_1_1, 4);
+/// ```
+///
+/// ```
+/// use utiles::xyz2rmid;
+/// let one_two_three = xyz2rmid(1, 2, 3);
+/// assert_eq!(one_two_three, 38);
+/// ```
+///
+/// ```
+/// use utiles::xyz2rmid;
+/// let last_tile_in_z12 = xyz2rmid(4095, 4095, 12);
+/// assert_eq!(last_tile_in_z12, 22369621 - 1); // total tiles thru z12 - 1
+/// ```
+pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
+    if z == 0 {
+        return x as u64 + y as u64 * 2u64.pow(u32::from(z));
+    }
+    let base_id: u64 = (4u64.pow(u32::from(z)) - 1) / 3;
+    base_id + x as u64 + y as u64 * 2u64.pow(u32::from(z))
+}
+
+/// Calculate the xyz of the tile from a row-major-id
+///
+/// # Examples
+/// ```
+/// use utiles::rmid2xyz;
+/// let zzz = rmid2xyz(0);
+/// assert_eq!(zzz, (0, 0, 0));
+/// ```
+///
+/// ```
+/// use utiles::rmid2xyz;
+/// let xyz_0_0_1 = rmid2xyz(1);
+/// assert_eq!(xyz_0_0_1, (0, 0, 1));
+/// ```
+///
+/// ```
+/// use utiles::rmid2xyz;
+/// let xyz_0_1_1 = rmid2xyz(2);
+/// assert_eq!(xyz_0_1_1, (1, 0, 1));
+/// ```
+///
+/// ```
+/// use utiles::rmid2xyz;
+/// let xyz_1_0_1 = rmid2xyz(3);
+/// assert_eq!(xyz_1_0_1, (0, 1, 1));
+/// ```
+///
+/// ```
+/// use utiles::rmid2xyz;
+/// let xyz_1_1_1 = rmid2xyz(4);
+/// assert_eq!(xyz_1_1_1, (1, 1, 1));
+/// ```
+///
+/// ```
+/// use utiles::rmid2xyz;
+/// let one_two_three = rmid2xyz(38);
+/// assert_eq!(one_two_three, (1, 2, 3));
+/// ```
+///
+/// ```
+/// use utiles::rmid2xyz;
+/// let last_tile_in_z12 = rmid2xyz(22369621 - 1); // total tiles thru z12 - 1
+/// assert_eq!(last_tile_in_z12, (4095, 4095, 12));
+/// ```
+pub fn rmid2xyz(i: u64) -> (u32, u32, u8) {
+    if i == 0 {
+        return (0, 0, 0);
+    }
+    let (i_o, z) = int_2_offset_zoom(i);
+    let pow_z = 2u64.pow(u32::from(z));
+    let x = (i_o % pow_z);
+    let y = (i_o / pow_z);
+    (x as u32, y as u32, z)
+}
+
+// Assuming int_2_offset_zoom is implemented correctly
 
 #[must_use]
 pub fn bbox2zoom(bbox: (u32, u32, u32, u32)) -> u8 {
@@ -216,20 +350,15 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesResult<(f64, f64
     } else {
         (lng, lat)
     };
-
-    let x = lng / 360.0 + 0.5;
     let sinlat = (lat.to_radians()).sin();
-
-    let temp = (1.0 + sinlat) / (1.0 - sinlat);
-    match temp.classify() {
-        FpCategory::Infinite | FpCategory::Nan => {
-            Err(UtilesError::ConversionError(
-                "X can not be computed: lat={lat}".to_string(),
-            ))
-            // Err("Y can not be computed: lat={lat}")
-        }
+    let yish = (1.0 + sinlat) / (1.0 - sinlat);
+    match yish.classify() {
+        FpCategory::Infinite | FpCategory::Nan => Err(UtilesError::ConversionError(
+            "Y can not be computed: lat={lat}".to_string(),
+        )),
         _ => {
-            let y = 0.5 - 0.25 * (temp.ln()) / PI;
+            let y = 0.5 - 0.25 * (yish.ln()) / PI;
+            let x = lng / 360.0 + 0.5;
             Ok((x, y))
         }
     }
@@ -262,10 +391,6 @@ pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> LngLat {
     let lat = (2.0 * (y / EARTH_RADIUS).exp().atan() - PI * 0.5) * 180.0 / PI;
     if truncate.is_some() {
         truncate_lnglat(&LngLat::new(lng, lat))
-        // LngLat {
-        //     lng: truncate_lng(lng),
-        //     lat: truncate_lat(lat),
-        // }
     } else {
         LngLat::new(lng, lat)
     }
@@ -288,29 +413,18 @@ fn _tile_edge_info(x: u32, y: u32, z: u8) -> TileEdgeInfo {
         return TileEdgeInfo::TopLeft;
     }
     let max_xy = 2u32.pow(u32::from(z));
-    if x == max_xy && y == 0 {
-        return TileEdgeInfo::TopRight;
-    }
-    if x == 0 && y == max_xy {
-        return TileEdgeInfo::BottomLeft;
-    }
-
     if x == max_xy && y == max_xy {
         return TileEdgeInfo::BottomRight;
     }
-    if x == 0 {
-        return TileEdgeInfo::Left;
+    match (x, y) {
+        (max, 0) if max == max_xy => TileEdgeInfo::TopRight,
+        (0, max) if max == max_xy => TileEdgeInfo::BottomLeft,
+        (0, _) => TileEdgeInfo::Left,
+        (max, _) if max == max_xy => TileEdgeInfo::Right,
+        (_, 0) => TileEdgeInfo::Top,
+        (_, max) if max == max_xy => TileEdgeInfo::Bottom,
+        _ => TileEdgeInfo::Middle,
     }
-    if x == max_xy {
-        return TileEdgeInfo::Right;
-    }
-    if y == 0 {
-        return TileEdgeInfo::Top;
-    }
-    if y == max_xy {
-        return TileEdgeInfo::Bottom;
-    }
-    TileEdgeInfo::Middle
 }
 
 fn _neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
