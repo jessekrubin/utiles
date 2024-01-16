@@ -29,7 +29,7 @@ utiles = { path = "../utiles" }
 utilejson = { path = "../utilejson" }
 utilesqlite = { path = "../utilesqlite" }
 tokio-stream = "0.1.14"
-futures = "0.3.29"
+futures = "0.3.30"
 walkdir = "2.4.0"
 time = "0.3.30"
 itertools = "0.12.0"
