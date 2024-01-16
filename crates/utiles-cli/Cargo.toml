@@ -24,7 +24,7 @@ thiserror.workspace= true
 clap = { version = "4.4.7", features = ["derive", "color", "wrap_help"] }
 clap-verbosity-flag = "2.1.0"
 globset = "0.4.13"
-ignore = "0.4.20"
+ignore = "0.4.22"
 utiles = { path = "../utiles" }
 utilejson = { path = "../utilejson" }
 utilesqlite = { path = "../utilesqlite" }
