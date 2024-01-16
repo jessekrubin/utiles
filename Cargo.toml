@@ -19,7 +19,7 @@ authors = ["Jesse K. Rubin <jessekrubin@gmail.com>"]
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
-anyhow = "1.0.75"
+anyhow = "1.0.79"
 fast_hilbert = "2.0.0"
 geo-types = "0.7.9"
 geojson = "0.24.1"
