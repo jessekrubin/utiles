@@ -9,14 +9,18 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::cast_possible_truncation)]
 
-pub mod errors;
-pub use crate::errors::UtilesError;
-
-pub use crate::fns::*;
-pub use crate::quadkey::*;
+pub use gdal::geotransform2optzoom;
 pub use lnglat::LngLat;
+pub use point::{Point2d, Point3d};
 pub use tile::Tile;
 pub use tile_like::TileLike;
+
+pub use crate::errors::UtilesError;
+pub use crate::fns::*;
+pub use crate::quadkey::*;
+
+pub mod errors;
+
 pub mod bbox;
 pub mod constants;
 pub mod fns;
@@ -29,6 +33,7 @@ pub mod lnglat;
 pub mod mbtiles;
 pub mod parsing;
 pub mod pmtiles;
+pub mod point;
 pub mod projection;
 pub mod quadkey;
 pub mod sibling_relationship;
@@ -43,8 +48,6 @@ pub mod tilejson;
 pub mod traits;
 pub mod zoom;
 
-pub use gdal::geotransform2optzoom;
-
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Tile macro to create a new tile.
@@ -57,11 +60,29 @@ macro_rules! utile {
     };
 }
 
+/// point2d macro to create a new point.
+/// Replacement for coord! macro from geo-types
+///
+/// # Examples
+///
+/// ```
+/// use utiles::{point2d, Point2d};
+/// let p = point2d!{ x: 1.0, y: 2.0 };
+/// assert_eq!(p.x(), 1.0);
+/// assert_eq!(p.y(), 2.0);
+/// ```
+#[macro_export]
+macro_rules! point2d {
+    { x: $x:expr, y: $y:expr } => {
+        Point2d::new($x, $y)
+    };
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use std::collections::HashSet;
+
+    use super::*;
 
     #[test]
     fn zoom_or_zooms() {

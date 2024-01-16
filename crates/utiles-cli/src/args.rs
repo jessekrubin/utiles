@@ -178,9 +178,11 @@ pub enum Commands {
         lnglat: LngLat,
     },
 
-    // ========================================================================
-    // TILE CLI UTILS - MERCANTILE LIKE CLI
-    // ========================================================================
+    /*
+    ========================================================================
+    TILE CLI UTILS - MERCANTILE LIKE CLI
+    ========================================================================
+    */
     /// Echo the Web Mercator tile at ZOOM level bounding GeoJSON [west, south,
     /// east, north] bounding boxes, features, or collections read from stdin.
     ///
@@ -199,21 +201,76 @@ pub enum Commands {
     )]
     BoundingTile(TileFmtArgs),
 
+    ///  Converts tiles given as [x, y, z] and/or quadkeys to/from the other format
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Examples:
+    ///
+    /// echo "[486, 332, 10]" | utiles quadkey
+    /// 0313102310
+    ///
+    /// echo "0313102310" | utiles quadkey
+    /// [486, 332, 10]
     #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
     Quadkey(TileFmtArgs),
 
-    #[command(name = "tiles", about = "Echo tiles of bbox", long_about = None)]
+    /// Echos web-mercator tiles at zoom level intersecting given geojson-bbox [west, south,
+    /// east, north], geojson-features, or geojson-collections read from stdin.
+    ///
+    /// Output format is a JSON `[x, y, z]` array by default; use --obj to output a
+    /// JSON object `{x: x, y: y, z: z}`.
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Example:
+    ///
+    /// $ echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
+    /// [852, 1550, 12]
+    /// [852, 1551, 12]
+    /// [853, 1550, 12]
+    /// [853, 1551, 12]
+    #[command(name = "tiles", about = "Echo tiles of bbox")]
     Tiles(TilesArgs),
 
+    /// Converts tiles to/from xyz ([x, y, z]) and/or pmtile-id format(s)
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Examples:
+    ///
+    /// echo "[486, 332, 10]" | utiles pmtileid
+    /// 506307
+    ///
+    /// echo "506307" | utiles pmtileid
+    /// [486, 332, 10]
     #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
     Pmtileid(TileFmtArgs),
 
+    /// Echo the neighbor tiles for input tiles
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
     #[command(name = "neighbors", about = "Echo neighbors of tile(s)", long_about = None)]
     Neighbors(TileFmtArgs),
 
+    /// Echo children tiles of input tiles
     #[command(name = "children", about = "Echo children of tile(s)", long_about = None)]
     Children(ParentChildrenArgs),
 
+    /// Echo parent tile of input tiles
     #[command(name = "parent", about = "Echo parent of tile(s)", long_about = None)]
     Parent(ParentChildrenArgs),
 

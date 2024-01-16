@@ -13,7 +13,7 @@ use walkdir::WalkDir;
 use utiles::bbox::BBox;
 use utiles::mbtiles::{MbtTileRow, MbtilesMetadataRow};
 use utiles::tile_data_row::TileData;
-use utiles::{flipy, tile_ranges, Tile, TileLike};
+use utiles::{tile_ranges, Tile, TileLike};
 use utilesqlite::Mbtiles;
 
 use crate::args::CopyArgs;
@@ -60,9 +60,11 @@ impl TilesFsWriter {
     }
 
     pub async fn write_tile(&self, tile: MbtTileRow) {
+        // HERE YOU NEED TO FLIP THE THING JESSE
         let filepath = self.dirpath(tile.z(), tile.x()).join(format!(
             "{}.{}",
-            flipy(tile.y(), tile.z()),
+            // flipy(tile.y(), tile.z()),
+            tile.y(),
             tile.extension()
         ));
         // debug!("filepath: {:?}", filepath);
@@ -183,23 +185,27 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
 
     let where_clause = cfg.sql_where(
         // Some(zoom_levels_for_where)
+        // flip happens here maybe
         None,
     );
     let start_time = std::time::Instant::now();
 
+    let count_query = &"SELECT count(*) FROM tiles".to_string();
     let total_tiles: u32 = mbt
         .conn()
-        .query_row(
-            &format!("SELECT count(*) FROM tiles {where_clause}"),
-            [],
-            |row| row.get(0),
-        )
+        .query_row(count_query, [], |row| row.get(0))
         .unwrap();
 
-    info!("finna write {total_tiles:?} from {mbtiles:?} to {output_dir:?}");
+    debug!("total_tiles: {:?}", total_tiles);
+
+    info!("# tiles: {total_tiles:?} ~ {mbtiles:?} => {output_dir:?}");
     let c = mbt.conn();
 
-    let metadata_vec = mbt.metadata().unwrap();
+    let res_metadata_vec = mbt.metadata();
+    let metadata_vec = res_metadata_vec.unwrap_or_else(|e| {
+        warn!("e: {e:?}");
+        vec![]
+    });
     let metadata_str = serde_json::to_string_pretty(&metadata_vec).unwrap();
     // ensure output_dir exists
     fs::create_dir_all(&output_dir).await.unwrap();
@@ -253,10 +259,8 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
         .query_map([], |row| {
             let zoom_level: u8 = row.get(0)?;
             let tile_column: u32 = row.get(1)?;
-
             let tile_row: u32 = row.get(2)?;
             let tile_data: Vec<u8> = row.get(3)?;
-
             let r = MbtTileRow::new(zoom_level, tile_column, tile_row, tile_data);
             Ok(r)
         })
@@ -269,8 +273,6 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
         .for_each_concurrent(0, |tile| async {
             match tile {
                 Ok(tile) => {
-                    let _t =
-                        Tile::new(tile.tile_column, tile.tile_row, tile.zoom_level);
                     twriter.write_tile(tile).await;
                 }
                 Err(e) => {

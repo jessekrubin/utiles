@@ -43,7 +43,6 @@ sort-all:
 
 black:
     black {{pyut}}/python {{pyut}}/tests
-    black python tests
 
 fmt: cargo-fmt black
 

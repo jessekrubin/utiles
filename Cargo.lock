@@ -1487,7 +1487,7 @@ dependencies = [
 
 [[package]]
 name = "pyutiles"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "fast_hilbert",
  "pyo3",
@@ -2373,7 +2373,7 @@ checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
 name = "utilejson"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -2383,7 +2383,7 @@ dependencies = [
 
 [[package]]
 name = "utiles"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "fast_hilbert",
  "geo-types",
@@ -2396,7 +2396,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-cli"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "clap-verbosity-flag",
@@ -2422,7 +2422,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-dev"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "deadpool-sqlite",
@@ -2447,7 +2447,7 @@ dependencies = [
 
 [[package]]
 name = "utilesqlite"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "deadpool-sqlite",
  "rusqlite",

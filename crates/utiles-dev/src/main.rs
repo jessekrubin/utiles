@@ -1,12 +1,9 @@
 use futures::TryStreamExt;
-use geozero;
-use geozero::mvt::{self, tile, Message, Tile};
-use geozero::{ProcessToJson, ToJson};
+
+use geozero::mvt::{Message, Tile};
+
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use sqlx::{
-    query, query_as, query_as_unchecked, ConnectOptions, Executor, FromRow, Statement,
-};
-use std::fmt::Pointer;
+use sqlx::{query_as, ConnectOptions, Executor, FromRow};
 
 // #[derive(Debug, FromRow)]
 // struct MetadataRow {
@@ -36,7 +33,7 @@ fn mvt_dev() {
     println!("bytes: {:?}", bytes.len());
     // let buf = bytes.as_slice();
 
-    let mut cursor = std::io::Cursor::new(bytes.as_slice());
+    let cursor = std::io::Cursor::new(bytes.as_slice());
 
     let mt = Tile::decode(cursor).unwrap();
 
@@ -90,7 +87,7 @@ async fn sqlxing() {
     let copts = SqliteConnectOptions::new()
         .filename(file)
         .create_if_missing(true);
-    let mut c = copts.connect().await.unwrap();
+    let _c = copts.connect().await.unwrap();
 
     let pool = SqlitePoolOptions::new()
         .max_connections(5)
@@ -101,9 +98,8 @@ async fn sqlxing() {
     // timing
     // start
     let start = std::time::Instant::now();
-    // let tthingydickr = query_as::<_, MetadataRow>("SELECT * FROM tiles");
     let mut r = query_as::<_, MetadataRow>("SELECT * FROM tiles").fetch(&pool);
-    while let Some(row) = r.try_next().await.unwrap() {
+    while let Some(_row) = r.try_next().await.unwrap() {
         // println!("row: {:?}", row);
     }
 

@@ -126,6 +126,18 @@ impl PyTile {
         }
     }
 
+    #[classmethod]
+    pub fn from_row_major_id(_cls: &PyType, row_major_id: u64) -> Self {
+        let xyz = Tile::from_row_major_id(row_major_id);
+        PyTile::from(xyz)
+    }
+
+    #[classmethod]
+    pub fn from_rmid(_cls: &PyType, row_major_id: u64) -> Self {
+        let xyz = Tile::from_row_major_id(row_major_id);
+        PyTile::from(xyz)
+    }
+
     pub fn quadkey(&self) -> String {
         self.xyz.quadkey()
     }
@@ -146,6 +158,14 @@ impl PyTile {
 
     pub fn parent_pmtileid(&self) -> u64 {
         self.xyz.parent_id()
+    }
+
+    pub fn row_major_id(&self) -> u64 {
+        self.xyz.row_major_id()
+    }
+
+    pub fn rmid(&self) -> u64 {
+        self.xyz.row_major_id()
     }
 
     #[classmethod]

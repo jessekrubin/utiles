@@ -3,10 +3,14 @@ from __future__ import annotations
 
 import logging
 
-import click
-
 from utiles import __version__
 from utiles.cli import cli
+
+try:
+    import click
+except ImportError as ie:
+    msg = "click not installed for rio/legacy utiles cli: `pip install click`"
+    raise ImportError(msg) from ie
 
 logger = logging.getLogger(__name__)
 

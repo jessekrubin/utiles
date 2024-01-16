@@ -113,7 +113,6 @@ impl PyLngLatBbox {
         self.bbox.tuple()
     }
 
-
     pub fn __richcmp__(
         &self,
         other: &PyAny,

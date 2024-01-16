@@ -55,7 +55,8 @@ fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
             "zoom must be between 0 and 32: {zoom}"
         )))?;
     }
-    Ok(utiles::minmax(zoom as u32))
+    let r = utiles::minmax(zoom as u8);
+    Ok(r)
 }
 
 #[pyfunction]
@@ -65,10 +66,7 @@ fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
 
 #[pyfunction]
 fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
-    println!("quadkey: {:?}", quadkey);
     let xyz = utiles::quadkey2tile(quadkey);
-    println!("{:?}", xyz);
-    println!("res: {:?}", xyz);
     match xyz {
         Ok(xyz) => Ok(PyTile::from(xyz)),
         Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),

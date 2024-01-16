@@ -210,8 +210,15 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadata
                 value: row.get(1)?,
             })
         })?
-        .collect::<RusqliteResult<Vec<MbtilesMetadataRow>, rusqlite::Error>>()?;
-    Ok(mdata)
+        .collect::<RusqliteResult<Vec<MbtilesMetadataRow>, rusqlite::Error>>();
+
+    match mdata {
+        Ok(mdata) => Ok(mdata),
+        Err(e) => {
+            error!("Error getting metadata: {}", e);
+            Err(e)
+        }
+    }
 }
 
 /// Return true/false if metadata table has a unique index on 'name'

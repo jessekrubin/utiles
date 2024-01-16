@@ -13,7 +13,8 @@ use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 
-use crate::{pmtiles, quadkey2tile, xyz2quadkey};
+use crate::mbtiles::MbtTileRow;
+use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
 use crate::{utile, UtilesError};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -80,13 +81,7 @@ impl PartialOrd<Self> for Tile {
 
 impl Ord for Tile {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.z != other.z {
-            return self.z.cmp(&other.z);
-        }
-        if self.y != other.y {
-            return self.y.cmp(&other.y);
-        }
-        self.x.cmp(&other.x)
+        (self.z, self.x, self.y).cmp(&(other.z, other.x, other.y))
     }
 }
 
@@ -101,10 +96,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::try_from(UtilesError::TileParseError(
-                        s.to_string(),
-                    ))
-                    .unwrap())
+                    return Err(Box::from(UtilesError::TileParseError(s.to_string())));
                 }
             }
         } else if s.starts_with('[') {
@@ -113,10 +105,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::try_from(UtilesError::TileParseError(
-                        s.to_string(),
-                    ))
-                    .unwrap())
+                    return Err(Box::from(UtilesError::TileParseError(s.to_string())));
                 }
             }
         }
@@ -126,9 +115,7 @@ impl FromStr for Tile {
         // if ok return tile but not tile parse error
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => {
-                Err(Box::try_from(UtilesError::TileParseError(s.to_string())).unwrap())
-            }
+            Err(_e) => Err(Box::from(UtilesError::TileParseError(s.to_string()))),
         }
     }
 }
@@ -175,6 +162,16 @@ impl Tile {
     }
 
     #[must_use]
+    pub fn from_row_major_id(id: u64) -> Self {
+        Tile::from(rmid2xyz(id))
+    }
+
+    #[must_use]
+    pub fn from_rmid(id: u64) -> Self {
+        Tile::from_row_major_id(id)
+    }
+
+    #[must_use]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
         if let Some(sep) = sep {
             format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y)
@@ -209,10 +206,7 @@ impl Tile {
         let res = serde_json::from_str::<Tile>(json);
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => {
-                Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
-                    .unwrap())
-            }
+            Err(_e) => Err(Box::from(UtilesError::TileParseError(json.to_string()))),
         }
     }
     // > {
@@ -236,10 +230,7 @@ impl Tile {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
             Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
-            Err(_e) => {
-                Err(Box::try_from(UtilesError::TileParseError(json.to_string()))
-                    .unwrap())
-            }
+            Err(_e) => Err(Box::from(UtilesError::TileParseError(json.to_string()))),
         }
     }
 
@@ -523,6 +514,17 @@ impl From<&Map<String, Value>> for Tile {
         let y = map["y"].as_u64().unwrap() as u32;
         let z = map["z"].as_u64().unwrap() as u8;
         utile!(x, y, z)
+    }
+}
+
+impl From<MbtTileRow> for Tile {
+    fn from(row: MbtTileRow) -> Self {
+        // flip the y
+        Self::new(
+            row.tile_column,
+            flipy(row.tile_row, row.zoom_level),
+            row.zoom_level,
+        )
     }
 }
 

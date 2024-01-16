@@ -3,7 +3,7 @@ pub fn xyz2pmid(x: u32, y: u32, z: u8) -> u64 {
     if z == 0 {
         return 0;
     }
-    let base_id: u64 = 1 + (1..z).map(|i| 4u64.pow(u32::from(i))).sum::<u64>();
+    let base_id: u64 = (4u64.pow(u32::from(z)) - 1) / 3;
     let h = fast_hilbert::xy2h(x, y, z);
     base_id + h
 }
@@ -14,6 +14,9 @@ pub fn zxy2pmid(z: u8, x: u32, y: u32) -> u64 {
     xyz2pmid(x, y, z)
 }
 
+/// Calculate the index of the tile for the zoom level as well as the zoom level.
+///
+/// h stands for
 #[must_use]
 pub fn calculate_h_o(i: u64) -> (u64, u8) {
     if i == 0 {

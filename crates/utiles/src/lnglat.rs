@@ -1,15 +1,10 @@
-use geo_types::{coord, Coord};
 use std::str::FromStr;
+
+use crate::point::Point2d;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LngLat {
-    pub xy: Coord,
-}
-
-impl From<Coord> for LngLat {
-    fn from(xy: Coord) -> Self {
-        LngLat::new(xy.x, xy.y)
-    }
+    pub xy: Point2d,
 }
 
 impl From<(f64, f64)> for LngLat {
@@ -30,11 +25,12 @@ impl FromStr for LngLat {
         Ok(LngLat::new(x, y))
     }
 }
+
 impl LngLat {
     #[must_use]
     pub fn new(lng: f64, lat: f64) -> Self {
         LngLat {
-            xy: coord! { x: lng, y: lat},
+            xy: Point2d::new(lng, lat),
         }
     }
 

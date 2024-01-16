@@ -25,11 +25,3 @@ pyo3 = { workspace = true, features = ["auto-initialize"] }
 
 [build-dependencies]
 pyo3-build-config.workspace = true
-
-[profile.dev]
-opt-level = 0
-
-[profile.release]
-opt-level = 3
-strip = true
-lto = true
