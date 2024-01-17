@@ -20,7 +20,7 @@ use pyutiles::pylnglatbbox::PyLngLatBbox;
 use pyutiles::pytile::PyTile;
 use std::collections::{HashMap, HashSet};
 use utiles::bbox::BBox;
-use utiles::libtiletype;
+use utiles::tile_type;
 use utiles::zoom::ZoomOrZooms;
 
 mod cli;
@@ -85,17 +85,17 @@ fn from_tuple(tile: TileTuple) -> PyTile {
 
 #[pyfunction]
 fn tiletype(buffer: &[u8]) -> usize {
-    libtiletype::enum2const(libtiletype::tiletype(buffer))
+    tile_type::enum2const(tile_type::tiletype(buffer))
 }
 
 #[pyfunction]
 fn tiletype_str(buffer: &[u8]) -> String {
-    libtiletype::tiletype_str(buffer)
+    tile_type::tiletype_str(buffer)
 }
 
 #[pyfunction]
 fn tiletype2headers(tiletype: usize) -> Vec<(&'static str, &'static str)> {
-    libtiletype::headers(&libtiletype::const2enum(tiletype))
+    tile_type::headers(&tile_type::const2enum(tiletype))
 }
 
 #[pyfunction]
@@ -746,14 +746,14 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tiletype, m)?)?;
     m.add_function(wrap_pyfunction!(tiletype_str, m)?)?;
     m.add_function(wrap_pyfunction!(tiletype2headers, m)?)?;
-    m.add("TILETYPE_UNKNOWN", libtiletype::TILETYPE_UNKNOWN)?;
-    m.add("TILETYPE_GIF", libtiletype::TILETYPE_GIF)?;
-    m.add("TILETYPE_JPG", libtiletype::TILETYPE_JPG)?;
-    m.add("TILETYPE_JSON", libtiletype::TILETYPE_JSON)?;
-    m.add("TILETYPE_PBF", libtiletype::TILETYPE_PBF)?;
-    m.add("TILETYPE_PBFGZ", libtiletype::TILETYPE_PBFGZ)?;
-    m.add("TILETYPE_PNG", libtiletype::TILETYPE_PNG)?;
-    m.add("TILETYPE_WEBP", libtiletype::TILETYPE_WEBP)?;
+    m.add("TILETYPE_UNKNOWN", tile_type::TILETYPE_UNKNOWN)?;
+    m.add("TILETYPE_GIF", tile_type::TILETYPE_GIF)?;
+    m.add("TILETYPE_JPG", tile_type::TILETYPE_JPG)?;
+    m.add("TILETYPE_JSON", tile_type::TILETYPE_JSON)?;
+    m.add("TILETYPE_PBF", tile_type::TILETYPE_PBF)?;
+    m.add("TILETYPE_PBFGZ", tile_type::TILETYPE_PBFGZ)?;
+    m.add("TILETYPE_PNG", tile_type::TILETYPE_PNG)?;
+    m.add("TILETYPE_WEBP", tile_type::TILETYPE_WEBP)?;
 
     // m.add_class::<TileTuple>()?;
     m.add_class::<PyTile>()?;

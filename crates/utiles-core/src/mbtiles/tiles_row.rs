@@ -1,4 +1,4 @@
-use crate::libtiletype::tiletype_str;
+use crate::tile_type::tiletype_str;
 use crate::{flipy, TileLike};
 #[derive(Debug, Clone)]
 pub struct MbtTileRow {

@@ -11,8 +11,8 @@
 
 pub use utiles_core::*;
 
-pub mod utilejson;
 pub mod cli;
+pub mod utilejson;
 // pub use gdal::geotransform2optzoom;
 // pub use lnglat::LngLat;
 // pub use point::{Point2d, Point3d};
