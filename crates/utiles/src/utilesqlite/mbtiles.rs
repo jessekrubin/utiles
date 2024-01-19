@@ -109,10 +109,7 @@ impl Mbtiles {
     pub fn bbox(&self) -> Result<BBox, Box<dyn Error>> {
         let bounding = self.tilejson()?.bounds;
         match bounding {
-            Some(bounding) => {
-                let bbox = BBox::from(&bounding);
-                Ok(bbox)
-            }
+            Some(bounds) => Ok(BBox::new(bounds.left, bounds.bottom, bounds.right, bounds.top)),
             None => Err("Error parsing metadata to TileJSON: no data available".into()),
         }
         // convert boundsd to BBox

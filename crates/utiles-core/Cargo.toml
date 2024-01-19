@@ -21,4 +21,3 @@ fast_hilbert.workspace = true
 # TODO: Remove the following dependencies and move them into `utiles`
 geo-types.workspace = true
 geojson.workspace = true
-tilejson.workspace = true
