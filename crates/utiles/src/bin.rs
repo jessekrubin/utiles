@@ -1,6 +1,7 @@
 // mod args;
 mod cli;
 mod utilejson;
+mod utilesqlite;
 // mod commands;
 // mod find;
 // mod stdinterator;

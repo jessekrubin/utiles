@@ -16,7 +16,7 @@ name = "utiles"
 path = "src/lib.rs"
 
 [[bin]]
-name = "ut"
+name = "utiles"
 path = "src/bin.rs"
 
 
@@ -32,7 +32,6 @@ tilejson.workspace = true
 
 # CLI dependencies
 tracing.workspace = true
-rusqlite = { workspace = true, features = ["bundled", "hooks"] }
 tokio = { workspace = true, features = ["fs"] }
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
 clap = { version = "4.4.7", features = ["derive", "color", "wrap_help"] }
@@ -40,10 +39,14 @@ clap-verbosity-flag = "2.1.0"
 globset = "0.4.13"
 ignore = "0.4.20"
 #utilejson = { path = "../utilejson" }
-utilesqlite = { path = "../utilesqlite" }
+#utilesqlite = { path = "../utilesqlite" }
 tokio-stream = "0.1.14"
 futures = "0.3.29"
 walkdir = "2.4.0"
 time = "0.3.30"
 itertools = "0.12.0"
 webbrowser = "0.8.12"
+# utilesqlite dependencies
+deadpool-sqlite = { version = "0.7.0", features = ["tracing"] }
+#async-sqlite = { version = "0.1.0", features = ["bundled", "backup", "blob", "serde_json", "trace", "hooks", "array", "functions", "modern-full"] }
+rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions"] }

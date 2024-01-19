@@ -1502,6 +1502,7 @@ version = "0.3.0"
 dependencies = [
  "clap",
  "clap-verbosity-flag",
+ "deadpool-sqlite",
  "fast_hilbert",
  "futures",
  "geo-types",
@@ -1520,7 +1521,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "utiles-core",
- "utilesqlite",
  "walkdir",
  "webbrowser",
 ]

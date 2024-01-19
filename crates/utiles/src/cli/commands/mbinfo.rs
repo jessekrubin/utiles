@@ -3,8 +3,8 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::debug;
 
-use utilesqlite::mbtiles::MbtilesZoomStats;
-use utilesqlite::Mbtiles;
+use crate::utilesqlite::mbtstats::MbtilesZoomStats;
+use crate::utilesqlite::Mbtiles;
 
 use crate::cli::args::MbtilesStatsArgs;
 

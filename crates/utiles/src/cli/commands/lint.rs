@@ -3,10 +3,10 @@ use std::path::{Path, PathBuf};
 
 use tracing::{debug, info, warn};
 
+use crate::utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
+use crate::utilesqlite::squealite;
 use utiles_core::lint_error::{UtilesLintError, UtilesLintResult};
 use utiles_core::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
-use utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
-use utilesqlite::squealite;
 
 use crate::cli::args::LintArgs;
 use crate::cli::find;

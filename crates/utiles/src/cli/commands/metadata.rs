@@ -3,8 +3,8 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::debug;
 
+use crate::utilesqlite::Mbtiles;
 use utiles_core::mbtiles::metadata2map;
-use utilesqlite::Mbtiles;
 
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 

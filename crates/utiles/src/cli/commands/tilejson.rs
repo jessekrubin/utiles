@@ -3,7 +3,7 @@ use std::path::Path;
 use tracing::debug;
 
 use crate::utilejson::tilejson_stringify;
-use utilesqlite::Mbtiles;
+use crate::utilesqlite::Mbtiles;
 
 use crate::cli::args::TilejsonArgs;
 
