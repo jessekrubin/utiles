@@ -5,13 +5,15 @@ use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use tilejson::TileJSON;
 use tracing::{debug, error};
 
-use crate::utilesqlite::insert_strategy::InsertStrategy;
-use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use utiles_core::bbox::BBox;
 use utiles_core::mbtiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::mbtiles::{metadata2tilejson, MinZoomMaxZoom};
+use utiles_core::mbtiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::{yflip, LngLat, Tile, TileLike};
+
+use crate::utilejson::metadata2tilejson;
+use crate::utilesqlite::insert_strategy::InsertStrategy;
+use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 
 pub struct Mbtiles {
     conn: Connection,

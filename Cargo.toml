@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     "crates/utiles-core",
     "crates/utiles",
-    "crates/utilesqlite",
     "utiles-pyo3"
 ]
 
