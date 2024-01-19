@@ -4,8 +4,8 @@ use deadpool_sqlite::{self, Config, Pool, PoolError, Runtime};
 use tilejson::TileJSON;
 use tracing::error;
 
-use utiles_core::mbtiles::metadata2tilejson;
-use utiles_core::mbtiles::metadata_row::MbtilesMetadataRow;
+use utiles_core::mbutiles::metadata2tilejson;
+use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::Tile;
 

@@ -29,7 +29,7 @@ pub mod geojson;
 pub mod geostats;
 pub mod lint_error;
 pub mod lnglat;
-pub mod mbtiles;
+pub mod mbutiles;
 pub mod parsing;
 pub mod pmtiles;
 pub mod point;

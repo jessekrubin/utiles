@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::mbtiles::metadata_row::{MbtilesMetadataRow, MbtilesMetadataRows};
+use crate::mbutiles::metadata_row::{MbtilesMetadataRow, MbtilesMetadataRows};
 
 #[must_use]
 pub fn metadata2duplicates(

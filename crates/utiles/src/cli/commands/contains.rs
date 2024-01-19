@@ -4,7 +4,7 @@ use tracing::{debug, error};
 use crate::utilesqlite::Mbtiles;
 use utiles_core::LngLat;
 
-/// Check if an mbtiles file contains a lnglat
+/// Check if an mbutiles file contains a lnglat
 ///
 /// Added by [dan-costello](https://github.com/dan-costello)
 pub fn contains_main(filepath: &str, lnglat: LngLat) {

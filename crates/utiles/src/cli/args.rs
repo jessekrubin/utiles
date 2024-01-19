@@ -88,7 +88,7 @@ pub struct ParentChildrenArgs {
 
 #[derive(Debug, Parser)]
 pub struct SqliteDbCommonArgs {
-    #[arg(required = true, help = "mbtiles filepath")]
+    #[arg(required = true, help = "mbutiles filepath")]
     pub filepath: String,
 
     #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
@@ -145,13 +145,13 @@ pub struct MbtilesStatsArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes", about = "Echo tilejson for mbtiles file(s)", long_about = None)]
+    #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes", about = "Echo tilejson for mbutiles file(s)", long_about = None)]
     Tilejson(TilejsonArgs),
 
     #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None, visible_alias = "cp")]
     Copy(CopyArgs),
 
-    #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
+    #[command(name = "lint", about = "Lint mbutiles file(s)", long_about = None)]
     Lint(LintArgs),
 
     /// metadata
@@ -164,14 +164,14 @@ pub enum Commands {
     #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
     Rimraf(RimrafArgs),
 
-    #[command(name = "mbinfo", about = "Echo basic stats on mbtiles file", long_about = None)]
+    #[command(name = "mbinfo", about = "Echo basic stats on mbutiles file", long_about = None)]
     Mbinfo(MbtilesStatsArgs),
 
-    // #[command(name = "geojsonio", about = "Open mbtiles in geojson.io", long_about = None)]
+    // #[command(name = "geojsonio", about = "Open mbutiles in geojson.io", long_about = None)]
     // Geojsonio(SqliteDbCommonArgs),
-    #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
+    #[command(name = "dbcontains", about = "Determine if mbutiles contains a latlong", long_about = None)]
     Contains {
-        #[arg(required = true, help = "mbtiles filepath")]
+        #[arg(required = true, help = "mbutiles filepath")]
         filepath: String,
 
         #[arg(required = true, help = "lat/long")]

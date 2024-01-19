@@ -18,7 +18,7 @@ pub fn find_filepaths(fspaths: &[String]) -> Vec<PathBuf> {
     let fspath = fspaths[0].clone();
 
     let mut glob_builder = GlobSetBuilder::new();
-    let glob = Glob::new("**/*.{mbtiles,sqlite,sqlite3}").unwrap();
+    let glob = Glob::new("**/*.{mbutiles,sqlite,sqlite3}").unwrap();
     glob_builder.add(glob);
     let globset = glob_builder.build().unwrap();
 

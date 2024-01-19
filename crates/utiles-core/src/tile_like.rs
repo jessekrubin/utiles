@@ -125,10 +125,10 @@ pub trait TileLike {
 
     #[must_use]
     fn sql_where(&self, flip: Option<bool>) -> String {
-        // classic mbtiles sqlite query:
+        // classic mbutiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
 
-        // flip y for tms (default for mbtiles)
+        // flip y for tms (default for mbutiles)
         if flip.unwrap_or(true) {
             format!(
                 "(zoom_level = {} AND tile_column = {} AND tile_row = {})",

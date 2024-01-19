@@ -12,7 +12,7 @@ use walkdir::WalkDir;
 
 use crate::utilesqlite::Mbtiles;
 use utiles_core::bbox::BBox;
-use utiles_core::mbtiles::{MbtTileRow, MbtilesMetadataRow};
+use utiles_core::mbutiles::{MbtTileRow, MbtilesMetadataRow};
 use utiles_core::tile_data_row::TileData;
 use utiles_core::{tile_ranges, Tile, TileLike};
 
@@ -461,9 +461,9 @@ fn get_tile_src(src: &str) -> Source {
 }
 
 fn get_tile_dst(dst: &str) -> Destination {
-    // if it contains '.mbtiles' then it's a mbtiles file
+    // if it contains '.mbutiles' then it's a mbutiles file
     // else it's a directory
-    if dst.contains(".mbtiles") {
+    if dst.contains(".mbutiles") {
         Destination::Mbtiles(dst.to_string())
     } else {
         Destination::Fs(dst.to_string())

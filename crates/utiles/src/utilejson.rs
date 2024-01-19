@@ -6,7 +6,7 @@ use serde_json::{Value as JSONValue, Value};
 use tilejson::{tilejson, Bounds, Center, TileJSON};
 
 use utiles_core::geostats::TileStats;
-use utiles_core::mbtiles::metadata_row::MbtilesMetadataRow;
+use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
 
 /// # Panics
 ///
@@ -31,7 +31,7 @@ fn to_val<V, E: Display>(val: Result<V, E>) -> Option<V> {
 }
 
 /// Convert metadata rows to a `TileJSON` object
-/// (ripped from martin-mbtiles thank y'all very much)
+/// (ripped from martin-mbutiles thank y'all very much)
 pub fn metadata2tilejson(
     metadata: Vec<MbtilesMetadataRow>,
 ) -> Result<TileJSON, Box<dyn Error>> {

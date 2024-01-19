@@ -6,7 +6,7 @@ use tracing::{debug, info, warn};
 use crate::utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 use crate::utilesqlite::squealite;
 use utiles_core::lint_error::{UtilesLintError, UtilesLintResult};
-use utiles_core::mbtiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
+use utiles_core::mbutiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
 
 use crate::cli::args::LintArgs;
 use crate::cli::find;
@@ -36,7 +36,7 @@ pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
         }
     }
 
-    // let mbtiles = mbtiles_result.unwrap();
+    // let mbutiles = mbtiles_result.unwrap();
     let has_unique_index_on_metadata_name =
         mbtiles.has_unique_index_on_metadata().unwrap();
     let metadata_name_is_primary_key =
@@ -85,7 +85,7 @@ pub fn lint_filepath(
     //     }
     // };
 
-    if !fspath_str.ends_with(".mbtiles") {
+    if !fspath_str.ends_with(".mbutiles") {
         let conn = match squealite::open(fspath_str) {
             Ok(conn) => conn,
             Err(e) => {
@@ -101,7 +101,7 @@ pub fn lint_filepath(
                 return Ok(lint_mbtiles_file(&mbtiles, fix));
             }
             Err(e) => {
-                warn!("Unable to determine if file is mbtiles: {}", e);
+                warn!("Unable to determine if file is mbutiles: {}", e);
                 return Err(UtilesLintError::NotAMbtilesDb(fspath_str.to_string()));
             }
         }

@@ -36,7 +36,7 @@ pub mod utilesqlite;
 // pub mod libtiletype;
 // pub mod lint_error;
 // pub mod lnglat;
-// pub mod mbtiles;
+// pub mod mbutiles;
 // pub mod parsing;
 // pub mod pmtiles;
 // pub mod point;

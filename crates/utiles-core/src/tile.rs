@@ -13,7 +13,7 @@ use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 
-use crate::mbtiles::MbtTileRow;
+use crate::mbutiles::MbtTileRow;
 use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
 use crate::{utile, UtilesError};
 
@@ -392,10 +392,10 @@ impl Tile {
 
     // #[must_use]
     // pub fn sql_where(&self, flip: Option<bool>) -> String {
-    //     // classic mbtiles sqlite query:
+    //     // classic mbutiles sqlite query:
     //     // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
     //
-    //     // flip y for tms (default for mbtiles)
+    //     // flip y for tms (default for mbutiles)
     //     if flip.unwrap_or(true) {
     //         format!(
     //             "(zoom_level = {} AND tile_column = {} AND tile_row = {})",

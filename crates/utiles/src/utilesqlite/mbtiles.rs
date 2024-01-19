@@ -6,8 +6,8 @@ use tilejson::TileJSON;
 use tracing::{debug, error};
 
 use utiles_core::bbox::BBox;
-use utiles_core::mbtiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::mbtiles::MinZoomMaxZoom;
+use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
+use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::{yflip, LngLat, Tile, TileLike};
 
@@ -109,7 +109,12 @@ impl Mbtiles {
     pub fn bbox(&self) -> Result<BBox, Box<dyn Error>> {
         let bounding = self.tilejson()?.bounds;
         match bounding {
-            Some(bounds) => Ok(BBox::new(bounds.left, bounds.bottom, bounds.right, bounds.top)),
+            Some(bounds) => Ok(BBox::new(
+                bounds.left,
+                bounds.bottom,
+                bounds.right,
+                bounds.top,
+            )),
             None => Err("Error parsing metadata to TileJSON: no data available".into()),
         }
         // convert boundsd to BBox

@@ -4,7 +4,7 @@ use serde::Serialize;
 use tracing::debug;
 
 use crate::utilesqlite::Mbtiles;
-use utiles_core::mbtiles::metadata2map;
+use utiles_core::mbutiles::metadata2map;
 
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 
@@ -77,12 +77,12 @@ pub fn metadata_set_main(args: &MetadataSetArgs) {
     // match current_value {
     //     Some(v) => {
     //         if args.value != v {
-    //             let r = mbtiles.metadata_set(&args.key, &args.value).unwrap();
+    //             let r = mbutiles.metadata_set(&args.key, &args.value).unwrap();
     //             debug!("metadata rows updated: {:?}", r);
     //         }
     //     }
     //     None => {
-    //         let r = mbtiles.metadata_set(&args.key, &args.value).unwrap();
+    //         let r = mbutiles.metadata_set(&args.key, &args.value).unwrap();
     //         debug!("metadata rows updated: {:?}", r);
     //     }
     // }

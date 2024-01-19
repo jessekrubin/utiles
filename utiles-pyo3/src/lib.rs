@@ -761,7 +761,7 @@ fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyLngLatBbox>()?;
     m.add_class::<PyBbox>()?;
 
-    // mbtiles...
+    // mbutiles...
     // m.add_class::<PyMbtiles>()?;
     // m.add_function(wrap_pyfunction!(query_db, m)?)?;
 

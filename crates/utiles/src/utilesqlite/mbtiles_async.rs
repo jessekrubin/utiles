@@ -6,7 +6,7 @@ use tracing::error;
 
 use crate::utilejson::metadata2tilejson;
 
-use utiles_core::mbtiles::metadata_row::MbtilesMetadataRow;
+use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::Tile;
 
