@@ -31,9 +31,9 @@ jobs:
           manylinux: auto
           working-directory: ./utiles-pyo3
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux-${{ matrix.target }}
           path: utiles-pyo3/dist
       - name: pytest
         if: ${{ startsWith(matrix.target, 'x86_64') }}
@@ -81,9 +81,9 @@ jobs:
           sccache: "true"
           working-directory: ./utiles-pyo3
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-windows-${{ matrix.target }}
           path: utiles-pyo3/dist
       - name: pytest
         if: ${{ !startsWith(matrix.target, 'aarch64') }}
@@ -113,9 +113,9 @@ jobs:
           sccache: "true"
           working-directory: ./utiles-pyo3
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-macos-${{ matrix.target }}
           path: utiles-pyo3/dist
 
       - name: pytest
@@ -140,9 +140,9 @@ jobs:
           args: --out dist
           working-directory: ./utiles-pyo3
       - name: Upload sdist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-sdist
           path: utiles-pyo3/dist
   
   release:
@@ -151,9 +151,7 @@ jobs:
     if: "startsWith(github.ref, 'refs/tags/')"
     needs: [linux, windows, macos, sdist]
     steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: wheels
+      - uses: actions/download-artifact@v4
       - name: list builds
         run: |
           ls -l

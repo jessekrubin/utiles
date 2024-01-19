@@ -8,11 +8,11 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::too_many_lines)]
 mod args;
-mod cli;
 mod commands;
+mod entry;
 mod find;
 mod stdinterator;
 mod stdinterator_filter;
 
-pub use crate::cli::cli::cli_main;
-pub use crate::cli::cli::cli_main_sync;
+pub use crate::cli::entry::cli_main;
+pub use crate::cli::entry::cli_main_sync;

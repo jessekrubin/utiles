@@ -112,7 +112,7 @@ pub fn cli_main_sync(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> u
 
 #[cfg(test)]
 mod tests {
-    use crate::args::Cli;
+    use crate::cli::args::Cli;
 
     #[test]
     fn verify_cli() {
