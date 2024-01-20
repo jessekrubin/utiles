@@ -289,28 +289,28 @@ impl From<Tile> for WebMercatorBbox {
     }
 }
 
-impl From<Vec<Coord>> for BBox {
-    fn from(coords: Vec<Coord>) -> Self {
-        let mut min_x = 180.0;
-        let mut min_y = 90.0;
-        let mut max_x = -180.0;
-        let mut max_y = -90.0;
-        for coord in coords {
-            let x = coord.x;
-            let y = coord.y;
-            if x < min_x {
-                min_x = x;
-            }
-            if y < min_y {
-                min_y = y;
-            }
-            if x > max_x {
-                max_x = x;
-            }
-            if y > max_y {
-                max_y = y;
-            }
-        }
-        BBox::new(min_x, min_y, max_x, max_y)
-    }
-}
+// impl From<Vec<Coord>> for BBox {
+//     fn from(coords: Vec<Coord>) -> Self {
+//         let mut min_x = 180.0;
+//         let mut min_y = 90.0;
+//         let mut max_x = -180.0;
+//         let mut max_y = -90.0;
+//         for coord in coords {
+//             let x = coord.x;
+//             let y = coord.y;
+//             if x < min_x {
+//                 min_x = x;
+//             }
+//             if y < min_y {
+//                 min_y = y;
+//             }
+//             if x > max_x {
+//                 max_x = x;
+//             }
+//             if y > max_y {
+//                 max_y = y;
+//             }
+//         }
+//         BBox::new(min_x, min_y, max_x, max_y)
+//     }
+// }

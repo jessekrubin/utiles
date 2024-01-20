@@ -1,4 +1,3 @@
-use geo_types::Coord;
 use serde_json::Value;
 
 use crate::bbox::BBox;
@@ -406,43 +405,6 @@ pub fn parse_float_blocks(input: &str) -> Vec<&str> {
 
     blocks
 }
-
-pub fn coords2bounds<I>(mut coords: I) -> Option<(f64, f64, f64, f64)>
-where
-    I: Iterator<Item = Coord>,
-{
-    // Initialize the bounds with the first coordinate.
-    let first_coord = coords.next()?;
-    let mut min_x = first_coord.x;
-    let mut max_x = first_coord.x;
-    let mut min_y = first_coord.y;
-    let mut max_y = first_coord.y;
-
-    // Iterate through the coordinates to find the extremes.
-    for coord in coords {
-        if coord.x < min_x {
-            min_x = coord.x;
-        }
-        if coord.x > max_x {
-            max_x = coord.x;
-        }
-        if coord.y < min_y {
-            min_y = coord.y;
-        }
-        if coord.y > max_y {
-            max_y = coord.y;
-        }
-    }
-
-    Some((min_x, min_y, max_x, max_y))
-}
-
-// #[must_use]
-// pub fn geojson_bounds(geojson_str: &str) -> BBox {
-//     let coords = geojson_coords(geojson_str);
-//     let bounds = coords2bounds(coords).unwrap();
-//     BBox::new(bounds.0, bounds.1, bounds.2, bounds.3)
-// }
 
 #[cfg(test)]
 mod tests {

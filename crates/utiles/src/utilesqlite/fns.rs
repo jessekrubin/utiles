@@ -128,14 +128,6 @@ mod tests {
                 let filename: String = row.get(0)?;
                 let tiletype: String = row.get(1)?;
                 let tilesize: Option<i32> = row.get(2)?;
-
-                // println!("==========");
-                // println!("{}: {}", filename, tiletype);
-                // let tilesize_str = match tilesize {
-                //     Some(s) => s.to_string(),
-                //     None => "None".to_string(),
-                // };
-                // println!("{}: {}", filename, tilesize_str);
                 let row = (filename, tiletype, tilesize);
                 Ok(row)
             })?

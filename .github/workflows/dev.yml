@@ -30,8 +30,8 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --verbose
           sccache: "true"
-          manylinux: auto
           working-directory: ./utiles-pyo3
+      #          manylinux: auto
 
       - name: pytest
         if: ${{ startsWith(matrix.target, 'x86_64') }}
