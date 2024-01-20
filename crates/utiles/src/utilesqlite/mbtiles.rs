@@ -16,17 +16,12 @@ use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::insert_strategy::InsertStrategy;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum MbtilesType {
+    #[default]
     Flat,
     Hash,
     Norm,
-}
-
-impl Default for MbtilesType {
-    fn default() -> Self {
-        MbtilesType::Flat
-    }
 }
 
 pub struct Mbtiles {
@@ -56,6 +51,7 @@ impl Mbtiles {
         Mbtiles { conn }
     }
 
+    #[must_use]
     pub fn open_in_memory() -> Self {
         let conn = Connection::open_in_memory().unwrap();
         Mbtiles { conn }

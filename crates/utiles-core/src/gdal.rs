@@ -38,6 +38,7 @@ impl GeoTransform {
         }
     }
 
+    #[must_use]
     pub fn optzoom(&self) -> u8 {
         let equator = 2.0 * std::f64::consts::PI * 6_378_137.0; // 2 * pi * radius of earth in meters
         let resolution = self.gt1 * (equator / 360.0);

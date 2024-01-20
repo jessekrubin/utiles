@@ -34,15 +34,14 @@ pub fn add_function_ut_tilesize(db: &Connection) -> Result<()> {
             assert_eq!(ctx.len(), 1, "called with unexpected number of arguments");
             let blob = ctx.get_raw(0).as_blob()?;
 
-            let size: Option<i64> = match imagesize::blob_size(&blob) {
+            let size: Option<i64> = match imagesize::blob_size(blob) {
                 Ok(imgsize) => {
-                    let size = if imgsize.width == imgsize.height {
+                    if imgsize.width == imgsize.height {
                         Some(imgsize.width as i64)
                     } else {
                         // -1 is there is a problem and img is not square
                         Some(-1)
-                    };
-                    size
+                    }
                 }
                 Err(e) => {
                     error!("error getting image size: {}", e);
