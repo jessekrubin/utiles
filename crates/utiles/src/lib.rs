@@ -9,9 +9,11 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::cast_possible_truncation)]
 
-pub use utiles_core::*;
+pub use core::*;
 
 pub mod cli;
+mod core;
+pub mod gj;
 pub mod utilejson;
 pub mod utilesqlite;
 

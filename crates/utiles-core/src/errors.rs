@@ -14,6 +14,9 @@ pub enum UtilesError {
     #[error("invalid zoom(s): {0}")]
     InvalidZoom(String),
 
+    #[error("invalid tile dimensions(s): {0}")]
+    InvalidTileDim(String),
+
     #[error("Coversion error: {0}")]
     ConversionError(String),
 

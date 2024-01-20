@@ -1,9 +1,10 @@
 use tracing::{debug, error};
-use utiles_core::parsing::parse_bbox;
+
 use utiles_core::{bounding_tile, Tile, TileLike};
 
 use crate::cli::args::TileFmtArgs;
 use crate::cli::stdinterator_filter;
+use crate::gj::parsing::parse_bbox_geojson;
 
 pub fn neighbors_main(args: TileFmtArgs) {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
@@ -22,7 +23,7 @@ pub fn bounding_tile_main(args: TileFmtArgs) {
     let bboxes = lines.map(|l| {
         let s = l.unwrap();
         debug!("l: {:?}", s);
-        parse_bbox(&s).unwrap()
+        parse_bbox_geojson(&s).unwrap()
     });
     for bbox in bboxes {
         let tile = bounding_tile(bbox, None);

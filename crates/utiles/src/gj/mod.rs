@@ -2,6 +2,8 @@ use geo_types::coord;
 use geo_types::Coord;
 use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};
 
+pub mod parsing;
+
 pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Vec<f64>>> {
     match g.value {
         GeoJsonValue::Point(c) => Box::new(std::iter::once(c)),

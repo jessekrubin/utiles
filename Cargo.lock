@@ -642,6 +642,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "imagesize"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "029d73f573d8e8d63e6d5020011d3255b28c3ba85d6cf870a07184ed23de9284"
+
+[[package]]
 name = "indoc"
 version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1508,7 +1514,9 @@ dependencies = [
  "geojson",
  "globset",
  "ignore",
+ "imagesize",
  "itertools",
+ "log",
  "rusqlite",
  "serde",
  "serde_json",
@@ -1530,7 +1538,6 @@ version = "0.3.0"
 dependencies = [
  "fast_hilbert",
  "geo-types",
- "geojson",
  "serde",
  "serde_json",
  "thiserror",

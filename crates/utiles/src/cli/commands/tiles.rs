@@ -10,6 +10,7 @@ use utiles_core::{Tile, TileLike};
 
 use crate::cli::args::TilesArgs;
 use crate::cli::stdinterator_filter::stdin_filtered;
+use crate::gj::parsing::parse_bbox_geojson;
 
 pub enum TileFmt {
     Arr,
@@ -41,7 +42,9 @@ pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) {
         .map(|l| {
             let s = l.unwrap();
             debug!("l: {:?}", s);
-            parse_bbox_ext(&s).unwrap()
+            // try parsing bbox ext first then try geojson
+            let t = parse_bbox_ext(&s).or_else(|_| parse_bbox_geojson(&s));
+            t.unwrap()
         })
         .flat_map(|b| {
             tiles(

@@ -1,9 +1,9 @@
-use crate::bbox::BBox;
-use crate::errors::UtilesResult;
-use crate::geojson::geojson_coords;
-use crate::UtilesError;
 use geo_types::Coord;
 use serde_json::Value;
+
+use crate::bbox::BBox;
+use crate::errors::UtilesResult;
+use crate::UtilesError;
 
 pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
     // strip leading/trailing  whitespace
@@ -17,7 +17,9 @@ pub fn parse_bbox_json(string: &str) -> UtilesResult<BBox> {
             let bbox: (f64, f64, f64, f64) = serde_json::from_value(v["bbox"].clone())?;
             return Ok(BBox::from(bbox));
         }
-        return Ok(geojson_bounds(s));
+        // return Ok(geojson_bounds(s));
+
+        return Err(UtilesError::InvalidBbox("Invalid bbox: ".to_string() + s));
     }
 
     let v: Value = serde_json::from_str(s)?;
@@ -435,12 +437,12 @@ where
     Some((min_x, min_y, max_x, max_y))
 }
 
-#[must_use]
-pub fn geojson_bounds(geojson_str: &str) -> BBox {
-    let coords = geojson_coords(geojson_str);
-    let bounds = coords2bounds(coords).unwrap();
-    BBox::new(bounds.0, bounds.1, bounds.2, bounds.3)
-}
+// #[must_use]
+// pub fn geojson_bounds(geojson_str: &str) -> BBox {
+//     let coords = geojson_coords(geojson_str);
+//     let bounds = coords2bounds(coords).unwrap();
+//     BBox::new(bounds.0, bounds.1, bounds.2, bounds.3)
+// }
 
 #[cfg(test)]
 mod tests {

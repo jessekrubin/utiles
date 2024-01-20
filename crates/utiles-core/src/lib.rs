@@ -25,7 +25,6 @@ pub mod bbox;
 pub mod constants;
 pub mod fns;
 pub mod gdal;
-pub mod geojson;
 pub mod geostats;
 pub mod lint_error;
 pub mod lnglat;
