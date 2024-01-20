@@ -1537,7 +1537,6 @@ name = "utiles-core"
 version = "0.3.0"
 dependencies = [
  "fast_hilbert",
- "geo-types",
  "serde",
  "serde_json",
  "thiserror",

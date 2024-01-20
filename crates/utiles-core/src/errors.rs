@@ -23,8 +23,14 @@ pub enum UtilesError {
     #[error("invalid projection (must be geographic/mercator): {0}")]
     InvalidProjection(String),
 
-    #[error("unknown utiles error")]
-    Unknown,
+    #[error("Unimplemented: {0}")]
+    Unimplemented(String),
+
+    #[error("sqlite err: {0}")]
+    SqliteErr(String),
+
+    #[error("unknown utiles error: {0}")]
+    Unknown(String),
 
     #[error("io error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),

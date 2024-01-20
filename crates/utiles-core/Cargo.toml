@@ -18,5 +18,3 @@ serde_json.workspace = true
 # Not going to get rid of fast_hilbert
 fast_hilbert.workspace = true
 
-# TODO: Remove the following dependencies and move them into `utiles`
-geo-types.workspace = true

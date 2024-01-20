@@ -31,7 +31,7 @@ fn to_val<V, E: Display>(val: Result<V, E>) -> Option<V> {
 }
 
 /// Convert metadata rows to a `TileJSON` object
-/// (ripped from martin-mbutiles thank y'all very much)
+/// (ripped from martin-mbtiles thank y'all very much)
 pub fn metadata2tilejson(
     metadata: Vec<MbtilesMetadataRow>,
 ) -> Result<TileJSON, Box<dyn Error>> {

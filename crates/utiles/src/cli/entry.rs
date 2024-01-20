@@ -10,6 +10,7 @@ use crate::cli::commands::{
     bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main,
     mbtiles_info_main, metadata_main, metadata_set_main, neighbors_main, parent_main,
     pmtileid_main, quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main,
+    touch_main,
 };
 
 struct LogConfig {
@@ -71,6 +72,9 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
 
     match args.command {
         Commands::Lint(args) => lint_main(&args),
+        Commands::Touch(args) => {
+            touch_main(&args).unwrap();
+        }
         Commands::Metadata(args) => metadata_main(&args),
         Commands::MetadataSet(args) => metadata_set_main(&args),
         Commands::Tilejson(args) => tilejson_main(&args),

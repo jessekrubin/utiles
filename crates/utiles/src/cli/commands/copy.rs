@@ -461,9 +461,9 @@ fn get_tile_src(src: &str) -> Source {
 }
 
 fn get_tile_dst(dst: &str) -> Destination {
-    // if it contains '.mbutiles' then it's a mbutiles file
+    // if it contains '.mbtiles' then it's a mbtiles file
     // else it's a directory
-    if dst.contains(".mbutiles") {
+    if dst.contains(".mbtiles") {
         Destination::Mbtiles(dst.to_string())
     } else {
         Destination::Fs(dst.to_string())
@@ -472,7 +472,6 @@ fn get_tile_dst(dst: &str) -> Destination {
 
 pub async fn copy_main(args: CopyArgs) {
     warn!("experimental command: copy/cp");
-
     // match args.zoom {
     //     Some(zoom) => {
     //         info!("zoom: {:?}", zoom);
@@ -481,7 +480,6 @@ pub async fn copy_main(args: CopyArgs) {
     //         info!("no zoom");
     //     }
     // }
-
     let zooms: Option<Vec<u8>> = args.zooms();
     let bbox = args.bbox;
 

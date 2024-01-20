@@ -1,9 +1,8 @@
-use serde::{Deserialize, Serialize};
-
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
 use crate::tile_like::TileLike;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct BBoxTuple(f64, f64, f64, f64);

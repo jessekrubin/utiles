@@ -36,7 +36,7 @@ pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
         }
     }
 
-    // let mbutiles = mbtiles_result.unwrap();
+    // let mbtiles = mbtiles_result.unwrap();
     let has_unique_index_on_metadata_name =
         mbtiles.has_unique_index_on_metadata().unwrap();
     let metadata_name_is_primary_key =
@@ -85,7 +85,7 @@ pub fn lint_filepath(
     //     }
     // };
 
-    if !fspath_str.ends_with(".mbutiles") {
+    if !fspath_str.ends_with(".mbtiles") {
         let conn = match squealite::open(fspath_str) {
             Ok(conn) => conn,
             Err(e) => {
@@ -101,7 +101,7 @@ pub fn lint_filepath(
                 return Ok(lint_mbtiles_file(&mbtiles, fix));
             }
             Err(e) => {
-                warn!("Unable to determine if file is mbutiles: {}", e);
+                warn!("Unable to determine if file is mbtiles: {}", e);
                 return Err(UtilesLintError::NotAMbtilesDb(fspath_str.to_string()));
             }
         }

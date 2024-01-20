@@ -11,7 +11,7 @@ pub enum UtilesLintError {
     #[error("not a sqlite database error: {0}")]
     NotASqliteDb(String),
 
-    #[error("not a mbutiles database error: {0}")]
+    #[error("not a mbtiles database error: {0}")]
     NotAMbtilesDb(String),
 
     #[error("no tiles table/view")]
@@ -20,10 +20,10 @@ pub enum UtilesLintError {
     #[error("no metadata table/view")]
     MbtMissingMetadata,
 
-    #[error("missing mbutiles magic-number/application_id")]
+    #[error("missing mbtiles magic-number/application_id")]
     MbtMissingMagicNumber,
 
-    #[error("Unrecognized mbutiles magic-number/application_id: {0} != 0x4d504258")]
+    #[error("Unrecognized mbtiles magic-number/application_id: {0} != 0x4d504258")]
     MbtUnknownMagicNumber(u32),
 
     #[error("missing index: {0}")]
