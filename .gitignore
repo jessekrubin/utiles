@@ -198,3 +198,5 @@ file.py
 
 # testing data
 blue-marble/
+crates/**/*.mbtiles
+crates/**/*.utiles
