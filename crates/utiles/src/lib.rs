@@ -16,46 +16,6 @@ mod core;
 pub mod gj;
 pub mod utilejson;
 pub mod utilesqlite;
-
-// pub use gdal::geotransform2optzoom;
-// pub use lnglat::LngLat;
-// pub use point::{Point2d, Point3d};
-// pub use tile::Tile;
-// pub use tile_like::TileLike;
-//
-// pub use crate::errors::UtilesError;
-// pub use crate::fns::*;
-// pub use crate::quadkey::*;
-//
-// pub mod errors;
-//
-// pub mod bbox;
-// pub mod constants;
-// pub mod fns;
-// mod gdal;
-// pub mod geojson;
-// mod geostats;
-// pub mod libtiletype;
-// pub mod lint_error;
-// pub mod lnglat;
-// pub mod mbutiles;
-// pub mod parsing;
-// pub mod pmtiles;
-// pub mod point;
-// pub mod projection;
-// pub mod quadkey;
-// pub mod sibling_relationship;
-// pub mod tile;
-// pub mod tile_data_row;
-// mod tile_feature;
-// mod tile_like;
-// pub mod tile_range;
-// mod tile_tuple;
-// mod tilecrz;
-// pub mod tilejson;
-// pub mod traits;
-// pub mod zoom;
-
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Tile macro to create a new tile.
