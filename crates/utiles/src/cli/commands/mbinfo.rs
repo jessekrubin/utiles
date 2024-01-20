@@ -3,10 +3,9 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::debug;
 
-use crate::utilesqlite::mbtstats::MbtilesZoomStats;
-use crate::utilesqlite::Mbtiles;
-
 use crate::cli::args::MbtilesStatsArgs;
+use crate::utilesqlite::Mbtiles;
+use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 
 #[derive(Debug, Serialize)]
 struct MbtilesStats {
@@ -18,7 +17,7 @@ struct MbtilesStats {
     zooms: Vec<MbtilesZoomStats>,
 }
 
-fn mbinfo(filepath: &str) -> Result<MbtilesStats, Box<dyn std::error::Error>> {
+fn mbinfo(filepath: &str) -> MbtilesStats {
     let filepath = Path::new(filepath);
     assert!(
         filepath.exists(),
@@ -41,14 +40,14 @@ fn mbinfo(filepath: &str) -> Result<MbtilesStats, Box<dyn std::error::Error>> {
     debug!("Finished zoom_stats query in {:?}", query_dt);
 
     if zoom_stats.is_empty() {
-        return Ok(MbtilesStats {
+        return MbtilesStats {
             filesize,
             ntiles: 0,
             minzoom: None,
             maxzoom: None,
             nzooms: 0,
             zooms: vec![],
-        });
+        };
     }
 
     let minzoom = zoom_stats.iter().map(|r| r.zoom).min();
@@ -56,28 +55,22 @@ fn mbinfo(filepath: &str) -> Result<MbtilesStats, Box<dyn std::error::Error>> {
     let minzoom_u8: Option<u8> = minzoom.map(|minzoom| minzoom.try_into().unwrap());
     let maxzoom_u8: Option<u8> = maxzoom.map(|maxzoom| maxzoom.try_into().unwrap());
 
-    Ok(MbtilesStats {
+    MbtilesStats {
         ntiles: zoom_stats.iter().map(|r| r.ntiles as u64).sum(),
         filesize,
         minzoom: minzoom_u8,
         maxzoom: maxzoom_u8,
         nzooms: zoom_stats.len() as u32,
         zooms: zoom_stats,
-    })
+    }
 }
 
 pub fn mbtiles_info_main(args: &MbtilesStatsArgs) {
     let stats = mbinfo(&args.common.filepath);
-    match stats {
-        Ok(stats) => {
-            let str = match args.common.min {
-                true => serde_json::to_string(&stats).unwrap(),
-                false => serde_json::to_string_pretty(&stats).unwrap(),
-            };
-            println!("{str}");
-        }
-        Err(e) => {
-            println!("Error: {e}");
-        }
-    }
+    let str = if args.common.min {
+        serde_json::to_string(&stats).unwrap()
+    } else {
+        serde_json::to_string_pretty(&stats).unwrap()
+    };
+    println!("{str}");
 }

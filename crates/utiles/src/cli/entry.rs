@@ -18,12 +18,13 @@ struct LogConfig {
     pub json: bool,
 }
 
-fn init_tracing(log_config: LogConfig) {
+fn init_tracing(log_config: &LogConfig) {
     let filter = if log_config.debug {
         EnvFilter::new("DEBUG")
     } else {
         EnvFilter::new("INFO")
     };
+    #[allow(clippy::match_bool)]
     match log_config.json {
         true => {
             let subscriber = fmt::Subscriber::builder()
@@ -54,18 +55,18 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     let args = Cli::parse_from(&argv);
 
     // if the command is "dev" init tracing w/ debug
-    if let Commands::Dev(_) = args.command {
-        init_tracing(LogConfig {
+    let logcfg = if let Commands::Dev(_) = args.command {
+        LogConfig {
             debug: true,
             json: args.log_json,
-        });
+        }
     } else {
-        init_tracing(LogConfig {
+        LogConfig {
             debug: args.debug,
             json: args.log_json,
-        });
-    }
-
+        }
+    };
+    init_tracing(&logcfg);
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);
     debug!("args: {:?}", args);

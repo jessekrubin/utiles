@@ -88,40 +88,50 @@ pub fn metadata_set_main(args: &MetadataSetArgs) {
     let current_value = mbtiles.metadata_get(&args.key).unwrap();
     let c = match &args.value {
         Some(value) => {
-            match current_value {
-                Some(v) => {
-                    if value != &v {
-                        let r = mbtiles.metadata_set(&args.key, value).unwrap();
-                        debug!("metadata rows updated: {:?}", r);
-                        Some(MetadataChangeFromTo {
-                            name: args.key.clone(),
-                            from: Some(v),
-                            to: Some(value.clone()),
-                        })
-                    } else {
-                        None
-                    }
-                }
-                None => {
+            if let Some(v) = current_value {
+                if value != &v {
                     let r = mbtiles.metadata_set(&args.key, value).unwrap();
                     debug!("metadata rows updated: {:?}", r);
                     Some(MetadataChangeFromTo {
                         name: args.key.clone(),
-                        from: None,
+                        from: Some(v),
                         to: Some(value.clone()),
                     })
+                } else {
+                    None
                 }
+            } else {
+                let r = mbtiles.metadata_set(&args.key, value).unwrap();
+                debug!("metadata rows updated: {:?}", r);
+                Some(MetadataChangeFromTo {
+                    name: args.key.clone(),
+                    from: None,
+                    to: Some(value.clone()),
+                })
             }
-            // let r = mbtiles.metadata_set(&args.key, value).unwrap();
-            // debug!("metadata rows updated: {:?}", r);
-            // if r == 0 {
-            //     None
-            // } else {
-            //     Some(MetadataChangeFromTo {
-            //         name: args.key.clone(),
-            //         from: current_value,
-            //         to: Some(value.clone()),
-            //     })
+            // match current_value {
+            //     Some(v) => {
+            //         if value != &v {
+            //             let r = mbtiles.metadata_set(&args.key, value).unwrap();
+            //             debug!("metadata rows updated: {:?}", r);
+            //             Some(MetadataChangeFromTo {
+            //                 name: args.key.clone(),
+            //                 from: Some(v),
+            //                 to: Some(value.clone()),
+            //             })
+            //         } else {
+            //             None
+            //         }
+            //     }
+            //     None => {
+            //         let r = mbtiles.metadata_set(&args.key, value).unwrap();
+            //         debug!("metadata rows updated: {:?}", r);
+            //         Some(MetadataChangeFromTo {
+            //             name: args.key.clone(),
+            //             from: None,
+            //             to: Some(value.clone()),
+            //         })
+            //     }
             // }
         }
         None => {
