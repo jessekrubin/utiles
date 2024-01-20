@@ -1,9 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
 use crate::tile_like::TileLike;
-use geo_types::Coord;
-use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct BBoxTuple(f64, f64, f64, f64);
 
@@ -247,12 +248,6 @@ impl From<BBox> for BBoxTuple {
     }
 }
 
-// impl From<&Bounds> for BBox {
-//     fn from(bounds: &Bounds) -> Self {
-//         BBox::new(bounds.left, bounds.bottom, bounds.right, bounds.top)
-//     }
-// }
-
 impl From<BBoxTuple> for BBox {
     fn from(tuple: BBoxTuple) -> Self {
         BBox::new(tuple.0, tuple.1, tuple.2, tuple.3)
@@ -264,10 +259,7 @@ impl From<&String> for BBox {
         // remove leading and trailing quotes
         let s = s.trim_matches('"');
         // let value: Value = serde_json::from_str(&s).unwrap();
-        match parse_bbox(s) {
-            Ok(bbox) => bbox,
-            Err(_e) => BBox::world_planet(),
-        }
+        parse_bbox(s).unwrap_or_else(|_e| BBox::world_planet())
     }
 }
 
@@ -288,29 +280,3 @@ impl From<Tile> for WebMercatorBbox {
         crate::xyz2bbox(tile.x, tile.y, tile.z)
     }
 }
-
-// impl From<Vec<Coord>> for BBox {
-//     fn from(coords: Vec<Coord>) -> Self {
-//         let mut min_x = 180.0;
-//         let mut min_y = 90.0;
-//         let mut max_x = -180.0;
-//         let mut max_y = -90.0;
-//         for coord in coords {
-//             let x = coord.x;
-//             let y = coord.y;
-//             if x < min_x {
-//                 min_x = x;
-//             }
-//             if y < min_y {
-//                 min_y = y;
-//             }
-//             if x > max_x {
-//                 max_x = x;
-//             }
-//             if y > max_y {
-//                 max_y = y;
-//             }
-//         }
-//         BBox::new(min_x, min_y, max_x, max_y)
-//     }
-// }
