@@ -9,13 +9,43 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::cast_possible_truncation)]
 
-pub use core::*;
+pub use gdal::geotransform2optzoom;
+pub use lnglat::LngLat;
+pub use point::{Point2d, Point3d};
+pub use tile::Tile;
+pub use tile_like::TileLike;
 
-pub mod cli;
-mod core;
-pub mod gj;
-pub mod utilejson;
-pub mod utilesqlite;
+pub use crate::errors::UtilesError;
+pub use crate::fns::*;
+pub use crate::quadkey::*;
+
+pub mod errors;
+
+pub mod bbox;
+pub mod constants;
+pub mod fns;
+pub mod gdal;
+pub mod geostats;
+pub mod lint_error;
+pub mod lnglat;
+pub mod mbutiles;
+pub mod parsing;
+pub mod pmtiles;
+pub mod point;
+pub mod projection;
+pub mod quadkey;
+pub mod sibling_relationship;
+pub mod tile;
+pub mod tile_data_row;
+mod tile_feature;
+mod tile_like;
+pub mod tile_range;
+mod tile_tuple;
+pub mod tile_type;
+mod tilecrz;
+pub mod traits;
+pub mod zoom;
+
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Tile macro to create a new tile.
@@ -34,7 +64,7 @@ macro_rules! utile {
 /// # Examples
 ///
 /// ```
-/// use utiles::{point2d, Point2d};
+/// use utiles_core::{point2d, Point2d};
 /// let p = point2d!{ x: 1.0, y: 2.0 };
 /// assert_eq!(p.x(), 1.0);
 /// assert_eq!(p.y(), 2.0);

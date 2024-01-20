@@ -22,4 +22,4 @@ serde_json.workspace = true
 tilejson.workspace = true
 tokio.workspace = true
 tracing.workspace = true
-utiles = { path = "../utiles" }
+utiles-core = { path = "../utiles-core" }

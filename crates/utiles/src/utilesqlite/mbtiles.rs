@@ -2,15 +2,27 @@ use std::error::Error;
 use std::path::Path;
 
 use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
-use serde::Serialize;
 use tilejson::TileJSON;
 use tracing::{debug, error};
 
 use utiles_core::bbox::BBox;
+use utiles_core::errors::UtilesResult;
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::mbutiles::{metadata2tilejson, MinZoomMaxZoom};
+use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::{yflip, LngLat, Tile, TileLike};
+use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesError};
+
+use crate::utilejson::metadata2tilejson;
+use crate::utilesqlite::insert_strategy::InsertStrategy;
+use crate::utilesqlite::mbtstats::MbtilesZoomStats;
+
+#[derive(Debug, Default)]
+pub enum MbtilesType {
+    #[default]
+    Flat,
+    Hash,
+    Norm,
+}
 
 pub struct Mbtiles {
     conn: Connection,
@@ -39,6 +51,7 @@ impl Mbtiles {
         Mbtiles { conn }
     }
 
+    #[must_use]
     pub fn open_in_memory() -> Self {
         let conn = Connection::open_in_memory().unwrap();
         Mbtiles { conn }
@@ -46,6 +59,11 @@ impl Mbtiles {
 
     pub fn init_flat_mbtiles(&mut self) -> RusqliteResult<()> {
         init_flat_mbtiles(&mut self.conn)
+    }
+
+    pub fn create(filepath: &str, mbtype: Option<MbtilesType>) -> UtilesResult<Self> {
+        let res = create_mbtiles_file(filepath, mbtype.unwrap_or_default())?;
+        Ok(Mbtiles { conn: res })
     }
 
     pub fn from_conn(conn: Connection) -> Mbtiles {
@@ -62,6 +80,14 @@ impl Mbtiles {
 
     pub fn metadata_set(&self, name: &str, value: &str) -> RusqliteResult<usize> {
         metadata_set(&self.conn, name, value)
+    }
+
+    pub fn metadata_delete(&self, name: &str) -> RusqliteResult<usize> {
+        let mut stmt = self
+            .conn
+            .prepare_cached("DELETE FROM metadata WHERE name=?1")?;
+        let r = stmt.execute(params![name])?;
+        Ok(r)
     }
 
     pub fn metadata_set_from_vec(
@@ -106,10 +132,12 @@ impl Mbtiles {
     pub fn bbox(&self) -> Result<BBox, Box<dyn Error>> {
         let bounding = self.tilejson()?.bounds;
         match bounding {
-            Some(bounding) => {
-                let bbox = BBox::from(&bounding);
-                Ok(bbox)
-            }
+            Some(bounds) => Ok(BBox::new(
+                bounds.left,
+                bounds.bottom,
+                bounds.right,
+                bounds.top,
+            )),
             None => Err("Error parsing metadata to TileJSON: no data available".into()),
         }
         // convert boundsd to BBox
@@ -186,6 +214,18 @@ impl Mbtiles {
 
     pub fn tiles_count_at_zoom(&self, zoom: u8) -> RusqliteResult<usize> {
         tiles_count_at_zoom(&self.conn, zoom)
+    }
+
+    pub fn update_metadata_minzoom_from_tiles(&self) -> RusqliteResult<usize> {
+        update_metadata_minzoom_from_tiles(&self.conn)
+    }
+
+    pub fn update_metadata_maxzoom_from_tiles(&self) -> RusqliteResult<usize> {
+        update_metadata_maxzoom_from_tiles(&self.conn)
+    }
+
+    pub fn update_metadata_minzoom_maxzoom_from_tiles(&self) -> RusqliteResult<usize> {
+        update_metadata_minzoom_maxzoom_from_tiles(&self.conn)
     }
 }
 
@@ -386,15 +426,6 @@ pub fn tiles_count_at_zoom(connection: &Connection, zoom: u8) -> RusqliteResult<
     Ok(rows as usize)
 }
 
-pub fn is_empty_db(connection: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = connection.prepare("SELECT COUNT(*) FROM sqlite_master")?;
-    let rows = stmt.query_row([], |row| {
-        let count: i64 = row.get(0)?;
-        Ok(count)
-    })?;
-    Ok(rows == 0_i64)
-}
-
 pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
     let script = "
         -- metadata table
@@ -432,6 +463,45 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
     }
 }
 
+pub fn create_mbtiles_file(
+    fspath: &str,
+    mbtype: MbtilesType,
+) -> UtilesResult<Connection> {
+    let mut conn = Connection::open(fspath).map_err(|e| {
+        let emsg = format!("Error opening mbtiles file: {}", e);
+        UtilesError::Unknown(emsg)
+    })?;
+    match mbtype {
+        MbtilesType::Flat => {
+            let r = init_flat_mbtiles(&mut conn);
+            match r {
+                Ok(_) => Ok(conn),
+                Err(e) => {
+                    error!("Error creating flat mbtiles file: {}", e);
+                    let emsg = format!("Error creating flat mbtiles file: {}", e);
+                    Err(UtilesError::Unknown(emsg))
+                }
+            }
+
+            // match r {
+            //     Ok(_) => Ok(()),
+            //     Err(e) => {
+            //         error!("Error creating flat mbtiles file: {}", e);
+            //         let emsg = format!("Error creating flat mbtiles file: {}", e);
+            //         Err(UtilesError::Unknown(emsg))
+            //     }
+            // }
+        }
+        _ => Err(UtilesError::Unimplemented(
+            "create_mbtiles_file: only flat mbtiles is implemented".to_string(),
+        )),
+    }
+
+    // // Ok(
+    //     conn
+    // )
+}
+
 pub fn insert_tile_flat_mbtiles(
     conn: &mut Connection,
     tile: Tile,
@@ -440,28 +510,6 @@ pub fn insert_tile_flat_mbtiles(
     let mut stmt = conn.prepare_cached("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
     let r = stmt.execute(params![tile.z, tile.x, tile.y, data])?;
     Ok(r)
-}
-
-pub enum InsertStrategy {
-    None,
-    Replace,
-    Ignore,
-    Rollback,
-    Abort,
-    Fail,
-}
-
-impl InsertStrategy {
-    pub fn to_sql_prefix(&self) -> &str {
-        match self {
-            InsertStrategy::None => "INSERT",
-            InsertStrategy::Replace => "INSERT OR REPLACE",
-            InsertStrategy::Ignore => "INSERT OR IGNORE",
-            InsertStrategy::Rollback => "INSERT OR ROLLBACK",
-            InsertStrategy::Abort => "INSERT OR ABORT",
-            InsertStrategy::Fail => "INSERT OR FAIL",
-        }
-    }
 }
 
 pub fn insert_tiles_flat_mbtiles(
@@ -589,16 +637,6 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(
         ),
         None => Ok(0),
     }
-}
-
-#[derive(Debug, Serialize)]
-pub struct MbtilesZoomStats {
-    pub zoom: u32,
-    pub ntiles: i64,
-    pub xmin: u32,
-    pub xmax: u32,
-    pub ymin: u32,
-    pub ymax: u32,
 }
 
 pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {

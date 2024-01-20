@@ -4,12 +4,13 @@ use deadpool_sqlite::{self, Config, Pool, PoolError, Runtime};
 use tilejson::TileJSON;
 use tracing::error;
 
-use utiles_core::mbutiles::metadata2tilejson;
+use crate::utilejson::metadata2tilejson;
+
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::Tile;
 
-use crate::mbtiles::{
+use crate::utilesqlite::mbtiles::{
     insert_tile_flat_mbtiles, insert_tiles_flat_mbtiles, mbtiles_metadata,
 };
 
