@@ -20,7 +20,7 @@ name = "utiles"
 path = "src/bin.rs"
 
 [dependencies]
-utiles-core = { path = "../utiles-core" }
+utiles-core = { path = "../utiles-core", version = "0.3.0" }
 fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
