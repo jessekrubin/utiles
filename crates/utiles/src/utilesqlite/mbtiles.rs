@@ -109,10 +109,10 @@ impl Mbtiles {
                 serde_json::to_string(&rows).unwrap()
             );
             // return the first one
-            let row = rows.get(0).unwrap();
+            let row = rows.first().unwrap();
             Ok(Some(row.value.clone()))
         } else {
-            let row = rows.get(0).unwrap();
+            let row = rows.first().unwrap();
             Ok(Some(row.value.clone()))
         }
     }
