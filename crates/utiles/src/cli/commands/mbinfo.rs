@@ -4,8 +4,8 @@ use serde::Serialize;
 use tracing::debug;
 
 use crate::cli::args::MbtilesStatsArgs;
-use crate::utilesqlite::Mbtiles;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
+use crate::utilesqlite::Mbtiles;
 
 #[derive(Debug, Serialize)]
 struct MbtilesStats {

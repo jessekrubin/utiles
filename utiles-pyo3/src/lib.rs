@@ -158,6 +158,7 @@ fn parse_bbox(args: &PyTuple) -> PyResult<PyLngLatBbox> {
 }
 
 fn _extract(arg: &PyAny) -> PyResult<Vec<PyTile>> {
+    // TODO: this code is identical to parse_tiles() and should be consolidated
     if let Ok(tiles) = arg.extract::<PyTile>() {
         return Ok(vec![tiles]);
     } else if let Ok(tiles) = arg.extract::<Vec<PyTile>>() {
@@ -617,14 +618,7 @@ fn simplify(_py: Python, args: &PyTuple) -> PyResult<HashSet<PyTile>> {
 
 #[pyfunction]
 fn coords(py: Python, obj: &PyAny) -> PyResult<Vec<(f64, f64)>> {
-    let coordsvec = _coords(py, obj);
-    match coordsvec {
-        Ok(coordsvec) => {
-            let coordsvec = coordsvec.iter.map(|(lng, lat)| (lng, lat)).collect();
-            Ok(coordsvec)
-        }
-        Err(e) => Err(e),
-    }
+    Ok(_coords(py, obj)?.iter.collect())
 }
 
 // impl Iterator for utiles::LngLat {
@@ -646,30 +640,23 @@ fn geotransform2optzoom(geotransform: (f64, f64, f64, f64, f64, f64)) -> u8 {
 
 #[pyfunction]
 fn geojson_bounds(py: Python, obj: &PyAny) -> PyResult<PyLngLatBbox> {
-    let coordsvec = _coords(py, obj);
-    match coordsvec {
-        Ok(coordsvec) => {
-            let coordsvec: Vec<(f64, f64)> =
-                coordsvec.iter.map(|(lng, lat)| (lng, lat)).collect();
-            let mut bbox: (f64, f64, f64, f64) = (180.0, 90.0, -180.0, -90.0);
+    let coordsvec = coords(py, obj)?;
+    let mut bbox: (f64, f64, f64, f64) = (180.0, 90.0, -180.0, -90.0);
 
-            for (lng, lat) in coordsvec {
-                if lat <= -90.0 || lat >= 90.0 {
-                    Err(PyErr::new::<PyValueError, _>(format!(
-                        "Invalid latitude: {lat}"
-                    )))?;
-                }
-                bbox = (
-                    bbox.0.min(lng),
-                    bbox.1.min(lat),
-                    bbox.2.max(lng),
-                    bbox.3.max(lat),
-                );
-            }
-            Ok(PyLngLatBbox::new(bbox.0, bbox.1, bbox.2, bbox.3))
+    for (lng, lat) in coordsvec {
+        if lat <= -90.0 || lat >= 90.0 {
+            Err(PyErr::new::<PyValueError, _>(format!(
+                "Invalid latitude: {lat}"
+            )))?;
         }
-        Err(e) => Err(e),
+        bbox = (
+            bbox.0.min(lng),
+            bbox.1.min(lat),
+            bbox.2.max(lng),
+            bbox.3.max(lat),
+        );
     }
+    Ok(PyLngLatBbox::new(bbox.0, bbox.1, bbox.2, bbox.3))
 }
 
 #[pyfunction]

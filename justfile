@@ -64,4 +64,7 @@ lintrs: clippy
 
 lint: lintpy lintrs
 
-
+ci:
+    cargo fmt -- --check
+    cargo clippy --all-targets --all-features -- -D warnings
+    cargo test
