@@ -6,11 +6,11 @@ use tilejson::TileJSON;
 use tracing::{debug, error};
 
 use utiles_core::bbox::BBox;
-use utiles_core::errors::UtilesResult;
+use utiles_core::errors::UtilesCoreResult;
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
 use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesError};
+use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::insert_strategy::InsertStrategy;
@@ -61,7 +61,10 @@ impl Mbtiles {
         init_flat_mbtiles(&mut self.conn)
     }
 
-    pub fn create(filepath: &str, mbtype: Option<MbtilesType>) -> UtilesResult<Self> {
+    pub fn create(
+        filepath: &str,
+        mbtype: Option<MbtilesType>,
+    ) -> UtilesCoreResult<Self> {
         let res = create_mbtiles_file(filepath, mbtype.unwrap_or_default())?;
         Ok(Mbtiles { conn: res })
     }
@@ -466,10 +469,10 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
 pub fn create_mbtiles_file(
     fspath: &str,
     mbtype: MbtilesType,
-) -> UtilesResult<Connection> {
+) -> UtilesCoreResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
         let emsg = format!("Error opening mbtiles file: {}", e);
-        UtilesError::Unknown(emsg)
+        UtilesCoreError::Unknown(emsg)
     })?;
     match mbtype {
         MbtilesType::Flat => {
@@ -479,7 +482,7 @@ pub fn create_mbtiles_file(
                 Err(e) => {
                     error!("Error creating flat mbtiles file: {}", e);
                     let emsg = format!("Error creating flat mbtiles file: {}", e);
-                    Err(UtilesError::Unknown(emsg))
+                    Err(UtilesCoreError::Unknown(emsg))
                 }
             }
 
@@ -492,7 +495,7 @@ pub fn create_mbtiles_file(
             //     }
             // }
         }
-        _ => Err(UtilesError::Unimplemented(
+        _ => Err(UtilesCoreError::Unimplemented(
             "create_mbtiles_file: only flat mbtiles is implemented".to_string(),
         )),
     }

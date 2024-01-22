@@ -1,7 +1,7 @@
-use crate::errors::UtilesResult;
+use crate::errors::UtilesCoreResult;
 use std::num::ParseIntError;
 
-use crate::UtilesError::InvalidZoom;
+use crate::UtilesCoreError::InvalidZoom;
 
 type Zooms = Vec<u8>;
 type ZoomsSetInt = u32;
@@ -80,7 +80,7 @@ pub fn zvec2zset(zvec: Zooms) -> ZoomsSetInt {
 /// let zvec = parse_zooms("1,2,3,4,4,4,4,4");
 /// assert_eq!(zvec.unwrap(), vec![1, 2, 3, 4]);
 /// ```
-pub fn parse_zooms(zstr: &str) -> UtilesResult<Vec<u8>> {
+pub fn parse_zooms(zstr: &str) -> UtilesCoreResult<Vec<u8>> {
     let mut zvec: Vec<u8> = vec![];
     for z in zstr.split(',') {
         if z.contains('-') {
