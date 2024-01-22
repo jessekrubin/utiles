@@ -12,10 +12,15 @@
 pub use core::*;
 
 pub mod cli;
-mod core;
+pub mod core;
+pub mod errors;
 pub mod gj;
+pub mod lint;
 pub mod utilejson;
 pub mod utilesqlite;
+
+pub use errors::UtilesError;
+
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Tile macro to create a new tile.

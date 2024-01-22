@@ -1,4 +1,4 @@
-use crate::errors::{UtilesError, UtilesResult};
+use crate::errors::{UtilesCoreError, UtilesCoreResult};
 use crate::Tile;
 #[must_use]
 pub fn xyz2quadkey_vec(x: u32, y: u32, z: u8) -> Vec<u8> {
@@ -44,7 +44,7 @@ pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
 /// let xyz = quadkey2xyz("0313102310").unwrap();
 /// assert_eq!(xyz, (486, 332, 10));
 /// ```
-pub fn quadkey2xyz(quadkey: &str) -> UtilesResult<(u32, u32, u8)> {
+pub fn quadkey2xyz(quadkey: &str) -> UtilesCoreResult<(u32, u32, u8)> {
     // Version with fold:
     //  quadkey.chars().try_fold((0, 0, 0), |(mut x, mut y, z), c| {
     //       x <<= 1;
@@ -78,7 +78,7 @@ pub fn quadkey2xyz(quadkey: &str) -> UtilesResult<(u32, u32, u8)> {
                 y += 1;
             }
             _ => {
-                return Err(UtilesError::InvalidQuadkey(c.to_string()));
+                return Err(UtilesCoreError::InvalidQuadkey(c.to_string()));
             }
         }
     }
@@ -93,7 +93,7 @@ pub fn quadkey2xyz(quadkey: &str) -> UtilesResult<(u32, u32, u8)> {
 /// let tile = quadkey2tile("0313102310").unwrap();
 /// assert_eq!(tile, Tile::new(486, 332, 10));
 /// ```
-pub fn quadkey2tile(quadkey: &str) -> UtilesResult<Tile> {
+pub fn quadkey2tile(quadkey: &str) -> UtilesCoreResult<Tile> {
     let xyz = quadkey2xyz(quadkey)?;
     Ok(Tile::new(xyz.0, xyz.1, xyz.2))
 }

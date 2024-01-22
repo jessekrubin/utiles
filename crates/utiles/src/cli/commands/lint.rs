@@ -3,13 +3,13 @@ use std::path::{Path, PathBuf};
 
 use tracing::{debug, info, warn};
 
-use crate::utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
-use crate::utilesqlite::squealite;
-use utiles_core::lint_error::{UtilesLintError, UtilesLintResult};
 use utiles_core::mbutiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
 
 use crate::cli::args::LintArgs;
 use crate::cli::find;
+use crate::lint::{UtilesLintError, UtilesLintResult};
+use crate::utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
+use crate::utilesqlite::squealite;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
     "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
@@ -115,6 +115,7 @@ pub fn lint_filepath(
         }
     }
 }
+
 fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
     for path in fspaths {
         let r = lint_filepath(&path, fix);
