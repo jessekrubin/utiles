@@ -141,14 +141,14 @@ impl CopyConfig {
     //     }
     // }
 
-    pub fn sql_where(&self, zoom_levels: Option<Vec<u8>>) -> String {
+    pub fn mbtiles_sql_where(&self, zoom_levels: Option<Vec<u8>>) -> String {
         let pred = match (&self.bbox, &self.zooms) {
             (Some(bbox), Some(zooms)) => {
                 let trange = tile_ranges(
                     bbox.tuple(),
                     zoom_levels.unwrap_or(zooms.clone()).into(),
                 );
-                trange.sql_where(Some(true))
+                trange.mbtiles_sql_where()
             }
             (Some(bbox), None) => {
                 let trange = tile_ranges(
@@ -157,7 +157,7 @@ impl CopyConfig {
                         .unwrap_or((0..28).map(|z| z as u8).collect::<Vec<u8>>())
                         .into(),
                 );
-                trange.sql_where(Some(true))
+                trange.mbtiles_sql_where()
             }
             (None, Some(zooms)) => {
                 format!(
@@ -183,7 +183,7 @@ impl CopyConfig {
 async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let mbt = Mbtiles::from(mbtiles.as_ref());
 
-    let where_clause = cfg.sql_where(
+    let where_clause = cfg.mbtiles_sql_where(
         // Some(zoom_levels_for_where)
         // flip happens here maybe
         None,
