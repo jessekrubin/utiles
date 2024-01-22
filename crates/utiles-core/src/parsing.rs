@@ -18,7 +18,9 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
         }
         // return Ok(geojson_bounds(s));
 
-        return Err(UtilesCoreError::InvalidBbox("Invalid bbox: ".to_string() + s));
+        return Err(UtilesCoreError::InvalidBbox(
+            "Invalid bbox: ".to_string() + s,
+        ));
     }
 
     let v: Value = serde_json::from_str(s)?;
@@ -27,9 +29,9 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     // and a four-element array represents a BBoxTuple
     let bbox = match v.as_array().map(std::vec::Vec::len) {
         // match len 0, 1, 3
-        Some(0) | Some(1) | Some(3) => {
-            Err(UtilesCoreError::InvalidBbox("Invalid bbox: ".to_string() + s))
-        }
+        Some(0) | Some(1) | Some(3) => Err(UtilesCoreError::InvalidBbox(
+            "Invalid bbox: ".to_string() + s,
+        )),
         Some(2) => {
             let coord: (f64, f64) = serde_json::from_value::<(f64, f64)>(v)?;
             Ok(BBox::new(coord.0, coord.1, coord.0, coord.1))

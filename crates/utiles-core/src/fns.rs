@@ -355,9 +355,11 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
     let sinlat = (lat.to_radians()).sin();
     let yish = (1.0 + sinlat) / (1.0 - sinlat);
     match yish.classify() {
-        FpCategory::Infinite | FpCategory::Nan => Err(UtilesCoreError::ConversionError(
-            "Y can not be computed: lat={lat}".to_string(),
-        )),
+        FpCategory::Infinite | FpCategory::Nan => {
+            Err(UtilesCoreError::ConversionError(
+                "Y can not be computed: lat={lat}".to_string(),
+            ))
+        }
         _ => {
             let y = 0.5 - 0.25 * (yish.ln()) / PI;
             let x = lng / 360.0 + 0.5;
