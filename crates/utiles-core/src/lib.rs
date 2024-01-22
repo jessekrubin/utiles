@@ -15,7 +15,7 @@ pub use point::{Point2d, Point3d};
 pub use tile::Tile;
 pub use tile_like::TileLike;
 
-pub use crate::errors::UtilesError;
+pub use crate::errors::UtilesCoreError;
 pub use crate::fns::*;
 pub use crate::quadkey::*;
 
@@ -26,7 +26,6 @@ pub mod constants;
 pub mod fns;
 pub mod gdal;
 pub mod geostats;
-pub mod lint_error;
 pub mod lnglat;
 pub mod mbutiles;
 pub mod parsing;

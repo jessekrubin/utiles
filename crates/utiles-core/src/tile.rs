@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::constants::EPSILON;
-use crate::errors::UtilesResult;
+use crate::errors::UtilesCoreResult;
 use crate::fns::{bounds, children, neighbors, parent, siblings, xy};
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
@@ -15,7 +15,7 @@ use crate::tile_tuple::TileTuple;
 
 use crate::mbutiles::MbtTileRow;
 use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
-use crate::{utile, UtilesError};
+use crate::{utile, UtilesCoreError};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
@@ -96,7 +96,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::from(UtilesError::TileParseError(s.to_string())));
+                    return Err(Box::from(UtilesCoreError::TileParseError(s.to_string())));
                 }
             }
         } else if s.starts_with('[') {
@@ -105,7 +105,7 @@ impl FromStr for Tile {
             match r {
                 Ok(tile) => return Ok(tile),
                 Err(_e) => {
-                    return Err(Box::from(UtilesError::TileParseError(s.to_string())));
+                    return Err(Box::from(UtilesCoreError::TileParseError(s.to_string())));
                 }
             }
         }
@@ -115,7 +115,7 @@ impl FromStr for Tile {
         // if ok return tile but not tile parse error
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => Err(Box::from(UtilesError::TileParseError(s.to_string()))),
+            Err(_e) => Err(Box::from(UtilesCoreError::TileParseError(s.to_string()))),
         }
     }
 }
@@ -194,11 +194,11 @@ impl Tile {
         pmtiles::parent_id(self.pmtileid())
     }
 
-    pub fn from_quadkey(quadkey: &str) -> UtilesResult<Self> {
+    pub fn from_quadkey(quadkey: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(quadkey)
     }
 
-    pub fn from_qk(qk: &str) -> UtilesResult<Self> {
+    pub fn from_qk(qk: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(qk)
     }
 
@@ -206,7 +206,7 @@ impl Tile {
         let res = serde_json::from_str::<Tile>(json);
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => Err(Box::from(UtilesError::TileParseError(json.to_string()))),
+            Err(_e) => Err(Box::from(UtilesCoreError::TileParseError(json.to_string()))),
         }
     }
     // > {
@@ -230,7 +230,7 @@ impl Tile {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
             Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
-            Err(_e) => Err(Box::from(UtilesError::TileParseError(json.to_string()))),
+            Err(_e) => Err(Box::from(UtilesCoreError::TileParseError(json.to_string()))),
         }
     }
 

@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum UtilesError {
+pub enum UtilesCoreError {
     #[error("tile parse error: {0}")]
     TileParseError(String),
 
@@ -36,4 +36,4 @@ pub enum UtilesError {
     SerdeJsonError(#[from] serde_json::Error),
 }
 
-pub type UtilesResult<T> = Result<T, UtilesError>;
+pub type UtilesCoreResult<T> = Result<T, UtilesCoreError>;

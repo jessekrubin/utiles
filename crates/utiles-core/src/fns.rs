@@ -4,14 +4,14 @@ use std::num::FpCategory;
 
 use crate::bbox::{BBox, WebMercatorBbox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
-use crate::errors::UtilesResult;
+use crate::errors::UtilesCoreResult;
 use crate::point2d;
 use crate::sibling_relationship::SiblingRelationship;
 use crate::tile_range::{TileRange, TileRanges};
 use crate::utile;
 use crate::zoom::ZoomOrZooms;
 use crate::Point2d;
-use crate::{LngLat, Tile, UtilesError};
+use crate::{LngLat, Tile, UtilesCoreError};
 
 #[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
@@ -346,7 +346,7 @@ pub fn bbox_truncate(
     (west, south, east, north)
 }
 
-pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesResult<(f64, f64)> {
+pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64, f64)> {
     let (lng, lat) = if truncate.unwrap_or(false) {
         (truncate_lng(lng), truncate_lat(lat))
     } else {
@@ -355,7 +355,7 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesResult<(f64, f64
     let sinlat = (lat.to_radians()).sin();
     let yish = (1.0 + sinlat) / (1.0 - sinlat);
     match yish.classify() {
-        FpCategory::Infinite | FpCategory::Nan => Err(UtilesError::ConversionError(
+        FpCategory::Infinite | FpCategory::Nan => Err(UtilesCoreError::ConversionError(
             "Y can not be computed: lat={lat}".to_string(),
         )),
         _ => {
