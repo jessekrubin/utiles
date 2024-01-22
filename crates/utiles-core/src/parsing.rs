@@ -136,12 +136,21 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
 /// ```
 pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
     // match 'world' or 'planet'
-    if string == "world" || string == "planet" {
-        return Ok(BBox::new(-180.0, -90.0, 180.0, 90.0));
-    }
-    // trim leading/trailing single/double quotes
-    let string = string.trim_matches(|c| c == '\'' || c == '"');
-    parse_bbox(string)
+    // match string/lower
+    let str_lower = string.to_lowercase();
+    let r = match str_lower.as_str() {
+        "world" | "planet" | "all" | "*" => Ok(BBox::new(-180.0, -90.0, 180.0, 90.0)),
+        "n" | "north" => Ok(BBox::new(-180.0, 0.0, 180.0, 90.0)),
+        "s" | "south" => Ok(BBox::new(-180.0, -90.0, 180.0, 0.0)),
+        "e" | "east" => Ok(BBox::new(0.0, -90.0, 180.0, 90.0)),
+        "w" | "west" => Ok(BBox::new(-180.0, -90.0, 0.0, 90.0)),
+        "ne" | "northeast" => Ok(BBox::new(0.0, 0.0, 180.0, 90.0)),
+        "nw" | "northwest" => Ok(BBox::new(-180.0, 0.0, 0.0, 90.0)),
+        "se" | "southeast" => Ok(BBox::new(0.0, -90.0, 180.0, 0.0)),
+        "sw" | "southwest" => Ok(BBox::new(-180.0, -90.0, 0.0, 0.0)),
+        _ => parse_bbox(string),
+    };
+    r
 }
 
 #[must_use]
