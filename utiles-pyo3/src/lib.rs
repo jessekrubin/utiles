@@ -186,7 +186,7 @@ fn _extract(arg: &PyAny) -> PyResult<Vec<PyTile>> {
 #[pyo3(signature = (* args))]
 fn parse_tiles(args: &PyTuple) -> PyResult<Vec<PyTile>> {
     if args.len() == 1 {
-        return Ok(_extract(args.get_item(0)?)?);
+        return _extract(args.get_item(0)?);
     } else if args.len() == 3 {
         // if the first value is a number assume the thing is a tile
         if let Ok(x) = args.get_item(0)?.extract::<u32>() {
