@@ -157,6 +157,9 @@ fn parse_bbox(args: &PyTuple) -> PyResult<PyLngLatBbox> {
     }
 }
 
+/// Extract a tile or tiles to Vec<PyTile>
+///
+/// Consolidated logic from parse_tiles() per rec by `@nyurikS` in PR #38
 fn _extract(arg: &PyAny) -> PyResult<Vec<PyTile>> {
     // TODO: this code is identical to parse_tiles() and should be consolidated
     if let Ok(tiles) = arg.extract::<PyTile>() {
@@ -183,22 +186,7 @@ fn _extract(arg: &PyAny) -> PyResult<Vec<PyTile>> {
 #[pyo3(signature = (* args))]
 fn parse_tiles(args: &PyTuple) -> PyResult<Vec<PyTile>> {
     if args.len() == 1 {
-        let arg = args.get_item(0)?;
-        if let Ok(tiles) = arg.extract::<PyTile>() {
-            return Ok(vec![tiles]);
-        } else if let Ok(tiles) = arg.extract::<Vec<PyTile>>() {
-            return Ok(tiles);
-        } else if let Ok(seq) = arg.extract::<Vec<(u32, u32, u32)>>() {
-            return Ok(seq
-                .iter()
-                .map(|xyz| PyTile::new(xyz.0, xyz.1, xyz.2 as u8))
-                .collect());
-        } else if let Ok(seq) = arg.extract::<Vec<Vec<u32>>>() {
-            return Ok(seq
-                .iter()
-                .map(|xyz| PyTile::new(xyz[0], xyz[1], xyz[2] as u8))
-                .collect());
-        }
+        return Ok(_extract(args.get_item(0)?)?);
     } else if args.len() == 3 {
         // if the first value is a number assume the thing is a tile
         if let Ok(x) = args.get_item(0)?.extract::<u32>() {
@@ -272,14 +260,6 @@ fn quadkey(args: &PyTuple) -> PyResult<String> {
 #[pyfunction]
 fn quadkey_to_tile(quadkey: &str) -> PyResult<PyTile> {
     quadkey2xyz(quadkey)
-
-    // let xyz = match res {
-    //     Ok(xyz) => xyz,
-    //     Err(_e) => Err(PyErr::new::<PyValueError, _>(format!(
-    //         "Invalid quadkey: {quadkey}"
-    //     )))?,
-    // };
-    // Ok(PyTile::from(xyz))
 }
 
 #[pyfunction]

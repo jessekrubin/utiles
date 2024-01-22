@@ -58,19 +58,22 @@ impl TileRange {
     }
 
     #[must_use]
-    pub fn sql_where(&self, flip: Option<bool>) -> String {
+    pub fn flipy(&self) -> Self {
+        Self {
+            minx: self.minx,
+            maxx: self.maxx,
+            miny: crate::fns::flipy(self.miny, self.zoom),
+            maxy: crate::fns::flipy(self.maxy, self.zoom),
+            zoom: self.zoom,
+        }
+    }
+
+    #[must_use]
+    pub fn mbtiles_sql_where(&self) -> String {
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
-        let miny = if flip.unwrap_or(true) {
-            crate::fns::flipy(self.miny, self.zoom)
-        } else {
-            self.miny
-        };
-        let maxy = if flip.unwrap_or(true) {
-            crate::fns::flipy(self.maxy, self.zoom)
-        } else {
-            self.maxy
-        };
+        let miny = crate::fns::flipy(self.miny, self.zoom);
+        let maxy = crate::fns::flipy(self.maxy, self.zoom);
         format!(
             "(zoom_level = {} AND tile_column >= {} AND tile_column <= {} AND tile_row >= {} AND tile_row <= {})",
             self.zoom,
@@ -157,15 +160,22 @@ impl TileRanges {
     }
 
     #[must_use]
+    pub fn flipy(&self) -> Self {
+        Self {
+            ranges: self.ranges.iter().map(TileRange::flipy).collect(),
+        }
+    }
+
+    #[must_use]
     pub fn length(&self) -> u64 {
         self.ranges.iter().map(TileRange::length).sum()
     }
 
     #[must_use]
-    pub fn sql_where(&self, flip: Option<bool>) -> String {
+    pub fn mbtiles_sql_where(&self) -> String {
         self.ranges
             .iter()
-            .map(|r| r.sql_where(flip))
+            .map(|r| r.mbtiles_sql_where())
             .collect::<Vec<String>>()
             .join(" OR ")
     }

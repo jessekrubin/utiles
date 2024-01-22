@@ -124,25 +124,26 @@ pub trait TileLike {
     }
 
     #[must_use]
-    fn sql_where(&self, flip: Option<bool>) -> String {
+    fn mbtiles_sql_where(&self) -> String {
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
 
         // flip y for tms (default for mbtiles)
-        if flip.unwrap_or(true) {
-            format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z(),
-                self.x(),
-                flipy(self.y(), self.z())
-            )
-        } else {
-            format!(
-                "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
-                self.z(),
-                self.x(),
-                self.y()
-            )
-        }
+        format!(
+            "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+            self.z(),
+            self.x(),
+            flipy(self.y(), self.z())
+        )
+    }
+
+    #[must_use]
+    fn mbtiles_sql_where_tms(&self) -> String {
+        format!(
+            "(zoom_level = {} AND tile_column = {} AND tile_row = {})",
+            self.z(),
+            self.x(),
+            self.y()
+        )
     }
 }
