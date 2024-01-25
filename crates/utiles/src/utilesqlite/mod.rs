@@ -6,6 +6,7 @@ pub mod mbtiles;
 pub mod mbtiles_async;
 pub mod mbtstats;
 pub mod squealite;
+mod sql_schemas;
 
 pub use fns::*;
 pub use mbtiles::Mbtiles;
