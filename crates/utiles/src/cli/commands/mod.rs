@@ -11,6 +11,7 @@ pub use tile_stream_cmds::{
     bounding_tile_main, neighbors_main, pmtileid_main, quadkey_main,
 };
 pub use touch::touch_main;
+pub use vacuum::vacuum_main;
 
 pub use tilejson::tilejson_main;
 pub use tiles::tiles_main;
@@ -28,3 +29,4 @@ mod tile_stream_cmds;
 mod tilejson;
 pub mod tiles;
 mod touch;
+mod vacuum;

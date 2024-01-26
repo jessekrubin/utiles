@@ -19,3 +19,9 @@ impl InsertStrategy {
         }
     }
 }
+
+impl Default for InsertStrategy {
+    fn default() -> Self {
+        InsertStrategy::None
+    }
+}

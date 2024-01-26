@@ -10,13 +10,13 @@ use tokio::time::{sleep, Duration};
 use tracing::{debug, info, warn};
 use walkdir::WalkDir;
 
-use crate::utilesqlite::Mbtiles;
 use utiles_core::bbox::BBox;
 use utiles_core::mbutiles::{MbtTileRow, MbtilesMetadataRow};
 use utiles_core::tile_data_row::TileData;
 use utiles_core::{tile_ranges, Tile, TileLike};
 
 use crate::cli::args::CopyArgs;
+use crate::utilesqlite::Mbtiles;
 
 // #[derive(Debug)]
 // pub struct MbtTileRow {
@@ -319,6 +319,9 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
     dst_mbt
         .init_flat_mbtiles()
         .expect("init_flat_mbtiles failed");
+    // let c = dst_mbt.conn.trace(Some(|s| {
+    //     debug!("SQL: {:?}", s);
+    // }));
     // Write metadata to db if exists...
 
     if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
@@ -331,14 +334,14 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
 
     // Database insertion task
     let db_task = task::spawn(async move {
-        let mut tiles = Vec::with_capacity(2048);
+        let mut tiles = Vec::with_capacity(999);
         let mut nwritten = 0;
         while let Some(tile_data) = rx.recv().await {
             tiles.push(tile_data);
-            if tiles.len() >= 2048 {
+            if tiles.len() >= 999 {
                 debug!("inserting tiles: {:?}", tiles.len());
                 let n_affected = dst_mbt
-                    .insert_tiles_flat(tiles.clone())
+                    .insert_tiles_flat(&tiles)
                     .expect("insert tiles flat failed");
                 nwritten += n_affected;
                 tiles.clear();
@@ -347,7 +350,7 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
         // Insert any remaining tiles
         if !tiles.is_empty() {
             let n_affected = dst_mbt
-                .insert_tiles_flat(tiles)
+                .insert_tiles_flat(&tiles)
                 .expect("insert tiles flat failed");
             nwritten += n_affected;
         }
@@ -418,7 +421,7 @@ async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
                 if tiles.len() > batch_size {
                     debug!("inserting tiles: {:?}", tiles.len());
                     let naff = dst_mbt
-                        .insert_tiles_flat(tiles)
+                        .insert_tiles_flat(&tiles)
                         .expect("insert tiles flat failed");
                     debug!("naff: {naff:?}");
                     // dst_mbt.insert_tiles_flat(tiles).await.unwrap();
@@ -432,7 +435,7 @@ async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
     }
     if !tiles.is_empty() {
         let naff = dst_mbt
-            .insert_tiles_flat(tiles)
+            .insert_tiles_flat(&tiles)
             .expect("insert tiles flat failed");
         debug!("Number of inserts: {naff:?}");
     }

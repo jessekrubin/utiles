@@ -1,8 +1,10 @@
 use std::error::Error;
 use std::path::Path;
 
+use rusqlite::types::ToSqlOutput;
 use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use tilejson::TileJSON;
+use tracing::instrument::WithSubscriber;
 use tracing::{debug, error};
 
 use utiles_core::bbox::BBox;
@@ -12,10 +14,12 @@ use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
+use crate::errors::UtilesResult;
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::insert_strategy::InsertStrategy;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
+use crate::utilesqlite::squealite::{open_existing, Sqlike3};
 
 #[derive(Debug, Default)]
 pub enum MbtilesType {
@@ -26,7 +30,13 @@ pub enum MbtilesType {
 }
 
 pub struct Mbtiles {
-    conn: Connection,
+    pub(crate) conn: Connection,
+}
+
+impl Sqlike3 for Mbtiles {
+    fn conn(&self) -> &Connection {
+        &self.conn
+    }
 }
 
 impl Mbtiles {
@@ -57,6 +67,35 @@ impl Mbtiles {
         let conn = Connection::open_in_memory().unwrap();
         Mbtiles { conn }
     }
+
+    pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
+        let c = open_existing(path);
+        match c {
+            Ok(c) => Ok(Mbtiles::from_conn(c)),
+            Err(e) => Err(e),
+        }
+        // let path = path.as_ref().to_owned();
+        // if !path.is_file() {
+        //     let emsg = format!("File does not exist: {}", path.to_str().unwrap());
+        //     return Err(UtilesError::FileDoesNotExist(path.to_str().unwrap().to_string()));
+        // }
+        // let mbt_res = Mbtiles::open(path).map_err(|e| {
+        //     let emsg = format!("Error opening mbtiles file: {}", e);
+        //     UtilesError::Unknown(emsg)
+        // });
+        // match mbt_res {
+        //     Ok(mbt) => Ok(mbt),
+        //     Err(e) => Err(e),
+        // }
+    }
+
+    // pub fn vacuum(&self) -> RusqliteResult<usize> {
+    //     vacuum(&self.conn)
+    // }
+    //
+    // pub fn analyze(&self) -> RusqliteResult<usize> {
+    //     analyze(&self.conn)
+    // }
 
     pub fn init_flat_mbtiles(&mut self) -> RusqliteResult<()> {
         init_flat_mbtiles(&mut self.conn)
@@ -201,7 +240,10 @@ impl Mbtiles {
         Ok(app_id)
     }
 
-    pub fn insert_tiles_flat(&mut self, tiles: Vec<TileData>) -> RusqliteResult<usize> {
+    pub fn insert_tiles_flat(
+        &mut self,
+        tiles: &Vec<TileData>,
+    ) -> RusqliteResult<usize> {
         insert_tiles_flat_mbtiles(&mut self.conn, tiles, Some(InsertStrategy::Ignore))
     }
     pub fn magic_number(&self) -> RusqliteResult<u32> {
@@ -529,41 +571,40 @@ pub fn insert_tile_flat_mbtiles(
     data: Vec<u8>,
 ) -> RusqliteResult<usize> {
     let mut stmt = conn.prepare_cached("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
-    let r = stmt.execute(params![tile.z, tile.x, tile.y, data])?;
+    let r = stmt.execute(params![tile.z, tile.x, tile.flipy(), data])?;
     Ok(r)
 }
 
 pub fn insert_tiles_flat_mbtiles(
     conn: &mut Connection,
-    tiles: Vec<TileData>,
+    tiles: &Vec<TileData>,
     insert_strategy: Option<InsertStrategy>,
 ) -> RusqliteResult<usize> {
     let tx = conn.transaction().expect("Error creating transaction");
+
+    let insert_strat = insert_strategy.unwrap_or_default();
+    let insert_clause = insert_strat.to_sql_prefix();
+    // TODO - use batch insert
+    // let batch_size = 999;
+    // let chunk_size = tiles.len() / batch_size;
+
     // scope so that stmt is not borrowed when tx.commit() is called
     let mut naff: usize = 0;
     {
-        let statement = match insert_strategy {
-            Some(is) => format!("{} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)", is.to_sql_prefix()),
-            None => "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)".to_string()
-        };
+        let statement = format!("{} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)", insert_clause);
         let mut stmt = tx.prepare_cached(&statement)?;
         for tile in tiles {
-            let r =
-                stmt.execute(params![tile.xyz.z, tile.xyz.x, tile.xyz.y, tile.data])?;
+            let r = stmt.execute(params![
+                tile.xyz.z,
+                tile.xyz.x,
+                tile.xyz.flipy(),
+                tile.data
+            ])?;
             naff += r;
         }
     }
     tx.commit().expect("Error committing transaction");
     Ok(naff)
-
-    // match tx {
-    //     Ok(tx) => {
-    //     }
-    //     Err(e) => {
-    //         error!("Error creating transaction: {}", e);
-    //         Err(e)
-    //     }
-    // }
 }
 
 pub fn metadata_get(

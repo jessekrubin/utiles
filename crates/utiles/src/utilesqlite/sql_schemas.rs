@@ -1,23 +1,16 @@
 pub const MBTILES_METADATA_SQLITE_SCHEMA: &str = "
 -- metadata table
-CREATE TABLE metadata
-(
-    name  TEXT NOT NULL PRIMARY KEY,
-    value TEXT
-);
+CREATE TABLE metadata(name TEXT NOT NULL, value TEXT);
 -- unique index on name
 CREATE UNIQUE INDEX metadata_index ON metadata (name);
 ";
 
 pub const MBTILES_FLAT_SQLITE_SCHEMA: &str = "
 -- metadata table
-CREATE TABLE metadata
-(
-    name  TEXT NOT NULL PRIMARY KEY,
-    value TEXT
-);
+CREATE TABLE metadata(name TEXT NOT NULL, value TEXT);
 -- unique index on name
 CREATE UNIQUE INDEX metadata_index ON metadata (name);
+
 -- tiles table
 CREATE TABLE tiles
 (
@@ -30,13 +23,9 @@ CREATE TABLE tiles
 CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);
 ";
 
-
 pub const MBTILES_HASH_TEXT_SQLITE_SCHEMA: &str = "
 -- metadata table
-CREATE TABLE metadata
-(
-    name  TEXT NOT NULL PRIMARY KEY,
-    value TEXT
+CREATE TABLE metadata (name  TEXT NOT NULL,value TEXT
 );
 -- unique index on name
 CREATE UNIQUE INDEX metadata_index ON metadata (name);

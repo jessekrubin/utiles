@@ -5,9 +5,9 @@ use utiles_core::zoom;
 use utiles_core::LngLat;
 
 use crate::cli::commands::dev::DevArgs;
-use utiles_core::VERSION;
-
 use crate::cli::commands::shapes::ShapesArgs;
+use crate::utilesqlite::Mbtiles;
+use utiles_core::VERSION;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
 /// ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝
@@ -176,6 +176,9 @@ pub enum Commands {
     #[command(name = "mbinfo", about = "Echo basic stats on mbtiles file", long_about = None)]
     Mbinfo(MbtilesStatsArgs),
 
+    #[command(name = "vacuum", about = "Vacuum sqlite database", long_about = None, visible_alias = "vac")]
+    Vacuum(SqliteDbCommonArgs),
+
     // #[command(name = "geojsonio", about = "Open mbtiles in geojson.io", long_about = None)]
     // Geojsonio(SqliteDbCommonArgs),
     #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
@@ -325,6 +328,7 @@ pub struct MinMaxZoom {
 pub struct ZoomArgGroup {
     /// Zoom level (0-32)
     #[arg(short, long, required = false, value_delimiter = ',', value_parser = zoom::parse_zooms)]
+    // pub zoom: Option<Vec<Vec<u8>>>,
     pub zoom: Option<Vec<Vec<u8>>>,
     // /// min zoom level (0-32)
     #[arg(long, conflicts_with = "zoom")]

@@ -15,8 +15,7 @@ pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
     "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
 ];
 
-pub fn lint_mbtiles_file(mbtiles: &Mbtiles, fix: bool) -> Vec<UtilesLintError> {
-    warn!("lint (fix -- {fix}) not implemented yet");
+pub fn lint_mbtiles_file(mbtiles: &Mbtiles, _fix: bool) -> Vec<UtilesLintError> {
     let mut errors = Vec::new();
     match mbtiles.magic_number() {
         Ok(magic_number) => {
