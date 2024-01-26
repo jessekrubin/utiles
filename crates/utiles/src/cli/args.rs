@@ -6,7 +6,7 @@ use utiles_core::LngLat;
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::shapes::ShapesArgs;
-use crate::utilesqlite::Mbtiles;
+
 use utiles_core::VERSION;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗

@@ -1,4 +1,6 @@
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum InsertStrategy {
+    #[default]
     None,
     Replace,
     Ignore,
@@ -8,7 +10,7 @@ pub enum InsertStrategy {
 }
 
 impl InsertStrategy {
-    pub fn to_sql_prefix(&self) -> &str {
+    pub fn sql_prefix(&self) -> &str {
         match self {
             InsertStrategy::None => "INSERT",
             InsertStrategy::Replace => "INSERT OR REPLACE",
@@ -17,11 +19,5 @@ impl InsertStrategy {
             InsertStrategy::Abort => "INSERT OR ABORT",
             InsertStrategy::Fail => "INSERT OR FAIL",
         }
-    }
-}
-
-impl Default for InsertStrategy {
-    fn default() -> Self {
-        InsertStrategy::None
     }
 }

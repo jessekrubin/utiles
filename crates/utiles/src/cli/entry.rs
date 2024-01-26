@@ -77,7 +77,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
             touch_main(&args).unwrap();
         }
         Commands::Vacuum(args) => {
-            let _r = vacuum_main(&args);
+            vacuum_main(&args);
         }
         Commands::Metadata(args) => metadata_main(&args),
         Commands::MetadataSet(args) => metadata_set_main(&args),

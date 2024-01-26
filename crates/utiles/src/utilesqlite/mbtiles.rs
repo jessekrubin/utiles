@@ -1,10 +1,9 @@
 use std::error::Error;
 use std::path::Path;
 
-use rusqlite::types::ToSqlOutput;
 use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use tilejson::TileJSON;
-use tracing::instrument::WithSubscriber;
+
 use tracing::{debug, error};
 
 use utiles_core::bbox::BBox;
@@ -583,7 +582,7 @@ pub fn insert_tiles_flat_mbtiles(
     let tx = conn.transaction().expect("Error creating transaction");
 
     let insert_strat = insert_strategy.unwrap_or_default();
-    let insert_clause = insert_strat.to_sql_prefix();
+    let insert_clause = insert_strat.sql_prefix();
     // TODO - use batch insert
     // let batch_size = 999;
     // let chunk_size = tiles.len() / batch_size;

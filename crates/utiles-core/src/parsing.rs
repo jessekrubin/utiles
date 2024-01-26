@@ -108,9 +108,7 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     if parts.len() == 4 {
         // if north < south err out
         if parts[3] < parts[1] {
-            Err(
-                "Invalid bbox: ".to_string() + s + " (north < south)",
-            )
+            Err("Invalid bbox: ".to_string() + s + " (north < south)")
         } else {
             Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
         }
