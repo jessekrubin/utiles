@@ -562,13 +562,7 @@ fn tiles_range_zoom(
 #[must_use]
 pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRanges {
     let zooms = as_zooms(zooms);
-    let bboxthing = BBox {
-        north: bounds.3,
-        south: bounds.1,
-        east: bounds.2,
-        west: bounds.0,
-    };
-    let bboxes: Vec<BBox> = bboxthing
+    let bboxes: Vec<BBox> = BBox::from(bounds)
         .bboxes()
         .into_iter()
         .map(|bbox| {

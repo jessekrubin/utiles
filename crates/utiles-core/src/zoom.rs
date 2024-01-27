@@ -163,11 +163,6 @@ impl ZoomRange {
 /// ```
 impl From<ZoomRange> for ZoomSet {
     fn from(zoom_range: ZoomRange) -> Self {
-        // (0..32)
-        //     .rev()
-        //     .filter(|&i| (zset & (1 << i)) != 0)
-        //     .map(|i| (31 - i) as u8) // Convert bit index to zoom level and cast to u8
-        //     .collect()
         ZoomSet(
             (zoom_range.minz..=zoom_range.maxz)
                 .rev()
