@@ -274,8 +274,8 @@ impl From<String> for BBox {
     }
 }
 
-impl From<Tile> for WebMercatorBbox {
-    fn from(tile: Tile) -> Self {
-        crate::xyz2bbox(tile.x, tile.y, tile.z)
-    }
-}
+// impl From<Tile> for WebMercatorBbox {
+//     fn from(tile: Tile) -> Self {
+//         crate::xyz2bbox(tile.x, tile.y, tile.z)
+//     }
+// }

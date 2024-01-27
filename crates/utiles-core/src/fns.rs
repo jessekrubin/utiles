@@ -530,13 +530,11 @@ pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
 pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
     let tile_size = EARTH_CIRCUMFERENCE / 2.0_f64.powi(i32::from(z));
     let left = f64::from(x) * tile_size - EARTH_CIRCUMFERENCE / 2.0;
-    let right = left + tile_size;
     let top = EARTH_CIRCUMFERENCE / 2.0 - f64::from(y) * tile_size;
-    let bottom = top - tile_size;
     WebMercatorBbox {
         left,
-        bottom,
-        right,
+        bottom: top - tile_size,
+        right: left + tile_size,
         top,
     }
 }
