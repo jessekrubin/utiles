@@ -1,9 +1,120 @@
 use crate::errors::UtilesCoreResult;
+use crate::UtilesCoreError;
 use std::num::ParseIntError;
+use std::ops::BitAnd;
 
 use crate::UtilesCoreError::InvalidZoom;
 
 type Zooms = Vec<u8>;
+
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
+pub struct ZoomSet(u32);
+
+#[must_use]
+pub fn zset2zvec(zset: u32) -> Vec<u8> {
+    (0..32)
+        .rev()
+        .filter(|&i| (zset & (1 << i)) != 0)
+        .map(|i| (31 - i) as u8) // Convert bit index to zoom level and cast to u8
+        .collect()
+}
+
+#[must_use]
+pub fn zvec2zset(zvec: Vec<u8>) -> u32 {
+    zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
+}
+
+/// ZoomSet is a set of zoom levels represented as a u32
+///
+/// # Examples
+/// ```
+/// use utiles_core::zoom::ZoomSet;
+/// let zset = ZoomSet::new(0b11100000_00000000_00000000_00000000);
+/// let zooms_vec: Vec<u8> = zset.into();
+/// assert_eq!(zooms_vec, vec![0, 1, 2]);
+/// ```
+impl ZoomSet {
+    #[must_use]
+    pub fn new(zset: u32) -> Self {
+        Self(zset)
+    }
+
+    #[must_use]
+    pub fn from_zooms(zooms: Vec<u8>) -> Self {
+        Self(zvec2zset(zooms))
+    }
+
+    #[must_use]
+    pub fn to_zooms(&self) -> Vec<u8> {
+        zset2zvec(self.0)
+    }
+}
+
+impl From<u8> for ZoomSet {
+    fn from(zoom: u8) -> Self {
+        ZoomSet(1 << (31 - zoom))
+    }
+}
+
+impl From<u32> for ZoomSet {
+    fn from(zset: u32) -> Self {
+        ZoomSet(zset)
+    }
+}
+
+impl TryFrom<Vec<u8>> for ZoomSet {
+    type Error = UtilesCoreError;
+
+    fn try_from(zvec: Vec<u8>) -> Result<Self, Self::Error> {
+        let result = zvec.iter().try_fold(0u32, |acc, &z| {
+            if z > 31 {
+                Err(InvalidZoom(z.to_string()))
+            } else {
+                Ok(acc | (1 << (31 - z)))
+            }
+        })?;
+        Ok(ZoomSet::new(result)) // Replace with actual construction method
+    }
+}
+
+impl BitAnd for ZoomSet {
+    type Output = ZoomSet;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        ZoomSet(self.0 & rhs.0)
+    }
+}
+
+impl BitAnd<u32> for ZoomSet {
+    type Output = ZoomSet;
+
+    fn bitand(self, rhs: u32) -> Self::Output {
+        ZoomSet(self.0 & rhs)
+    }
+}
+
+impl BitAnd<ZoomSet> for u32 {
+    type Output = ZoomSet;
+
+    fn bitand(self, rhs: ZoomSet) -> Self::Output {
+        ZoomSet(self & rhs.0)
+    }
+}
+
+impl BitAnd<u8> for ZoomSet {
+    type Output = ZoomSet;
+
+    fn bitand(self, rhs: u8) -> Self::Output {
+        ZoomSet(self.0 & (1 << (31 - rhs)))
+    }
+}
+
+impl From<ZoomSet> for Vec<u8> {
+    fn from(zset: ZoomSet) -> Self {
+        zset2zvec(zset.0)
+    }
+}
+
 type ZoomsSetInt = u32;
 
 pub struct ZoomRange {
@@ -14,7 +125,7 @@ pub struct ZoomRange {
 // default zoom range
 impl Default for ZoomRange {
     fn default() -> Self {
-        Self { minz: 0, maxz: 32 }
+        Self { minz: 0, maxz: 31 }
     }
 }
 
@@ -36,23 +147,28 @@ impl ZoomRange {
     pub fn from_min(min: u8) -> Self {
         Self {
             minz: min,
-            maxz: 32,
+            maxz: 31,
         }
     }
 }
 
-#[must_use]
-pub fn zset2zvec(zset: ZoomsSetInt) -> Vec<u8> {
-    (0..32)
-        .rev()
-        .filter(|&i| (zset & (1 << i)) != 0)
-        .map(|i| (31 - i) as u8) // Convert bit index to zoom level and cast to u8
-        .collect()
-}
-
-#[must_use]
-pub fn zvec2zset(zvec: Zooms) -> ZoomsSetInt {
-    zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
+/// convert range of zoom levels to a set of zoom levels
+///
+/// # Examples
+/// ```
+/// use utiles_core::zoom::{ZoomRange, ZoomSet};
+/// let zrange = ZoomRange::new(0, 7);
+/// let zset: ZoomSet = zrange.into();
+/// assert_eq!(zset, ZoomSet::new(0b11111111_00000000_00000000_00000000));
+/// ```
+impl From<ZoomRange> for ZoomSet {
+    fn from(zoom_range: ZoomRange) -> Self {
+        ZoomSet(
+            (zoom_range.minz..=zoom_range.maxz)
+                .rev()
+                .fold(0, |acc, z| acc | (1 << (31 - z))),
+        )
+    }
 }
 
 /// parse a string of zoom levels to a vector of zoom levels
@@ -214,5 +330,17 @@ mod tests {
         let zvec: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
         let zset_from_zvec = zvec2zset(zvec);
         assert_eq!(zset_from_zvec, zset);
+    }
+
+    #[test]
+    fn zoom_set_into_zoom_vec() {
+        let zset_int: u32 = 0b11111111_00000000_00000000_00000000; // Example, zoom levels 2 and 4 are set
+        let zset: ZoomSet = zset_int.into();
+        let zvec = Vec::from(zset);
+        assert_eq!(zvec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
+
+        // let zvec: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
+        // let zset_from_zvec = zvec2zset(zvec);
+        // assert_eq!(zset_from_zvec, zset);
     }
 }

@@ -5,6 +5,7 @@ mod insert_strategy;
 pub mod mbtiles;
 pub mod mbtiles_async;
 pub mod mbtstats;
+mod sql_schemas;
 pub mod squealite;
 
 pub use fns::*;
