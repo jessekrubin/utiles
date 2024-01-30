@@ -14,10 +14,17 @@ click==8.1.7
     # via
     #   black
     #   mercantile
+colorama==0.4.6
+    # via
+    #   click
+    #   colorlog
+    #   pytest
 colorlog==6.8.0
     # via nox
 coverage[toml]==7.4.0
-    # via pytest-cov
+    # via
+    #   coverage
+    #   pytest-cov
 distlib==0.3.8
     # via virtualenv
 filelock==3.13.1
