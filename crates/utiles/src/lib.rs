@@ -18,6 +18,7 @@ pub mod gj;
 pub mod lint;
 pub mod utilejson;
 pub mod utilesqlite;
+mod server;
 
 pub use errors::UtilesError;
 

@@ -6,6 +6,7 @@ use utiles_core::LngLat;
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::shapes::ShapesArgs;
+use crate::cli::commands::serve::ServeArgs;
 
 use utiles_core::VERSION;
 
@@ -208,8 +209,8 @@ pub enum Commands {
     /// echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
     /// [426, 775, 11]
     #[command(
-        name = "bounding-tile",
-        about = "Echo the bounding tile of a lonlat/bbox/GeoJSON"
+    name = "bounding-tile",
+    about = "Echo the bounding tile of a lonlat/bbox/GeoJSON"
     )]
     BoundingTile(TileFmtArgs),
 
@@ -288,6 +289,9 @@ pub enum Commands {
 
     #[command(name = "shapes", about = "Echo shapes of tile(s) as GeoJSON", long_about = None)]
     Shapes(ShapesArgs),
+
+    #[command(name = "serve", about = "utiles server (wip)", long_about = None, hide = true)]
+    Serve(ServeArgs),
 
     /// Development/Playground command (hidden)
     #[command(name = "dev", about = "dev command", long_about = None, hide = true, hide = true)]
