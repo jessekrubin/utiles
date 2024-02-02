@@ -11,6 +11,7 @@ mod mbtiles_deadpool;
 pub mod mbtstats;
 mod sql_schemas;
 pub mod squealite;
+mod sqlite_u64;
 
 pub use fns::*;
 pub use mbtiles::Mbtiles;
