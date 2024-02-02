@@ -6,7 +6,10 @@ use axum::{
     body::{Body, Bytes},
     extract::Request,
     extract::State,
-    http::StatusCode,
+    http::{
+        header::{HeaderMap, HeaderValue},
+        StatusCode,
+    },
     middleware::Next,
     response::{IntoResponse, Response},
     routing::get,
@@ -21,6 +24,7 @@ use serde_json::json;
 use tracing::{info, warn};
 
 use utiles_core::{quadkey2tile, utile, Tile};
+use utiles_core::tile_type::{blob2headers, tiletype};
 
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
@@ -152,26 +156,51 @@ struct TileZxyPath {
 async fn tile_zxy_path(
     State(state): State<Arc<ServerState>>,
     Path(path): Path<TileZxyPath>,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
+) -> Result<impl IntoResponse, impl IntoResponse> {
     let mbtiles = state.datasets.mbtiles.get(&path.dataset);
     if mbtiles.is_none() {
         return Err((
             StatusCode::NOT_FOUND,
             Json(json!({
                 "error": "Dataset not found",
-                "dataset": path.dataset
+                "dataset": path.dataset,
+                "status": 404,
             }))
-            .to_string(),
+                .to_string(),
         ));
     }
     let t = utile!(path.x, path.y, path.z);
     let mbtiles = mbtiles.unwrap();
     let tile_data = mbtiles.query_tile(t).await.unwrap();
-    // info!("tile_data: {:?}", tile_data);
     match tile_data {
-        Some(data) => Ok(Response::new(Body::from(data))),
+        Some(data) => {
+            let headers = blob2headers(
+                &data
+            );
+            let hm = headers.iter().fold(HeaderMap::new(), |mut acc, (k, v)| {
+                acc.insert(k.clone(), HeaderValue::from_str(v).unwrap());
+                acc
+            });
+            // for (k, v) in &headers {
+            //
+            // }
+
+            Ok(
+                (
+                    StatusCode::OK,
+                    hm,
+                    Body::from(data)
+                )
+            )
+        }
         None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
     }
+
+    // info!("tile_data: {:?}", tile_data);
+    // match tile_data {
+    //     Some(data) => Ok(Response::new(Body::from(data))),
+    //     None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
+    // }
     // let tile_data = mbtiles.query_tile(t).await.unwrap();
     // // info!("tile_data: {:?}", tile_data);
     // match tile_data {
@@ -179,6 +208,7 @@ async fn tile_zxy_path(
     //     None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
     // }
 }
+
 
 #[derive(Deserialize)]
 struct TileQuadkeyPath {
@@ -267,9 +297,9 @@ async fn buffer_and_print<B>(
     direction: &str,
     body: B,
 ) -> Result<Bytes, (StatusCode, String)>
-where
-    B: axum::body::HttpBody<Data = Bytes>,
-    B::Error: std::fmt::Display,
+    where
+        B: axum::body::HttpBody<Data=Bytes>,
+        B::Error: std::fmt::Display,
 {
     let bytes = match body.collect().await {
         Ok(collected) => collected.to_bytes(),

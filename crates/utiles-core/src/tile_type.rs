@@ -84,6 +84,12 @@ pub fn headers(tiletype: &TileType) -> Vec<(&'static str, &'static str)> {
 }
 
 #[must_use]
+pub fn blob2headers(b: &[u8]) -> Vec<(&'static str, &'static str)> {
+    let tiletype = tiletype(b);
+    headers(&tiletype)
+}
+
+#[must_use]
 pub fn tiletype_str(buffer: &[u8]) -> String {
     let tiletype = tiletype(buffer);
     match tiletype {
@@ -97,3 +103,5 @@ pub fn tiletype_str(buffer: &[u8]) -> String {
         TileType::Webp => "webp".to_string(),
     }
 }
+
+
