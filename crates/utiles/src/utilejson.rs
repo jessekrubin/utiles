@@ -71,10 +71,9 @@ pub fn metadata2tilejson(
         }
         if let Some(value) = obj.remove("tilestats") {
             if let Ok(v) = serde_json::from_value::<TileStats>(value) {
-                tj.other.insert(
-                    "tilestats".parse().unwrap(),
-                    serde_json::to_value(v).unwrap(),
-                );
+                let key = "tilestats".to_string();
+                let val = serde_json::to_value(v)?;
+                tj.other.insert(key, val);
             }
         }
     }

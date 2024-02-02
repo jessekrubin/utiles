@@ -443,9 +443,32 @@ pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool> {
     Ok(has_metadata && has_tiles)
 }
 
-pub fn tile_exists(connection: &Connection, tile: Tile) -> RusqliteResult<bool> {
+pub fn query_zxy(
+    connection: &Connection,
+    z: u8,
+    x: u32,
+    y: u32,
+) -> RusqliteResult<Option<Vec<u8>>> {
+    let mut stmt = connection.prepare_cached("SELECT tile_data FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3")?;
+    let tile_data: Option<Vec<u8>> = stmt
+        .query_row(params![z, x, y], |row| row.get(0))
+        .optional()?;
+    Ok(tile_data)
+}
+
+pub fn query_tile<T: TileLike>(
+    connection: &Connection,
+    tile: T,
+) -> RusqliteResult<Option<Vec<u8>>> {
+    query_zxy(connection, tile.z(), tile.x(), tile.y())
+}
+
+pub fn tile_exists<T: TileLike>(
+    connection: &Connection,
+    tile: T,
+) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3")?;
-    let rows = stmt.query_row(params![tile.z, tile.x, tile.flipy()], |row| {
+    let rows = stmt.query_row(params![tile.z(), tile.x(), tile.flipy()], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
     })?;

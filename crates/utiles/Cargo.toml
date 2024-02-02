@@ -54,3 +54,5 @@ imagesize = "0.12.0"
 log = "0.4.20"
 axum = { version = "0.7.4", features = ["tokio", "json", "macros"] }
 http-body-util = "0.1.0"
+async-trait = "0.1.77"
+async-sqlite = { version = "0.2.1", features = ["bundled", "functions", "trace", ] }
