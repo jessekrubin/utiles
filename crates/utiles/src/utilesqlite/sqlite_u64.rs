@@ -108,7 +108,9 @@ fn i64_to_u64_unsafe_transmute(value: i64) -> u64 {
 
 #[cfg(test)]
 mod sqlite_u64_transmute_tests {
-    use crate::utilesqlite::sqlite_u64::{i64_to_u64_unsafe_transmute, u64_to_i64_unsafe_transmute};
+    use crate::utilesqlite::sqlite_u64::{
+        i64_to_u64_unsafe_transmute, u64_to_i64_unsafe_transmute,
+    };
 
     #[test]
     fn test_i64_to_u64_zero() {
@@ -145,7 +147,6 @@ mod sqlite_u64_transmute_tests {
         assert_eq!(i64_to_u64_unsafe_transmute(original), expected);
     }
 }
-
 
 fn u64_to_i64_ptr(value: u64) -> i64 {
     let ptr = &value as *const u64 as *const i64;

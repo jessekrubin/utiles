@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::{info, warn};
 
-use utiles_core::{utile, Tile};
+use utiles_core::{quadkey2tile, utile, Tile};
 
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
@@ -61,7 +61,10 @@ async fn preflight() -> Datasets {
     for ds in datasets_vec {
         // let tj = ds.tilejson().await.unwrap();
         // info!("tj: {:?}", tj);
-        datasets.insert(ds.filename().clone().to_string(), ds);
+        datasets.insert(
+            ds.filename().clone().to_string().replace(".mbtiles", ""),
+            ds,
+        );
     }
 
     // print the datasets
@@ -101,9 +104,11 @@ pub async fn utiles_serve() -> Result<(), Box<dyn std::error::Error>> {
         .route("/uitiles", get(uitiles))
         .route("/datasets", get(|_: Request<Body>| async { "datasets" }))
         .route("/tiles/:dataset/tile.json", get(ds_tilejson))
+        .route("/tiles/:dataset/:quadkey", get(handle_tile_quadkey))
         .route("/tiles/:dataset/:z/:x/:y", get(tile_zxy_path))
-        // .layer(middleware::from_fn(print_request_response))
+        .layer(axum::middleware::from_fn(print_request_response))
         .with_state(shared_state);
+    let app = app.fallback(four_o_four);
 
     // run our app with hyper, listening globally on port 3000
     let host = "0.0.0.0".to_string();
@@ -114,7 +119,28 @@ pub async fn utiles_serve() -> Result<(), Box<dyn std::error::Error>> {
     axum::serve(listener, app).await.unwrap();
     Ok(())
 }
+// #[derive(Debug, Deserialize)]
+// pub enum YParam {
+//     Y(u32),
+//     YExt { y: u32, ext: String },
+// }
 
+#[derive(Debug, Deserialize)]
+pub enum YParam {
+    Y(u32),
+    YExt(String),
+}
+
+// impl std::str::FromStr for YParam {
+//     type Err = std::convert::Infallible;
+//
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         match s.parse::<u32>() {
+//             Ok(num) => Ok(YParam::Y(num)),
+//             Err(_) => Ok(YParam::YExt(s.to_string())),
+//         }
+//     }
+// }
 #[derive(Deserialize)]
 struct TileZxyPath {
     dataset: String,
@@ -127,13 +153,51 @@ async fn tile_zxy_path(
     State(state): State<Arc<ServerState>>,
     Path(path): Path<TileZxyPath>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let dataset = path.dataset;
-    let z = path.z;
-    let x = path.x;
-    let y = path.y;
-    let mbtiles = state.datasets.mbtiles.get(&dataset).unwrap();
-    let t = utile!(x, y, z);
+    let mbtiles = state.datasets.mbtiles.get(&path.dataset);
+    if mbtiles.is_none() {
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "error": "Dataset not found",
+                "dataset": path.dataset
+            }))
+            .to_string(),
+        ));
+    }
+    let t = utile!(path.x, path.y, path.z);
+    let mbtiles = mbtiles.unwrap();
     let tile_data = mbtiles.query_tile(t).await.unwrap();
+    // info!("tile_data: {:?}", tile_data);
+    match tile_data {
+        Some(data) => Ok(Response::new(Body::from(data))),
+        None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
+    }
+    // let tile_data = mbtiles.query_tile(t).await.unwrap();
+    // // info!("tile_data: {:?}", tile_data);
+    // match tile_data {
+    //     Some(data) => Ok(Response::new(Body::from(data))),
+    //     None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
+    // }
+}
+
+#[derive(Deserialize)]
+struct TileQuadkeyPath {
+    dataset: String,
+    quadkey: String,
+}
+
+async fn handle_tile_quadkey(
+    State(state): State<Arc<ServerState>>,
+    Path(path): Path<TileQuadkeyPath>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let mbtiles = state.datasets.mbtiles.get(&path.dataset).unwrap();
+    let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {
+        (
+            StatusCode::BAD_REQUEST,
+            format!("Error parsing quadkey: {}", e),
+        )
+    })?;
+    let tile_data = mbtiles.query_tile(parsed_tile).await.unwrap();
     // info!("tile_data: {:?}", tile_data);
     match tile_data {
         Some(data) => Ok(Response::new(Body::from(data))),
@@ -160,6 +224,10 @@ async fn root() -> &'static str {
 struct Health {
     status: String,
     uptime: u64,
+}
+
+async fn four_o_four() -> impl IntoResponse {
+    (StatusCode::NOT_FOUND, "four oh four...")
 }
 
 async fn health(State(state): State<Arc<ServerState>>) -> Json<Health> {
