@@ -15,7 +15,6 @@ use axum::{
     routing::get,
     Json, Router,
 };
-use http_body_util::BodyExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tower::ServiceBuilder;
