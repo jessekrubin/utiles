@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-use axum::extract::Path;
+use axum::extract::{Host, Path};
 use axum::{
     body::Body,
     extract::Request,
@@ -205,13 +205,17 @@ async fn handle_tile_quadkey(
 }
 
 async fn ds_tilejson(
+    Host(hostname): axum::extract::Host,
     State(state): State<Arc<ServerState>>,
     Path(path): Path<String>,
 ) -> impl IntoResponse {
     let dataset = path;
     let mbtiles = state.datasets.mbtiles.get(&dataset).unwrap();
     let tilejson = mbtiles.tilejson().await.unwrap();
-    Json(tilejson)
+    let mut with_tiles = tilejson.clone();
+    let tiles_url = format!("http://{}/tiles/{}/{{z}}/{{x}}/{{y}}", hostname, dataset);
+    with_tiles.tiles = vec![tiles_url];
+    Json(with_tiles)
 }
 
 // basic handler that responds with a static string
