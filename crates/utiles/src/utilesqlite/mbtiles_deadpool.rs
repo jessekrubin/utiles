@@ -7,7 +7,7 @@ use tracing::error;
 
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::{Tile, TileLike};
+use utiles_core::Tile;
 
 use crate::errors::UtilesResult;
 use crate::utilejson::metadata2tilejson;
@@ -48,7 +48,7 @@ impl MbtilesAsync for MbtilesDeadpool {
         &self.dbpath.fspath
     }
     fn filename(&self) -> &str {
-        &self.dbpath.fspath
+        &self.dbpath.filename
     }
     async fn tilejson(&self) -> Result<TileJSON, Box<dyn Error>> {
         let metadata = self.metadata_rows().await?;

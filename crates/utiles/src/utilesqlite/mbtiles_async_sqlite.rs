@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::path::PathBuf;
 
 use async_sqlite::{JournalMode, Pool, PoolBuilder};
 use async_trait::async_trait;
@@ -56,38 +55,16 @@ impl MbtilesAsync for MbtilesAsyncSqlitePool {
     }
 
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>> {
-        let r = self
-            .pool
-            .conn(|conn| mbtiles_metadata(conn))
+        self.pool
+            .conn(mbtiles_metadata)
             .await
-            .map_err(|e| UtilesError::AsyncSqliteError(e));
-        match r {
-            Ok(mdrows) => Ok(mdrows),
-            Err(e) => Err(e.into()),
-        }
+            .map_err(UtilesError::AsyncSqliteError)
     }
-    //
-    // async fn query_tile<T: TileLike>(&self, tile: T) -> UtilesResult<Option<Vec<u8>>> {
-    //     let r = self.pool.conn(
-    //         |conn| {
-    //             Ok(query_tile(conn, tile))
-    //         }
-    //     ).await?;
-    //     match r {
-    //         Ok(tile) => Ok(tile),
-    //         Err(e) => Err(e.into()),
-    //     }
-    // }
 
     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>> {
-        let r = self
-            .pool
+        self.pool
             .conn(move |conn| query_zxy(conn, z, x, y))
             .await
-            .map_err(|e| UtilesError::AsyncSqliteError(e));
-        match r {
-            Ok(tile) => Ok(tile),
-            Err(e) => Err(e.into()),
-        }
+            .map_err(UtilesError::AsyncSqliteError)
     }
 }

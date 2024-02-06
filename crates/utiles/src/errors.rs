@@ -1,5 +1,5 @@
 use async_sqlite;
-use async_sqlite::Error as AsyncSqliteError;
+
 use rusqlite;
 use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
@@ -27,7 +27,6 @@ pub enum UtilesError {
 
 pub type UtilesResult<T> = Result<T, UtilesError>;
 
-// impl From<RusqliteResult<()>> for UtilesError {
 impl From<RusqliteResult<()>> for UtilesError {
     fn from(e: RusqliteResult<()>) -> Self {
         match e {
@@ -36,19 +35,3 @@ impl From<RusqliteResult<()>> for UtilesError {
         }
     }
 }
-
-//
-// impl From<rusqlite::Error> for UtilesError {
-//     fn from(e: rusqlite::Error) -> Self {
-//         UtilesError::SqliteError(e)
-//     }
-// }
-//
-// impl From<AsyncSqliteError> for UtilesError {
-//     fn from(e: AsyncSqliteError) -> Self {
-//         UtilesError::AsyncSqliteError(e)
-//     }
-// }
-//
-//
-//

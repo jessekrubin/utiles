@@ -4,8 +4,8 @@ pub fn u64_to_i64_shift(value: u64) -> i64 {
 
     // Subtracting the OFFSET from the u64 value. This might wrap around, which is expected.
     // Wrapping sub is used to explicitly indicate that wrap around is intended.
-    let converted_value = value.wrapping_sub(OFFSET) as i64;
-    converted_value
+
+    value.wrapping_sub(OFFSET) as i64
 }
 
 pub fn i64_to_u64_shift(value: i64) -> u64 {
@@ -14,8 +14,8 @@ pub fn i64_to_u64_shift(value: i64) -> u64 {
 
     // Adding the OFFSET back to the i64 value to get the original u64 value.
     // This is safe because we're adding to an i64, which will not overflow an u64.
-    let original_value = (value as u64).wrapping_add(OFFSET);
-    original_value
+
+    (value as u64).wrapping_add(OFFSET)
 }
 
 #[cfg(test)]
