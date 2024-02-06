@@ -28,6 +28,9 @@ pub struct Cli {
     #[arg(long, short, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
     pub debug: bool,
 
+    #[arg(long, global = true, default_value = "false", help = "trace mode", action = clap::ArgAction::SetTrue)]
+    pub trace: bool,
+
     /// format log as NDJSON
     #[arg(long, global = true, default_value = "false", action = clap::ArgAction::SetTrue)]
     pub log_json: bool,

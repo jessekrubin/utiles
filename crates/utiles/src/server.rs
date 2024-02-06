@@ -1,18 +1,16 @@
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::Duration;
 
-use crate::utilesqlite::mbtiles_async::MbtilesAsync;
-use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
 use axum::extract::Path;
 use axum::{
-    body::{Body, Bytes},
+    body::Body,
     extract::Request,
     extract::State,
     http::{
         header::{HeaderMap, HeaderValue},
         StatusCode,
     },
-    middleware::Next,
     response::{IntoResponse, Response},
     routing::get,
     Json, Router,
@@ -20,9 +18,19 @@ use axum::{
 use http_body_util::BodyExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tower::ServiceBuilder;
+use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
+use tower_http::{
+    timeout::TimeoutLayer,
+    trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
+};
 use tracing::{debug, info, warn};
+
 use utiles_core::tile_type::blob2headers;
 use utiles_core::{quadkey2tile, utile, Tile};
+
+use crate::utilesqlite::mbtiles_async::MbtilesAsync;
+use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
 
 //=============================================================================
 
@@ -96,6 +104,19 @@ pub async fn utiles_serve() -> Result<(), Box<dyn std::error::Error>> {
     // ...seems to be the idiomatic way to do this...
     let shared_state = Arc::new(state);
 
+    // Build our middleware stack
+    let middleware = ServiceBuilder::new()
+        // tracing/logging
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::new().include_headers(false))
+                .on_body_chunk(DefaultOnBodyChunk::new())
+                .on_failure(DefaultOnFailure::new())
+                .on_request(DefaultOnRequest::new())
+                .on_response(DefaultOnResponse::new().include_headers(false)),
+        )
+        .layer(TimeoutLayer::new(Duration::from_secs(10)));
+
     // Build the app/router!
     let app = Router::new()
         .route("/", get(root))
@@ -105,7 +126,8 @@ pub async fn utiles_serve() -> Result<(), Box<dyn std::error::Error>> {
         .route("/tiles/:dataset/tile.json", get(ds_tilejson))
         .route("/tiles/:dataset/:quadkey", get(handle_tile_quadkey))
         .route("/tiles/:dataset/:z/:x/:y", get(tile_zxy_path))
-        .layer(axum::middleware::from_fn(print_request_response))
+        // .layer(axum::middleware::from_fn(print_request_response))
+        .layer(middleware)
         .with_state(shared_state) // shared app/server state
         .fallback(four_o_four); // 404
 
@@ -225,41 +247,41 @@ async fn uitiles() -> Json<serde_json::Value> {
     Json(json!({"status": "TODO/WIP/NOT_IMPLEMENTED_YET"}))
 }
 
-async fn print_request_response(
-    req: Request,
-    next: Next,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let (parts, body) = req.into_parts();
-    let bytes = buffer_and_print("request", body).await?;
-    let req = Request::from_parts(parts, Body::from(bytes));
-
-    let res = next.run(req).await;
-
-    let (parts, body) = res.into_parts();
-    let bytes = buffer_and_print("response", body).await?;
-    let res = Response::from_parts(parts, Body::from(bytes));
-    Ok(res)
-}
-
-async fn buffer_and_print<B>(
-    direction: &str,
-    body: B,
-) -> Result<Bytes, (StatusCode, String)>
-where
-    B: axum::body::HttpBody<Data = Bytes>,
-    B::Error: std::fmt::Display,
-{
-    let bytes = match body.collect().await {
-        Ok(collected) => collected.to_bytes(),
-        Err(err) => {
-            return Err((
-                StatusCode::BAD_REQUEST,
-                format!("failed to read {direction} body: {err}"),
-            ));
-        }
-    };
-    if let Ok(body) = std::str::from_utf8(&bytes) {
-        info!("{direction} body = {body:?}");
-    }
-    Ok(bytes)
-}
+// async fn print_request_response(
+//     req: Request,
+//     next: Next,
+// ) -> Result<impl IntoResponse, (StatusCode, String)> {
+//     let (parts, body) = req.into_parts();
+//     let bytes = buffer_and_print("request", body).await?;
+//     let req = Request::from_parts(parts, Body::from(bytes));
+//
+//     let res = next.run(req).await;
+//
+//     let (parts, body) = res.into_parts();
+//     let bytes = buffer_and_print("response", body).await?;
+//     let res = Response::from_parts(parts, Body::from(bytes));
+//     Ok(res)
+// }
+//
+// async fn buffer_and_print<B>(
+//     direction: &str,
+//     body: B,
+// ) -> Result<Bytes, (StatusCode, String)>
+//     where
+//         B: axum::body::HttpBody<Data=Bytes>,
+//         B::Error: std::fmt::Display,
+// {
+//     let bytes = match body.collect().await {
+//         Ok(collected) => collected.to_bytes(),
+//         Err(err) => {
+//             return Err((
+//                 StatusCode::BAD_REQUEST,
+//                 format!("failed to read {direction} body: {err}"),
+//             ));
+//         }
+//     };
+//     if let Ok(body) = std::str::from_utf8(&bytes) {
+//         info!("{direction} body = {body:?}");
+//     }
+//     Ok(bytes)
+// }

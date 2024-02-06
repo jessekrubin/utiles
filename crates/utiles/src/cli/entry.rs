@@ -15,11 +15,14 @@ use crate::cli::commands::{
 
 struct LogConfig {
     pub debug: bool,
+    pub trace: bool,
     pub json: bool,
 }
 
 fn init_tracing(log_config: &LogConfig) {
-    let filter = if log_config.debug {
+    let filter = if log_config.trace {
+        EnvFilter::new("TRACE")
+    } else if log_config.debug {
         EnvFilter::new("DEBUG")
     } else {
         EnvFilter::new("INFO")
@@ -57,11 +60,13 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     // if the command is "dev" init tracing w/ debug
     let logcfg = if let Commands::Dev(_) = args.command {
         LogConfig {
+            trace: false,
             debug: true,
             json: args.log_json,
         }
     } else {
         LogConfig {
+            trace: args.trace,
             debug: args.debug,
             json: args.log_json,
         }

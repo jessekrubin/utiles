@@ -56,3 +56,5 @@ axum = { version = "0.7.4", features = ["tokio", "json", "macros"] }
 http-body-util = "0.1.0"
 async-trait = "0.1.77"
 async-sqlite = { version = "0.2.1", features = ["bundled", "functions", "trace", ] }
+tower = { version = "0.4.13", features = ["timeout"] }
+tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id"] }
