@@ -28,7 +28,8 @@ pub struct Cli {
     #[arg(long, short, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
     pub debug: bool,
 
-    #[arg(long, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
+    /// format log as NDJSON
+    #[arg(long, global = true, default_value = "false", action = clap::ArgAction::SetTrue)]
     pub log_json: bool,
 
     /// CLI subcommands
@@ -89,9 +90,11 @@ pub struct ParentChildrenArgs {
 
 #[derive(Debug, Parser)]
 pub struct SqliteDbCommonArgs {
+    /// mbtiles filepath
     #[arg(required = true, help = "mbtiles filepath")]
     pub filepath: String,
 
+    /// compact json (default: false)
     #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
     pub min: bool,
 }
@@ -152,36 +155,44 @@ pub struct MbtilesStatsArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    /// Echo the `tile.json` for mbtiles file
     #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes", about = "Echo tilejson for mbtiles file(s)", long_about = None)]
     Tilejson(TilejsonArgs),
 
-    #[command(name = "touch", about = "create new mbtiles file(s)", long_about = None)]
+    /// Create new mbtiles db w/ schema
+    #[command(name = "touch", long_about = None)]
     Touch(TouchArgs),
 
+    /// Copy tiles from src -> dst
     #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None, visible_alias = "cp")]
     Copy(CopyArgs),
 
+    /// Lint mbtiles file(s) (wip)
     #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
     Lint(LintArgs),
 
-    /// metadata
-    #[command(name = "metadata", visible_aliases = ["meta", "md"], about = "Echo metadata (table) as json", long_about = None)]
+    /// Echo metadata (table) as json arr/obj
+    #[command(name = "metadata", visible_aliases = ["meta", "md"], long_about = None)]
     Metadata(MetadataArgs),
 
-    #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"], about = "Set metadata key/value", long_about = None)]
+    /// Set metadata key/value
+    #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"], long_about = None)]
     MetadataSet(MetadataSetArgs),
 
     #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
     Rimraf(RimrafArgs),
 
-    #[command(name = "mbinfo", about = "Echo basic stats on mbtiles file", long_about = None)]
+    /// Echo mbtiles info/stats
+    #[command(name = "mbinfo", long_about = None)]
     Mbinfo(MbtilesStatsArgs),
 
-    #[command(name = "vacuum", about = "Vacuum sqlite database", long_about = None, visible_alias = "vac")]
+    /// VACUUM sqlite db
+    #[command(name = "vacuum", long_about = None, visible_alias = "vac")]
     Vacuum(SqliteDbCommonArgs),
 
     // #[command(name = "geojsonio", about = "Open mbtiles in geojson.io", long_about = None)]
     // Geojsonio(SqliteDbCommonArgs),
+    /// Determine if mbtiles contains a latlong
     #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
     Contains {
         #[arg(required = true, help = "mbtiles filepath")]
@@ -280,6 +291,15 @@ pub enum Commands {
     Neighbors(TileFmtArgs),
 
     /// Echo children tiles of input tiles
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Example:
+    ///    echo "[486, 332, 10]" | utiles children
+    ///    [972, 664, 11]
     #[command(name = "children", about = "Echo children of tile(s)", long_about = None)]
     Children(ParentChildrenArgs),
 
@@ -287,9 +307,20 @@ pub enum Commands {
     #[command(name = "parent", about = "Echo parent of tile(s)", long_about = None)]
     Parent(ParentChildrenArgs),
 
+    /// Echo tiles as GeoJSON feature collections/sequences
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
+    /// printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Example:
+    ///     echo "[486, 332, 10]" | mercantile shapes --precision 4 --bbox
+    ///     [-9.1406, 53.1204, -8.7891, 53.3309]
     #[command(name = "shapes", about = "Echo shapes of tile(s) as GeoJSON", long_about = None)]
     Shapes(ShapesArgs),
 
+    /// utiles server (wip)
     #[command(name = "serve", about = "utiles server (wip)", long_about = None, hide = true)]
     Serve(ServeArgs),
 
@@ -301,6 +332,7 @@ pub enum Commands {
 #[derive(Debug, Parser, Clone)]
 #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None)]
 pub struct RimrafArgs {
+    /// dirpath to nuke
     #[arg(required = true, help = "dirpath to rm")]
     pub dirpath: String,
 
@@ -332,9 +364,9 @@ pub struct MinMaxZoom {
 pub struct ZoomArgGroup {
     /// Zoom level (0-32)
     #[arg(short, long, required = false, value_delimiter = ',', value_parser = zoom::parse_zooms)]
-    // pub zoom: Option<Vec<Vec<u8>>>,
     pub zoom: Option<Vec<Vec<u8>>>,
-    // /// min zoom level (0-32)
+
+    /// min zoom level (0-32)
     #[arg(long, conflicts_with = "zoom")]
     pub minzoom: Option<u8>,
 
@@ -364,20 +396,26 @@ impl ZoomArgGroup {
 #[derive(Debug, Parser)]
 #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None)]
 pub struct CopyArgs {
+    /// src dataset fspath (mbtiles, dirpath)
     #[arg(required = true, help = "src dataset fspath")]
     pub src: String,
 
+    /// dst dataset fspath (mbtiles, dirpath)
     #[arg(required = true, help = "dst dataset fspath")]
     pub dst: String,
+
+    /// dryrun (don't actually copy)
+    #[arg(required = false, long, short = 'n', action = clap::ArgAction::SetTrue)]
+    pub dryrun: bool,
 
     /// force overwrite dst
     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
     pub force: bool,
 
-    /// args...
     #[command(flatten)]
     pub zoom: Option<ZoomArgGroup>,
 
+    /// bbox (west, south, east, north)
     #[arg(required = false, long, value_parser = parse_bbox_ext, allow_hyphen_values = true)]
     pub bbox: Option<BBox>,
 }

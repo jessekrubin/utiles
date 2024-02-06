@@ -23,8 +23,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::{info, warn};
 
-use utiles_core::{quadkey2tile, utile, Tile};
 use utiles_core::tile_type::{blob2headers, tiletype};
+use utiles_core::{quadkey2tile, utile, Tile};
 
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
@@ -166,7 +166,7 @@ async fn tile_zxy_path(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-                .to_string(),
+            .to_string(),
         ));
     }
     let t = utile!(path.x, path.y, path.z);
@@ -174,9 +174,7 @@ async fn tile_zxy_path(
     let tile_data = mbtiles.query_tile(t).await.unwrap();
     match tile_data {
         Some(data) => {
-            let headers = blob2headers(
-                &data
-            );
+            let headers = blob2headers(&data);
             let hm = headers.iter().fold(HeaderMap::new(), |mut acc, (k, v)| {
                 acc.insert(k.clone(), HeaderValue::from_str(v).unwrap());
                 acc
@@ -185,13 +183,7 @@ async fn tile_zxy_path(
             //
             // }
 
-            Ok(
-                (
-                    StatusCode::OK,
-                    hm,
-                    Body::from(data)
-                )
-            )
+            Ok((StatusCode::OK, hm, Body::from(data)))
         }
         None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
     }
@@ -208,7 +200,6 @@ async fn tile_zxy_path(
     //     None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
     // }
 }
-
 
 #[derive(Deserialize)]
 struct TileQuadkeyPath {
@@ -297,9 +288,9 @@ async fn buffer_and_print<B>(
     direction: &str,
     body: B,
 ) -> Result<Bytes, (StatusCode, String)>
-    where
-        B: axum::body::HttpBody<Data=Bytes>,
-        B::Error: std::fmt::Display,
+where
+    B: axum::body::HttpBody<Data = Bytes>,
+    B::Error: std::fmt::Display,
 {
     let bytes = match body.collect().await {
         Ok(collected) => collected.to_bytes(),

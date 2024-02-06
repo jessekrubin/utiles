@@ -103,5 +103,3 @@ pub fn tiletype_str(buffer: &[u8]) -> String {
         TileType::Webp => "webp".to_string(),
     }
 }
-
-
