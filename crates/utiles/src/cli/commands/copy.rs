@@ -181,7 +181,8 @@ impl CopyConfig {
 }
 
 async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
-    let mbt = Mbtiles::from(mbtiles.as_ref());
+    let mbt_path = Path::new(&mbtiles);
+    let mbt = Mbtiles::from(mbt_path);
 
     let where_clause = cfg.mbtiles_sql_where(
         // Some(zoom_levels_for_where)
@@ -219,7 +220,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
             format!(
                 "SELECT DISTINCT zoom_level, tile_column FROM tiles {where_clause}"
             )
-            .as_str(),
+                .as_str(),
         )
         .unwrap();
 
@@ -391,7 +392,7 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
 async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let batch_size = 2048; // Define your batch size
-                           // get all files...
+    // get all files...
     let walker = WalkDir::new(dirpath).min_depth(3).max_depth(3);
     let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();
 

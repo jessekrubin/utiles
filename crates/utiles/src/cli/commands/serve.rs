@@ -1,7 +1,7 @@
 use clap::Parser;
 use tracing::debug;
 
-use crate::server::utiles_serve;
+use crate::server::{utiles_serve, UtilesServerConfig};
 
 #[derive(Debug, Parser)]
 #[command(name = "dev", about = "dev", long_about = "development/playground")]
@@ -30,6 +30,11 @@ pub struct ServeArgs {
 #[allow(clippy::unused_async)]
 pub async fn serve_main(args: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
     debug!("args: {:?}", args);
-    utiles_serve().await.expect("utiles_serve failed");
+    let fspaths = vec![
+        "D:\\blue-marble\\blue-marble.mbtiles".to_string(),
+        "D:\\maps\\reptiles\\mbtiles\\faacb\\20230420\\sec-crop\\Seattle_SEC_20230420_c98.mbtiles".to_string(),
+    ];
+    let cfg = UtilesServerConfig::new("0.0.0.0".to_string(), 3333, fspaths);
+    utiles_serve(cfg).await.expect("utiles_serve failed");
     Ok(())
 }

@@ -21,8 +21,12 @@ pub enum UtilesError {
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 
+    #[error("utiles error: {0}")]
+    Error(String),
+
     #[error("unknown utiles error: {0}")]
     Unknown(String),
+
 }
 
 pub type UtilesResult<T> = Result<T, UtilesError>;

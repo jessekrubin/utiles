@@ -36,6 +36,40 @@ pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Connection> {
     Ok(db)
 }
 
+/// Row returned by `PRAGMA database_list;`
+#[derive(Debug)]
+pub struct PragmaDatabaseListRow {
+    pub seq: i64,
+    pub name: String,
+    pub file: String,
+}
+
+pub fn pragma_database_list(conn: &Connection) -> RusqliteResult<Vec<PragmaDatabaseListRow>> {
+    let mut stmt = conn.prepare("PRAGMA database_list")?;
+    let mapped_rows = stmt.query_map([], |row| {
+        let seq: i64 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let file: String = row.get(2)?;
+        Ok(PragmaDatabaseListRow { seq, name, file })
+    })?;
+    let rows = mapped_rows.collect::<RusqliteResult<Vec<PragmaDatabaseListRow>>>()?;
+    Ok(rows)
+}
+
+pub fn query_db_fspath(conn: &Connection) -> RusqliteResult<Option<String>> {
+    let rows = pragma_database_list(conn)?;
+    let row = rows
+        .iter()
+        .find_map(|r| {
+            if r.name == "main" {
+                Some(r.file.clone())
+            } else {
+                None
+            }
+        });
+    Ok(row)
+}
+
 pub fn is_empty_db(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare("SELECT COUNT(*) FROM sqlite_master")?;
     let rows = stmt.query_row([], |row| {

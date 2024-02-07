@@ -27,6 +27,9 @@ pub enum UtilesLintError {
     MbtUnknownMagicNumber(u32),
 
     #[error("missing index: {0}")]
+    MissingIndex(String),
+
+    #[error("missing unique index: {0}")]
     MissingUniqueIndex(String),
 
     #[error("duplicate metadata key: {0}")]

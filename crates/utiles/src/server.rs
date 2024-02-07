@@ -1,42 +1,52 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-use axum::extract::{Host, Path};
 use axum::{
-    body::Body,
-    extract::Request,
+    body::Body
+    ,
     extract::State,
     http::{
         header::{HeaderMap, HeaderValue},
         StatusCode,
     },
+    Json,
     response::{IntoResponse, Response},
-    routing::get,
-    Json, Router,
+    Router, routing::get,
 };
+use axum::extract::{Host, Path};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tilejson::TileJSON;
+use tokio::signal;
 use tower::ServiceBuilder;
-use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
 use tower_http::{
     timeout::TimeoutLayer,
     trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
 };
+use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
 use tracing::{debug, info, warn};
 
+use utiles_core::{quadkey2tile, Tile, utile};
 use utiles_core::tile_type::blob2headers;
-use utiles_core::{quadkey2tile, utile, Tile};
 
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
 
 //=============================================================================
 
-pub struct Datasets {
-    pub mbtiles: HashMap<String, MbtilesAsyncSqlitePool>,
+pub struct MbtilesDataset {
+    pub mbtiles: MbtilesAsyncSqlitePool,
+    pub tilejson: TileJSON,
 }
 
+pub struct Datasets {
+    // pub mbtiles: HashMap<String, MbtilesAsyncSqlitePool>,
+    pub mbtiles: BTreeMap<String, MbtilesDataset>,
+    // pub tilejsons: HashMap<String, TileJSON>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UtilesServerConfig {
     pub host: String,
     pub port: u16,
@@ -66,10 +76,21 @@ impl UtilesServerConfig {
 async fn preflight(config: &UtilesServerConfig) -> Datasets {
     warn!("__PREFLIGHT__");
     debug!("preflight fspaths: {:?}", config.fspaths);
-    let mut datasets = HashMap::new();
+    let mut datasets = BTreeMap::new();
+    // let mut tilejsons = HashMap::new();
     for fspath in config.fspaths.iter() {
-        let pool = MbtilesAsyncSqlitePool::open(fspath).await.unwrap();
-        datasets.insert(pool.filename().to_string().replace(".mbtiles", ""), pool);
+        let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
+        let tilejson = pool.tilejson().await.unwrap();
+        let filename = pool.filename().to_string().replace(".mbtiles", "");
+        let mbt_ds = MbtilesDataset {
+            mbtiles: pool,
+            tilejson,
+        };
+        // datasets.insert(pool.filename().to_string().replace(".mbtiles", ""), mbt_ds);
+
+        datasets.insert(filename, mbt_ds);
+        // datasets.insert(pool.filename().to_string().replace(".mbtiles", ""), pool);
+        // tilejsons.insert(pool.filename().to_string().replace(".mbtiles", ""), tilejson);
     }
 
     // print the datasets
@@ -80,16 +101,13 @@ async fn preflight(config: &UtilesServerConfig) -> Datasets {
     Datasets { mbtiles: datasets }
 }
 
-pub async fn utiles_serve() -> Result<(), Box<dyn std::error::Error>> {
-    warn!("__UTILES_SERVE__");
+pub async fn utiles_serve(
+    cfg: UtilesServerConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
+    info!("__UTILES_SERVE__");
+    let utiles_serve_config_json = serde_json::to_string_pretty(&cfg).unwrap();
+    info!("config:\n{}", utiles_serve_config_json);
 
-    // tmp fspath(s) hard  coded
-    let fspaths = vec![
-        "D:\\blue-marble\\blue-marble.mbtiles".to_string(),
-        "D:\\maps\\reptiles\\mbtiles\\faacb\\20230420\\sec-crop\\Seattle_SEC_20230420_c98.mbtiles".to_string(),
-    ];
-
-    let cfg = UtilesServerConfig::new("0.0.0.0".to_string(), 3333, fspaths);
 
     let addr = cfg.addr();
     let datasets = preflight(&cfg).await;
@@ -121,11 +139,10 @@ pub async fn utiles_serve() -> Result<(), Box<dyn std::error::Error>> {
         .route("/", get(root))
         .route("/health", get(health))
         .route("/uitiles", get(uitiles))
-        .route("/datasets", get(|_: Request<Body>| async { "datasets" }))
-        .route("/tiles/:dataset/tile.json", get(ds_tilejson))
-        .route("/tiles/:dataset/:quadkey", get(handle_tile_quadkey))
-        .route("/tiles/:dataset/:z/:x/:y", get(tile_zxy_path))
-        // .layer(axum::middleware::from_fn(print_request_response))
+        .route("/datasets", get(get_datasets))
+        .route("/tiles/:dataset/tile.json", get(get_dataset_tilejson))
+        .route("/tiles/:dataset/:quadkey", get(get_dataset_tile_quadkey))
+        .route("/tiles/:dataset/:z/:x/:y", get(get_dataset_tile_zxy))
         .layer(middleware)
         .with_state(shared_state) // shared app/server state
         .fallback(four_o_four); // 404
@@ -133,10 +150,71 @@ pub async fn utiles_serve() -> Result<(), Box<dyn std::error::Error>> {
     // let addr = cfg.addr();
     info!("Listening on: {}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app).with_graceful_shutdown(
+        shutdown_signal()
+    ).await.unwrap();
     Ok(())
 }
 
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+        let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+        let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    info!("SIGTERM received ~ shutting down... :(");
+}
+
+
+// =============
+// REQUEST ID
+// =============
+
+
+/// Radix36 for request_id
+///
+/// ```
+/// use utiles::server::u64_radis36;
+/// assert_eq!(u64_radix36(0), "0");
+/// assert_eq!(u64_radix36(1234), "ya");
+/// assert_eq!(u64_radix36(1109), "ut");
+/// ```
+pub fn u64_radix36(x: u64) -> String {
+    let x = x;
+    let mut result = ['\0'; 128];
+    let mut used = 0;
+    let mut x = x as u32;
+    loop {
+        let m = x % 36;
+        x /= 36;
+        result[used] = std::char::from_digit(m, 36).unwrap();
+        used += 1;
+        if x == 0 {
+            break;
+        }
+    }
+    let mut s = String::new();
+    for c in result[..used].iter().rev() {
+        s.push(*c);
+    }
+    s
+}
 #[derive(Deserialize)]
 struct TileZxyPath {
     dataset: String,
@@ -145,7 +223,7 @@ struct TileZxyPath {
     y: u32,
 }
 
-async fn tile_zxy_path(
+async fn get_dataset_tile_zxy(
     State(state): State<Arc<ServerState>>,
     Path(path): Path<TileZxyPath>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
@@ -158,12 +236,12 @@ async fn tile_zxy_path(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-            .to_string(),
+                .to_string(),
         ));
     }
     let t = utile!(path.x, path.y, path.z);
-    let mbtiles = mbtiles.unwrap();
-    let tile_data = mbtiles.query_tile(t).await.unwrap();
+    let mbt_ds = mbtiles.unwrap();
+    let tile_data = mbt_ds.mbtiles.query_tile(t).await.unwrap();
     match tile_data {
         Some(data) => {
             let headers = blob2headers(&data);
@@ -184,37 +262,57 @@ struct TileQuadkeyPath {
     quadkey: String,
 }
 
-async fn handle_tile_quadkey(
+async fn get_dataset_tile_quadkey(
     State(state): State<Arc<ServerState>>,
     Path(path): Path<TileQuadkeyPath>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let mbtiles = state.datasets.mbtiles.get(&path.dataset).unwrap();
+    let mbt_ds = state.datasets.mbtiles.get(&path.dataset);
+    if mbt_ds.is_none() {
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "error": "Dataset not found",
+                "dataset": path.dataset,
+                "status": 404,
+            }))
+                .to_string(),
+        ));
+    }
     let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {
         (
             StatusCode::BAD_REQUEST,
             format!("Error parsing quadkey: {}", e),
         )
     })?;
-    let tile_data = mbtiles.query_tile(parsed_tile).await.unwrap();
-    // info!("tile_data: {:?}", tile_data);
+    let mbt_ds = mbt_ds.unwrap();
+    let tile_data = mbt_ds.mbtiles.query_tile(parsed_tile).await.unwrap();
     match tile_data {
         Some(data) => Ok(Response::new(Body::from(data))),
         None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
     }
 }
 
-async fn ds_tilejson(
+async fn get_datasets(State(state): State<Arc<ServerState>>) -> impl IntoResponse {
+    let r = state
+        .datasets
+        .mbtiles
+        .keys()
+        .cloned()
+        .collect::<Vec<String>>();
+    Json(r)
+}
+
+async fn get_dataset_tilejson(
     Host(hostname): axum::extract::Host,
     State(state): State<Arc<ServerState>>,
     Path(path): Path<String>,
 ) -> impl IntoResponse {
     let dataset = path;
-    let mbtiles = state.datasets.mbtiles.get(&dataset).unwrap();
-    let tilejson = mbtiles.tilejson().await.unwrap();
-    let mut with_tiles = tilejson.clone();
+    let ds = state.datasets.mbtiles.get(&dataset).unwrap();
+    let mut tilejson_with_tiles = ds.tilejson.clone();
     let tiles_url = format!("http://{}/tiles/{}/{{z}}/{{x}}/{{y}}", hostname, dataset);
-    with_tiles.tiles = vec![tiles_url];
-    Json(with_tiles)
+    tilejson_with_tiles.tiles = vec![tiles_url];
+    Json(tilejson_with_tiles)
 }
 
 // basic handler that responds with a static string
@@ -245,46 +343,5 @@ async fn health(State(state): State<Arc<ServerState>>) -> Json<Health> {
 
 /// UI-tiles (ui) wip
 async fn uitiles() -> Json<serde_json::Value> {
-    // let v =
-    //     json!({"status": "TODO/WIP/NOT_IMPLEMENTED_YET"});
     Json(json!({"status": "TODO/WIP/NOT_IMPLEMENTED_YET"}))
 }
-
-// async fn print_request_response(
-//     req: Request,
-//     next: Next,
-// ) -> Result<impl IntoResponse, (StatusCode, String)> {
-//     let (parts, body) = req.into_parts();
-//     let bytes = buffer_and_print("request", body).await?;
-//     let req = Request::from_parts(parts, Body::from(bytes));
-//
-//     let res = next.run(req).await;
-//
-//     let (parts, body) = res.into_parts();
-//     let bytes = buffer_and_print("response", body).await?;
-//     let res = Response::from_parts(parts, Body::from(bytes));
-//     Ok(res)
-// }
-//
-// async fn buffer_and_print<B>(
-//     direction: &str,
-//     body: B,
-// ) -> Result<Bytes, (StatusCode, String)>
-//     where
-//         B: axum::body::HttpBody<Data=Bytes>,
-//         B::Error: std::fmt::Display,
-// {
-//     let bytes = match body.collect().await {
-//         Ok(collected) => collected.to_bytes(),
-//         Err(err) => {
-//             return Err((
-//                 StatusCode::BAD_REQUEST,
-//                 format!("failed to read {direction} body: {err}"),
-//             ));
-//         }
-//     };
-//     if let Ok(body) = std::str::from_utf8(&bytes) {
-//         info!("{direction} body = {body:?}");
-//     }
-//     Ok(bytes)
-// }

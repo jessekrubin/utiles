@@ -16,7 +16,7 @@ pub mod core;
 pub mod errors;
 pub mod gj;
 pub mod lint;
-mod server;
+pub mod server;
 pub mod utilejson;
 pub mod utilesqlite;
 

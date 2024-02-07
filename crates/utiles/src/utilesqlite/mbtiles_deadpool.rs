@@ -11,7 +11,7 @@ use utiles_core::Tile;
 
 use crate::errors::UtilesResult;
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::db_fspath::DbFspath;
+use crate::utilesqlite::dbpath::DbPath;
 use crate::utilesqlite::mbtiles::{
     insert_tile_flat_mbtiles, insert_tiles_flat_mbtiles, mbtiles_metadata,
 };
@@ -21,7 +21,7 @@ use crate::UtilesError;
 pub struct MbtilesDeadpool {
     // pub client: Client,
     pub pool: Pool,
-    pub dbpath: DbFspath,
+    pub dbpath: DbPath,
 }
 
 #[async_trait]
@@ -39,7 +39,7 @@ impl MbtilesAsync for MbtilesDeadpool {
         match pool {
             Ok(p) => Ok(Self {
                 pool: p,
-                dbpath: DbFspath::new(path),
+                dbpath: DbPath::new(path),
             }),
             Err(e) => Err(UtilesError::Unknown(e.to_string())),
         }
