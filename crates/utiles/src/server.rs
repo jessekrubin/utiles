@@ -190,7 +190,7 @@ async fn shutdown_signal() {
 /// Radix36 for request_id
 ///
 /// ```
-/// use utiles::server::u64_radis36;
+/// use utiles::server::u64_radix36;
 /// assert_eq!(u64_radix36(0), "0");
 /// assert_eq!(u64_radix36(1234), "ya");
 /// assert_eq!(u64_radix36(1109), "ut");
