@@ -66,6 +66,7 @@ pub struct ServerState {
 }
 
 impl UtilesServerConfig {
+    #[must_use]
     pub fn new(host: String, port: u16, fspaths: Vec<String>) -> Self {
         Self {
             host,
@@ -74,6 +75,7 @@ impl UtilesServerConfig {
         }
     }
 
+    #[must_use]
     pub fn addr(&self) -> String {
         format!("{}:{}", self.host, self.port)
     }
@@ -177,7 +179,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(unix)]
-    let terminate = async {
+        let terminate = async {
         signal::unix::signal(signal::unix::SignalKind::terminate())
             .expect("failed to install signal handler")
             .recv()
@@ -185,7 +187,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
+        let terminate = std::future::pending::<()>();
 
     tokio::select! {
         _ = ctrl_c => {},
@@ -206,8 +208,8 @@ async fn shutdown_signal() {
 /// assert_eq!(u64_radix36(1234), "ya");
 /// assert_eq!(u64_radix36(1109), "ut");
 /// ```
+#[must_use]
 pub fn u64_radix36(x: u64) -> String {
-    let x = x;
     let mut result = ['\0'; 128];
     let mut used = 0;
     let mut x = x as u32;
@@ -233,7 +235,7 @@ struct Radix36MakeRequestId {
 }
 
 impl MakeRequestId for Radix36MakeRequestId {
-    fn make_request_id<B>(&mut self, request: &Request<B>) -> Option<RequestId> {
+    fn make_request_id<B>(&mut self, _request: &Request<B>) -> Option<RequestId> {
         let request_id_u64 = self.counter.fetch_add(1, Ordering::SeqCst);
         let request_id = u64_radix36(request_id_u64).parse().unwrap();
         Some(RequestId::new(request_id))
@@ -264,7 +266,7 @@ async fn get_dataset_tile_zxy(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-            .to_string(),
+                .to_string(),
         ));
     }
     let t = utile!(path.x, path.y, path.z);
@@ -303,7 +305,7 @@ async fn get_dataset_tile_quadkey(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-            .to_string(),
+                .to_string(),
         ));
     }
     let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {

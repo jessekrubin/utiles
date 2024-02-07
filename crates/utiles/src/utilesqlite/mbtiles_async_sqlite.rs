@@ -44,11 +44,10 @@ impl MbtilesAsyncSqlitePool {
         let journal_mode = self
             .pool
             .conn(move |conn| {
-                let r = conn.query_row("PRAGMA journal_mode", [], |row| {
+                conn.query_row("PRAGMA journal_mode", [], |row| {
                     let jm: String = row.get(0)?;
                     Ok(jm)
-                });
-                r
+                })
             })
             .await?;
         Ok(journal_mode)
