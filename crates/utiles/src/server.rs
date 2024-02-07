@@ -1,34 +1,40 @@
 use std::collections::BTreeMap;
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
+};
 use std::time::Duration;
 
+use axum::extract::{Host, Path};
+use axum::http::HeaderName;
 use axum::{
-    body::Body
-    ,
+    body::Body,
     extract::State,
     http::{
         header::{HeaderMap, HeaderValue},
-        StatusCode,
+        Request, StatusCode,
     },
-    Json,
     response::{IntoResponse, Response},
-    Router, routing::get,
+    routing::get,
+    Json, Router,
 };
-use axum::extract::{Host, Path};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tilejson::TileJSON;
 use tokio::signal;
 use tower::ServiceBuilder;
+use tower_http::request_id::{
+    MakeRequestId, PropagateRequestIdLayer, RequestId, SetRequestIdLayer,
+};
+use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
 use tower_http::{
     timeout::TimeoutLayer,
     trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
 };
-use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
 use tracing::{debug, info, warn};
 
-use utiles_core::{quadkey2tile, Tile, utile};
 use utiles_core::tile_type::blob2headers;
+use utiles_core::{quadkey2tile, utile, Tile};
 
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
@@ -108,7 +114,6 @@ pub async fn utiles_serve(
     let utiles_serve_config_json = serde_json::to_string_pretty(&cfg).unwrap();
     info!("config:\n{}", utiles_serve_config_json);
 
-
     let addr = cfg.addr();
     let datasets = preflight(&cfg).await;
     let start = std::time::Instant::now();
@@ -120,18 +125,25 @@ pub async fn utiles_serve(
     // Wrap state in an Arc so that it can be shared with the app...
     // ...seems to be the idiomatic way to do this...
     let shared_state = Arc::new(state);
+    let x_request_id = HeaderName::from_static("x-request-id");
 
     // Build our middleware stack
     let middleware = ServiceBuilder::new()
+        .layer(SetRequestIdLayer::new(
+            x_request_id.clone(),
+            Radix36MakeRequestId::default(),
+        ))
         // tracing/logging
         .layer(
             TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::new().include_headers(false))
+                .make_span_with(DefaultMakeSpan::new().include_headers(true))
                 .on_body_chunk(DefaultOnBodyChunk::new())
                 .on_failure(DefaultOnFailure::new())
                 .on_request(DefaultOnRequest::new())
-                .on_response(DefaultOnResponse::new().include_headers(false)),
+                .on_response(DefaultOnResponse::new().include_headers(true)),
         )
+        // propagate `x-request-id` headers from request to response
+        .layer(PropagateRequestIdLayer::new(x_request_id))
         .layer(TimeoutLayer::new(Duration::from_secs(10)));
 
     // Build the app/router!
@@ -150,9 +162,10 @@ pub async fn utiles_serve(
     // let addr = cfg.addr();
     info!("Listening on: {}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).with_graceful_shutdown(
-        shutdown_signal()
-    ).await.unwrap();
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap();
     Ok(())
 }
 
@@ -164,7 +177,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(unix)]
-        let terminate = async {
+    let terminate = async {
         signal::unix::signal(signal::unix::SignalKind::terminate())
             .expect("failed to install signal handler")
             .recv()
@@ -172,7 +185,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(not(unix))]
-        let terminate = std::future::pending::<()>();
+    let terminate = std::future::pending::<()>();
 
     tokio::select! {
         _ = ctrl_c => {},
@@ -181,11 +194,9 @@ async fn shutdown_signal() {
     info!("SIGTERM received ~ shutting down... :(");
 }
 
-
 // =============
 // REQUEST ID
 // =============
-
 
 /// Radix36 for request_id
 ///
@@ -215,6 +226,23 @@ pub fn u64_radix36(x: u64) -> String {
     }
     s
 }
+
+#[derive(Clone, Default)]
+struct Radix36MakeRequestId {
+    counter: Arc<AtomicU64>,
+}
+
+impl MakeRequestId for Radix36MakeRequestId {
+    fn make_request_id<B>(&mut self, request: &Request<B>) -> Option<RequestId> {
+        let request_id_u64 = self.counter.fetch_add(1, Ordering::SeqCst);
+        let request_id = u64_radix36(request_id_u64).parse().unwrap();
+        Some(RequestId::new(request_id))
+    }
+}
+
+// =====================================================================
+// ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES
+// =====================================================================
 #[derive(Deserialize)]
 struct TileZxyPath {
     dataset: String,
@@ -236,7 +264,7 @@ async fn get_dataset_tile_zxy(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-                .to_string(),
+            .to_string(),
         ));
     }
     let t = utile!(path.x, path.y, path.z);
@@ -275,7 +303,7 @@ async fn get_dataset_tile_quadkey(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-                .to_string(),
+            .to_string(),
         ));
     }
     let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {

@@ -27,14 +27,16 @@ impl DbPath {
     }
 }
 
-
 impl<P: AsRef<std::path::Path>> From<P> for DbPath {
     fn from(p: P) -> Self {
         let fspath = p.as_ref().to_str().unwrap().to_string();
-        let filename = p.as_ref().file_name().unwrap().to_str().unwrap().to_string();
-        DbPath {
-            fspath,
-            filename,
-        }
+        let filename = p
+            .as_ref()
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
+        DbPath { fspath, filename }
     }
 }

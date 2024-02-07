@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use crate::UtilesError;
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HashType {
@@ -36,7 +36,10 @@ impl FromStr for HashType {
             "xxh64" => Ok(HashType::Xxh64),
             "xxh3_64" => Ok(HashType::Xxh3_64),
             "xxh3_128" => Ok(HashType::Xxh3_128),
-            _ => Err(UtilesError::Error(format!("HashType::from_str: unknown hash type: {}", s))),
+            _ => Err(UtilesError::Error(format!(
+                "HashType::from_str: unknown hash type: {}",
+                s
+            ))),
         }
     }
 }

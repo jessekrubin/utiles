@@ -2,8 +2,8 @@ use clap::Parser;
 use tracing::{debug, warn};
 
 use crate::utilesqlite::hash_types::HashType;
-use crate::utilesqlite::Mbtiles;
 use crate::utilesqlite::mbtiles::{add_functions, mbt_agg_tiles_hash};
+use crate::utilesqlite::Mbtiles;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗      ██████╗ ███████╗██╗   ██╗
 /// ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝      ██╔══██╗██╔════╝██║   ██║

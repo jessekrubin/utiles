@@ -26,7 +26,6 @@ pub enum UtilesError {
 
     #[error("unknown utiles error: {0}")]
     Unknown(String),
-
 }
 
 pub type UtilesResult<T> = Result<T, UtilesError>;

@@ -1,4 +1,3 @@
-
 #[derive(Debug, Default)]
 pub enum MbtilesType {
     #[default]

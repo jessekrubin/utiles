@@ -44,7 +44,9 @@ pub struct PragmaDatabaseListRow {
     pub file: String,
 }
 
-pub fn pragma_database_list(conn: &Connection) -> RusqliteResult<Vec<PragmaDatabaseListRow>> {
+pub fn pragma_database_list(
+    conn: &Connection,
+) -> RusqliteResult<Vec<PragmaDatabaseListRow>> {
     let mut stmt = conn.prepare("PRAGMA database_list")?;
     let mapped_rows = stmt.query_map([], |row| {
         let seq: i64 = row.get(0)?;
@@ -58,15 +60,13 @@ pub fn pragma_database_list(conn: &Connection) -> RusqliteResult<Vec<PragmaDatab
 
 pub fn query_db_fspath(conn: &Connection) -> RusqliteResult<Option<String>> {
     let rows = pragma_database_list(conn)?;
-    let row = rows
-        .iter()
-        .find_map(|r| {
-            if r.name == "main" {
-                Some(r.file.clone())
-            } else {
-                None
-            }
-        });
+    let row = rows.iter().find_map(|r| {
+        if r.name == "main" {
+            Some(r.file.clone())
+        } else {
+            None
+        }
+    });
     Ok(row)
 }
 

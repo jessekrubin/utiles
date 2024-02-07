@@ -1,16 +1,16 @@
 use std::error::Error;
 use std::path::Path;
 
-use rusqlite::{Connection, OptionalExtension, params, Result as RusqliteResult};
+use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use tilejson::TileJSON;
 use tracing::{debug, error};
 
-use utiles_core::{LngLat, Tile, TileLike, UtilesCoreError, yflip};
 use utiles_core::bbox::BBox;
 use utiles_core::errors::UtilesCoreResult;
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
 use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
+use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;
 use crate::utilejson::metadata2tilejson;
@@ -41,10 +41,7 @@ impl Mbtiles {
         let path = path.as_ref().to_owned();
         let conn_res = Connection::open(path);
         match conn_res {
-            Ok(c) => Ok(Mbtiles {
-                conn: c,
-                dbpath,
-            }),
+            Ok(c) => Ok(Mbtiles { conn: c, dbpath }),
             Err(e) => Err(e),
         }
     }
@@ -62,7 +59,10 @@ impl Mbtiles {
     #[must_use]
     pub fn open_in_memory() -> Self {
         let conn = Connection::open_in_memory().unwrap();
-        Mbtiles { conn, dbpath: DbPath::memory() }
+        Mbtiles {
+            conn,
+            dbpath: DbPath::memory(),
+        }
     }
 
     pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -194,10 +194,7 @@ impl Mbtiles {
     pub fn from_filepath(fspath: &str) -> RusqliteResult<Mbtiles> {
         let dbpath = DbPath::from(fspath);
         let conn = Connection::open(fspath)?;
-        Ok(Mbtiles {
-            conn,
-            dbpath,
-        })
+        Ok(Mbtiles { conn, dbpath })
     }
 
     pub fn from_filepath_str(fspath: &str) -> Result<Mbtiles, Box<dyn Error>> {
@@ -264,7 +261,6 @@ impl Mbtiles {
         update_metadata_minzoom_maxzoom_from_tiles(&self.conn)
     }
 }
-
 
 impl<P: AsRef<std::path::Path>> From<P> for Mbtiles {
     fn from(p: P) -> Self {
@@ -766,13 +762,10 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     Ok(rows)
 }
 
-
 // =================================================================
 // HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS
 // =================================================================
-fn mbt_agg_tile_hash_query(
-    hash_type: HashType,
-) -> String {
+fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
     let sql = format!(
         "SELECT coalesce(
             {}_concat_hex(
@@ -792,47 +785,31 @@ pub fn mbt_agg_tiles_hash(
     conn: &Connection,
     hash_type: HashType,
 ) -> RusqliteResult<String> {
-    let mut stmt = conn.prepare_cached(
-        mbt_agg_tile_hash_query(hash_type).as_str()
-    )?;
+    let mut stmt = conn.prepare_cached(mbt_agg_tile_hash_query(hash_type).as_str())?;
     let agg_tiles_hash_str: String = stmt.query_row([], |row| row.get(0))?;
-    Ok(
-        agg_tiles_hash_str
-    )
+    Ok(agg_tiles_hash_str)
 }
 
-pub fn mbt_agg_tiles_hash_md5(
-    conn: &Connection,
-) -> RusqliteResult<String> {
+pub fn mbt_agg_tiles_hash_md5(conn: &Connection) -> RusqliteResult<String> {
     mbt_agg_tiles_hash(conn, HashType::Md5)
 }
 
-pub fn mbt_agg_tiles_hash_fnv1a(
-    conn: &Connection,
-) -> RusqliteResult<String> {
+pub fn mbt_agg_tiles_hash_fnv1a(conn: &Connection) -> RusqliteResult<String> {
     mbt_agg_tiles_hash(conn, HashType::Fnv1a)
 }
 
-pub fn mbt_agg_tiles_hash_xxh32(
-    conn: &Connection,
-) -> RusqliteResult<String> {
+pub fn mbt_agg_tiles_hash_xxh32(conn: &Connection) -> RusqliteResult<String> {
     mbt_agg_tiles_hash(conn, HashType::Xxh32)
 }
 
-pub fn mbt_agg_tiles_hash_xxh64(
-    conn: &Connection,
-) -> RusqliteResult<String> {
+pub fn mbt_agg_tiles_hash_xxh64(conn: &Connection) -> RusqliteResult<String> {
     mbt_agg_tiles_hash(conn, HashType::Xxh64)
 }
 
-pub fn mbt_agg_tiles_hash_xxh3_64(
-    conn: &Connection,
-) -> RusqliteResult<String> {
+pub fn mbt_agg_tiles_hash_xxh3_64(conn: &Connection) -> RusqliteResult<String> {
     mbt_agg_tiles_hash(conn, HashType::Xxh3_64)
 }
 
-pub fn mbt_agg_tiles_hash_xxh3_128(
-    conn: &Connection,
-) -> RusqliteResult<String> {
+pub fn mbt_agg_tiles_hash_xxh3_128(conn: &Connection) -> RusqliteResult<String> {
     mbt_agg_tiles_hash(conn, HashType::Xxh3_128)
 }
