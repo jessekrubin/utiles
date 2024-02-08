@@ -346,6 +346,10 @@ pub fn bbox_truncate(
     (west, south, east, north)
 }
 
+/// Convert lng lat to web mercator x and y
+///
+/// This function is different than "xy" in that it
+/// accounts for
 pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64, f64)> {
     let (lng, lat) = if truncate.unwrap_or(false) {
         (truncate_lng(lng), truncate_lat(lat))
@@ -369,30 +373,52 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
 }
 
 #[must_use]
-pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
-    let trunc = truncate.unwrap_or(false);
-    let mut lng = lng;
-    let mut lat = lat;
-    if trunc {
-        lng = truncate_lng(lng);
-        lat = truncate_lat(lat);
-    }
+pub fn lnglat2webmercator(lng: f64, lat: f64) -> (f64, f64) {
     let x = EARTH_RADIUS * lng.to_radians();
     let y = if lat == 90.0 {
         f64::INFINITY
     } else if lat == -90.0 {
         f64::NEG_INFINITY
     } else {
-        // (1.0 + (lat.to_radians()).sin()) / (1.0 - (lat.to_radians()).sin())
         EARTH_RADIUS * (PI * 0.25 + 0.5 * lat.to_radians()).tan().ln()
     };
     (x, y)
 }
 
+/// Convert web mercator x and y to longitude and latitude.
+///
+/// # Examples
+/// ```
+/// use utiles_core::webmercator2lnglat;
+/// let (lng, lat) = webmercator2lnglat(0.5, 0.5);
+/// assert!((lng - 0.0).abs() < 0.0001, "lng: {}", lng);
+/// assert!((lat - 0.0).abs() < 0.0001, "lat: {}", lat);
+/// ```
+///
 #[must_use]
-pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> LngLat {
+#[inline]
+pub fn webmercator2lnglat(x: f64, y: f64) -> (f64, f64) {
     let lng = x / EARTH_RADIUS * 180.0 / PI;
     let lat = (2.0 * (y / EARTH_RADIUS).exp().atan() - PI * 0.5) * 180.0 / PI;
+    (lng, lat)
+}
+
+/// Convert longitude and latitude to web mercator x and y with optional truncation.
+///
+/// Name "xy" comes from mercantile python library.
+#[must_use]
+pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
+    let (lng, lat) = if truncate.unwrap_or(false) {
+        (truncate_lng(lng), truncate_lat(lat))
+    } else {
+        (lng, lat)
+    };
+    lnglat2webmercator(lng, lat)
+}
+
+#[must_use]
+pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> LngLat {
+    let (lng, lat) = webmercator2lnglat(x, y);
     if truncate.is_some() {
         truncate_lnglat(&LngLat::new(lng, lat))
     } else {
