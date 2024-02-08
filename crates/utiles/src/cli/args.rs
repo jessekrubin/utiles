@@ -22,13 +22,14 @@ fn about() -> String {
 }
 
 #[derive(Debug, Parser)]
-#[command(name = "ut", about = about(), version = VERSION, long_about = None, author, max_term_width = 88)]
+#[command(name = "ut", about = about(), version = VERSION, author, max_term_width = 88)]
 pub struct Cli {
-    /// debug mode (print/log a lot of stuff)
-    #[arg(long, short, global = true, default_value = "false", help = "debug mode", action = clap::ArgAction::SetTrue)]
+    /// debug mode (print/log more)
+    #[arg(long, global = true, default_value = "false", action = clap::ArgAction::SetTrue)]
     pub debug: bool,
 
-    #[arg(long, global = true, default_value = "false", help = "trace mode", action = clap::ArgAction::SetTrue)]
+    /// trace mode (print/log EVEN more)
+    #[arg(long, global = true, default_value = "false", action = clap::ArgAction::SetTrue)]
     pub trace: bool,
 
     /// format log as NDJSON
@@ -94,17 +95,18 @@ pub struct ParentChildrenArgs {
 #[derive(Debug, Parser)]
 pub struct SqliteDbCommonArgs {
     /// mbtiles filepath
-    #[arg(required = true, help = "mbtiles filepath")]
+    #[arg(required = true)]
     pub filepath: String,
 
-    /// compact json (default: false)
-    #[arg(required = false, short, long, help = "compact json", action = clap::ArgAction::SetTrue)]
+    /// compact/minified json (default: false)
+    #[arg(required = false, short, long, action = clap::ArgAction::SetTrue)]
     pub min: bool,
 }
 
 #[derive(Debug, Parser)]
 pub struct TouchArgs {
-    #[arg(required = true, help = "mbtiles filepath")]
+    /// mbtiles filepath
+    #[arg(required = true)]
     pub filepath: String,
 }
 
@@ -113,7 +115,8 @@ pub struct MetadataArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    #[arg(required = false, long, help = "output as json object not array", action = clap::ArgAction::SetTrue)]
+    /// Output as json object not array
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub obj: bool,
 }
 
@@ -122,10 +125,12 @@ pub struct MetadataSetArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    #[arg(required = true, help = "key")]
+    /// key
+    #[arg(required = true)]
     pub key: String,
 
-    #[arg(required = true, help = "value")]
+    /// value
+    #[arg(required = true)]
     pub value: Option<String>,
 }
 
@@ -134,15 +139,18 @@ pub struct TilejsonArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    #[arg(required = false, short, long, help = "include tilestats", action = clap::ArgAction::SetTrue)]
+    /// include tilestats
+    #[arg(required = false, short, long, action = clap::ArgAction::SetTrue)]
     pub tilestats: bool,
 }
 
 #[derive(Debug, Parser)]
 pub struct LintArgs {
-    #[arg(required = true, help = "filepath(s) or dirpath(s)", num_args(1..))]
+    /// filepath(s) or dirpath(s)
+    #[arg(required = true, num_args(1..))]
     pub(crate) fspaths: Vec<String>,
 
+    /// fix lint errors (NOT IMPLEMENTED)
     #[arg(required = false, long, action = clap::ArgAction::SetTrue, default_value = "false")]
     pub(crate) fix: bool,
 }
@@ -159,49 +167,50 @@ pub struct MbtilesStatsArgs {
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     /// Echo the `tile.json` for mbtiles file
-    #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes", about = "Echo tilejson for mbtiles file(s)", long_about = None)]
+    #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes")]
     Tilejson(TilejsonArgs),
 
     /// Create new mbtiles db w/ schema
-    #[command(name = "touch", long_about = None)]
+    #[command(name = "touch")]
     Touch(TouchArgs),
 
     /// Copy tiles from src -> dst
-    #[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None, visible_alias = "cp")]
+    #[command(name = "copy", visible_alias = "cp")]
     Copy(CopyArgs),
 
     /// Lint mbtiles file(s) (wip)
-    #[command(name = "lint", about = "Lint mbtiles file(s)", long_about = None)]
+    #[command(name = "lint")]
     Lint(LintArgs),
 
     /// Echo metadata (table) as json arr/obj
-    #[command(name = "metadata", visible_aliases = ["meta", "md"], long_about = None)]
+    #[command(name = "metadata", visible_aliases = ["meta", "md"])]
     Metadata(MetadataArgs),
 
     /// Set metadata key/value
-    #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"], long_about = None)]
+    #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"])]
     MetadataSet(MetadataSetArgs),
 
-    #[command(name = "rimraf", about = "rm-rf dirpath", long_about = None, visible_alias = "rmrf")]
+    /// rm-rf dirpath
+    #[command(name = "rimraf", visible_alias = "rmrf")]
     Rimraf(RimrafArgs),
 
     /// Echo mbtiles info/stats
-    #[command(name = "mbinfo", long_about = None)]
+    #[command(name = "mbinfo")]
     Mbinfo(MbtilesStatsArgs),
 
     /// VACUUM sqlite db
-    #[command(name = "vacuum", long_about = None, visible_alias = "vac")]
+    #[command(name = "vacuum", visible_alias = "vac")]
     Vacuum(SqliteDbCommonArgs),
 
-    // #[command(name = "geojsonio", about = "Open mbtiles in geojson.io", long_about = None)]
-    // Geojsonio(SqliteDbCommonArgs),
     /// Determine if mbtiles contains a latlong
-    #[command(name = "dbcontains", about = "Determine if mbtiles contains a latlong", long_about = None)]
+    #[command(name = "dbcontains")]
     Contains {
-        #[arg(required = true, help = "mbtiles filepath")]
+        /// mbtiles filepath
+        #[arg(required = true)]
         filepath: String,
 
-        #[arg(required = true, help = "lat/long")]
+        /// lat/long
+        #[arg(required = true)]
         lnglat: LngLat,
     },
 
@@ -213,37 +222,57 @@ pub enum Commands {
     /// Echo the Web Mercator tile at ZOOM level bounding GeoJSON [west, south,
     /// east, north] bounding boxes, features, or collections read from stdin.
     ///
-    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
-    /// printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
-    ///
-    /// Example:
-    ///
-    /// echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
-    /// [426, 775, 11]
-    #[command(
-        name = "bounding-tile",
-        about = "Echo the bounding tile of a lonlat/bbox/GeoJSON"
-    )]
-    BoundingTile(TileFmtArgs),
-
-    ///  Converts tiles given as [x, y, z] and/or quadkeys to/from the other format
-    ///
-    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
-    /// printed ASCII RS-delimited sequence of JSON (like
+    /// Input may be a compact newline-delimited sequences of JSON or a
+    /// pretty-printed ASCII RS-delimited sequence of JSON (like
     /// https://tools.ietf.org/html/rfc8142 and
     /// https://tools.ietf.org/html/rfc7159).
     ///
     /// Examples:
     ///
-    /// echo "[486, 332, 10]" | utiles quadkey
-    /// 0313102310
+    ///   > echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
+    ///   [426, 775, 11]
+    #[command(
+        name = "bounding-tile",
+        verbatim_doc_comment,
+        about = "Echo bounding tile at zoom for bbox / geojson"
+    )]
+    BoundingTile(TileFmtArgs),
+
+    /// Converts tiles to/from quadkey/[x, y, z]
     ///
-    /// echo "0313102310" | utiles quadkey
-    /// [486, 332, 10]
-    #[command(name = "quadkey", visible_alias = "qk", about = "Convert to/from quadkey(s)", long_about = None)]
+    /// Input may be a compact newline-delimited sequences of JSON or a
+    /// pretty-printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Examples:
+    ///
+    ///   > echo "[486, 332, 10]" | utiles quadkey
+    ///   0313102310
+    ///   > echo "0313102310" | utiles quadkey
+    ///   [486, 332, 10]
+    ///   > utiles quadkey 0313102310
+    ///   [486, 332, 10]
+    #[command(name = "quadkey", verbatim_doc_comment, visible_alias = "qk")]
     Quadkey(TileFmtArgs),
+
+    /// Converts tile(s) to/from pmtile-id/[x, y, z]
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a
+    /// pretty-printed ASCII RS-delimited sequence of JSON (like
+    /// https://tools.ietf.org/html/rfc8142 and
+    /// https://tools.ietf.org/html/rfc7159).
+    ///
+    /// Examples:
+    ///
+    ///   > echo "[486, 332, 10]" | utiles pmtileid
+    ///   506307
+    ///   > echo "506307" | utiles pmtileid
+    ///   [486, 332, 10]
+    ///   > utiles pmtileid 506307
+    ///   [486, 332, 10]
+    #[command(name = "pmtileid", verbatim_doc_comment, visible_alias = "pmid")]
+    Pmtileid(TileFmtArgs),
 
     /// Echos web-mercator tiles at zoom level intersecting given geojson-bbox [west, south,
     /// east, north], geojson-features, or geojson-collections read from stdin.
@@ -251,94 +280,99 @@ pub enum Commands {
     /// Output format is a JSON `[x, y, z]` array by default; use --obj to output a
     /// JSON object `{x: x, y: y, z: z}`.
     ///
-    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
-    /// printed ASCII RS-delimited sequence of JSON (like
+    /// bbox shorthands (case-insensitive):
+    ///     "*"  | "world"     => [-180, -85.0511, 180, 85.0511]
+    ///     "n"  | "north"     => [-180, 0, 180, 85.0511]
+    ///     "s"  | "south"     => [-180, -85.0511, 180, 0]
+    ///     "e"  | "east"      => [0, -85.0511, 180, 85.0511]
+    ///     "w"  | "west"      => [-180, -85.0511, 0, 85.0511]
+    ///     "ne" | "northeast" => [0, 0, 180, 85.0511]
+    ///     "se" | "southeast" => [0, -85.0511, 180, 0]
+    ///     "nw" | "northwest" => [-180, 0, 0, 85.0511]
+    ///     "sw" | "southwest" => [-180, -85.0511, 0, 0]
+    ///
+    /// Input may be a compact newline-delimited sequences of JSON or a
+    /// pretty-printed ASCII RS-delimited sequence of JSON (like
     /// https://tools.ietf.org/html/rfc8142 and
     /// https://tools.ietf.org/html/rfc7159).
     ///
     /// Example:
     ///
-    /// $ echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
-    /// [852, 1550, 12]
-    /// [852, 1551, 12]
-    /// [853, 1550, 12]
-    /// [853, 1551, 12]
-    #[command(name = "tiles", about = "Echo tiles of bbox")]
+    ///   > echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
+    ///   [852, 1550, 12]
+    ///   [852, 1551, 12]
+    ///   [853, 1550, 12]
+    ///   [853, 1551, 12]
+    ///   > utiles tiles 12 "[-105.05, 39.95, -105, 40]"
+    ///   [852, 1550, 12]
+    ///   [852, 1551, 12]
+    ///   [853, 1550, 12]
+    ///   [853, 1551, 12]
+    #[command(
+        name = "tiles",
+        verbatim_doc_comment,
+        about = "Echo tiles at zoom intersecting geojson bbox / feature / collection"
+    )]
     Tiles(TilesArgs),
-
-    /// Converts tiles to/from xyz ([x, y, z]) and/or pmtile-id format(s)
-    ///
-    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
-    /// printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
-    ///
-    /// Examples:
-    ///
-    /// echo "[486, 332, 10]" | utiles pmtileid
-    /// 506307
-    ///
-    /// echo "506307" | utiles pmtileid
-    /// [486, 332, 10]
-    #[command(name = "pmtileid", visible_alias = "pmid", about = "Convert to/from pmtile id(s)", long_about = None)]
-    Pmtileid(TileFmtArgs),
 
     /// Echo the neighbor tiles for input tiles
     ///
-    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
-    /// printed ASCII RS-delimited sequence of JSON (like
+    /// Input may be a compact newline-delimited sequences of JSON or a
+    /// pretty-printed ASCII RS-delimited sequence of JSON (like
     /// https://tools.ietf.org/html/rfc8142 and
     /// https://tools.ietf.org/html/rfc7159).
-    ///
-    #[command(name = "neighbors", about = "Echo neighbors of tile(s)", long_about = None)]
+    #[command(name = "neighbors")]
     Neighbors(TileFmtArgs),
 
     /// Echo children tiles of input tiles
     ///
-    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
-    /// printed ASCII RS-delimited sequence of JSON (like
+    /// Input may be a compact newline-delimited sequences of JSON or a
+    /// pretty-printed ASCII RS-delimited sequence of JSON (like
     /// https://tools.ietf.org/html/rfc8142 and
     /// https://tools.ietf.org/html/rfc7159).
     ///
     /// Example:
-    ///    echo "[486, 332, 10]" | utiles children
-    ///    [972, 664, 11]
-    #[command(name = "children", about = "Echo children of tile(s)", long_about = None)]
+    ///
+    ///   > echo "[486, 332, 10]" | utiles children
+    ///   [972, 664, 11]
+    #[command(name = "children", verbatim_doc_comment)]
     Children(ParentChildrenArgs),
 
     /// Echo parent tile of input tiles
-    #[command(name = "parent", about = "Echo parent of tile(s)", long_about = None)]
+    #[command(name = "parent")]
     Parent(ParentChildrenArgs),
 
     /// Echo tiles as GeoJSON feature collections/sequences
     ///
-    /// Input may be a compact newline-delimited sequences of JSON or a pretty-
-    /// printed ASCII RS-delimited sequence of JSON (like
+    /// Input may be a compact newline-delimited sequences of JSON or a
+    /// pretty-printed ASCII RS-delimited sequence of JSON (like
     /// https://tools.ietf.org/html/rfc8142 and
     /// https://tools.ietf.org/html/rfc7159).
     ///
     /// Example:
-    ///     echo "[486, 332, 10]" | mercantile shapes --precision 4 --bbox
-    ///     [-9.1406, 53.1204, -8.7891, 53.3309]
-    #[command(name = "shapes", about = "Echo shapes of tile(s) as GeoJSON", long_about = None)]
+    ///
+    ///   > echo "[486, 332, 10]" | utiles shapes --precision 4 --bbox
+    ///   [-9.1406, 53.1204, -8.7891, 53.3309]
+    #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
     /// utiles server (wip)
-    #[command(name = "serve", about = "utiles server (wip)", long_about = None, hide = true)]
+    #[command(name = "serve", hide = true)]
     Serve(ServeArgs),
 
     /// Development/Playground command (hidden)
-    #[command(name = "dev", about = "dev command", long_about = None, hide = true, hide = true)]
+    #[command(name = "dev", hide = true)]
     Dev(DevArgs),
 }
 
 #[derive(Debug, Parser, Clone)]
-#[command(name = "rimraf", about = "rm-rf dirpath", long_about = None)]
+#[command(name = "rimraf", about = "rm-rf dirpath")]
 pub struct RimrafArgs {
     /// dirpath to nuke
-    #[arg(required = true, help = "dirpath to rm")]
+    #[arg(required = true)]
     pub dirpath: String,
 
+    /// collect and print file sizes
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub(crate) size: bool,
 
@@ -397,14 +431,14 @@ impl ZoomArgGroup {
 }
 
 #[derive(Debug, Parser)]
-#[command(name = "copy", about = "Copy tiles from src -> dst", long_about = None)]
+#[command(name = "copy", about = "Copy tiles from src -> dst")]
 pub struct CopyArgs {
-    /// src dataset fspath (mbtiles, dirpath)
-    #[arg(required = true, help = "src dataset fspath")]
+    /// source dataset fspath (mbtiles, dirpath)
+    #[arg(required = true)]
     pub src: String,
 
-    /// dst dataset fspath (mbtiles, dirpath)
-    #[arg(required = true, help = "dst dataset fspath")]
+    /// destination dataset fspath (mbtiles, dirpath)
+    #[arg(required = true)]
     pub dst: String,
 
     /// dryrun (don't actually copy)

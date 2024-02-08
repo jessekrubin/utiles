@@ -11,11 +11,11 @@ use utiles_core::Tile;
 #[group(required = false, multiple = false, id = "project")]
 pub struct ShapesProject {
     /// Output in geographic coordinates (the default).
-    #[arg(long , default_value = "false", conflicts_with = "mercator", action = clap::ArgAction::SetTrue)]
+    #[arg(long, default_value = "false", conflicts_with = "mercator", action = clap::ArgAction::SetTrue)]
     geographic: bool,
 
     /// Output in Web Mercator coordinates.
-    #[arg(long , default_value = "false", conflicts_with = "geographic", action = clap::ArgAction::SetTrue)]
+    #[arg(long, default_value = "false", conflicts_with = "geographic", action = clap::ArgAction::SetTrue)]
     mercator: bool,
 }
 
@@ -31,11 +31,12 @@ impl Default for ShapesProject {
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false, id = "output-mode")]
 pub struct ShapesOutputMode {
-    #[arg(long , default_value = "false", conflicts_with = "bbox", action = clap::ArgAction::SetTrue)]
+    /// Output as a GeoJSON feature collections
+    #[arg(long, default_value = "false", conflicts_with = "bbox", action = clap::ArgAction::SetTrue)]
     feature: bool,
 
     /// Output in Web Mercator coordinates.
-    #[arg(long , default_value = "false", conflicts_with = "feature", action = clap::ArgAction::SetTrue)]
+    #[arg(long, default_value = "false", conflicts_with = "feature", action = clap::ArgAction::SetTrue)]
     bbox: bool,
 }
 
