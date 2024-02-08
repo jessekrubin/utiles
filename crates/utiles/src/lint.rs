@@ -60,7 +60,8 @@ pub struct MbtilesLinter {
 }
 
 impl MbtilesLinter {
-    #[must_use] pub fn new(path: &str, fix: bool) -> Self {
+    #[must_use]
+    pub fn new(path: &str, fix: bool) -> Self {
         MbtilesLinter {
             path: PathBuf::from(path),
             fix,
@@ -91,12 +92,8 @@ impl MbtilesLinter {
             }
         };
         match magic_number {
-            0 => {
-                Err(UtilesLintError::MbtMissingMagicNumber)
-            }
-            _ => {
-                Err(UtilesLintError::MbtUnknownMagicNumber(magic_number))
-            }
+            0 => Err(UtilesLintError::MbtMissingMagicNumber),
+            _ => Err(UtilesLintError::MbtUnknownMagicNumber(magic_number)),
         }
     }
 

@@ -3,8 +3,8 @@ use std::error::Error;
 use async_trait::async_trait;
 use tilejson::TileJSON;
 
-use utiles_core::{Tile, TileLike};
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
+use utiles_core::{Tile, TileLike};
 
 use crate::errors::UtilesResult;
 use crate::UtilesError;
