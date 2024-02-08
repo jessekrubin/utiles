@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use tracing::debug;
 
 #[derive(Debug, Clone)]
 pub struct DbPath {
@@ -6,6 +7,12 @@ pub struct DbPath {
     pub fspath: String,
     /// the filename of the mbtiles file (filesystem path basename)
     pub filename: String,
+}
+
+impl std::fmt::Display for DbPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.fspath)
+    }
 }
 
 impl DbPath {
@@ -29,6 +36,7 @@ impl DbPath {
 
 impl<P: AsRef<std::path::Path>> From<P> for DbPath {
     fn from(p: P) -> Self {
+        debug!("DbPath::from: {:?}", p.as_ref());
         let fspath = p.as_ref().to_str().unwrap().to_string();
         let filename = p
             .as_ref()

@@ -1,4 +1,11 @@
+use crate::utilesqlite;
+use crate::utilesqlite::MbtilesAsync;
+use std::path::PathBuf;
 use thiserror::Error;
+
+pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
+    "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
+];
 
 #[derive(Error, Debug)]
 pub enum UtilesLintError {
@@ -46,3 +53,57 @@ pub enum UtilesLintError {
 }
 
 pub type UtilesLintResult<T> = Result<T, UtilesLintError>;
+
+pub struct MbtilesLinter {
+    pub path: PathBuf,
+    pub fix: bool,
+}
+
+impl MbtilesLinter {
+    pub fn new(path: &str, fix: bool) -> Self {
+        MbtilesLinter {
+            path: PathBuf::from(path),
+            fix,
+        }
+    }
+
+    async fn open_mbtiles(
+        &self,
+    ) -> UtilesLintResult<utilesqlite::MbtilesAsyncSqlitePool> {
+        let mbtiles = match utilesqlite::MbtilesAsyncSqlitePool::open(
+            &self.path.to_str().unwrap(),
+        )
+        .await
+        {
+            Ok(m) => m,
+            Err(e) => {
+                return Err(UtilesLintError::UnableToOpen(e.to_string()));
+            }
+        };
+        Ok(mbtiles)
+    }
+
+    pub async fn check_magic_number<T: MbtilesAsync>(mbt: &T) -> UtilesLintResult<()> {
+        let magic_number = match mbt.magic_number().await {
+            Ok(m) => m,
+            Err(e) => {
+                return Err(UtilesLintError::Unknown(e.to_string()));
+            }
+        };
+        match magic_number {
+            0 => {
+                return Err(UtilesLintError::MbtMissingMagicNumber);
+            }
+            _ => {
+                return Err(UtilesLintError::MbtUnknownMagicNumber(magic_number));
+            }
+        }
+    }
+
+    pub async fn lint(&self) -> UtilesLintResult<Vec<UtilesLintError>> {
+        let mut lint_results = vec![];
+        let mbt = self.open_mbtiles().await?;
+        lint_results.push(MbtilesLinter::check_magic_number(&mbt).await);
+        Ok(lint_results.into_iter().filter_map(|e| e.err()).collect())
+    }
+}

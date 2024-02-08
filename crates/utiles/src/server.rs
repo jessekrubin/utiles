@@ -33,6 +33,7 @@ use tower_http::{
 };
 use tracing::{debug, info, warn};
 
+use crate::globster::find_filepaths;
 use utiles_core::tile_type::blob2headers;
 use utiles_core::{quadkey2tile, utile, Tile};
 
@@ -84,9 +85,13 @@ impl UtilesServerConfig {
 async fn preflight(config: &UtilesServerConfig) -> Datasets {
     warn!("__PREFLIGHT__");
     debug!("preflight fspaths: {:?}", config.fspaths);
+
+    let filepaths = find_filepaths(&config.fspaths);
+    debug!("filepaths: {:?}", filepaths);
+
     let mut datasets = BTreeMap::new();
     // let mut tilejsons = HashMap::new();
-    for fspath in config.fspaths.iter() {
+    for fspath in filepaths.iter() {
         let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
         let tilejson = pool.tilejson().await.unwrap();
         let filename = pool.filename().to_string().replace(".mbtiles", "");
@@ -102,8 +107,8 @@ async fn preflight(config: &UtilesServerConfig) -> Datasets {
     }
 
     // print the datasets
-    for k in datasets.keys() {
-        info!("{}", k);
+    for (k, ds) in &datasets {
+        info!("{}: {}", k, ds.mbtiles.filepath());
     }
 
     Datasets { mbtiles: datasets }
@@ -218,7 +223,7 @@ pub fn u8_radix36_char(num: u8) -> char {
     }
 }
 
-/// Radix36 for request_id
+/// Radix36 for request_id mimics fastify's req-id
 ///
 /// ```
 /// use utiles::server::u64_radix36;

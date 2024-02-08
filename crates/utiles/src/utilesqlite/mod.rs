@@ -18,3 +18,6 @@ pub mod squealite;
 pub use fns::*;
 pub use mbtiles::Mbtiles;
 pub use mbtiles_deadpool::MbtilesDeadpool;
+
+pub use mbtiles_async::MbtilesAsync;
+pub use mbtiles_async_sqlite::MbtilesAsyncSqlitePool;

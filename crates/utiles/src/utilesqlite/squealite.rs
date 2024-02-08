@@ -58,6 +58,26 @@ pub fn pragma_database_list(
     Ok(rows)
 }
 
+pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
+    let mut stmt = conn.prepare("PRAGMA application_id")?;
+    let mut rows = stmt.query([])?;
+    let row = rows.next()?.unwrap();
+    let app_id: u32 = row.get(0)?;
+    Ok(app_id)
+}
+
+pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {
+    let mut stmt = conn.prepare("PRAGMA journal_mode")?;
+    let mut rows = stmt.query([])?;
+    let row = rows.next()?.unwrap();
+    let jm: String = row.get(0)?;
+    Ok(jm)
+}
+
+pub fn magic_number(conn: &Connection) -> RusqliteResult<u32> {
+    application_id(conn)
+}
+
 pub fn query_db_fspath(conn: &Connection) -> RusqliteResult<Option<String>> {
     let rows = pragma_database_list(conn)?;
     let row = rows.iter().find_map(|r| {

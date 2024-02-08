@@ -7,13 +7,9 @@ use utiles_core::mbutiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUM
 
 use crate::cli::args::LintArgs;
 use crate::cli::find;
-use crate::lint::{UtilesLintError, UtilesLintResult};
+use crate::lint::{UtilesLintError, UtilesLintResult, REQUIRED_METADATA_FIELDS};
 use crate::utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 use crate::utilesqlite::squealite;
-
-pub const REQUIRED_METADATA_FIELDS: [&str; 7] = [
-    "name", "center", "bounds", "minzoom", "maxzoom", "format", "type",
-];
 
 pub fn lint_mbtiles_file(mbtiles: &Mbtiles, _fix: bool) -> Vec<UtilesLintError> {
     let mut errors = Vec::new();

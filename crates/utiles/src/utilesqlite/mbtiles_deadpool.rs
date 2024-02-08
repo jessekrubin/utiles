@@ -74,6 +74,10 @@ impl MbtilesAsync for MbtilesDeadpool {
         }
     }
 
+    async fn magic_number(&self) -> UtilesResult<u32> {
+        todo!()
+    }
+
     // async fn select_tile<T: TileLike>(&self, tile: T) -> UtilesResult<Vec<u8>> {
     //     Err(UtilesError::Unimplemented("deadpool select_tile".to_string()))
     // }
