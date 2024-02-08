@@ -179,7 +179,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(unix)]
-        let terminate = async {
+    let terminate = async {
         signal::unix::signal(signal::unix::SignalKind::terminate())
             .expect("failed to install signal handler")
             .recv()
@@ -187,7 +187,7 @@ async fn shutdown_signal() {
     };
 
     #[cfg(not(unix))]
-        let terminate = std::future::pending::<()>();
+    let terminate = std::future::pending::<()>();
 
     tokio::select! {
         _ = ctrl_c => {},
@@ -266,7 +266,7 @@ async fn get_dataset_tile_zxy(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-                .to_string(),
+            .to_string(),
         ));
     }
     let t = utile!(path.x, path.y, path.z);
@@ -305,7 +305,7 @@ async fn get_dataset_tile_quadkey(
                 "dataset": path.dataset,
                 "status": 404,
             }))
-                .to_string(),
+            .to_string(),
         ));
     }
     let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {
