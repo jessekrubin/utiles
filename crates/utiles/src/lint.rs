@@ -60,7 +60,7 @@ pub struct MbtilesLinter {
 }
 
 impl MbtilesLinter {
-    pub fn new(path: &str, fix: bool) -> Self {
+    #[must_use] pub fn new(path: &str, fix: bool) -> Self {
         MbtilesLinter {
             path: PathBuf::from(path),
             fix,
@@ -71,7 +71,7 @@ impl MbtilesLinter {
         &self,
     ) -> UtilesLintResult<utilesqlite::MbtilesAsyncSqlitePool> {
         let mbtiles = match utilesqlite::MbtilesAsyncSqlitePool::open(
-            &self.path.to_str().unwrap(),
+            self.path.to_str().unwrap(),
         )
         .await
         {
@@ -92,10 +92,10 @@ impl MbtilesLinter {
         };
         match magic_number {
             0 => {
-                return Err(UtilesLintError::MbtMissingMagicNumber);
+                Err(UtilesLintError::MbtMissingMagicNumber)
             }
             _ => {
-                return Err(UtilesLintError::MbtUnknownMagicNumber(magic_number));
+                Err(UtilesLintError::MbtUnknownMagicNumber(magic_number))
             }
         }
     }
