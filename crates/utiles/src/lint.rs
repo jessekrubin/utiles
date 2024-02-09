@@ -174,10 +174,6 @@ impl MbtilesLinter {
             .collect::<Vec<String>>();
         if missing_metadata_keys.is_empty() {
             Ok(())
-        } else if missing_metadata_keys.len() == 1 {
-            Err(UtilesLintError::MbtMissingMetadataKv(
-                missing_metadata_keys[0].clone(),
-            ))
         } else {
             let errs = missing_metadata_keys
                 .iter()
@@ -220,7 +216,14 @@ impl MbtilesLinter {
 
         let rows_errs = MbtilesLinter::check_metadata_rows(mbt).await;
         if let Err(e) = rows_errs {
-            errs.push(e);
+            match e {
+                UtilesLintError::LintErrors(es) => {
+                    errs.extend(es);
+                }
+                _ => {
+                    errs.push(e);
+                }
+            }
         }
         if errs.is_empty() {
             Ok(())

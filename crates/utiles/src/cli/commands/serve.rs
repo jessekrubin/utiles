@@ -30,7 +30,7 @@ impl ServeArgs {
         UtilesServerConfig::new(
             self.host.clone(),
             self.port,
-            self.fspaths.clone().unwrap_or(vec![]),
+            self.fspaths.clone().unwrap_or_default(),
         )
     }
 }

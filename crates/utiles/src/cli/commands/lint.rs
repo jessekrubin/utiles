@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use futures::{stream, StreamExt};
-use tracing::{debug, info, warn};
+use tracing::{debug, warn};
 
 use crate::cli::args::LintArgs;
 use crate::globster;
@@ -128,7 +128,7 @@ async fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
                     debug!("r: {:?}", r);
                     // print each err....
                     if r.is_empty() {
-                        info!("No errors found");
+                        debug!("OK: {}", path.display());
                     } else {
                         warn!("{} - {} errors found", path.display(), r.len());
 
