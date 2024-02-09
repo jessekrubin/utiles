@@ -17,6 +17,7 @@ use crate::utilesqlite::dbpath::{DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{mbtiles_metadata, query_zxy};
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::squealite::{journal_mode, magic_number};
+use crate::UtilesError;
 
 #[derive(Clone)]
 pub struct MbtilesAsyncSqliteClient {
@@ -29,17 +30,6 @@ pub struct MbtilesAsyncSqlitePool {
     pub dbpath: DbPath,
     pub pool: Pool,
 }
-
-// #[async_trait]
-// pub trait Sqlike3Async {
-//     async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self>
-//         where
-//             Self: Sized + Send; // Ensure Self is Send
-//     // async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> where Self: Sized + Send;
-// }
-// impl<T> MbtilesAsync for T
-//     where
-//         T: AsyncSqlite,
 
 #[async_trait]
 pub trait AsyncSqlite: Send + Sync {
@@ -128,41 +118,6 @@ impl MbtilesAsyncSqlitePool {
     }
 }
 
-// #[async_trait]
-// impl Sqlike3Async for MbtilesAsyncSqlitePool {
-//     async fn magic_number(&self) -> RusqliteResult<u32> {
-//         let r = self.pool.conn(magic_number).await;
-//         r
-//     }
-//     async fn is_empty_db(&self) -> RusqliteResult<bool> {
-//         self.pool.conn(is_empty_db)
-//     }
-//     async fn vacuum(&self) -> RusqliteResult<usize> {
-//         self.pool.conn(vacuum)
-//     }
-//     async fn analyze(&self) -> RusqliteResult<usize> {
-//         self.pool.conn(analyze)
-//     }
-// }
-// #[async_trait]
-// impl MbtilesAsync for MbtilesAsyncSqliteClient {
-//     // Implementation of other methods...
-//
-//     fn dbpath(&self) -> &DbPath {
-//         &self.dbpath
-//     }
-//
-//     // Correct the filepath method if necessary
-//     fn filepath(&self) -> &str {
-//         self.db_path().as_str() // Assuming DbPath has an as_str() method to get the filesystem path
-//     }
-//
-//     // Ensure the filename method is correctly implemented
-//     fn filename(&self) -> &str {
-//         // You need to implement logic to extract the filename from the dbpath
-//     }
-// }
-
 impl DbPathTrait for MbtilesAsyncSqliteClient {
     fn db_path(&self) -> &DbPath {
         &self.dbpath
@@ -206,16 +161,29 @@ where
     }
 
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>> {
-        let metadata = self.conn(mbtiles_metadata).await?;
+        let metadata = self
+            .conn(mbtiles_metadata)
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
         Ok(metadata)
     }
 
     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>> {
-        let tile = self.conn(move |conn| query_zxy(conn, z, x, y)).await?;
+        let tile = self
+            .conn(move |conn| query_zxy(conn, z, x, y))
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+
         Ok(tile)
     }
 }
-//
+
+// =============================================================
+// =============================================================
+// NON GENERIC IMPLEMENTATION
+// =============================================================
+// =============================================================
+
 // #[async_trait]
 // impl MbtilesAsync for MbtilesAsyncSqliteClient {
 //     fn filepath(&self) -> &str {

@@ -1,5 +1,5 @@
 use clap::Parser;
-use tracing::debug;
+use tracing::{debug, warn};
 
 use crate::server::{utiles_serve, UtilesServerConfig};
 
@@ -25,16 +25,23 @@ pub struct ServeArgs {
     strict: bool,
 }
 
+impl ServeArgs {
+    pub fn to_cfg(&self) -> UtilesServerConfig {
+        UtilesServerConfig::new(
+            self.host.clone(),
+            self.port,
+            self.fspaths.clone().unwrap_or(vec![]),
+        )
+    }
+}
+
 #[allow(clippy::unused_async)]
 pub async fn serve_main(args: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
     debug!("args: {:?}", args);
-    let fspaths = vec![
-        "D:\\blue-marble\\blue-marble.mbtiles".to_string(),
-        // "D:\\maps\\reptiles\\mbtiles\\faacb\\20230420\\sec-crop\\Seattle_SEC_20230420_c98.mbtiles".to_string(),
-        "D:\\maps\\reptiles\\mbtiles\\faacb\\20220908".to_string(),
-        "D:\\maps\\reptiles\\mbtiles\\osm".to_string(),
-    ];
-    let cfg = UtilesServerConfig::new("0.0.0.0".to_string(), 3333, fspaths);
+    if args.fspaths.is_none() || args.fspaths.as_ref().unwrap().is_empty() {
+        warn!("no fspaths provided");
+    }
+    let cfg = args.to_cfg();
     utiles_serve(cfg).await.expect("utiles_serve failed");
     Ok(())
 }

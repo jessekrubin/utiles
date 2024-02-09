@@ -33,24 +33,22 @@ use tower_http::{
 };
 use tracing::{debug, info, warn};
 
-use crate::globster::find_filepaths;
 use utiles_core::tile_type::blob2headers;
 use utiles_core::{quadkey2tile, utile, Tile};
 
+use crate::globster::find_filepaths;
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
-use crate::utilesqlite::mbtiles_async_sqlite::MbtilesAsyncSqlitePool;
+use crate::utilesqlite::MbtilesAsyncSqliteClient;
 
 //=============================================================================
 
 pub struct MbtilesDataset {
-    pub mbtiles: MbtilesAsyncSqlitePool,
+    pub mbtiles: MbtilesAsyncSqliteClient,
     pub tilejson: TileJSON,
 }
 
 pub struct Datasets {
-    // pub mbtiles: HashMap<String, MbtilesAsyncSqlitePool>,
     pub mbtiles: BTreeMap<String, MbtilesDataset>,
-    // pub tilejsons: HashMap<String, TileJSON>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -92,7 +90,10 @@ async fn preflight(config: &UtilesServerConfig) -> Datasets {
     let mut datasets = BTreeMap::new();
     // let mut tilejsons = HashMap::new();
     for fspath in filepaths.iter() {
-        let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
+        // let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
+        let pool = MbtilesAsyncSqliteClient::open_readonly(fspath)
+            .await
+            .unwrap();
         let tilejson = pool.tilejson().await.unwrap();
         let filename = pool.filename().to_string().replace(".mbtiles", "");
         let mbt_ds = MbtilesDataset {

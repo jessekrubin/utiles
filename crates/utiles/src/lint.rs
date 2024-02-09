@@ -1,7 +1,12 @@
-use crate::utilesqlite::MbtilesAsync;
+use crate::utilesqlite::mbtiles::{
+    has_unique_index_on_metadata, metadata_table_name_is_primary_key,
+};
+use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
+use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::{utilesqlite, UtilesError};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
+use utiles_core::mbutiles::metadata2duplicates;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 5] =
     ["bounds", "format", "maxzoom", "minzoom", "name"];
@@ -137,7 +142,9 @@ impl MbtilesLinter {
         Ok(mbtiles)
     }
 
-    pub async fn check_magic_number<T: MbtilesAsync>(mbt: &T) -> UtilesLintResult<()> {
+    pub async fn check_magic_number(
+        mbt: &MbtilesAsyncSqliteClient,
+    ) -> UtilesLintResult<()> {
         let magic_number_res = mbt.magic_number().await;
         match magic_number_res {
             Ok(magic_number) => {
@@ -152,8 +159,9 @@ impl MbtilesLinter {
             Err(e) => Err(e.into()),
         }
     }
-
-    pub async fn check_metadata<T: MbtilesAsync>(mbt: &T) -> UtilesLintResult<()> {
+    pub async fn check_metadata_rows(
+        mbt: &MbtilesAsyncSqliteClient,
+    ) -> UtilesLintResult<()> {
         let metadata_rows = mbt.metadata_rows().await?;
         let metadata_keys = metadata_rows
             .iter()
@@ -175,6 +183,48 @@ impl MbtilesLinter {
                 .iter()
                 .map(|k| UtilesLintError::MbtMissingMetadataKv(k.clone()))
                 .collect::<Vec<UtilesLintError>>();
+            Err(UtilesLintError::LintErrors(errs))
+        }
+    }
+
+    pub async fn check_metadata(
+        mbt: &MbtilesAsyncSqliteClient,
+    ) -> UtilesLintResult<()> {
+        // that metadata table exists
+        let has_unique_index_on_metadata_name = mbt
+            .conn(has_unique_index_on_metadata)
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+
+        let mut errs = vec![];
+        let name_is_pk = mbt
+            .conn(metadata_table_name_is_primary_key)
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+        if has_unique_index_on_metadata_name || name_is_pk {
+            let rows = mbt.metadata_rows().await?;
+            let duplicate_rows = metadata2duplicates(rows.clone());
+            if !duplicate_rows.is_empty() {
+                errs.extend(
+                    duplicate_rows
+                        .keys()
+                        .map(|k| UtilesLintError::DuplicateMetadataKey(k.clone()))
+                        .collect::<Vec<UtilesLintError>>(),
+                );
+            }
+        } else {
+            errs.push(UtilesLintError::MissingUniqueIndex(
+                "metadata.name".to_string(),
+            ));
+        }
+
+        let rows_errs = MbtilesLinter::check_metadata_rows(mbt).await;
+        if let Err(e) = rows_errs {
+            errs.push(e);
+        }
+        if errs.is_empty() {
+            Ok(())
+        } else {
             Err(UtilesLintError::LintErrors(errs))
         }
     }
