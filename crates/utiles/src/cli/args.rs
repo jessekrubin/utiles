@@ -111,6 +111,16 @@ pub struct TouchArgs {
 }
 
 #[derive(Debug, Parser)]
+pub struct VacuumArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    /// fspath to vacuum db into
+    #[arg(required = false)]
+    pub into: Option<String>,
+}
+
+#[derive(Debug, Parser)]
 pub struct MetadataArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -200,7 +210,7 @@ pub enum Commands {
 
     /// VACUUM sqlite db
     #[command(name = "vacuum", visible_alias = "vac")]
-    Vacuum(SqliteDbCommonArgs),
+    Vacuum(VacuumArgs),
 
     /// Determine if mbtiles contains a latlong
     #[command(name = "dbcontains")]

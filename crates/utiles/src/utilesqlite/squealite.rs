@@ -15,6 +15,11 @@ pub trait Sqlike3 {
     fn vacuum(&self) -> RusqliteResult<usize> {
         vacuum(self.conn())
     }
+
+    fn vacuum_into(&self, dst: String) -> RusqliteResult<usize> {
+        vacuum_into(self.conn(), dst)
+    }
+
     fn analyze(&self) -> RusqliteResult<usize> {
         analyze(self.conn())
     }
@@ -102,6 +107,12 @@ pub fn is_empty_db(connection: &Connection) -> RusqliteResult<bool> {
 pub fn vacuum(conn: &Connection) -> RusqliteResult<usize> {
     let mut stmt = conn.prepare_cached("VACUUM")?;
     let r = stmt.execute([])?;
+    Ok(r)
+}
+
+pub fn vacuum_into(conn: &Connection, dst: String) -> RusqliteResult<usize> {
+    let mut stmt = conn.prepare_cached("VACUUM INTO ?")?;
+    let r = stmt.execute([dst])?;
     Ok(r)
 }
 
