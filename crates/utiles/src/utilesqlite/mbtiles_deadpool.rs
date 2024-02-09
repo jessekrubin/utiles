@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use async_trait::async_trait;
-use deadpool_sqlite::{self, Config, Pool, Runtime};
+use deadpool_sqlite::{self, Pool};
 use tilejson::TileJSON;
 use tracing::error;
 

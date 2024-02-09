@@ -1,10 +1,10 @@
-use futures::{stream, StreamExt};
+use futures::{StreamExt};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use tracing::{debug, info, warn};
+use tracing::{debug, warn};
 
-use utiles_core::mbutiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
+use utiles_core::mbutiles::{metadata2duplicates, metadata2map};
 
 use crate::cli::args::LintArgs;
 // use crate::cli::find;
@@ -119,9 +119,9 @@ async fn lint_filepath_async(
     path: &Path,
     fix: bool,
 ) -> UtilesLintResult<Vec<UtilesLintError>> {
-    let linter = MbtilesLinter::new(&path, fix);
-    let lint_results = linter.lint().await;
-    lint_results
+    let linter = MbtilesLinter::new(path, fix);
+    
+    linter.lint().await
 }
 
 async fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
