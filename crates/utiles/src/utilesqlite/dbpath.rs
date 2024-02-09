@@ -48,3 +48,14 @@ impl<P: AsRef<std::path::Path>> From<P> for DbPath {
         DbPath { fspath, filename }
     }
 }
+
+pub trait DbPathTrait {
+    fn db_path(&self) -> &DbPath;
+    fn filepath(&self) -> &str {
+        &self.db_path().fspath
+    }
+
+    fn filename(&self) -> &str {
+        &self.db_path().filename
+    }
+}

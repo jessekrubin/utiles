@@ -26,24 +26,6 @@ pub struct MbtilesDeadpool {
 
 #[async_trait]
 impl MbtilesAsync for MbtilesDeadpool {
-    async fn open(path: &str) -> UtilesResult<Self> {
-        let cfg = Config::new(path);
-        let pool = cfg.create_pool(Runtime::Tokio1);
-
-        // let conn = pool.get().await.unwrap();
-        // let conn = pool.get().await;
-
-        // pool.status()
-
-        // .expect("DB connection failed");
-        match pool {
-            Ok(p) => Ok(Self {
-                pool: p,
-                dbpath: DbPath::new(path),
-            }),
-            Err(e) => Err(UtilesError::Unknown(e.to_string())),
-        }
-    }
     fn filepath(&self) -> &str {
         &self.dbpath.fspath
     }
@@ -78,9 +60,14 @@ impl MbtilesAsync for MbtilesDeadpool {
         todo!()
     }
 
-    // async fn select_tile<T: TileLike>(&self, tile: T) -> UtilesResult<Vec<u8>> {
-    //     Err(UtilesError::Unimplemented("deadpool select_tile".to_string()))
-    // }
+    async fn query_zxy(
+        &self,
+        _z: u8,
+        _x: u32,
+        _y: u32,
+    ) -> UtilesResult<Option<Vec<u8>>> {
+        todo!()
+    }
 }
 
 impl MbtilesDeadpool {

@@ -77,7 +77,9 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     debug!("args: {:?}", args);
 
     match args.command {
-        Commands::Lint(args) => lint_main(&args),
+        Commands::Lint(args) => {
+            lint_main(&args).await;
+        }
         Commands::Touch(args) => {
             touch_main(&args).unwrap();
         }

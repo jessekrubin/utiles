@@ -1,3 +1,4 @@
+use futures::{stream, StreamExt};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -6,30 +7,33 @@ use tracing::{debug, info, warn};
 use utiles_core::mbutiles::{metadata2duplicates, metadata2map, MBTILES_MAGIC_NUMBER};
 
 use crate::cli::args::LintArgs;
-use crate::cli::find;
-use crate::lint::{UtilesLintError, UtilesLintResult, REQUIRED_METADATA_FIELDS};
+// use crate::cli::find;
+use crate::globster;
+use crate::lint::{
+    MbtilesLinter, UtilesLintError, UtilesLintResult, REQUIRED_METADATA_FIELDS,
+};
 use crate::utilesqlite::mbtiles::{is_mbtiles, Mbtiles};
 use crate::utilesqlite::squealite;
 
 pub fn lint_mbtiles_file(mbtiles: &Mbtiles, _fix: bool) -> Vec<UtilesLintError> {
     let mut errors = Vec::new();
-    match mbtiles.magic_number() {
-        Ok(magic_number) => {
-            match magic_number {
-                MBTILES_MAGIC_NUMBER => {}
-                // zero
-                0 => {
-                    errors.push(UtilesLintError::MbtMissingMagicNumber);
-                }
-                _ => {
-                    errors.push(UtilesLintError::MbtUnknownMagicNumber(magic_number));
-                }
-            }
-        }
-        Err(e) => {
-            errors.push(UtilesLintError::Unknown(e.to_string()));
-        }
-    }
+    // match mbtiles.magic_number() {
+    //     Ok(magic_number) => {
+    //         match magic_number {
+    //             MBTILES_MAGIC_NUMBER => {}
+    //             // zero
+    //             0 => {
+    //                 errors.push(UtilesLintError::MbtMissingMagicNumber);
+    //             }
+    //             _ => {
+    //                 errors.push(UtilesLintError::MbtUnknownMagicNumber(magic_number));
+    //             }
+    //         }
+    //     }
+    //     Err(e) => {
+    //         errors.push(UtilesLintError::Unknown(e.to_string()));
+    //     }
+    // }
 
     // let mbtiles = mbtiles_result.unwrap();
     let has_unique_index_on_metadata_name =
@@ -111,15 +115,78 @@ pub fn lint_filepath(
     }
 }
 
-fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
+async fn lint_filepath_async(
+    path: &Path,
+    fix: bool,
+) -> UtilesLintResult<Vec<UtilesLintError>> {
+    let linter = MbtilesLinter::new(&path, fix);
+    let lint_results = linter.lint().await;
+    lint_results
+}
+
+async fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
+    // for each concurrent
+
+    // stream::iter(fspaths)
+    //     .for_each_concurrent(4, |path| async move {
+    //         let linter = MbtilesLinter::new(&path, fix);
+    //         let lint_results = linter.lint().await;
+    //         match lint_results {
+    //             Ok(r) => {
+    //                 debug!("r: {:?}", r);
+    //                 // print each err....
+    //                 if r.is_empty() {
+    //                     info!("No errors found");
+    //                 } else {
+    //                     warn!("{} - {} errors found", path.display(), r.len());
+    //
+    //                     // let agg_err = UtilesLintError::LintErrors(r);
+    //                     for err in r {
+    //                         warn!("{}", err.to_string());
+    //                     }
+    //                 }
+    //             }
+    //             Err(e) => {
+    //                 warn!("Unable to open file: {}", e);
+    //                 warn!("Error: {}", e);
+    //             }
+    //         }
+    //     },
+    //     )
+    //     .await;
+
+    // for path in fspaths {
+    //     let r = lint_filepath(&path, fix);
+    //     match r {
+    //         Ok(r) => {
+    //             debug!("r: {:?}", r);
+    //             // print each err....
+    //             if r.is_empty() {
+    //                 info!("No errors found");
+    //             } else {
+    //                 warn!("{} - {} errors found", path.display(), r.len());
+    //
+    //                 // let agg_err = UtilesLintError::LintErrors(r);
+    //                 for err in r {
+    //                     warn!("{}", err.to_string());
+    //                 }
+    //             }
+    //         }
+    //         Err(e) => {
+    //             warn!("Unable to open file: {}", e);
+    //             warn!("Error: {}", e);
+    //         }
+    //     }
+    // }
     for path in fspaths {
-        let r = lint_filepath(&path, fix);
-        match r {
+        let linter = MbtilesLinter::new(&path, fix);
+        let lint_results = linter.lint().await;
+        match lint_results {
             Ok(r) => {
                 debug!("r: {:?}", r);
                 // print each err....
                 if r.is_empty() {
-                    info!("No errors found");
+                    debug!("{} - OK", path.display());
                 } else {
                     warn!("{} - {} errors found", path.display(), r.len());
 
@@ -137,17 +204,17 @@ fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
     }
 }
 
-pub fn lint_main(args: &LintArgs) {
-    let filepaths = find::find_filepaths(&args.fspaths);
+pub async fn lint_main(args: &LintArgs) {
+    let filepaths = globster::find_filepaths(&args.fspaths);
     if args.fix {
-        warn!("lint fix is not implemented yet");
+        warn!("NOT IMPLEMENTED: `utiles lint --fix`");
     }
     debug!("filepaths: {:?}", filepaths);
     if filepaths.is_empty() {
         warn!("No files found");
         return;
     }
-    lint_filepaths(filepaths, args.fix);
+    lint_filepaths(filepaths, args.fix).await;
 }
 
 pub fn lint_metadata_map(map: &HashMap<String, String>) -> Vec<UtilesLintError> {
