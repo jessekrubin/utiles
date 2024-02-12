@@ -3,6 +3,7 @@ use std::path::Path;
 
 use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use tilejson::TileJSON;
+use tracing::warn;
 use tracing::{debug, error};
 
 use utiles_core::bbox::BBox;
@@ -156,7 +157,7 @@ impl Mbtiles {
         }
     }
 
-    pub fn tilejson(&self) -> Result<TileJSON, Box<dyn Error>> {
+    pub fn tilejson(&self) -> UtilesResult<TileJSON> {
         let metadata = self.metadata()?;
         let tj = metadata2tilejson(metadata);
         match tj {
@@ -189,7 +190,7 @@ impl Mbtiles {
         Ok(contains)
     }
 
-    pub fn tj(&self) -> Result<TileJSON, Box<dyn Error>> {
+    pub fn tj(&self) -> UtilesResult<TileJSON> {
         self.tilejson()
     }
 
@@ -312,9 +313,26 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadata
     }
 }
 
+pub fn mbtiles_metadata_row(
+    conn: &Connection,
+    name: &str,
+) -> RusqliteResult<Option<MbtilesMetadataRow>> {
+    let mut stmt =
+        conn.prepare_cached("SELECT name, value FROM metadata WHERE name=?1")?;
+    let mdata = stmt
+        .query_row(params![name], |row| {
+            Ok(MbtilesMetadataRow {
+                name: row.get(0)?,
+                value: row.get(1)?,
+            })
+        })
+        .optional()?;
+    Ok(mdata)
+}
+
 /// Return true/false if metadata table has a unique index on 'name'
 pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND tbl_name='metadata' AND name='name'")?;
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND tbl_name='metadata' AND name='name'")?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
@@ -323,7 +341,7 @@ pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
 }
 
 pub fn metadata_table_name_is_primary_key(conn: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='metadata' AND sql LIKE '%PRIMARY KEY%'")?;
+    let mut stmt = conn.prepare("SELECT COUNT(name) FROM sqlite_schema WHERE type='table' AND name='metadata' AND sql LIKE '%PRIMARY KEY%'")?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
@@ -382,7 +400,7 @@ pub fn minzoom_maxzoom(conn: &Connection) -> RusqliteResult<Option<MinZoomMaxZoo
 
 pub fn has_tiles_table_or_view(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT name FROM sqlite_master WHERE name='tiles' AND (type='table' OR type='view')",
+        "SELECT name FROM sqlite_schema WHERE name='tiles' AND (type='table' OR type='view')",
     )?;
     let mut rows = stmt.query([])?;
     let mut count = 0;
@@ -394,7 +412,7 @@ pub fn has_tiles_table_or_view(connection: &Connection) -> RusqliteResult<bool> 
 
 pub fn has_tiles_view(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT COUNT(name) FROM sqlite_master WHERE type='view' AND name='tiles'",
+        "SELECT COUNT(name) FROM sqlite_schema WHERE type='view' AND name='tiles'",
     )?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
@@ -405,7 +423,7 @@ pub fn has_tiles_view(connection: &Connection) -> RusqliteResult<bool> {
 
 pub fn has_tiles_table(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='tiles'",
+        "SELECT COUNT(name) FROM sqlite_schema WHERE type='table' AND name='tiles'",
     )?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
@@ -416,7 +434,7 @@ pub fn has_tiles_table(connection: &Connection) -> RusqliteResult<bool> {
 
 pub fn has_metadata_table(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT COUNT(name) FROM sqlite_master WHERE type='table' AND name='metadata'",
+        "SELECT COUNT(name) FROM sqlite_schema WHERE type='table' AND name='metadata'",
     )?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
@@ -427,7 +445,7 @@ pub fn has_metadata_table(connection: &Connection) -> RusqliteResult<bool> {
 
 pub fn has_metadata_view(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare(
-        "SELECT COUNT(name) FROM sqlite_master WHERE type='view' AND name='metadata'",
+        "SELECT COUNT(name) FROM sqlite_schema WHERE type='view' AND name='metadata'",
     )?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
@@ -437,9 +455,52 @@ pub fn has_metadata_view(connection: &Connection) -> RusqliteResult<bool> {
 }
 
 pub fn has_metadata_table_or_view(connection: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = connection.prepare("SELECT name FROM sqlite_master WHERE name='metadata' AND (type='table' OR type='view')")?;
+    let mut stmt = connection.prepare("SELECT name FROM sqlite_schema WHERE name='metadata' AND (type='table' OR type='view')")?;
     let nrows = stmt.query([]).iter().count();
     Ok(nrows == 1)
+}
+
+pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
+    // check that there is an index in the db that indexes columns named zoom_level, tile_column, tile_row
+
+    let q = "
+        SELECT
+            idx.name AS index_name,
+            tbl.name AS table_name,
+            idx.sql AS index_sql
+        FROM
+            sqlite_schema AS tbl
+        JOIN
+            sqlite_schema AS idx ON tbl.name = idx.tbl_name
+        WHERE
+            tbl.type IN ('table', 'view') AND
+            tbl.name = 'tiles' AND
+            idx.type = 'index' AND
+            (
+                idx.sql LIKE '%zoom_level%' OR
+                idx.sql LIKE '%tile_column%' OR
+                idx.sql LIKE '%tile_row%'
+            );
+    ";
+    let mut stmt = connection.prepare(q)?;
+    let nrows = stmt
+        .query_map([], |row| {
+            let index_name: String = row.get(0)?;
+            let table_name: String = row.get(1)?;
+            let index_sql: String = row.get(2)?;
+            Ok((index_name, table_name, index_sql))
+        })?
+        .collect::<RusqliteResult<Vec<(String, String, String)>>>()?;
+    match nrows.len() {
+        0 => {
+            // log it!
+            warn!("rows : {:?}", nrows);
+            warn!("No index found for zoom_level, tile_column, tile_row");
+            Ok(false)
+        }
+        _ => Ok(true),
+    }
+    // Ok(nrows.len() > 0)
 }
 
 pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool> {
@@ -482,12 +543,14 @@ pub fn tile_exists<T: TileLike>(
 }
 
 pub fn tiles_is_empty(connection: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles LIMIT 1")?;
-    let rows = stmt.query_row([], |row| {
-        let count: i64 = row.get(0)?;
-        Ok(count)
-    })?;
-    Ok(rows == 0_i64)
+    let mut stmt = connection.prepare_cached("SELECT * FROM tiles LIMIT 1")?;
+    let rows = stmt
+        .query_row([], |row| {
+            let count: i64 = row.get(0)?;
+            Ok(count)
+        })
+        .optional()?;
+    Ok(rows.is_none())
 }
 
 pub fn tiles_count(connection: &Connection) -> RusqliteResult<usize> {

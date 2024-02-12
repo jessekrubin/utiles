@@ -94,7 +94,14 @@ async fn preflight(config: &UtilesServerConfig) -> Datasets {
         let pool = MbtilesAsyncSqliteClient::open_readonly(fspath)
             .await
             .unwrap();
-        let tilejson = pool.tilejson().await.unwrap();
+        debug!("sanity check: {:?}", pool.filepath());
+        let is_valid = pool.is_mbtiles().await;
+        // if error or not a valid mbtiles file, skip it
+        if is_valid.is_err() || !is_valid.unwrap() {
+            warn!("Skipping non-mbtiles file: {:?}", fspath);
+            continue;
+        }
+        let tilejson = pool.tilejson_ext().await.unwrap();
         let filename = pool.filename().to_string().replace(".mbtiles", "");
         let mbt_ds = MbtilesDataset {
             mbtiles: pool,

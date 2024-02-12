@@ -6,6 +6,7 @@ use tilejson::TileJSON;
 use tracing::error;
 
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
+use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::Tile;
 
@@ -32,8 +33,11 @@ impl MbtilesAsync for MbtilesDeadpool {
     fn filename(&self) -> &str {
         &self.dbpath.filename
     }
-    async fn tilejson(&self) -> Result<TileJSON, Box<dyn Error>> {
-        let metadata = self.metadata_rows().await?;
+    async fn tilejson(&self) -> UtilesResult<TileJSON> {
+        let metadata = self.metadata_rows().await.map_err(|e| {
+            error!("Error getting metadata rows: {}", e);
+            UtilesError::Unknown(e.to_string())
+        })?;
         let tj = metadata2tilejson(metadata);
         match tj {
             Ok(t) => Ok(t),
@@ -66,6 +70,25 @@ impl MbtilesAsync for MbtilesDeadpool {
         _x: u32,
         _y: u32,
     ) -> UtilesResult<Option<Vec<u8>>> {
+        todo!()
+    }
+
+    async fn metadata_row(
+        &self,
+        _name: &str,
+    ) -> UtilesResult<Option<MbtilesMetadataRow>> {
+        todo!()
+    }
+
+    async fn query_minzoom_maxzoom(&self) -> UtilesResult<Option<MinZoomMaxZoom>> {
+        todo!()
+    }
+
+    async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
+        todo!()
+    }
+
+    async fn is_mbtiles(&self) -> UtilesResult<bool> {
         todo!()
     }
 }

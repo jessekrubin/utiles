@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fmt::Display;
 use std::str::FromStr;
 
@@ -7,6 +6,8 @@ use tilejson::{tilejson, Bounds, Center, TileJSON};
 
 use utiles_core::geostats::TileStats;
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
+
+use crate::errors::UtilesResult;
 
 /// # Panics
 ///
@@ -32,9 +33,7 @@ fn to_val<V, E: Display>(val: Result<V, E>) -> Option<V> {
 
 /// Convert metadata rows to a `TileJSON` object
 /// (ripped from martin-mbtiles thank y'all very much)
-pub fn metadata2tilejson(
-    metadata: Vec<MbtilesMetadataRow>,
-) -> Result<TileJSON, Box<dyn Error>> {
+pub fn metadata2tilejson(metadata: Vec<MbtilesMetadataRow>) -> UtilesResult<TileJSON> {
     let mut tj = tilejson! {tiles : vec![]};
     let mut json: Option<JSONValue> = None;
 
@@ -50,7 +49,6 @@ pub fn metadata2tilejson(
             "maxzoom" => tj.maxzoom = to_val(value.parse()),
             "description" => tj.description = Some(value),
             "attribution" => tj.attribution = Some(value),
-            // "type" => layer_type = Some(value),
             "legend" => tj.legend = Some(value),
             "template" => tj.template = Some(value),
             "json" => json = to_val(serde_json::from_str(&value)),
@@ -72,8 +70,11 @@ pub fn metadata2tilejson(
         if let Some(value) = obj.remove("tilestats") {
             if let Ok(v) = serde_json::from_value::<TileStats>(value) {
                 let key = "tilestats".to_string();
-                let val = serde_json::to_value(v)?;
-                tj.other.insert(key, val);
+                let val = serde_json::to_value(v);
+                // try to insert the tilestats into the other field
+                if let Ok(val) = val {
+                    tj.other.insert(key, val);
+                }
             }
         }
     }
