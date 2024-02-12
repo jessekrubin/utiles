@@ -33,7 +33,7 @@ tilejson.workspace = true
 tracing.workspace = true
 tokio = { workspace = true, features = ["fs"] }
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
-clap = { version = "4.4.7", features = ["derive", "color", "wrap_help"] }
+clap = { version = "4.5.0", features = ["derive", "color", "wrap_help"] }
 clap-verbosity-flag = "2.1.0"
 globset = "0.4.13"
 ignore = "0.4.20"
