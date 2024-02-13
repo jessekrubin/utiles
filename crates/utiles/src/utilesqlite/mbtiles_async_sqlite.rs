@@ -211,28 +211,14 @@ where
 
     #[tracing::instrument]
     async fn is_mbtiles(&self) -> UtilesResult<bool> {
-        // let span = span!(Level::DEBUG, "is_mbtiles", filepath = %self.filepath());
-
-        debug!("Checking if is mbtiles: {}", self.filepath());
-        debug!(
-            "checking if has metadata table or view: {}",
-            self.filepath()
-        );
         let has_metadata_table_or_view = self.conn(has_metadata_table_or_view).await?;
-        debug!("checking if has tiles table or view: {}", self.filepath());
+        debug!("has-metadata-table-or-view: {}", has_metadata_table_or_view);
         let has_tiles_table_or_view = self.conn(has_tiles_table_or_view).await?;
-        // span here
-        debug!(
-            target: "is-mbtiles",
-            "has_metadata_table_or_view: {}",
-            has_metadata_table_or_view,
-        );
-
+        debug!("has-tiles-table-or-view: {}", has_tiles_table_or_view);
         if !has_metadata_table_or_view || !has_tiles_table_or_view {
             debug!("Not a mbtiles file: {}", self.filepath());
             return Ok(false);
         }
-
         // assert tiles is not empty
         let tiles_is_empty = self
             .conn(tiles_is_empty)

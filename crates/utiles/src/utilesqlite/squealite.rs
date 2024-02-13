@@ -42,6 +42,115 @@ pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Connection> {
     Ok(db)
 }
 
+#[derive(Debug)]
+pub struct PragmaTableListRow {
+    pub schema: String,
+    pub name: String,
+    pub type_: String,
+    pub ncol: i64,
+    pub wr: bool,
+    pub strict: bool,
+}
+
+pub fn pragma_table_list(conn: &Connection) -> RusqliteResult<Vec<PragmaTableListRow>> {
+    let mut stmt = conn.prepare("PRAGMA table_list")?;
+    let mapped_rows = stmt.query_map([], |row| {
+        let schema: String = row.get(0)?;
+        let name: String = row.get(1)?;
+        let type_: String = row.get(2)?;
+        let ncol: i64 = row.get(3)?;
+        let wr: bool = row.get(4)?;
+        let strict: bool = row.get(5)?;
+        Ok(PragmaTableListRow {
+            schema,
+            name,
+            type_,
+            ncol,
+            wr,
+            strict,
+        })
+    })?;
+    let rows = mapped_rows.collect::<RusqliteResult<Vec<PragmaTableListRow>>>()?;
+    Ok(rows)
+}
+
+#[derive(Debug)]
+pub struct PragmaTableInfoRow {
+    pub cid: i64,
+    pub name: String,
+    pub type_: String,
+    pub notnull: bool,
+    pub dflt_value: Option<String>,
+    pub pk: bool,
+}
+
+pub fn pragma_table_info(
+    conn: &Connection,
+    table: &str,
+) -> RusqliteResult<Vec<PragmaTableInfoRow>> {
+    let stmt_str = format!("PRAGMA table_info({})", table);
+    let mut stmt = conn.prepare(stmt_str)?;
+    let mapped_rows = stmt.query_map([], |row| {
+        let cid: i64 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let type_: String = row.get(2)?;
+        let notnull: bool = row.get(3)?;
+        let dflt_value: Option<String> = row.get(4)?;
+        let pk: bool = row.get(5)?;
+        Ok(PragmaTableInfoRow {
+            cid,
+            name,
+            type_,
+            notnull,
+            dflt_value,
+            pk,
+        })
+    })?;
+    let rows = mapped_rows.collect::<RusqliteResult<Vec<PragmaTableInfoRow>>>()?;
+    Ok(rows)
+}
+
+#[derive(Debug)]
+pub struct PragmaTableXInfoRow {
+    pub cid: i64,
+    pub name: String,
+    pub type_: String,
+    pub notnull: bool,
+    pub dflt_value: Option<String>,
+    pub pk: bool,
+    pub hidden: bool,
+}
+
+pub fn pragma_table_xinfo(
+    conn: &Connection,
+    table: &str,
+) -> RusqliteResult<Vec<PragmaTableXInfoRow>> {
+    let stmt_str = format!("PRAGMA table_xinfo({})", table);
+    let mut stmt = conn.prepare(
+        stmt_str
+    )?;
+    let mapped_rows = stmt.query_map([], |row| {
+        let cid: i64 = row.get(0)?;
+        let name: String = row.get(1)?;
+        let type_: String = row.get(2)?;
+        let notnull: bool = row.get(3)?;
+        let dflt_value: Option<String> = row.get(4)?;
+        let pk: bool = row.get(5)?;
+        let hidden: bool = row.get(6)?;
+        Ok(PragmaTableXInfoRow {
+            cid,
+            name,
+            type_,
+            notnull,
+            dflt_value,
+            pk,
+            hidden,
+        })
+    })?;
+    let rows = mapped_rows.collect::<RusqliteResult<Vec<PragmaTableXInfoRow>>>()?;
+    Ok(rows)
+}
+
 /// Row returned by `PRAGMA database_list;`
 #[derive(Debug)]
 pub struct PragmaDatabaseListRow {
@@ -77,9 +186,10 @@ pub fn pragma_index_list(
     conn: &Connection,
     table: &str,
 ) -> RusqliteResult<Vec<PragmaIndexListRow>> {
-    let mut stmt = conn.prepare("PRAGMA index_list(?)")?;
+    let stmt_str = format!("PRAGMA index_list({})", table);
+    let mut stmt = conn.prepare(&stmt_str)?;
 
-    let mapped_rows = stmt.query_map([table], |row| {
+    let mapped_rows = stmt.query_map([], |row| {
         let name: String = row.get(1)?;
         let row = PragmaIndexListRow {
             seq: row.get(0)?,
@@ -105,8 +215,9 @@ pub fn pragma_index_info(
     conn: &Connection,
     index: &str,
 ) -> RusqliteResult<Vec<PragmaIndexInfoRow>> {
-    let mut stmt = conn.prepare("PRAGMA index_info(?)")?;
-    let mapped_rows = stmt.query_map([index], |row| {
+    let stmt_str = format!("PRAGMA index_info({})", index);
+    let mut stmt = conn.prepare(&stmt_str)?;
+    let mapped_rows = stmt.query_map([], |row| {
         let row = PragmaIndexInfoRow {
             seqno: row.get(0)?,
             cid: row.get(1)?,

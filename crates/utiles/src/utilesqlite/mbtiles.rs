@@ -3,8 +3,7 @@ use std::path::Path;
 
 use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
 use tilejson::TileJSON;
-use tracing::warn;
-use tracing::{debug, error};
+use tracing::{debug, error, warn};
 
 use utiles_core::bbox::BBox;
 use utiles_core::errors::UtilesCoreResult;
@@ -23,7 +22,8 @@ use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use crate::utilesqlite::mbtype::MbtilesType;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
 use crate::utilesqlite::squealite::{
-    application_id, open_existing, query_db_fspath, Sqlike3,
+    application_id, open_existing, pragma_index_info, pragma_index_list,
+    pragma_table_list, query_db_fspath, Sqlike3,
 };
 
 pub struct Mbtiles {
@@ -462,14 +462,38 @@ pub fn has_metadata_table_or_view(connection: &Connection) -> RusqliteResult<boo
 
 // TODO: make actually robust...
 pub fn has_zoom_row_col_autoindex(connection: &Connection) -> RusqliteResult<bool> {
-    // check that there is an index in the db that indexes columns named zoom_level, tile_column, tile_row
-    let mut stmt = connection.prepare("SELECT COUNT(name) FROM sqlite_schema WHERE type='index' AND name='sqlite_autoindex_tiles_1'")?;
-    // index info
-    let nrows = stmt.query_row([], |row| {
-        let count: i64 = row.get(0)?;
-        Ok(count)
-    })?;
-    Ok(nrows == 1_i64)
+    let tables_list = pragma_table_list(connection)?;
+    let tables = tables_list
+        .iter()
+        .filter(|t| t.type_ == "table")
+        .collect::<Vec<_>>();
+
+    for table in tables {
+        let indexes = pragma_index_list(connection, &table.name);
+        if indexes.is_err() {
+            debug!("indexes: {:?}", indexes);
+            continue;
+        }
+        let indexes = indexes.unwrap();
+        let unique_indexes = indexes.iter().filter(|i| i.unique).collect::<Vec<_>>();
+        for index in unique_indexes {
+            let index_info = pragma_index_info(connection, &index.name)?;
+            let index_info = index_info
+                .iter()
+                .filter(|i| {
+                    i.name == "zoom_level"
+                        || i.name == "tile_column"
+                        || i.name == "tile_row"
+                })
+                .collect::<Vec<_>>();
+            if index_info.len() == 3 {
+                return Ok(true);
+            }
+        }
+    }
+
+    warn!("No index/autoindex found for zoom_level, tile_column, tile_row");
+    Ok(false)
 }
 
 pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {

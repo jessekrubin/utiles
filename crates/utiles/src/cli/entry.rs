@@ -27,6 +27,7 @@ fn init_tracing(log_config: &LogConfig) {
     } else {
         EnvFilter::new("INFO")
     };
+    let debug_or_trace = log_config.debug || log_config.trace;
     #[allow(clippy::match_bool)]
     match log_config.json {
         true => {
@@ -42,6 +43,7 @@ fn init_tracing(log_config: &LogConfig) {
             let subscriber = fmt::Subscriber::builder()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
+                .with_target(debug_or_trace)
                 .finish();
             tracing::subscriber::set_global_default(subscriber)
                 .expect("tracing::subscriber::set_global_default(...) failed.");

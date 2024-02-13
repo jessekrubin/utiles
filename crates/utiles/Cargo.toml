@@ -55,3 +55,4 @@ async-sqlite = { version = "0.2.1", features = ["bundled", "functions", "trace",
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id"] }
 tokio-signal = "0.2.9"
+colored = "2.1.0"
