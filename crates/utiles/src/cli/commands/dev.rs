@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use clap::Parser;
 use tracing::{debug, warn};
 
@@ -22,9 +23,7 @@ pub struct DevArgs {
 async fn dev(args: DevArgs) -> Result<(), Box<dyn std::error::Error>> {
     // DEV START
     debug!("args: {:?}", args);
-    let filepath = "D:\\blue-marble\\blue-marble.mbtiles".to_string();
-    // let filepath = "D:\\blue-marble\\blue-marble.z0z4.mbtiles".to_string();
-
+    let filepath = args.fspath.unwrap ();
     let mbt = Mbtiles::open(filepath)?;
     add_functions(&mbt.conn)?;
 

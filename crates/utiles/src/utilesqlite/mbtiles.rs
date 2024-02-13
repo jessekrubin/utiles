@@ -22,9 +22,7 @@ use crate::utilesqlite::insert_strategy::InsertStrategy;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use crate::utilesqlite::mbtype::MbtilesType;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
-use crate::utilesqlite::squealite::{
-    application_id, open_existing, query_db_fspath, Sqlike3,
-};
+use crate::utilesqlite::squealite::{application_id, open_existing, query_db_fspath, Sqlike3};
 
 pub struct Mbtiles {
     pub dbpath: DbPath,
@@ -460,6 +458,18 @@ pub fn has_metadata_table_or_view(connection: &Connection) -> RusqliteResult<boo
     Ok(nrows == 1)
 }
 
+// TODO: make actually robust...
+pub fn has_zoom_row_col_autoindex(connection: &Connection) -> RusqliteResult<bool> {
+    // check that there is an index in the db that indexes columns named zoom_level, tile_column, tile_row
+    let mut stmt = connection.prepare("SELECT COUNT(name) FROM sqlite_schema WHERE type='index' AND name='sqlite_autoindex_tiles_1'")?;
+    // index info
+    let nrows = stmt.query_row([], |row| {
+        let count: i64 = row.get(0)?;
+        Ok(count)
+    })?;
+    Ok(nrows == 1_i64)
+}
+
 pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
     // check that there is an index in the db that indexes columns named zoom_level, tile_column, tile_row
 
@@ -493,10 +503,11 @@ pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
         .collect::<RusqliteResult<Vec<(String, String, String)>>>()?;
     match nrows.len() {
         0 => {
-            // log it!
-            warn!("rows : {:?}", nrows);
-            warn!("No index found for zoom_level, tile_column, tile_row");
-            Ok(false)
+            let check_autoindex = has_zoom_row_col_autoindex(connection)?;
+            if !check_autoindex {
+                warn!("No index/autoindex found for zoom_level, tile_column, tile_row");
+            }
+            Ok(check_autoindex)
         }
         _ => Ok(true),
     }

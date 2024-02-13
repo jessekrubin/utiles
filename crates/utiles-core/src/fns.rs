@@ -13,6 +13,15 @@ use crate::zoom::ZoomOrZooms;
 use crate::Point2d;
 use crate::{LngLat, Tile, UtilesCoreError};
 
+/// Return upper left lnglat as tuple `(f64, f64)` from x,y,z
+#[must_use]
+pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
+    let z2 = f64::from(2_u32.pow(u32::from(z)));
+    let lon_deg = (f64::from(x) / z2) * 360.0 - 180.0;
+    let lat_rad = ((1.0 - 2.0 * f64::from(y) / z2) * PI).sinh().atan();
+    (lon_deg, lat_rad.to_degrees())
+}
+
 #[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
     let (lon_deg, lat_deg) = ult(x, y, z);
@@ -34,15 +43,7 @@ pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y + 1, z)
 }
 
-#[must_use]
-pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
-    let z2 = f64::from(2_u32.pow(u32::from(z)));
-    let lon_deg = (f64::from(x) / z2) * 360.0 - 180.0;
-    let lat_rad = ((1.0 - 2.0 * f64::from(y) / z2) * PI).sinh().atan();
 
-    let lat_deg = lat_rad.to_degrees();
-    (lon_deg, lat_deg)
-}
 
 #[must_use]
 pub fn minmax(zoom: u8) -> (u32, u32) {
