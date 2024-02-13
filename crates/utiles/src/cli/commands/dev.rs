@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use clap::Parser;
+use std::path::PathBuf;
 use tracing::{debug, warn};
 
 use crate::utilesqlite::hash_types::HashType;
@@ -23,7 +23,7 @@ pub struct DevArgs {
 async fn dev(args: DevArgs) -> Result<(), Box<dyn std::error::Error>> {
     // DEV START
     debug!("args: {:?}", args);
-    let filepath = args.fspath.unwrap ();
+    let filepath = args.fspath.unwrap();
     let mbt = Mbtiles::open(filepath)?;
     add_functions(&mbt.conn)?;
 

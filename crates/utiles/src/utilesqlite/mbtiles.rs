@@ -22,7 +22,9 @@ use crate::utilesqlite::insert_strategy::InsertStrategy;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use crate::utilesqlite::mbtype::MbtilesType;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
-use crate::utilesqlite::squealite::{application_id, open_existing, query_db_fspath, Sqlike3};
+use crate::utilesqlite::squealite::{
+    application_id, open_existing, query_db_fspath, Sqlike3,
+};
 
 pub struct Mbtiles {
     pub dbpath: DbPath,
