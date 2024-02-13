@@ -41,6 +41,7 @@ fn init_tracing(log_config: &LogConfig) {
         }
         false => {
             let subscriber = fmt::Subscriber::builder()
+                .compact()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
                 .with_target(debug_or_trace)

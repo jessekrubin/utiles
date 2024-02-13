@@ -89,7 +89,7 @@ pub fn pragma_table_info(
     table: &str,
 ) -> RusqliteResult<Vec<PragmaTableInfoRow>> {
     let stmt_str = format!("PRAGMA table_info({})", table);
-    let mut stmt = conn.prepare(stmt_str)?;
+    let mut stmt = conn.prepare(&stmt_str)?;
     let mapped_rows = stmt.query_map([], |row| {
         let cid: i64 = row.get(0)?;
         let name: String = row.get(1)?;
@@ -126,9 +126,7 @@ pub fn pragma_table_xinfo(
     table: &str,
 ) -> RusqliteResult<Vec<PragmaTableXInfoRow>> {
     let stmt_str = format!("PRAGMA table_xinfo({})", table);
-    let mut stmt = conn.prepare(
-        stmt_str
-    )?;
+    let mut stmt = conn.prepare(&stmt_str)?;
     let mapped_rows = stmt.query_map([], |row| {
         let cid: i64 = row.get(0)?;
         let name: String = row.get(1)?;
