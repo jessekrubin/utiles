@@ -1,101 +1,47 @@
-use std::error::Error;
-
-use deadpool_sqlite::{self, Config, Pool, PoolError, Runtime};
+use async_trait::async_trait;
 use tilejson::TileJSON;
-use tracing::error;
-
-use crate::utilejson::metadata2tilejson;
 
 use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::tile_data_row::TileData;
-use utiles_core::Tile;
+use utiles_core::mbutiles::MinZoomMaxZoom;
+use utiles_core::{Tile, TileLike};
 
-use crate::utilesqlite::mbtiles::{
-    insert_tile_flat_mbtiles, insert_tiles_flat_mbtiles, mbtiles_metadata,
-};
+use crate::errors::UtilesResult;
 
-pub struct MbtilesAsync {
-    // pub client: Client,
-    pub pool: Pool,
-}
+// #[async_trait]
+// pub trait Sqlike3Async {
+//     // async fn conn(&self) -> &Connection;
+//     async fn is_empty_db(&self) -> RusqliteResult<bool>;
+//     async fn vacuum(&self) -> RusqliteResult<usize>;
+//
+//     async fn analyze(&self) -> RusqliteResult<usize>;
+//
+//     async fn magic_number(&self) -> UtilesResult<u32>;
+// }
 
-impl MbtilesAsync {
-    pub async fn open(path: &str) -> Result<Self, PoolError> {
-        let cfg = Config::new(path);
-        let pool = cfg.create_pool(Runtime::Tokio1).unwrap();
-        // let conn = pool.get().await.unwrap();
-        // let conn = pool.get().await;
-
-        // pool.status()
-
-        // .expect("DB connection failed");
-        Ok(Self { pool })
-        // let c = ClientBuilder::new().path(path).open().await?;
-        // Ok(Self { client: c })
-    }
-
-    pub async fn metadata_rows(
+#[async_trait]
+pub trait MbtilesAsync: Sized {
+    fn filepath(&self) -> &str;
+    fn filename(&self) -> &str;
+    async fn is_mbtiles(&self) -> UtilesResult<bool>;
+    async fn magic_number(&self) -> UtilesResult<u32>;
+    async fn tilejson(&self) -> UtilesResult<TileJSON>;
+    async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>>;
+    async fn metadata_row(
         &self,
-    ) -> Result<Vec<MbtilesMetadataRow>, Box<dyn Error>> {
-        let c = self.pool.get().await.unwrap();
-        let r = c
-            .interact(|conn| {
-                mbtiles_metadata(conn)
-                // let mdrows = mbtiles_metadata(conn);
-                // mdrows
-            })
-            .await;
+        name: &str,
+    ) -> UtilesResult<Option<MbtilesMetadataRow>>;
+    async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>>;
 
-        // let mdrows = self.client.conn(|conn| mbtiles_metadata(conn)).await?;
-        // println!("mdrows: {:?}", mdrows);
-        // Ok(vec![])
-        Ok(r??)
+    async fn query_tile(&self, tile: Tile) -> UtilesResult<Option<Vec<u8>>> {
+        self.query_zxy(tile.z(), tile.x(), tile.y()).await
     }
 
-    pub async fn tilejson(&self) -> Result<TileJSON, Box<dyn Error>> {
-        let metadata = self.metadata_rows().await?;
-        let tj = metadata2tilejson(metadata);
-        match tj {
-            Ok(t) => Ok(t),
-            Err(e) => {
-                error!("Error parsing metadata to TileJSON: {}", e);
-                Err(e)
-            }
-        }
-    }
-
-    pub async fn insert_tile(
+    async fn query_minzoom_maxzoom(&self) -> UtilesResult<Option<MinZoomMaxZoom>>;
+    async fn query_tilelike<T: TileLike + Send>(
         &self,
-        tile: Tile,
-        data: Vec<u8>,
-    ) -> Result<(), Box<dyn Error>> {
-        let c = self.pool.get().await.unwrap();
-        let _interaction_res = c
-            .interact(move |conn| {
-                // Assuming insert_tile_flat_mbtiles is a synchronous function
-                insert_tile_flat_mbtiles(conn, tile, data).map_err(|e| {
-                    error!("Error inserting tile: {}", e);
-                    e
-                })
-            })
-            .await?;
-
-        Ok(())
+        tile: T,
+    ) -> UtilesResult<Option<Vec<u8>>> {
+        self.query_zxy(tile.z(), tile.x(), tile.y()).await
     }
-
-    pub async fn insert_tiles_flat(
-        &self,
-        tiles: Vec<TileData>,
-    ) -> Result<(), Box<dyn Error>> {
-        let c = self.pool.get().await.unwrap();
-        let interaction_res = c
-            .interact(move |conn| {
-                // Assuming insert_tile_flat_mbtiles is a synchronous function
-
-                insert_tiles_flat_mbtiles(conn, &tiles, None)
-            })
-            .await?;
-        println!("interaction_res: {:?}", interaction_res);
-        Ok(())
-    }
+    async fn tilejson_ext(&self) -> UtilesResult<TileJSON>;
 }

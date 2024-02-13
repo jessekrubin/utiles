@@ -9,17 +9,20 @@ use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
     bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main,
     mbtiles_info_main, metadata_main, metadata_set_main, neighbors_main, parent_main,
-    pmtileid_main, quadkey_main, rimraf_main, shapes_main, tilejson_main, tiles_main,
-    touch_main, vacuum_main,
+    pmtileid_main, quadkey_main, rimraf_main, serve_main, shapes_main, tilejson_main,
+    tiles_main, touch_main, vacuum_main,
 };
 
 struct LogConfig {
     pub debug: bool,
+    pub trace: bool,
     pub json: bool,
 }
 
 fn init_tracing(log_config: &LogConfig) {
-    let filter = if log_config.debug {
+    let filter = if log_config.trace {
+        EnvFilter::new("TRACE")
+    } else if log_config.debug {
         EnvFilter::new("DEBUG")
     } else {
         EnvFilter::new("INFO")
@@ -57,11 +60,13 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     // if the command is "dev" init tracing w/ debug
     let logcfg = if let Commands::Dev(_) = args.command {
         LogConfig {
+            trace: false,
             debug: true,
             json: args.log_json,
         }
     } else {
         LogConfig {
+            trace: args.trace,
             debug: args.debug,
             json: args.log_json,
         }
@@ -72,7 +77,9 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     debug!("args: {:?}", args);
 
     match args.command {
-        Commands::Lint(args) => lint_main(&args),
+        Commands::Lint(args) => {
+            lint_main(&args).await;
+        }
         Commands::Touch(args) => {
             touch_main(&args).unwrap();
         }
@@ -102,6 +109,10 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),
         Commands::Shapes(args) => shapes_main(args),
+        // server WIP
+        Commands::Serve(args) => {
+            let _r = serve_main(args).await;
+        }
     }
     0
 }

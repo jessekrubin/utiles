@@ -10,7 +10,6 @@
 mod args;
 mod commands;
 mod entry;
-mod find;
 mod stdinterator;
 mod stdinterator_filter;
 

@@ -1,3 +1,6 @@
+use async_sqlite;
+
+use rusqlite;
 use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
 
@@ -12,8 +15,14 @@ pub enum UtilesError {
     #[error("sqlite err: {0}")]
     SqliteError(#[from] rusqlite::Error),
 
+    #[error("sqlite err: {0}")]
+    AsyncSqliteError(#[from] async_sqlite::Error),
+
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
+
+    #[error("utiles error: {0}")]
+    Error(String),
 
     #[error("unknown utiles error: {0}")]
     Unknown(String),

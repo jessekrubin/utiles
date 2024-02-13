@@ -1,3 +1,6 @@
+#![deny(missing_docs)]
+//! GDAL related functions/utils
+
 /// A geotransform is an affine transformation from the image coordinate space
 /// (row, column), also known as (pixel, line) to the georeferenced coordinate
 /// space (projected or geographic coordinates).
@@ -26,6 +29,7 @@ pub struct GeoTransform {
 }
 
 impl GeoTransform {
+    /// Create a new GeoTransform with given coefficients.
     #[must_use]
     pub fn new(gt0: f64, gt1: f64, gt2: f64, gt3: f64, gt4: f64, gt5: f64) -> Self {
         GeoTransform {
@@ -38,6 +42,7 @@ impl GeoTransform {
         }
     }
 
+    /// Compute the optimal zoom level for a geo-transform.
     #[must_use]
     pub fn optzoom(&self) -> u8 {
         let equator = 2.0 * std::f64::consts::PI * 6_378_137.0; // 2 * pi * radius of earth in meters
@@ -53,6 +58,7 @@ impl From<(f64, f64, f64, f64, f64, f64)> for GeoTransform {
     }
 }
 
+/// Compute the optimal zoom level for a geo-transform.
 #[must_use]
 pub fn geotransform2optzoom(geotransform: (f64, f64, f64, f64, f64, f64)) -> u8 {
     let gt = GeoTransform::from(geotransform);

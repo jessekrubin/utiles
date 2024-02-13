@@ -181,7 +181,8 @@ impl CopyConfig {
 }
 
 async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
-    let mbt = Mbtiles::from(mbtiles.as_ref());
+    let mbt_path = Path::new(&mbtiles);
+    let mbt = Mbtiles::from(mbt_path);
 
     let where_clause = cfg.mbtiles_sql_where(
         // Some(zoom_levels_for_where)
