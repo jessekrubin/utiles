@@ -78,34 +78,37 @@ pub async fn update_mbtiles(
     mbt.register_utiles_sqlite_functions().await?;
     let format = mbt.metadata_row("format").await?;
     let queryfmt = mbt.conn(query_distinct_tiletype_fast).await?;
-
-    if queryfmt.len() == 1 {
-        let fmt = queryfmt[0].clone();
-        if let Some(format) = format {
-            if format.value != fmt {
+    match queryfmt.len() {
+        0 => {
+            warn!("no format found: {}", filepath);
+        }
+        1 => {
+            let fmt = queryfmt[0].clone();
+            if let Some(format) = format {
+                if format.value != fmt {
+                    changes.push(MetadataChangeFromTo {
+                        name: "format".to_string(),
+                        from: Some(format.value.clone()),
+                        to: Some(fmt.clone()),
+                    });
+                    if !dryrun {
+                        mbt.metadata_set("format", &fmt).await?;
+                    }
+                }
+            } else {
                 changes.push(MetadataChangeFromTo {
                     name: "format".to_string(),
-                    from: Some(format.value.clone()),
+                    from: None,
                     to: Some(fmt.clone()),
                 });
                 if !dryrun {
                     mbt.metadata_set("format", &fmt).await?;
                 }
             }
-        } else {
-            changes.push(MetadataChangeFromTo {
-                name: "format".to_string(),
-                from: None,
-                to: Some(fmt.clone()),
-            });
-            if !dryrun {
-                mbt.metadata_set("format", &fmt).await?;
-            }
         }
-    } else if queryfmt.len() > 1 {
-        warn!("NOT IMPLEMENTED multiple formats found: {:?}", queryfmt);
-    } else {
-        warn!("no format found: {}", filepath);
+        _ => {
+            warn!("NOT IMPLEMENTED multiple formats found: {:?}", queryfmt);
+        }
     }
     debug!("queryfmt: {:?}", queryfmt);
     debug!("metadata changes: {:?}", changes);
