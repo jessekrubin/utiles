@@ -18,7 +18,8 @@ use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
     has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
-    mbtiles_metadata, mbtiles_metadata_row, minzoom_maxzoom, query_zxy, tiles_is_empty,
+    mbtiles_metadata, mbtiles_metadata_row, minzoom_maxzoom, query_zxy,
+    register_utiles_sqlite_functions, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::squealite::{journal_mode, magic_number};
@@ -84,12 +85,34 @@ impl AsyncSqlite for MbtilesAsyncSqlitePool {
 }
 
 impl MbtilesAsyncSqliteClient {
+    pub async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
+        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        debug!("Opening mbtiles file with client: {}", dbpath);
+        let client = ClientBuilder::new().path(path).open().await?;
+
+        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+    }
+
+    pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
+        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        debug!("Opening existing mbtiles file with client: {}", dbpath);
+        let client = ClientBuilder::new()
+            .path(path)
+            .flags(
+                OpenFlags::SQLITE_OPEN_READ_WRITE
+                    | OpenFlags::SQLITE_OPEN_NO_MUTEX
+                    | OpenFlags::SQLITE_OPEN_URI,
+            )
+            .open()
+            .await?;
+        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+    }
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
             | OpenFlags::SQLITE_OPEN_URI;
         let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
-        debug!("Opening mbtiles file with client: {}", dbpath);
+        debug!("Opening readonly mbtiles file with client: {}", dbpath);
         let client = ClientBuilder::new().path(path).flags(flags).open().await?;
         Ok(MbtilesAsyncSqliteClient { client, dbpath })
     }
@@ -120,6 +143,22 @@ impl MbtilesAsyncSqlitePool {
         let pool = PoolBuilder::new()
             .path(path)
             .flags(flags)
+            .num_conns(2)
+            .open()
+            .await?;
+        Ok(MbtilesAsyncSqlitePool { pool, dbpath })
+    }
+
+    pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
+        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        info!("Opening existing mbtiles file with pool: {}", dbpath);
+        let pool = PoolBuilder::new()
+            .path(path)
+            .flags(
+                OpenFlags::SQLITE_OPEN_READ_WRITE
+                    | OpenFlags::SQLITE_OPEN_NO_MUTEX
+                    | OpenFlags::SQLITE_OPEN_URI,
+            )
             .num_conns(2)
             .open()
             .await?;
@@ -164,6 +203,12 @@ where
     fn filename(&self) -> &str {
         &self.db_path().filename
     }
+
+    async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()> {
+        let r = self.conn(register_utiles_sqlite_functions).await?;
+        Ok(r)
+    }
+
     #[tracing::instrument]
     async fn is_mbtiles(&self) -> UtilesResult<bool> {
         // let span = span!(Level::DEBUG, "is_mbtiles", filepath = %self.filepath());
@@ -211,6 +256,14 @@ where
         Ok(has_zoom_row_col_index)
     }
 
+    async fn tiles_is_empty(&self) -> UtilesResult<bool> {
+        let tiles_is_empty = self
+            .conn(tiles_is_empty)
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+        Ok(tiles_is_empty)
+    }
+
     async fn magic_number(&self) -> UtilesResult<u32> {
         let magic_number = self.conn(magic_number).await?;
         Ok(magic_number)
@@ -235,6 +288,56 @@ where
             .map_err(UtilesError::AsyncSqliteError)?;
         Ok(row)
     }
+
+    async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize> {
+        let name_str = name.to_string();
+        let value_str = value.to_string();
+        let rows = self
+            .conn(move |conn| {
+                conn.execute(
+                    "INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)",
+                    [&name_str, &value_str],
+                )
+            })
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+        Ok(rows)
+    }
+
+    async fn metadata_minzoom(&self) -> UtilesResult<Option<u8>> {
+        let minzoom = self.metadata_row("minzoom").await?;
+        match minzoom {
+            Some(m) => {
+                let mz = m.value.parse::<u8>().map_err(UtilesError::from);
+                match mz {
+                    Ok(z) => Ok(Some(z)),
+                    Err(e) => {
+                        error!("Error parsing minzoom: {}", e);
+                        Err(e)
+                    }
+                }
+            }
+            None => Ok(None),
+        }
+    }
+
+    async fn metadata_maxzoom(&self) -> UtilesResult<Option<u8>> {
+        let maxzoom = self.metadata_row("maxzoom").await?;
+        match maxzoom {
+            Some(m) => {
+                let mz = m.value.parse::<u8>().map_err(UtilesError::from);
+                match mz {
+                    Ok(z) => Ok(Some(z)),
+                    Err(e) => {
+                        error!("Error parsing maxzoom: {}", e);
+                        Err(e)
+                    }
+                }
+            }
+            None => Ok(None),
+        }
+    }
+
     async fn tilejson(&self) -> UtilesResult<TileJSON> {
         let metadata = self.metadata_rows().await?;
         let tj = metadata2tilejson(metadata);

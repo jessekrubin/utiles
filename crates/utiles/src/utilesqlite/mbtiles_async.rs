@@ -22,6 +22,8 @@ use crate::errors::UtilesResult;
 pub trait MbtilesAsync: Sized {
     fn filepath(&self) -> &str;
     fn filename(&self) -> &str;
+
+    async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()>;
     async fn is_mbtiles(&self) -> UtilesResult<bool>;
     async fn magic_number(&self) -> UtilesResult<u32>;
     async fn tilejson(&self) -> UtilesResult<TileJSON>;
@@ -30,6 +32,12 @@ pub trait MbtilesAsync: Sized {
         &self,
         name: &str,
     ) -> UtilesResult<Option<MbtilesMetadataRow>>;
+    async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize>;
+    async fn tiles_is_empty(&self) -> UtilesResult<bool>;
+
+    async fn metadata_minzoom(&self) -> UtilesResult<Option<u8>>;
+    async fn metadata_maxzoom(&self) -> UtilesResult<Option<u8>>;
+
     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>>;
 
     async fn query_tile(&self, tile: Tile) -> UtilesResult<Option<Vec<u8>>> {

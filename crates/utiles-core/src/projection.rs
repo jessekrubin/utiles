@@ -9,7 +9,7 @@ pub enum Projection {
 
 impl From<String> for Projection {
     fn from(s: String) -> Self {
-        match s.as_str() {
+        match s.to_ascii_lowercase().as_str() {
             "mercator" => Projection::Mercator,
             "geographic" => Projection::Geographic,
             _ => {

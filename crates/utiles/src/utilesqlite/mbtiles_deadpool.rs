@@ -91,6 +91,26 @@ impl MbtilesAsync for MbtilesDeadpool {
     async fn is_mbtiles(&self) -> UtilesResult<bool> {
         todo!()
     }
+
+    async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()> {
+        todo!()
+    }
+
+    async fn metadata_set(&self, _name: &str, _value: &str) -> UtilesResult<usize> {
+        todo!()
+    }
+
+    async fn tiles_is_empty(&self) -> UtilesResult<bool> {
+        todo!()
+    }
+
+    async fn metadata_minzoom(&self) -> UtilesResult<Option<u8>> {
+        todo!()
+    }
+
+    async fn metadata_maxzoom(&self) -> UtilesResult<Option<u8>> {
+        todo!()
+    }
 }
 
 impl MbtilesDeadpool {

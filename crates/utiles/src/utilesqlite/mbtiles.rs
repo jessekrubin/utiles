@@ -836,6 +836,30 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
 }
 
 // =================================================================
+// queries with sqlite extension functions
+// =================================================================
+
+pub fn query_distinct_tiletype_fast(conn: &Connection) -> RusqliteResult<Vec<String>> {
+    let mut stmt = conn.prepare(
+        //     for each zoom get 1 random row and then get the distinct tiletypes
+        "SELECT DISTINCT ut_tiletype(tile_data) AS tile_type FROM (SELECT zoom_level, tile_data FROM tiles GROUP BY zoom_level) GROUP BY zoom_level;"
+    )?;
+
+    let tile_format: Vec<String> =
+        stmt.query_map([], |row| row.get(0))?
+            .collect::<RusqliteResult<Vec<String>, rusqlite::Error>>()?;
+    Ok(tile_format)
+}
+
+pub fn query_distinct_tiletype(conn: &Connection) -> RusqliteResult<Vec<String>> {
+    let mut stmt = conn.prepare("SELECT DISTINCT ut_tiletype(tile_data) FROM tiles")?;
+    let tile_format: Vec<String> =
+        stmt.query_map([], |row| row.get(0))?
+            .collect::<RusqliteResult<Vec<String>, rusqlite::Error>>()?;
+    Ok(tile_format)
+}
+
+// =================================================================
 // HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS
 // =================================================================
 fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
