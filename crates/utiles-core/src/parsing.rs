@@ -4,6 +4,7 @@ use crate::bbox::BBox;
 use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 
+/// Parse a string into a BBox
 pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
@@ -156,11 +157,6 @@ pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
         _ => parse_bbox(string),
     };
     r
-}
-
-#[must_use]
-pub fn string_is_digits(string: &str) -> bool {
-    string.chars().all(|c| c.is_ascii_digit())
 }
 
 /// Parse a string into vector of integer strings

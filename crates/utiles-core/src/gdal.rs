@@ -1,4 +1,3 @@
-#![deny(missing_docs)]
 //! GDAL related functions/utils
 
 /// A geotransform is an affine transformation from the image coordinate space

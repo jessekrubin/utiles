@@ -1,3 +1,5 @@
+//! utiles-core ~ core util(e)ities
+// #![warn(missing_docs)]
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
@@ -9,6 +11,7 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::cast_possible_truncation)]
 
+pub use bbox::BBox;
 pub use gdal::geotransform2optzoom;
 pub use lnglat::LngLat;
 pub use point::{Point2d, Point3d};

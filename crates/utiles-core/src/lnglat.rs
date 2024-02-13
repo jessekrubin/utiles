@@ -2,8 +2,10 @@ use std::str::FromStr;
 
 use crate::point::Point2d;
 
+/// LngLat contains a longitude and latitude as f64.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LngLat {
+    /// 2d point - x -> longitude, y -> latitude
     pub xy: Point2d,
 }
 
@@ -27,6 +29,7 @@ impl FromStr for LngLat {
 }
 
 impl LngLat {
+    /// Create a new LngLat from longitude & latitude.
     #[must_use]
     pub fn new(lng: f64, lat: f64) -> Self {
         LngLat {
@@ -34,26 +37,31 @@ impl LngLat {
         }
     }
 
+    /// Return the x/lng/lon/long/longitude value.
     #[must_use]
     pub fn lng(&self) -> f64 {
         self.xy.x
     }
 
+    /// Return the y/lat/latitude value.
     #[must_use]
     pub fn lat(&self) -> f64 {
         self.xy.y
     }
 
+    /// Return the x/lng/lon/long/longitude value.
     #[must_use]
     pub fn lon(&self) -> f64 {
         self.xy.x
     }
 
+    /// Return the y/lat/latitude value.
     #[must_use]
     pub fn x(&self) -> f64 {
         self.xy.x
     }
 
+    /// Return the y/lat/latitude value.
     #[must_use]
     pub fn y(&self) -> f64 {
         self.xy.y

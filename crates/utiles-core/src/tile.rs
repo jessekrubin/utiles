@@ -243,10 +243,15 @@ impl Tile {
     }
 
     pub fn from_json(json: &str) -> Result<Self, Box<dyn Error>> {
-        if json.starts_with('{') {
-            Self::from_json_obj(json)
+        let json_no_space = if json.starts_with(' ') {
+            json.trim()
         } else {
-            Self::from_json_arr(json)
+            json
+        };
+        if json_no_space.starts_with('{') {
+            Self::from_json_obj(json_no_space)
+        } else {
+            Self::from_json_arr(json_no_space)
         }
     }
 
@@ -451,10 +456,7 @@ impl Tile {
         let mut properties: Map<String, Value> = Map::new();
         properties.insert("title".to_string(), Value::from(format!("XYZ tile {xyz}")));
         properties.extend(opts.props.clone().unwrap_or_default());
-        let id = match opts.fid.clone() {
-            Some(fid) => fid,
-            None => xyz,
-        };
+        let id = opts.fid.clone().unwrap_or(xyz);
         let tile_feature = TileFeature {
             id,
             type_: "Feature".to_string(),

@@ -1,3 +1,4 @@
+/// Convert x,y,z to pmtile-id.
 #[must_use]
 pub fn xyz2pmid(x: u32, y: u32, z: u8) -> u64 {
     if z == 0 {
@@ -8,6 +9,7 @@ pub fn xyz2pmid(x: u32, y: u32, z: u8) -> u64 {
     base_id + h
 }
 
+/// Convert z,x,y to pmtile-id.
 #[allow(dead_code)]
 #[must_use]
 pub fn zxy2pmid(z: u8, x: u32, y: u32) -> u64 {
@@ -34,6 +36,7 @@ pub fn calculate_h_o(i: u64) -> (u64, u8) {
     }
 }
 
+/// Convert pmtile-id to (x, y, z).
 #[must_use]
 pub fn pmid2xyz(i: u64) -> (u32, u32, u8) {
     if i == 0 {
@@ -44,6 +47,7 @@ pub fn pmid2xyz(i: u64) -> (u32, u32, u8) {
     (x, y, z)
 }
 
+/// Convert pmtile-id to (z, x, y).
 #[allow(dead_code)]
 #[must_use]
 pub fn pmid2zxy(i: u64) -> (u8, u32, u32) {
@@ -51,7 +55,7 @@ pub fn pmid2zxy(i: u64) -> (u8, u32, u32) {
     (z, x, y)
 }
 
-// Fast parent ID calculation without converting to ZXY (ported from pmtiles go)
+/// Fast parent ID calculation without converting to ZXY (ported from pmtiles go)
 #[must_use]
 pub fn parent_id(i: u64) -> u64 {
     let mut acc: u64 = 0;

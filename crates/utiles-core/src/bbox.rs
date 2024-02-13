@@ -196,25 +196,48 @@ impl BBox {
             && self.west <= other.east
     }
 
+    /// Returns a vector of bounding boxes (`BBox`) associated with the current instance.
+    ///
+    /// If the instance crosses the antimeridian (the 180-degree meridian), this function
+    /// returns two `BBox` instances:
+    /// - The first bounding box covers the area from the object's western boundary to 180 degrees east.
+    /// - The second bounding box covers the area from -180 degrees west to the object's eastern boundary.
+    ///
+    /// If the instance does not cross the antimeridian, the function returns a vector
+    /// containing a single `BBox` that represents the current instance itself.
+    ///
+    /// # Returns
+    /// - `Vec<BBox>`: A vector containing one `BBox` if the instance does not cross the antimeridian,
+    /// or two `BBox`es if it does.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use utiles_core::BBox;
+    /// let example = BBox::new(-10.0, -10.0, 10.0, 10.0);
+    /// let bboxes = example.bboxes();
+    /// assert_eq!(bboxes.len(), 1);
+    ///
+    /// let bboxes_crosses = BBox::new(179.0, -89.0, -179.0, 89.0).bboxes();
+    /// assert_eq!(bboxes_crosses.len(), 2); // Split into two bounding boxes
+    /// ```
     #[must_use]
     pub fn bboxes(&self) -> Vec<BBox> {
         if self.crosses_antimeridian() {
-            let mut bboxes = Vec::new();
-            let bbox1 = BBox {
-                north: self.north,
-                south: self.south,
-                east: 180.0,
-                west: self.west,
-            };
-            let bbox2 = BBox {
-                north: self.north,
-                south: self.south,
-                east: self.east,
-                west: -180.0,
-            };
-            bboxes.push(bbox1);
-            bboxes.push(bbox2);
-            bboxes
+            vec![
+                BBox {
+                    north: self.north,
+                    south: self.south,
+                    east: 180.0,
+                    west: self.west,
+                },
+                BBox {
+                    north: self.north,
+                    south: self.south,
+                    east: self.east,
+                    west: -180.0,
+                },
+            ]
         } else {
             vec![*self]
         }
