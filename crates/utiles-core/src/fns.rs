@@ -43,8 +43,6 @@ pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y + 1, z)
 }
 
-
-
 #[must_use]
 pub fn minmax(zoom: u8) -> (u32, u32) {
     (0, 2_u32.pow(zoom as u32) - 1)
