@@ -7,7 +7,7 @@ use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesCoreResult;
 use crate::point2d;
 use crate::sibling_relationship::SiblingRelationship;
-use crate::tile_range::{TileRange, TileRanges};
+use crate::tile_zbox::{TileZBox, TileZBoxes};
 use crate::utile;
 use crate::zoom::ZoomOrZooms;
 use crate::Point2d;
@@ -613,7 +613,7 @@ fn tiles_range_zoom(
 
 /// Return TileRanges from a bounding box and zoom(s).
 #[must_use]
-pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRanges {
+pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileZBoxes {
     let zooms = as_zooms(zooms);
     let bboxes: Vec<BBox> = BBox::from(bounds)
         .bboxes()
@@ -628,7 +628,7 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
             }
         })
         .collect();
-    let ranges: Vec<TileRange> = bboxes
+    let ranges: Vec<TileZBox> = bboxes
         .into_iter()
         .flat_map(move |bbox| {
             let zooms = zooms.clone();
@@ -651,7 +651,7 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
                     zoom,
                     Some(false),
                 );
-                TileRange::new(
+                TileZBox::new(
                     top_left_tile.x,
                     bottom_right_tile.x,
                     top_left_tile.y,
@@ -662,7 +662,7 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
         })
         .collect();
 
-    TileRanges::from(ranges)
+    TileZBoxes::from(ranges)
 }
 
 /// Return the number of tiles for a bounding box and zoom(s).

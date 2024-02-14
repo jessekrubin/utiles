@@ -17,6 +17,7 @@ pub use lnglat::LngLat;
 pub use point::{Point2d, Point3d};
 pub use tile::Tile;
 pub use tile_like::TileLike;
+pub use tile_zbox::TileZBox;
 
 pub use crate::errors::UtilesCoreError;
 pub use crate::fns::*;
@@ -42,9 +43,9 @@ pub mod tile;
 pub mod tile_data_row;
 mod tile_feature;
 mod tile_like;
-pub mod tile_range;
 mod tile_tuple;
 pub mod tile_type;
+pub mod tile_zbox;
 mod tilecrz;
 pub mod traits;
 pub mod zoom;

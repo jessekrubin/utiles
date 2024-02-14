@@ -1,5 +1,11 @@
 //! Constants module
 
+/// MAX ZOOM (31)
+pub const MAX_ZOOM: u8 = 31;
+
+/// MAX ZOOM JS NUMBER (28)
+pub const MAX_ZOOM_JS: u8 = 28;
+
 /// Earth radius in meters
 pub const EARTH_RADIUS: f64 = 6_378_137.0;
 

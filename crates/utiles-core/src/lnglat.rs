@@ -6,7 +6,7 @@ use crate::point::Point2d;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LngLat {
     /// 2d point - x -> longitude, y -> latitude
-    pub xy: Point2d,
+    pub xy: Point2d<f64>,
 }
 
 impl From<(f64, f64)> for LngLat {
@@ -30,6 +30,15 @@ impl FromStr for LngLat {
 
 impl LngLat {
     /// Create a new LngLat from longitude & latitude.
+
+    // why does this work
+    // #[must_use]
+    // pub fn new(lng: f64, lat: f64) -> Self {
+    //     let xy = Point2d::new(lng, lat);
+    //     LngLat { xy }
+    // }
+    //
+    // but this doesn't
     #[must_use]
     pub fn new(lng: f64, lat: f64) -> Self {
         LngLat {
