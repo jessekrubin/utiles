@@ -183,6 +183,7 @@ impl Tile {
     }
 
     /// Return tile from pmtile-id (alias for from_pmtileid)
+    #[must_use]
     pub fn from_pmid(id: u64) -> Self {
         pmtiles::pmid2xyz(id).into()
     }

@@ -153,19 +153,19 @@ impl ZoomRange {
     /// Create a new ZoomRange
     #[must_use]
     pub fn new(min: u8, max: u8) -> Self {
-        Self { min: min, max: max }
+        Self { min, max }
     }
 
     /// Create a new ZoomRange from a maximum zoom level (0 to max)
     #[must_use]
     pub fn from_max(max: u8) -> Self {
-        Self { min: 0, max: max }
+        Self { min: 0, max }
     }
 
     /// Create a new ZoomRange from a minimum zoom level (min to 31)
     #[must_use]
     pub fn from_min(min: u8) -> Self {
-        Self { min: min, max: 31 }
+        Self { min, max: 31 }
     }
 }
 
