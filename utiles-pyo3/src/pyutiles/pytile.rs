@@ -157,7 +157,7 @@ impl PyTile {
     }
 
     pub fn parent_pmtileid(&self) -> u64 {
-        self.xyz.parent_id()
+        self.xyz.parent_pmtileid()
     }
 
     pub fn row_major_id(&self) -> u64 {

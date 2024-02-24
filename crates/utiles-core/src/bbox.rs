@@ -1,40 +1,47 @@
+//! Bounding-boxes!
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
 use crate::tile_like::TileLike;
 use serde::{Deserialize, Serialize};
 
+/// Bounding box tuple
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct BBoxTuple(f64, f64, f64, f64);
 
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
-pub struct CoordTuple(f64, f64);
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
-pub enum BBoxParseAble {
-    BBoxTuple((f64, f64, f64, f64)),
-    CoordTuple((f64, f64)),
-}
-
+/// Bounding box struct
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BBox {
+    /// west/left boundary
     pub west: f64,
+    /// south/bottom boundary
     pub south: f64,
+    /// east/right boundary
     pub east: f64,
+    /// north/top boundary
     pub north: f64,
 }
 
+/// Web Mercator Bounding box struct
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WebMercatorBbox {
+    /// left/west boundary
     pub left: f64,
+    /// bottom/south boundary
     pub bottom: f64,
+    /// right/east boundary
     pub right: f64,
+    /// top/north boundary
     pub top: f64,
 }
 
+/// Bounding box containable enum
 pub enum BBoxContainable {
+    /// LngLat
     LngLat(LngLat),
+    /// BBox
     BBox(BBox),
+    /// Tile
     Tile(Tile),
 }
 
@@ -63,6 +70,7 @@ impl From<(i32, i32, i32, i32)> for BBox {
 }
 
 impl BBox {
+    /// Create a new BBox
     #[must_use]
     pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         BBox {
@@ -73,6 +81,7 @@ impl BBox {
         }
     }
 
+    /// Returns a bounding box that covers the entire world.
     #[must_use]
     pub fn world_planet() -> Self {
         BBox {
@@ -83,6 +92,7 @@ impl BBox {
         }
     }
 
+    /// Returns a bounding box that covers the entire web mercator world.
     #[must_use]
     pub fn world_web() -> Self {
         BBox {
@@ -93,49 +103,67 @@ impl BBox {
         }
     }
 
+    /// Returns true if the bounding box crosses the antimeridian (the 180-degree meridian).
     #[must_use]
     pub fn crosses_antimeridian(&self) -> bool {
         self.west > self.east
     }
 
+    /// Returns the bounding box as a tuple
     #[must_use]
     pub fn tuple(&self) -> (f64, f64, f64, f64) {
         (self.west(), self.south(), self.east(), self.north())
     }
 
+    /// Returns the top/north boundary of the bounding box
     #[must_use]
     pub fn north(&self) -> f64 {
         self.north
     }
+
+    /// Returns the bottom/south boundary of the bounding box
     #[must_use]
     pub fn south(&self) -> f64 {
         self.south
     }
+
+    /// Returns the right/east boundary of the bounding box
     #[must_use]
     pub fn east(&self) -> f64 {
         self.east
     }
+
+    /// Returns the left/west boundary of the bounding box
     #[must_use]
     pub fn west(&self) -> f64 {
         self.west
     }
+
+    /// Returns the top/north boundary of the bounding box
     #[must_use]
     pub fn top(&self) -> f64 {
         self.north
     }
+
+    /// Returns the bottom/south boundary of the bounding box
     #[must_use]
     pub fn bottom(&self) -> f64 {
         self.south
     }
+
+    /// Returns the right/east boundary of the bounding box
     #[must_use]
     pub fn right(&self) -> f64 {
         self.east
     }
+
+    /// Returns the left/west boundary of the bounding box
     #[must_use]
     pub fn left(&self) -> f64 {
         self.west
     }
 
+    /// Returns the center of the bounding box as a `LngLat`
     #[must_use]
     pub fn contains_lnglat(&self, lnglat: LngLat) -> bool {
         let lng = lnglat.lng();
@@ -157,12 +185,14 @@ impl BBox {
         false
     }
 
+    /// Returns true if the current instance contains the given `Tile`
     #[must_use]
     pub fn contains_tile(&self, tile: Tile) -> bool {
         let bbox = tile.bbox();
         self.contains_bbox(bbox.into())
     }
 
+    /// Returns true if the current instance contains the given `BBox`
     #[must_use]
     pub fn contains_bbox(&self, other: BBox) -> bool {
         self.north >= other.north
@@ -171,6 +201,7 @@ impl BBox {
             && self.west <= other.west
     }
 
+    /// Returns true if the current instance contains the given `BBoxContainable` object.
     #[must_use]
     pub fn contains(&self, other: BBoxContainable) -> bool {
         match other {
@@ -180,6 +211,7 @@ impl BBox {
         }
     }
 
+    /// Returns true if the current instance is within the given bounding box.
     #[must_use]
     pub fn is_within(&self, other: &BBox) -> bool {
         self.north <= other.north
@@ -188,6 +220,7 @@ impl BBox {
             && self.west >= other.west
     }
 
+    /// Returns true if the current instance intersects with the given bounding box.
     #[must_use]
     pub fn intersects(&self, other: &BBox) -> bool {
         self.north >= other.south
@@ -243,21 +276,25 @@ impl BBox {
         }
     }
 
+    /// Return upper left corner of bounding box as `LngLat`
     #[must_use]
     pub fn ul(&self) -> LngLat {
         LngLat::new(self.west, self.north)
     }
 
+    /// Return upper right corner of bounding box as `LngLat`
     #[must_use]
     pub fn ur(&self) -> LngLat {
         LngLat::new(self.east, self.north)
     }
 
+    /// Return lower right corner of bounding box as `LngLat`
     #[must_use]
     pub fn lr(&self) -> LngLat {
         LngLat::new(self.east, self.south)
     }
 
+    /// Return lower left corner of bounding box as `LngLat`
     #[must_use]
     pub fn ll(&self) -> LngLat {
         LngLat::new(self.west, self.south)

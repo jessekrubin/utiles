@@ -1,5 +1,5 @@
 //! utiles-core ~ core util(e)ities
-// #![warn(missing_docs)]
+// #![deny(missing_docs)]
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]

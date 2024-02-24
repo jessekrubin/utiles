@@ -1,3 +1,4 @@
+//! Core util(e)ity functions for working with web mercator tiles, bounding boxes, et al
 use std::collections::{HashMap, HashSet};
 use std::f64::consts::PI;
 use std::num::FpCategory;

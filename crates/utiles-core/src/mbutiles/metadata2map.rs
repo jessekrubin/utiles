@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::mbutiles::metadata_row::{MbtilesMetadataRow, MbtilesMetadataRows};
 
+/// Return a `HashMap<String, Vec<MbtilesMetadataRow>>` of duplicate metadata rows
 #[must_use]
 pub fn metadata2duplicates(
     rows: Vec<MbtilesMetadataRow>,
@@ -22,6 +23,8 @@ pub fn metadata2duplicates(
         .filter(|(_k, v)| v.len() > 1)
         .collect()
 }
+
+/// Convert a `MbtilesMetadataRows` to a `HashMap<String, String>`
 #[must_use]
 pub fn metadata2map(rows: &MbtilesMetadataRows) -> HashMap<String, String> {
     // let map: HashMap<String, String> =

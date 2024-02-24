@@ -1,9 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// Projection enum
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Projection {
+    /// Geographic projection (lat/lng coordinates)
     Geographic,
+
+    /// Mercator projection (x/y coordinates)
     Mercator,
 }
 

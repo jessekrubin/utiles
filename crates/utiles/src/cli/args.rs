@@ -443,11 +443,7 @@ impl ZoomArgGroup {
             None => match (self.minzoom, self.maxzoom) {
                 (Some(minzoom), Some(maxzoom)) => Some((minzoom..=maxzoom).collect()),
                 (Some(minzoom), None) => Some((minzoom..=31).collect()),
-                (None, Some(maxzoom)) => {
-                    let thingy: Vec<u8> = (0..=maxzoom).collect();
-                    println!("thingy: {thingy:?}");
-                    Some((0..=maxzoom).collect())
-                }
+                (None, Some(maxzoom)) => Some((0..=maxzoom).collect()),
                 (None, None) => None,
             },
         }

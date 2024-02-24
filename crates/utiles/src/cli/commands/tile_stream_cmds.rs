@@ -41,19 +41,20 @@ pub fn pmtileid_main(args: TileFmtArgs) {
             .unwrap() // remove the `"` and `'` chars from the beginning and end of the line
             .trim_matches(|c| c == '"' || c == '\'')
             .to_string();
-        if lstr.starts_with('[') {
+        if lstr.starts_with('[') || lstr.starts_with('{') {
             // treat as tile
             let tile = Tile::from_json(&lstr).unwrap();
             println!("{}", tile.pmtileid());
         } else {
             // treat as pmtileid
-            let pmid: u64 = lstr.parse().unwrap();
-            let tile = Tile::from_pmid(pmid);
-            if tile.is_err() {
-                error!("Invalid pmtileid: {pmid}");
-                println!("Invalid pmtileid: {pmid}");
+            let pmid = lstr.parse::<u64>();
+
+            if pmid.is_err() {
+                error!("Invalid pmtileid: {lstr}");
+                println!("Invalid pmtileid: {lstr}");
             } else {
-                println!("{}", tile.unwrap().json_arr());
+                let tile = Tile::from_pmid(pmid.unwrap());
+                println!("{}", tile.json_arr());
             }
         }
     }
