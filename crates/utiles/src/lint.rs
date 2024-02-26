@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 use crate::utilesqlite::mbtiles::{
     has_unique_index_on_metadata, metadata_table_name_is_primary_key,
 };
@@ -20,9 +22,6 @@ pub enum UtilesLintWarning {
 
 #[derive(Error, Debug)]
 pub enum UtilesLintError {
-    #[error("invalid path: {0}")]
-    InvalidPath(String),
-
     #[error("unable to open: {0}")]
     UnableToOpen(String),
 
@@ -64,6 +63,28 @@ pub enum UtilesLintError {
 
     #[error("utiles error: {0}")]
     UtilesError(#[from] UtilesError),
+}
+
+impl UtilesLintError {
+    #[must_use]
+    pub fn format_error(&self, filepath: &str) -> String {
+        let errcode = "MBT".red();
+        let errstr = format!("{}: {}", errcode, self);
+
+        // let error_str = format!("STTUFF -- {}", self.to_string());
+        let e_str = format!("{}: {}", filepath, errstr);
+        e_str
+        // match self {
+        //     UtilesError::CoreError(e) => e.to_string(),
+        //     UtilesError::Unimplemented(e) => e.to_string(),
+        //     UtilesError::SqliteError(e) => e.to_string(),
+        //     UtilesError::AsyncSqliteError(e) => e.to_string(),
+        //     UtilesError::FileDoesNotExist(e) => e.to_string(),
+        //     UtilesError::ParseIntError(e) => e.to_string(),
+        //     UtilesError::Error(e) => e.to_string(),
+        //     UtilesError::Unknown(e) => e.to_string(),
+        // }
+    }
 }
 
 // impl From<UtilesError> for UtilesLintError {
@@ -234,6 +255,11 @@ impl MbtilesLinter {
 
     pub async fn lint(&self) -> UtilesLintResult<Vec<UtilesLintError>> {
         let mbt = self.open_mbtiles().await?;
+        if !mbt.is_mbtiles().await? {
+            return Err(UtilesLintError::NotAMbtilesDb(
+                self.path.to_str().unwrap().to_string(),
+            ));
+        }
         let mut lint_results = vec![];
         // lint_results.push(MbtilesLinter::check_magic_number(&mbt).await);
 

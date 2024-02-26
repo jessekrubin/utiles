@@ -7,9 +7,21 @@ use crate::UtilesCoreError::InvalidZoom;
 
 type Zooms = Vec<u8>;
 
+/// ZoomSet is a set of zoom levels represented as a 32 bit unsigned integer
+/// where each bit represents a zoom level (0 to 31). The least significant bit
+/// represents zoom level 31 and the most significant bit represents zoom level 0.
+///
+/// # Examples
+/// ```
+/// use utiles_core::zoom::ZoomSet;
+/// let zset = ZoomSet::new(0b11100000_00000000_00000000_00000000);
+/// let zooms_vec: Vec<u8> = zset.into();
+/// assert_eq!(zooms_vec, vec![0, 1, 2]);
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct ZoomSet(u32);
 
+/// Return a vector of zoom levels from a zoom-set u32
 #[must_use]
 pub fn zset2zvec(zset: u32) -> Vec<u8> {
     (0..32)
@@ -19,6 +31,7 @@ pub fn zset2zvec(zset: u32) -> Vec<u8> {
         .collect()
 }
 
+/// Return a zoom-set u32 from a vector of zoom levels
 #[must_use]
 pub fn zvec2zset(zvec: Vec<u8>) -> u32 {
     zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
@@ -34,16 +47,19 @@ pub fn zvec2zset(zvec: Vec<u8>) -> u32 {
 /// assert_eq!(zooms_vec, vec![0, 1, 2]);
 /// ```
 impl ZoomSet {
+    /// Create a new ZoomSet from a u32
     #[must_use]
     pub fn new(zset: u32) -> Self {
         Self(zset)
     }
 
+    /// Create a new ZoomSet from a vector of zoom levels
     #[must_use]
     pub fn from_zooms(zooms: Vec<u8>) -> Self {
         Self(zvec2zset(zooms))
     }
 
+    /// Return a vector of zoom levels from a zoom-set u32
     #[must_use]
     pub fn to_zooms(&self) -> Vec<u8> {
         zset2zvec(self.0)
@@ -117,38 +133,39 @@ impl From<ZoomSet> for Vec<u8> {
 
 type ZoomsSetInt = u32;
 
+/// Struct representing zoom level range (min, max)
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ZoomRange {
-    pub minz: u8,
-    pub maxz: u8,
+    /// Minimum zoom level
+    pub min: u8,
+    /// Maximum zoom level
+    pub max: u8,
 }
 
 // default zoom range
 impl Default for ZoomRange {
     fn default() -> Self {
-        Self { minz: 0, maxz: 31 }
+        Self { min: 0, max: 31 }
     }
 }
 
 impl ZoomRange {
+    /// Create a new ZoomRange
     #[must_use]
     pub fn new(min: u8, max: u8) -> Self {
-        Self {
-            minz: min,
-            maxz: max,
-        }
+        Self { min, max }
     }
 
+    /// Create a new ZoomRange from a maximum zoom level (0 to max)
     #[must_use]
     pub fn from_max(max: u8) -> Self {
-        Self { minz: 0, maxz: max }
+        Self { min: 0, max }
     }
 
+    /// Create a new ZoomRange from a minimum zoom level (min to 31)
     #[must_use]
     pub fn from_min(min: u8) -> Self {
-        Self {
-            minz: min,
-            maxz: 31,
-        }
+        Self { min, max: 31 }
     }
 }
 
@@ -164,7 +181,7 @@ impl ZoomRange {
 impl From<ZoomRange> for ZoomSet {
     fn from(zoom_range: ZoomRange) -> Self {
         ZoomSet(
-            (zoom_range.minz..=zoom_range.maxz)
+            (zoom_range.min..=zoom_range.max)
                 .rev()
                 .fold(0, |acc, z| acc | (1 << (31 - z))),
         )
@@ -233,12 +250,14 @@ pub fn parse_zooms(zstr: &str) -> UtilesCoreResult<Vec<u8>> {
     Ok(zvec)
 }
 
+/// Enum representing a single zoom level or a vec of zoom levels
 pub enum ZoomOrZooms {
+    /// A single zoom level
     Zoom(u8),
+
+    /// A vec of zoom levels
     Zooms(Vec<u8>),
 }
-
-pub struct ZoomsSet(ZoomsSetInt);
 
 impl From<u8> for ZoomOrZooms {
     fn from(zoom: u8) -> Self {

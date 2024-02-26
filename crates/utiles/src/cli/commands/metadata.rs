@@ -43,7 +43,7 @@ pub fn metadata_main(args: &MetadataArgs) {
 }
 
 #[derive(Debug, Serialize)]
-struct MetadataChangeFromTo {
+pub struct MetadataChangeFromTo {
     pub name: String,
     pub from: Option<String>,
     pub to: Option<String>,

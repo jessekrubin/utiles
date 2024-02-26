@@ -1,7 +1,7 @@
 use imagesize;
-use log::error;
 use rusqlite::functions::FunctionFlags;
 use rusqlite::{Connection, Result};
+use tracing::{debug, error};
 
 use utiles_core::tile_type::tiletype_str;
 
@@ -58,6 +58,7 @@ pub fn add_function_ut_tilesize(db: &Connection) -> Result<()> {
 }
 
 pub fn add_ut_functions(db: &Connection) -> Result<()> {
+    debug!("registering utiles sqlite ext fns");
     add_function_ut_tiletype(db)?;
     add_function_ut_tilesize(db)?;
     Ok(())

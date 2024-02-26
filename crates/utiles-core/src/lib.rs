@@ -1,3 +1,5 @@
+//! utiles-core ~ core util(e)ities
+// #![deny(missing_docs)]
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
@@ -9,11 +11,13 @@
 #![allow(clippy::similar_names)]
 #![allow(clippy::cast_possible_truncation)]
 
+pub use bbox::BBox;
 pub use gdal::geotransform2optzoom;
 pub use lnglat::LngLat;
 pub use point::{Point2d, Point3d};
 pub use tile::Tile;
 pub use tile_like::TileLike;
+pub use tile_zbox::TileZBox;
 
 pub use crate::errors::UtilesCoreError;
 pub use crate::fns::*;
@@ -39,9 +43,9 @@ pub mod tile;
 pub mod tile_data_row;
 mod tile_feature;
 mod tile_like;
-pub mod tile_range;
 mod tile_tuple;
 pub mod tile_type;
+pub mod tile_zbox;
 mod tilecrz;
 pub mod traits;
 pub mod zoom;

@@ -1,3 +1,4 @@
+//! Core util(e)ity functions for working with web mercator tiles, bounding boxes, et al
 use std::collections::{HashMap, HashSet};
 use std::f64::consts::PI;
 use std::num::FpCategory;
@@ -7,7 +8,7 @@ use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesCoreResult;
 use crate::point2d;
 use crate::sibling_relationship::SiblingRelationship;
-use crate::tile_range::{TileRange, TileRanges};
+use crate::tile_zbox::{TileZBox, TileZBoxes};
 use crate::utile;
 use crate::zoom::ZoomOrZooms;
 use crate::Point2d;
@@ -22,32 +23,38 @@ pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
     (lon_deg, lat_rad.to_degrees())
 }
 
+/// Return upper left lnglat as LngLat from x,y,z
 #[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
     let (lon_deg, lat_deg) = ult(x, y, z);
     LngLat::new(lon_deg, lat_deg)
 }
 
+/// Return lower left lnglat as LngLat from x,y,z
 #[must_use]
 pub fn ll(x: u32, y: u32, z: u8) -> LngLat {
     ul(x, y + 1, z)
 }
 
+/// Return upper right lnglat as LngLat from x,y,z
 #[must_use]
 pub fn ur(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y, z)
 }
 
+/// Return lower right lnglat as LngLat from x,y,z
 #[must_use]
 pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y + 1, z)
 }
 
+/// Return tuple (min, max) x/y for a zoom-level
 #[must_use]
 pub fn minmax(zoom: u8) -> (u32, u32) {
     (0, 2_u32.pow(zoom as u32) - 1)
 }
 
+/// Return true if x, y, z is a valid tile coordinate
 #[must_use]
 pub fn valid(x: u32, y: u32, z: u8) -> bool {
     let (minx, maxx) = minmax(z);
@@ -55,18 +62,24 @@ pub fn valid(x: u32, y: u32, z: u8) -> bool {
     x >= minx && x <= maxx && y >= miny && y <= maxy
 }
 
+/// Return the inverted/y-flipped y coordinate for a given y and z
 #[must_use]
 #[inline]
 pub fn flipy(y: u32, z: u8) -> u32 {
     2_u32.pow(u32::from(z)) - 1 - y
 }
 
+/// Return the y-flipped y coordinate for a given y and z
 #[must_use]
 #[inline]
 pub fn yflip(y: u32, z: u8) -> u32 {
     flipy(y, z)
 }
 
+/// Return cumulative base-tile-id for a tile and the zoom level of the tile
+///
+/// Base-tile-id is the sum of all tiles in all zoom levels below the zoom level
+/// of the tile.
 #[must_use]
 #[inline]
 pub fn int_2_offset_zoom(i: u64) -> (u64, u8) {
@@ -201,8 +214,7 @@ pub fn rmid2xyz(i: u64) -> (u32, u32, u8) {
     (x as u32, y as u32, z)
 }
 
-// Assuming int_2_offset_zoom is implemented correctly
-
+/// Calculate the zoom level for the bounding-tile of a bbox
 #[must_use]
 pub fn bbox2zoom(bbox: (u32, u32, u32, u32)) -> u8 {
     let max_zoom = 28;
@@ -216,6 +228,7 @@ pub fn bbox2zoom(bbox: (u32, u32, u32, u32)) -> u8 {
     max_zoom
 }
 
+/// Return the bbox tuple given x, y, z.
 #[must_use]
 pub fn bounds(x: u32, y: u32, z: u8) -> (f64, f64, f64, f64) {
     let ul_corner = ul(x, y, z);
@@ -228,6 +241,7 @@ pub fn bounds(x: u32, y: u32, z: u8) -> (f64, f64, f64, f64) {
     )
 }
 
+/// Truncate a longitude to the valid range of -180 to 180.
 #[must_use]
 pub fn truncate_lng(lng: f64) -> f64 {
     if lng > 180.0 {
@@ -239,6 +253,7 @@ pub fn truncate_lng(lng: f64) -> f64 {
     }
 }
 
+/// Truncate a latitude to the valid range of -90 to 90.
 #[must_use]
 pub fn truncate_lat(lat: f64) -> f64 {
     if lat > 90.0 {
@@ -250,11 +265,13 @@ pub fn truncate_lat(lat: f64) -> f64 {
     }
 }
 
+/// Truncate a LngLat to valid range of longitude and latitude.
 #[must_use]
 pub fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
     LngLat::new(truncate_lng(lnglat.lng()), truncate_lat(lnglat.lat()))
 }
 
+/// Return the parent tile of a tile given x, y, z, and n (number of ancestors).
 #[must_use]
 pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
     let n = n.unwrap_or(0);
@@ -269,6 +286,7 @@ pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
     }
 }
 
+/// Return the children of a tile given x, y, z, and zoom.
 #[must_use]
 pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
     let zoom = zoom.unwrap_or(z + 1);
@@ -287,6 +305,9 @@ pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
     tiles
 }
 
+/// Return the siblings of a tile given x, y, z
+///
+/// Siblings are tiles that share the same parent, NOT neighbors.
 #[must_use]
 pub fn siblings(x: u32, y: u32, z: u8) -> Vec<Tile> {
     let sibrel = SiblingRelationship::from((x, y));
@@ -359,7 +380,7 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
     let yish = (1.0 + sinlat) / (1.0 - sinlat);
     match yish.classify() {
         FpCategory::Infinite | FpCategory::Nan => {
-            Err(UtilesCoreError::ConversionError(
+            Err(UtilesCoreError::LngLat2WebMercator(
                 "Y can not be computed: lat={lat}".to_string(),
             ))
         }
@@ -371,6 +392,7 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
     }
 }
 
+/// Convert lng lat to web mercator x and y
 #[must_use]
 pub fn lnglat2webmercator(lng: f64, lat: f64) -> (f64, f64) {
     let x = EARTH_RADIUS * lng.to_radians();
@@ -415,6 +437,7 @@ pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
     lnglat2webmercator(lng, lat)
 }
 
+/// Convert web mercator x and y to longitude and latitude with optional truncation.
 #[must_use]
 pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> LngLat {
     let (lng, lat) = webmercator2lnglat(x, y);
@@ -469,6 +492,7 @@ fn _neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
     ]
 }
 
+/// Return neighbors of a tile (non-wrapping).
 #[must_use]
 pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
     if z == 0 {
@@ -528,11 +552,13 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
     }
 }
 
+/// Return Tile struct from longitude, latitude, and zoom.
 #[must_use]
 pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> Tile {
     Tile::from_lnglat_zoom(lng, lat, zoom, truncate)
 }
 
+/// Return the bounding tile for a bounding box.
 #[must_use]
 pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
     let (west, south, east, north) =
@@ -551,6 +577,7 @@ pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
     utile!(x, y, z)
 }
 
+/// Return web-mercator bbox from x, y, z.
 #[must_use]
 pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
     let tile_size = EARTH_CIRCUMFERENCE / 2.0_f64.powi(i32::from(z));
@@ -564,6 +591,7 @@ pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
     }
 }
 
+/// Return zooms-vec from a ZoomOrZooms enum
 #[must_use]
 pub fn as_zooms(zoom_or_zooms: ZoomOrZooms) -> Vec<u8> {
     match zoom_or_zooms {
@@ -584,8 +612,9 @@ fn tiles_range_zoom(
     (minx..=maxx).flat_map(move |i| (miny..=maxy).map(move |j| (i, j, zoom)))
 }
 
+/// Return TileRanges from a bounding box and zoom(s).
 #[must_use]
-pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRanges {
+pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileZBoxes {
     let zooms = as_zooms(zooms);
     let bboxes: Vec<BBox> = BBox::from(bounds)
         .bboxes()
@@ -600,7 +629,7 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
             }
         })
         .collect();
-    let ranges: Vec<TileRange> = bboxes
+    let ranges: Vec<TileZBox> = bboxes
         .into_iter()
         .flat_map(move |bbox| {
             let zooms = zooms.clone();
@@ -623,7 +652,7 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
                     zoom,
                     Some(false),
                 );
-                TileRange::new(
+                TileZBox::new(
                     top_left_tile.x,
                     bottom_right_tile.x,
                     top_left_tile.y,
@@ -634,15 +663,17 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileRang
         })
         .collect();
 
-    TileRanges::from(ranges)
+    TileZBoxes::from(ranges)
 }
 
+/// Return the number of tiles for a bounding box and zoom(s).
 #[must_use]
 pub fn tiles_count(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> u64 {
     let ranges = tile_ranges(bounds, zooms);
     ranges.length()
 }
 
+/// Return an iterator of tiles for a bounding box and zoom(s).
 pub fn tiles(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,
@@ -721,6 +752,7 @@ fn merge(merge_set: &HashSet<Tile>) -> (HashSet<Tile>, bool) {
     (current_tileset.into_iter().collect(), changed)
 }
 
+/// Simplify a set of tiles replacing children with parents where possible.
 #[allow(dead_code)]
 #[must_use]
 pub fn simplify<S: ::std::hash::BuildHasher + Default>(

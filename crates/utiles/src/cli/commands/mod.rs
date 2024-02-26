@@ -14,6 +14,7 @@ pub use tile_stream_cmds::{
 pub use tilejson::tilejson_main;
 pub use tiles::tiles_main;
 pub use touch::touch_main;
+pub use update::update_main;
 pub use vacuum::vacuum_main;
 
 mod children_parent;
@@ -30,4 +31,5 @@ mod tile_stream_cmds;
 mod tilejson;
 pub mod tiles;
 mod touch;
+mod update;
 mod vacuum;

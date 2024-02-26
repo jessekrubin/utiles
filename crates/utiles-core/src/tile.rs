@@ -17,20 +17,46 @@ use crate::mbutiles::MbtTileRow;
 use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
 use crate::{utile, UtilesCoreError};
 
+/// Tile X-Y-Z struct
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Tile {
+    /// x value (column)
+    pub x: u32,
+
+    /// y value (row -- flipped in mbtiles)
+    pub y: u32,
+
+    /// z value (zoom level)
+    pub z: u8,
+}
+
+/// Geometry for tile-feature (polygon or linestring)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
+    /// type of geometry (Polygon or LineString)
     #[serde(rename = "type")]
     pub type_: String,
+
+    /// coordinates for the geometry [ [ [x1, y1], [x2, y2], ... ] ]
     pub coordinates: Vec<Vec<Vec<f64>>>,
 }
 
+/// Options for creating a tile-feature
 #[derive(Debug, Serialize)]
 pub struct FeatureOptions {
+    /// feature id to use
     pub fid: Option<String>,
-    // feature id
+
+    /// GeoJSON properties to use
     pub props: Option<Map<String, Value>>,
+
+    /// projection to use
     pub projection: Projection,
+
+    /// buffer size to use
     pub buffer: Option<f64>,
+
+    /// precision to use (number of decimal places)
     pub precision: Option<i32>,
 }
 
@@ -44,13 +70,6 @@ impl Default for FeatureOptions {
             precision: None,
         }
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Tile {
-    pub x: u32,
-    pub y: u32,
-    pub z: u8,
 }
 
 impl From<TileTuple> for Tile {
@@ -139,42 +158,49 @@ impl TileLike for Tile {
 }
 
 impl Tile {
+    /// Create a new Tile
     #[must_use]
     pub fn new(x: u32, y: u32, z: u8) -> Self {
         Tile { x, y, z }
     }
 
+    /// Return bounds tuple (west, south, east, north) for the tile
     #[must_use]
     pub fn bounds(&self) -> (f64, f64, f64, f64) {
         bounds(self.x, self.y, self.z)
     }
 
+    /// Return pmtile-id for the tile
     #[must_use]
     pub fn pmtileid(&self) -> u64 {
         pmtiles::xyz2pmid(self.x, self.y, self.z)
     }
 
+    /// Return tile from pmtile-id
     #[must_use]
     pub fn from_pmtileid(id: u64) -> Self {
-        let (x, y, z) = pmtiles::pmid2xyz(id);
-        Tile::new(x, y, z)
+        pmtiles::pmid2xyz(id).into()
     }
 
-    pub fn from_pmid(id: u64) -> Result<Tile, Box<dyn Error>> {
-        let (x, y, z) = pmtiles::pmid2xyz(id);
-        Ok(Tile::new(x, y, z))
+    /// Return tile from pmtile-id (alias for from_pmtileid)
+    #[must_use]
+    pub fn from_pmid(id: u64) -> Self {
+        pmtiles::pmid2xyz(id).into()
     }
 
+    /// Return tile from row-major tile-id
     #[must_use]
     pub fn from_row_major_id(id: u64) -> Self {
         Tile::from(rmid2xyz(id))
     }
 
+    /// Return tile from row-major tile-id (alias for from_row_major_id)
     #[must_use]
     pub fn from_rmid(id: u64) -> Self {
         Tile::from_row_major_id(id)
     }
 
+    /// Return zxy string with optional separator (default is '/')
     #[must_use]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
         if let Some(sep) = sep {
@@ -184,6 +210,15 @@ impl Tile {
         }
     }
 
+    /// Return zxy string with extension and optional separator (default is '/')
+    ///
+    /// # Examples
+    /// ```
+    /// use utiles_core::Tile;
+    /// let tile = Tile::new(1, 2, 3);
+    /// assert_eq!(tile.fmt_zxy_ext("png", Some("-")), "3-1-2.png");
+    /// assert_eq!(tile.fmt_zxy_ext("png", None), "3/1/2.png");
+    /// ```
     #[must_use]
     pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
         if let Some(sep) = sep {
@@ -193,19 +228,30 @@ impl Tile {
         }
     }
 
+    /// Return the parent tile's pmtile-id
     #[must_use]
-    pub fn parent_id(&self) -> u64 {
-        pmtiles::parent_id(self.pmtileid())
+    pub fn parent_pmtileid(&self) -> u64 {
+        self.parent(None).pmtileid()
     }
 
+    /// Convert quadkey string to Tile
     pub fn from_quadkey(quadkey: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(quadkey)
     }
 
+    /// Convert quadkey string to Tile (alias for from_quadkey)
     pub fn from_qk(qk: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(qk)
     }
 
+    /// Return tile from json-object string (e.g. `{"x": 1, "y": 2, "z": 3}`)
+    ///
+    /// # Examples
+    /// ```
+    /// use utiles_core::Tile;
+    /// let tile = Tile::from_json_obj(r#"{"x": 1, "y": 2, "z": 3}"#).unwrap();
+    /// assert_eq!(tile, Tile::new(1, 2, 3));
+    /// ```
     pub fn from_json_obj(json: &str) -> Result<Self, Box<dyn Error>> {
         let res = serde_json::from_str::<Tile>(json);
         match res {
@@ -232,6 +278,14 @@ impl Tile {
     //     // }
     // }
 
+    /// Return tile from json-array string (e.g. `[1, 2, 3]`)
+    ///
+    /// # Examples
+    /// ```
+    /// use utiles_core::Tile;
+    /// let tile = Tile::from_json_arr("[1, 2, 3]").unwrap();
+    /// assert_eq!(tile, Tile::new(1, 2, 3));
+    /// ```
     pub fn from_json_arr(json: &str) -> Result<Self, Box<dyn Error>> {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
@@ -242,30 +296,40 @@ impl Tile {
         }
     }
 
+    /// Return tile from json string either object or array
     pub fn from_json(json: &str) -> Result<Self, Box<dyn Error>> {
-        if json.starts_with('{') {
-            Self::from_json_obj(json)
+        let json_no_space = if json.starts_with(' ') {
+            json.trim()
         } else {
-            Self::from_json_arr(json)
+            json
+        };
+        if json_no_space.starts_with('{') {
+            Self::from_json_obj(json_no_space)
+        } else {
+            Self::from_json_arr(json_no_space)
         }
     }
 
+    /// Return tile from json string either object or array
     #[must_use]
     pub fn from_json_loose(json: &str) -> Self {
         let v = serde_json::from_str::<Value>(json).unwrap();
         Self::from(v)
     }
 
+    /// Return the quadkey for the tile
     #[must_use]
     pub fn quadkey(&self) -> String {
         xyz2quadkey(self.x, self.y, self.z)
     }
 
+    /// Return the quadkey for the tile (alias for quadkey)
     #[must_use]
     pub fn qk(&self) -> String {
         xyz2quadkey(self.x, self.y, self.z)
     }
 
+    /// Return new Tile from given (lng, lat, zoom)
     #[must_use]
     pub fn from_lnglat_zoom(
         lng: f64,
@@ -306,6 +370,7 @@ impl Tile {
         }
     }
 
+    /// Return the bounding box of the tile
     #[must_use]
     pub fn up(&self) -> Self {
         Self {
@@ -315,6 +380,7 @@ impl Tile {
         }
     }
 
+    /// Return the tile to the bottom
     #[must_use]
     pub fn down(&self) -> Self {
         Self {
@@ -324,6 +390,7 @@ impl Tile {
         }
     }
 
+    /// Return the tile to the left
     #[must_use]
     pub fn left(&self) -> Self {
         Self {
@@ -333,6 +400,7 @@ impl Tile {
         }
     }
 
+    /// Return the tile to the right
     #[must_use]
     pub fn right(&self) -> Self {
         Self {
@@ -342,6 +410,7 @@ impl Tile {
         }
     }
 
+    /// Return the tile to the top left
     #[must_use]
     pub fn up_left(&self) -> Self {
         Self {
@@ -351,6 +420,7 @@ impl Tile {
         }
     }
 
+    /// Return the tile to the top right
     #[must_use]
     pub fn up_right(&self) -> Self {
         Self {
@@ -360,6 +430,7 @@ impl Tile {
         }
     }
 
+    /// Return the tile to the bottom left
     #[must_use]
     pub fn down_left(&self) -> Self {
         Self {
@@ -369,6 +440,7 @@ impl Tile {
         }
     }
 
+    /// Return the tile to the bottom right
     #[must_use]
     pub fn down_right(&self) -> Self {
         Self {
@@ -378,26 +450,31 @@ impl Tile {
         }
     }
 
+    /// Return a vector with the 3-8 neighbors of the tile
     #[must_use]
     pub fn neighbors(&self) -> Vec<Self> {
         neighbors(self.x, self.y, self.z)
     }
 
+    /// Return the children tiles of the tile
     #[must_use]
     pub fn children(&self, zoom: Option<u8>) -> Vec<Tile> {
         children(self.x, self.y, self.z, zoom)
     }
 
+    /// Return the parent tile
     #[must_use]
     pub fn parent(&self, zoom: Option<u8>) -> Self {
         parent(self.x, self.y, self.z, zoom)
     }
 
+    /// Return sibling tiles that share the same parent tile (not neighbors)
     #[must_use]
     pub fn siblings(&self) -> Vec<Self> {
         siblings(self.x, self.y, self.z)
     }
 
+    /// Return a TileFeature for the tile
     pub fn feature(
         &self,
         opts: &FeatureOptions,
@@ -451,10 +528,7 @@ impl Tile {
         let mut properties: Map<String, Value> = Map::new();
         properties.insert("title".to_string(), Value::from(format!("XYZ tile {xyz}")));
         properties.extend(opts.props.clone().unwrap_or_default());
-        let id = match opts.fid.clone() {
-            Some(fid) => fid,
-            None => xyz,
-        };
+        let id = opts.fid.clone().unwrap_or(xyz);
         let tile_feature = TileFeature {
             id,
             type_: "Feature".to_string(),

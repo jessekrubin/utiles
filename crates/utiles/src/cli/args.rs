@@ -174,6 +174,16 @@ pub struct MbtilesStatsArgs {
     pub(crate) full: bool,
 }
 
+#[derive(Debug, Parser)]
+pub struct UpdateArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    /// dryrun (don't actually update)
+    #[arg(required = false, long, short = 'n', action = clap::ArgAction::SetTrue)]
+    pub(crate) dryrun: bool,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     /// Echo the `tile.json` for mbtiles file
@@ -199,6 +209,10 @@ pub enum Commands {
     /// Set metadata key/value
     #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"])]
     MetadataSet(MetadataSetArgs),
+
+    /// Update mbtiles db
+    #[command(name = "update")]
+    Update(UpdateArgs),
 
     /// rm-rf dirpath
     #[command(name = "rimraf", visible_alias = "rmrf")]
@@ -429,11 +443,7 @@ impl ZoomArgGroup {
             None => match (self.minzoom, self.maxzoom) {
                 (Some(minzoom), Some(maxzoom)) => Some((minzoom..=maxzoom).collect()),
                 (Some(minzoom), None) => Some((minzoom..=31).collect()),
-                (None, Some(maxzoom)) => {
-                    let thingy: Vec<u8> = (0..=maxzoom).collect();
-                    println!("thingy: {thingy:?}");
-                    Some((0..=maxzoom).collect())
-                }
+                (None, Some(maxzoom)) => Some((0..=maxzoom).collect()),
                 (None, None) => None,
             },
         }

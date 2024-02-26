@@ -1,14 +1,21 @@
 use crate::tile_type::tiletype_str;
 use crate::{flipy, TileLike};
+
+/// Mbtiles Tile Row struct
 #[derive(Debug, Clone)]
 pub struct MbtTileRow {
+    /// zoom_level INTEGER NOT NULL -- z
     pub zoom_level: u8,
+    /// tile_column INTEGER NOT NULL -- x
     pub tile_column: u32,
+    /// tile_row INTEGER NOT NULL -- y (flipped)
     pub tile_row: u32,
+    /// tile_data BLOB NOT NULL -- tile data
     pub tile_data: Vec<u8>,
 }
 
 impl MbtTileRow {
+    /// Create a new MbtTileRow
     #[must_use]
     pub fn new(
         zoom_level: u8,
@@ -40,6 +47,7 @@ impl TileLike for MbtTileRow {
 }
 
 impl MbtTileRow {
+    /// Return the file extension of the tile based on the tile_data
     #[must_use]
     pub fn extension(&self) -> String {
         tiletype_str(&self.tile_data)

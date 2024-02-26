@@ -10,7 +10,7 @@ use crate::cli::commands::{
     bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main,
     mbtiles_info_main, metadata_main, metadata_set_main, neighbors_main, parent_main,
     pmtileid_main, quadkey_main, rimraf_main, serve_main, shapes_main, tilejson_main,
-    tiles_main, touch_main, vacuum_main,
+    tiles_main, touch_main, update_main, vacuum_main,
 };
 
 struct LogConfig {
@@ -27,6 +27,7 @@ fn init_tracing(log_config: &LogConfig) {
     } else {
         EnvFilter::new("INFO")
     };
+    let debug_or_trace = log_config.debug || log_config.trace;
     #[allow(clippy::match_bool)]
     match log_config.json {
         true => {
@@ -40,8 +41,10 @@ fn init_tracing(log_config: &LogConfig) {
         }
         false => {
             let subscriber = fmt::Subscriber::builder()
+                .compact()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
+                .with_target(debug_or_trace)
                 .finish();
             tracing::subscriber::set_global_default(subscriber)
                 .expect("tracing::subscriber::set_global_default(...) failed.");
@@ -88,6 +91,9 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         }
         Commands::Metadata(args) => metadata_main(&args),
         Commands::MetadataSet(args) => metadata_set_main(&args),
+        Commands::Update(args) => {
+            update_main(&args).await;
+        }
         Commands::Tilejson(args) => tilejson_main(&args),
         Commands::Copy(args) => {
             copy_main(args).await;
@@ -126,6 +132,7 @@ pub fn cli_main_sync(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> u
         .build()
         .unwrap()
         .block_on(async { cli_main(argv, loop_fn).await });
+    // run the async main function
     r
 }
 

@@ -1,5 +1,7 @@
 use crate::errors::{UtilesCoreError, UtilesCoreResult};
 use crate::Tile;
+
+/// Return the quadkey for a tile as a vector of u8 values (0, 1, 2, 3).
 #[must_use]
 pub fn xyz2quadkey_vec(x: u32, y: u32, z: u8) -> Vec<u8> {
     let mut qk_arr = Vec::with_capacity(z as usize);

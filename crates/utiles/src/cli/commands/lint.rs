@@ -131,15 +131,19 @@ async fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
                         debug!("OK: {}", path.display());
                     } else {
                         warn!("{} - {} errors found", path.display(), r.len());
-
                         // let agg_err = UtilesLintError::LintErrors(r);
+                        let strings = r
+                            .iter()
+                            .map(|e| e.format_error(&path.display().to_string()))
+                            .collect::<Vec<String>>();
+                        let joined = strings.join("\n");
+                        println!("{}", joined);
                         for err in r {
                             warn!("{}", err.to_string());
                         }
                     }
                 }
                 Err(e) => {
-                    warn!("Unable to open file: {}", e);
                     warn!("Error: {}", e);
                 }
             }
