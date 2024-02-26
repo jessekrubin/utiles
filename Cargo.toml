@@ -18,7 +18,7 @@ license = "MIT OR Apache-2.0"
 [workspace.dependencies]
 anyhow = "1.0.75"
 fast_hilbert = "2.0.0"
-geo-types = "0.7.9"
+geo-types = "0.7.13"
 geojson = "0.24.1"
 pyo3 = "0.20.0"
 pyo3-build-config = "0.20.0"
