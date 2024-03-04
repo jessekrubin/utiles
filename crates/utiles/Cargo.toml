@@ -39,7 +39,7 @@ globset = "0.4.13"
 #utilesqlite = { path = "../utilesqlite" }
 tokio-stream = "0.1.14"
 futures = "0.3.29"
-walkdir = "2.4.0"
+walkdir = "2.5.0"
 time = "0.3.30"
 webbrowser = "0.8.12"
 # utilesqlite dependencies
