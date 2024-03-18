@@ -49,7 +49,7 @@ deadpool-sqlite = { version = "0.7.0", features = ["tracing"] }
 #async-sqlite = { version = "0.1.0", features = ["bundled", "backup", "blob", "serde_json", "trace", "hooks", "array", "functions", "modern-full"] }
 imagesize = "0.12.0"
 axum = { version = "0.7.4", features = ["tokio", "json", "macros"] }
-http-body-util = "0.1.0"
+http-body-util = "0.1.1"
 async-trait = "0.1.77"
 async-sqlite = { version = "0.2.1", features = ["bundled", "functions", "trace", ] }
 tower = { version = "0.4.13", features = ["timeout"] }
