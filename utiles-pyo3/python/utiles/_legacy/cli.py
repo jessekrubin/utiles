@@ -1,4 +1,5 @@
 """Utiles cli"""
+
 from __future__ import annotations
 
 import json
@@ -452,7 +453,7 @@ def children(_ctx: click.Context, input: str, depth: int = 1) -> None:
     for line in iter_lines(src):
         tiles = [json.loads(line)[:3]]
         for _i in range(depth):
-            tiles = sum([utiles.children(t) for t in tiles], [])
+            tiles = sum([utiles.children(t) for t in tiles], [])  # noqa: RUF017
         for t in tiles:
             click.echo(t.json(obj=False))
 

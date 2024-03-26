@@ -95,6 +95,7 @@ impl TileEncoding {
 /// 78 5E - Fast Compression
 /// 78 9C - Default Compression
 /// 78 DA - Best Compression
+#[must_use]
 pub fn zlib_magic_headers(buffer: &[u8]) -> bool {
     buffer.starts_with(
         b"\x78\x01", // No Compression/low

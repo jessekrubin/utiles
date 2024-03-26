@@ -229,7 +229,7 @@ def test_root_parent() -> None:
 
 @pytest.mark.parametrize("args", [(486, 332, 10, 9), ((486, 332, 10), 9)])
 def test_parent_invalid_args(
-    args: Union[Tuple[int, int, int, int], Tuple[Tuple[int, int, int], int]]
+    args: Union[Tuple[int, int, int, int], Tuple[Tuple[int, int, int], int]],
 ) -> None:
     """tile arg must have length 1 or 3"""
     with pytest.raises(ValueError):
@@ -481,7 +481,7 @@ def test_arg_parse(
 
 @pytest.mark.parametrize("args", [(0, 0), (0, 0, 0, 0)])
 def test_arg_parse_error(
-    args: Union[Tuple[int, int], Tuple[int, int, int, int]]
+    args: Union[Tuple[int, int], Tuple[int, int, int, int]],
 ) -> None:
     """Helper function raises exception as expected"""
     with pytest.raises(ValueError):
