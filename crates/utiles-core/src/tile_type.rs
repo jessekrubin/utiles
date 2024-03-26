@@ -51,6 +51,62 @@ pub const TILETYPE_PNG: usize = 6;
 /// constant for webp tile type
 pub const TILETYPE_WEBP: usize = 7;
 
+/// Encoding of the tile data (based on maplibre/martin)
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub enum TileEncoding {
+    /// Data is not compressed, but it can be
+    Uncompressed = 0b0000_0000,
+    Internal = 0b0000_0001,
+    // png/jpg
+    Gzip = 0b0000_0010,
+    Zlib = 0b0000_0100,
+    Brotli = 0b0000_1000,
+    Zstd = 0b0001_0000,
+}
+
+impl TileEncoding {
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        Some(match value.to_ascii_lowercase().as_str() {
+            "none" => Self::Uncompressed,
+            "gzip" => Self::Gzip,
+            "zlib" | "deflate" => Self::Zlib,
+            "brotli" | "br" => Self::Brotli,
+            "zstd" => Self::Zstd,
+            _ => None?,
+        })
+    }
+
+    #[must_use]
+    pub fn content_encoding(&self) -> Option<&str> {
+        match self {
+            Self::Uncompressed => None,
+            Self::Internal => None,
+            Self::Gzip => Some("gzip"),
+            Self::Zlib => Some("deflate"),
+            Self::Brotli => Some("br"),
+            Self::Zstd => Some("zstd"),
+        }
+    }
+}
+
+/// Return true if buffer starts with zlib magic headers
+/// 78 01 - No Compression/low
+/// 78 5E - Fast Compression
+/// 78 9C - Default Compression
+/// 78 DA - Best Compression
+pub fn zlib_magic_headers(buffer: &[u8]) -> bool {
+    buffer.starts_with(
+        b"\x78\x01", // No Compression/low
+    ) || buffer.starts_with(
+        b"\x78\x5E", // Fast Compression
+    ) || buffer.starts_with(
+        b"\x78\x9C", // Default Compression
+    ) || buffer.starts_with(
+        b"\x78\xDA", // Best Compression
+    )
+}
+
 /// Return type of the tile data from a buffer
 #[must_use]
 pub fn tiletype(buffer: &[u8]) -> TileType {
@@ -59,13 +115,13 @@ pub fn tiletype(buffer: &[u8]) -> TileType {
             v if v.starts_with(b"\x89PNG\r\n\x1a\n") => return TileType::Png,
             v if v.starts_with(b"\xff\xd8") => return TileType::Jpg,
             v if v.starts_with(b"GIF87a") || v.starts_with(b"GIF89a") => {
-                return TileType::Gif
+                return TileType::Gif;
             }
             v if v.starts_with(b"RIFF") && &v[8..12] == b"WEBP" => {
-                return TileType::Webp
+                return TileType::Webp;
             }
             v if v.starts_with(b"\x1f\x8b") => return TileType::Pbfgz,
-            v if v.starts_with(b"\x78\x9c") => return TileType::Pbf,
+            v if zlib_magic_headers(v) => return TileType::Pbf,
             v if v.starts_with(b"{") || v.starts_with(b"[") => return TileType::Json,
             _ => {}
         }
@@ -112,7 +168,11 @@ pub fn headers(tiletype: &TileType) -> Vec<(&'static str, &'static str)> {
         TileType::Json => vec![("Content-Type", "application/json")],
         TileType::Gif => vec![("Content-Type", "image/gif")],
         TileType::Webp => vec![("Content-Type", "image/webp")],
-        TileType::Pbf | TileType::Pbfgz => vec![
+        TileType::Pbf => vec![
+            ("Content-Type", "application/x-protobuf"),
+            ("Content-Encoding", "deflate"),
+        ],
+        TileType::Pbfgz => vec![
             ("Content-Type", "application/x-protobuf"),
             ("Content-Encoding", "gzip"),
         ],

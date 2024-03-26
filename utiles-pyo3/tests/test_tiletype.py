@@ -122,6 +122,11 @@ def test_tiletype(
         assert ttype == expected
 
 
+def test_tiletype_pbfmvt():
+    data = b'\x1a\xf7\xb2\x01x\x02\n\x0fgloballandcover(\x80 \x1a\x05class"\x06\n\x04crop\x12\x85\x02\x18\x03"\xfa\x01\tq\x961\xfa\x054\x08\x0e,0\x02\x1a\x17@\nB\x1e \x11b\x084\x0b\x17#K\x13\x07\x1a+\x071Wh46\x068\x1d\x07\x1f2\x17&\x06\x0c\x1b@\nV'
+    assert tiletype(data) == "pbf"
+
+
 @pytest.mark.parametrize(
     "tile",
     TEST_TILES_BYTES,
