@@ -44,13 +44,13 @@ time = "0.3.30"
 webbrowser = "0.8.12"
 # utilesqlite dependencies
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
-sqlite-hashes = { version = "0.6", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.7", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 deadpool-sqlite = { version = "0.7.0", features = ["tracing"] }
 #async-sqlite = { version = "0.1.0", features = ["bundled", "backup", "blob", "serde_json", "trace", "hooks", "array", "functions", "modern-full"] }
 imagesize = "0.12.0"
-axum = { version = "0.7.4", features = ["tokio", "json", "macros"] }
+axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 http-body-util = "0.1.0"
-async-trait = "0.1.77"
+async-trait = "0.1.79"
 async-sqlite = { version = "0.2.1", features = ["bundled", "functions", "trace", ] }
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id"] }
