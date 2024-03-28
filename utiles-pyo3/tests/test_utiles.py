@@ -87,7 +87,7 @@ def test_quadkey(tile: Tuple[int, int, int], quadkey: str) -> None:
 
     utiles_qk = utiles.xyz2quadkey(*tile)
     assert utiles_qk == quadkey, f"utiles: {utiles_qk} ~ mercantile: {quadkey}"
-    assert utiles.xyz2quadkey(0, 0, 0) == ""  # noqa: PLC1901
+    assert utiles.xyz2quadkey(0, 0, 0) == ""
     assert utiles.xyz2quadkey(1, 0, 1) == "1"
     assert utiles.quadkey(utiles.Tile(1, 0, 1)) == "1"
     assert utiles.xyz2quadkey(1, 1, 1) == "3"

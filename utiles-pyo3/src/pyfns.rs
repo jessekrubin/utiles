@@ -2,6 +2,7 @@ use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
 use crate::pyutiles::pytile::PyTile;
 use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 use pyo3::{pyfunction, PyErr, PyResult};
 
@@ -12,7 +13,7 @@ pub fn xyz(x: u32, y: u32, z: u8) -> PyTile {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn ul(args: &PyTuple) -> PyResult<PyLngLat> {
+pub fn ul(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLat> {
     let tile = crate::parse_tile_arg(args)?;
     let lnglat = tile.ul();
     Ok(lnglat)
@@ -49,7 +50,7 @@ pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn bounds(args: &PyTuple) -> PyResult<PyLngLatBbox> {
+pub fn bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
     let tile = crate::parse_tile_arg(args)?;
     let bbox = tile.bounds();
     Ok(bbox)

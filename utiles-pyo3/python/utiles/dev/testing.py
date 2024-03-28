@@ -1,4 +1,5 @@
 """Utiles rust cli tests"""
+
 from __future__ import annotations
 
 try:
@@ -79,6 +80,7 @@ def run_cli(
         capture_output=True,
         text=True,
         shell=False,  # noqa: S603
+        check=False,
     )
     tf = time_ns()
     return CliResult(

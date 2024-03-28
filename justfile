@@ -50,10 +50,10 @@ mypy:
     mypy --config-file {{pyut}}/pyproject.toml {{pyut}}/python {{pyut}}/tests
 
 ruff:
-    ruff .
+    ruff check .
 
 ruffix:
-    ruff --fix --show-fixes
+    ruff check . --fix --show-fixes
 
 clippy:
     cargo clippy

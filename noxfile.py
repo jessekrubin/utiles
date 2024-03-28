@@ -1,4 +1,5 @@
 """Nox sessions for linting, docs, and testing."""
+
 from __future__ import annotations
 
 from pathlib import Path

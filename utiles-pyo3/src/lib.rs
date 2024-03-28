@@ -100,7 +100,7 @@ fn tiletype2headers(tiletype: usize) -> Vec<(&'static str, &'static str)> {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn parse_tile_arg(args: &PyTuple) -> PyResult<PyTile> {
+fn parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
     if args.len() == 1 {
         let arg = args.get_item(0)?;
         if let Ok(tile) = arg.extract::<PyTile>() {
@@ -124,7 +124,7 @@ fn parse_tile_arg(args: &PyTuple) -> PyResult<PyTile> {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn parse_bbox(args: &PyTuple) -> PyResult<PyLngLatBbox> {
+fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
     let arglen = args.len();
     match arglen {
         1 => {
@@ -160,7 +160,7 @@ fn parse_bbox(args: &PyTuple) -> PyResult<PyLngLatBbox> {
 /// Extract a tile or tiles to Vec<PyTile>
 ///
 /// Consolidated logic from parse_tiles() per rec by `@nyurikS` in PR #38
-fn _extract(arg: &PyAny) -> PyResult<Vec<PyTile>> {
+fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
     // TODO: this code is identical to parse_tiles() and should be consolidated
     if let Ok(tiles) = arg.extract::<PyTile>() {
         return Ok(vec![tiles]);
@@ -184,9 +184,9 @@ fn _extract(arg: &PyAny) -> PyResult<Vec<PyTile>> {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn parse_tiles(args: &PyTuple) -> PyResult<Vec<PyTile>> {
+fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
     if args.len() == 1 {
-        return _extract(args.get_item(0)?);
+        return _extract(&args.get_item(0)?);
     } else if args.len() == 3 {
         // if the first value is a number assume the thing is a tile
         if let Ok(x) = args.get_item(0)?.extract::<u32>() {
@@ -203,13 +203,13 @@ fn parse_tiles(args: &PyTuple) -> PyResult<Vec<PyTile>> {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn _parse_tile_arg(args: &PyTuple) -> PyResult<PyTile> {
+pub fn _parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
     parse_tile_arg(args)
 }
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn xy_bounds(args: &PyTuple) -> PyResult<PyBbox> {
+pub fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
     let tile = parse_tile_arg(args)?;
     let pybbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
     Ok(PyBbox::new(
@@ -233,7 +233,7 @@ pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<Py
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn pmtileid(args: &PyTuple) -> PyResult<u64> {
+fn pmtileid(args: &Bound<'_, PyTuple>) -> PyResult<u64> {
     let tile = parse_tile_arg(args)?;
     Ok(tile.pmtileid())
 }
@@ -252,7 +252,7 @@ fn from_pmtileid(pmtileid: u64) -> PyTile {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn quadkey(args: &PyTuple) -> PyResult<String> {
+fn quadkey(args: &Bound<'_, PyTuple>) -> PyResult<String> {
     let tile = parse_tile_arg(args)?;
     Ok(utiles::xyz2quadkey(tile.xyz.x, tile.xyz.y, tile.xyz.z))
 }
@@ -264,7 +264,7 @@ fn quadkey_to_tile(quadkey: &str) -> PyResult<PyTile> {
 
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None))]
-fn parent(args: &PyTuple, zoom: Option<u8>) -> PyResult<Option<PyTile>> {
+fn parent(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Option<PyTile>> {
     // Parse the tile argument
     let tile = parse_tile_arg(args)?;
     if tile.xyz.z == 0 {
@@ -294,7 +294,7 @@ fn parent(args: &PyTuple, zoom: Option<u8>) -> PyResult<Option<PyTile>> {
 
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None))]
-fn children(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
+fn children(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
     let tile = parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z + 1);
     if zoom < tile.xyz.z {
@@ -309,7 +309,7 @@ fn children(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
 
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None))]
-fn neighbors(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
+fn neighbors(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
     let tile = parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z);
     if zoom < tile.xyz.z {
@@ -323,7 +323,10 @@ fn neighbors(args: &PyTuple, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
 
 #[pyfunction]
 #[pyo3(signature = (* args, truncate = None))]
-fn bounding_tile(args: &PyTuple, truncate: Option<bool>) -> PyResult<PyTile> {
+fn bounding_tile(
+    args: &Bound<'_, PyTuple>,
+    truncate: Option<bool>,
+) -> PyResult<PyTile> {
     let res = parse_bbox(args);
     if res.is_err() {
         return Err(res.err().unwrap());
@@ -435,8 +438,8 @@ enum CoordsExtractor<'a> {
 }
 
 #[pyfunction]
-fn _coords(_py: Python, obj: &PyAny) -> PyResult<CoordinateIterator> {
-    let thing = CoordsExtractor::extract(obj)?;
+fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
+    let thing = CoordsExtractor::extract_bound(obj)?;
     match thing {
         CoordsExtractor::ListVecF64(v) => {
             // ensure 2d
@@ -476,8 +479,8 @@ fn _coords(_py: Python, obj: &PyAny) -> PyResult<CoordinateIterator> {
                 });
             }
             let mut coordsvec: Vec<(f64, f64)> = Vec::new();
-            for item in &l {
-                let c = _coords(_py, item)?;
+            for item in l {
+                let c = _coords(&item.as_borrowed())?;
                 let cv = c.iter.collect::<Vec<_>>();
                 coordsvec.extend(cv)
             }
@@ -492,7 +495,7 @@ fn _coords(_py: Python, obj: &PyAny) -> PyResult<CoordinateIterator> {
                 });
             }
             if t.len() == 1 {
-                let res = _coords(_py, t[0]);
+                let res = _coords(&t[0].as_borrowed());
                 return res;
             }
             Ok(CoordinateIterator {
@@ -502,13 +505,15 @@ fn _coords(_py: Python, obj: &PyAny) -> PyResult<CoordinateIterator> {
         CoordsExtractor::Dict(d) => {
             // extract the sub dict key 'coordinates'
             if let Some(coords) = d.get("coordinates") {
-                let res = _coords(_py, coords);
+                let c = *coords;
+                let res = _coords(&c.as_borrowed());
                 return res;
             }
             // extract the sub dict
             if let Some(geom) = d.get("geometry") {
                 // recurse around again
-                let res = _coords(_py, geom);
+                let geom_ref = *geom;
+                let res = _coords(&geom_ref.as_borrowed());
                 return Ok(res.unwrap());
             }
             if let Some(features) = d.get("features") {
@@ -516,7 +521,7 @@ fn _coords(_py: Python, obj: &PyAny) -> PyResult<CoordinateIterator> {
                     // chain the iterators
                     let mut coords = vec![];
                     for feature in features {
-                        let res = _coords(_py, feature)?;
+                        let res = _coords(&feature.as_borrowed())?;
                         coords.extend(res.iter);
                     }
                     return Ok(CoordinateIterator {
@@ -561,7 +566,7 @@ fn merge(merge_set: &HashSet<PyTile>) -> (HashSet<PyTile>, bool) {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-fn simplify(_py: Python, args: &PyTuple) -> PyResult<HashSet<PyTile>> {
+fn simplify(args: &Bound<'_, PyTuple>) -> PyResult<HashSet<PyTile>> {
     // Parse tiles from the input sequence
     let tiles = parse_tiles(args)?;
     let mut _tiles = tiles.into_iter().collect::<Vec<PyTile>>();
@@ -597,8 +602,8 @@ fn simplify(_py: Python, args: &PyTuple) -> PyResult<HashSet<PyTile>> {
 }
 
 #[pyfunction]
-fn coords(py: Python, obj: &PyAny) -> PyResult<Vec<(f64, f64)>> {
-    Ok(_coords(py, obj)?.iter.collect())
+fn coords(obj: &Bound<'_, PyAny>) -> PyResult<Vec<(f64, f64)>> {
+    Ok(_coords(obj)?.iter.collect())
 }
 
 // impl Iterator for utiles::LngLat {
@@ -619,8 +624,8 @@ fn geotransform2optzoom(geotransform: (f64, f64, f64, f64, f64, f64)) -> u8 {
 }
 
 #[pyfunction]
-fn geojson_bounds(py: Python, obj: &PyAny) -> PyResult<PyLngLatBbox> {
-    let coordsvec = coords(py, obj)?;
+fn geojson_bounds(obj: &Bound<'_, PyAny>) -> PyResult<PyLngLatBbox> {
+    let coordsvec = coords(obj)?;
     let mut bbox: (f64, f64, f64, f64) = (180.0, 90.0, -180.0, -90.0);
 
     for (lng, lat) in coordsvec {
@@ -656,7 +661,7 @@ fn feature(
     Ok(f)
 }
 
-fn lib_constants(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
     m.add("__build_profile__", env!("PROFILE"))?;
     Ok(())
@@ -665,10 +670,9 @@ fn lib_constants(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 /// Utiles python module
 #[pymodule]
 #[pyo3(name = "_utiles")]
-fn libutiles(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // lib constants
-    lib_constants(_py, m)?;
-
+    lib_constants(m)?;
     // mercantile functions
     m.add_function(wrap_pyfunction!(parse_tile_arg, m)?)?;
     m.add_function(wrap_pyfunction!(_parse_tile_arg, m)?)?;

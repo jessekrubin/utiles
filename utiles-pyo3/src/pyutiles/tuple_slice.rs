@@ -38,7 +38,7 @@ impl<T: IntoPy<PyObject>> IntoPy<PyObject> for TupleSliceResult<T> {
                 // convert all to pyint
                 let v: Vec<PyObject> = v.into_iter().map(|x| x.into_py(py)).collect();
                 // convert to tuple
-                let pytuple = PyTuple::new(py, v);
+                let pytuple = PyTuple::new_bound(py, v);
                 pytuple.into_py(py)
             }
         }

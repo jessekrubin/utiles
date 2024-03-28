@@ -1,4 +1,5 @@
 """Utiles rust cli tests"""
+
 import json
 import sys
 from json import dumps as stringify
@@ -21,6 +22,7 @@ def _run_cli_old(
         capture_output=True,
         text=True,
         shell=False,  # noqa: S603
+        check=True,
     )
     return res
 
