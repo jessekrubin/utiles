@@ -20,7 +20,7 @@ impl PyLngLat {
     }
 
     #[classmethod]
-    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> Self {
+    pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
         let ll = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         Self::new(ll.lng(), ll.lat())
     }
@@ -53,7 +53,7 @@ impl PyLngLat {
 
     pub fn __richcmp__(
         &self,
-        other: &PyAny,
+        other: &Bound<'_, PyAny>,
         op: CompareOp,
         py: Python<'_>,
     ) -> PyObject {

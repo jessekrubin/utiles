@@ -109,7 +109,7 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_quadkey(_cls: &PyType, quadkey: String) -> PyResult<Self> {
+    pub fn from_quadkey(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
         let xyz = Tile::from_quadkey(&quadkey);
         match xyz {
             Ok(xyz) => Ok(PyTile::from(xyz)),
@@ -118,7 +118,7 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_qk(_cls: &PyType, quadkey: String) -> PyResult<Self> {
+    pub fn from_qk(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
         let xyz = Tile::from_quadkey(&quadkey);
         match xyz {
             Ok(xyz) => Ok(PyTile::from(xyz)),
@@ -127,13 +127,13 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_row_major_id(_cls: &PyType, row_major_id: u64) -> Self {
+    pub fn from_row_major_id(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
         PyTile::from(xyz)
     }
 
     #[classmethod]
-    pub fn from_rmid(_cls: &PyType, row_major_id: u64) -> Self {
+    pub fn from_rmid(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
         PyTile::from(xyz)
     }
@@ -147,7 +147,7 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_pmtileid(_cls: &PyType, tileid: u64) -> Self {
+    pub fn from_pmtileid(_cls: &Bound<'_, PyType>, tileid: u64) -> Self {
         let xyz = Tile::from_pmtileid(tileid);
         PyTile::from(xyz)
     }
@@ -170,7 +170,7 @@ impl PyTile {
 
     #[classmethod]
     pub fn from_lnglat_zoom(
-        _cls: &PyType,
+        _cls: &Bound<'_, PyType>,
         lng: f64,
         lat: f64,
         zoom: u8,
@@ -280,7 +280,7 @@ impl PyTile {
 
     pub fn __richcmp__(
         &self,
-        other: &PyAny,
+        other: &Bound<'_, PyAny>,
         op: CompareOp,
         py: Python<'_>,
     ) -> PyObject {

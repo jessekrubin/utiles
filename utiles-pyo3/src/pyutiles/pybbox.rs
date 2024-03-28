@@ -1,5 +1,6 @@
 use crate::pyutiles::pytile::PyTile;
 use pyo3::basic::CompareOp;
+use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{
     exceptions, pyclass, pymethods, IntoPy, PyAny, PyErr, PyObject, PyRef, PyResult,
@@ -29,7 +30,7 @@ impl PyBbox {
     }
 
     #[classmethod]
-    pub fn from_tile(_cls: &PyType, tile: &PyTile) -> Self {
+    pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
         let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
@@ -120,7 +121,7 @@ impl PyBbox {
 
     pub fn __richcmp__(
         &self,
-        other: &PyAny,
+        other: &Bound<'_, PyAny>,
         op: CompareOp,
         py: Python<'_>,
     ) -> PyObject {
