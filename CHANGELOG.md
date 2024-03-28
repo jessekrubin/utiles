@@ -1,3 +1,18 @@
+# 0.4.0 (2024-03-28)
+
+ - Updated to pyo3 `v0.21.0`
+ - Cli help messages cleaned up
+ - General spring cleaning!
+ - Hid the `utiles tilejson` cli alias `trader-joes`
+
+# 0.3.1 (2024-01-30)
+
+ - Minor bug fixes
+
+# 0.3.0 (2024-01-16)
+
+ - Expanded utiles cli with several more commands
+
 # 0.2.0 (2023-11-10)
 
  - Converted cli to rust as an excerise in learning clap
