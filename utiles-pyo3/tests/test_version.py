@@ -1,14 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List, Tuple, Union
 
-import pytest
 import tomli
-from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
-from utiles import Tile
 
 PWD = Path(__file__).parent
 PYPROJECT_TOML = PWD.parent / "pyproject.toml"
@@ -53,7 +49,6 @@ def test_version() -> None:
     assert utiles.__version__ == cargo_version
 
     try:
-
         pyproject_version = tomli.loads(Path(PYPROJECT_TOML).read_text())["project"][
             "version"
         ]
