@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use crate::pyutiles::pyiters::IntIterator;
 use crate::pyutiles::tuple_slice;
@@ -83,8 +83,8 @@ impl PyTile {
         }
     }
 
-    pub fn asdict(&self) -> HashMap<&str, u32> {
-        let mut map = HashMap::new();
+    pub fn asdict(&self) -> BTreeMap<&str, u32> {
+        let mut map = BTreeMap::new();
         map.insert("x", self.xyz.x());
         map.insert("y", self.xyz.y());
         map.insert("z", u32::from(self.xyz.z()));
@@ -272,27 +272,46 @@ impl PyTile {
         hasher.finish()
     }
 
-    // pub fn __eq__(&self, other: &Self) -> bool {
-    //     self.xyz.x == other.xyz.x
-    //         && self.xyz.y == other.xyz.y
-    //         && self.xyz.z == other.xyz.z
-    // }
-
     pub fn __richcmp__(
         &self,
         other: &Bound<'_, PyAny>,
         op: CompareOp,
         py: Python<'_>,
     ) -> PyObject {
-        // fn __richcmp__(&self, other: PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
-
-        let maybetuple = other.extract::<(u32, u32, u8)>();
-        if let Ok(tuple) = maybetuple {
+        let is_pytile = other.is_instance_of::<PyTile>();
+        if is_pytile {
+            let maybe_pytile = other.extract::<PyTile>();
+            match maybe_pytile {
+                Ok(other) => match op {
+                    CompareOp::Eq => ((self.xyz.x == other.xyz.x)
+                        && (self.xyz.y == other.xyz.y)
+                        && (self.xyz.z == other.xyz.z))
+                        .into_py(py),
+                    CompareOp::Ne => ((self.xyz.x != other.xyz.x)
+                        || (self.xyz.y != other.xyz.y)
+                        || (self.xyz.z != other.xyz.z))
+                        .into_py(py),
+                    CompareOp::Lt => ((self.xyz.x < other.xyz.x)
+                        && (self.xyz.y < other.xyz.y)
+                        && (self.xyz.z < other.xyz.z))
+                        .into_py(py),
+                    CompareOp::Gt => ((self.xyz.x > other.xyz.x)
+                        && (self.xyz.y > other.xyz.y)
+                        && (self.xyz.z > other.xyz.z))
+                        .into_py(py),
+                    CompareOp::Ge => ((self.xyz.x >= other.xyz.x)
+                        && (self.xyz.y >= other.xyz.y)
+                        && (self.xyz.z >= other.xyz.z))
+                        .into_py(py),
+                    CompareOp::Le => ((self.xyz.x <= other.xyz.x)
+                        && (self.xyz.y <= other.xyz.y)
+                        && (self.xyz.z <= other.xyz.z))
+                        .into_py(py),
+                },
+                Err(_) => py.NotImplemented(),
+            }
+        } else if let Ok(tuple) = other.extract::<(u32, u32, u8)>() {
             match op {
-                CompareOp::Lt => ((self.xyz.x < tuple.0)
-                    && (self.xyz.y < tuple.1)
-                    && (self.xyz.z < tuple.2))
-                    .into_py(py),
                 CompareOp::Eq => ((self.xyz.x == tuple.0)
                     && (self.xyz.y == tuple.1)
                     && (self.xyz.z == tuple.2))
@@ -301,25 +320,25 @@ impl PyTile {
                     || (self.xyz.y != tuple.1)
                     || (self.xyz.z != tuple.2))
                     .into_py(py),
-                _ => py.NotImplemented(),
+                CompareOp::Lt => ((self.xyz.x < tuple.0)
+                    && (self.xyz.y < tuple.1)
+                    && (self.xyz.z < tuple.2))
+                    .into_py(py),
+                CompareOp::Gt => ((self.xyz.x > tuple.0)
+                    && (self.xyz.y > tuple.1)
+                    && (self.xyz.z > tuple.2))
+                    .into_py(py),
+                CompareOp::Ge => ((self.xyz.x >= tuple.0)
+                    && (self.xyz.y >= tuple.1)
+                    && (self.xyz.z >= tuple.2))
+                    .into_py(py),
+                CompareOp::Le => ((self.xyz.x <= tuple.0)
+                    && (self.xyz.y <= tuple.1)
+                    && (self.xyz.z <= tuple.2))
+                    .into_py(py),
             }
         } else {
-            let other = other.extract::<PyRef<PyTile>>().unwrap();
-            match op {
-                CompareOp::Lt => ((self.xyz.x < other.xyz.x)
-                    && (self.xyz.y < other.xyz.y)
-                    && (self.xyz.z < other.xyz.z))
-                    .into_py(py),
-                CompareOp::Eq => ((self.xyz.x == other.xyz.x)
-                    && (self.xyz.y == other.xyz.y)
-                    && (self.xyz.z == other.xyz.z))
-                    .into_py(py),
-                CompareOp::Ne => ((self.xyz.x != other.xyz.x)
-                    || (self.xyz.y != other.xyz.y)
-                    || (self.xyz.z != other.xyz.z))
-                    .into_py(py),
-                _ => py.NotImplemented(),
-            }
+            py.NotImplemented()
         }
     }
 
@@ -499,6 +518,7 @@ impl From<PyTile> for Tile {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn test_pytile_macro() {
         let tile = pytile!(0, 0, 0);

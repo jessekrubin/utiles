@@ -1,3 +1,7 @@
+# 0.4.1 (2024-04-04)
+
+ - Fixed problem with python tile `__richcmp__` not handling invalid tiles and non-tile-like objs
+
 # 0.4.0 (2024-03-28)
 
  - Updated to pyo3 `v0.21.0`
