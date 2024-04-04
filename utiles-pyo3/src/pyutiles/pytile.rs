@@ -310,37 +310,35 @@ impl PyTile {
                 },
                 Err(_) => py.NotImplemented(),
             }
-        } else {
-            if let Ok(tuple) = other.extract::<(u32, u32, u8)>() {
-                match op {
-                    CompareOp::Eq => ((self.xyz.x == tuple.0)
-                        && (self.xyz.y == tuple.1)
-                        && (self.xyz.z == tuple.2))
-                        .into_py(py),
-                    CompareOp::Ne => ((self.xyz.x != tuple.0)
-                        || (self.xyz.y != tuple.1)
-                        || (self.xyz.z != tuple.2))
-                        .into_py(py),
-                    CompareOp::Lt => ((self.xyz.x < tuple.0)
-                        && (self.xyz.y < tuple.1)
-                        && (self.xyz.z < tuple.2))
-                        .into_py(py),
-                    CompareOp::Gt => ((self.xyz.x > tuple.0)
-                        && (self.xyz.y > tuple.1)
-                        && (self.xyz.z > tuple.2))
-                        .into_py(py),
-                    CompareOp::Ge => ((self.xyz.x >= tuple.0)
-                        && (self.xyz.y >= tuple.1)
-                        && (self.xyz.z >= tuple.2))
-                        .into_py(py),
-                    CompareOp::Le => ((self.xyz.x <= tuple.0)
-                        && (self.xyz.y <= tuple.1)
-                        && (self.xyz.z <= tuple.2))
-                        .into_py(py),
-                }
-            } else {
-                py.NotImplemented()
+        } else if let Ok(tuple) = other.extract::<(u32, u32, u8)>() {
+            match op {
+                CompareOp::Eq => ((self.xyz.x == tuple.0)
+                    && (self.xyz.y == tuple.1)
+                    && (self.xyz.z == tuple.2))
+                    .into_py(py),
+                CompareOp::Ne => ((self.xyz.x != tuple.0)
+                    || (self.xyz.y != tuple.1)
+                    || (self.xyz.z != tuple.2))
+                    .into_py(py),
+                CompareOp::Lt => ((self.xyz.x < tuple.0)
+                    && (self.xyz.y < tuple.1)
+                    && (self.xyz.z < tuple.2))
+                    .into_py(py),
+                CompareOp::Gt => ((self.xyz.x > tuple.0)
+                    && (self.xyz.y > tuple.1)
+                    && (self.xyz.z > tuple.2))
+                    .into_py(py),
+                CompareOp::Ge => ((self.xyz.x >= tuple.0)
+                    && (self.xyz.y >= tuple.1)
+                    && (self.xyz.z >= tuple.2))
+                    .into_py(py),
+                CompareOp::Le => ((self.xyz.x <= tuple.0)
+                    && (self.xyz.y <= tuple.1)
+                    && (self.xyz.z <= tuple.2))
+                    .into_py(py),
             }
+        } else {
+            py.NotImplemented()
         }
     }
 
