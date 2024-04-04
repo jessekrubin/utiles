@@ -53,7 +53,7 @@ jobs:
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
-          pytest
+          pytest --benchmark-disable
 #      - name: Build wheels
 #        uses: PyO3/maturin-action@v1
 #        with:

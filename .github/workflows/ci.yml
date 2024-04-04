@@ -44,7 +44,7 @@ jobs:
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
-          pytest
+          pytest --benchmark-disable
       # - name: pytest
       #   if: ${{ !startsWith(matrix.target, 'x86') && matrix.target != 'ppc64' }}
       #   uses: uraimo/run-on-arch-action@v2.5.0
@@ -94,7 +94,7 @@ jobs:
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
-          pytest
+          pytest --benchmark-disable
   macos:
     runs-on: macos-latest
     strategy:
@@ -127,7 +127,7 @@ jobs:
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
-          pytest
+          pytest --benchmark-disable
 
   sdist:
     runs-on: ubuntu-latest
