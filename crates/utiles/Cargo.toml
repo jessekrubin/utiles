@@ -41,7 +41,7 @@ tokio-stream = "0.1.14"
 futures = "0.3.29"
 walkdir = "2.4.0"
 time = "0.3.36"
-webbrowser = "0.8.14"
+webbrowser = "0.8.15"
 # utilesqlite dependencies
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
 sqlite-hashes = { version = "0.7", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
