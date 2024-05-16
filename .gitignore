@@ -187,9 +187,6 @@ cdk.out/
 thirdparty/
 third-party/
 
-#############
-## P2 DATA ##
-#############
 deployment.tar.gz
 target/
 .hypothesis/ 
