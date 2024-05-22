@@ -553,7 +553,6 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
 }
 
 /// Return Tile struct from longitude, latitude, and zoom.
-#[must_use]
 pub fn tile(
     lng: f64,
     lat: f64,
@@ -564,7 +563,6 @@ pub fn tile(
 }
 
 /// Return the bounding tile for a bounding box.
-#[must_use]
 pub fn bounding_tile(
     bbox: BBox,
     truncate: Option<bool>,
@@ -621,7 +619,6 @@ fn tiles_range_zoom(
 }
 
 /// Return TileRanges from a bounding box and zoom(s).
-#[must_use]
 pub fn tile_ranges(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,
@@ -677,7 +674,6 @@ pub fn tile_ranges(
 }
 
 /// Return the number of tiles for a bounding box and zoom(s).
-#[must_use]
 pub fn tiles_count(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,

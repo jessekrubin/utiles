@@ -311,7 +311,6 @@ impl Tile {
     }
 
     /// Return tile from json string either object or array
-    #[must_use]
     pub fn from_json_loose(json: &str) -> Result<Self, UtilesCoreError> {
         let v = serde_json::from_str::<Value>(json)?;
         let t = Tile::try_from(&v)?;
@@ -331,7 +330,6 @@ impl Tile {
     }
 
     /// Return new Tile from given (lng, lat, zoom)
-    #[must_use]
     pub fn from_lnglat_zoom(
         lng: f64,
         lat: f64,
