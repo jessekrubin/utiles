@@ -622,19 +622,17 @@ impl TryFrom<&Value> for Tile {
                         UtilesCoreError::InvalidJson(serde_json::to_string(&v).unwrap())
                     })?;
                     Ok(Tile::from((x, y, z)))
+                } else if v.contains_key("tile")
+                    && v["tile"].is_array()
+                    && v["tile"].as_array().unwrap().len() == 3
+                {
+                    let tuple =
+                        serde_json::from_value::<TileTuple>(v["tile"].clone())?;
+                    Ok(Tile::from(tuple))
                 } else {
-                    if v.contains_key("tile")
-                        && v["tile"].is_array()
-                        && v["tile"].as_array().unwrap().len() == 3
-                    {
-                        let tuple =
-                            serde_json::from_value::<TileTuple>(v["tile"].clone())?;
-                        Ok(Tile::from(tuple))
-                    } else {
-                        Err(UtilesCoreError::InvalidJson(
-                            serde_json::to_string(&v).unwrap(),
-                        ))
-                    }
+                    Err(UtilesCoreError::InvalidJson(
+                        serde_json::to_string(&v).unwrap(),
+                    ))
                 }
             }
             _ => Err(UtilesCoreError::InvalidJson(val.to_string())),
