@@ -1,3 +1,4 @@
+use crate::UtilesCoreError;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -11,14 +12,14 @@ pub enum Projection {
     Mercator,
 }
 
-impl From<String> for Projection {
-    fn from(s: String) -> Self {
-        match s.to_ascii_lowercase().as_str() {
-            "mercator" => Projection::Mercator,
-            "geographic" => Projection::Geographic,
-            _ => {
-                panic!("Invalid projection: {s}");
-            }
+impl TryFrom<String> for Projection {
+    type Error = UtilesCoreError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.to_lowercase().as_str() {
+            "geographic" => Ok(Projection::Geographic),
+            "mercator" => Ok(Projection::Mercator),
+            _ => Err(UtilesCoreError::Str(value)),
         }
     }
 }

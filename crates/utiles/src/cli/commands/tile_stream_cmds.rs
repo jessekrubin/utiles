@@ -4,6 +4,7 @@ use utiles_core::{bounding_tile, Tile, TileLike};
 
 use crate::cli::args::TileFmtArgs;
 use crate::cli::stdinterator_filter;
+use crate::errors::UtilesResult;
 use crate::gj::parsing::parse_bbox_geojson;
 
 pub fn neighbors_main(args: TileFmtArgs) {
@@ -18,7 +19,7 @@ pub fn neighbors_main(args: TileFmtArgs) {
     }
 }
 
-pub fn bounding_tile_main(args: TileFmtArgs) {
+pub fn bounding_tile_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let bboxes = lines.map(|l| {
         let s = l.unwrap();
@@ -26,11 +27,12 @@ pub fn bounding_tile_main(args: TileFmtArgs) {
         parse_bbox_geojson(&s).unwrap()
     });
     for bbox in bboxes {
-        let tile = bounding_tile(bbox, None);
+        let tile = bounding_tile(bbox, None)?;
         // let tile = Tile::from_bbox(&bbox, zoom);
         let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
         println!("{}{}", rs, tile.json_arr());
     }
+    Ok(())
 }
 
 pub fn pmtileid_main(args: TileFmtArgs) {

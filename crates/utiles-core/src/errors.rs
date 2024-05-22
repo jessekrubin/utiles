@@ -36,6 +36,10 @@ pub enum UtilesCoreError {
     #[error("unknown utiles error: {0}")]
     Unknown(String),
 
+    /// Error with some string
+    #[error("{0}")]
+    Str(String),
+
     /// Error on serde io error
     #[error("io error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),

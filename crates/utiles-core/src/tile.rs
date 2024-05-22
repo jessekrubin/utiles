@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::convert::TryFrom;
 use std::error::Error;
 use std::str::FromStr;
 
@@ -6,17 +7,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::constants::EPSILON;
+use crate::errors::UtilesCoreError;
 use crate::errors::UtilesCoreResult;
 use crate::fns::{bounds, children, neighbors, parent, siblings, xy};
+use crate::mbutiles::MbtTileRow;
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
-
-use crate::errors::UtilesCoreError;
-use crate::mbutiles::MbtTileRow;
 use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, utile, xyz2quadkey};
-use std::convert::TryFrom;
 
 /// Tile X-Y-Z struct
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -338,14 +337,8 @@ impl Tile {
         lat: f64,
         zoom: u8,
         truncate: Option<bool>,
-    ) -> Self {
-        let xy = crate::_xy(lng, lat, truncate);
-        let (x, y) = match xy {
-            Ok(xy) => xy,
-            Err(e) => {
-                panic!("Invalid lnglat: {e}");
-            }
-        };
+    ) -> Result<Self, UtilesCoreError> {
+        let (x, y) = crate::_xy(lng, lat, truncate)?;
         let z2 = 2.0_f64.powi(i32::from(zoom));
         let z2f = z2;
         let xtile = if x <= 0.0 {
@@ -365,11 +358,11 @@ impl Tile {
             let yt = (y + EPSILON) * z2f;
             (yt.floor()) as u32
         };
-        Self {
+        Ok(Self {
             x: xtile,
             y: ytile,
             z: zoom,
-        }
+        })
     }
 
     /// Return the bounding box of the tile
@@ -643,14 +636,14 @@ impl TryFrom<&Value> for Tile {
 //     }
 // }
 
-impl From<&str> for Tile {
-    fn from(s: &str) -> Self {
-        let res = Tile::from_json(s);
+impl TryFrom<&str> for Tile {
+    type Error = UtilesCoreError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        let res = Tile::from_str(s);
         match res {
-            Ok(tile) => tile,
-            Err(e) => {
-                panic!("Invalid json value: {e}");
-            }
+            Ok(tile) => Ok(tile),
+            Err(e) => Err(UtilesCoreError::TileParseError(e.to_string())),
         }
     }
 }
@@ -707,7 +700,8 @@ mod tests {
         let json_obj_with_tile_array = r#"{"tile": [1, 2, 3]}"#;
         let val_obj_with_tile_array =
             serde_json::from_str::<Value>(json_obj_with_tile_array).unwrap();
-        let tile_from_obj_with_tile_array = Tile::from(val_obj_with_tile_array);
+        let tile_from_obj_with_tile_array =
+            Tile::from(val_obj_with_tile_array).unwrap();
         assert_eq!(tile_from_obj_with_tile_array, Tile::new(1, 2, 3));
     }
 }

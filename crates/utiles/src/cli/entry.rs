@@ -81,7 +81,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
 
     match args.command {
         Commands::Lint(args) => {
-            lint_main(&args).await;
+            let _r = lint_main(&args).await;
         }
         Commands::Touch(args) => {
             touch_main(&args).unwrap();
@@ -96,7 +96,7 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         }
         Commands::Tilejson(args) => tilejson_main(&args),
         Commands::Copy(args) => {
-            copy_main(args).await;
+            let _ = copy_main(args).await;
         }
         Commands::Mbinfo(args) => mbtiles_info_main(&args),
         Commands::Dev(args) => {
@@ -109,7 +109,12 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         // mercantile cli like
         Commands::Quadkey(args) => quadkey_main(args),
         Commands::Pmtileid(args) => pmtileid_main(args),
-        Commands::BoundingTile(args) => bounding_tile_main(args),
+        Commands::BoundingTile(args) => {
+            let r = bounding_tile_main(args);
+            if r.is_err() {
+                return 1;
+            }
+        }
         Commands::Tiles(args) => tiles_main(args, loop_fn),
         Commands::Neighbors(args) => neighbors_main(args),
         Commands::Children(args) => children_main(args),
