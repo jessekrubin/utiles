@@ -519,7 +519,7 @@ pub async fn copy_main(args: CopyArgs) -> UtilesResult<()> {
         (Source::Fs(_src), Destination::Mbtiles(_dst)) => CopySrcDest::Fs2Mbtiles,
         _ => panic!("src/dst combo not supported"),
     };
-    
+
     match srcdst {
         CopySrcDest::Mbtiles2Fs => copy_mbtiles2fs(args.src, args.dst, cfg).await,
         CopySrcDest::Fs2Mbtiles => copy_fs2mbtiles(args.src, args.dst, cfg).await,
