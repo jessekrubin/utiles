@@ -541,13 +541,26 @@ impl From<(u32, u32, u8)> for Tile {
         TileTuple::from(tuple).into()
     }
 }
+impl TryFrom<&Map<String, Value>> for Tile {
+    type Error = UtilesCoreError;
 
-impl From<&Map<String, Value>> for Tile {
-    fn from(map: &Map<String, Value>) -> Self {
-        let x = map["x"].as_u64().unwrap() as u32;
-        let y = map["y"].as_u64().unwrap() as u32;
-        let z = map["z"].as_u64().unwrap() as u8;
-        utile!(x, y, z)
+    fn try_from(map: &Map<String, Value>) -> Result<Self, Self::Error> {
+        let x = map["x"].as_u64().ok_or_else(|| {
+            UtilesCoreError::InvalidJson(
+                serde_json::to_string(&map).unwrap_or("".to_string()),
+            )
+        })? as u32;
+        let y = map["y"].as_u64().ok_or_else(|| {
+            UtilesCoreError::InvalidJson(
+                serde_json::to_string(&map).unwrap_or("".to_string()),
+            )
+        })? as u32;
+        let z = map["z"].as_u64().ok_or_else(|| {
+            UtilesCoreError::InvalidJson(
+                serde_json::to_string(&map).unwrap_or("".to_string()),
+            )
+        })? as u8;
+        Ok(Tile::new(x, y, z))
     }
 }
 
@@ -613,25 +626,38 @@ impl TryFrom<&Value> for Tile {
             Value::Object(v) => {
                 if v.contains_key("x") && v.contains_key("y") && v.contains_key("z") {
                     let x = v["x"].as_u64().ok_or_else(|| {
-                        UtilesCoreError::InvalidJson(serde_json::to_string(&v).unwrap())
+                        UtilesCoreError::InvalidJson(
+                            serde_json::to_string(&v)
+                                .expect("Invalid json object for Tile from Value"),
+                        )
                     })?;
                     let y = v["y"].as_u64().ok_or_else(|| {
-                        UtilesCoreError::InvalidJson(serde_json::to_string(&v).unwrap())
+                        UtilesCoreError::InvalidJson(
+                            serde_json::to_string(&v)
+                                .expect("Invalid json object for Tile from Value"),
+                        )
                     })?;
                     let z = v["z"].as_u64().ok_or_else(|| {
-                        UtilesCoreError::InvalidJson(serde_json::to_string(&v).unwrap())
+                        UtilesCoreError::InvalidJson(
+                            serde_json::to_string(&v)
+                                .expect("Invalid json object for Tile from Value"),
+                        )
                     })?;
                     Ok(Tile::from((x, y, z)))
                 } else if v.contains_key("tile")
                     && v["tile"].is_array()
-                    && v["tile"].as_array().unwrap().len() == 3
+                    && v["tile"]
+                        .as_array()
+                        .expect("Unable to get tile array from Value")
+                        .len()
+                        == 3
                 {
-                    let tuple =
-                        serde_json::from_value::<TileTuple>(v["tile"].clone())?;
+                    let tuple = serde_json::from_value::<TileTuple>(v["tile"].clone())?;
                     Ok(Tile::from(tuple))
                 } else {
                     Err(UtilesCoreError::InvalidJson(
-                        serde_json::to_string(&v).unwrap(),
+                        serde_json::to_string(&v)
+                            .expect("Invalid json object for Tile from Value"),
                     ))
                 }
             }

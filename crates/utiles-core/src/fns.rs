@@ -721,23 +721,27 @@ pub fn tiles(
                 upper_left_lnglat.lat(),
                 zoom,
                 Some(false),
-            )
-            .unwrap();
+            );
             let bottom_right_tile = Tile::from_lnglat_zoom(
                 lower_right_lnglat.lng() - LL_EPSILON,
                 lower_right_lnglat.lat() + LL_EPSILON,
                 zoom,
                 Some(false),
-            )
-            .unwrap();
-            tiles_range_zoom(
-                top_left_tile.x,
-                bottom_right_tile.x,
-                top_left_tile.y,
-                bottom_right_tile.y,
-                zoom,
-            )
-            .map(move |(x, y, z)| Tile { x, y, z })
+            );
+
+            match (top_left_tile, bottom_right_tile) {
+                (Ok(top_left), Ok(bottom_right)) => tiles_range_zoom(
+                    top_left.x,
+                    bottom_right.x,
+                    top_left.y,
+                    bottom_right.y,
+                    zoom,
+                )
+                .map(move |(x, y, z)| Tile { x, y, z })
+                .collect::<Vec<_>>()
+                .into_iter(),
+                _ => Vec::new().into_iter(),
+            }
         })
     })
 }
