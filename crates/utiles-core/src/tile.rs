@@ -611,20 +611,42 @@ impl TryFrom<&Value> for Tile {
                 Ok(t)
             }
             Value::Object(v) => {
-                if v.contains_key("tile")
-                    && v["tile"].is_array()
-                    && v["tile"].as_array().unwrap().len() == 3
-                {
-                    let tuple = serde_json::from_value::<TileTuple>(v["tile"].clone())?;
-                    Ok(Tile::from(tuple))
+                if v.contains_key("x") && v.contains_key("y") && v.contains_key("z") {
+                    let x = v["x"].as_u64().ok_or_else(|| {
+                        UtilesCoreError::InvalidJson(serde_json::to_string(&v).unwrap())
+                    })?;
+                    let y = v["y"].as_u64().ok_or_else(|| {
+                        UtilesCoreError::InvalidJson(serde_json::to_string(&v).unwrap())
+                    })?;
+                    let z = v["z"].as_u64().ok_or_else(|| {
+                        UtilesCoreError::InvalidJson(serde_json::to_string(&v).unwrap())
+                    })?;
+                    Ok(Tile::from((x, y, z)))
                 } else {
-                    Err(UtilesCoreError::InvalidJson(
-                        serde_json::to_string(&v).unwrap(),
-                    ))
+                    if v.contains_key("tile")
+                        && v["tile"].is_array()
+                        && v["tile"].as_array().unwrap().len() == 3
+                    {
+                        let tuple =
+                            serde_json::from_value::<TileTuple>(v["tile"].clone())?;
+                        Ok(Tile::from(tuple))
+                    } else {
+                        Err(UtilesCoreError::InvalidJson(
+                            serde_json::to_string(&v).unwrap(),
+                        ))
+                    }
                 }
             }
             _ => Err(UtilesCoreError::InvalidJson(val.to_string())),
         }
+    }
+}
+
+impl TryFrom<Value> for Tile {
+    type Error = UtilesCoreError;
+
+    fn try_from(val: Value) -> Result<Self, Self::Error> {
+        Tile::try_from(&val)
     }
 }
 
@@ -681,7 +703,7 @@ mod tests {
     fn tile_from_value_obj() {
         let json_obj = r#"{"x": 1, "y": 2, "z": 3}"#;
         let val_obj = serde_json::from_str::<Value>(json_obj).unwrap();
-        let tile_from_obj = Tile::from(val_obj);
+        let tile_from_obj = Tile::try_from(val_obj).unwrap();
         assert_eq!(tile_from_obj, Tile::new(1, 2, 3));
     }
 
@@ -689,7 +711,7 @@ mod tests {
     fn tile_from_value_arr() {
         let json_arr = r#"[1, 2, 3]"#;
         let val_arr = serde_json::from_str::<Value>(json_arr).unwrap();
-        let tile_from_arr = Tile::from(val_arr);
+        let tile_from_arr = Tile::try_from(val_arr).unwrap();
         assert_eq!(tile_from_arr, Tile::new(1, 2, 3));
     }
 
@@ -699,7 +721,7 @@ mod tests {
         let val_obj_with_tile_array =
             serde_json::from_str::<Value>(json_obj_with_tile_array).unwrap();
         let tile_from_obj_with_tile_array =
-            Tile::from(val_obj_with_tile_array).unwrap();
+            Tile::try_from(val_obj_with_tile_array).unwrap();
         assert_eq!(tile_from_obj_with_tile_array, Tile::new(1, 2, 3));
     }
 }

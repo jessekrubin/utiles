@@ -109,7 +109,7 @@ mod tests {
         let expect = vec![Tile::new(3413, 6202, 14), Tile::new(3413, 6203, 14)];
         assert_eq!(tiles.collect::<Vec<Tile>>(), expect);
 
-        let ntiles = tiles_count(bounds, 14.into());
+        let ntiles = tiles_count(bounds, 14.into()).unwrap();
         assert_eq!(ntiles, 2);
     }
 

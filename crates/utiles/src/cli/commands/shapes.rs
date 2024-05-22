@@ -195,10 +195,7 @@ pub fn shapes_main(args: ShapesArgs) {
 
     let mut first = true;
 
-    for tile_n_properties in parsed_lines
-        .filter(|tile_n_properties| tile_n_properties.is_some())
-        .map(|tile_n_properties| tile_n_properties.unwrap())
-    {
+    for tile_n_properties in parsed_lines.flatten() {
         let tile = tile_n_properties.tile;
         let properties = tile_n_properties.properties;
         let mut f = tile.feature(&feature_options).unwrap();
