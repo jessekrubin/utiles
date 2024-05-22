@@ -1,7 +1,7 @@
 use crate::cli::stdinterator::StdInterator;
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
-use tracing::debug;
+use tracing::{debug, error};
 use utiles_core::projection::Projection;
 use utiles_core::tile::FeatureOptions;
 use utiles_core::Tile;
@@ -133,14 +133,22 @@ pub fn shapes_main(args: ShapesArgs) {
         } else {
             None
         };
-        let t = Tile::from(&val);
-        TileWithProperties {
-            tile: t,
-            id,
-            properties,
+        let t = Tile::try_from(&val);
+        match t {
+            Ok(tile) => {
+                let tile_with_properties = TileWithProperties {
+                    tile,
+                    id,
+                    properties,
+                };
+                Some(tile_with_properties)
+            }
+            Err(e) => {
+                error!("Error parsing tile: {}", e);
+                // throw the error here
+                panic!("Error parsing tile: {}", e);
+            }
         }
-
-        // Tile::from_json_loose(&ln)
     });
     let feature_options: FeatureOptions = FeatureOptions {
         fid: None,
@@ -187,7 +195,10 @@ pub fn shapes_main(args: ShapesArgs) {
 
     let mut first = true;
 
-    for tile_n_properties in parsed_lines {
+    for tile_n_properties in parsed_lines
+        .filter(|tile_n_properties| tile_n_properties.is_some())
+        .map(|tile_n_properties| tile_n_properties.unwrap())
+    {
         let tile = tile_n_properties.tile;
         let properties = tile_n_properties.properties;
         let mut f = tile.feature(&feature_options).unwrap();

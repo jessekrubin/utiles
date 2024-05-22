@@ -16,7 +16,8 @@ pub struct TileFeature {
 
 impl TileFeature {
     pub fn to_json(&self) -> String {
-        serde_json::to_string(self).unwrap()
+        serde_json::to_string(self)
+            .expect("Failed to serialize TileFeature... which should never happen")
     }
 
     pub fn bbox_lons(&self) -> Vec<f64> {

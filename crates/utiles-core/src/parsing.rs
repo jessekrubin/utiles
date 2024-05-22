@@ -45,7 +45,9 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
             // take first four elements
             let bbox_vec = v
                 .as_array()
-                .unwrap()
+                .expect(
+                    "Failed to parse bbox from JSON. Expected an array of 4 elements or a GeoJSON-like object with a 'bbox' key.",
+                )
                 .iter()
                 .take(4)
                 .cloned()
@@ -229,7 +231,9 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
 pub fn parse_uints(input: &str) -> Vec<u64> {
     parse_uint_strings(input)
         .iter()
-        .map(|s| s.parse::<u64>().unwrap())
+        .map(|s| s.parse::<u64>().expect(
+            "Failed to parse unsigned integer from string. Expected a string of digits.",
+        ))
         .collect()
 }
 
@@ -325,7 +329,9 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 pub fn parse_ints(input: &str) -> Vec<i64> {
     parse_int_strings(input)
         .iter()
-        .map(|s| s.parse::<i64>().unwrap())
+        .map(|s| s.parse::<i64>().expect(
+            "Failed to parse signed integer from string. Expected a string of digits with an optional leading '-' character.",
+        ))
         .collect()
 }
 
