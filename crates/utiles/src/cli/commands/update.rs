@@ -116,7 +116,7 @@ pub async fn update_mbtiles(
     Ok(changes)
 }
 
-pub async fn update_main(args: &UpdateArgs) {
+pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
     assert!(
@@ -135,4 +135,5 @@ pub async fn update_main(args: &UpdateArgs) {
     debug!("changes: {:?}", changes);
     let s = serde_json::to_string_pretty(&changes).unwrap();
     println!("{}", s);
+    Ok(())
 }

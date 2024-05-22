@@ -2,12 +2,11 @@ use std::path::Path;
 
 use tracing::{debug, info};
 
-use utiles_core::errors::UtilesCoreResult;
-
 use crate::cli::args::TouchArgs;
+use crate::errors::UtilesResult;
 use crate::utilesqlite::Mbtiles;
 
-pub fn touch_main(args: &TouchArgs) -> UtilesCoreResult<()> {
+pub fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
     let filepath = &args.filepath;
     debug!("touch: {}", filepath);
     // check that filepath does not exist already

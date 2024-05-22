@@ -12,6 +12,7 @@ use crate::cli::commands::{
     pmtileid_main, quadkey_main, rimraf_main, serve_main, shapes_main, tilejson_main,
     tiles_main, touch_main, update_main, vacuum_main,
 };
+use crate::errors::UtilesResult;
 
 struct LogConfig {
     pub debug: bool,
@@ -79,53 +80,38 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
     debug!("argv: {:?}", argv);
     debug!("args: {:?}", args);
 
-    match args.command {
-        Commands::Lint(args) => {
-            let _r = lint_main(&args).await;
-        }
-        Commands::Touch(args) => {
-            touch_main(&args).unwrap();
-        }
-        Commands::Vacuum(args) => {
-            vacuum_main(&args);
-        }
+    let res: UtilesResult<()> = match args.command {
+        Commands::Lint(args) => lint_main(&args).await,
+        Commands::Touch(args) => touch_main(&args),
+        Commands::Vacuum(args) => vacuum_main(&args),
         Commands::Metadata(args) => metadata_main(&args),
         Commands::MetadataSet(args) => metadata_set_main(&args),
-        Commands::Update(args) => {
-            update_main(&args).await;
-        }
+        Commands::Update(args) => update_main(&args).await,
         Commands::Tilejson(args) => tilejson_main(&args),
-        Commands::Copy(args) => {
-            let _ = copy_main(args).await;
-        }
+        Commands::Copy(args) => copy_main(args).await,
         Commands::Mbinfo(args) => mbtiles_info_main(&args),
-        Commands::Dev(args) => {
-            let _r = dev_main(args).await;
-        }
-        Commands::Rimraf(args) => {
-            rimraf_main(args).await;
-        }
+        Commands::Dev(args) => dev_main(args).await,
+        Commands::Rimraf(args) => rimraf_main(args).await,
         Commands::Contains { filepath, lnglat } => contains_main(&filepath, lnglat),
         // mercantile cli like
         Commands::Quadkey(args) => quadkey_main(args),
         Commands::Pmtileid(args) => pmtileid_main(args),
-        Commands::BoundingTile(args) => {
-            let r = bounding_tile_main(args);
-            if r.is_err() {
-                return 1;
-            }
-        }
+        Commands::BoundingTile(args) => bounding_tile_main(args),
         Commands::Tiles(args) => tiles_main(args, loop_fn),
         Commands::Neighbors(args) => neighbors_main(args),
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),
         Commands::Shapes(args) => shapes_main(args),
         // server WIP
-        Commands::Serve(args) => {
-            let _r = serve_main(args).await;
+        Commands::Serve(args) => serve_main(args).await,
+    };
+    match res {
+        Ok(_) => 0,
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            1
         }
     }
-    0
 }
 
 // not sure why this is needed... cargo thinks it's unused???

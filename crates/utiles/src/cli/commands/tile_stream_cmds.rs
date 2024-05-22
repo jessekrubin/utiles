@@ -7,7 +7,7 @@ use crate::cli::stdinterator_filter;
 use crate::errors::UtilesResult;
 use crate::gj::parsing::parse_bbox_geojson;
 
-pub fn neighbors_main(args: TileFmtArgs) {
+pub fn neighbors_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
     for tile in tiles {
@@ -17,6 +17,7 @@ pub fn neighbors_main(args: TileFmtArgs) {
             println!("{}{}", rs, neighbor.json_arr());
         }
     }
+    Ok(())
 }
 
 pub fn bounding_tile_main(args: TileFmtArgs) -> UtilesResult<()> {
@@ -35,7 +36,7 @@ pub fn bounding_tile_main(args: TileFmtArgs) -> UtilesResult<()> {
     Ok(())
 }
 
-pub fn pmtileid_main(args: TileFmtArgs) {
+pub fn pmtileid_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     for line in lines {
         // if the line bgins w '[' treat as tile
@@ -60,9 +61,10 @@ pub fn pmtileid_main(args: TileFmtArgs) {
             }
         }
     }
+    Ok(())
 }
 
-pub fn quadkey_main(args: TileFmtArgs) {
+pub fn quadkey_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     for line in lines {
         // if the line begins w/ '['/'{' treat as json-tile
@@ -88,4 +90,5 @@ pub fn quadkey_main(args: TileFmtArgs) {
             }
         }
     }
+    Ok(())
 }

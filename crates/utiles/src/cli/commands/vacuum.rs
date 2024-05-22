@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use tracing::{error, info};
 
 use crate::cli::args::VacuumArgs;
+use crate::errors::UtilesResult;
 use crate::utilesqlite::squealite::Sqlike3;
 use crate::utilesqlite::Mbtiles;
 
@@ -20,7 +21,7 @@ pub struct VacuumInfo {
     pub size_diff: i64,
 }
 
-pub fn vacuum_main(args: &VacuumArgs) {
+pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     // check that the file exists
     let mbt = Mbtiles::open_existing(&args.common.filepath).unwrap();
     // get file size from filepath
@@ -78,4 +79,5 @@ pub fn vacuum_main(args: &VacuumArgs) {
         serde_json::to_string_pretty(&info).unwrap()
     };
     println!("{}", out_str);
+    Ok(())
 }

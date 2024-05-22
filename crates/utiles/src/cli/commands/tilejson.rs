@@ -6,8 +6,9 @@ use crate::utilejson::tilejson_stringify;
 use crate::utilesqlite::Mbtiles;
 
 use crate::cli::args::TilejsonArgs;
+use crate::errors::UtilesResult;
 
-pub fn tilejson_main(args: &TilejsonArgs) {
+pub fn tilejson_main(args: &TilejsonArgs) -> UtilesResult<()> {
     debug!("tilejson: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
@@ -28,4 +29,6 @@ pub fn tilejson_main(args: &TilejsonArgs) {
     }
     let s = tilejson_stringify(&tj, Option::from(!args.common.min));
     println!("{s}");
+
+    Ok(())
 }

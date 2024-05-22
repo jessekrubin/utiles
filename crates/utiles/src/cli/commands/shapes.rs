@@ -1,4 +1,5 @@
 use crate::cli::stdinterator::StdInterator;
+use crate::errors::UtilesResult;
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
 use tracing::{debug, error};
@@ -102,7 +103,7 @@ struct TileWithProperties {
     properties: Option<Map<String, Value>>,
 }
 
-pub fn shapes_main(args: ShapesArgs) {
+pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
     debug!("{:?}", args);
     let input_lines = StdInterator::new(args.input);
     let lines = input_lines
@@ -231,4 +232,5 @@ pub fn shapes_main(args: ShapesArgs) {
         println!("]");
         println!("}}");
     }
+    Ok(())
 }

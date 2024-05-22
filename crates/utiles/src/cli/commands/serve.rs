@@ -1,3 +1,4 @@
+use crate::errors::UtilesResult;
 use clap::Parser;
 use tracing::{debug, warn};
 
@@ -36,7 +37,7 @@ impl ServeArgs {
 }
 
 #[allow(clippy::unused_async)]
-pub async fn serve_main(args: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn serve_main(args: ServeArgs) -> UtilesResult<()> {
     debug!("args: {:?}", args);
     if args.fspaths.is_none() || args.fspaths.as_ref().unwrap().is_empty() {
         warn!("no fspaths provided");
