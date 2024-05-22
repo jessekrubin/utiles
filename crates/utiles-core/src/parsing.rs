@@ -426,6 +426,8 @@ pub fn parse_float_blocks(input: &str) -> Vec<&str> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
+
     use crate::bbox::*;
     use crate::parsing::parse_bbox;
 

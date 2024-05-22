@@ -84,6 +84,8 @@ macro_rules! point2d {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
+
     use std::collections::HashSet;
 
     use super::*;
