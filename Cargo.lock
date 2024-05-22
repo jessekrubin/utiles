@@ -1455,7 +1455,7 @@ dependencies = [
 
 [[package]]
 name = "pyutiles"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "fast_hilbert",
  "pyo3",
@@ -2173,7 +2173,7 @@ checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
 name = "utiles"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "async-sqlite",
  "async-trait",
@@ -2209,7 +2209,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-core"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "fast_hilbert",
  "serde",
