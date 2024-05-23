@@ -4,6 +4,7 @@ use futures::{stream, StreamExt};
 use tracing::{debug, warn};
 
 use crate::cli::args::LintArgs;
+use crate::errors::UtilesResult;
 use crate::globster;
 use crate::lint::MbtilesLinter;
 
@@ -203,7 +204,7 @@ async fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
     // }
 }
 
-pub async fn lint_main(args: &LintArgs) {
+pub async fn lint_main(args: &LintArgs) -> UtilesResult<()> {
     let filepaths = globster::find_filepaths(&args.fspaths);
     if args.fix {
         warn!("NOT IMPLEMENTED: `utiles lint --fix`");
@@ -211,16 +212,8 @@ pub async fn lint_main(args: &LintArgs) {
     debug!("filepaths: {:?}", filepaths);
     if filepaths.is_empty() {
         warn!("No files found");
-        return;
+        return Ok(());
     }
     lint_filepaths(filepaths, args.fix).await;
+    Ok(())
 }
-
-// pub fn lint_metadata_map(map: &HashMap<String, String>) -> Vec<UtilesLintError> {
-//     let errs = REQUIRED_METADATA_FIELDS
-//         .iter()
-//         .filter(|key| !map.contains_key(&(**key).to_string()))
-//         .map(|key| UtilesLintError::MbtMissingMetadataKv((*key).to_string()))
-//         .collect::<Vec<UtilesLintError>>();
-//     errs
-// }

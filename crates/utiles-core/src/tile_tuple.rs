@@ -1,5 +1,6 @@
 use crate::tile_like::TileLike;
 use serde::Deserialize;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
 #[allow(clippy::upper_case_acronyms)]
 pub struct TileTuple(pub u32, pub u32, pub u8);

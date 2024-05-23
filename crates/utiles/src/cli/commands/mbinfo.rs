@@ -4,6 +4,7 @@ use serde::Serialize;
 use tracing::debug;
 
 use crate::cli::args::MbtilesStatsArgs;
+use crate::errors::UtilesResult;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use crate::utilesqlite::Mbtiles;
 
@@ -65,7 +66,7 @@ fn mbinfo(filepath: &str) -> MbtilesStats {
     }
 }
 
-pub fn mbtiles_info_main(args: &MbtilesStatsArgs) {
+pub fn mbtiles_info_main(args: &MbtilesStatsArgs) -> UtilesResult<()> {
     let stats = mbinfo(&args.common.filepath);
     let str = if args.common.min {
         serde_json::to_string(&stats).unwrap()
@@ -73,4 +74,5 @@ pub fn mbtiles_info_main(args: &MbtilesStatsArgs) {
         serde_json::to_string_pretty(&stats).unwrap()
     };
     println!("{str}");
+    Ok(())
 }

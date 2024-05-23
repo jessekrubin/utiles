@@ -1,3 +1,4 @@
+use crate::errors::UtilesResult;
 use clap::Parser;
 use tracing::{debug, warn};
 
@@ -19,7 +20,7 @@ pub struct DevArgs {
 }
 
 #[allow(clippy::unused_async)]
-async fn dev(args: DevArgs) -> Result<(), Box<dyn std::error::Error>> {
+async fn dev(args: DevArgs) -> UtilesResult<()> {
     // DEV START
     debug!("args: {:?}", args);
     let filepath = args.fspath.unwrap();
@@ -49,7 +50,7 @@ async fn dev(args: DevArgs) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub async fn dev_main(args: DevArgs) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn dev_main(args: DevArgs) -> UtilesResult<()> {
     warn!("__DEV_MAIN__");
     dev(args).await?;
     Ok(())

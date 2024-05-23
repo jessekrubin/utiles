@@ -16,6 +16,7 @@ use utiles_core::tile_data_row::TileData;
 use utiles_core::{tile_ranges, Tile, TileLike};
 
 use crate::cli::args::CopyArgs;
+use crate::errors::UtilesResult;
 use crate::utilesqlite::Mbtiles;
 
 // #[derive(Debug)]
@@ -141,13 +142,16 @@ impl CopyConfig {
     //     }
     // }
 
-    pub fn mbtiles_sql_where(&self, zoom_levels: Option<Vec<u8>>) -> String {
+    pub fn mbtiles_sql_where(
+        &self,
+        zoom_levels: Option<Vec<u8>>,
+    ) -> UtilesResult<String> {
         let pred = match (&self.bbox, &self.zooms) {
             (Some(bbox), Some(zooms)) => {
                 let trange = tile_ranges(
                     bbox.tuple(),
                     zoom_levels.unwrap_or(zooms.clone()).into(),
-                );
+                )?;
                 trange.mbtiles_sql_where()
             }
             (Some(bbox), None) => {
@@ -156,7 +160,7 @@ impl CopyConfig {
                     zoom_levels
                         .unwrap_or((0..28).map(|z| z as u8).collect::<Vec<u8>>())
                         .into(),
-                );
+                )?;
                 trange.mbtiles_sql_where()
             }
             (None, Some(zooms)) => {
@@ -173,14 +177,18 @@ impl CopyConfig {
         };
         // attach 'WHERE'
         if pred.is_empty() {
-            pred
+            Ok(pred)
         } else {
-            format!("WHERE {pred}")
+            Ok(format!("WHERE {pred}"))
         }
     }
 }
 
-async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
+async fn copy_mbtiles2fs(
+    mbtiles: String,
+    output_dir: String,
+    cfg: CopyConfig,
+) -> UtilesResult<()> {
     let mbt_path = Path::new(&mbtiles);
     let mbt = Mbtiles::from(mbt_path);
 
@@ -188,7 +196,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
         // Some(zoom_levels_for_where)
         // flip happens here maybe
         None,
-    );
+    )?;
     let start_time = std::time::Instant::now();
 
     let count_query = &"SELECT count(*) FROM tiles".to_string();
@@ -287,6 +295,7 @@ async fn copy_mbtiles2fs(mbtiles: String, output_dir: String, cfg: CopyConfig) {
     let elapsed = end_time - start_time;
     let elapsed_secs = elapsed.as_secs();
     debug!("elapsed_secs: {elapsed_secs:?}");
+    Ok(())
 }
 
 fn fspath2xyz(path: &Path) -> Result<(u32, u32, u8), std::num::ParseIntError> {
@@ -313,7 +322,11 @@ fn fspath2xyz(path: &Path) -> Result<(u32, u32, u8), std::num::ParseIntError> {
     Ok((x, y, z))
 }
 
-async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
+async fn copy_fs2mbtiles(
+    dirpath: String,
+    mbtiles: String,
+    _cfg: CopyConfig,
+) -> UtilesResult<()> {
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let walker = WalkDir::new(&dirpath).min_depth(3).max_depth(3);
     let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();
@@ -386,6 +399,7 @@ async fn copy_fs2mbtiles(dirpath: String, mbtiles: String, _cfg: CopyConfig) {
     drop(tx);
     // Wait for the database task to complete
     db_task.await.unwrap();
+    Ok(())
 }
 
 #[allow(dead_code)]
@@ -474,7 +488,7 @@ fn get_tile_dst(dst: &str) -> Destination {
     }
 }
 
-pub async fn copy_main(args: CopyArgs) {
+pub async fn copy_main(args: CopyArgs) -> UtilesResult<()> {
     warn!("experimental command: copy/cp");
     // match args.zoom {
     //     Some(zoom) => {
@@ -505,12 +519,9 @@ pub async fn copy_main(args: CopyArgs) {
         (Source::Fs(_src), Destination::Mbtiles(_dst)) => CopySrcDest::Fs2Mbtiles,
         _ => panic!("src/dst combo not supported"),
     };
+
     match srcdst {
-        CopySrcDest::Mbtiles2Fs => {
-            copy_mbtiles2fs(args.src, args.dst, cfg).await;
-        }
-        CopySrcDest::Fs2Mbtiles => {
-            copy_fs2mbtiles(args.src, args.dst, cfg).await;
-        }
+        CopySrcDest::Mbtiles2Fs => copy_mbtiles2fs(args.src, args.dst, cfg).await,
+        CopySrcDest::Fs2Mbtiles => copy_fs2mbtiles(args.src, args.dst, cfg).await,
     }
 }

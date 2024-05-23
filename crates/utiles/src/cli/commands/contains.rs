@@ -1,13 +1,14 @@
 use std::path::Path;
 use tracing::{debug, error};
 
+use crate::errors::UtilesResult;
 use crate::utilesqlite::Mbtiles;
 use utiles_core::LngLat;
 
 /// Check if an mbtiles file contains a lnglat
 ///
 /// Added by [dan-costello](https://github.com/dan-costello)
-pub fn contains_main(filepath: &str, lnglat: LngLat) {
+pub fn contains_main(filepath: &str, lnglat: LngLat) -> UtilesResult<()> {
     debug!("contains: {filepath}");
     // check that filepath exists and is file
     let filepath = Path::new(filepath);
@@ -29,4 +30,5 @@ pub fn contains_main(filepath: &str, lnglat: LngLat) {
     } else {
         println!("{}", contains.unwrap());
     }
+    Ok(())
 }

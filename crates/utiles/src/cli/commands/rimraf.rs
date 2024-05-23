@@ -8,6 +8,8 @@ use tracing::error;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::cli::args::RimrafArgs;
+use crate::errors::UtilesResult;
+use crate::UtilesError;
 
 #[allow(dead_code)]
 pub async fn rimraf_main2(args: RimrafArgs) {
@@ -129,13 +131,16 @@ impl Rimrafer {
     }
 }
 
-pub async fn rimraf_main(args: RimrafArgs) {
+pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
     println!("rimraf_main: args: {args:?}");
     // check that dirpath exists
     let dirpath = Path::new(&args.dirpath);
     if !dirpath.exists() {
         error!("dirpath does not exist: {:?}", dirpath);
-        return;
+        return Err(UtilesError::Error(format!(
+            "dirpath does not exist: {:?}",
+            dirpath
+        )));
     }
 
     let files_iter = WalkDir::new(args.clone().dirpath.clone())
@@ -153,4 +158,5 @@ pub async fn rimraf_main(args: RimrafArgs) {
     .await;
     fs::remove_dir_all(&rmrfer.cfg.dirpath).await.unwrap();
     rmrfer.print_stats();
+    Ok(())
 }

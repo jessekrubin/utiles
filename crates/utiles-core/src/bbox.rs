@@ -317,25 +317,32 @@ impl From<&String> for BBox {
     fn from(s: &String) -> Self {
         // remove leading and trailing quotes
         let s = s.trim_matches('"');
-        // let value: Value = serde_json::from_str(&s).unwrap();
         parse_bbox(s).unwrap_or_else(|_e| BBox::world_planet())
     }
 }
 
-impl From<&str> for BBox {
-    fn from(s: &str) -> Self {
-        parse_bbox(s).unwrap()
+impl TryFrom<&str> for BBox {
+    type Error = &'static str;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        parse_bbox(s).map_err(|_| "Failed to parse BBox")
     }
 }
 
-impl From<String> for BBox {
-    fn from(s: String) -> Self {
-        self::BBox::from(&s)
-    }
-}
-
-// impl From<Tile> for WebMercatorBbox {
-//     fn from(tile: Tile) -> Self {
-//         crate::xyz2bbox(tile.x, tile.y, tile.z)
+// impl From<&str> for BBox {
+//     fn from(s: &str) -> Self {
+//         parse_bbox(s).unwrap()
 //     }
 // }
+
+// impl From<String> for BBox {
+//     fn from(s: String) -> Self {
+//         self::BBox::from(&s)
+//     }
+// }
+
+// // impl From<Tile> for WebMercatorBbox {
+// //     fn from(tile: Tile) -> Self {
+// //         crate::xyz2bbox(tile.x, tile.y, tile.z)
+// //     }
+// // }

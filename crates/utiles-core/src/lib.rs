@@ -1,9 +1,11 @@
 //! utiles-core ~ core util(e)ities
 // #![deny(missing_docs)]
 #![deny(clippy::all)]
+#![deny(clippy::correctness)]
+#![deny(clippy::panic)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
-#![deny(clippy::correctness)]
+#![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
@@ -82,6 +84,8 @@ macro_rules! point2d {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
+
     use std::collections::HashSet;
 
     use super::*;
@@ -109,7 +113,7 @@ mod tests {
         let expect = vec![Tile::new(3413, 6202, 14), Tile::new(3413, 6203, 14)];
         assert_eq!(tiles.collect::<Vec<Tile>>(), expect);
 
-        let ntiles = tiles_count(bounds, 14.into());
+        let ntiles = tiles_count(bounds, 14.into()).unwrap();
         assert_eq!(ntiles, 2);
     }
 

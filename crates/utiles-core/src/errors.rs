@@ -20,6 +20,10 @@ pub enum UtilesCoreError {
     #[error("invalid zoom(s): {0}")]
     InvalidZoom(String),
 
+    /// Error for invalid json
+    #[error("invalid json: {0}")]
+    InvalidJson(String),
+
     /// Error for when converting from lnglat to web mercator fails
     #[error("conversion err: {0}")]
     LngLat2WebMercator(String),
@@ -31,6 +35,10 @@ pub enum UtilesCoreError {
     /// Error on unknown error catch all
     #[error("unknown utiles error: {0}")]
     Unknown(String),
+
+    /// Error with some string
+    #[error("{0}")]
+    Str(String),
 
     /// Error on serde io error
     #[error("io error: {0}")]

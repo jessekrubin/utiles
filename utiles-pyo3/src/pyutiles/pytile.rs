@@ -175,9 +175,10 @@ impl PyTile {
         lat: f64,
         zoom: u8,
         truncate: Option<bool>,
-    ) -> Self {
-        let xyz = Tile::from_lnglat_zoom(lng, lat, zoom, truncate);
-        PyTile::from(xyz)
+    ) -> PyResult<Self> {
+        let xyz = Tile::from_lnglat_zoom(lng, lat, zoom, truncate)
+            .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
+        Ok(PyTile::from(xyz))
     }
 
     pub fn __repr__(&self) -> String {

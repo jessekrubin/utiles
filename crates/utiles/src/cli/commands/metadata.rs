@@ -6,9 +6,10 @@ use tracing::debug;
 use utiles_core::mbutiles::metadata2map;
 
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
+use crate::errors::UtilesResult;
 use crate::utilesqlite::Mbtiles;
 
-pub fn metadata_main(args: &MetadataArgs) {
+pub fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
@@ -40,6 +41,7 @@ pub fn metadata_main(args: &MetadataArgs) {
         serde_json::to_string_pretty::<serde_json::Value>(&json_val).unwrap()
     };
     println!("{out_str}");
+    Ok(())
 }
 
 #[derive(Debug, Serialize)]
@@ -68,7 +70,7 @@ pub struct MetadataChangeFromTo {
 //     pub value: Option<String>,
 // }
 
-pub fn metadata_set_main(args: &MetadataSetArgs) {
+pub fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
@@ -155,4 +157,5 @@ pub fn metadata_set_main(args: &MetadataSetArgs) {
         // print to stderr
         eprintln!("No change");
     }
+    Ok(())
 }

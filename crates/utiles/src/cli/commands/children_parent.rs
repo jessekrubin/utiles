@@ -2,8 +2,9 @@ use utiles_core::{Tile, TileLike};
 
 use crate::cli::args::ParentChildrenArgs;
 use crate::cli::stdinterator_filter;
+use crate::errors::UtilesResult;
 
-pub fn parent_main(args: ParentChildrenArgs) {
+pub fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
     for tile in tiles {
@@ -14,9 +15,10 @@ pub fn parent_main(args: ParentChildrenArgs) {
         let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
         println!("{}{}", rs, parent.json_arr());
     }
+    Ok(())
 }
 
-pub fn children_main(args: ParentChildrenArgs) {
+pub fn children_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
     for tile in tiles {
@@ -26,4 +28,5 @@ pub fn children_main(args: ParentChildrenArgs) {
             println!("{}{}", rs, child.json_arr());
         }
     }
+    Ok(())
 }

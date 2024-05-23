@@ -553,28 +553,34 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
 }
 
 /// Return Tile struct from longitude, latitude, and zoom.
-#[must_use]
-pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> Tile {
+pub fn tile(
+    lng: f64,
+    lat: f64,
+    zoom: u8,
+    truncate: Option<bool>,
+) -> Result<Tile, UtilesCoreError> {
     Tile::from_lnglat_zoom(lng, lat, zoom, truncate)
 }
 
 /// Return the bounding tile for a bounding box.
-#[must_use]
-pub fn bounding_tile(bbox: BBox, truncate: Option<bool>) -> Tile {
+pub fn bounding_tile(
+    bbox: BBox,
+    truncate: Option<bool>,
+) -> Result<Tile, UtilesCoreError> {
     let (west, south, east, north) =
         bbox_truncate(bbox.west, bbox.south, bbox.east, bbox.north, truncate);
-    let tmin = tile(west, north, 32, truncate);
-    let tmax = tile(east - LL_EPSILON, south + LL_EPSILON, 32, truncate);
+    let tmin = tile(west, north, 32, truncate)?;
+    let tmax = tile(east - LL_EPSILON, south + LL_EPSILON, 32, truncate)?;
 
     let cell = (tmin.x, tmin.y, tmax.x, tmax.y);
     let z = bbox2zoom(cell);
     if z == 0 {
-        return utile!(0, 0, 0);
+        Ok(utile!(0, 0, 0))
+    } else {
+        let x = cell.0 >> (32 - z);
+        let y = cell.1 >> (32 - z);
+        Ok(utile!(x, y, z))
     }
-
-    let x = cell.0 >> (32 - z);
-    let y = cell.1 >> (32 - z);
-    utile!(x, y, z)
 }
 
 /// Return web-mercator bbox from x, y, z.
@@ -613,8 +619,10 @@ fn tiles_range_zoom(
 }
 
 /// Return TileRanges from a bounding box and zoom(s).
-#[must_use]
-pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileZBoxes {
+pub fn tile_ranges(
+    bounds: (f64, f64, f64, f64),
+    zooms: ZoomOrZooms,
+) -> Result<TileZBoxes, UtilesCoreError> {
     let zooms = as_zooms(zooms);
     let bboxes: Vec<BBox> = BBox::from(bounds)
         .bboxes()
@@ -645,32 +653,33 @@ pub fn tile_ranges(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> TileZBox
                     upper_left_lnglat.lat(),
                     zoom,
                     Some(false),
-                );
+                )?;
                 let bottom_right_tile = Tile::from_lnglat_zoom(
                     lower_right_lnglat.lng() - LL_EPSILON,
                     lower_right_lnglat.lat() + LL_EPSILON,
                     zoom,
                     Some(false),
-                );
-                TileZBox::new(
+                )?;
+                Ok(TileZBox::new(
                     top_left_tile.x,
                     bottom_right_tile.x,
                     top_left_tile.y,
                     bottom_right_tile.y,
                     zoom,
-                )
+                ))
             })
         })
-        .collect();
-
-    TileZBoxes::from(ranges)
+        .collect::<Result<Vec<TileZBox>, UtilesCoreError>>()?;
+    Ok(TileZBoxes::from(ranges))
 }
 
 /// Return the number of tiles for a bounding box and zoom(s).
-#[must_use]
-pub fn tiles_count(bounds: (f64, f64, f64, f64), zooms: ZoomOrZooms) -> u64 {
-    let ranges = tile_ranges(bounds, zooms);
-    ranges.length()
+pub fn tiles_count(
+    bounds: (f64, f64, f64, f64),
+    zooms: ZoomOrZooms,
+) -> Result<u64, UtilesCoreError> {
+    let ranges = tile_ranges(bounds, zooms)?;
+    Ok(ranges.length())
 }
 
 /// Return an iterator of tiles for a bounding box and zoom(s).
@@ -719,14 +728,20 @@ pub fn tiles(
                 zoom,
                 Some(false),
             );
-            tiles_range_zoom(
-                top_left_tile.x,
-                bottom_right_tile.x,
-                top_left_tile.y,
-                bottom_right_tile.y,
-                zoom,
-            )
-            .map(move |(x, y, z)| Tile { x, y, z })
+
+            match (top_left_tile, bottom_right_tile) {
+                (Ok(top_left), Ok(bottom_right)) => tiles_range_zoom(
+                    top_left.x,
+                    bottom_right.x,
+                    top_left.y,
+                    bottom_right.y,
+                    zoom,
+                )
+                .map(move |(x, y, z)| Tile { x, y, z })
+                .collect::<Vec<_>>()
+                .into_iter(),
+                _ => Vec::new().into_iter(),
+            }
         })
     })
 }

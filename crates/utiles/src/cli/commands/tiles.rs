@@ -10,6 +10,7 @@ use utiles_core::{Tile, TileLike};
 
 use crate::cli::args::TilesArgs;
 use crate::cli::stdinterator_filter::stdin_filtered;
+use crate::errors::UtilesResult;
 use crate::gj::parsing::parse_bbox_geojson;
 
 pub enum TileFmt {
@@ -33,7 +34,7 @@ impl TileStringFormatter for TileFmt {
     }
 }
 
-pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) {
+pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) -> UtilesResult<()> {
     let lines = stdin_filtered(args.inargs.input);
     let mut stdout = io::stdout();
     let lock = stdout.lock();
@@ -75,4 +76,5 @@ pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) {
         }
     }
     stdout.flush().unwrap();
+    Ok(())
 }

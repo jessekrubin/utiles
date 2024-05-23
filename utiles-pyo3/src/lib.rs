@@ -228,7 +228,10 @@ pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<Py
         )))?;
     }
     let xyz = utiles::Tile::from_lnglat_zoom(lng, lat, zoom, truncate);
-    Ok(PyTile::from(xyz))
+    match xyz {
+        Ok(xyz) => Ok(PyTile::from(xyz)),
+        Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
+    }
 }
 
 #[pyfunction]
@@ -332,7 +335,8 @@ fn bounding_tile(
         return Err(res.err().unwrap());
     }
     let bbox = res.unwrap();
-    let res = utiles::bounding_tile(bbox.into(), truncate);
+    let res = utiles::bounding_tile(bbox.into(), truncate)
+        .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
     Ok(PyTile::from(res))
 }
 
@@ -372,11 +376,12 @@ fn tiles_count(
     north: f64,
     zooms: PyZoomOrZooms,
     truncate: Option<bool>,
-) -> u64 {
+) -> PyResult<u64> {
     let (west, south, east, north) =
         utiles::bbox_truncate(west, south, east, north, truncate);
 
     utiles::tiles_count((west, south, east, north), ZoomOrZooms::from(zooms))
+        .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))
 }
 
 #[pyfunction]
@@ -387,7 +392,7 @@ fn tiles(
     north: f64,
     zooms: PyZoomOrZooms,
     truncate: Option<bool>,
-) -> TilesGenerator {
+) -> PyResult<TilesGenerator> {
     let (west, south, east, north) =
         utiles::bbox_truncate(west, south, east, north, truncate);
     let zooms_vec = match zooms {
@@ -396,16 +401,17 @@ fn tiles(
     };
     let zooms_vec_iter = zooms_vec.clone();
     let ntiles =
-        utiles::tiles_count((west, south, east, north), ZoomOrZooms::from(zooms_vec));
+        utiles::tiles_count((west, south, east, north), ZoomOrZooms::from(zooms_vec))
+            .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
     let xyzs = utiles::tiles(
         (west, south, east, north),
         ZoomOrZooms::from(zooms_vec_iter),
     )
     .map(PyTile::from);
-    TilesGenerator {
+    Ok(TilesGenerator {
         iter: Box::new(xyzs),
         length: ntiles,
-    }
+    })
 }
 
 #[pyfunction]
