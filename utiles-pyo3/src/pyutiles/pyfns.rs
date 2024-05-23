@@ -1,4 +1,4 @@
-use crate::pyutiles::{pyparsing, pycoords};
+use crate::pyutiles::{pycoords, pyparsing};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
@@ -6,10 +6,10 @@ use pyo3::{pyfunction, PyErr, PyResult};
 use std::collections::HashMap;
 use utiles::zoom::ZoomOrZooms;
 
-use crate::pyutiles::pyparsing::parse_tile_arg;
 use crate::pyutiles::pybbox::PyBbox;
 use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
+use crate::pyutiles::pyparsing::parse_tile_arg;
 use crate::pyutiles::pytile::PyTile;
 use crate::pyutiles::pytile_tuple::TileTuple;
 use crate::pyutiles::pytilelike::PyTileLike;
