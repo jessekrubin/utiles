@@ -21,6 +21,9 @@ pub enum UtilesError {
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 
+    #[error("Not a file: {0}")]
+    NotAFile(String),
+
     #[error("parse int error: {0}")]
     ParseIntError(#[from] std::num::ParseIntError),
 

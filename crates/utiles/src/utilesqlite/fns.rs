@@ -70,6 +70,7 @@ mod tests {
 
     type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
+    #[allow(clippy::panic)]
     fn repo_root() -> std::path::PathBuf {
         // recurse up until we find a dir called "test-data"
         let mut p = std::env::current_dir().unwrap();

@@ -1,22 +1,28 @@
-use crate::cli::stdinterator::StdInterator;
-use crate::errors::UtilesResult;
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
 use tracing::{debug, error};
+
 use utiles_core::projection::Projection;
 use utiles_core::tile::FeatureOptions;
 use utiles_core::Tile;
+
+use crate::cli::stdinterator::StdInterator;
+use crate::errors::{UtilesError, UtilesResult};
 
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false, id = "project")]
 pub struct ShapesProject {
     /// Output in geographic coordinates (the default).
-    #[arg(long, default_value = "false", conflicts_with = "mercator", action = clap::ArgAction::SetTrue)]
+    #[arg(
+        long, default_value = "false", conflicts_with = "mercator", action = clap::ArgAction::SetTrue
+    )]
     geographic: bool,
 
     /// Output in Web Mercator coordinates.
-    #[arg(long, default_value = "false", conflicts_with = "geographic", action = clap::ArgAction::SetTrue)]
+    #[arg(
+        long, default_value = "false", conflicts_with = "geographic", action = clap::ArgAction::SetTrue
+    )]
     mercator: bool,
 }
 
@@ -33,11 +39,15 @@ impl Default for ShapesProject {
 #[group(required = false, multiple = false, id = "output-mode")]
 pub struct ShapesOutputMode {
     /// Output as a GeoJSON feature collections
-    #[arg(long, default_value = "false", conflicts_with = "bbox", action = clap::ArgAction::SetTrue)]
+    #[arg(
+        long, default_value = "false", conflicts_with = "bbox", action = clap::ArgAction::SetTrue
+    )]
     feature: bool,
 
     /// Output in Web Mercator coordinates.
-    #[arg(long, default_value = "false", conflicts_with = "feature", action = clap::ArgAction::SetTrue)]
+    #[arg(
+        long, default_value = "false", conflicts_with = "feature", action = clap::ArgAction::SetTrue
+    )]
     bbox: bool,
 }
 
@@ -119,15 +129,6 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
         } else {
             None
         };
-        // let properties: Option<Map<String, Value>> = match val["properties"].is_object()
-        // {
-        //     true => {
-        //         let properties = val["properties"].as_object().unwrap().clone();
-        //         Option::from(properties)
-        //     }
-        //     false => None,
-        // };
-
         let id = if val["id"].is_string() {
             let id = val["id"].as_str().unwrap().to_string();
             Option::from(id)
@@ -142,14 +143,37 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
                     id,
                     properties,
                 };
-                Some(tile_with_properties)
+                Ok(tile_with_properties)
+                // Ok(Some(tile_with_properties))
             }
             Err(e) => {
                 error!("Error parsing tile: {}", e);
                 // throw the error here
-                panic!("Error parsing tile: {}", e);
+                Err(UtilesError::Error(format!("Error parsing tile: {}", e)))
             }
         }
+        // Some(
+        //     TileWithProperties {
+        //         tile: t,
+        //         id,
+        //         properties,
+        //     }
+        // )
+        // match t {
+        //     Ok(tile) => {
+        //         let tile_with_properties = TileWithProperties {
+        //             tile,
+        //             id,
+        //             properties,
+        //         };
+        //         Some(tile_with_properties)
+        //     }
+        //     Err(e) => {
+        //         error!("Error parsing tile: {}", e);
+        //         // throw the error here
+        //         panic!("Error parsing tile: {}", e);
+        //     }
+        // }
     });
     let feature_options: FeatureOptions = FeatureOptions {
         fid: None,
@@ -158,10 +182,6 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
                 geographic: false,
                 mercator: true,
             }) => Projection::Mercator,
-            // ShapesProject {
-            //     geographic: false,
-            //     mercator: true,
-            // } => Projection::Mercator,
             _ => Projection::Geographic,
         },
         props: None,
@@ -184,23 +204,17 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
                 bbox: true,
             }
         ),
-        // Some(output_mode) => match output_mode {
-        //     ShapesOutputMode {
-        //         feature: false,
-        //         bbox: true,
-        //     } => true,
-        //     _ => false,
-        // },
+
         None => false,
     };
 
     let mut first = true;
 
-    for tile_n_properties in parsed_lines.flatten() {
+    for tile_n_properties in parsed_lines {
+        let tile_n_properties = tile_n_properties?;
         let tile = tile_n_properties.tile;
         let properties = tile_n_properties.properties;
         let mut f = tile.feature(&feature_options).unwrap();
-
         if let Some(properties) = properties {
             f.properties.extend(properties);
         }

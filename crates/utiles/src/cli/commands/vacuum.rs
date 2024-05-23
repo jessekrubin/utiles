@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 use crate::cli::args::VacuumArgs;
 use crate::errors::UtilesResult;
-use crate::utilesqlite::squealite::Sqlike3;
-use crate::utilesqlite::Mbtiles;
+use crate::utilesqlite::squealite::{Sqlike3, SqliteDb};
+use crate::UtilesError;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VacuumInfo {
@@ -23,7 +23,8 @@ pub struct VacuumInfo {
 
 pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     // check that the file exists
-    let mbt = Mbtiles::open_existing(&args.common.filepath).unwrap();
+    let db = SqliteDb::open_existing(&args.common.filepath)?;
+
     // get file size from filepath
     let pre_vac_file_size = std::fs::metadata(&args.common.filepath).unwrap().len();
 
@@ -31,30 +32,32 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     let vacuum_start_time = std::time::Instant::now();
     if let Some(dst) = &args.into {
         if dst == &args.common.filepath {
-            error!("Cannot vacuum into the same file");
-            panic!("Cannot vacuum into the same file");
-        }
-        // check that the destination file does not exist
-        if std::path::Path::new(dst).exists() {
-            error!("Destination file already exists: {}", dst);
-            panic!("Destination file already exists: {}", dst);
+            warn!("Vacuuming into the same file");
+        } else {
+            // check that the destination file does not exist
+            if std::path::Path::new(dst).exists() {
+                error!("Destination file already exists: {}", dst);
+                return Err(UtilesError::Error(
+                    "Destination file already exists".to_string(),
+                ));
+            }
         }
         info!("vacuuming: {} -> {}", args.common.filepath, dst);
-        mbt.vacuum_into(dst.clone()).unwrap();
+        db.vacuum_into(dst.clone()).unwrap();
     } else {
         info!("vacuuming: {}", args.common.filepath);
-        mbt.vacuum().unwrap();
+        db.vacuum().unwrap();
     }
     let vacuum_time_ms = vacuum_start_time.elapsed().as_millis();
 
     let analyze_start_time = std::time::Instant::now();
     if let Some(dst) = &args.into {
-        let mbt_dst = Mbtiles::open_existing(dst).unwrap();
+        let dst_db = SqliteDb::open_existing(dst)?;
         info!("analyzing: {}", dst);
-        mbt_dst.analyze().unwrap();
+        dst_db.analyze().unwrap();
     } else {
         info!("analyzing: {}", args.common.filepath);
-        mbt.analyze().unwrap();
+        db.analyze().unwrap();
     }
     let analyze_time_ms = analyze_start_time.elapsed().as_millis();
 

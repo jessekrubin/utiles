@@ -8,6 +8,7 @@ use crate::UtilesError;
 
 pub trait Sqlike3 {
     fn conn(&self) -> &Connection;
+    // fn open_existing<P: AsRef<Path>>(path: P) -> RusqliteResult<Self>;
 
     fn is_empty_db(&self) -> RusqliteResult<bool> {
         is_empty_db(self.conn())
@@ -26,6 +27,29 @@ pub trait Sqlike3 {
     }
 }
 
+pub struct SqliteDb {
+    pub conn: Connection,
+}
+
+impl Sqlike3 for SqliteDb {
+    fn conn(&self) -> &Connection {
+        &self.conn
+    }
+}
+
+impl SqliteDb {
+    pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
+        let conn = open_existing(path)?;
+        Ok(SqliteDb { conn })
+    }
+}
+
+impl From<Connection> for SqliteDb {
+    fn from(conn: Connection) -> Self {
+        SqliteDb { conn }
+    }
+}
+
 pub fn open(path: &str) -> RusqliteResult<Connection> {
     let conn = Connection::open(path)?;
     Ok(conn)
@@ -33,10 +57,17 @@ pub fn open(path: &str) -> RusqliteResult<Connection> {
 
 pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Connection> {
     let filepath = path.as_ref();
+
+    let fspath = filepath
+        .to_str()
+        .unwrap_or("unknown.could not convert path to string")
+        .to_string();
+    // metadata
     if !filepath.exists() {
-        return Err(UtilesError::FileDoesNotExist(
-            path.as_ref().to_str().unwrap().to_string(),
-        ));
+        return Err(UtilesError::FileDoesNotExist(fspath));
+    }
+    if !filepath.is_file() {
+        return Err(UtilesError::NotAFile(fspath));
     }
     let db = Connection::open(filepath)?;
     Ok(db)
@@ -247,7 +278,9 @@ pub fn pragma_index_list_all_tables(
 pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
     let mut stmt = conn.prepare("PRAGMA application_id")?;
     let mut rows = stmt.query([])?;
-    let row = rows.next()?.unwrap();
+    let row = rows
+        .next()?
+        .expect("'PRAGMA application_id' -- should return row but did not");
     let app_id: u32 = row.get(0)?;
     Ok(app_id)
 }
@@ -255,7 +288,9 @@ pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
 pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {
     let mut stmt = conn.prepare("PRAGMA journal_mode")?;
     let mut rows = stmt.query([])?;
-    let row = rows.next()?.unwrap();
+    let row = rows
+        .next()?
+        .expect("'PRAGMA journal_mode' -- should return row but did not");
     let jm: String = row.get(0)?;
     Ok(jm)
 }
