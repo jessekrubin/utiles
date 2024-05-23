@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use pyo3::types::PyTuple;
 use pyo3::{pyfunction, Bound, PyResult};
 
-use crate::pyutiles::parsing::parse_tiles;
+use crate::pyutiles::pyparsing::parse_tiles;
 use crate::pyutiles::pytile::PyTile;
 
 fn merge(merge_set: &HashSet<PyTile>) -> (HashSet<PyTile>, bool) {

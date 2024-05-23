@@ -1,4 +1,4 @@
-use crate::pyutiles::{parsing, pycoords};
+use crate::pyutiles::{pyparsing, pycoords};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
@@ -6,7 +6,7 @@ use pyo3::{pyfunction, PyErr, PyResult};
 use std::collections::HashMap;
 use utiles::zoom::ZoomOrZooms;
 
-use crate::pyutiles::parsing::parse_tile_arg;
+use crate::pyutiles::pyparsing::parse_tile_arg;
 use crate::pyutiles::pybbox::PyBbox;
 use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
@@ -145,7 +145,7 @@ pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
 #[pyfunction]
 #[pyo3(signature = (* args))]
 pub fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
-    let tile = parsing::parse_tile_arg(args)?;
+    let tile = pyparsing::parse_tile_arg(args)?;
     let pybbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
     Ok(PyBbox::new(
         pybbox.left,
@@ -172,7 +172,7 @@ pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<Py
 #[pyfunction]
 #[pyo3(signature = (* args))]
 pub fn pmtileid(args: &Bound<'_, PyTuple>) -> PyResult<u64> {
-    let tile = parsing::parse_tile_arg(args)?;
+    let tile = pyparsing::parse_tile_arg(args)?;
     Ok(tile.pmtileid())
 }
 
@@ -191,7 +191,7 @@ pub fn from_pmtileid(pmtileid: u64) -> PyTile {
 #[pyfunction]
 #[pyo3(signature = (* args))]
 pub fn quadkey(args: &Bound<'_, PyTuple>) -> PyResult<String> {
-    let tile = parsing::parse_tile_arg(args)?;
+    let tile = pyparsing::parse_tile_arg(args)?;
     Ok(utiles::xyz2quadkey(tile.xyz.x, tile.xyz.y, tile.xyz.z))
 }
 
@@ -204,7 +204,7 @@ pub fn quadkey_to_tile(quadkey: &str) -> PyResult<PyTile> {
 #[pyo3(signature = (* args, zoom = None))]
 pub fn parent(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Option<PyTile>> {
     // Parse the tile argument
-    let tile = parsing::parse_tile_arg(args)?;
+    let tile = pyparsing::parse_tile_arg(args)?;
     if tile.xyz.z == 0 {
         return Ok(None);
     }
@@ -233,7 +233,7 @@ pub fn parent(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Option<Py
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None))]
 pub fn children(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
-    let tile = parsing::parse_tile_arg(args)?;
+    let tile = pyparsing::parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z + 1);
     if zoom < tile.xyz.z {
         Err(PyErr::new::<PyValueError, _>(format!(
@@ -248,7 +248,7 @@ pub fn children(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyT
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None))]
 pub fn neighbors(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
-    let tile = parsing::parse_tile_arg(args)?;
+    let tile = pyparsing::parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z);
     if zoom < tile.xyz.z {
         Err(PyErr::new::<PyValueError, _>(format!(
@@ -265,7 +265,7 @@ pub fn bounding_tile(
     args: &Bound<'_, PyTuple>,
     truncate: Option<bool>,
 ) -> PyResult<PyTile> {
-    let res = parsing::parse_bbox(args);
+    let res = pyparsing::parse_bbox(args);
     if res.is_err() {
         return Err(res.err().unwrap());
     }

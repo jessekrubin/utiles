@@ -15,7 +15,7 @@ pub mod pytiles;
 pub mod tuple_slice;
 pub mod zoom;
 
-pub mod parsing;
+pub mod pyparsing;
 pub mod pycoords;
 mod pyfns;
 pub(crate) mod pytile_tuple;

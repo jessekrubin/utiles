@@ -34,8 +34,8 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // lib constants
     lib_constants(m)?;
     // mercantile functions
-    m.add_function(wrap_pyfunction!(pyutiles::parsing::parse_tile_arg, m)?)?;
-    m.add_function(wrap_pyfunction!(pyutiles::parsing::_parse_tile_arg, m)?)?;
+    m.add_function(wrap_pyfunction!(pyutiles::pyparsing::parse_tile_arg, m)?)?;
+    m.add_function(wrap_pyfunction!(pyutiles::pyparsing::_parse_tile_arg, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::minmax, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::ul, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::bounds, m)?)?;
@@ -63,7 +63,7 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(pyutiles::tiles_count, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::tiles_list, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::xyz, m)?)?;
-    m.add_function(wrap_pyfunction!(pyutiles::parsing::parse_tiles, m)?)?;
+    m.add_function(wrap_pyfunction!(pyutiles::pyparsing::parse_tiles, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::xyz2quadkey, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::quadkey2xyz, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::from_tuple, m)?)?;
