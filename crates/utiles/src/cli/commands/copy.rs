@@ -17,6 +17,7 @@ use utiles_core::{tile_ranges, Tile, TileLike};
 
 use crate::cli::args::CopyArgs;
 use crate::errors::{UtilesError, UtilesResult};
+use crate::metadata_json::parse_metadata_json;
 use crate::utilesqlite::Mbtiles;
 
 // #[derive(Debug)]
@@ -339,9 +340,16 @@ async fn copy_fs2mbtiles(
     // Write metadata to db if exists...
 
     if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
-        let metadata_vec: Vec<MbtilesMetadataRow> =
-            serde_json::from_str(&metadata_str).unwrap();
-        dst_mbt.metadata_set_from_vec(&metadata_vec).unwrap();
+        // found metadata.json
+        let metadata_vec = parse_metadata_json(&metadata_str);
+        match metadata_vec {
+            Ok(metadata_vec) => {
+                dst_mbt.metadata_set_from_vec(&metadata_vec).unwrap();
+            }
+            Err(e) => {
+                warn!("e: {e:?}");
+            }
+        }
     }
 
     let (tx, mut rx) = mpsc::channel(64);
