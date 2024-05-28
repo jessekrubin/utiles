@@ -15,8 +15,9 @@ use crate::errors::UtilesResult;
 #[must_use]
 pub fn tilejson_stringify(tj: &TileJSON, fmt: Option<bool>) -> String {
     match fmt {
-        Some(false) => serde_json::to_string(&tj).unwrap(),
-        _ => serde_json::to_string_pretty(&tj).unwrap(),
+        Some(false) => serde_json::to_string(&tj).expect("tilejson_stringify failed"),
+        _ => serde_json::to_string_pretty(&tj)
+            .expect("tilejson_stringify failed (pretty-print)"),
     }
 }
 

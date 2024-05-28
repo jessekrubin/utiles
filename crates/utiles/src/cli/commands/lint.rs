@@ -205,7 +205,7 @@ async fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
 }
 
 pub async fn lint_main(args: &LintArgs) -> UtilesResult<()> {
-    let filepaths = globster::find_filepaths(&args.fspaths);
+    let filepaths = globster::find_filepaths(&args.fspaths)?;
     if args.fix {
         warn!("NOT IMPLEMENTED: `utiles lint --fix`");
     }

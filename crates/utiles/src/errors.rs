@@ -12,12 +12,6 @@ pub enum UtilesError {
     #[error("Unimplemented: {0}")]
     Unimplemented(String),
 
-    #[error("sqlite err: {0}")]
-    SqliteError(#[from] rusqlite::Error),
-
-    #[error("sqlite err: {0}")]
-    AsyncSqliteError(#[from] async_sqlite::Error),
-
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 
@@ -27,11 +21,29 @@ pub enum UtilesError {
     #[error("parse int error: {0}")]
     ParseIntError(#[from] std::num::ParseIntError),
 
+    #[error("parsing error: {0}")]
+    ParsingError(String),
+
     #[error("utiles error: {0}")]
     Error(String),
 
+    #[error("utiles error: {0}")]
+    Str(String),
+
     #[error("unknown utiles error: {0}")]
     Unknown(String),
+
+    #[error("sqlite err: {0}")]
+    SqliteError(#[from] rusqlite::Error),
+
+    #[error("sqlite err: {0}")]
+    AsyncSqliteError(#[from] async_sqlite::Error),
+
+    #[error("globset error: {0}")]
+    GlobsetError(#[from] globset::Error),
+
+    #[error("serde error: {0}")]
+    SerdeError(#[from] serde_json::Error),
 }
 
 pub type UtilesResult<T> = Result<T, UtilesError>;

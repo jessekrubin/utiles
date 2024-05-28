@@ -1,5 +1,6 @@
 // allow dead code in this module
 #![allow(dead_code)]
+#![allow(clippy::unwrap_used)]
 
 mod dbpath;
 pub mod fns;

@@ -211,7 +211,7 @@ pub enum Commands {
     MetadataSet(MetadataSetArgs),
 
     /// Update mbtiles db
-    #[command(name = "update")]
+    #[command(name = "update", visible_aliases = ["up"])]
     Update(UpdateArgs),
 
     /// rm-rf dirpath

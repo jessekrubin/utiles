@@ -7,7 +7,19 @@ pub fn stdin_filtered(
     let input_lines = StdInterator::new(input);
     let filtered_lines = input_lines
         .filter(|l| !l.is_err())
-        .filter(|l| !l.as_ref().unwrap().is_empty())
-        .filter(|l| l.as_ref().unwrap() != "\x1e");
+        .filter(|l| {
+            let r = l.as_ref();
+            match r {
+                Ok(s) => !s.is_empty(),
+                Err(_) => false,
+            }
+        })
+        .filter(|l| {
+            let r = l.as_ref();
+            match r {
+                Ok(s) => s != "\x1e",
+                Err(_) => false,
+            }
+        });
     Box::new(filtered_lines)
 }

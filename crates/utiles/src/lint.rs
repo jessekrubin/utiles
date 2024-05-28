@@ -150,16 +150,17 @@ impl MbtilesLinter {
     async fn open_mbtiles(
         &self,
     ) -> UtilesLintResult<utilesqlite::MbtilesAsyncSqliteClient> {
-        let mbtiles = match utilesqlite::MbtilesAsyncSqliteClient::open_readonly(
-            self.path.to_str().unwrap(),
-        )
-        .await
-        {
-            Ok(m) => m,
-            Err(e) => {
-                return Err(UtilesLintError::UnableToOpen(e.to_string()));
-            }
-        };
+        let pth = self
+            .path
+            .to_str()
+            .ok_or(UtilesLintError::Unknown("unknown path".to_string()))?;
+        let mbtiles =
+            match utilesqlite::MbtilesAsyncSqliteClient::open_readonly(pth).await {
+                Ok(m) => m,
+                Err(e) => {
+                    return Err(UtilesLintError::UnableToOpen(e.to_string()));
+                }
+            };
         Ok(mbtiles)
     }
 
@@ -256,9 +257,8 @@ impl MbtilesLinter {
     pub async fn lint(&self) -> UtilesLintResult<Vec<UtilesLintError>> {
         let mbt = self.open_mbtiles().await?;
         if !mbt.is_mbtiles().await? {
-            return Err(UtilesLintError::NotAMbtilesDb(
-                self.path.to_str().unwrap().to_string(),
-            ));
+            let pth = self.path.to_str().unwrap_or("unknown-path");
+            return Err(UtilesLintError::NotAMbtilesDb(pth.to_string()));
         }
         let mut lint_results = vec![];
         // lint_results.push(MbtilesLinter::check_magic_number(&mbt).await);

@@ -3,7 +3,7 @@
 #![deny(clippy::panic)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
-#![deny(clippy::panic)]
+#![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
@@ -58,6 +58,7 @@ macro_rules! point2d {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
     use std::collections::HashSet;
 
     use super::*;

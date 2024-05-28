@@ -101,6 +101,8 @@ pub fn parse_metadata_json(json_data: &str) -> UtilesResult<Vec<MbtilesMetadataR
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
+
     use super::*;
 
     #[test]

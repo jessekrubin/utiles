@@ -2,13 +2,13 @@ use geo_types::Coord;
 use serde_json::Value;
 
 use utiles_core::bbox::BBox;
-use utiles_core::errors::UtilesCoreResult;
 use utiles_core::UtilesCoreError;
 
-// use crate::geojson::geojson_bounds;
+use crate::errors::UtilesResult;
 use crate::gj::geojson_coords;
+use crate::UtilesError;
 
-pub fn parse_bbox_geojson(string: &str) -> UtilesCoreResult<BBox> {
+pub fn parse_bbox_geojson(string: &str) -> UtilesResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
@@ -17,19 +17,20 @@ pub fn parse_bbox_geojson(string: &str) -> UtilesCoreResult<BBox> {
         let v: Value = serde_json::from_str(s)?;
         // if it has a "bbox" key, use that
         if v["bbox"].is_array() {
-            let bbox: (f64, f64, f64, f64) = serde_json::from_value(v["bbox"].clone())?;
+            let bbox: (f64, f64, f64, f64) = serde_json::from_value(v["bbox"].clone())
+                .map_err(UtilesError::SerdeError)?;
             return Ok(BBox::from(bbox));
         }
-        return Ok(geojson_bounds(s));
+        return geojson_bounds(s);
     }
     let v: Value = serde_json::from_str(s)?;
     // Assume a single pair of coordinates represents a CoordTuple
     // and a four-element array represents a BBoxTuple
     let bbox = match v.as_array().map(std::vec::Vec::len) {
         // match len 0, 1, 3
-        Some(0) | Some(1) | Some(3) => Err(UtilesCoreError::InvalidBbox(
-            "Invalid bbox: ".to_string() + s,
-        )),
+        Some(0) | Some(1) | Some(3) => {
+            Err(UtilesCoreError::InvalidBbox("Invalid bbox: ".to_string() + s).into())
+        }
         Some(2) => {
             let coord: (f64, f64) = serde_json::from_value::<(f64, f64)>(v)?;
             Ok(BBox::new(coord.0, coord.1, coord.0, coord.1))
@@ -40,16 +41,30 @@ pub fn parse_bbox_geojson(string: &str) -> UtilesCoreResult<BBox> {
         }
         _ => {
             // take first four elements
-            let bbox_vec = v
-                .as_array()
-                .unwrap()
-                .iter()
-                .take(4)
-                .cloned()
-                .collect::<Vec<Value>>();
-            Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
-                Value::Array(bbox_vec),
-            )?))
+            let bbox_arr = v.as_array();
+            match bbox_arr {
+                Some(arr) => {
+                    let bbox = serde_json::from_value::<(f64, f64, f64, f64)>(
+                        Value::Array(arr.iter().take(4).cloned().collect()),
+                    )
+                    .map_err(|e| UtilesError::ParsingError(e.to_string()))?;
+                    Ok(BBox::from(bbox))
+                }
+                None => {
+                    Err(UtilesError::ParsingError("Invalid bbox: ".to_string() + s))
+                }
+            }
+
+            // let bbox_vec = v
+            //     .as_array()
+            //     .unwrap()
+            //     .iter()
+            //     .take(4)
+            //     .cloned()
+            //     .collect::<Vec<Value>>();
+            // Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
+            //     Value::Array(bbox_vec),
+            // )?))
         }
     };
     bbox
@@ -85,9 +100,11 @@ where
     Some((min_x, min_y, max_x, max_y))
 }
 
-#[must_use]
-pub fn geojson_bounds(geojson_str: &str) -> BBox {
-    let coords = geojson_coords(geojson_str);
-    let bounds = coords2bounds(coords).unwrap();
-    BBox::new(bounds.0, bounds.1, bounds.2, bounds.3)
+pub fn geojson_bounds(geojson_str: &str) -> UtilesResult<BBox> {
+    let coords = geojson_coords(geojson_str)?;
+    let bounds = coords2bounds(coords);
+    match bounds {
+        Some(bounds) => Ok(BBox::new(bounds.0, bounds.1, bounds.2, bounds.3)),
+        None => Err(UtilesError::ParsingError("Invalid bbox".to_string())),
+    }
 }
