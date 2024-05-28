@@ -12,6 +12,9 @@ pub enum UtilesError {
     #[error("Unimplemented: {0}")]
     Unimplemented(String),
 
+    #[error("invalid fspath: {0}")]
+    InvalidFspath(String),
+
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 
@@ -32,6 +35,9 @@ pub enum UtilesError {
 
     #[error("unknown utiles error: {0}")]
     Unknown(String),
+
+    #[error("io error: {0}")]
+    IoError(#[from] std::io::Error),
 
     #[error("sqlite err: {0}")]
     SqliteError(#[from] rusqlite::Error),

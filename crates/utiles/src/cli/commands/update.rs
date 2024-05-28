@@ -129,11 +129,10 @@ pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
         "Not a file: {filepath}",
         filepath = filepath.display()
     );
-    let changes = update_mbtiles(&args.common.filepath, args.dryrun)
-        .await
-        .unwrap();
+    let changes = update_mbtiles(&args.common.filepath, args.dryrun).await?;
     debug!("changes: {:?}", changes);
-    let s = serde_json::to_string_pretty(&changes).unwrap();
+    let s = serde_json::to_string_pretty(&changes)
+        .expect("should not fail; changes is a Vec<MetadataChangeFromTo>");
     println!("{}", s);
     Ok(())
 }

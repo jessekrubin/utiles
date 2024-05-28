@@ -1,3 +1,5 @@
+use crate::errors::UtilesResult;
+use crate::UtilesError;
 use std::path::PathBuf;
 use tracing::debug;
 
@@ -18,14 +20,19 @@ impl std::fmt::Display for DbPath {
 impl DbPath {
     pub fn new(fspath: &str) -> Self {
         let p = PathBuf::from(fspath);
-        let filename = p.file_name().unwrap();
-        let filename = filename.to_str().unwrap().to_string();
+        let filename = p
+            .file_name()
+            .expect("DbPath::new: invalid path, could not get filename from path");
         DbPath {
             fspath: fspath.to_string(),
-            filename,
+            filename: filename
+                .to_str()
+                .expect(
+                    "DbPath::new: invalid path, could not convert filename to string",
+                )
+                .to_string(),
         }
     }
-
     pub fn memory() -> Self {
         DbPath {
             fspath: ":memory:".to_string(),
@@ -34,20 +41,37 @@ impl DbPath {
     }
 }
 
-impl<P: AsRef<std::path::Path>> From<P> for DbPath {
-    fn from(p: P) -> Self {
-        debug!("DbPath::from: {:?}", p.as_ref());
-        let fspath = p.as_ref().to_str().unwrap().to_string();
-        let filename = p
-            .as_ref()
-            .file_name()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string();
-        DbPath { fspath, filename }
-    }
+// try from for dbpath
+
+pub fn pathlike2dbpath<P: AsRef<std::path::Path>>(p: P) -> UtilesResult<DbPath> {
+    debug!("pathlike2dbpath: {:?}", p.as_ref());
+    let fspath = p
+        .as_ref()
+        .to_str()
+        .ok_or(UtilesError::InvalidFspath(
+            "pathlike2dbpath: invalid path".to_string(),
+        ))?
+        .to_string();
+    let filename = p
+        .as_ref()
+        .file_name()
+        .ok_or(UtilesError::InvalidFspath(
+            "pathlike2dbpath: invalid filename".to_string(),
+        ))?
+        .to_str()
+        .ok_or(UtilesError::InvalidFspath(
+            "pathlike2dbpath: invalid filename".to_string(),
+        ))?
+        .to_string();
+    Ok(DbPath { fspath, filename })
 }
+
+// impl<P: AsRef<std::path::Path>> From<P> for DbPath {
+//     fn from(p: P) -> Self {
+//         debug!("DbPath::from: {:?}", p.as_ref());
+//         pathlike2dbpath(p).unwrap()
+//     }
+// }
 
 pub trait DbPathTrait {
     fn db_path(&self) -> &DbPath;

@@ -66,6 +66,7 @@ pub fn add_ut_functions(db: &Connection) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
     use rusqlite::params;
 
     type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;

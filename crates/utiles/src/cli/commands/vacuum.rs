@@ -26,7 +26,8 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     let db = SqliteDb::open_existing(&args.common.filepath)?;
 
     // get file size from filepath
-    let pre_vac_file_size = std::fs::metadata(&args.common.filepath).unwrap().len();
+    let pre_vac_file_size = std::fs::metadata(&args.common.filepath)?.len();
+    // .unwrap().len();
 
     // do the vacuum
     let vacuum_start_time = std::time::Instant::now();
@@ -43,10 +44,10 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
             }
         }
         info!("vacuuming: {} -> {}", args.common.filepath, dst);
-        db.vacuum_into(dst.clone()).unwrap();
+        db.vacuum_into(dst.clone())?;
     } else {
         info!("vacuuming: {}", args.common.filepath);
-        db.vacuum().unwrap();
+        db.vacuum()?;
     }
     let vacuum_time_ms = vacuum_start_time.elapsed().as_millis();
 
@@ -54,17 +55,17 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     if let Some(dst) = &args.into {
         let dst_db = SqliteDb::open_existing(dst)?;
         info!("analyzing: {}", dst);
-        dst_db.analyze().unwrap();
+        dst_db.analyze()?;
     } else {
         info!("analyzing: {}", args.common.filepath);
-        db.analyze().unwrap();
+        db.analyze()?;
     }
     let analyze_time_ms = analyze_start_time.elapsed().as_millis();
 
     // get file size from filepath
     let vacuumed_file_size = match &args.into {
-        Some(dst) => std::fs::metadata(dst).unwrap().len(),
-        None => std::fs::metadata(&args.common.filepath).unwrap().len(),
+        Some(dst) => std::fs::metadata(dst)?.len(),
+        None => std::fs::metadata(&args.common.filepath)?.len(),
     };
     let info = VacuumInfo {
         fspath: args.common.filepath.clone(),
@@ -77,9 +78,12 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
         size_diff: (vacuumed_file_size as i64) - (pre_vac_file_size as i64),
     };
     let out_str = if args.common.min {
-        serde_json::to_string(&info).unwrap()
+        serde_json::to_string(&info)
+            .expect("Error serializing VacuumInfo to JSON. This should never happen.")
     } else {
-        serde_json::to_string_pretty(&info).unwrap()
+        serde_json::to_string_pretty(&info).expect(
+            "Error serializing VacuumInfo to pretty JSON. This should never happen.",
+        )
     };
     println!("{}", out_str);
     Ok(())
