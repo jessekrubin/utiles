@@ -169,8 +169,8 @@ impl MbtilesLinter {
             .collect::<Vec<String>>();
         let missing_metadata_keys = REQUIRED_METADATA_FIELDS
             .iter()
-            .filter(|k| !metadata_keys.contains(&k.to_string()))
-            .map(|k| k.to_string())
+            .filter(|k| !metadata_keys.contains(&(**k).to_string()))
+            .map(|k| (*k).to_string())
             .collect::<Vec<String>>();
         if missing_metadata_keys.is_empty() {
             Ok(())
