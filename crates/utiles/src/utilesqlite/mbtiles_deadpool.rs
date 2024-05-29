@@ -154,7 +154,7 @@ impl MbtilesDeadpool {
         let _interaction_res = c
             .interact(move |conn| {
                 // Assuming insert_tile_flat_mbtiles is a synchronous function
-                insert_tile_flat_mbtiles(conn, tile, data).map_err(|e| {
+                insert_tile_flat_mbtiles(conn, tile, &data).map_err(|e| {
                     error!("Error inserting tile: {}", e);
                     e
                 })

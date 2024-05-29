@@ -151,12 +151,12 @@ mod sqlite_u64_transmute_tests {
 }
 
 fn u64_to_i64_ptr(value: u64) -> i64 {
-    let ptr = &value as *const u64 as *const i64;
+    let ptr = std::ptr::addr_of!(value).cast::<i64>();
     unsafe { *ptr }
 }
 
 fn i64_to_u64_ptr(value: i64) -> u64 {
-    let ptr = &value as *const i64 as *const u64;
+    let ptr = std::ptr::addr_of!(value).cast::<u64>();
     unsafe { *ptr }
 }
 

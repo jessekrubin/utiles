@@ -91,7 +91,7 @@ async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
 
     let mut datasets = BTreeMap::new();
     // let mut tilejsons = HashMap::new();
-    for fspath in filepaths.iter() {
+    for fspath in &filepaths {
         // let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
         let pool = MbtilesAsyncSqliteClient::open_readonly(fspath).await?;
         debug!("sanity check: {:?}", pool.filepath());
@@ -234,7 +234,7 @@ pub fn u8_radix36_char(num: u8) -> char {
     }
 }
 
-/// Radix36 for request_id mimics fastify's req-id
+/// Radix36 for `request_id` mimics fastify's req-id
 ///
 /// ```
 /// use utiles::server::u64_radix36;

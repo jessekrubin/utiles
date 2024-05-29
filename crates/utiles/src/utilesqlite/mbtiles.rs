@@ -91,7 +91,7 @@ impl Mbtiles {
         mbtype: Option<MbtilesType>,
     ) -> UtilesCoreResult<Self> {
         let dbpath = DbPath::new(filepath);
-        let res = create_mbtiles_file(filepath, mbtype.unwrap_or_default())?;
+        let res = create_mbtiles_file(filepath, &mbtype.unwrap_or_default())?;
         Ok(Mbtiles { conn: res, dbpath })
     }
 
@@ -302,7 +302,7 @@ pub fn add_functions(conn: &Connection) -> RusqliteResult<()> {
 // QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS
 // =====================================================================
 
-/// return a vector of MbtilesMetadataRow structs
+/// return a vector of `MbtilesMetadataRow` structs
 pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
     let mut stmt = conn.prepare_cached("SELECT name, value FROM metadata")?;
     let mdata = stmt
@@ -576,14 +576,14 @@ pub fn query_zxy(
 
 pub fn query_tile<T: TileLike>(
     connection: &Connection,
-    tile: T,
+    tile: &T,
 ) -> RusqliteResult<Option<Vec<u8>>> {
     query_zxy(connection, tile.z(), tile.x(), tile.y())
 }
 
 pub fn tile_exists<T: TileLike>(
     connection: &Connection,
-    tile: T,
+    tile: &T,
 ) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3")?;
     let rows = stmt.query_row(params![tile.z(), tile.x(), tile.flipy()], |row| {
@@ -679,7 +679,7 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
 
 pub fn create_mbtiles_file(
     fspath: &str,
-    mbtype: MbtilesType,
+    mbtype: &MbtilesType,
 ) -> UtilesCoreResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
         let emsg = format!("Error opening mbtiles file: {e}");
@@ -706,7 +706,7 @@ pub fn create_mbtiles_file(
 pub fn insert_tile_flat_mbtiles(
     conn: &mut Connection,
     tile: Tile,
-    data: Vec<u8>,
+    data: &[u8],
 ) -> RusqliteResult<usize> {
     let mut stmt = conn.prepare_cached("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
     let r = stmt.execute(params![tile.z, tile.x, tile.flipy(), data])?;
