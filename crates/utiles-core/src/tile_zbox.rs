@@ -214,7 +214,7 @@ impl TileZBoxes {
     pub fn mbtiles_sql_where(&self) -> String {
         self.ranges
             .iter()
-            .map(|r| r.mbtiles_sql_where())
+            .map(TileZBox::mbtiles_sql_where)
             .collect::<Vec<String>>()
             .join(" OR ")
     }
