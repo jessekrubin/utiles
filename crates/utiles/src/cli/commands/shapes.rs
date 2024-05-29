@@ -38,7 +38,7 @@ impl Default for ShapesProject {
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false, id = "output-mode")]
 pub struct ShapesOutputMode {
-    /// Output as a GeoJSON feature collections
+    /// Output as a `GeoJSON` feature collections
     #[arg(
         long, default_value = "false", conflicts_with = "bbox", action = clap::ArgAction::SetTrue
     )]
@@ -79,7 +79,7 @@ pub struct ShapesArgs {
     #[command(flatten)]
     output_mode: Option<ShapesOutputMode>,
 
-    /// Output as a GeoJSON feature collections.
+    /// Output as a `GeoJSON` feature collections.
     #[arg(long, action)]
     collect: bool,
 

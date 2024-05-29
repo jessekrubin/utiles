@@ -40,7 +40,7 @@ pub enum UtilesError {
     #[error("utiles-core error: {0}")]
     CoreError(#[from] utiles_core::UtilesCoreError),
 
-    /// Error from std::io
+    /// Error from `std::io`
     #[error("io error: {0}")]
     IoError(#[from] std::io::Error),
 
@@ -48,7 +48,7 @@ pub enum UtilesError {
     #[error("sqlite err: {0}")]
     SqliteError(#[from] rusqlite::Error),
 
-    /// Error from async_sqlite
+    /// Error from `async_sqlite`
     #[error("sqlite err: {0}")]
     AsyncSqliteError(#[from] async_sqlite::Error),
 
@@ -56,7 +56,7 @@ pub enum UtilesError {
     #[error("globset error: {0}")]
     GlobsetError(#[from] globset::Error),
 
-    /// Error from serde_json
+    /// Error from `serde_json`
     #[error("serde error: {0}")]
     SerdeError(#[from] serde_json::Error),
 }

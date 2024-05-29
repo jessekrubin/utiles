@@ -243,13 +243,13 @@ pub enum Commands {
     TILE CLI UTILS - MERCANTILE LIKE CLI
     ========================================================================
     */
-    /// Echo the Web Mercator tile at ZOOM level bounding GeoJSON [west, south,
+    /// Echo the Web Mercator tile at ZOOM level bounding `GeoJSON` [west, south,
     /// east, north] bounding boxes, features, or collections read from stdin.
     ///
     /// Input may be a compact newline-delimited sequences of JSON or a
     /// pretty-printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
+    /// <https://tools.ietf.org/html/rfc8142> and
+    /// <https://tools.ietf.org/html/rfc7159>).
     ///
     /// Examples:
     ///
@@ -266,8 +266,8 @@ pub enum Commands {
     ///
     /// Input may be a compact newline-delimited sequences of JSON or a
     /// pretty-printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
+    /// <https://tools.ietf.org/html/rfc8142> and
+    /// <https://tools.ietf.org/html/rfc7159>).
     ///
     /// Examples:
     ///
@@ -284,8 +284,8 @@ pub enum Commands {
     ///
     /// Input may be a compact newline-delimited sequences of JSON or a
     /// pretty-printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
+    /// <https://tools.ietf.org/html/rfc8142> and
+    /// <https://tools.ietf.org/html/rfc7159>).
     ///
     /// Examples:
     ///
@@ -317,8 +317,8 @@ pub enum Commands {
     ///
     /// Input may be a compact newline-delimited sequences of JSON or a
     /// pretty-printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
+    /// <https://tools.ietf.org/html/rfc8142> and
+    /// <https://tools.ietf.org/html/rfc7159>).
     ///
     /// Example:
     ///
@@ -343,8 +343,8 @@ pub enum Commands {
     ///
     /// Input may be a compact newline-delimited sequences of JSON or a
     /// pretty-printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
+    /// <https://tools.ietf.org/html/rfc8142> and
+    /// <https://tools.ietf.org/html/rfc7159>).
     #[command(name = "neighbors")]
     Neighbors(TileFmtArgs),
 
@@ -352,8 +352,8 @@ pub enum Commands {
     ///
     /// Input may be a compact newline-delimited sequences of JSON or a
     /// pretty-printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
+    /// <https://tools.ietf.org/html/rfc8142> and
+    /// <https://tools.ietf.org/html/rfc7159>).
     ///
     /// Example:
     ///
@@ -366,12 +366,12 @@ pub enum Commands {
     #[command(name = "parent")]
     Parent(ParentChildrenArgs),
 
-    /// Echo tiles as GeoJSON feature collections/sequences
+    /// Echo tiles as `GeoJSON` feature collections/sequences
     ///
     /// Input may be a compact newline-delimited sequences of JSON or a
     /// pretty-printed ASCII RS-delimited sequence of JSON (like
-    /// https://tools.ietf.org/html/rfc8142 and
-    /// https://tools.ietf.org/html/rfc7159).
+    /// <https://tools.ietf.org/html/rfc8142> and
+    /// <https://tools.ietf.org/html/rfc7159>).
     ///
     /// Example:
     ///
