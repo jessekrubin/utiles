@@ -176,7 +176,7 @@ impl MbtilesDeadpool {
                 insert_tiles_flat_mbtiles(conn, &tiles, None)
             })
             .await?;
-        println!("interaction_res: {:?}", interaction_res);
+        println!("interaction_res: {interaction_res:?}");
         Ok(())
     }
 }

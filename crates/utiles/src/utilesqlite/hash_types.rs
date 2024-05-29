@@ -37,8 +37,7 @@ impl FromStr for HashType {
             "xxh3_64" => Ok(HashType::Xxh3_64),
             "xxh3_128" => Ok(HashType::Xxh3_128),
             _ => Err(UtilesError::Error(format!(
-                "HashType::from_str: unknown hash type: {}",
-                s
+                "HashType::from_str: unknown hash type: {s}"
             ))),
         }
     }

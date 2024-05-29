@@ -85,6 +85,6 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
             "Error serializing VacuumInfo to pretty JSON. This should never happen.",
         )
     };
-    println!("{}", out_str);
+    println!("{out_str}");
     Ok(())
 }

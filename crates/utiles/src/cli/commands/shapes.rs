@@ -149,7 +149,7 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
             Err(e) => {
                 error!("Error parsing tile: {}", e);
                 // throw the error here
-                Err(UtilesError::Error(format!("Error parsing tile: {}", e)))
+                Err(UtilesError::Error(format!("Error parsing tile: {e}")))
             }
         }
         // Some(

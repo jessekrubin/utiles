@@ -682,7 +682,7 @@ pub fn create_mbtiles_file(
     mbtype: MbtilesType,
 ) -> UtilesCoreResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
-        let emsg = format!("Error opening mbtiles file: {}", e);
+        let emsg = format!("Error opening mbtiles file: {e}");
         UtilesCoreError::Unknown(emsg)
     })?;
     match mbtype {
@@ -692,7 +692,7 @@ pub fn create_mbtiles_file(
                 Ok(_) => Ok(conn),
                 Err(e) => {
                     error!("Error creating flat mbtiles file: {}", e);
-                    let emsg = format!("Error creating flat mbtiles file: {}", e);
+                    let emsg = format!("Error creating flat mbtiles file: {e}");
                     Err(UtilesCoreError::Unknown(emsg))
                 }
             }
@@ -729,7 +729,7 @@ pub fn insert_tiles_flat_mbtiles(
     // scope so that stmt is not borrowed when tx.commit() is called
     let mut naff: usize = 0;
     {
-        let statement = format!("{} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)", insert_clause);
+        let statement = format!("{insert_clause} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)");
         let mut stmt = tx.prepare_cached(&statement)?;
         for tile in tiles {
             let r = stmt.execute(params![
@@ -904,15 +904,14 @@ pub fn query_distinct_tiletype(conn: &Connection) -> RusqliteResult<Vec<String>>
 fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
     let sql = format!(
         "SELECT coalesce(
-            {}_concat_hex(
+            {hash_type}_concat_hex(
                 cast(zoom_level AS text),
                 cast(tile_column AS text),
                 cast(tile_row AS text),
                 tile_data
                 ORDER BY zoom_level, tile_column, tile_row),
-            {}_hex(''))
-        FROM tiles",
-        hash_type, hash_type
+            {hash_type}_hex(''))
+        FROM tiles"
     );
     sql
 }

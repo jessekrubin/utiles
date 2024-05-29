@@ -361,7 +361,7 @@ async fn get_dataset_tile_quadkey(
     let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {
         (
             StatusCode::BAD_REQUEST,
-            format!("Error parsing quadkey: {}", e),
+            format!("Error parsing quadkey: {e}"),
         )
     })?;
     let mbt_ds = mbt_ds.unwrap();
@@ -390,7 +390,7 @@ async fn get_dataset_tilejson(
     let dataset = path;
     let ds = state.datasets.mbtiles.get(&dataset).unwrap();
     let mut tilejson_with_tiles = ds.tilejson.clone();
-    let tiles_url = format!("http://{}/tiles/{}/{{z}}/{{x}}/{{y}}", hostname, dataset);
+    let tiles_url = format!("http://{hostname}/tiles/{dataset}/{{z}}/{{x}}/{{y}}");
     tilejson_with_tiles.tiles = vec![tiles_url];
     Json(tilejson_with_tiles)
 }

@@ -69,10 +69,10 @@ impl UtilesLintError {
     #[must_use]
     pub fn format_error(&self, filepath: &str) -> String {
         let errcode = "MBT".red();
-        let errstr = format!("{}: {}", errcode, self);
+        let errstr = format!("{errcode}: {self}");
 
         // let error_str = format!("STTUFF -- {}", self.to_string());
-        let e_str = format!("{}: {}", filepath, errstr);
+        let e_str = format!("{filepath}: {errstr}");
         e_str
         // match self {
         //     UtilesError::CoreError(e) => e.to_string(),

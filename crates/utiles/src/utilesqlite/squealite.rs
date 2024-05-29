@@ -119,7 +119,7 @@ pub fn pragma_table_info(
     conn: &Connection,
     table: &str,
 ) -> RusqliteResult<Vec<PragmaTableInfoRow>> {
-    let stmt_str = format!("PRAGMA table_info({})", table);
+    let stmt_str = format!("PRAGMA table_info({table})");
     let mut stmt = conn.prepare(&stmt_str)?;
     let mapped_rows = stmt.query_map([], |row| {
         let cid: i64 = row.get(0)?;
@@ -156,7 +156,7 @@ pub fn pragma_table_xinfo(
     conn: &Connection,
     table: &str,
 ) -> RusqliteResult<Vec<PragmaTableXInfoRow>> {
-    let stmt_str = format!("PRAGMA table_xinfo({})", table);
+    let stmt_str = format!("PRAGMA table_xinfo({table})");
     let mut stmt = conn.prepare(&stmt_str)?;
     let mapped_rows = stmt.query_map([], |row| {
         let cid: i64 = row.get(0)?;
@@ -215,7 +215,7 @@ pub fn pragma_index_list(
     conn: &Connection,
     table: &str,
 ) -> RusqliteResult<Vec<PragmaIndexListRow>> {
-    let stmt_str = format!("PRAGMA index_list({})", table);
+    let stmt_str = format!("PRAGMA index_list({table})");
     let mut stmt = conn.prepare(&stmt_str)?;
 
     let mapped_rows = stmt.query_map([], |row| {
@@ -244,7 +244,7 @@ pub fn pragma_index_info(
     conn: &Connection,
     index: &str,
 ) -> RusqliteResult<Vec<PragmaIndexInfoRow>> {
-    let stmt_str = format!("PRAGMA index_info({})", index);
+    let stmt_str = format!("PRAGMA index_info({index})");
     let mut stmt = conn.prepare(&stmt_str)?;
     let mapped_rows = stmt.query_map([], |row| {
         let row = PragmaIndexInfoRow {

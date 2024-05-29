@@ -133,6 +133,6 @@ pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
     debug!("changes: {:?}", changes);
     let s = serde_json::to_string_pretty(&changes)
         .expect("should not fail; changes is a Vec<MetadataChangeFromTo>");
-    println!("{}", s);
+    println!("{s}");
     Ok(())
 }

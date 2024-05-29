@@ -18,8 +18,8 @@
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::no_effect_underscore_binding)]
-#![allow(clippy::uninlined_format_args)]
-#![allow(clippy::if_not_else)]
+// #![allow(clippy::uninlined_format_args)]
+// #![allow(clippy::if_not_else)]
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::ignored_unit_patterns)]
 #![allow(clippy::match_same_arms)]
@@ -135,7 +135,7 @@ mod tests {
         ];
 
         for tile in valid_tiles {
-            assert!(tile.valid(), "{:?} is not valid", tile);
+            assert!(tile.valid(), "{tile:?} is not valid");
         }
     }
 
@@ -149,7 +149,7 @@ mod tests {
         ];
 
         for tile in invalid_tiles {
-            assert!(!tile.valid(), "{:?} is valid", tile);
+            assert!(!tile.valid(), "{tile:?} is valid");
         }
     }
 

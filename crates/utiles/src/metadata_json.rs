@@ -171,7 +171,7 @@ mod tests {
         // let pjson = serde_json::to_string_pretty(&rows).unwrap();
         // println!("{}", pjson);
 
-        println!("{:?}", rows);
+        println!("{rows:?}");
 
         // have to parse then serialize to compare...
         let expected_rows: Vec<MbtilesMetadataRow> =
