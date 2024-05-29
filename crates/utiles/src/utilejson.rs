@@ -53,9 +53,6 @@ pub fn metadata2tilejson(metadata: Vec<MbtilesMetadataRow>) -> UtilesResult<Tile
             "legend" => tj.legend = Some(value),
             "template" => tj.template = Some(value),
             "json" => json = to_val(serde_json::from_str(&value)),
-            "format" | "generator" => {
-                tj.other.insert(name, Value::String(value));
-            }
             _ => {
                 tj.other.insert(name, Value::String(value));
             }

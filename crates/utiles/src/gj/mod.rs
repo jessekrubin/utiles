@@ -35,10 +35,12 @@ pub fn geojson_geometry_coords(g: Geometry) -> Box<dyn Iterator<Item = Coord>> {
 pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
     match g.value {
         GeoJsonValue::Point(c) => vec![c],
-        GeoJsonValue::MultiPoint(c) => c.into_iter().collect(),
-        GeoJsonValue::LineString(c) => c.into_iter().collect(),
-        GeoJsonValue::MultiLineString(c) => c.into_iter().flatten().collect(),
-        GeoJsonValue::Polygon(c) => c.into_iter().flatten().collect(),
+        GeoJsonValue::MultiPoint(c) | GeoJsonValue::LineString(c) => {
+            c.into_iter().collect()
+        }
+        GeoJsonValue::MultiLineString(c) | GeoJsonValue::Polygon(c) => {
+            c.into_iter().flatten().collect()
+        }
         GeoJsonValue::MultiPolygon(c) => c.into_iter().flatten().flatten().collect(),
         GeoJsonValue::GeometryCollection(c) => c
             .into_iter()

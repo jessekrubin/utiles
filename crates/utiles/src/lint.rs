@@ -242,7 +242,7 @@ impl MbtilesLinter {
         // lint_results.push(MbtilesLinter::check_magic_number(&mbt).await);
 
         match MbtilesLinter::check_metadata(&mbt).await {
-            Ok(_) => {}
+            Ok(()) => {}
             Err(e) => match e {
                 UtilesLintError::LintErrors(errs) => {
                     lint_results.push(Ok(()));

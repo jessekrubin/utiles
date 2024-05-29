@@ -66,7 +66,7 @@ pub type UtilesResult<T> = Result<T, UtilesError>;
 impl From<RusqliteResult<()>> for UtilesError {
     fn from(e: RusqliteResult<()>) -> Self {
         match e {
-            Ok(_) => UtilesError::Unknown("unknown error".to_string()),
+            Ok(()) => UtilesError::Unknown("unknown error".to_string()),
             Err(e) => UtilesError::SqliteError(e),
         }
     }

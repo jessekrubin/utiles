@@ -110,7 +110,7 @@ pub async fn cli_main(
     };
 
     match res {
-        Ok(_) => Ok(0),
+        Ok(()) => Ok(0),
         Err(e) => {
             error!("Error: {}", e);
             Err(e)

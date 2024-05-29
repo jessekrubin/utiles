@@ -326,8 +326,9 @@ fn fspath2xyz(path: &Path) -> Result<(u32, u32, u8), std::num::ParseIntError> {
 async fn copy_fs2mbtiles(
     dirpath: String,
     mbtiles: String,
-    _cfg: CopyConfig,
+    cfg: CopyConfig,
 ) -> UtilesResult<()> {
+    debug!("dirpath: {dirpath:?}, mbtiles: {mbtiles:?} cfg: {cfg:?}");
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let walker = WalkDir::new(&dirpath).min_depth(3).max_depth(3);
     let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();

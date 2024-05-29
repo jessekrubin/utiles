@@ -689,7 +689,7 @@ pub fn create_mbtiles_file(
         MbtilesType::Flat => {
             let r = init_flat_mbtiles(&mut conn);
             match r {
-                Ok(_) => Ok(conn),
+                Ok(()) => Ok(conn),
                 Err(e) => {
                     error!("Error creating flat mbtiles file: {}", e);
                     let emsg = format!("Error creating flat mbtiles file: {e}");
