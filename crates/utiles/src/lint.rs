@@ -148,7 +148,7 @@ impl MbtilesLinter {
         let magic_number_res = mbt.magic_number().await;
         match magic_number_res {
             Ok(magic_number) => {
-                if magic_number == 0x4d504258 {
+                if magic_number == 0x4d50_4258 {
                     Ok(())
                 } else if magic_number == 0 {
                     Err(UtilesLintError::MbtMissingMagicNumber)

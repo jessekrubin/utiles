@@ -27,7 +27,7 @@ mod i64_shift_tests {
     #[test]
     fn test_u64_to_i64_left() {
         let original: u64 = 0;
-        let expected: i64 = -9223372036854775808;
+        let expected: i64 = -9_223_372_036_854_775_808;
         assert_eq!(u64_to_i64_shift(original), expected);
         let back: u64 = i64_to_u64_shift(expected);
         assert_eq!(back, original);
@@ -36,7 +36,7 @@ mod i64_shift_tests {
     #[test]
     fn test_i64_to_u64_middle() {
         let original: i64 = 0;
-        let expected: u64 = 9223372036854775808;
+        let expected: u64 = 9_223_372_036_854_775_808;
         assert_eq!(i64_to_u64_shift(original), expected);
         let back: i64 = u64_to_i64_shift(expected);
         assert_eq!(back, original);
@@ -44,8 +44,8 @@ mod i64_shift_tests {
 
     #[test]
     fn test_u64_to_i64_right() {
-        let original: u64 = 0xFFFFFFFFFFFFFFFF; // Max u64 value
-        let expected: i64 = 9223372036854775807;
+        let original: u64 = 0xFFFF_FFFF_FFFF_FFFF; // Max u64 value
+        let expected: i64 = 9_223_372_036_854_775_807;
         assert_eq!(u64_to_i64_shift(original), expected);
         let back: u64 = i64_to_u64_shift(expected);
         assert_eq!(back, original);
@@ -54,12 +54,12 @@ mod i64_shift_tests {
     #[test]
     fn test_round_trip() {
         // Tests that converting back and forth yields the original value
-        let original_u64: u64 = 0xFEDCBA9876543210;
+        let original_u64: u64 = 0xFEDC_BA98_7654_3210;
         let intermediate_i64: i64 = u64_to_i64_shift(original_u64);
         let final_u64: u64 = i64_to_u64_shift(intermediate_i64);
         assert_eq!(original_u64, final_u64);
 
-        let original_i64: i64 = -0x123456789ABCDEF;
+        let original_i64: i64 = -0x0123_4567_89AB_CDEF;
         let intermediate_u64: u64 = i64_to_u64_shift(original_i64);
         let final_i64: i64 = u64_to_i64_shift(intermediate_u64);
         assert_eq!(original_i64, final_i64);
@@ -123,29 +123,29 @@ mod sqlite_u64_transmute_tests {
 
     #[test]
     fn test_u64_to_i64_positive() {
-        let original: u64 = 0x7FFFFFFFFFFFFFFF; // Max positive i64 value
-        let expected: i64 = 0x7FFFFFFFFFFFFFFF; // Same value as i64
+        let original: u64 = 0x7FFF_FFFF_FFFF_FFFF; // Max positive i64 value
+        let expected: i64 = 0x7FFF_FFFF_FFFF_FFFF; // Same value as i64
         assert_eq!(u64_to_i64_unsafe_transmute(original), expected);
     }
 
     #[test]
     fn test_u64_to_i64_negative() {
-        let original: u64 = 0xFFFFFFFFFFFFFFFF; // Max u64 value, interpreted as -1 in i64
+        let original: u64 = 0xFFFF_FFFF_FFFF_FFFF; // Max u64 value, interpreted as -1 in i64
         let expected: i64 = -1;
         assert_eq!(u64_to_i64_unsafe_transmute(original), expected);
     }
 
     #[test]
     fn test_i64_to_u64_positive() {
-        let original: i64 = 0x7FFFFFFFFFFFFFFF; // Max positive i64 value
-        let expected: u64 = 0x7FFFFFFFFFFFFFFF; // Same value as u64
+        let original: i64 = 0x7FFF_FFFF_FFFF_FFFF; // Max positive i64 value
+        let expected: u64 = 0x7FFF_FFFF_FFFF_FFFF; // Same value as u64
         assert_eq!(i64_to_u64_unsafe_transmute(original), expected);
     }
 
     #[test]
     fn test_i64_to_u64_negative() {
         let original: i64 = -1;
-        let expected: u64 = 0xFFFFFFFFFFFFFFFF; // Max u64 value
+        let expected: u64 = 0xFFFF_FFFF_FFFF_FFFF; // Max u64 value
         assert_eq!(i64_to_u64_unsafe_transmute(original), expected);
     }
 }
@@ -173,29 +173,29 @@ mod sqlite_u64_ptr_tests {
 
     #[test]
     fn test_u64_to_i64_positive() {
-        let original: u64 = 0x7FFFFFFFFFFFFFFF; // Max positive i64 value
-        let expected: i64 = 0x7FFFFFFFFFFFFFFF; // Same value as i64
+        let original: u64 = 0x7FFF_FFFF_FFFF_FFFF; // Max positive i64 value
+        let expected: i64 = 0x7FFF_FFFF_FFFF_FFFF; // Same value as i64
         assert_eq!(u64_to_i64_ptr(original), expected);
     }
 
     #[test]
     fn test_u64_to_i64_negative() {
-        let original: u64 = 0xFFFFFFFFFFFFFFFF; // Max u64 value, interpreted as -1 in i64
+        let original: u64 = 0xFFFF_FFFF_FFFF_FFFF; // Max u64 value, interpreted as -1 in i64
         let expected: i64 = -1;
         assert_eq!(u64_to_i64_ptr(original), expected);
     }
 
     #[test]
     fn test_i64_to_u64_positive() {
-        let original: i64 = 0x7FFFFFFFFFFFFFFF; // Max positive i64 value
-        let expected: u64 = 0x7FFFFFFFFFFFFFFF; // Same value as u64
+        let original: i64 = 0x7FFF_FFFF_FFFF_FFFF; // Max positive i64 value
+        let expected: u64 = 0x7FFF_FFFF_FFFF_FFFF; // Same value as u64
         assert_eq!(i64_to_u64_ptr(original), expected);
     }
 
     #[test]
     fn test_i64_to_u64_negative() {
         let original: i64 = -1;
-        let expected: u64 = 0xFFFFFFFFFFFFFFFF; // Max u64 value
+        let expected: u64 = 0xFFFF_FFFF_FFFF_FFFF; // Max u64 value
         assert_eq!(i64_to_u64_ptr(original), expected);
     }
 }
