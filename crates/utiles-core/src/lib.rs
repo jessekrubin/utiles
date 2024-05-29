@@ -1,11 +1,13 @@
 //! utiles-core ~ core util(e)ities
 // #![deny(missing_docs)]
+
 #![deny(clippy::all)]
 #![deny(clippy::correctness)]
 #![deny(clippy::panic)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
 #![deny(clippy::unwrap_used)]
+#![deny(clippy::pedantic)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_errors_doc)]

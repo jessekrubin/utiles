@@ -460,7 +460,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_str_commas() {
-        let string = r#"-180.0, -85.0, 180.0, 85.0"#;
+        let string = r"-180.0, -85.0, 180.0, 85.0";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
@@ -469,7 +469,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_str_spaces() {
-        let string = r#"-180.0 -85.0 180.0 85.0"#;
+        let string = r"-180.0 -85.0 180.0 85.0";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
@@ -487,7 +487,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_bad() {
-        let string = r#"[-180.0,]"#;
+        let string = r"[-180.0,]";
         let bbox_result = parse_bbox(string);
         assert!(bbox_result.is_err());
     }
