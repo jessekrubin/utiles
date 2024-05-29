@@ -24,16 +24,16 @@ pub struct ZoomSet(u32);
 /// Return a vector of zoom levels from a zoom-set u32
 #[must_use]
 pub fn zset2zvec(zset: u32) -> Vec<u8> {
-    (0..32)
+    (0u8..32)
         .rev()
-        .filter(|&i| (zset & (1 << i)) != 0)
-        .map(|i| (31 - i) as u8) // Convert bit index to zoom level and cast to u8
+        .filter(|&i| (zset & (1u32 << i)) != 0)
+        .map(|i| 31 - i) // Convert bit index to zoom level
         .collect()
 }
 
 /// Return a zoom-set u32 from a vector of zoom levels
 #[must_use]
-pub fn zvec2zset(zvec: Vec<u8>) -> u32 {
+pub fn zvec2zset(zvec: &[u8]) -> u32 {
     zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
 }
 
@@ -55,7 +55,7 @@ impl ZoomSet {
 
     /// Create a new `ZoomSet` from a vector of zoom levels
     #[must_use]
-    pub fn from_zooms(zooms: Vec<u8>) -> Self {
+    pub fn from_zooms(zooms: &[u8]) -> Self {
         Self(zvec2zset(zooms))
     }
 
@@ -282,7 +282,7 @@ impl From<ZoomOrZooms> for ZoomsSetInt {
     fn from(zoom_or_zooms: ZoomOrZooms) -> Self {
         match zoom_or_zooms {
             ZoomOrZooms::Zoom(zoom) => 1 << (31 - zoom),
-            ZoomOrZooms::Zooms(zooms) => zvec2zset(zooms),
+            ZoomOrZooms::Zooms(zooms) => zvec2zset(&zooms),
         }
     }
 }
@@ -320,7 +320,7 @@ mod tests {
     fn zvec2zset_none() {
         let zset: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
         let zvec: Vec<u8> = vec![];
-        assert_eq!(zvec2zset(zvec), zset);
+        assert_eq!(zvec2zset(&zvec), zset);
     }
 
     #[test]
@@ -328,7 +328,7 @@ mod tests {
         let zset: u32 = 0b1110_0000_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
         let zvec: Vec<u8> = vec![0, 1, 2];
 
-        assert_eq!(zvec2zset(zvec), zset);
+        assert_eq!(zvec2zset(&zvec), zset);
     }
 
     #[test]
@@ -338,14 +338,14 @@ mod tests {
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
             21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
         ];
-        assert_eq!(zvec2zset(zvec), zset);
+        assert_eq!(zvec2zset(&zvec), zset);
     }
 
     #[test]
     fn zvec2zset_0_1_2_3_4_5_6_7() {
         let zset: u32 = 0b1111_1111_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
         let zvec: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
-        let zset_from_zvec = zvec2zset(zvec);
+        let zset_from_zvec = zvec2zset(&zvec);
         assert_eq!(zset_from_zvec, zset);
     }
 

@@ -1,7 +1,6 @@
 //! utiles-core ~ core util(e)ities
 // #![deny(missing_docs)]
-// #![deny(clippy::pedantic)]
-
+#![deny(clippy::pedantic)]
 #![deny(clippy::all)]
 #![deny(clippy::correctness)]
 #![deny(clippy::panic)]

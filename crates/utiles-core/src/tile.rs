@@ -339,23 +339,25 @@ impl Tile {
         let (x, y) = crate::_xy(lng, lat, truncate)?;
         let z2 = 2.0_f64.powi(i32::from(zoom));
         let z2f = z2;
+
         let xtile = if x <= 0.0 {
             0
         } else if x >= 1.0 {
-            (z2f - 1.0) as u32
+            u32::try_from((z2 - 1.0).floor() as i64).unwrap_or(0)
         } else {
             let xt = (x + EPSILON) * z2f;
-            (xt.floor()) as u32
+            u32::try_from(xt.floor() as i64).unwrap_or(0)
         };
 
         let ytile = if y <= 0.0 {
             0
         } else if y >= 1.0 {
-            (z2f - 1.0) as u32
+            u32::try_from((z2 - 1.0).floor() as i64).unwrap_or(0)
         } else {
             let yt = (y + EPSILON) * z2f;
-            (yt.floor()) as u32
+            u32::try_from(yt.floor() as i64).unwrap_or(0)
         };
+
         Ok(Self {
             x: xtile,
             y: ytile,

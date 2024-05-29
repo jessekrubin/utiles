@@ -209,6 +209,10 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
 
 /// Parse a string into vector of integers
 ///
+/// # Panics
+///
+/// Panics if the string contains a number that cannot be parsed as u64.
+///
 /// # Examples
 /// ```
 /// use utiles_core::parsing::parse_uints;
@@ -318,6 +322,10 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 }
 
 /// Parse a string into a vector of signed integers
+///
+/// # Panics
+///
+/// Panics if the string contains a number that cannot be parsed as i64.
 ///
 /// # Examples
 /// ```
