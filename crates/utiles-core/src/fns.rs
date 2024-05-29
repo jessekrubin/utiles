@@ -203,6 +203,7 @@ pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
 /// assert_eq!(last_tile_in_z12, (4095, 4095, 12));
 /// ```
 #[must_use]
+#[allow(clippy::cast_possible_truncation)]
 pub fn rmid2xyz(i: u64) -> (u32, u32, u8) {
     if i == 0 {
         return (0, 0, 0);

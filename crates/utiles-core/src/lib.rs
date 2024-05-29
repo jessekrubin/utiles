@@ -1,5 +1,4 @@
 //! utiles-core ~ core util(e)ities
-// #![deny(missing_docs)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::all)]
 #![deny(clippy::correctness)]
@@ -11,7 +10,6 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::similar_names)]
-#![allow(clippy::cast_possible_truncation)]
 
 pub use bbox::BBox;
 pub use gdal::geotransform2optzoom;
