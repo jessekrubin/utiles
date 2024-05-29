@@ -125,28 +125,6 @@ impl MbtilesLinter {
             fix,
         }
     }
-    // (path: &str, fix: bool) -> Self {
-    //     MbtilesLinter {
-    //         path: PathBuf::from(path),
-    //         fix,
-    //     }
-    // }
-
-    // async fn open_mbtiles(
-    //     &self,
-    // ) -> UtilesLintResult<utilesqlite::MbtilesAsyncSqlitePool> {
-    //     let mbtiles = match utilesqlite::MbtilesAsyncSqlitePool::open(
-    //         self.path.to_str().unwrap(),
-    //     )
-    //         .await
-    //     {
-    //         Ok(m) => m,
-    //         Err(e) => {
-    //             return Err(UtilesLintError::UnableToOpen(e.to_string()));
-    //         }
-    //     };
-    //     Ok(mbtiles)
-    // }
     async fn open_mbtiles(
         &self,
     ) -> UtilesLintResult<utilesqlite::MbtilesAsyncSqliteClient> {
