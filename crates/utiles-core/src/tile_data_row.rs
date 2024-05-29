@@ -1,7 +1,7 @@
 use crate::tile::Tile;
 use crate::TileLike;
 
-/// TileData container with Tile and u8 bytes
+/// `TileData` container with Tile and u8 bytes
 #[derive(Debug, Clone)]
 pub struct TileData {
     /// tile x, y, z
@@ -12,7 +12,7 @@ pub struct TileData {
 }
 
 impl TileData {
-    /// Create a new TileData
+    /// Create a new `TileData`
     #[must_use]
     pub fn new(xyz: Tile, data: Vec<u8>) -> TileData {
         TileData { xyz, data }

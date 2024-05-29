@@ -23,26 +23,26 @@ pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
     (lon_deg, lat_rad.to_degrees())
 }
 
-/// Return upper left lnglat as LngLat from x,y,z
+/// Return upper left lnglat as `LngLat` from x,y,z
 #[must_use]
 pub fn ul(x: u32, y: u32, z: u8) -> LngLat {
     let (lon_deg, lat_deg) = ult(x, y, z);
     LngLat::new(lon_deg, lat_deg)
 }
 
-/// Return lower left lnglat as LngLat from x,y,z
+/// Return lower left lnglat as `LngLat` from x,y,z
 #[must_use]
 pub fn ll(x: u32, y: u32, z: u8) -> LngLat {
     ul(x, y + 1, z)
 }
 
-/// Return upper right lnglat as LngLat from x,y,z
+/// Return upper right lnglat as `LngLat` from x,y,z
 #[must_use]
 pub fn ur(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y, z)
 }
 
-/// Return lower right lnglat as LngLat from x,y,z
+/// Return lower right lnglat as `LngLat` from x,y,z
 #[must_use]
 pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
     ul(x + 1, y + 1, z)
@@ -51,7 +51,7 @@ pub fn lr(x: u32, y: u32, z: u8) -> LngLat {
 /// Return tuple (min, max) x/y for a zoom-level
 #[must_use]
 pub fn minmax(zoom: u8) -> (u32, u32) {
-    (0, 2_u32.pow(zoom as u32) - 1)
+    (0, 2_u32.pow(u32::from(zoom)) - 1)
 }
 
 /// Return true if x, y, z is a valid tile coordinate
@@ -152,10 +152,10 @@ pub fn int_2_offset_zoom(i: u64) -> (u64, u8) {
 #[must_use]
 pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
     if z == 0 {
-        return x as u64 + y as u64 * 2u64.pow(u32::from(z));
+        return u64::from(x) + u64::from(y) * 2u64.pow(u32::from(z));
     }
     let base_id: u64 = (4u64.pow(u32::from(z)) - 1) / 3;
-    base_id + x as u64 + y as u64 * 2u64.pow(u32::from(z))
+    base_id + u64::from(x) + u64::from(y) * 2u64.pow(u32::from(z))
 }
 
 /// Calculate the xyz of the tile from a row-major-id
@@ -203,6 +203,7 @@ pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
 /// assert_eq!(last_tile_in_z12, (4095, 4095, 12));
 /// ```
 #[must_use]
+#[allow(clippy::cast_possible_truncation)]
 pub fn rmid2xyz(i: u64) -> (u32, u32, u8) {
     if i == 0 {
         return (0, 0, 0);
@@ -265,7 +266,7 @@ pub fn truncate_lat(lat: f64) -> f64 {
     }
 }
 
-/// Truncate a LngLat to valid range of longitude and latitude.
+/// Truncate a `LngLat` to valid range of longitude and latitude.
 #[must_use]
 pub fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
     LngLat::new(truncate_lng(lnglat.lng()), truncate_lat(lnglat.lat()))
@@ -368,8 +369,9 @@ pub fn bbox_truncate(
 
 /// Convert lng lat to web mercator x and y
 ///
-/// This function is different than "xy" in that it
-/// accounts for
+/// # Errors
+///
+/// Returns error if y can not be computed.
 pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64, f64)> {
     let (lng, lat) = if truncate.unwrap_or(false) {
         (truncate_lng(lng), truncate_lat(lat))
@@ -396,9 +398,9 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
 #[must_use]
 pub fn lnglat2webmercator(lng: f64, lat: f64) -> (f64, f64) {
     let x = EARTH_RADIUS * lng.to_radians();
-    let y = if lat == 90.0 {
+    let y = if (lat - 90.0).abs() < f64::EPSILON {
         f64::INFINITY
-    } else if lat == -90.0 {
+    } else if (lat + 90.0).abs() < f64::EPSILON {
         f64::NEG_INFINITY
     } else {
         EARTH_RADIUS * (PI * 0.25 + 0.5 * lat.to_radians()).tan().ln()
@@ -597,7 +599,7 @@ pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
     }
 }
 
-/// Return zooms-vec from a ZoomOrZooms enum
+/// Return zooms-vec from a `ZoomOrZooms` enum
 #[must_use]
 pub fn as_zooms(zoom_or_zooms: ZoomOrZooms) -> Vec<u8> {
     match zoom_or_zooms {
@@ -618,7 +620,7 @@ fn tiles_range_zoom(
     (minx..=maxx).flat_map(move |i| (miny..=maxy).map(move |j| (i, j, zoom)))
 }
 
-/// Return TileRanges from a bounding box and zoom(s).
+/// Return `TileRanges` from a bounding box and zoom(s).
 pub fn tile_ranges(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,

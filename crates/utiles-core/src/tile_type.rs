@@ -1,6 +1,6 @@
-//! TileType module (needs work)
+//! `TileType` module (needs work)
 
-/// TileType or format of the tile data
+/// `TileType` or format of the tile data
 pub enum TileType {
     /// Unknown format
     Unknown = 0,
@@ -23,7 +23,7 @@ pub enum TileType {
     /// PNG image
     Png = 6,
 
-    /// WebP image
+    /// `WebP` image
     Webp = 7,
 }
 
@@ -80,8 +80,7 @@ impl TileEncoding {
     #[must_use]
     pub fn content_encoding(&self) -> Option<&str> {
         match self {
-            Self::Uncompressed => None,
-            Self::Internal => None,
+            Self::Internal | Self::Uncompressed => None,
             Self::Gzip => Some("gzip"),
             Self::Zlib => Some("deflate"),
             Self::Brotli => Some("br"),
@@ -132,7 +131,7 @@ pub fn tiletype(buffer: &[u8]) -> TileType {
 
 /// Return the tile type as a constant
 #[must_use]
-pub fn enum2const(tiletype: TileType) -> usize {
+pub fn enum2const(tiletype: &TileType) -> usize {
     match tiletype {
         TileType::Unknown => TILETYPE_UNKNOWN,
         TileType::Gif => TILETYPE_GIF,
@@ -177,7 +176,7 @@ pub fn headers(tiletype: &TileType) -> Vec<(&'static str, &'static str)> {
             ("Content-Type", "application/x-protobuf"),
             ("Content-Encoding", "gzip"),
         ],
-        _ => vec![],
+        TileType::Unknown => vec![],
     }
 }
 

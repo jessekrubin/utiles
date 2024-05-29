@@ -15,7 +15,7 @@ use utiles_core::mbutiles::MinZoomMaxZoom;
 
 use crate::errors::UtilesResult;
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::dbpath::{DbPath, DbPathTrait};
+use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
     has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
     mbtiles_metadata, mbtiles_metadata_row, minzoom_maxzoom, query_zxy,
@@ -37,7 +37,8 @@ pub struct MbtilesAsyncSqlitePool {
     pub pool: Pool,
 }
 
-impl fmt::Debug for MbtilesAsyncSqlitePool {
+#[allow(clippy::missing_fields_in_debug)]
+impl Debug for MbtilesAsyncSqlitePool {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //     use the dbpath to debug
         f.debug_struct("MbtilesAsyncSqlitePool")
@@ -46,7 +47,8 @@ impl fmt::Debug for MbtilesAsyncSqlitePool {
     }
 }
 
-impl fmt::Debug for MbtilesAsyncSqliteClient {
+#[allow(clippy::missing_fields_in_debug)]
+impl Debug for MbtilesAsyncSqliteClient {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("MbtilesAsyncSqliteClient")
             .field("fspath", &self.dbpath.fspath)
@@ -86,18 +88,17 @@ impl AsyncSqlite for MbtilesAsyncSqlitePool {
 
 impl MbtilesAsyncSqliteClient {
     pub async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
-        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        let dbpath = pathlike2dbpath(path)?;
         debug!("Opening mbtiles file with client: {}", dbpath);
-        let client = ClientBuilder::new().path(path).open().await?;
-
-        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+        let client = ClientBuilder::new().path(&dbpath.fspath).open().await?;
+        Ok(MbtilesAsyncSqliteClient { dbpath, client })
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
-        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        let dbpath = pathlike2dbpath(path)?;
         debug!("Opening existing mbtiles file with client: {}", dbpath);
         let client = ClientBuilder::new()
-            .path(path)
+            .path(&dbpath.fspath)
             .flags(
                 OpenFlags::SQLITE_OPEN_READ_WRITE
                     | OpenFlags::SQLITE_OPEN_NO_MUTEX
@@ -105,16 +106,20 @@ impl MbtilesAsyncSqliteClient {
             )
             .open()
             .await?;
-        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+        Ok(MbtilesAsyncSqliteClient { dbpath, client })
     }
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
             | OpenFlags::SQLITE_OPEN_URI;
-        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        let dbpath = pathlike2dbpath(path)?;
         debug!("Opening readonly mbtiles file with client: {}", dbpath);
-        let client = ClientBuilder::new().path(path).flags(flags).open().await?;
-        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+        let client = ClientBuilder::new()
+            .path(&dbpath.fspath)
+            .flags(flags)
+            .open()
+            .await?;
+        Ok(MbtilesAsyncSqliteClient { dbpath, client })
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {
@@ -138,22 +143,22 @@ impl MbtilesAsyncSqlitePool {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
             | OpenFlags::SQLITE_OPEN_URI;
-        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        let dbpath = pathlike2dbpath(path)?;
         info!("Opening mbtiles file with pool: {}", dbpath);
         let pool = PoolBuilder::new()
-            .path(path)
+            .path(&dbpath.fspath)
             .flags(flags)
             .num_conns(2)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqlitePool { pool, dbpath })
+        Ok(MbtilesAsyncSqlitePool { dbpath, pool })
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
-        let dbpath = DbPath::new(path.as_ref().to_str().unwrap());
+        let dbpath = pathlike2dbpath(path)?;
         info!("Opening existing mbtiles file with pool: {}", dbpath);
         let pool = PoolBuilder::new()
-            .path(path)
+            .path(&dbpath.fspath)
             .flags(
                 OpenFlags::SQLITE_OPEN_READ_WRITE
                     | OpenFlags::SQLITE_OPEN_NO_MUTEX
@@ -162,7 +167,7 @@ impl MbtilesAsyncSqlitePool {
             .num_conns(2)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqlitePool { pool, dbpath })
+        Ok(MbtilesAsyncSqlitePool { dbpath, pool })
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {

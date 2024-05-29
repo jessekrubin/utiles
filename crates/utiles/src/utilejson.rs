@@ -15,8 +15,9 @@ use crate::errors::UtilesResult;
 #[must_use]
 pub fn tilejson_stringify(tj: &TileJSON, fmt: Option<bool>) -> String {
     match fmt {
-        Some(false) => serde_json::to_string(&tj).unwrap(),
-        _ => serde_json::to_string_pretty(&tj).unwrap(),
+        Some(false) => serde_json::to_string(&tj).expect("tilejson_stringify failed"),
+        _ => serde_json::to_string_pretty(&tj)
+            .expect("tilejson_stringify failed (pretty-print)"),
     }
 }
 
@@ -52,9 +53,6 @@ pub fn metadata2tilejson(metadata: Vec<MbtilesMetadataRow>) -> UtilesResult<Tile
             "legend" => tj.legend = Some(value),
             "template" => tj.template = Some(value),
             "json" => json = to_val(serde_json::from_str(&value)),
-            "format" | "generator" => {
-                tj.other.insert(name, Value::String(value));
-            }
             _ => {
                 tj.other.insert(name, Value::String(value));
             }

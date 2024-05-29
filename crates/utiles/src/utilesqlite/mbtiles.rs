@@ -15,7 +15,7 @@ use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 use crate::errors::UtilesResult;
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::add_ut_functions;
-use crate::utilesqlite::dbpath::DbPath;
+use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::utilesqlite::hash_types::HashType;
 use crate::utilesqlite::insert_strategy::InsertStrategy;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
@@ -25,6 +25,7 @@ use crate::utilesqlite::squealite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
     pragma_table_list, query_db_fspath, Sqlike3,
 };
+use crate::UtilesError;
 
 pub struct Mbtiles {
     pub dbpath: DbPath,
@@ -38,40 +39,37 @@ impl Sqlike3 for Mbtiles {
 }
 
 impl Mbtiles {
-    pub fn open<P: AsRef<Path>>(path: P) -> RusqliteResult<Self> {
+    pub fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         // if it is ':memory:' then open_in_memory
-        let dbpath = DbPath::from(path.as_ref());
-        let path = path.as_ref().to_owned();
-        let conn_res = Connection::open(path);
+        let dbpath = pathlike2dbpath(path)?;
+        let conn_res = Connection::open(&dbpath.fspath);
         match conn_res {
             Ok(c) => Ok(Mbtiles { conn: c, dbpath }),
-            Err(e) => Err(e),
+            Err(e) => Err(UtilesError::SqliteError(e)),
         }
     }
 
     pub fn open_with_flags<P: AsRef<Path>>(
         path: P,
         flags: rusqlite::OpenFlags,
-    ) -> Self {
-        let dbpath = DbPath::from(path.as_ref());
-        let path = path.as_ref().to_owned();
-        let conn = Connection::open_with_flags(path, flags).unwrap();
-        Mbtiles { conn, dbpath }
+    ) -> UtilesResult<Self> {
+        let dbpath = pathlike2dbpath(path)?;
+        let conn = Connection::open_with_flags(&dbpath.fspath, flags)?;
+        Ok(Mbtiles { dbpath, conn })
     }
 
-    #[must_use]
-    pub fn open_in_memory() -> Self {
-        let conn = Connection::open_in_memory().unwrap();
-        Mbtiles {
+    pub fn open_in_memory() -> UtilesResult<Self> {
+        let conn = Connection::open_in_memory()?;
+        Ok(Mbtiles {
             conn,
             dbpath: DbPath::memory(),
-        }
+        })
     }
 
     pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let c = open_existing(path);
         match c {
-            Ok(c) => Ok(Mbtiles::from_conn(c)),
+            Ok(c) => Mbtiles::from_conn(c),
             Err(e) => Err(e),
         }
     }
@@ -93,21 +91,21 @@ impl Mbtiles {
         mbtype: Option<MbtilesType>,
     ) -> UtilesCoreResult<Self> {
         let dbpath = DbPath::new(filepath);
-        let res = create_mbtiles_file(filepath, mbtype.unwrap_or_default())?;
+        let res = create_mbtiles_file(filepath, &mbtype.unwrap_or_default())?;
         Ok(Mbtiles { conn: res, dbpath })
     }
 
-    pub fn from_conn(conn: Connection) -> Mbtiles {
+    pub fn from_conn(conn: Connection) -> UtilesResult<Mbtiles> {
         let guessed_fspath = query_db_fspath(&conn);
         let dbpath = match guessed_fspath {
-            Ok(Some(fspath)) => DbPath::from(fspath),
+            Ok(Some(fspath)) => pathlike2dbpath(fspath)?,
             Ok(None) => DbPath::memory(),
             Err(e) => {
                 error!("Error guessing fspath: {}", e);
                 DbPath::memory()
             }
         };
-        Mbtiles { conn, dbpath }
+        Ok(Mbtiles { dbpath, conn })
     }
 
     pub fn conn(&self) -> &Connection {
@@ -146,14 +144,24 @@ impl Mbtiles {
             error!(
                 "metadata has more than one row for name: {} - {}",
                 name,
-                serde_json::to_string(&rows).unwrap()
+                serde_json::to_string(&rows)
+                    .expect("metadata_get: error serializing metadata rows")
             );
             // return the first one
-            let row = rows.first().unwrap();
-            Ok(Some(row.value.clone()))
+            let row = rows.first();
+            match row {
+                Some(row) => Ok(Some(row.value.clone())),
+                None => Ok(None),
+            }
         } else {
-            let row = rows.first().unwrap();
-            Ok(Some(row.value.clone()))
+            let row = rows.first();
+            match row {
+                None => Ok(None),
+                Some(row) => {
+                    let value = row.value.clone();
+                    Ok(Some(value))
+                }
+            }
         }
     }
 
@@ -185,7 +193,7 @@ impl Mbtiles {
 
     pub fn contains(&self, lnglat: LngLat) -> Result<bool, Box<dyn Error>> {
         let bbox = self.bbox()?;
-        let contains = bbox.contains_lnglat(lnglat);
+        let contains = bbox.contains_lnglat(&lnglat);
         // return false if not ok
         Ok(contains)
     }
@@ -194,14 +202,14 @@ impl Mbtiles {
         self.tilejson()
     }
 
-    pub fn from_filepath(fspath: &str) -> RusqliteResult<Mbtiles> {
-        let dbpath = DbPath::from(fspath);
+    pub fn from_filepath(fspath: &str) -> UtilesResult<Mbtiles> {
+        let dbpath = pathlike2dbpath(fspath)?;
         let conn = Connection::open(fspath)?;
-        Ok(Mbtiles { conn, dbpath })
+        Ok(Mbtiles { dbpath, conn })
     }
 
     pub fn from_filepath_str(fspath: &str) -> Result<Mbtiles, Box<dyn Error>> {
-        Mbtiles::from_filepath(fspath).map_err(|e| e.into())
+        Mbtiles::from_filepath(fspath).map_err(std::convert::Into::into)
     }
 
     // check that 'metadata' table exists and has a unique index on 'name'
@@ -261,6 +269,8 @@ impl Mbtiles {
 }
 
 impl<P: AsRef<std::path::Path>> From<P> for Mbtiles {
+    // TODO: fix uses of this
+    #[allow(clippy::unwrap_used)]
     fn from(p: P) -> Self {
         Mbtiles::open_existing(p).unwrap()
     }
@@ -292,7 +302,7 @@ pub fn add_functions(conn: &Connection) -> RusqliteResult<()> {
 // QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS
 // =====================================================================
 
-/// return a vector of MbtilesMetadataRow structs
+/// return a vector of `MbtilesMetadataRow` structs
 pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
     let mut stmt = conn.prepare_cached("SELECT name, value FROM metadata")?;
     let mdata = stmt
@@ -404,7 +414,7 @@ pub fn has_tiles_table_or_view(connection: &Connection) -> RusqliteResult<bool> 
     )?;
     let mut rows = stmt.query([])?;
     let mut count = 0;
-    while let Some(_row) = rows.next().unwrap() {
+    while let Some(_row) = rows.next()? {
         count += 1;
     }
     Ok(count == 1)
@@ -470,24 +480,28 @@ pub fn has_zoom_row_col_autoindex(connection: &Connection) -> RusqliteResult<boo
 
     for table in tables {
         let indexes = pragma_index_list(connection, &table.name);
-        if indexes.is_err() {
-            debug!("indexes: {:?}", indexes);
-            continue;
-        }
-        let indexes = indexes.unwrap();
-        let unique_indexes = indexes.iter().filter(|i| i.unique).collect::<Vec<_>>();
-        for index in unique_indexes {
-            let index_info = pragma_index_info(connection, &index.name)?;
-            let index_info = index_info
-                .iter()
-                .filter(|i| {
-                    i.name == "zoom_level"
-                        || i.name == "tile_column"
-                        || i.name == "tile_row"
-                })
-                .collect::<Vec<_>>();
-            if index_info.len() == 3 {
-                return Ok(true);
+        match indexes {
+            Ok(indexes) => {
+                let unique_indexes =
+                    indexes.iter().filter(|i| i.unique).collect::<Vec<_>>();
+                for index in unique_indexes {
+                    let index_info = pragma_index_info(connection, &index.name)?;
+                    let index_info = index_info
+                        .iter()
+                        .filter(|i| {
+                            i.name == "zoom_level"
+                                || i.name == "tile_column"
+                                || i.name == "tile_row"
+                        })
+                        .collect::<Vec<_>>();
+                    if index_info.len() == 3 {
+                        return Ok(true);
+                    }
+                }
+            }
+            Err(e) => {
+                error!("Error getting indexes: {}", e);
+                return Err(e);
             }
         }
     }
@@ -562,14 +576,14 @@ pub fn query_zxy(
 
 pub fn query_tile<T: TileLike>(
     connection: &Connection,
-    tile: T,
+    tile: &T,
 ) -> RusqliteResult<Option<Vec<u8>>> {
     query_zxy(connection, tile.z(), tile.x(), tile.y())
 }
 
 pub fn tile_exists<T: TileLike>(
     connection: &Connection,
-    tile: T,
+    tile: &T,
 ) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3")?;
     let rows = stmt.query_row(params![tile.z(), tile.x(), tile.flipy()], |row| {
@@ -665,20 +679,20 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
 
 pub fn create_mbtiles_file(
     fspath: &str,
-    mbtype: MbtilesType,
+    mbtype: &MbtilesType,
 ) -> UtilesCoreResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
-        let emsg = format!("Error opening mbtiles file: {}", e);
+        let emsg = format!("Error opening mbtiles file: {e}");
         UtilesCoreError::Unknown(emsg)
     })?;
     match mbtype {
         MbtilesType::Flat => {
             let r = init_flat_mbtiles(&mut conn);
             match r {
-                Ok(_) => Ok(conn),
+                Ok(()) => Ok(conn),
                 Err(e) => {
                     error!("Error creating flat mbtiles file: {}", e);
-                    let emsg = format!("Error creating flat mbtiles file: {}", e);
+                    let emsg = format!("Error creating flat mbtiles file: {e}");
                     Err(UtilesCoreError::Unknown(emsg))
                 }
             }
@@ -692,7 +706,7 @@ pub fn create_mbtiles_file(
 pub fn insert_tile_flat_mbtiles(
     conn: &mut Connection,
     tile: Tile,
-    data: Vec<u8>,
+    data: &[u8],
 ) -> RusqliteResult<usize> {
     let mut stmt = conn.prepare_cached("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
     let r = stmt.execute(params![tile.z, tile.x, tile.flipy(), data])?;
@@ -715,7 +729,7 @@ pub fn insert_tiles_flat_mbtiles(
     // scope so that stmt is not borrowed when tx.commit() is called
     let mut naff: usize = 0;
     {
-        let statement = format!("{} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)", insert_clause);
+        let statement = format!("{insert_clause} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)");
         let mut stmt = tx.prepare_cached(&statement)?;
         for tile in tiles {
             let r = stmt.execute(params![
@@ -831,7 +845,7 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
         "SELECT zoom_level, COUNT(*), MIN(tile_row), MAX(tile_row), MIN(tile_column), MAX(tile_column)
          FROM tiles
          GROUP BY zoom_level"
-    ).unwrap();
+    )?;
 
     let rows = stmt
         .query_map([], |row| {
@@ -843,8 +857,10 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
             let min_tile_row: i64 = row.get(2)?;
             let max_tile_row: i64 = row.get(3)?;
             // flip the stuff
-            let ymin = yflip(max_tile_row as u32, zoom.try_into().unwrap());
-            let ymax = yflip(min_tile_row as u32, zoom.try_into().unwrap());
+            let zu8 = zoom as u8;
+            let ymin = yflip(max_tile_row as u32, zu8);
+            let ymax = yflip(min_tile_row as u32, zu8);
+
             Ok(MbtilesZoomStats {
                 zoom,
                 ntiles,
@@ -854,8 +870,7 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
                 ymax,
             })
         })?
-        .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()
-        .unwrap();
+        .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()?;
     Ok(rows)
 }
 
@@ -889,15 +904,14 @@ pub fn query_distinct_tiletype(conn: &Connection) -> RusqliteResult<Vec<String>>
 fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
     let sql = format!(
         "SELECT coalesce(
-            {}_concat_hex(
+            {hash_type}_concat_hex(
                 cast(zoom_level AS text),
                 cast(tile_column AS text),
                 cast(tile_row AS text),
                 tile_data
                 ORDER BY zoom_level, tile_column, tile_row),
-            {}_hex(''))
-        FROM tiles",
-        hash_type, hash_type
+            {hash_type}_hex(''))
+        FROM tiles"
     );
     sql
 }

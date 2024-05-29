@@ -23,10 +23,10 @@ impl PyLngLatBbox {
     pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         PyLngLatBbox {
             bbox: BBox {
-                north,
+                west,
                 south,
                 east,
-                west,
+                north,
             },
         }
     }

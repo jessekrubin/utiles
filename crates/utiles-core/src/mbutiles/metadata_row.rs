@@ -10,7 +10,7 @@ pub struct MbtilesMetadataRow {
 }
 
 impl MbtilesMetadataRow {
-    /// Create a new MbtilesMetadataRow
+    /// Create a new `MbtilesMetadataRow`
     #[must_use]
     pub fn new(name: String, value: String) -> Self {
         MbtilesMetadataRow { name, value }

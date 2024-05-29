@@ -69,10 +69,10 @@ impl UtilesLintError {
     #[must_use]
     pub fn format_error(&self, filepath: &str) -> String {
         let errcode = "MBT".red();
-        let errstr = format!("{}: {}", errcode, self);
+        let errstr = format!("{errcode}: {self}");
 
         // let error_str = format!("STTUFF -- {}", self.to_string());
-        let e_str = format!("{}: {}", filepath, errstr);
+        let e_str = format!("{filepath}: {errstr}");
         e_str
         // match self {
         //     UtilesError::CoreError(e) => e.to_string(),
@@ -125,41 +125,20 @@ impl MbtilesLinter {
             fix,
         }
     }
-    // (path: &str, fix: bool) -> Self {
-    //     MbtilesLinter {
-    //         path: PathBuf::from(path),
-    //         fix,
-    //     }
-    // }
-
-    // async fn open_mbtiles(
-    //     &self,
-    // ) -> UtilesLintResult<utilesqlite::MbtilesAsyncSqlitePool> {
-    //     let mbtiles = match utilesqlite::MbtilesAsyncSqlitePool::open(
-    //         self.path.to_str().unwrap(),
-    //     )
-    //         .await
-    //     {
-    //         Ok(m) => m,
-    //         Err(e) => {
-    //             return Err(UtilesLintError::UnableToOpen(e.to_string()));
-    //         }
-    //     };
-    //     Ok(mbtiles)
-    // }
     async fn open_mbtiles(
         &self,
     ) -> UtilesLintResult<utilesqlite::MbtilesAsyncSqliteClient> {
-        let mbtiles = match utilesqlite::MbtilesAsyncSqliteClient::open_readonly(
-            self.path.to_str().unwrap(),
-        )
-        .await
-        {
-            Ok(m) => m,
-            Err(e) => {
-                return Err(UtilesLintError::UnableToOpen(e.to_string()));
-            }
-        };
+        let pth = self
+            .path
+            .to_str()
+            .ok_or(UtilesLintError::Unknown("unknown path".to_string()))?;
+        let mbtiles =
+            match utilesqlite::MbtilesAsyncSqliteClient::open_readonly(pth).await {
+                Ok(m) => m,
+                Err(e) => {
+                    return Err(UtilesLintError::UnableToOpen(e.to_string()));
+                }
+            };
         Ok(mbtiles)
     }
 
@@ -169,7 +148,7 @@ impl MbtilesLinter {
         let magic_number_res = mbt.magic_number().await;
         match magic_number_res {
             Ok(magic_number) => {
-                if magic_number == 0x4d504258 {
+                if magic_number == 0x4d50_4258 {
                     Ok(())
                 } else if magic_number == 0 {
                     Err(UtilesLintError::MbtMissingMagicNumber)
@@ -190,8 +169,8 @@ impl MbtilesLinter {
             .collect::<Vec<String>>();
         let missing_metadata_keys = REQUIRED_METADATA_FIELDS
             .iter()
-            .filter(|k| !metadata_keys.contains(&k.to_string()))
-            .map(|k| k.to_string())
+            .filter(|k| !metadata_keys.contains(&(**k).to_string()))
+            .map(|k| (*k).to_string())
             .collect::<Vec<String>>();
         if missing_metadata_keys.is_empty() {
             Ok(())
@@ -256,15 +235,14 @@ impl MbtilesLinter {
     pub async fn lint(&self) -> UtilesLintResult<Vec<UtilesLintError>> {
         let mbt = self.open_mbtiles().await?;
         if !mbt.is_mbtiles().await? {
-            return Err(UtilesLintError::NotAMbtilesDb(
-                self.path.to_str().unwrap().to_string(),
-            ));
+            let pth = self.path.to_str().unwrap_or("unknown-path");
+            return Err(UtilesLintError::NotAMbtilesDb(pth.to_string()));
         }
         let mut lint_results = vec![];
         // lint_results.push(MbtilesLinter::check_magic_number(&mbt).await);
 
         match MbtilesLinter::check_metadata(&mbt).await {
-            Ok(_) => {}
+            Ok(()) => {}
             Err(e) => match e {
                 UtilesLintError::LintErrors(errs) => {
                     lint_results.push(Ok(()));
@@ -276,6 +254,9 @@ impl MbtilesLinter {
             },
         }
 
-        Ok(lint_results.into_iter().filter_map(|e| e.err()).collect())
+        Ok(lint_results
+            .into_iter()
+            .filter_map(std::result::Result::err)
+            .collect())
     }
 }

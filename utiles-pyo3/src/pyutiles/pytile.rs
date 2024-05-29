@@ -2,8 +2,8 @@ use pyo3::prelude::*;
 use std::collections::{BTreeMap, HashMap};
 
 use crate::pyutiles::pyiters::IntIterator;
+use crate::pyutiles::pytile_tuple::TileTuple;
 use crate::pyutiles::tuple_slice;
-use crate::TileTuple;
 use utiles::tile::Tile;
 
 use utiles;
@@ -257,10 +257,10 @@ impl PyTile {
         let (west, south, east, north) = self.xyz.bounds();
         PyLngLatBbox {
             bbox: BBox {
-                north,
+                west,
                 south,
                 east,
-                west,
+                north,
             },
         }
     }

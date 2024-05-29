@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use std::collections::BTreeMap;
 use std::sync::{
     atomic::{AtomicU64, Ordering},
@@ -33,6 +34,7 @@ use tower_http::{
 };
 use tracing::{debug, info, warn};
 
+use crate::errors::UtilesResult;
 use utiles_core::tile_type::blob2headers;
 use utiles_core::{quadkey2tile, utile, Tile};
 
@@ -80,20 +82,18 @@ impl UtilesServerConfig {
     }
 }
 
-async fn preflight(config: &UtilesServerConfig) -> Datasets {
+async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     warn!("__PREFLIGHT__");
     debug!("preflight fspaths: {:?}", config.fspaths);
 
-    let filepaths = find_filepaths(&config.fspaths);
+    let filepaths = find_filepaths(&config.fspaths)?;
     debug!("filepaths: {:?}", filepaths);
 
     let mut datasets = BTreeMap::new();
     // let mut tilejsons = HashMap::new();
-    for fspath in filepaths.iter() {
+    for fspath in &filepaths {
         // let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
-        let pool = MbtilesAsyncSqliteClient::open_readonly(fspath)
-            .await
-            .unwrap();
+        let pool = MbtilesAsyncSqliteClient::open_readonly(fspath).await?;
         debug!("sanity check: {:?}", pool.filepath());
         let is_valid = pool.is_mbtiles().await;
         // if error or not a valid mbtiles file, skip it
@@ -101,7 +101,7 @@ async fn preflight(config: &UtilesServerConfig) -> Datasets {
             warn!("Skipping non-mbtiles file: {:?}", fspath);
             continue;
         }
-        let tilejson = pool.tilejson_ext().await.unwrap();
+        let tilejson = pool.tilejson_ext().await?;
         let filename = pool.filename().to_string().replace(".mbtiles", "");
         let mbt_ds = MbtilesDataset {
             mbtiles: pool,
@@ -119,18 +119,19 @@ async fn preflight(config: &UtilesServerConfig) -> Datasets {
         info!("{}: {}", k, ds.mbtiles.filepath());
     }
 
-    Datasets { mbtiles: datasets }
+    Ok(Datasets { mbtiles: datasets })
 }
 
 pub async fn utiles_serve(
     cfg: UtilesServerConfig,
 ) -> Result<(), Box<dyn std::error::Error>> {
     info!("__UTILES_SERVE__");
-    let utiles_serve_config_json = serde_json::to_string_pretty(&cfg).unwrap();
+    let utiles_serve_config_json = serde_json::to_string_pretty(&cfg)
+        .expect("Failed to serialize utiles_serve_config_json");
     info!("config:\n{}", utiles_serve_config_json);
 
     let addr = cfg.addr();
-    let datasets = preflight(&cfg).await;
+    let datasets = preflight(&cfg).await?;
     let start = std::time::Instant::now();
     let state = ServerState {
         config: cfg,
@@ -176,7 +177,9 @@ pub async fn utiles_serve(
 
     // let addr = cfg.addr();
     info!("Listening on: {}", addr);
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .expect("Failed to bind to address");
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await
@@ -203,8 +206,8 @@ async fn shutdown_signal() {
     let terminate = std::future::pending::<()>();
 
     tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
+        () = ctrl_c => {},
+        () = terminate => {},
     }
     info!("SIGTERM received ~ shutting down... :(");
 }
@@ -231,7 +234,7 @@ pub fn u8_radix36_char(num: u8) -> char {
     }
 }
 
-/// Radix36 for request_id mimics fastify's req-id
+/// Radix36 for `request_id` mimics fastify's req-id
 ///
 /// ```
 /// use utiles::server::u64_radix36;
@@ -277,7 +280,9 @@ struct Radix36MakeRequestId {
 impl MakeRequestId for Radix36MakeRequestId {
     fn make_request_id<B>(&mut self, _request: &Request<B>) -> Option<RequestId> {
         let request_id_u64 = self.counter.fetch_add(1, Ordering::SeqCst);
-        let request_id = u64_radix36(request_id_u64).parse().unwrap();
+        let request_id = u64_radix36(request_id_u64)
+            .parse()
+            .expect("Failed to parse request_id");
         Some(RequestId::new(request_id))
     }
 }
@@ -311,18 +316,23 @@ async fn get_dataset_tile_zxy(
     }
     let t = utile!(path.x, path.y, path.z);
     let mbt_ds = mbtiles.unwrap();
-    let tile_data = mbt_ds.mbtiles.query_tile(t).await.unwrap();
+    let tile_data = mbt_ds.mbtiles.query_tile(t).await;
     match tile_data {
-        Some(data) => {
-            let headers = blob2headers(&data);
-
-            let mut headers_map = HeaderMap::new();
-            for (k, v) in headers {
-                headers_map.insert(k, HeaderValue::from_str(v).unwrap());
+        Ok(data) => match data {
+            Some(data) => {
+                let headers = blob2headers(&data);
+                let mut headers_map = HeaderMap::new();
+                for (k, v) in headers {
+                    headers_map.insert(k, HeaderValue::from_str(v).unwrap());
+                }
+                Ok((StatusCode::OK, headers_map, Body::from(data)))
             }
-            Ok((StatusCode::OK, headers_map, Body::from(data)))
+            None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
+        },
+        Err(e) => {
+            warn!("Error querying tile: {:?}", e);
+            Err((StatusCode::NOT_FOUND, "Tile not found".to_string()))
         }
-        None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
     }
 }
 
@@ -351,7 +361,7 @@ async fn get_dataset_tile_quadkey(
     let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {
         (
             StatusCode::BAD_REQUEST,
-            format!("Error parsing quadkey: {}", e),
+            format!("Error parsing quadkey: {e}"),
         )
     })?;
     let mbt_ds = mbt_ds.unwrap();
@@ -380,7 +390,7 @@ async fn get_dataset_tilejson(
     let dataset = path;
     let ds = state.datasets.mbtiles.get(&dataset).unwrap();
     let mut tilejson_with_tiles = ds.tilejson.clone();
-    let tiles_url = format!("http://{}/tiles/{}/{{z}}/{{x}}/{{y}}", hostname, dataset);
+    let tiles_url = format!("http://{hostname}/tiles/{dataset}/{{z}}/{{x}}/{{y}}");
     tilejson_with_tiles.tiles = vec![tiles_url];
     Json(tilejson_with_tiles)
 }

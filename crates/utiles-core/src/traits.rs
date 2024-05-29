@@ -1,4 +1,4 @@
-/// BoundingBox like trait
+/// `BoundingBox` like trait
 pub trait BoundingBoxLike {
     /// Returns west/left bound
     fn west(&self) -> f64;

@@ -94,7 +94,7 @@ pub trait TileLike {
         xyz2rmid(self.x(), self.y(), self.z())
     }
 
-    /// Return the row major id for the tile (alias for row_major_id)
+    /// Return the row major id for the tile (alias for `row_major_id`)
     #[must_use]
     fn rmid(&self) -> u64 {
         self.row_major_id()
@@ -108,7 +108,7 @@ pub trait TileLike {
         (ul.lng(), lr.lat(), lr.lng(), ul.lat())
     }
 
-    /// Return the center of the tile as a LngLat
+    /// Return the center of the tile as a `LngLat`
     #[must_use]
     fn center(&self) -> LngLat {
         let ul = self.ul();

@@ -4,7 +4,11 @@ use crate::bbox::BBox;
 use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 
-/// Parse a string into a BBox
+/// Parse a string into a `BBox`
+///
+/// # Errors
+///
+/// Returns error if unable to parse JSON string into a `BBox`
 pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
@@ -30,7 +34,7 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     // and a four-element array represents a BBoxTuple
     let bbox = match v.as_array().map(std::vec::Vec::len) {
         // match len 0, 1, 3
-        Some(0) | Some(1) | Some(3) => Err(UtilesCoreError::InvalidBbox(
+        Some(0 | 1 | 3) => Err(UtilesCoreError::InvalidBbox(
             "Invalid bbox: ".to_string() + s,
         )),
         Some(2) => {
@@ -43,24 +47,29 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
         }
         _ => {
             // take first four elements
-            let bbox_vec = v
-                .as_array()
-                .expect(
-                    "Failed to parse bbox from JSON. Expected an array of 4 elements or a GeoJSON-like object with a 'bbox' key.",
-                )
-                .iter()
-                .take(4)
-                .cloned()
-                .collect::<Vec<Value>>();
-            Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
-                Value::Array(bbox_vec),
-            )?))
+            let bbox_vec_as_arr = v.as_array();
+            match bbox_vec_as_arr {
+                None => Err(UtilesCoreError::InvalidBbox(
+                    "Invalid bbox: ".to_string() + s,
+                )),
+                Some(bbox_vec) => {
+                    let bbox_vec =
+                        bbox_vec.iter().take(4).cloned().collect::<Vec<Value>>();
+                    Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
+                        Value::Array(bbox_vec),
+                    )?))
+                }
+            }
         }
     };
     bbox
 }
 
-/// Parse a string into a BBox
+/// Parse a string into a `BBox`
+///
+/// # Errors
+///
+/// Returns error on bbox parsing failure
 ///
 /// # Examples
 ///
@@ -87,22 +96,22 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
 /// let bbox = parse_bbox("[-180.0, -85.0, 180.0, 85.0]").unwrap();
 /// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
-pub fn parse_bbox(string: &str) -> Result<BBox, String> {
+pub fn parse_bbox(string: &str) -> UtilesCoreResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
     if s.starts_with('{') || s.starts_with('[') {
         let bbox = parse_bbox_json(s);
-        return bbox.map_err(|e| e.to_string());
+        return bbox;
     }
     let parts: Vec<f64> = if s.contains(',') {
         s.split(',')
-            .map(|p| p.trim())
+            .map(str::trim)
             .filter_map(|p| p.parse::<f64>().ok())
             .collect()
     } else if s.contains(' ') {
         s.split(' ')
-            .map(|p| p.trim())
+            .map(str::trim)
             .filter_map(|p| p.parse::<f64>().ok())
             .collect()
     } else {
@@ -111,17 +120,24 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     if parts.len() == 4 {
         // if north < south err out
         if parts[3] < parts[1] {
-            Err("Invalid bbox: ".to_string() + s + " (north < south)")
+            Err(UtilesCoreError::InvalidBbox(
+                "Invalid bbox: ".to_string() + s + " (north < south)",
+            ))
         } else {
             Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
         }
     } else {
-        let msg = format!("Invalid bbox: {s}");
-        Err(msg)
+        Err(UtilesCoreError::InvalidBbox(
+            "Invalid bbox: ".to_string() + s,
+        ))
     }
 }
 
-/// Parse a string into a BBox with special handling of 'world' and 'planet'
+/// Parse a string into a `BBox` with special handling of 'world' and 'planet'
+///
+/// # Errors
+///
+/// Returns error on bbox parsing failure
 ///
 /// # Examples
 ///
@@ -142,7 +158,7 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
 /// let bbox = parse_bbox_ext("-180,-85,180,85").unwrap();
 /// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
-pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
+pub fn parse_bbox_ext(string: &str) -> UtilesCoreResult<BBox> {
     // match 'world' or 'planet'
     // match string/lower
     let str_lower = string.to_lowercase();
@@ -209,6 +225,10 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
 
 /// Parse a string into vector of integers
 ///
+/// # Panics
+///
+/// Panics if the string contains a number that cannot be parsed as u64.
+///
 /// # Examples
 /// ```
 /// use utiles_core::parsing::parse_uints;
@@ -231,9 +251,7 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
 pub fn parse_uints(input: &str) -> Vec<u64> {
     parse_uint_strings(input)
         .iter()
-        .map(|s| s.parse::<u64>().expect(
-            "Failed to parse unsigned integer from string. Expected a string of digits.",
-        ))
+        .flat_map(|s| s.parse::<u64>())
         .collect()
 }
 
@@ -289,7 +307,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
             '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
                 if start.is_none() || is_negative {
                     // Start of a new number block (potentially negative)
-                    start = Some(i - is_negative as usize); // Include '-' in block if negative
+                    start = Some(i - usize::from(is_negative)); // Include '-' in block if negative
                 }
                 is_negative = false; // Once we have digits, it's no longer just a '-'
             }
@@ -329,9 +347,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 pub fn parse_ints(input: &str) -> Vec<i64> {
     parse_int_strings(input)
         .iter()
-        .map(|s| s.parse::<i64>().expect(
-            "Failed to parse signed integer from string. Expected a string of digits with an optional leading '-' character.",
-        ))
+        .flat_map(|s| s.parse::<i64>())
         .collect()
 }
 
@@ -433,7 +449,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_simple() {
-        let string = r#"[-180.0, -85.0, 180.0, 85.0]"#;
+        let string = r"[-180.0, -85.0, 180.0, 85.0]";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
@@ -451,7 +467,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_simple_len_6() {
-        let string = r#"[-180.0, -85.0, 180.0, 85.0, 0, 10]"#;
+        let string = r"[-180.0, -85.0, 180.0, 85.0, 0, 10]";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
@@ -460,7 +476,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_str_commas() {
-        let string = r#"-180.0, -85.0, 180.0, 85.0"#;
+        let string = r"-180.0, -85.0, 180.0, 85.0";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
@@ -469,7 +485,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_str_spaces() {
-        let string = r#"-180.0 -85.0 180.0 85.0"#;
+        let string = r"-180.0 -85.0 180.0 85.0";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
@@ -487,7 +503,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_bad() {
-        let string = r#"[-180.0,]"#;
+        let string = r"[-180.0,]";
         let bbox_result = parse_bbox(string);
         assert!(bbox_result.is_err());
     }

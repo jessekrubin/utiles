@@ -91,7 +91,9 @@ pub fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     let c = match &args.value {
         Some(value) => {
             if let Some(v) = current_value {
-                if value != &v {
+                if value == &v {
+                    None
+                } else {
                     let r = mbtiles.metadata_set(&args.key, value).unwrap();
                     debug!("metadata rows updated: {:?}", r);
                     Some(MetadataChangeFromTo {
@@ -99,8 +101,6 @@ pub fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
                         from: Some(v),
                         to: Some(value.clone()),
                     })
-                } else {
-                    None
                 }
             } else {
                 let r = mbtiles.metadata_set(&args.key, value).unwrap();

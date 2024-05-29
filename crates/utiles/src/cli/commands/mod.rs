@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 pub use children_parent::{children_main, parent_main};
 pub use contains::contains_main;
 pub use copy::copy_main;

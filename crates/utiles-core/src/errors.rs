@@ -9,6 +9,10 @@ pub enum UtilesCoreError {
     TileParseError(String),
 
     /// Error on invalid tile-quadkey
+    #[error("invalid tile: {0}")]
+    InvalidTile(String),
+
+    /// Error on invalid tile-quadkey
     #[error("invalid quadkey: {0}")]
     InvalidQuadkey(String),
 

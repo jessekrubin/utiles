@@ -15,7 +15,7 @@ use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
-use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, utile, xyz2quadkey};
+use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
 
 /// Tile X-Y-Z struct
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -33,7 +33,7 @@ pub struct Tile {
 /// Geometry for tile-feature (polygon or linestring)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
-    /// type of geometry (Polygon or LineString)
+    /// type of geometry (Polygon or `LineString`)
     #[serde(rename = "type")]
     pub type_: String,
 
@@ -47,7 +47,7 @@ pub struct FeatureOptions {
     /// feature id to use
     pub fid: Option<String>,
 
-    /// GeoJSON properties to use
+    /// `GeoJSON` properties to use
     pub props: Option<Map<String, Value>>,
 
     /// projection to use
@@ -182,7 +182,7 @@ impl Tile {
         pmtiles::pmid2xyz(id).into()
     }
 
-    /// Return tile from pmtile-id (alias for from_pmtileid)
+    /// Return tile from pmtile-id (alias for `from_pmtileid`)
     #[must_use]
     pub fn from_pmid(id: u64) -> Self {
         pmtiles::pmid2xyz(id).into()
@@ -194,7 +194,7 @@ impl Tile {
         Tile::from(rmid2xyz(id))
     }
 
-    /// Return tile from row-major tile-id (alias for from_row_major_id)
+    /// Return tile from row-major tile-id (alias for `from_row_major_id`)
     #[must_use]
     pub fn from_rmid(id: u64) -> Self {
         Tile::from_row_major_id(id)
@@ -239,12 +239,16 @@ impl Tile {
         quadkey2tile(quadkey)
     }
 
-    /// Convert quadkey string to Tile (alias for from_quadkey)
+    /// Convert quadkey string to Tile (alias for `from_quadkey`)
     pub fn from_qk(qk: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(qk)
     }
 
     /// Return tile from json-object string (e.g. `{"x": 1, "y": 2, "z": 3}`)
+    ///
+    /// # Errors
+    ///
+    /// Returns error if serde parsing fails
     ///
     /// # Examples
     /// ```
@@ -252,33 +256,19 @@ impl Tile {
     /// let tile = Tile::from_json_obj(r#"{"x": 1, "y": 2, "z": 3}"#).unwrap();
     /// assert_eq!(tile, Tile::new(1, 2, 3));
     /// ```
-    pub fn from_json_obj(json: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_json_obj(json: &str) -> UtilesCoreResult<Self> {
         let res = serde_json::from_str::<Tile>(json);
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => {
-                Err(Box::from(UtilesCoreError::TileParseError(json.to_string())))
-            }
+            Err(_e) => Err(UtilesCoreError::TileParseError(json.to_string())),
         }
     }
-    // > {
-    //     let res = serde_json::from_str::<Tile>(json);
-    //     match res {
-    //         Ok(tile) => tile,
-    //         Err(e) => {
-    //         //     raise parse error
-    //             UtilesError::TileParseError(json.to_string())
-    //         }
-    //     }
-    //     // match res {
-    //     //     Ok(tile) => tile,
-    //     //     Err(e) => {
-    //     //         panic!("Invalid json_arr: {e}");
-    //     //     }
-    //     // }
-    // }
 
     /// Return tile from json-array string (e.g. `[1, 2, 3]`)
+    ///
+    /// # Errors
+    ///
+    /// Returns error if serde parsing fails
     ///
     /// # Examples
     /// ```
@@ -286,18 +276,30 @@ impl Tile {
     /// let tile = Tile::from_json_arr("[1, 2, 3]").unwrap();
     /// assert_eq!(tile, Tile::new(1, 2, 3));
     /// ```
-    pub fn from_json_arr(json: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_json_arr(json: &str) -> UtilesCoreResult<Self> {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
             Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
-            Err(_e) => {
-                Err(Box::from(UtilesCoreError::TileParseError(json.to_string())))
-            }
+            Err(_e) => Err(UtilesCoreError::TileParseError(json.to_string())),
         }
     }
 
     /// Return tile from json string either object or array
-    pub fn from_json(json: &str) -> Result<Self, Box<dyn Error>> {
+    ///
+    /// # Errors
+    ///
+    /// Returns error if serde parsing fails
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use utiles_core::Tile;
+    /// let tile_from_obj = Tile::from_json(r#"{"x": 1, "y": 2, "z": 3}"#).unwrap();
+    /// assert_eq!(tile_from_obj, Tile::new(1, 2, 3));
+    /// let tile_from_arr = Tile::from_json(r#"[1, 2, 3]"#).unwrap();
+    /// assert_eq!(tile_from_arr, Tile::new(1, 2, 3));
+    /// ```
+    pub fn from_json(json: &str) -> Result<Self, UtilesCoreError> {
         let json_no_space = if json.starts_with(' ') {
             json.trim()
         } else {
@@ -311,7 +313,11 @@ impl Tile {
     }
 
     /// Return tile from json string either object or array
-    pub fn from_json_loose(json: &str) -> Result<Self, UtilesCoreError> {
+    ///
+    /// # Errors
+    ///
+    /// Returns error if unable to parse json string
+    pub fn from_json_loose(json: &str) -> UtilesCoreResult<Self> {
         let v = serde_json::from_str::<Value>(json)?;
         let t = Tile::try_from(&v)?;
         Ok(t)
@@ -330,32 +336,39 @@ impl Tile {
     }
 
     /// Return new Tile from given (lng, lat, zoom)
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the conversion fails resulting in invalid tile
+    #[allow(clippy::cast_possible_truncation)]
     pub fn from_lnglat_zoom(
         lng: f64,
         lat: f64,
         zoom: u8,
         truncate: Option<bool>,
-    ) -> Result<Self, UtilesCoreError> {
+    ) -> UtilesCoreResult<Self> {
         let (x, y) = crate::_xy(lng, lat, truncate)?;
         let z2 = 2.0_f64.powi(i32::from(zoom));
         let z2f = z2;
+
         let xtile = if x <= 0.0 {
             0
         } else if x >= 1.0 {
-            (z2f - 1.0) as u32
+            u32::try_from((z2 - 1.0).floor() as i64).unwrap_or(0)
         } else {
             let xt = (x + EPSILON) * z2f;
-            (xt.floor()) as u32
+            u32::try_from(xt.floor() as i64).unwrap_or(0)
         };
 
         let ytile = if y <= 0.0 {
             0
         } else if y >= 1.0 {
-            (z2f - 1.0) as u32
+            u32::try_from((z2 - 1.0).floor() as i64).unwrap_or(0)
         } else {
             let yt = (y + EPSILON) * z2f;
-            (yt.floor()) as u32
+            u32::try_from(yt.floor() as i64).unwrap_or(0)
         };
+
         Ok(Self {
             x: xtile,
             y: ytile,
@@ -467,7 +480,7 @@ impl Tile {
         siblings(self.x, self.y, self.z)
     }
 
-    /// Return a TileFeature for the tile
+    /// Return a `TileFeature` for the tile
     pub fn feature(
         &self,
         opts: &FeatureOptions,
@@ -485,7 +498,7 @@ impl Tile {
                 let (east_merc, north_merc) = xy(east, north, None);
                 (west_merc, south_merc, east_merc, north_merc)
             }
-            _ => (west, south, east, north),
+            Projection::Geographic => (west, south, east, north),
         };
 
         // Apply buffer
@@ -545,21 +558,36 @@ impl TryFrom<&Map<String, Value>> for Tile {
     type Error = UtilesCoreError;
 
     fn try_from(map: &Map<String, Value>) -> Result<Self, Self::Error> {
-        let x = map["x"].as_u64().ok_or_else(|| {
+        let x = u32::try_from(map["x"].as_u64().ok_or_else(|| {
             UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or("".to_string()),
+                serde_json::to_string(&map).unwrap_or_default(),
             )
-        })? as u32;
-        let y = map["y"].as_u64().ok_or_else(|| {
+        })?)
+        .map_err(|_| {
             UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or("".to_string()),
+                serde_json::to_string(&map).unwrap_or_default(),
             )
-        })? as u32;
-        let z = map["z"].as_u64().ok_or_else(|| {
+        })?;
+        let y = u32::try_from(map["y"].as_u64().ok_or_else(|| {
             UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or("".to_string()),
+                serde_json::to_string(&map).unwrap_or_default(),
             )
-        })? as u8;
+        })?)
+        .map_err(|_| {
+            UtilesCoreError::InvalidJson(
+                serde_json::to_string(&map).unwrap_or_default(),
+            )
+        })?;
+        let z = u8::try_from(map["z"].as_u64().ok_or_else(|| {
+            UtilesCoreError::InvalidJson(
+                serde_json::to_string(&map).unwrap_or_default(),
+            )
+        })?)
+        .map_err(|_| {
+            UtilesCoreError::InvalidJson(
+                serde_json::to_string(&map).unwrap_or_default(),
+            )
+        })?;
         Ok(Tile::new(x, y, z))
     }
 }
@@ -575,12 +603,29 @@ impl From<MbtTileRow> for Tile {
     }
 }
 
-impl From<(u64, u64, u64)> for Tile {
-    fn from(tuple: (u64, u64, u64)) -> Self {
-        let x = tuple.0 as u32;
-        let y = tuple.1 as u32;
-        let z = tuple.2 as u8;
-        utile!(x, y, z)
+impl TryFrom<(u64, u64, u64)> for Tile {
+    type Error = UtilesCoreError;
+
+    fn try_from(tuple: (u64, u64, u64)) -> Result<Self, Self::Error> {
+        let x = u32::try_from(tuple.0).map_err(|_| {
+            UtilesCoreError::InvalidTile(format!(
+                "({},{},{})",
+                tuple.0, tuple.1, tuple.2
+            ))
+        })?;
+        let y = u32::try_from(tuple.1).map_err(|_| {
+            UtilesCoreError::InvalidTile(format!(
+                "({},{},{})",
+                tuple.0, tuple.1, tuple.2
+            ))
+        })?;
+        let z = u8::try_from(tuple.2).map_err(|_| {
+            UtilesCoreError::InvalidTile(format!(
+                "({},{},{})",
+                tuple.0, tuple.1, tuple.2
+            ))
+        })?;
+        Ok(Tile::new(x, y, z))
     }
 }
 
@@ -590,26 +635,25 @@ impl TryFrom<&Vec<Value>> for Tile {
     fn try_from(arr: &Vec<Value>) -> Result<Self, Self::Error> {
         if arr.len() < 3 {
             Err(UtilesCoreError::InvalidJson(
-                serde_json::to_string(&arr).unwrap_or("".to_string()),
+                serde_json::to_string(&arr).unwrap_or_default(),
             ))
         } else {
             let x = arr[0].as_u64().ok_or_else(|| {
                 UtilesCoreError::InvalidJson(
-                    serde_json::to_string(&arr).unwrap_or("".to_string()),
+                    serde_json::to_string(&arr).unwrap_or_default(),
                 )
             })?;
             let y = arr[1].as_u64().ok_or_else(|| {
                 UtilesCoreError::InvalidJson(
-                    serde_json::to_string(&arr).unwrap_or("".to_string()),
+                    serde_json::to_string(&arr).unwrap_or_default(),
                 )
             })?;
             let z = arr[2].as_u64().ok_or_else(|| {
                 UtilesCoreError::InvalidJson(
-                    serde_json::to_string(&arr).unwrap_or("".to_string()),
+                    serde_json::to_string(&arr).unwrap_or_default(),
                 )
             })?;
-
-            Ok(Tile::from((x, y, z)))
+            Tile::try_from((x, y, z))
         }
     }
 }
@@ -643,7 +687,7 @@ impl TryFrom<&Value> for Tile {
                                 .expect("Invalid json object for Tile from Value"),
                         )
                     })?;
-                    Ok(Tile::from((x, y, z)))
+                    Tile::try_from((x, y, z))
                 } else if v.contains_key("tile")
                     && v["tile"].is_array()
                     && v["tile"]
@@ -713,7 +757,7 @@ mod tests {
 
     #[test]
     fn parse_json_arr() {
-        let json_arr = r#"[1, 2, 3]"#;
+        let json_arr = r"[1, 2, 3]";
         let tile = Tile::from_json_arr(json_arr).unwrap();
         assert_eq!(tile, Tile::new(1, 2, 3));
     }
@@ -735,7 +779,7 @@ mod tests {
 
     #[test]
     fn tile_from_value_arr() {
-        let json_arr = r#"[1, 2, 3]"#;
+        let json_arr = r"[1, 2, 3]";
         let val_arr = serde_json::from_str::<Value>(json_arr).unwrap();
         let tile_from_arr = Tile::try_from(val_arr).unwrap();
         assert_eq!(tile_from_arr, Tile::new(1, 2, 3));

@@ -16,7 +16,8 @@ use utiles_core::tile_data_row::TileData;
 use utiles_core::{tile_ranges, Tile, TileLike};
 
 use crate::cli::args::CopyArgs;
-use crate::errors::UtilesResult;
+use crate::errors::{UtilesError, UtilesResult};
+use crate::metadata_json::parse_metadata_json;
 use crate::utilesqlite::Mbtiles;
 
 // #[derive(Debug)]
@@ -325,8 +326,9 @@ fn fspath2xyz(path: &Path) -> Result<(u32, u32, u8), std::num::ParseIntError> {
 async fn copy_fs2mbtiles(
     dirpath: String,
     mbtiles: String,
-    _cfg: CopyConfig,
+    cfg: CopyConfig,
 ) -> UtilesResult<()> {
+    debug!("dirpath: {dirpath:?}, mbtiles: {mbtiles:?} cfg: {cfg:?}");
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let walker = WalkDir::new(&dirpath).min_depth(3).max_depth(3);
     let mut dst_mbt = Mbtiles::open(&mbtiles).unwrap();
@@ -339,9 +341,16 @@ async fn copy_fs2mbtiles(
     // Write metadata to db if exists...
 
     if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
-        let metadata_vec: Vec<MbtilesMetadataRow> =
-            serde_json::from_str(&metadata_str).unwrap();
-        dst_mbt.metadata_set_from_vec(&metadata_vec).unwrap();
+        // found metadata.json
+        let metadata_vec = parse_metadata_json(&metadata_str);
+        match metadata_vec {
+            Ok(metadata_vec) => {
+                dst_mbt.metadata_set_from_vec(&metadata_vec).unwrap();
+            }
+            Err(e) => {
+                warn!("e: {e:?}");
+            }
+        }
     }
 
     let (tx, mut rx) = mpsc::channel(64);
@@ -463,62 +472,57 @@ async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
     }
 }
 
-fn get_tile_src(src: &str) -> Source {
+fn get_tile_src(src: &str) -> UtilesResult<Source> {
     let src_path = Path::new(src);
     if src_path.exists() {
         if src_path.is_file() {
-            Source::Mbtiles(src.to_string())
+            Ok(Source::Mbtiles(src.to_string()))
         } else if src_path.is_dir() {
-            Source::Fs(src.to_string())
+            Ok(Source::Fs(src.to_string()))
         } else {
-            panic!("src is not file or dir: {src_path:?}");
+            Err(UtilesError::Error("src is not file or dir".to_string()))
         }
     } else {
-        panic!("src does not exist: {src_path:?}");
+        Err(UtilesError::FileDoesNotExist(src.to_string()))
     }
 }
 
-fn get_tile_dst(dst: &str) -> Destination {
+fn get_tile_dst(dst: &str) -> UtilesResult<Destination> {
     // if it contains '.mbtiles' then it's a mbtiles file
     // else it's a directory
     if dst.contains(".mbtiles") {
-        Destination::Mbtiles(dst.to_string())
+        Ok(Destination::Mbtiles(dst.to_string()))
     } else {
-        Destination::Fs(dst.to_string())
+        Ok(Destination::Fs(dst.to_string()))
     }
 }
 
 pub async fn copy_main(args: CopyArgs) -> UtilesResult<()> {
     warn!("experimental command: copy/cp");
-    // match args.zoom {
-    //     Some(zoom) => {
-    //         info!("zoom: {:?}", zoom);
-    //     }
-    //     None => {
-    //         info!("no zoom");
-    //     }
-    // }
+
     let zooms: Option<Vec<u8>> = args.zooms();
     let bbox = args.bbox;
 
-    let cfg = CopyConfig::new(
-        get_tile_src(&args.src),
-        get_tile_dst(&args.dst),
-        zooms,
-        bbox,
-    );
+    let src = get_tile_src(&args.src)?;
+    let dst = get_tile_dst(&args.dst)?;
+    let cfg = CopyConfig::new(src, dst, zooms, bbox);
 
     // log it out
     debug!("cfg: {:?}", cfg);
+
+    // TODO: figure out what I was doing here there is some duplication
+    //       of things happening...
     // make sure input file exists and is file...
-    let src = get_tile_src(&args.src);
-    let dst = get_tile_dst(&args.dst);
+    let src = get_tile_src(&args.src)?;
+    let dst = get_tile_dst(&args.dst)?;
 
     let srcdst = match (src, dst) {
-        (Source::Mbtiles(_src), Destination::Fs(_dst)) => CopySrcDest::Mbtiles2Fs,
-        (Source::Fs(_src), Destination::Mbtiles(_dst)) => CopySrcDest::Fs2Mbtiles,
-        _ => panic!("src/dst combo not supported"),
-    };
+        (Source::Mbtiles(_src), Destination::Fs(_dst)) => Ok(CopySrcDest::Mbtiles2Fs),
+        (Source::Fs(_src), Destination::Mbtiles(_dst)) => Ok(CopySrcDest::Fs2Mbtiles),
+        _ => Err(UtilesError::Unimplemented(
+            "Unimplemented src/dst combination for copy/cp".to_string(),
+        )),
+    }?;
 
     match srcdst {
         CopySrcDest::Mbtiles2Fs => copy_mbtiles2fs(args.src, args.dst, cfg).await,

@@ -1,7 +1,7 @@
 use std::io::{self};
 
 use clap::Parser;
-use tracing::debug;
+use tracing::{debug, error};
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
@@ -54,7 +54,10 @@ fn init_tracing(log_config: &LogConfig) {
 }
 
 #[allow(clippy::unused_async)]
-pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> u8 {
+pub async fn cli_main(
+    argv: Option<Vec<String>>,
+    loop_fn: Option<&dyn Fn()>,
+) -> UtilesResult<u8> {
     // print args
     let argv = argv.unwrap_or_else(|| std::env::args().collect::<Vec<_>>());
 
@@ -105,26 +108,29 @@ pub async fn cli_main(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> 
         // server WIP
         Commands::Serve(args) => serve_main(args).await,
     };
+
     match res {
-        Ok(_) => 0,
+        Ok(()) => Ok(0),
         Err(e) => {
-            eprintln!("Error: {}", e);
-            1
+            error!("Error: {}", e);
+            Err(e)
         }
     }
 }
 
 // not sure why this is needed... cargo thinks it's unused???
 #[allow(dead_code)]
-#[must_use]
-pub fn cli_main_sync(argv: Option<Vec<String>>, loop_fn: Option<&dyn Fn()>) -> u8 {
-    let r = tokio::runtime::Builder::new_multi_thread()
+pub fn cli_main_sync(
+    argv: Option<Vec<String>>,
+    loop_fn: Option<&dyn Fn()>,
+) -> UtilesResult<u8> {
+    tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
-        .unwrap()
-        .block_on(async { cli_main(argv, loop_fn).await });
-    // run the async main function
-    r
+        .expect(
+            "tokio::runtime::Builder::new_multi_thread().enable_all().build() failed.",
+        )
+        .block_on(async { cli_main(argv, loop_fn).await })
 }
 
 #[cfg(test)]

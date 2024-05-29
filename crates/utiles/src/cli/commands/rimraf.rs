@@ -138,8 +138,7 @@ pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
     if !dirpath.exists() {
         error!("dirpath does not exist: {:?}", dirpath);
         return Err(UtilesError::Error(format!(
-            "dirpath does not exist: {:?}",
-            dirpath
+            "dirpath does not exist: {dirpath:?}"
         )));
     }
 
