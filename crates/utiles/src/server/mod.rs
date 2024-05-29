@@ -1,9 +1,7 @@
 #![allow(clippy::unwrap_used)]
+
 use std::collections::BTreeMap;
-use std::sync::{
-    atomic::{AtomicU64, Ordering},
-    Arc,
-};
+use std::sync::Arc;
 use std::time::Duration;
 
 use axum::extract::{Host, Path};
@@ -13,7 +11,7 @@ use axum::{
     extract::State,
     http::{
         header::{HeaderMap, HeaderValue},
-        Request, StatusCode,
+        StatusCode,
     },
     response::{IntoResponse, Response},
     routing::get,
@@ -24,9 +22,7 @@ use serde_json::json;
 use tilejson::TileJSON;
 use tokio::signal;
 use tower::ServiceBuilder;
-use tower_http::request_id::{
-    MakeRequestId, PropagateRequestIdLayer, RequestId, SetRequestIdLayer,
-};
+use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
 use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
 use tower_http::{
     timeout::TimeoutLayer,
@@ -34,13 +30,17 @@ use tower_http::{
 };
 use tracing::{debug, info, warn};
 
-use crate::errors::UtilesResult;
+use request_id::Radix36MakeRequestId;
 use utiles_core::tile_type::blob2headers;
 use utiles_core::{quadkey2tile, utile, Tile};
 
+use crate::errors::UtilesResult;
 use crate::globster::find_filepaths;
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::MbtilesAsyncSqliteClient;
+
+pub mod radix36;
+mod request_id;
 
 //=============================================================================
 
@@ -118,6 +118,8 @@ async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     for (k, ds) in &datasets {
         info!("{}: {}", k, ds.mbtiles.filepath());
     }
+
+    info!("__PREFLIGHT_DONE__");
 
     Ok(Datasets { mbtiles: datasets })
 }
@@ -215,77 +217,6 @@ async fn shutdown_signal() {
 // =============
 // REQUEST ID
 // =============
-
-/// Convert u8 to radix36 char
-/// ```
-/// use utiles::server::u8_radix36_char;
-/// assert_eq!(u8_radix36_char(0), '0');
-/// assert_eq!(u8_radix36_char(9), '9');
-/// assert_eq!(u8_radix36_char(10), 'a');
-/// assert_eq!(u8_radix36_char(35), 'z');
-/// ```
-#[must_use]
-#[inline]
-pub fn u8_radix36_char(num: u8) -> char {
-    if num < 10 {
-        (b'0' + num) as char
-    } else {
-        (b'a' + num - 10) as char
-    }
-}
-
-/// Radix36 for `request_id` mimics fastify's req-id
-///
-/// ```
-/// use utiles::server::u64_radix36;
-/// assert_eq!(u64_radix36(0), "0");
-/// assert_eq!(u64_radix36(1234), "ya");
-/// assert_eq!(u64_radix36(1109), "ut");
-/// assert_eq!(u64_radix36(18446744073709551615), "3w5e11264sgsf");
-/// ```
-#[must_use]
-pub fn u64_radix36(x: u64) -> String {
-    if x < 36 {
-        return u8_radix36_char(x as u8).to_string();
-    }
-    let mut result = ['\0'; 128];
-    let mut used = 1;
-    let mut x = x; // as u32;
-    let mut m = (x % 36) as u8;
-    x /= 36;
-    result[0] = u8_radix36_char(m);
-    if x > 0 {
-        loop {
-            m = (x % 36) as u8;
-            x /= 36;
-            result[used] = u8_radix36_char(m);
-            used += 1;
-            if x == 0 {
-                break;
-            }
-        }
-    }
-    let mut s = String::new();
-    for c in result[..used].iter().rev() {
-        s.push(*c);
-    }
-    s
-}
-
-#[derive(Clone, Default)]
-struct Radix36MakeRequestId {
-    counter: Arc<AtomicU64>,
-}
-
-impl MakeRequestId for Radix36MakeRequestId {
-    fn make_request_id<B>(&mut self, _request: &Request<B>) -> Option<RequestId> {
-        let request_id_u64 = self.counter.fetch_add(1, Ordering::SeqCst);
-        let request_id = u64_radix36(request_id_u64)
-            .parse()
-            .expect("Failed to parse request_id");
-        Some(RequestId::new(request_id))
-    }
-}
 
 // =====================================================================
 // ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES

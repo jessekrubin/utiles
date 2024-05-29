@@ -239,6 +239,7 @@ where
         }
 
         let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
+
         debug!(
             target: "is-mbtiles",
             "has_zoom_row_col_index: {}",
@@ -352,12 +353,22 @@ where
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
         let mut metadata = self.metadata_rows().await?;
         // if no 'minzoom' or 'maxzoom' are found we gotta wuery them...
-        let minzoom_or_maxzoom_missing = metadata
-            .iter()
-            .any(|m| m.name == "minzoom" || m.name == "maxzoom");
 
-        // query minzoom maxzoom
-        if minzoom_or_maxzoom_missing {
+        // check if minzoom or maxzoom are missing
+        let minzoom_value = metadata.iter().find(|m| m.name == "minzoom");
+        let maxzoom_value = metadata.iter().find(|m| m.name == "maxzoom");
+
+        // check if minzoom and maxzoom are present and valid
+        let minzoom_maxzoom_status = match (minzoom_value, maxzoom_value) {
+            (Some(minzoom), Some(maxzoom)) => {
+                let minzoom = minzoom.value.parse::<u8>();
+                let maxzoom = maxzoom.value.parse::<u8>();
+                matches!((minzoom, maxzoom), (Ok(_), Ok(_)))
+            }
+            _ => false,
+        };
+
+        if !minzoom_maxzoom_status {
             warn!("minzoom/maxzoom missing from metadata: {}", self.filepath());
             let minmax = self.query_minzoom_maxzoom().await?;
             match minmax {
@@ -378,7 +389,6 @@ where
                 }
             }
         }
-
         let tj = metadata2tilejson(metadata);
         match tj {
             Ok(t) => Ok(t),
