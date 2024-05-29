@@ -128,6 +128,10 @@ pub struct MetadataArgs {
     /// Output as json object not array
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub obj: bool,
+
+    /// Output as json string for values (default: false)
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue, default_value = "false")]
+    pub raw: bool,
 }
 
 #[derive(Debug, Parser)]

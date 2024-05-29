@@ -1,6 +1,8 @@
 pub use tiles_row::MbtTileRow;
 
-pub use crate::mbutiles::metadata2map::{metadata2duplicates, metadata2map};
+pub use crate::mbutiles::metadata2map::{
+    metadata2duplicates, metadata2map, metadata2map_val,
+};
 pub use crate::mbutiles::metadata_row::{MbtilesMetadataRow, MbtilesMetadataRows};
 pub use crate::mbutiles::minzoom_maxzoom::MinZoomMaxZoom;
 
