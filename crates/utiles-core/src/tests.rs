@@ -52,7 +52,7 @@ fn tile_is_valid() {
     ];
 
     for tile in valid_tiles {
-        assert!(tile.valid(), "{:?} is not valid", tile);
+        assert!(tile.valid(), "{tile:?} is not valid");
     }
 }
 
@@ -66,7 +66,7 @@ fn tile_is_invalid() {
     ];
 
     for tile in invalid_tiles {
-        assert!(!tile.valid(), "{:?} is valid", tile);
+        assert!(!tile.valid(), "{tile:?} is valid");
     }
 }
 
