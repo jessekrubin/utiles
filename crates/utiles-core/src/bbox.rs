@@ -37,9 +37,9 @@ pub struct WebMercatorBbox {
 
 /// Bounding box containable enum
 pub enum BBoxContainable {
-    /// LngLat
+    /// `LngLat`
     LngLat(LngLat),
-    /// BBox
+    /// `BBox`
     BBox(BBox),
     /// Tile
     Tile(Tile),

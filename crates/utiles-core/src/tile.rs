@@ -33,7 +33,7 @@ pub struct Tile {
 /// Geometry for tile-feature (polygon or linestring)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileFeatureGeometry {
-    /// type of geometry (Polygon or LineString)
+    /// type of geometry (Polygon or `LineString`)
     #[serde(rename = "type")]
     pub type_: String,
 
@@ -47,7 +47,7 @@ pub struct FeatureOptions {
     /// feature id to use
     pub fid: Option<String>,
 
-    /// GeoJSON properties to use
+    /// `GeoJSON` properties to use
     pub props: Option<Map<String, Value>>,
 
     /// projection to use

@@ -39,7 +39,7 @@ pub struct Layer {
 pub enum GeometryType {
     /// Point
     Point,
-    /// LineString
+    /// `LineString`
     LineString,
     /// Polygon
     Polygon,

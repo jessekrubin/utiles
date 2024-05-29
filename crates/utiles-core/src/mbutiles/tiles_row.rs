@@ -4,13 +4,13 @@ use crate::{flipy, TileLike};
 /// Mbtiles Tile Row struct
 #[derive(Debug, Clone)]
 pub struct MbtTileRow {
-    /// zoom_level INTEGER NOT NULL -- z
+    /// `zoom_level` INTEGER NOT NULL -- z
     pub zoom_level: u8,
-    /// tile_column INTEGER NOT NULL -- x
+    /// `tile_column` INTEGER NOT NULL -- x
     pub tile_column: u32,
-    /// tile_row INTEGER NOT NULL -- y (flipped)
+    /// `tile_row` INTEGER NOT NULL -- y (flipped)
     pub tile_row: u32,
-    /// tile_data BLOB NOT NULL -- tile data
+    /// `tile_data` BLOB NOT NULL -- tile data
     pub tile_data: Vec<u8>,
 }
 

@@ -2,13 +2,13 @@ use crate::tile::Tile;
 
 /// Sibling relationship for tiles
 pub enum SiblingRelationship {
-    /// UpperLeft sibling
+    /// `UpperLeft` sibling
     UpperLeft = 0,
-    /// UpperRight sibling
+    /// `UpperRight` sibling
     UpperRight = 1,
-    /// LowerLeft sibling
+    /// `LowerLeft` sibling
     LowerLeft = 2,
-    /// LowerRight sibling
+    /// `LowerRight` sibling
     LowerRight = 3,
 }
 

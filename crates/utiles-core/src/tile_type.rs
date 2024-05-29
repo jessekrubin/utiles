@@ -23,7 +23,7 @@ pub enum TileType {
     /// PNG image
     Png = 6,
 
-    /// WebP image
+    /// `WebP` image
     Webp = 7,
 }
 
