@@ -254,6 +254,6 @@ impl MbtilesLinter {
             },
         }
 
-        Ok(lint_results.into_iter().filter_map(|e| e.err()).collect())
+        Ok(lint_results.into_iter().filter_map(std::result::Result::err).collect())
     }
 }

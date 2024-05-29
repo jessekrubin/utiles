@@ -209,7 +209,7 @@ impl Mbtiles {
     }
 
     pub fn from_filepath_str(fspath: &str) -> Result<Mbtiles, Box<dyn Error>> {
-        Mbtiles::from_filepath(fspath).map_err(|e| e.into())
+        Mbtiles::from_filepath(fspath).map_err(std::convert::Into::into)
     }
 
     // check that 'metadata' table exists and has a unique index on 'name'
