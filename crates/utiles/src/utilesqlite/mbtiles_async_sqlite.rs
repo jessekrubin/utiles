@@ -91,7 +91,7 @@ impl MbtilesAsyncSqliteClient {
         let dbpath = pathlike2dbpath(path)?;
         debug!("Opening mbtiles file with client: {}", dbpath);
         let client = ClientBuilder::new().path(&dbpath.fspath).open().await?;
-        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+        Ok(MbtilesAsyncSqliteClient { dbpath, client })
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -106,7 +106,7 @@ impl MbtilesAsyncSqliteClient {
             )
             .open()
             .await?;
-        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+        Ok(MbtilesAsyncSqliteClient { dbpath, client })
     }
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
@@ -119,7 +119,7 @@ impl MbtilesAsyncSqliteClient {
             .flags(flags)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqliteClient { client, dbpath })
+        Ok(MbtilesAsyncSqliteClient { dbpath, client })
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {
@@ -151,7 +151,7 @@ impl MbtilesAsyncSqlitePool {
             .num_conns(2)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqlitePool { pool, dbpath })
+        Ok(MbtilesAsyncSqlitePool { dbpath, pool })
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -167,7 +167,7 @@ impl MbtilesAsyncSqlitePool {
             .num_conns(2)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqlitePool { pool, dbpath })
+        Ok(MbtilesAsyncSqlitePool { dbpath, pool })
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {

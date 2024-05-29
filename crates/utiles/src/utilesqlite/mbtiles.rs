@@ -55,7 +55,7 @@ impl Mbtiles {
     ) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(path)?;
         let conn = Connection::open_with_flags(&dbpath.fspath, flags)?;
-        Ok(Mbtiles { conn, dbpath })
+        Ok(Mbtiles { dbpath, conn })
     }
 
     pub fn open_in_memory() -> UtilesResult<Self> {
@@ -105,7 +105,7 @@ impl Mbtiles {
                 DbPath::memory()
             }
         };
-        Ok(Mbtiles { conn, dbpath })
+        Ok(Mbtiles { dbpath, conn })
     }
 
     pub fn conn(&self) -> &Connection {
@@ -205,7 +205,7 @@ impl Mbtiles {
     pub fn from_filepath(fspath: &str) -> UtilesResult<Mbtiles> {
         let dbpath = pathlike2dbpath(fspath)?;
         let conn = Connection::open(fspath)?;
-        Ok(Mbtiles { conn, dbpath })
+        Ok(Mbtiles { dbpath, conn })
     }
 
     pub fn from_filepath_str(fspath: &str) -> Result<Mbtiles, Box<dyn Error>> {
