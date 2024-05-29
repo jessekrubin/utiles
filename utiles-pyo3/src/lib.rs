@@ -2,7 +2,7 @@
 #![deny(clippy::perf)]
 #![deny(dead_code)]
 #![warn(clippy::style)]
-// #![warn(clippy::pedantic)]
+// #![deny(clippy::pedantic)]
 #![warn(clippy::unnecessary_wraps)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_errors_doc)]

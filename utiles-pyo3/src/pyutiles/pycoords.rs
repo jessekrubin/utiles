@@ -64,7 +64,7 @@ pub fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
             for item in l {
                 let c = _coords(&item.as_borrowed())?;
                 let cv = c.iter.collect::<Vec<_>>();
-                coordsvec.extend(cv)
+                coordsvec.extend(cv);
             }
             Ok(CoordinateIterator {
                 iter: Box::new(coordsvec.into_iter()),

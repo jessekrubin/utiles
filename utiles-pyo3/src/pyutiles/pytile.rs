@@ -257,10 +257,10 @@ impl PyTile {
         let (west, south, east, north) = self.xyz.bounds();
         PyLngLatBbox {
             bbox: BBox {
-                north,
+                west,
                 south,
                 east,
-                west,
+                north,
             },
         }
     }

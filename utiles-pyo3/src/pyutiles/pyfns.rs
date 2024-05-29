@@ -119,7 +119,7 @@ pub fn feature(
 
 /// Extract a tile or tiles to Vec<PyTile>
 ///
-/// Consolidated logic from parse_tiles() per rec by `@nyurikS` in PR #38
+/// Consolidated logic from `parse_tiles()` per rec by `@nyurikS` in PR #38
 pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
     // TODO: this code is identical to parse_tiles() and should be consolidated
     if let Ok(tiles) = arg.extract::<PyTile>() {

@@ -15,7 +15,7 @@ pub fn ut_cli(py: Python, args: Option<Vec<String>>) -> PyResult<u8> {
     match rc {
         Ok(_) => Ok(0),
         Err(e) => {
-            let py_err = PyException::new_err(format!("{}", e));
+            let py_err = PyException::new_err(format!("{e}"));
             Err(py_err)
         }
     }

@@ -104,14 +104,10 @@ impl PyBbox {
 
     pub fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
         match idx {
-            0 => Ok(self.bbox.left()),
-            1 => Ok(self.bbox.bottom()),
-            2 => Ok(self.bbox.right()),
-            3 => Ok(self.bbox.top()),
-            -1 => Ok(self.bbox.top()),
-            -2 => Ok(self.bbox.right()),
-            -3 => Ok(self.bbox.bottom()),
-            -4 => Ok(self.bbox.left()),
+            0 | -4 => Ok(self.bbox.left()),
+            1 | -3 => Ok(self.bbox.bottom()),
+            2 | -2 => Ok(self.bbox.right()),
+            3 | -1 => Ok(self.bbox.top()),
             4 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
             _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
                 "index out of range (must be -4..4)",
