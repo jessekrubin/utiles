@@ -193,7 +193,7 @@ impl Mbtiles {
 
     pub fn contains(&self, lnglat: LngLat) -> Result<bool, Box<dyn Error>> {
         let bbox = self.bbox()?;
-        let contains = bbox.contains_lnglat(lnglat);
+        let contains = bbox.contains_lnglat(&lnglat);
         // return false if not ok
         Ok(contains)
     }

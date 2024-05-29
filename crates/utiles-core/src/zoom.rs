@@ -7,7 +7,7 @@ use crate::UtilesCoreError::InvalidZoom;
 
 type Zooms = Vec<u8>;
 
-/// ZoomSet is a set of zoom levels represented as a 32 bit unsigned integer
+/// `ZoomSet` is a set of zoom levels represented as a 32 bit unsigned integer
 /// where each bit represents a zoom level (0 to 31). The least significant bit
 /// represents zoom level 31 and the most significant bit represents zoom level 0.
 ///
@@ -37,7 +37,7 @@ pub fn zvec2zset(zvec: Vec<u8>) -> u32 {
     zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
 }
 
-/// ZoomSet is a set of zoom levels represented as a u32
+/// `ZoomSet` is a set of zoom levels represented as a u32
 ///
 /// # Examples
 /// ```
@@ -47,13 +47,13 @@ pub fn zvec2zset(zvec: Vec<u8>) -> u32 {
 /// assert_eq!(zooms_vec, vec![0, 1, 2]);
 /// ```
 impl ZoomSet {
-    /// Create a new ZoomSet from a u32
+    /// Create a new `ZoomSet` from a u32
     #[must_use]
     pub fn new(zset: u32) -> Self {
         Self(zset)
     }
 
-    /// Create a new ZoomSet from a vector of zoom levels
+    /// Create a new `ZoomSet` from a vector of zoom levels
     #[must_use]
     pub fn from_zooms(zooms: Vec<u8>) -> Self {
         Self(zvec2zset(zooms))
@@ -150,19 +150,19 @@ impl Default for ZoomRange {
 }
 
 impl ZoomRange {
-    /// Create a new ZoomRange
+    /// Create a new `ZoomRange`
     #[must_use]
     pub fn new(min: u8, max: u8) -> Self {
         Self { min, max }
     }
 
-    /// Create a new ZoomRange from a maximum zoom level (0 to max)
+    /// Create a new `ZoomRange` from a maximum zoom level (0 to max)
     #[must_use]
     pub fn from_max(max: u8) -> Self {
         Self { min: 0, max }
     }
 
-    /// Create a new ZoomRange from a minimum zoom level (min to 31)
+    /// Create a new `ZoomRange` from a minimum zoom level (min to 31)
     #[must_use]
     pub fn from_min(min: u8) -> Self {
         Self { min, max: 31 }
@@ -217,10 +217,8 @@ pub fn parse_zooms(zstr: &str) -> UtilesCoreResult<Vec<u8>> {
     let mut zvec: Vec<u8> = vec![];
     for z in zstr.split(',') {
         if z.contains('-') {
-            let zrange: Result<Vec<u8>, ParseIntError> = z
-                .split('-')
-                .map(|z| z.parse::<u8>())
-                .collect::<Result<Vec<_>, _>>();
+            let zrange: Result<Vec<u8>, ParseIntError> =
+                z.split('-').map(str::parse).collect::<Result<Vec<_>, _>>();
 
             let zrange = match zrange {
                 Ok(zrange) => match zrange.len() {
@@ -245,7 +243,7 @@ pub fn parse_zooms(zstr: &str) -> UtilesCoreResult<Vec<u8>> {
         }
     }
     // unique and sort zooms
-    zvec.sort();
+    zvec.sort_unstable();
     zvec.dedup();
     Ok(zvec)
 }

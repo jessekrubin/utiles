@@ -1,11 +1,13 @@
-//! Geostats structs/models/objs - ref: from https://github.com/mapbox/mapbox-geostats
+//! Geostats structs/models/objs
+//!
+//! ref: [mapbox/mapbox-geostats](https://github.com/mapbox/mapbox-geostats)
 //!
 //! Usually comes from tippecanoe's `json` metadata field from a mbtiles db.
 //!
-//! Converted w/ the help of chadwick-general-purpose-tool (ChadGPT) from geostats schema.
+//! Converted w/ the help of chadwick-general-purpose-tool (`ChadGPT`) from geostats schema.
 use serde::{Deserialize, Serialize};
 
-/// TileStats struct
+/// `TileStats` struct
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TileStats {
@@ -32,7 +34,7 @@ pub struct Layer {
     pub attributes: Vec<Attribute>,
 }
 
-/// GeometryType enum
+/// `GeometryType` enum
 #[derive(Debug, Serialize, Deserialize)]
 pub enum GeometryType {
     /// Point
@@ -60,7 +62,7 @@ pub struct Attribute {
     pub max: Option<f64>,
 }
 
-/// Attribute DataType enum
+/// Attribute `DataType` enum
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum DataType {

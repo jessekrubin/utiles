@@ -57,8 +57,8 @@ fn tile_is_valid() {
     // invalid tile
     let tile = Tile::new(1, 1, 0);
     assert!(!tile.valid());
-    let _tile = Tile::new(1, 234, 1);
-    assert!(!_tile.valid());
+    let tile = Tile::new(1, 234, 1);
+    assert!(!tile.valid());
 }
 
 #[test]

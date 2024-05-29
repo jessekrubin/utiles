@@ -10,11 +10,7 @@ pub fn metadata2duplicates(
     rows.into_iter()
         .fold(
             HashMap::new(),
-            |mut acc: std::collections::HashMap<
-                std::string::String,
-                Vec<MbtilesMetadataRow>,
-            >,
-             row| {
+            |mut acc: HashMap<String, Vec<MbtilesMetadataRow>>, row| {
                 acc.entry(row.name.clone()).or_default().push(row);
                 acc
             },
@@ -27,9 +23,10 @@ pub fn metadata2duplicates(
 /// Convert a `MbtilesMetadataRows` to a `HashMap<String, String>`
 #[must_use]
 pub fn metadata2map(rows: &MbtilesMetadataRows) -> HashMap<String, String> {
-    // let map: HashMap<String, String> =
-    return HashMap::from_iter(
-        rows.iter().map(|row| (row.name.clone(), row.value.clone())),
-    );
-    // map
+    // return HashMap::from_iter(
+    //     // rows.iter().map(|row| (row.name.clone(), row.value.clone())),
+    // );
+    rows.iter()
+        .map(|row| (row.name.clone(), row.value.clone()))
+        .collect::<HashMap<_, _>>()
 }

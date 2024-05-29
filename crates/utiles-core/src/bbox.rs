@@ -70,14 +70,14 @@ impl From<(i32, i32, i32, i32)> for BBox {
 }
 
 impl BBox {
-    /// Create a new BBox
+    /// Create a new `BBox`
     #[must_use]
     pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         BBox {
-            north,
+            west,
             south,
             east,
-            west,
+            north,
         }
     }
 
@@ -165,7 +165,7 @@ impl BBox {
 
     /// Returns the center of the bounding box as a `LngLat`
     #[must_use]
-    pub fn contains_lnglat(&self, lnglat: LngLat) -> bool {
+    pub fn contains_lnglat(&self, lnglat: &LngLat) -> bool {
         let lng = lnglat.lng();
         let lat = lnglat.lat();
         if self.crosses_antimeridian() {
@@ -187,14 +187,14 @@ impl BBox {
 
     /// Returns true if the current instance contains the given `Tile`
     #[must_use]
-    pub fn contains_tile(&self, tile: Tile) -> bool {
+    pub fn contains_tile(&self, tile: &Tile) -> bool {
         let bbox = tile.bbox();
-        self.contains_bbox(bbox.into())
+        self.contains_bbox(&bbox.into())
     }
 
     /// Returns true if the current instance contains the given `BBox`
     #[must_use]
-    pub fn contains_bbox(&self, other: BBox) -> bool {
+    pub fn contains_bbox(&self, other: &BBox) -> bool {
         self.north >= other.north
             && self.south <= other.south
             && self.east >= other.east
@@ -203,7 +203,7 @@ impl BBox {
 
     /// Returns true if the current instance contains the given `BBoxContainable` object.
     #[must_use]
-    pub fn contains(&self, other: BBoxContainable) -> bool {
+    pub fn contains(&self, other: &BBoxContainable) -> bool {
         match other {
             BBoxContainable::LngLat(lnglat) => self.contains_lnglat(lnglat),
             BBoxContainable::BBox(bbox) => self.contains_bbox(bbox),

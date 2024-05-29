@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::point::Point2d;
 
-/// LngLat contains a longitude and latitude as f64.
+/// `LngLat` contains a longitude and latitude as f64.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LngLat {
     /// 2d point - x -> longitude, y -> latitude
@@ -29,7 +29,7 @@ impl FromStr for LngLat {
 }
 
 impl LngLat {
-    /// Create a new LngLat from longitude & latitude.
+    /// Create a new `LngLat` from longitude & latitude.
 
     // why does this work
     // #[must_use]
@@ -83,14 +83,23 @@ impl std::fmt::Display for LngLat {
     }
 }
 
-impl Iterator for LngLat {
+impl IntoIterator for LngLat {
     type Item = (f64, f64);
+    type IntoIter = std::iter::Once<Self::Item>;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let lng = self.xy.x;
-        let lat = self.xy.y;
-        self.xy.x += 1.0;
-        self.xy.y += 1.0;
-        Some((lng, lat))
+    fn into_iter(self) -> Self::IntoIter {
+        std::iter::once((self.xy.x, self.xy.y))
     }
 }
+//
+// impl Iterator for LngLat {
+//     type Item = (f64, f64);
+//
+//     fn next(&mut self) -> Option<Self::Item> {
+//         let lng = self.xy.x;
+//         let lat = self.xy.y;
+//         self.xy.x += 1.0;
+//         self.xy.y += 1.0;
+//         Some((lng, lat))
+//     }
+// }

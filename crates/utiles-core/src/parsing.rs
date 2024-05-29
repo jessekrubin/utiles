@@ -4,7 +4,7 @@ use crate::bbox::BBox;
 use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 
-/// Parse a string into a BBox
+/// Parse a string into a `BBox`
 pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
@@ -30,7 +30,7 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     // and a four-element array represents a BBoxTuple
     let bbox = match v.as_array().map(std::vec::Vec::len) {
         // match len 0, 1, 3
-        Some(0) | Some(1) | Some(3) => Err(UtilesCoreError::InvalidBbox(
+        Some(0 | 1 | 3) => Err(UtilesCoreError::InvalidBbox(
             "Invalid bbox: ".to_string() + s,
         )),
         Some(2) => {
@@ -60,7 +60,7 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     bbox
 }
 
-/// Parse a string into a BBox
+/// Parse a string into a `BBox`
 ///
 /// # Examples
 ///
@@ -97,12 +97,12 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     }
     let parts: Vec<f64> = if s.contains(',') {
         s.split(',')
-            .map(|p| p.trim())
+            .map(str::trim)
             .filter_map(|p| p.parse::<f64>().ok())
             .collect()
     } else if s.contains(' ') {
         s.split(' ')
-            .map(|p| p.trim())
+            .map(str::trim)
             .filter_map(|p| p.parse::<f64>().ok())
             .collect()
     } else {
@@ -121,7 +121,7 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     }
 }
 
-/// Parse a string into a BBox with special handling of 'world' and 'planet'
+/// Parse a string into a `BBox` with special handling of 'world' and 'planet'
 ///
 /// # Examples
 ///
@@ -289,7 +289,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
             '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
                 if start.is_none() || is_negative {
                     // Start of a new number block (potentially negative)
-                    start = Some(i - is_negative as usize); // Include '-' in block if negative
+                    start = Some(i - usize::from(is_negative)); // Include '-' in block if negative
                 }
                 is_negative = false; // Once we have digits, it's no longer just a '-'
             }
@@ -433,7 +433,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_simple() {
-        let string = r#"[-180.0, -85.0, 180.0, 85.0]"#;
+        let string = r"[-180.0, -85.0, 180.0, 85.0]";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();
@@ -451,7 +451,7 @@ mod tests {
 
     #[test]
     fn parse_bbox_simple_len_6() {
-        let string = r#"[-180.0, -85.0, 180.0, 85.0, 0, 10]"#;
+        let string = r"[-180.0, -85.0, 180.0, 85.0, 0, 10]";
         let bbox_result = parse_bbox(string);
         // assert!(bbox_result.is_ok());
         let bbox = bbox_result.unwrap();

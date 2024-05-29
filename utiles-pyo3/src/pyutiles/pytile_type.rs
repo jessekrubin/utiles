@@ -3,7 +3,8 @@ use utiles::tile_type;
 
 #[pyfunction]
 pub fn tiletype(buffer: &[u8]) -> usize {
-    tile_type::enum2const(tile_type::tiletype(buffer))
+    let ttype = tile_type::tiletype(buffer);
+    tile_type::enum2const(&ttype)
 }
 
 #[pyfunction]

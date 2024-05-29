@@ -93,7 +93,7 @@ impl TileZBox {
 
     /// Return whether the `TileZBox` contains the given tile-like input
     #[must_use]
-    pub fn contains_tile<T: TileLike>(&self, tile: T) -> bool {
+    pub fn contains_tile<T: TileLike>(&self, tile: &T) -> bool {
         tile.z() == self.zoom
             && tile.x() >= self.min.x
             && tile.x() <= self.max.x
@@ -180,7 +180,7 @@ impl IntoIterator for TileZBoxes {
     fn into_iter(self) -> Self::IntoIter {
         self.ranges
             .into_iter()
-            .flat_map(|r| r.into_iter())
+            .flat_map(std::iter::IntoIterator::into_iter)
             .collect::<Vec<Self::Item>>()
             .into_iter()
     }

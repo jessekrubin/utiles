@@ -28,7 +28,7 @@ pub struct GeoTransform {
 }
 
 impl GeoTransform {
-    /// Create a new GeoTransform with given coefficients.
+    /// Create a new `GeoTransform` with given coefficients.
     #[must_use]
     pub fn new(gt0: f64, gt1: f64, gt2: f64, gt3: f64, gt4: f64, gt5: f64) -> Self {
         GeoTransform {
@@ -71,7 +71,12 @@ mod tests {
     #[test]
     fn test_geotransform2optzoom() {
         let optz = geotransform2optzoom((
-            -77.000138, 0.000278, 0.0, 26.0001389, 0.0, -0.000278,
+            -77.000_138,
+            0.000_278,
+            0.0,
+            26.000_138_9,
+            0.0,
+            -0.000_278,
         ));
         assert_eq!(optz, 12);
     }

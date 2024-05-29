@@ -15,7 +15,7 @@ pub struct MbtTileRow {
 }
 
 impl MbtTileRow {
-    /// Create a new MbtTileRow
+    /// Create a new `MbtTileRow`
     #[must_use]
     pub fn new(
         zoom_level: u8,
@@ -47,7 +47,7 @@ impl TileLike for MbtTileRow {
 }
 
 impl MbtTileRow {
-    /// Return the file extension of the tile based on the tile_data
+    /// Return the file extension of the tile based on the `tile_data`
     #[must_use]
     pub fn extension(&self) -> String {
         tiletype_str(&self.tile_data)
