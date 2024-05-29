@@ -7,7 +7,7 @@ use crate::UtilesCoreError::InvalidZoom;
 
 type Zooms = Vec<u8>;
 
-/// `ZoomSet` is a set of zoom levels represented as a 32 bit unsigned integer
+/// `ZoomSet` is a set of zoom levels represented as a 32-bit unsigned integer
 /// where each bit represents a zoom level (0 to 31). The least significant bit
 /// represents zoom level 31 and the most significant bit represents zoom level 0.
 ///
@@ -37,7 +37,7 @@ pub fn zvec2zset(zvec: &[u8]) -> u32 {
     zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
 }
 
-/// `ZoomSet` is a set of zoom levels represented as a u32
+/// `ZoomSet` is a set of zoom levels represented as 32-unsigned integer
 ///
 /// # Examples
 /// ```

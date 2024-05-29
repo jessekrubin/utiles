@@ -91,15 +91,3 @@ impl IntoIterator for LngLat {
         std::iter::once((self.xy.x, self.xy.y))
     }
 }
-//
-// impl Iterator for LngLat {
-//     type Item = (f64, f64);
-//
-//     fn next(&mut self) -> Option<Self::Item> {
-//         let lng = self.xy.x;
-//         let lat = self.xy.y;
-//         self.xy.x += 1.0;
-//         self.xy.y += 1.0;
-//         Some((lng, lat))
-//     }
-// }

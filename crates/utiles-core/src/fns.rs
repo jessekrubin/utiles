@@ -369,8 +369,9 @@ pub fn bbox_truncate(
 
 /// Convert lng lat to web mercator x and y
 ///
-/// This function is different than "xy" in that it
-/// accounts for
+/// # Errors
+///
+/// Returns error if y can not be computed.
 pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64, f64)> {
     let (lng, lat) = if truncate.unwrap_or(false) {
         (truncate_lng(lng), truncate_lat(lat))

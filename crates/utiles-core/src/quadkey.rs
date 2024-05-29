@@ -19,8 +19,7 @@ pub fn xyz2quadkey_vec(x: u32, y: u32, z: u8) -> Vec<u8> {
     }
     qk_arr
 }
-// tile = ut.Tile(486, 332, 10)
-// expected = "0313102310"
+
 /// Return the quadkey for a tile as a string.
 /// # Examples
 /// ```
@@ -37,6 +36,11 @@ pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
 }
 
 /// Return (x, y, z) for a quadkey as a tuple.
+///
+/// # Errors
+///
+/// Returns an error if the quadkey is invalid and cannot be converted to
+/// tile xyz.
 ///
 /// # Examples
 /// ```
@@ -88,6 +92,11 @@ pub fn quadkey2xyz(quadkey: &str) -> UtilesCoreResult<(u32, u32, u8)> {
 }
 
 /// Return Tile struct from quadkey string
+///
+/// # Errors
+///
+/// Returns an error if the quadkey is invalid and cannot be converted to
+/// tile xyz.
 ///
 /// # Examples
 /// ```

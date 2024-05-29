@@ -28,7 +28,7 @@ pub fn parse_bbox_geojson(string: &str) -> UtilesResult<BBox> {
     // and a four-element array represents a BBoxTuple
     let bbox = match v.as_array().map(std::vec::Vec::len) {
         // match len 0, 1, 3
-        Some(0) | Some(1) | Some(3) => {
+        Some(0 | 1 | 3) => {
             Err(UtilesCoreError::InvalidBbox("Invalid bbox: ".to_string() + s).into())
         }
         Some(2) => {

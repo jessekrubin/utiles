@@ -5,6 +5,10 @@ use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 
 /// Parse a string into a `BBox`
+///
+/// # Errors
+///
+/// Returns error if unable to parse JSON string into a `BBox`
 pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
@@ -63,6 +67,10 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
 
 /// Parse a string into a `BBox`
 ///
+/// # Errors
+///
+/// Returns error on bbox parsing failure
+///
 /// # Examples
 ///
 /// ```
@@ -88,13 +96,13 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
 /// let bbox = parse_bbox("[-180.0, -85.0, 180.0, 85.0]").unwrap();
 /// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
-pub fn parse_bbox(string: &str) -> Result<BBox, String> {
+pub fn parse_bbox(string: &str) -> UtilesCoreResult<BBox> {
     // strip leading/trailing  whitespace
     let s = string.trim();
     // if the first char is "{" assume it is geojson-like
     if s.starts_with('{') || s.starts_with('[') {
         let bbox = parse_bbox_json(s);
-        return bbox.map_err(|e| e.to_string());
+        return bbox;
     }
     let parts: Vec<f64> = if s.contains(',') {
         s.split(',')
@@ -112,17 +120,24 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
     if parts.len() == 4 {
         // if north < south err out
         if parts[3] < parts[1] {
-            Err("Invalid bbox: ".to_string() + s + " (north < south)")
+            Err(UtilesCoreError::InvalidBbox(
+                "Invalid bbox: ".to_string() + s + " (north < south)",
+            ))
         } else {
             Ok(BBox::new(parts[0], parts[1], parts[2], parts[3]))
         }
     } else {
-        let msg = format!("Invalid bbox: {s}");
-        Err(msg)
+        Err(UtilesCoreError::InvalidBbox(
+            "Invalid bbox: ".to_string() + s,
+        ))
     }
 }
 
 /// Parse a string into a `BBox` with special handling of 'world' and 'planet'
+///
+/// # Errors
+///
+/// Returns error on bbox parsing failure
 ///
 /// # Examples
 ///
@@ -143,7 +158,7 @@ pub fn parse_bbox(string: &str) -> Result<BBox, String> {
 /// let bbox = parse_bbox_ext("-180,-85,180,85").unwrap();
 /// assert_eq!(bbox, utiles_core::bbox::BBox::new(-180.0, -85.0, 180.0, 85.0));
 /// ```
-pub fn parse_bbox_ext(string: &str) -> Result<BBox, String> {
+pub fn parse_bbox_ext(string: &str) -> UtilesCoreResult<BBox> {
     // match 'world' or 'planet'
     // match string/lower
     let str_lower = string.to_lowercase();

@@ -67,6 +67,7 @@ pub fn add_ut_functions(db: &Connection) -> Result<()> {
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
+
     use rusqlite::params;
 
     type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;
@@ -77,9 +78,7 @@ mod tests {
         let mut p = std::env::current_dir().unwrap();
         let mut count = 0;
         loop {
-            if count > 5 {
-                panic!("too many recursions");
-            }
+            assert!(count <= 5, "too many recursions");
             if p.join("test-data").exists() && p.join("test-data").is_dir() {
                 break;
             }

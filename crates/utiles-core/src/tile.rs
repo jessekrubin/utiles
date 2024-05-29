@@ -246,39 +246,29 @@ impl Tile {
 
     /// Return tile from json-object string (e.g. `{"x": 1, "y": 2, "z": 3}`)
     ///
+    /// # Errors
+    ///
+    /// Returns error if serde parsing fails
+    ///
     /// # Examples
     /// ```
     /// use utiles_core::Tile;
     /// let tile = Tile::from_json_obj(r#"{"x": 1, "y": 2, "z": 3}"#).unwrap();
     /// assert_eq!(tile, Tile::new(1, 2, 3));
     /// ```
-    pub fn from_json_obj(json: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_json_obj(json: &str) -> UtilesCoreResult<Self> {
         let res = serde_json::from_str::<Tile>(json);
         match res {
             Ok(tile) => Ok(tile),
-            Err(_e) => {
-                Err(Box::from(UtilesCoreError::TileParseError(json.to_string())))
-            }
+            Err(_e) => Err(UtilesCoreError::TileParseError(json.to_string())),
         }
     }
-    // > {
-    //     let res = serde_json::from_str::<Tile>(json);
-    //     match res {
-    //         Ok(tile) => tile,
-    //         Err(e) => {
-    //         //     raise parse error
-    //             UtilesError::TileParseError(json.to_string())
-    //         }
-    //     }
-    //     // match res {
-    //     //     Ok(tile) => tile,
-    //     //     Err(e) => {
-    //     //         panic!("Invalid json_arr: {e}");
-    //     //     }
-    //     // }
-    // }
 
     /// Return tile from json-array string (e.g. `[1, 2, 3]`)
+    ///
+    /// # Errors
+    ///
+    /// Returns error if serde parsing fails
     ///
     /// # Examples
     /// ```
@@ -286,18 +276,30 @@ impl Tile {
     /// let tile = Tile::from_json_arr("[1, 2, 3]").unwrap();
     /// assert_eq!(tile, Tile::new(1, 2, 3));
     /// ```
-    pub fn from_json_arr(json: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_json_arr(json: &str) -> UtilesCoreResult<Self> {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
             Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
-            Err(_e) => {
-                Err(Box::from(UtilesCoreError::TileParseError(json.to_string())))
-            }
+            Err(_e) => Err(UtilesCoreError::TileParseError(json.to_string())),
         }
     }
 
     /// Return tile from json string either object or array
-    pub fn from_json(json: &str) -> Result<Self, Box<dyn Error>> {
+    ///
+    /// # Errors
+    ///
+    /// Returns error if serde parsing fails
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use utiles_core::Tile;
+    /// let tile_from_obj = Tile::from_json(r#"{"x": 1, "y": 2, "z": 3}"#).unwrap();
+    /// assert_eq!(tile_from_obj, Tile::new(1, 2, 3));
+    /// let tile_from_arr = Tile::from_json(r#"[1, 2, 3]"#).unwrap();
+    /// assert_eq!(tile_from_arr, Tile::new(1, 2, 3));
+    /// ```
+    pub fn from_json(json: &str) -> Result<Self, UtilesCoreError> {
         let json_no_space = if json.starts_with(' ') {
             json.trim()
         } else {
@@ -311,7 +313,11 @@ impl Tile {
     }
 
     /// Return tile from json string either object or array
-    pub fn from_json_loose(json: &str) -> Result<Self, UtilesCoreError> {
+    ///
+    /// # Errors
+    ///
+    /// Returns error if unable to parse json string
+    pub fn from_json_loose(json: &str) -> UtilesCoreResult<Self> {
         let v = serde_json::from_str::<Value>(json)?;
         let t = Tile::try_from(&v)?;
         Ok(t)
@@ -330,13 +336,17 @@ impl Tile {
     }
 
     /// Return new Tile from given (lng, lat, zoom)
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the conversion fails resulting in invalid tile
     #[allow(clippy::cast_possible_truncation)]
     pub fn from_lnglat_zoom(
         lng: f64,
         lat: f64,
         zoom: u8,
         truncate: Option<bool>,
-    ) -> Result<Self, UtilesCoreError> {
+    ) -> UtilesCoreResult<Self> {
         let (x, y) = crate::_xy(lng, lat, truncate)?;
         let z2 = 2.0_f64.powi(i32::from(zoom));
         let z2f = z2;

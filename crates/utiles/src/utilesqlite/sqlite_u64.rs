@@ -20,6 +20,8 @@ pub fn i64_to_u64_shift(value: i64) -> u64 {
 
 #[cfg(test)]
 mod i64_shift_tests {
+    #![allow(clippy::similar_names)]
+
     use super::*;
 
     #[test]

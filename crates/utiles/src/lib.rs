@@ -10,8 +10,34 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::cast_possible_truncation)]
+// road to clippy::pedantic
+#![deny(clippy::pedantic)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::unreadable_literal)]
+#![allow(clippy::unnecessary_wraps)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_sign_loss)]
+#![allow(clippy::no_effect_underscore_binding)]
+#![allow(clippy::uninlined_format_args)]
+#![allow(clippy::if_not_else)]
+#![allow(clippy::cast_possible_wrap)]
+#![allow(clippy::ignored_unit_patterns)]
+#![allow(clippy::match_same_arms)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::inefficient_to_string)]
+#![allow(clippy::redundant_closure_for_method_calls)]
+#![allow(clippy::single_match_else)]
+#![allow(clippy::explicit_iter_loop)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::doc_markdown)]
+#![allow(clippy::inconsistent_struct_constructor)]
+#![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::missing_fields_in_debug)]
+#![allow(clippy::ptr_as_ptr)]
+#![allow(clippy::borrow_as_ptr)]
 
 pub use core::*;
+pub use errors::UtilesError;
 
 pub mod cli;
 pub mod core;
@@ -23,8 +49,6 @@ mod metadata_json;
 pub mod server;
 pub mod utilejson;
 pub mod utilesqlite;
-
-pub use errors::UtilesError;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -59,6 +83,7 @@ macro_rules! point2d {
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
+
     use std::collections::HashSet;
 
     use super::*;
@@ -86,8 +111,8 @@ mod tests {
         let expect = vec![Tile::new(3413, 6202, 14), Tile::new(3413, 6203, 14)];
         assert_eq!(tiles.collect::<Vec<Tile>>(), expect);
 
-        let ntiles = tiles_count(bounds, 14.into()).unwrap();
-        assert_eq!(ntiles, 2);
+        let num_tiles = tiles_count(bounds, 14.into()).unwrap();
+        assert_eq!(num_tiles, 2);
     }
 
     #[test]
@@ -102,22 +127,30 @@ mod tests {
 
     #[test]
     fn tile_is_valid() {
-        let tile = Tile::new(0, 0, 0);
-        assert!(tile.valid());
-        let tile = Tile::new(1, 0, 0);
-        assert!(!tile.valid());
-        let tile = Tile::new(0, 1, 0);
-        assert!(!tile.valid());
-        let tile = Tile::new(0, 0, 1);
-        assert!(tile.valid());
-        let tile = Tile::new(1, 1, 1);
-        assert!(tile.valid());
+        let valid_tiles = vec![
+            Tile::new(0, 0, 0),
+            Tile::new(0, 0, 1),
+            Tile::new(1, 1, 1),
+            Tile::new(243, 166, 9),
+        ];
 
-        // invalid tile
-        let tile = Tile::new(1, 1, 0);
-        assert!(!tile.valid());
-        let _tile = Tile::new(1, 234, 1);
-        assert!(!_tile.valid());
+        for tile in valid_tiles {
+            assert!(tile.valid(), "{:?} is not valid", tile);
+        }
+    }
+
+    #[test]
+    fn tile_is_invalid() {
+        let invalid_tiles = vec![
+            Tile::new(0, 1, 0),
+            Tile::new(1, 0, 0),
+            Tile::new(1, 1, 0),
+            Tile::new(1, 234, 1),
+        ];
+
+        for tile in invalid_tiles {
+            assert!(!tile.valid(), "{:?} is valid", tile);
+        }
     }
 
     #[test]

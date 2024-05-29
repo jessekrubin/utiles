@@ -1,5 +1,6 @@
 #![cfg(test)]
 #![allow(clippy::unwrap_used)]
+#![deny(clippy::similar_names)]
 
 use crate::*;
 use std::collections::HashSet;
@@ -27,8 +28,8 @@ fn tiles_single_zoom() {
     let expect = vec![Tile::new(3413, 6202, 14), Tile::new(3413, 6203, 14)];
     assert_eq!(tiles.collect::<Vec<Tile>>(), expect);
 
-    let ntiles = tiles_count(bounds, 14.into()).unwrap();
-    assert_eq!(ntiles, 2);
+    let num_tiles = tiles_count(bounds, 14.into()).unwrap();
+    assert_eq!(num_tiles, 2);
 }
 
 #[test]
@@ -43,22 +44,30 @@ fn tiles_anti_meridian() {
 
 #[test]
 fn tile_is_valid() {
-    let tile = Tile::new(0, 0, 0);
-    assert!(tile.valid());
-    let tile = Tile::new(1, 0, 0);
-    assert!(!tile.valid());
-    let tile = Tile::new(0, 1, 0);
-    assert!(!tile.valid());
-    let tile = Tile::new(0, 0, 1);
-    assert!(tile.valid());
-    let tile = Tile::new(1, 1, 1);
-    assert!(tile.valid());
+    let valid_tiles = vec![
+        Tile::new(0, 0, 0),
+        Tile::new(0, 0, 1),
+        Tile::new(1, 1, 1),
+        Tile::new(243, 166, 9),
+    ];
 
-    // invalid tile
-    let tile = Tile::new(1, 1, 0);
-    assert!(!tile.valid());
-    let tile = Tile::new(1, 234, 1);
-    assert!(!tile.valid());
+    for tile in valid_tiles {
+        assert!(tile.valid(), "{:?} is not valid", tile);
+    }
+}
+
+#[test]
+fn tile_is_invalid() {
+    let invalid_tiles = vec![
+        Tile::new(0, 1, 0),
+        Tile::new(1, 0, 0),
+        Tile::new(1, 1, 0),
+        Tile::new(1, 234, 1),
+    ];
+
+    for tile in invalid_tiles {
+        assert!(!tile.valid(), "{:?} is valid", tile);
+    }
 }
 
 #[test]
