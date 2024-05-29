@@ -23,25 +23,20 @@ pub fn parse_metadata_json_value(val: Value) -> UtilesResult<MbtilesMetadataRows
                 let row_res = serde_json::from_value::<MbtilesMetadataRowValue>(value);
                 match row_res {
                     Ok(row) => {
-                        match row.value {
-                            Value::String(value) => {
-                                let r = MbtilesMetadataRow::new(row.name, value);
-                                rows.push(r);
-                            }
-                            _ => {
-                                // if it is not a string then serialize it
-                                let value_string = serde_json::to_string(&row.value);
-                                match value_string {
-                                    Ok(value_string) => {
-                                        let r = MbtilesMetadataRow::new(
-                                            row.name,
-                                            value_string,
-                                        );
-                                        rows.push(r);
-                                    }
-                                    Err(e) => {
-                                        error!("error serializing value: {}", e);
-                                    }
+                        if let Value::String(value) = row.value {
+                            let r = MbtilesMetadataRow::new(row.name, value);
+                            rows.push(r);
+                        } else {
+                            // if it is not a string then serialize it
+                            let value_string = serde_json::to_string(&row.value);
+                            match value_string {
+                                Ok(value_string) => {
+                                    let r =
+                                        MbtilesMetadataRow::new(row.name, value_string);
+                                    rows.push(r);
+                                }
+                                Err(e) => {
+                                    error!("error serializing value: {}", e);
                                 }
                             }
                         }
@@ -56,22 +51,19 @@ pub fn parse_metadata_json_value(val: Value) -> UtilesResult<MbtilesMetadataRows
         Value::Object(map) => {
             let mut rows = Vec::new();
             for (key, value) in map {
-                match value {
-                    Value::String(value) => {
-                        let r = MbtilesMetadataRow::new(key, value);
-                        rows.push(r);
-                    }
-                    _ => {
-                        // if it is not a string then serialize it
-                        let value_string = serde_json::to_string(&value);
-                        match value_string {
-                            Ok(value_string) => {
-                                let r = MbtilesMetadataRow::new(key, value_string);
-                                rows.push(r);
-                            }
-                            Err(e) => {
-                                error!("error serializing value: {}", e);
-                            }
+                if let Value::String(value) = value {
+                    let r = MbtilesMetadataRow::new(key, value);
+                    rows.push(r);
+                } else {
+                    // if it is not a string then serialize it
+                    let value_string = serde_json::to_string(&value);
+                    match value_string {
+                        Ok(value_string) => {
+                            let r = MbtilesMetadataRow::new(key, value_string);
+                            rows.push(r);
+                        }
+                        Err(e) => {
+                            error!("error serializing value: {}", e);
                         }
                     }
                 }

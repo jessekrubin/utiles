@@ -26,7 +26,7 @@
 #![allow(clippy::module_name_repetitions)]
 // #![allow(clippy::inefficient_to_string)]
 // #![allow(clippy::redundant_closure_for_method_calls)]
-#![allow(clippy::single_match_else)]
+// #![allow(clippy::single_match_else)]
 #![allow(clippy::explicit_iter_loop)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::doc_markdown)]
