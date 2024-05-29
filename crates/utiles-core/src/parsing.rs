@@ -43,18 +43,19 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
         }
         _ => {
             // take first four elements
-            let bbox_vec = v
-                .as_array()
-                .expect(
-                    "Failed to parse bbox from JSON. Expected an array of 4 elements or a GeoJSON-like object with a 'bbox' key.",
-                )
-                .iter()
-                .take(4)
-                .cloned()
-                .collect::<Vec<Value>>();
-            Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
-                Value::Array(bbox_vec),
-            )?))
+            let bbox_vec_as_arr = v.as_array();
+            match bbox_vec_as_arr {
+                None => Err(UtilesCoreError::InvalidBbox(
+                    "Invalid bbox: ".to_string() + s,
+                )),
+                Some(bbox_vec) => {
+                    let bbox_vec =
+                        bbox_vec.iter().take(4).cloned().collect::<Vec<Value>>();
+                    Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
+                        Value::Array(bbox_vec),
+                    )?))
+                }
+            }
         }
     };
     bbox
@@ -235,9 +236,7 @@ pub fn parse_uint_strings(input: &str) -> Vec<&str> {
 pub fn parse_uints(input: &str) -> Vec<u64> {
     parse_uint_strings(input)
         .iter()
-        .map(|s| s.parse::<u64>().expect(
-            "Failed to parse unsigned integer from string. Expected a string of digits.",
-        ))
+        .flat_map(|s| s.parse::<u64>())
         .collect()
 }
 
@@ -323,10 +322,6 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 
 /// Parse a string into a vector of signed integers
 ///
-/// # Panics
-///
-/// Panics if the string contains a number that cannot be parsed as i64.
-///
 /// # Examples
 /// ```
 /// use utiles_core::parsing::parse_ints;
@@ -337,9 +332,7 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
 pub fn parse_ints(input: &str) -> Vec<i64> {
     parse_int_strings(input)
         .iter()
-        .map(|s| s.parse::<i64>().expect(
-            "Failed to parse signed integer from string. Expected a string of digits with an optional leading '-' character.",
-        ))
+        .flat_map(|s| s.parse::<i64>())
         .collect()
 }
 
