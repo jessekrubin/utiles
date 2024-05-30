@@ -1,38 +1,27 @@
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::error;
 
-use utiles_core::mbutiles::{MbtilesMetadataRow, MbtilesMetadataRows};
-
 use crate::errors::UtilesResult;
+use crate::mbt::{MbtMetadataRow, MbtilesMetadataRowParsed, MbtilesMetadataRows};
 use crate::UtilesError;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MbtilesMetadataRowValue {
-    /// name TEXT NOT NULL
-    pub name: String,
-    /// value TEXT NOT NULL
-    pub value: Value,
-}
 
 pub fn parse_metadata_json_value(val: Value) -> UtilesResult<MbtilesMetadataRows> {
     match val {
         Value::Array(arr) => {
             let mut rows = Vec::new();
             for value in arr {
-                let row_res = serde_json::from_value::<MbtilesMetadataRowValue>(value);
+                let row_res = serde_json::from_value::<MbtilesMetadataRowParsed>(value);
                 match row_res {
                     Ok(row) => {
                         if let Value::String(value) = row.value {
-                            let r = MbtilesMetadataRow::new(row.name, value);
+                            let r = MbtMetadataRow::new(row.name, value);
                             rows.push(r);
                         } else {
                             // if it is not a string then serialize it
                             let value_string = serde_json::to_string(&row.value);
                             match value_string {
                                 Ok(value_string) => {
-                                    let r =
-                                        MbtilesMetadataRow::new(row.name, value_string);
+                                    let r = MbtMetadataRow::new(row.name, value_string);
                                     rows.push(r);
                                 }
                                 Err(e) => {
@@ -52,14 +41,14 @@ pub fn parse_metadata_json_value(val: Value) -> UtilesResult<MbtilesMetadataRows
             let mut rows = Vec::new();
             for (key, value) in map {
                 if let Value::String(value) = value {
-                    let r = MbtilesMetadataRow::new(key, value);
+                    let r = MbtMetadataRow::new(key, value);
                     rows.push(r);
                 } else {
                     // if it is not a string then serialize it
                     let value_string = serde_json::to_string(&value);
                     match value_string {
                         Ok(value_string) => {
-                            let r = MbtilesMetadataRow::new(key, value_string);
+                            let r = MbtMetadataRow::new(key, value_string);
                             rows.push(r);
                         }
                         Err(e) => {
@@ -80,7 +69,7 @@ pub fn parse_metadata_json_value(val: Value) -> UtilesResult<MbtilesMetadataRows
     }
 }
 
-pub fn parse_metadata_json(json_data: &str) -> UtilesResult<Vec<MbtilesMetadataRow>> {
+pub fn parse_metadata_json(json_data: &str) -> UtilesResult<Vec<MbtMetadataRow>> {
     let parsed_res = serde_json::from_str(json_data);
     match parsed_res {
         Ok(data) => parse_metadata_json_value(data),
@@ -166,7 +155,7 @@ mod tests {
         println!("{rows:?}");
 
         // have to parse then serialize to compare...
-        let expected_rows: Vec<MbtilesMetadataRow> =
+        let expected_rows: Vec<MbtMetadataRow> =
             serde_json::from_str(expected_json).unwrap();
         let expected_rows_json = serde_json::to_string_pretty(&expected_rows).unwrap();
         // stringify the rows
@@ -205,10 +194,6 @@ mod tests {
         ]
         "#;
         let rows = parse_metadata_json(json_data).unwrap();
-        // assert_eq!(
-        //     rows.len(),
-        //     6,
-        // );
         let expected_json = r#"
         [
           {
@@ -238,7 +223,7 @@ mod tests {
         ]
         "#;
         // have to parse then serialize to compare...
-        let expected_rows: Vec<MbtilesMetadataRow> =
+        let expected_rows: Vec<MbtMetadataRow> =
             serde_json::from_str(expected_json).unwrap();
         let expected_rows_json = serde_json::to_string_pretty(&expected_rows).unwrap();
         // stringify the rows

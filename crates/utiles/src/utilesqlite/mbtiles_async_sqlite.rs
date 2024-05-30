@@ -10,10 +10,8 @@ use rusqlite::{Connection, OpenFlags};
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
 
-use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::mbutiles::MinZoomMaxZoom;
-
 use crate::errors::UtilesResult;
+use crate::mbt::{MbtMetadataRow, MinZoomMaxZoom};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
@@ -261,7 +259,7 @@ where
         Ok(magic_number)
     }
 
-    async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>> {
+    async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>> {
         let metadata = self
             .conn(mbtiles_metadata)
             .await
@@ -269,10 +267,7 @@ where
         Ok(metadata)
     }
 
-    async fn metadata_row(
-        &self,
-        name: &str,
-    ) -> UtilesResult<Option<MbtilesMetadataRow>> {
+    async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>> {
         let name_str = name.to_string();
         let row = self
             .conn(move |conn| mbtiles_metadata_row(conn, &name_str))
@@ -373,11 +368,11 @@ where
             let minmax = self.query_minzoom_maxzoom().await?;
             match minmax {
                 Some(mm) => {
-                    let minzoom = MbtilesMetadataRow {
+                    let minzoom = MbtMetadataRow {
                         name: "minzoom".to_string(),
                         value: mm.minzoom.to_string(),
                     };
-                    let maxzoom = MbtilesMetadataRow {
+                    let maxzoom = MbtMetadataRow {
                         name: "maxzoom".to_string(),
                         value: mm.maxzoom.to_string(),
                     };

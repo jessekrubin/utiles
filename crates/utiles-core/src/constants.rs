@@ -17,3 +17,6 @@ pub const EPSILON: f64 = 1e-14;
 
 /// Episilon for floating point comparison for latlng
 pub const LL_EPSILON: f64 = 1e-11;
+
+/// Magic-number/application-id of mbtiles
+pub const MBTILES_MAGIC_NUMBER: u32 = 0x4d50_4258;

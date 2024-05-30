@@ -10,12 +10,12 @@ use crate::constants::EPSILON;
 use crate::errors::UtilesCoreError;
 use crate::errors::UtilesCoreResult;
 use crate::fns::{bounds, children, neighbors, parent, siblings, xy};
-use crate::mbutiles::MbtTileRow;
+// use crate::mbutiles::MbtTileRow;
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
-use crate::{flipy, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
+use crate::{pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
 
 /// Tile X-Y-Z struct
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -554,6 +554,7 @@ impl From<(u32, u32, u8)> for Tile {
         TileTuple::from(tuple).into()
     }
 }
+
 impl TryFrom<&Map<String, Value>> for Tile {
     type Error = UtilesCoreError;
 
@@ -589,17 +590,6 @@ impl TryFrom<&Map<String, Value>> for Tile {
             )
         })?;
         Ok(Tile::new(x, y, z))
-    }
-}
-
-impl From<MbtTileRow> for Tile {
-    fn from(row: MbtTileRow) -> Self {
-        // flip the y
-        Self::new(
-            row.tile_column,
-            flipy(row.tile_row, row.zoom_level),
-            row.zoom_level,
-        )
     }
 }
 

@@ -2,17 +2,17 @@ use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-use crate::mbutiles::metadata_row::{MbtilesMetadataRow, MbtilesMetadataRows};
+use crate::mbt::metadata_row::{MbtMetadataRow, MbtilesMetadataRows};
 
 /// Return a `HashMap<String, Vec<MbtilesMetadataRow>>` of duplicate metadata rows
 #[must_use]
 pub fn metadata2duplicates(
-    rows: Vec<MbtilesMetadataRow>,
-) -> BTreeMap<String, Vec<MbtilesMetadataRow>> {
+    rows: Vec<MbtMetadataRow>,
+) -> BTreeMap<String, Vec<MbtMetadataRow>> {
     rows.into_iter()
         .fold(
             BTreeMap::new(),
-            |mut acc: BTreeMap<String, Vec<MbtilesMetadataRow>>, row| {
+            |mut acc: BTreeMap<String, Vec<MbtMetadataRow>>, row| {
                 acc.entry(row.name.clone()).or_default().push(row);
                 acc
             },

@@ -3,11 +3,9 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::debug;
 
-use utiles_core::mbutiles::metadata_row::MbtilesMetadataRowParsed;
-use utiles_core::mbutiles::{metadata2map, metadata2map_val};
-
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 use crate::errors::UtilesResult;
+use crate::mbt::{metadata2map, metadata2map_val, MbtilesMetadataRowParsed};
 use crate::utilesqlite::Mbtiles;
 
 pub fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {

@@ -3,7 +3,7 @@ use serde_json::Value;
 
 /// Metadata row struct for `mbtiles` metadata table
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MbtilesMetadataRow {
+pub struct MbtMetadataRow {
     /// name TEXT NOT NULL
     pub name: String,
     /// value TEXT NOT NULL
@@ -19,18 +19,18 @@ pub struct MbtilesMetadataRowParsed {
     pub value: Value,
 }
 
-impl MbtilesMetadataRow {
+impl MbtMetadataRow {
     /// Create a new `MbtilesMetadataRow`
     #[must_use]
     pub fn new(name: String, value: String) -> Self {
-        MbtilesMetadataRow { name, value }
+        MbtMetadataRow { name, value }
     }
 }
 
-pub type MbtilesMetadataRows = Vec<MbtilesMetadataRow>;
+pub type MbtilesMetadataRows = Vec<MbtMetadataRow>;
 
-impl From<MbtilesMetadataRow> for MbtilesMetadataRowParsed {
-    fn from(row: MbtilesMetadataRow) -> Self {
+impl From<MbtMetadataRow> for MbtilesMetadataRowParsed {
+    fn from(row: MbtMetadataRow) -> Self {
         let value = match row.value.parse::<Value>() {
             Ok(v) => v,
             Err(_) => Value::String(row.value.clone()),

@@ -11,12 +11,12 @@ use tracing::{debug, info, warn};
 use walkdir::WalkDir;
 
 use utiles_core::bbox::BBox;
-use utiles_core::mbutiles::{MbtTileRow, MbtilesMetadataRow};
 use utiles_core::tile_data_row::TileData;
 use utiles_core::{tile_ranges, Tile, TileLike};
 
 use crate::cli::args::CopyArgs;
 use crate::errors::{UtilesError, UtilesResult};
+use crate::mbt::{MbtMetadataRow, MbtTileRow};
 use crate::metadata_json::parse_metadata_json;
 use crate::utilesqlite::Mbtiles;
 
@@ -466,7 +466,7 @@ async fn copy_fs2mbtiles_simple(dirpath: String, mbtiles: String) {
 
     // if DIR/metadata.json exists we set the metadata from it
     if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
-        let metadata_vec: Vec<MbtilesMetadataRow> =
+        let metadata_vec: Vec<MbtMetadataRow> =
             serde_json::from_str(&metadata_str).unwrap();
         dst_mbt.metadata_set_from_vec(&metadata_vec).unwrap();
     }

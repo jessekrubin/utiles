@@ -1,11 +1,11 @@
 use async_trait::async_trait;
 use tilejson::TileJSON;
 
-use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::{Tile, TileLike};
 
 use crate::errors::UtilesResult;
+use crate::mbt::MbtMetadataRow;
+use crate::mbt::MinZoomMaxZoom;
 
 // #[async_trait]
 // pub trait Sqlike3Async {
@@ -27,11 +27,8 @@ pub trait MbtilesAsync: Sized {
     async fn is_mbtiles(&self) -> UtilesResult<bool>;
     async fn magic_number(&self) -> UtilesResult<u32>;
     async fn tilejson(&self) -> UtilesResult<TileJSON>;
-    async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>>;
-    async fn metadata_row(
-        &self,
-        name: &str,
-    ) -> UtilesResult<Option<MbtilesMetadataRow>>;
+    async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>>;
+    async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>>;
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize>;
     async fn tiles_is_empty(&self) -> UtilesResult<bool>;
 

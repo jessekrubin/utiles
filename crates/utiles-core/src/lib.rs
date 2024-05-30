@@ -32,7 +32,6 @@ pub mod fns;
 pub mod gdal;
 pub mod geostats;
 pub mod lnglat;
-pub mod mbutiles;
 pub mod parsing;
 pub mod pmtiles;
 pub mod point;

@@ -7,12 +7,11 @@ use tracing::{debug, error, warn};
 
 use utiles_core::bbox::BBox;
 use utiles_core::errors::UtilesCoreResult;
-use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::mbutiles::MinZoomMaxZoom;
 use utiles_core::tile_data_row::TileData;
 use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;
+use crate::mbt::{MbtMetadataRow, MinZoomMaxZoom};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::add_ut_functions;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
@@ -112,7 +111,7 @@ impl Mbtiles {
         &self.conn
     }
 
-    pub fn metadata(&self) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
+    pub fn metadata(&self) -> RusqliteResult<Vec<MbtMetadataRow>> {
         mbtiles_metadata(&self.conn)
     }
 
@@ -130,7 +129,7 @@ impl Mbtiles {
 
     pub fn metadata_set_from_vec(
         &self,
-        metadata: &Vec<MbtilesMetadataRow>,
+        metadata: &Vec<MbtMetadataRow>,
     ) -> RusqliteResult<usize> {
         metadata_set_many(&self.conn, metadata)
     }
@@ -303,16 +302,16 @@ pub fn add_functions(conn: &Connection) -> RusqliteResult<()> {
 // =====================================================================
 
 /// return a vector of `MbtilesMetadataRow` structs
-pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
+pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtMetadataRow>> {
     let mut stmt = conn.prepare_cached("SELECT name, value FROM metadata")?;
     let mdata = stmt
         .query_map([], |row| {
-            Ok(MbtilesMetadataRow {
+            Ok(MbtMetadataRow {
                 name: row.get(0)?,
                 value: row.get(1)?,
             })
         })?
-        .collect::<RusqliteResult<Vec<MbtilesMetadataRow>, rusqlite::Error>>();
+        .collect::<RusqliteResult<Vec<MbtMetadataRow>, rusqlite::Error>>();
 
     match mdata {
         Ok(mdata) => Ok(mdata),
@@ -326,12 +325,12 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtilesMetadata
 pub fn mbtiles_metadata_row(
     conn: &Connection,
     name: &str,
-) -> RusqliteResult<Option<MbtilesMetadataRow>> {
+) -> RusqliteResult<Option<MbtMetadataRow>> {
     let mut stmt =
         conn.prepare_cached("SELECT name, value FROM metadata WHERE name=?1")?;
     let mdata = stmt
         .query_row(params![name], |row| {
-            Ok(MbtilesMetadataRow {
+            Ok(MbtMetadataRow {
                 name: row.get(0)?,
                 value: row.get(1)?,
             })
@@ -748,17 +747,17 @@ pub fn insert_tiles_flat_mbtiles(
 pub fn metadata_get(
     conn: &Connection,
     name: &str,
-) -> RusqliteResult<Vec<MbtilesMetadataRow>> {
+) -> RusqliteResult<Vec<MbtMetadataRow>> {
     let mut stmt =
         conn.prepare_cached("SELECT name, value FROM metadata WHERE name=?1")?;
     let mdata = stmt
         .query_map(params![name], |row| {
-            Ok(MbtilesMetadataRow {
+            Ok(MbtMetadataRow {
                 name: row.get(0)?,
                 value: row.get(1)?,
             })
         })?
-        .collect::<RusqliteResult<Vec<MbtilesMetadataRow>, rusqlite::Error>>()?;
+        .collect::<RusqliteResult<Vec<MbtMetadataRow>, rusqlite::Error>>()?;
     Ok(mdata)
 }
 
@@ -776,7 +775,7 @@ pub fn metadata_set(
 
 pub fn metadata_set_many(
     conn: &Connection,
-    metadata: &Vec<MbtilesMetadataRow>,
+    metadata: &Vec<MbtMetadataRow>,
 ) -> RusqliteResult<usize> {
     // Use an UPSERT statement to insert or update as necessary
     let sql = "INSERT OR REPLACE INTO metadata (name, value) VALUES (?1, ?2)";
@@ -825,11 +824,11 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(
         Some(minmax) => metadata_set_many(
             conn,
             &vec![
-                MbtilesMetadataRow {
+                MbtMetadataRow {
                     name: "minzoom".to_string(),
                     value: minmax.minzoom.to_string(),
                 },
-                MbtilesMetadataRow {
+                MbtMetadataRow {
                     name: "maxzoom".to_string(),
                     value: minmax.maxzoom.to_string(),
                 },
