@@ -118,6 +118,10 @@ pub struct VacuumArgs {
     /// fspath to vacuum db into
     #[arg(required = false)]
     pub into: Option<String>,
+
+    /// Analyze db after vacuum
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub analyze: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -170,7 +174,7 @@ pub struct LintArgs {
 }
 
 #[derive(Debug, Parser)]
-pub struct MbtilesStatsArgs {
+pub struct InfoArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
@@ -223,8 +227,8 @@ pub enum Commands {
     Rimraf(RimrafArgs),
 
     /// Echo mbtiles info/stats
-    #[command(name = "mbinfo")]
-    Mbinfo(MbtilesStatsArgs),
+    #[command(name = "info")]
+    Info(InfoArgs),
 
     /// VACUUM sqlite db
     #[command(name = "vacuum", visible_alias = "vac")]

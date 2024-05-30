@@ -1,4 +1,4 @@
-use tracing::{debug, error};
+use tracing::error;
 
 use utiles_core::{bounding_tile, Tile, TileLike};
 
@@ -9,8 +9,9 @@ use crate::gj::parsing::parse_bbox_geojson;
 
 pub fn neighbors_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
-    for tile in tiles {
+    for line_res in lines {
+        let line = line_res?;
+        let tile = Tile::from_json(&line)?;
         let neighbors = tile.neighbors();
         for neighbor in neighbors {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
@@ -22,14 +23,11 @@ pub fn neighbors_main(args: TileFmtArgs) -> UtilesResult<()> {
 
 pub fn bounding_tile_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    let bboxes = lines.map(|l| {
-        let s = l.unwrap();
-        debug!("l: {:?}", s);
-        parse_bbox_geojson(&s).unwrap()
-    });
-    for bbox in bboxes {
+
+    for line_res in lines {
+        let line = line_res?;
+        let bbox = parse_bbox_geojson(&line)?;
         let tile = bounding_tile(bbox, None)?;
-        // let tile = Tile::from_bbox(&bbox, zoom);
         let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
         println!("{}{}", rs, tile.json_arr());
     }

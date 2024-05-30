@@ -335,10 +335,6 @@ async fn copy_fs2mbtiles(
     dst_mbt
         .init_flat_mbtiles()
         .expect("init_flat_mbtiles failed");
-    // let c = dst_mbt.conn.trace(Some(|s| {
-    //     debug!("SQL: {:?}", s);
-    // }));
-    // Write metadata to db if exists...
 
     if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
         // found metadata.json

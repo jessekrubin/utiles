@@ -3,7 +3,7 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::debug;
 
-use crate::cli::args::MbtilesStatsArgs;
+use crate::cli::args::InfoArgs;
 use crate::errors::UtilesResult;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use crate::utilesqlite::Mbtiles;
@@ -66,7 +66,7 @@ fn mbinfo(filepath: &str) -> MbtilesStats {
     }
 }
 
-pub fn mbtiles_info_main(args: &MbtilesStatsArgs) -> UtilesResult<()> {
+pub fn info_main(args: &InfoArgs) -> UtilesResult<()> {
     let stats = mbinfo(&args.common.filepath);
     let str = if args.common.min {
         serde_json::to_string(&stats).unwrap()

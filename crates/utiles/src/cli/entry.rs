@@ -7,8 +7,8 @@ use tracing_subscriber::EnvFilter;
 
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
-    bounding_tile_main, children_main, contains_main, copy_main, dev_main, lint_main,
-    mbtiles_info_main, metadata_main, metadata_set_main, neighbors_main, parent_main,
+    bounding_tile_main, children_main, contains_main, copy_main, dev_main, info_main,
+    lint_main, metadata_main, metadata_set_main, neighbors_main, parent_main,
     pmtileid_main, quadkey_main, rimraf_main, serve_main, shapes_main, tilejson_main,
     tiles_main, touch_main, update_main, vacuum_main,
 };
@@ -92,7 +92,7 @@ pub async fn cli_main(
         Commands::Update(args) => update_main(&args).await,
         Commands::Tilejson(args) => tilejson_main(&args),
         Commands::Copy(args) => copy_main(args).await,
-        Commands::Mbinfo(args) => mbtiles_info_main(&args),
+        Commands::Info(args) => info_main(&args),
         Commands::Dev(args) => dev_main(args).await,
         Commands::Rimraf(args) => rimraf_main(args).await,
         Commands::Contains { filepath, lnglat } => contains_main(&filepath, lnglat),
