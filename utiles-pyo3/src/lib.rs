@@ -19,6 +19,7 @@ use pyutiles::pytile::PyTile;
 use utiles::tile_type;
 
 mod cli;
+mod fmt_nbytes;
 mod pyutiles;
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -98,6 +99,9 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // rust-cli
     m.add_function(wrap_pyfunction!(cli::ut_cli, m)?)?;
+
+    // misc
+    m.add_function(wrap_pyfunction!(fmt_nbytes::fmt_nbytes, m)?)?;
 
     Ok(())
 }
