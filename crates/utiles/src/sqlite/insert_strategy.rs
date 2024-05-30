@@ -10,6 +10,7 @@ pub enum InsertStrategy {
 }
 
 impl InsertStrategy {
+    #[must_use]
     pub fn sql_prefix(&self) -> &str {
         match self {
             InsertStrategy::None => "INSERT",

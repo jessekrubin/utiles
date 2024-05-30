@@ -12,18 +12,18 @@ use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;
 use crate::mbt::{MbtMetadataRow, MinZoomMaxZoom};
+use crate::sqlite::InsertStrategy;
+use crate::sqlite::{
+    application_id, open_existing, pragma_index_info, pragma_index_list,
+    pragma_table_list, query_db_fspath, Sqlike3,
+};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::add_ut_functions;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::utilesqlite::hash_types::HashType;
-use crate::utilesqlite::insert_strategy::InsertStrategy;
 use crate::utilesqlite::mbtstats::MbtilesZoomStats;
 use crate::utilesqlite::mbtype::MbtilesType;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
-use crate::utilesqlite::squealite::{
-    application_id, open_existing, pragma_index_info, pragma_index_list,
-    pragma_table_list, query_db_fspath, Sqlike3,
-};
 use crate::UtilesError;
 
 pub struct Mbtiles {

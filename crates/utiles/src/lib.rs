@@ -41,9 +41,11 @@ pub mod gj;
 mod globster;
 pub mod lint;
 
+mod dev;
 mod mbt;
 mod metadata_json;
 pub mod server;
+pub mod sqlite;
 pub mod utilejson;
 pub mod utilesqlite;
 

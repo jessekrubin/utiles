@@ -3,7 +3,7 @@ use tracing::{error, info, warn};
 
 use crate::cli::args::VacuumArgs;
 use crate::errors::UtilesResult;
-use crate::utilesqlite::squealite::{Sqlike3, SqliteDb};
+use crate::sqlite::{Sqlike3, SqliteDb};
 use crate::UtilesError;
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -12,6 +12,7 @@ use tracing::{debug, error, info, warn};
 
 use crate::errors::UtilesResult;
 use crate::mbt::{MbtMetadataRow, MinZoomMaxZoom};
+use crate::sqlite::{journal_mode, magic_number};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
@@ -20,7 +21,6 @@ use crate::utilesqlite::mbtiles::{
     register_utiles_sqlite_functions, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
-use crate::utilesqlite::squealite::{journal_mode, magic_number};
 use crate::UtilesError;
 
 #[derive(Clone)]
