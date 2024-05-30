@@ -409,11 +409,7 @@ def bounding_tile(_ctx: click.Context, input: str, seq: bool = False) -> None:
 
         west, south, east, north = bbox
         vals = utiles.bounding_tile(west, south, east, north, truncate=False)
-
-        # print(vals)
-        # output = json.dumps(vals)
         output = vals.json(obj=False)
-
         if seq:
             click.echo(RS)
 

@@ -131,6 +131,7 @@ select = [
     "ICN",
     "N",
     "PLC",
+    #"ERA001",
     "PLE",
     "PLR",
     "PLW",
