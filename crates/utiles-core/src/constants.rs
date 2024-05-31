@@ -1,7 +1,7 @@
 //! Constants module
 
-/// MAX ZOOM (31)
-pub const MAX_ZOOM: u8 = 31;
+/// MAX ZOOM (30)
+pub const MAX_ZOOM: u8 = 30;
 
 /// MAX ZOOM JS NUMBER (28)
 pub const MAX_ZOOM_JS: u8 = 28;

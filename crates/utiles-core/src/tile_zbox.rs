@@ -1,3 +1,4 @@
+//! `TileZBox` - zoom-x-y bounding box
 use crate::{Point2d, TileLike};
 
 /// A struct representing a bbox of tiles at a specific zoom level

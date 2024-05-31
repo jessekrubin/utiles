@@ -1,3 +1,5 @@
+//! Zoom levels, zoom-collections and ranges oh my!
+use crate::constants::MAX_ZOOM;
 use std::num::ParseIntError;
 use std::ops::BitAnd;
 
@@ -101,6 +103,31 @@ impl ZoomSet {
     pub fn to_zooms(&self) -> Vec<u8> {
         zset2zvec(self.0)
     }
+
+    #[must_use]
+    pub fn zoom_ranges(&self) -> Vec<ZoomRange> {
+        let mut ranges: Vec<ZoomRange> = vec![];
+        let mut min: u8 = 0;
+        let mut max: u8 = 0;
+        let mut i: u8 = 0;
+        while i < MAX_ZOOM {
+            if self.0 & (1 << i) != 0 {
+                if min == 0 {
+                    min = i;
+                }
+                max = i;
+            } else if min != 0 {
+                ranges.push(ZoomRange::new(min, max));
+                min = 0;
+                max = 0;
+            }
+            i += 1;
+        }
+        if min != 0 {
+            ranges.push(ZoomRange::new(min, max));
+        }
+        ranges
+    }
 }
 
 impl From<u8> for ZoomSet {
@@ -126,7 +153,7 @@ impl TryFrom<Vec<u8>> for ZoomSet {
 
     fn try_from(zvec: Vec<u8>) -> Result<Self, Self::Error> {
         let result = zvec.iter().try_fold(0u32, |acc, &z| {
-            if z > 30 {
+            if z > MAX_ZOOM {
                 Err(InvalidZoom(z.to_string()))
             } else {
                 Ok(acc | (1 << z))
@@ -182,7 +209,10 @@ pub struct ZoomRange {
 // default zoom range
 impl Default for ZoomRange {
     fn default() -> Self {
-        Self { min: 0, max: 30 }
+        Self {
+            min: 0,
+            max: MAX_ZOOM,
+        }
     }
 }
 
@@ -215,7 +245,8 @@ impl IntoIterator for ZoomRange {
     }
 }
 
-/// convert range of zoom levels to a set of zoom levels
+/// Convert range of zoom levels to a set of zoom levels
+///
 /// # Examples
 /// ```
 /// use utiles_core::zoom::{ZoomRange, ZoomSet};
