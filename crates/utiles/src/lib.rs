@@ -41,7 +41,7 @@ pub mod gj;
 mod globster;
 pub mod lint;
 
-mod dev;
+pub mod dev;
 mod mbt;
 mod metadata_json;
 pub mod server;

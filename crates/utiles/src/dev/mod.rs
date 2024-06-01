@@ -3,4 +3,4 @@
 //! DEAD CODE IS ALLOWED!
 #![allow(dead_code)]
 
-mod sqlite_u64;
+pub mod sqlite_u64;
