@@ -9,6 +9,8 @@ pub use pragma::*;
 pub use sqlike3::Sqlike3;
 
 mod db;
+mod errors;
 mod insert_strategy;
+mod page_size;
 mod pragma;
 mod sqlike3;

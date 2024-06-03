@@ -1,6 +1,32 @@
 use rusqlite::Connection;
 
+use crate::sqlite::errors::{SqliteError, SqliteResult};
+use crate::sqlite::page_size::{is_valid_page_size, pragma_page_size_get};
 use crate::sqlite::RusqliteResult;
+
+pub fn pragma_page_size(
+    conn: &Connection,
+    page_size: Option<i64>,
+) -> SqliteResult<i64> {
+    if let Some(page_size) = page_size {
+        if is_valid_page_size(page_size) {
+            // set page size
+            let current_page_size = pragma_page_size_get(conn)?;
+            if current_page_size == page_size {
+                return Ok(page_size);
+            }
+            let stmt_str = format!("PRAGMA page_size = {page_size}");
+            conn.execute(&stmt_str, [])?;
+            Ok(page_size)
+        } else {
+            Err(SqliteError::InvalidPageSize(format!(
+                "Invalid page size: {page_size}",
+            )))
+        }
+    } else {
+        pragma_page_size_get(conn)
+    }
+}
 
 #[derive(Debug)]
 pub struct PragmaTableListRow {

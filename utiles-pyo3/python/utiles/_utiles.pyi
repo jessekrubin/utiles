@@ -161,6 +161,7 @@ class Tile:
         buffer: float | None = ...,
         precision: int | None = ...,
     ) -> Any: ...
+    def center(self) -> LngLat: ...
 
 TileLike = Union[Tile, Tuple[int, int, int], int]
 
