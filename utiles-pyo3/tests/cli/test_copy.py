@@ -47,7 +47,9 @@ class TestCopyPyramid:
         _mbtiles_filepath = _osm_standard_z0z4_mbtiles(test_data_root)
         out_path = tmp_path / "osm-pyramid"
         # copy mbtiles to tile pyramid with bbox of -180,0,0,90 (top left quadrant)
-        result = _run_cli(["cp", str(_mbtiles_filepath), str(out_path), "--bbox", "-180,0,0,90"])
+        result = _run_cli(
+            ["cp", str(_mbtiles_filepath), str(out_path), "--bbox", "-180,0,0,90"]
+        )
         assert result.returncode == 0
         assert out_path.exists()
         assert out_path.is_dir()

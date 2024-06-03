@@ -883,10 +883,11 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(
     }
 }
 
+#[allow(clippy::cast_precision_loss)]
 pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
     let mut stmt = conn.prepare_cached(
-        "SELECT zoom_level, COUNT(*), MIN(tile_row), MAX(tile_row), MIN(tile_column), MAX(tile_column)
+        "SELECT zoom_level, COUNT(*), MIN(tile_row), MAX(tile_row), MIN(tile_column), MAX(tile_column), SUM(OCTET_LENGTH(tile_data)) as nbytes
          FROM tiles
          GROUP BY zoom_level"
     )?;
@@ -904,7 +905,8 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
             let zu8 = zoom as u8;
             let ymin = yflip(max_tile_row as u32, zu8);
             let ymax = yflip(min_tile_row as u32, zu8);
-
+            let nbytes: u64 = row.get(6)?;
+            let nbytes_avg: f64 = nbytes as f64 / ntiles as f64;
             Ok(MbtilesZoomStats {
                 zoom,
                 ntiles,
@@ -912,6 +914,8 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
                 xmax: max_tile_column as u32,
                 ymin,
                 ymax,
+                nbytes,
+                nbytes_avg,
             })
         })?
         .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()?;

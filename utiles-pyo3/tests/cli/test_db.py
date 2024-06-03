@@ -77,6 +77,7 @@ def test_mbtiles_info(test_data_root: Path) -> None:
     assert result.returncode == 0
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 341
+
     expected_info_json = {
         "filesize": 1572864,
         "ntiles": 341,
@@ -86,11 +87,55 @@ def test_mbtiles_info(test_data_root: Path) -> None:
         "minzoom": 0,
         "maxzoom": 4,
         "zooms": [
-            {"zoom": 0, "ntiles": 1, "xmin": 0, "xmax": 0, "ymin": 0, "ymax": 0},
-            {"zoom": 1, "ntiles": 4, "xmin": 0, "xmax": 1, "ymin": 0, "ymax": 1},
-            {"zoom": 2, "ntiles": 16, "xmin": 0, "xmax": 3, "ymin": 0, "ymax": 3},
-            {"zoom": 3, "ntiles": 64, "xmin": 0, "xmax": 7, "ymin": 0, "ymax": 7},
-            {"zoom": 4, "ntiles": 256, "xmin": 0, "xmax": 15, "ymin": 0, "ymax": 15},
+            {
+                "zoom": 0,
+                "ntiles": 1,
+                "xmin": 0,
+                "xmax": 0,
+                "ymin": 0,
+                "ymax": 0,
+                "nbytes": 6915,
+            },
+            {
+                "zoom": 1,
+                "ntiles": 4,
+                "xmin": 0,
+                "xmax": 1,
+                "ymin": 0,
+                "ymax": 1,
+                "nbytes": 24787,
+            },
+            {
+                "zoom": 2,
+                "ntiles": 16,
+                "xmin": 0,
+                "xmax": 3,
+                "ymin": 0,
+                "ymax": 3,
+                "nbytes": 66425,
+            },
+            {
+                "zoom": 3,
+                "ntiles": 64,
+                "xmin": 0,
+                "xmax": 7,
+                "ymin": 0,
+                "ymax": 7,
+                "nbytes": 211704,
+            },
+            {
+                "zoom": 4,
+                "ntiles": 256,
+                "xmin": 0,
+                "xmax": 15,
+                "ymin": 0,
+                "ymax": 15,
+                "nbytes": 1106134,
+            },
         ],
     }
+    parsed_data["zooms"] = [
+        {k: v for k, v in e.items() if k != "nbytes_avg"} for e in parsed_data["zooms"]
+    ]
+    print(parsed_data)
     assert parsed_data == expected_info_json
