@@ -50,7 +50,7 @@ def test_missing_from_libutiles() -> None:
     # print(libutiles_imports_str)
 
 
-def main():
+def main() -> None:
     ignored_members = {
         "__all__",
         "__doc__",

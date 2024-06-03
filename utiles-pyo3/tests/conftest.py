@@ -1,24 +1,20 @@
+from functools import lru_cache
 from pathlib import Path
-from typing import Union
 
 import pytest
 
 PWD = Path(__file__).parent
 
-_REPO_ROOT: Union[Path, None] = None
 
-
+@lru_cache(maxsize=1)
 def _repo_root() -> Path:
-    global _REPO_ROOT
-    if _REPO_ROOT is not None:
-        return _REPO_ROOT
     _root = PWD
     for _i in range(5):
         _root = _root.parent
         if (_root / ".github").is_dir():
-            _REPO_ROOT = _root
             return _root
-    raise RuntimeError("Could not find repo root")
+    ex = RuntimeError("Could not find repo root")
+    raise ex
 
 
 @pytest.fixture
