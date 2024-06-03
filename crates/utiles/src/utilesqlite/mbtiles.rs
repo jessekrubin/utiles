@@ -11,7 +11,7 @@ use utiles_core::tile_data_row::TileData;
 use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MinZoomMaxZoom};
+use crate::mbt::{MbtMetadataRow, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom};
 use crate::sqlite::InsertStrategy;
 use crate::sqlite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
@@ -21,7 +21,7 @@ use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::add_ut_functions;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::utilesqlite::hash_types::HashType;
-use crate::utilesqlite::mbtstats::MbtilesZoomStats;
+
 use crate::utilesqlite::mbtype::MbtilesType;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
 use crate::UtilesError;
@@ -73,13 +73,17 @@ impl Mbtiles {
         }
     }
 
-    // pub fn vacuum(&self) -> RusqliteResult<usize> {
-    //     vacuum(&self.conn)
-    // }
-    //
-    // pub fn analyze(&self) -> RusqliteResult<usize> {
-    //     analyze(&self.conn)
-    // }
+    pub fn db_filesize(&self) -> UtilesResult<u64> {
+        let pth = Path::new(&self.dbpath.fspath);
+        debug!("pth: {:?}", pth);
+        let metadata = pth.metadata()?;
+        debug!("metadata: {:?}", metadata);
+        // file size
+        let filesize = metadata.len();
+        debug!("filesize: {:?}", filesize);
+
+        Ok(metadata.len())
+    }
 
     pub fn init_flat_mbtiles(&mut self) -> RusqliteResult<()> {
         init_flat_mbtiles(&mut self.conn)
@@ -240,6 +244,47 @@ impl Mbtiles {
     }
     pub fn magic_number(&self) -> RusqliteResult<u32> {
         self.application_id()
+    }
+
+    pub fn mbt_stats(&self) -> UtilesResult<MbtilesStats> {
+        let query_ti = std::time::Instant::now();
+        let filesize = self.db_filesize()?;
+        debug!("Started zoom_stats query");
+        let page_count = self.pragma_page_count()?;
+        let page_size = self.pragma_page_size()?;
+        let zoom_stats = self.zoom_stats()?;
+        let query_dt = query_ti.elapsed();
+        debug!("Finished zoom_stats query in {:?}", query_dt);
+
+        if zoom_stats.is_empty() {
+            return Ok(MbtilesStats {
+                filesize,
+                page_count,
+                page_size,
+                ntiles: 0,
+                minzoom: None,
+                maxzoom: None,
+                nzooms: 0,
+                zooms: vec![],
+            });
+        }
+
+        let minzoom = zoom_stats.iter().map(|r| r.zoom).min();
+        let maxzoom = zoom_stats.iter().map(|r| r.zoom).max();
+        let minzoom_u8: Option<u8> = minzoom
+            .map(|minzoom| minzoom.try_into().expect("Error converting minzoom to u8"));
+        let maxzoom_u8: Option<u8> = maxzoom
+            .map(|maxzoom| maxzoom.try_into().expect("Error converting maxzoom to u8"));
+        Ok(MbtilesStats {
+            ntiles: zoom_stats.iter().map(|r| r.ntiles).sum(),
+            filesize,
+            page_count,
+            page_size,
+            minzoom: minzoom_u8,
+            maxzoom: maxzoom_u8,
+            nzooms: zoom_stats.len() as u32,
+            zooms: zoom_stats,
+        })
     }
 
     pub fn zoom_stats(&self) -> RusqliteResult<Vec<MbtilesZoomStats>> {
@@ -850,7 +895,7 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
         .query_map([], |row| {
             let zoom: u32 = row.get(0)?;
 
-            let ntiles: i64 = row.get(1)?;
+            let ntiles = row.get(1)?;
             let min_tile_column: i64 = row.get(4)?;
             let max_tile_column: i64 = row.get(5)?;
             let min_tile_row: i64 = row.get(2)?;

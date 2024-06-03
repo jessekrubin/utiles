@@ -21,32 +21,7 @@ def test_touch(tmp_path: Path, test_data_root: Path) -> None:
 
     result = _run_cli(["info", str(new_mbtiles)])
     assert result.returncode == 0
-    parsed_data = json.loads(result.stdout)
-    assert parsed_data["ntiles"] == 0
-    expected_info_json = {
-        "filesize": 20480,
-        "ntiles": 0,
-        "nzooms": 0,
-        "page_count": 5,
-        "page_size": 4096,
-        "minzoom": None,
-        "maxzoom": None,
-        "zooms": [],
-    }
-    assert parsed_data == expected_info_json
-
-
-def test_touch_page_size_512(tmp_path: Path) -> None:
-    # make a new file
-    new_mbtiles = tmp_path / "new.mbtiles"
-    result = _run_cli(["touch", str(new_mbtiles), "--page-size", "512"])
-    assert result.returncode == 0
-    assert new_mbtiles.exists()
-    assert new_mbtiles.is_file()
-    assert new_mbtiles.suffix == ".mbtiles"
-
-    result = _run_cli(["info", str(new_mbtiles)])
-    assert result.returncode == 0
+    result.print()
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
@@ -55,6 +30,33 @@ def test_touch_page_size_512(tmp_path: Path) -> None:
         "nzooms": 0,
         "page_count": 6,
         "page_size": 512,
+        "minzoom": None,
+        "maxzoom": None,
+        "zooms": [],
+    }
+    assert parsed_data == expected_info_json
+
+
+def test_touch_page_size_4096(tmp_path: Path) -> None:
+    # make a new file
+    new_mbtiles = tmp_path / "new.mbtiles"
+    result = _run_cli(["touch", str(new_mbtiles), "--page-size", "4096"])
+    assert result.returncode == 0
+    assert new_mbtiles.exists()
+    assert new_mbtiles.is_file()
+    assert new_mbtiles.suffix == ".mbtiles"
+
+    result = _run_cli(["info", "--debug", str(new_mbtiles)])
+    result.print()
+    assert result.returncode == 0
+    parsed_data = json.loads(result.stdout)
+    assert parsed_data["ntiles"] == 0
+    expected_info_json = {
+        "filesize": 20480,
+        "ntiles": 0,
+        "nzooms": 0,
+        "page_count": 5,
+        "page_size": 4096,
         "minzoom": None,
         "maxzoom": None,
         "zooms": [],

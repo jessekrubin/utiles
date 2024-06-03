@@ -66,6 +66,16 @@ class CliResult:
         """Parse json"""
         return json_loads(self.stdout)
 
+    def print(self) -> None:
+        """Print"""
+        print(f"args: {self.args}")
+        print(f"stdout: {self.stdout}")
+        print(f"stderr: {self.stderr}")
+        print(f"returncode: {self.returncode}")
+        print(f"dt: {self.dt}")
+        print(f"input: {self.input}")
+        print(f"completed_process: {self.completed_process}")
+
 
 def run_cli(
     args: list[str] | None,

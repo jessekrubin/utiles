@@ -20,7 +20,7 @@ fn check_page_size(page_size: i64) -> UtilesResult<i64> {
 pub fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
     let filepath = &args.filepath;
 
-    let page_size = check_page_size(args.page_size.unwrap_or(4096))?;
+    let page_size = check_page_size(args.page_size.unwrap_or(512))?;
     debug!("touch: {}", filepath);
     // check that filepath does not exist already
     let fpth = Path::new(filepath);
