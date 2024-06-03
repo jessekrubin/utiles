@@ -83,6 +83,12 @@ def run_cli(
         check=False,
     )
     tf = time_ns()
+    if completed_process.returncode != 0:
+        print(f"completed_process: {completed_process}")
+        print(f"completed_process.stdout: {completed_process.stdout}")
+        print(f"completed_process.stderr: {completed_process.stderr}")
+        print(f"completed_process.returncode: {completed_process.returncode}")
+        print(f"input: {input}")
     return CliResult(
         args=_args,
         stdout=completed_process.stdout,

@@ -44,7 +44,7 @@ impl Mbtiles {
         let conn_res = Connection::open(&dbpath.fspath);
         match conn_res {
             Ok(c) => Ok(Mbtiles { conn: c, dbpath }),
-            Err(e) => Err(UtilesError::SqliteError(e)),
+            Err(e) => Err(UtilesError::RusqliteError(e)),
         }
     }
 

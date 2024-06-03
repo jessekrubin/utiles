@@ -44,9 +44,13 @@ pub enum UtilesError {
     #[error("io error: {0}")]
     IoError(#[from] std::io::Error),
 
+    /// Error from `sqlite` module
+    #[error("sqlite error: {0}")]
+    SqliteError(#[from] crate::sqlite::SqliteError),
+
     /// Error from rusqlite
-    #[error("sqlite err: {0}")]
-    SqliteError(#[from] rusqlite::Error),
+    #[error("rusqlite err: {0}")]
+    RusqliteError(#[from] rusqlite::Error),
 
     /// Error from `async_sqlite`
     #[error("sqlite err: {0}")]
@@ -67,7 +71,7 @@ impl From<RusqliteResult<()>> for UtilesError {
     fn from(e: RusqliteResult<()>) -> Self {
         match e {
             Ok(()) => UtilesError::Unknown("unknown error".to_string()),
-            Err(e) => UtilesError::SqliteError(e),
+            Err(e) => UtilesError::RusqliteError(e),
         }
     }
 }

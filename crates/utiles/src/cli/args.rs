@@ -108,6 +108,10 @@ pub struct TouchArgs {
     /// mbtiles filepath
     #[arg(required = true)]
     pub filepath: String,
+
+    /// page size (default: 4096)
+    #[arg(required = false, long)]
+    pub page_size: Option<i64>,
 }
 
 #[derive(Debug, Parser)]
