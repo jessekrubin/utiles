@@ -1,5 +1,6 @@
 //! Zoom levels, zoom-collections and ranges oh my!
 use crate::constants::MAX_ZOOM;
+use serde::Serialize;
 use std::num::ParseIntError;
 use std::ops::BitAnd;
 
@@ -27,7 +28,7 @@ type Zooms = Vec<u8>;
 /// let zooms_rev_vec: Vec<u8> = zset_int_rev.into();
 /// assert_eq!(zooms_rev_vec, vec![0, 1, 2]);
 /// ```
-#[derive(Debug, Clone, Eq, PartialEq, Default)]
+#[derive(Debug, Clone, Eq, PartialEq, Default, Serialize)]
 pub struct ZoomSet(u32);
 
 /// Return a vector of zoom levels from a zoom-set u32
@@ -102,6 +103,11 @@ impl ZoomSet {
     #[must_use]
     pub fn to_zooms(&self) -> Vec<u8> {
         zset2zvec(self.0)
+    }
+
+    #[must_use]
+    pub fn all() -> Self {
+        Self(0b0111_1111_1111_1111_1111_1111_1111_1111)
     }
 
     #[must_use]

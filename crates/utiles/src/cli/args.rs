@@ -8,6 +8,7 @@ use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
 
+use utiles_core::zoom::ZoomSet;
 use utiles_core::VERSION;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
@@ -495,5 +496,13 @@ impl CopyArgs {
             Some(zoom) => zoom.zooms(),
             None => None,
         }
+    }
+
+    pub fn zoom_set(&self) -> Option<zoom::ZoomSet> {
+        self.zooms().map(|zooms| ZoomSet::from_zooms(&zooms))
+    }
+
+    pub fn bboxes(&self) -> Option<Vec<BBox>> {
+        self.bbox.as_ref().map(|bbox| vec![*bbox])
     }
 }

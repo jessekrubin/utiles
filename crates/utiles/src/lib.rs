@@ -41,6 +41,7 @@ pub mod gj;
 mod globster;
 pub mod lint;
 
+mod copy;
 pub mod dev;
 pub mod mbt;
 pub mod server;

@@ -5,6 +5,15 @@ use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+pub enum UtilesCopyError {
+    #[error("src and dst are the same")]
+    SrcDstSame(String),
+
+    #[error("src does not exist: {0}")]
+    SrcNotExists(String),
+}
+
+#[derive(Error, Debug)]
 pub enum UtilesError {
     #[error("Unimplemented: {0}")]
     Unimplemented(String),
@@ -33,12 +42,19 @@ pub enum UtilesError {
     #[error("unknown utiles error: {0}")]
     Unknown(String),
 
+    #[error("path conversion error: {0}")]
+    PathConversionError(String),
+
     // ===============================================================
     // EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL
     // ===============================================================
     /// Error from the utiles-core crate
     #[error("utiles-core error: {0}")]
     CoreError(#[from] utiles_core::UtilesCoreError),
+
+    /// Error from utiles::copy
+    #[error("utiles-copy error: {0}")]
+    CopyError(#[from] UtilesCopyError),
 
     /// Error from `std::io`
     #[error("io error: {0}")]

@@ -119,7 +119,6 @@ pub async fn cli_main(
 }
 
 // not sure why this is needed... cargo thinks it's unused???
-#[allow(dead_code)]
 pub fn cli_main_sync(
     argv: Option<Vec<String>>,
     loop_fn: Option<&dyn Fn()>,

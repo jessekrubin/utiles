@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 pub struct BBoxTuple(f64, f64, f64, f64);
 
 /// Bounding box struct
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct BBox {
     /// west/left boundary
     pub west: f64,
