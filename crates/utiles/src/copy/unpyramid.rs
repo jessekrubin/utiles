@@ -12,6 +12,7 @@ use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
 use crate::mbt::parse_metadata_json;
 use crate::utilesqlite::Mbtiles;
+use crate::UtilesError;
 
 fn fspath2xyz(path: &Path) -> UtilesResult<(u32, u32, u8)> {
     let path = Path::new(path);
@@ -42,8 +43,8 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
     let mbtiles_path = &cfg.dst;
     debug!("dirpath: {dirpath:?}, mbtiles: {mbtiles_path:?} cfg: {cfg:?}");
     let metadata_path = Path::new(&dirpath).join("metadata.json");
-    let walker = WalkDir::new(&dirpath).min_depth(3).max_depth(3);
-    let mut dst_mbt = Mbtiles::open(&mbtiles_path)?;
+    let walker = WalkDir::new(dirpath).min_depth(3).max_depth(3);
+    let mut dst_mbt = Mbtiles::open(mbtiles_path)?;
     dst_mbt
         .init_flat_mbtiles()
         .expect("init_flat_mbtiles failed");
@@ -89,21 +90,33 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
     });
 
     // File processing tasks
-    for entry in walker {
-        let entry = entry.unwrap();
+    for entry in walker.into_iter().filter_map(Result::ok) {
         let path = entry.path().to_owned();
         let tx_clone = tx.clone();
         let tile_xyz = fspath2xyz(&path);
         match tile_xyz {
             Ok(tile_xyz) => {
                 task::spawn(async move {
-                    let data = fs::read(&path).await.unwrap();
-                    let tile_data = TileData::new(
-                        Tile::new(tile_xyz.0, tile_xyz.1, tile_xyz.2),
-                        data,
-                    );
-                    tx_clone.send(tile_data).await.unwrap();
-                    debug!("sent tile: {:?}", tile_xyz);
+                    let data = fs::read(&path).await;
+                    match data {
+                        Ok(data) => {
+                            let tile_data = TileData::new(
+                                Tile::new(tile_xyz.0, tile_xyz.1, tile_xyz.2),
+                                data,
+                            );
+                            match tx_clone.send(tile_data).await {
+                                Ok(()) => {
+                                    debug!("sent tile: {:?}", tile_xyz);
+                                }
+                                Err(e) => {
+                                    warn!("e: {e:?}");
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            warn!("e: {e:?}");
+                        }
+                    }
                 });
             }
             Err(e) => {
@@ -115,6 +128,8 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
     // drop tx to close the channel
     drop(tx);
     // Wait for the database task to complete
-    db_task.await.unwrap();
+    db_task
+        .await
+        .map_err(|e| UtilesError::Unknown(format!("db_task error: {e:?}")))?;
     Ok(())
 }

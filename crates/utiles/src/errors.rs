@@ -52,7 +52,7 @@ pub enum UtilesError {
     #[error("utiles-core error: {0}")]
     CoreError(#[from] utiles_core::UtilesCoreError),
 
-    /// Error from utiles::copy
+    /// Error from `utiles::copy`
     #[error("utiles-copy error: {0}")]
     CopyError(#[from] UtilesCopyError),
 

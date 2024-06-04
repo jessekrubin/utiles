@@ -155,7 +155,7 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
         .for_each_concurrent(0, |tile| async {
             match tile {
                 Ok(tile) => match twriter.write_tile(tile).await {
-                    Ok(_) => {}
+                    Ok(()) => {}
                     Err(e) => {
                         warn!("tile error: {:?}", e);
                     }
