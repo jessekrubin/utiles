@@ -62,6 +62,13 @@ macro_rules! utile {
     };
 }
 
+#[macro_export]
+macro_rules! utile_yup {
+    ($x:expr, $y:expr, $z:expr) => {
+        Tile::new($x, flipy($y, $z), $z)
+    };
+}
+
 /// point2d macro to create a new point.
 /// Replacement for coord! macro from geo-types
 ///

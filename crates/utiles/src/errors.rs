@@ -1,5 +1,4 @@
 use async_sqlite;
-
 use rusqlite;
 use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
@@ -23,6 +22,9 @@ pub enum UtilesError {
 
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
+
+    #[error("Path already exists: {0}")]
+    PathExistsError(String),
 
     #[error("Not a file: {0}")]
     NotAFile(String),
@@ -79,6 +81,9 @@ pub enum UtilesError {
     /// Error from `serde_json`
     #[error("serde error: {0}")]
     SerdeError(#[from] serde_json::Error),
+    // /// image error
+    // #[error("image error: {0}")]
+    // ImageError(#[from] image::ImageError),
 }
 
 pub type UtilesResult<T> = Result<T, UtilesError>;

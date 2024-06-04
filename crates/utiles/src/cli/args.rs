@@ -1,15 +1,16 @@
 use clap::{Args, Parser, Subcommand};
+
 use utiles_core::bbox::BBox;
 use utiles_core::parsing::parse_bbox_ext;
 use utiles_core::zoom;
+use utiles_core::zoom::ZoomSet;
 use utiles_core::LngLat;
+use utiles_core::VERSION;
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
-
-use utiles_core::zoom::ZoomSet;
-use utiles_core::VERSION;
+// use crate::cli::commands::WebpifyArgs;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
 /// ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝
@@ -393,6 +394,9 @@ pub enum Commands {
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
+    // /// Convert raster mbtiles to webp format
+    // #[command(name = "webpify", about = "Convert raster mbtiles to webp format")]
+    // Webpify(WebpifyArgs),
     /// utiles server (wip)
     #[command(name = "serve", hide = true)]
     Serve(ServeArgs),

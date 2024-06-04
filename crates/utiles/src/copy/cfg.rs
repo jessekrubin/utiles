@@ -39,13 +39,6 @@ impl CopyConfig {
                     .collect::<Vec<_>>()
                     .join(" OR ");
                 format!("({pred})")
-                //
-                //
-                // let trange = tile_ranges(
-                //     bbox.tuple(),
-                //     zoom_levels.unwrap_or(zooms.clone()).into(),
-                // )?;
-                // trange.mbtiles_sql_where()
             }
             (Some(bbox), None) => {
                 let zboxes = bbox
@@ -63,11 +56,6 @@ impl CopyConfig {
                     .collect::<Vec<_>>()
                     .join(" OR ");
                 format!("({pred})")
-                // let trange = tile_ranges(
-                //     bbox.tuple(),
-                //     zoom_levels.unwrap_or(self.zset.as_ref().unwrap().into()),
-                // )?;
-                // trange.mbtiles_sql_where()
             }
             (None, Some(zooms)) => {
                 format!(

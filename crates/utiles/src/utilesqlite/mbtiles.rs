@@ -88,13 +88,14 @@ impl Mbtiles {
     pub fn init_flat_mbtiles(&mut self) -> RusqliteResult<()> {
         init_flat_mbtiles(&mut self.conn)
     }
+    // pub fn open
 
-    pub fn create(
-        filepath: &str,
+    pub fn create<P: AsRef<Path>>(
+        path: P,
         mbtype: Option<MbtilesType>,
-    ) -> UtilesCoreResult<Self> {
-        let dbpath = DbPath::new(filepath);
-        let res = create_mbtiles_file(filepath, &mbtype.unwrap_or_default())?;
+    ) -> UtilesResult<Self> {
+        let dbpath = pathlike2dbpath(&path)?;
+        let res = create_mbtiles_file(&path, &mbtype.unwrap_or_default())?;
         Ok(Mbtiles { conn: res, dbpath })
     }
 
@@ -242,6 +243,15 @@ impl Mbtiles {
     ) -> RusqliteResult<usize> {
         insert_tiles_flat_mbtiles(&mut self.conn, tiles, Some(InsertStrategy::Ignore))
     }
+
+    pub fn insert_tile_flat<T: TileLike>(
+        &mut self,
+        tile: &T,
+        datal: &[u8],
+    ) -> RusqliteResult<usize> {
+        insert_tile_flat_mbtiles::<T>(&mut self.conn, tile.tile(), datal)
+    }
+
     pub fn magic_number(&self) -> RusqliteResult<u32> {
         self.application_id()
     }
@@ -721,8 +731,8 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
     }
 }
 
-pub fn create_mbtiles_file(
-    fspath: &str,
+pub fn create_mbtiles_file<P: AsRef<Path>>(
+    fspath: P,
     mbtype: &MbtilesType,
 ) -> UtilesCoreResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
@@ -747,13 +757,13 @@ pub fn create_mbtiles_file(
     }
 }
 
-pub fn insert_tile_flat_mbtiles(
+pub fn insert_tile_flat_mbtiles<T: TileLike>(
     conn: &mut Connection,
     tile: Tile,
     data: &[u8],
 ) -> RusqliteResult<usize> {
     let mut stmt = conn.prepare_cached("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
-    let r = stmt.execute(params![tile.z, tile.x, tile.flipy(), data])?;
+    let r = stmt.execute(params![tile.z(), tile.x(), tile.flipy(), data])?;
     Ok(r)
 }
 

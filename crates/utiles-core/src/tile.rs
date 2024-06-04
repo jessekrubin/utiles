@@ -164,6 +164,12 @@ impl Tile {
         Tile { x, y, z }
     }
 
+    /// flip the y value (row) and return flipped tile
+    #[must_use]
+    pub fn flip(&self) -> Self {
+        Tile::new(self.x, self.flipy(), self.z)
+    }
+
     /// Return bounds tuple (west, south, east, north) for the tile
     #[must_use]
     pub fn bounds(&self) -> (f64, f64, f64, f64) {

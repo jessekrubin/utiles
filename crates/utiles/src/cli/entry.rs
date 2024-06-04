@@ -105,6 +105,7 @@ pub async fn cli_main(
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),
         Commands::Shapes(args) => shapes_main(args),
+        // Commands::Webpify(args) => webpify_main(args),
         // server WIP
         Commands::Serve(args) => serve_main(args).await,
     };
