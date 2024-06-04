@@ -1,3 +1,4 @@
+pub use metadata::{parse_metadata_json, parse_metadata_json_value};
 pub use tiles_row::MbtTileRow;
 
 pub use crate::mbt::mbt_stats::{MbtilesStats, MbtilesZoomStats};

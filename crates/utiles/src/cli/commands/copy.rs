@@ -16,8 +16,7 @@ use utiles_core::{tile_ranges, Tile, TileLike};
 
 use crate::cli::args::CopyArgs;
 use crate::errors::{UtilesError, UtilesResult};
-use crate::mbt::{MbtMetadataRow, MbtTileRow};
-use crate::metadata_json::parse_metadata_json;
+use crate::mbt::{parse_metadata_json, MbtMetadataRow, MbtTileRow};
 use crate::utilesqlite::Mbtiles;
 
 // #[derive(Debug)]
