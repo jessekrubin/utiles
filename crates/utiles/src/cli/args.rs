@@ -63,9 +63,10 @@ fmt-tokens:
     `{json_arr}`/`{json}`  -> [x, y, z]
     `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
     `{quadkey}`/`{qk}`     -> quadkey string
+    `{pmtileid}`/`{pmid}`  -> pmtile-id
     `{x}`                  -> x tile coord
     `{y}`                  -> y tile coord
-    `{z}`                  -> zoom level
+    `{z}`                  -> z/zoom level
     `{-y}`/`{yup}`         -> y tile coord flipped/tms
     `{zxy}`                -> z/x/y
     "#
