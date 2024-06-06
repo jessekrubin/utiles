@@ -7,7 +7,7 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::too_many_lines)]
-mod args;
+pub mod args;
 mod commands;
 mod entry;
 mod stdinterator;

@@ -19,11 +19,11 @@ pub use tile::Tile;
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
 
-pub use crate::errors::UtilesCoreError;
+pub use crate::errors::{UtilesCoreError, UtilesCoreResult};
 pub use crate::fns::*;
 pub use crate::quadkey::*;
 
-pub mod errors;
+mod errors;
 
 pub mod bbox;
 pub mod constants;

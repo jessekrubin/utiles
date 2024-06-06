@@ -6,8 +6,8 @@ use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
 use utiles_core::bbox::BBox;
-use utiles_core::errors::UtilesCoreResult;
 use utiles_core::tile_data_row::TileData;
+use utiles_core::UtilesCoreResult;
 use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;

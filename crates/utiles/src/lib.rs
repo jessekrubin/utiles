@@ -18,35 +18,24 @@
 #![allow(clippy::unnecessary_wraps)]
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_sign_loss)]
-// #![allow(clippy::no_effect_underscore_binding)]
 #![allow(clippy::cast_possible_wrap)]
-// #![allow(clippy::ignored_unit_patterns)]
-// #![allow(clippy::match_same_arms)]
-// #![allow(clippy::unreadable_literal)]
-// #![allow(clippy::explicit_iter_loop)]
-// #![allow(clippy::doc_markdown)]
-// #![allow(clippy::inconsistent_struct_constructor)]
-// #![allow(clippy::needless_pass_by_value)]
-// #![allow(clippy::missing_fields_in_debug)]
-// #![allow(clippy::ptr_as_ptr)]
-// #![allow(clippy::borrow_as_ptr)]
 
 pub use core::*;
-pub use errors::UtilesError;
+pub use errors::{UtilesError, UtilesResult};
+pub use tile_strfmt::TileStringFormatter;
 
 pub mod cli;
-pub mod core;
-pub mod errors;
+mod copy;
+mod core;
+pub mod dev;
+mod errors;
 pub mod gj;
 mod globster;
 pub mod lint;
-
-mod copy;
-pub mod dev;
 pub mod mbt;
 pub mod server;
 pub mod sqlite;
-pub mod tile_strfmt;
+mod tile_strfmt;
 pub mod utilejson;
 pub mod utilesqlite;
 

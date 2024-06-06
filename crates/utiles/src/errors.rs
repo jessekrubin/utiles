@@ -1,8 +1,7 @@
-use async_sqlite;
-use rusqlite;
 use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
 
+pub type UtilesResult<T> = Result<T, UtilesError>;
 #[derive(Error, Debug)]
 pub enum UtilesCopyError {
     #[error("src and dst are the same")]
@@ -80,13 +79,8 @@ pub enum UtilesError {
 
     /// Error from `serde_json`
     #[error("serde error: {0}")]
-    SerdeError(#[from] serde_json::Error),
-    // /// image error
-    // #[error("image error: {0}")]
-    // ImageError(#[from] image::ImageError),
+    SerdeJsonError(#[from] serde_json::Error),
 }
-
-pub type UtilesResult<T> = Result<T, UtilesError>;
 
 impl From<RusqliteResult<()>> for UtilesError {
     fn from(e: RusqliteResult<()>) -> Self {
