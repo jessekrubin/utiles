@@ -59,24 +59,6 @@ impl From<&str> for FormatParts {
             _ => FormatParts::Str(s.to_string()),
         }
     }
-    // match token.to_lowercase().as_str() {
-    // "x" => tokens.push(FormatParts::Token(FormatTokens::X)),
-    // "y" | "yup" | "-y" => {
-    // tokens.push(FormatParts::Token(FormatTokens::Y))
-    // }
-    // "z" => tokens.push(FormatParts::Token(FormatTokens::Z)),
-    // "zxy" => tokens.push(FormatParts::Token(FormatTokens::ZxyFslash)),
-    // "quadkey" | "qk" => {
-    // tokens.push(FormatParts::Token(FormatTokens::Quadkey))
-    // }
-    // "json" | "json_arr" => {
-    // tokens.push(FormatParts::Token(FormatTokens::JsonArr))
-    // }
-    // "json_obj" => {
-    // tokens.push(FormatParts::Token(FormatTokens::JsonObj))
-    // }
-    // _ => tokens.push(FormatParts::Str(token.clone())),
-    // }
 }
 
 impl From<&FormatTokens> for String {
@@ -250,8 +232,6 @@ mod tests {
         let fmt = "tiles/{z}/{x}/{y}";
         let f = TileStringFormatter::new(fmt);
         let tile = Tile::new(1, 2, 3);
-        println!("{:?}", f.tokens);
-
         assert_eq!(
             f.tokens,
             vec![
