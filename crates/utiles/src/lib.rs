@@ -46,6 +46,7 @@ pub mod dev;
 pub mod mbt;
 pub mod server;
 pub mod sqlite;
+pub mod tile_strfmt;
 pub mod utilejson;
 pub mod utilesqlite;
 

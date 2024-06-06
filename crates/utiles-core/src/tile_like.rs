@@ -22,15 +22,35 @@ pub trait TileLike {
         flipy(self.y(), self.z())
     }
 
+    /// both bc I keep forgetting which is which
+    fn flipy(&self) -> u32 {
+        flipy(self.y(), self.z())
+    }
+
+    fn yup(&self) -> u32 {
+        flipy(self.y(), self.z())
+    }
+
+    fn xyz_str_fslash(&self) -> String {
+        format!("{}/{}/{}", self.x(), self.y(), self.z())
+    }
+
+    fn zxy_str_fslash(&self) -> String {
+        format!("{}/{}/{}", self.z(), self.x(), self.y())
+    }
+
+    fn xyz_str_sep(&self, sep: &str) -> String {
+        format!("{}{}{}{}{}", self.x(), sep, self.y(), sep, self.z())
+    }
+
+    fn zxy_str_sep(&self, sep: &str) -> String {
+        format!("{}{}{}{}{}", self.z(), sep, self.x(), sep, self.y())
+    }
+
     /// Return Tile struct
     #[must_use]
     fn tile(&self) -> Tile {
         Tile::new(self.x(), self.y(), self.z())
-    }
-
-    /// both bc I keep forgetting which is which
-    fn flipy(&self) -> u32 {
-        flipy(self.y(), self.z())
     }
 
     /// Return if the tile is valid (x, y is in bounds for zoom level z)
