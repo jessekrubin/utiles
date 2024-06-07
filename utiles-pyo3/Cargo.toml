@@ -11,12 +11,10 @@ name = "libutiles"
 crate-type = ["cdylib"]
 
 [dependencies]
-fast_hilbert.workspace = true
+utiles = { path = "../crates/utiles" }
 pyo3.workspace = true
-rusqlite.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-utiles = { path = "../crates/utiles" }
 tracing.workspace = true
 size.workspace = true
 

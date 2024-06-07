@@ -1468,10 +1468,8 @@ dependencies = [
 name = "pyutiles"
 version = "0.4.2"
 dependencies = [
- "fast_hilbert",
  "pyo3",
  "pyo3-build-config",
- "rusqlite",
  "serde",
  "serde_json",
  "size",
