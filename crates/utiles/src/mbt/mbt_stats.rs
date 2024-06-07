@@ -19,6 +19,7 @@ pub struct MbtilesStats {
     pub nzooms: u32,
     pub page_count: i64,
     pub page_size: i64,
+    pub freelist_count: i64,
     pub minzoom: Option<u8>,
     pub maxzoom: Option<u8>,
     pub zooms: Vec<MbtilesZoomStats>,

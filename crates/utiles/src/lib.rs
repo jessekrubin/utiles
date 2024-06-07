@@ -19,16 +19,15 @@
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::cast_possible_wrap)]
-
+pub mod core;
 pub use core::*;
 pub use errors::{UtilesError, UtilesResult};
 pub use tile_strfmt::TileStringFormatter;
 
 pub mod cli;
 mod copy;
-mod core;
 pub mod dev;
-mod errors;
+pub(crate) mod errors;
 pub mod gj;
 mod globster;
 pub mod lint;

@@ -7,17 +7,6 @@ use crate::errors::UtilesResult;
 use crate::mbt::MbtMetadataRow;
 use crate::mbt::MinZoomMaxZoom;
 
-// #[async_trait]
-// pub trait Sqlike3Async {
-//     // async fn conn(&self) -> &Connection;
-//     async fn is_empty_db(&self) -> RusqliteResult<bool>;
-//     async fn vacuum(&self) -> RusqliteResult<usize>;
-//
-//     async fn analyze(&self) -> RusqliteResult<usize>;
-//
-//     async fn magic_number(&self) -> UtilesResult<u32>;
-// }
-
 #[async_trait]
 pub trait MbtilesAsync: Sized {
     fn filepath(&self) -> &str;

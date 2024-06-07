@@ -1,7 +1,8 @@
 use std::error::Error;
 use std::path::Path;
 
-use rusqlite::{params, Connection, OptionalExtension, Result as RusqliteResult};
+use crate::sqlite::RusqliteResult;
+use rusqlite::{params, Connection, OptionalExtension};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
@@ -262,6 +263,7 @@ impl Mbtiles {
         debug!("Started zoom_stats query");
         let page_count = self.pragma_page_count()?;
         let page_size = self.pragma_page_size()?;
+        let freelist_count = self.pragma_freelist_count()?;
         let zoom_stats = self.zoom_stats()?;
         let query_dt = query_ti.elapsed();
         debug!("Finished zoom_stats query in {:?}", query_dt);
@@ -271,6 +273,7 @@ impl Mbtiles {
                 filesize,
                 page_count,
                 page_size,
+                freelist_count,
                 ntiles: 0,
                 minzoom: None,
                 maxzoom: None,
@@ -290,6 +293,7 @@ impl Mbtiles {
             filesize,
             page_count,
             page_size,
+            freelist_count,
             minzoom: minzoom_u8,
             maxzoom: maxzoom_u8,
             nzooms: zoom_stats.len() as u32,

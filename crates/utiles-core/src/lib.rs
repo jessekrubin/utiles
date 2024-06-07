@@ -19,9 +19,9 @@ pub use tile::Tile;
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
 
-pub use crate::errors::{UtilesCoreError, UtilesCoreResult};
 pub use crate::fns::*;
 pub use crate::quadkey::*;
+pub use errors::{UtilesCoreError, UtilesCoreResult};
 
 mod errors;
 

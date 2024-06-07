@@ -12,10 +12,10 @@
 
 use pyo3::prelude::*;
 
-use pyutiles::pybbox::PyBbox;
-use pyutiles::pylnglat::PyLngLat;
-use pyutiles::pylnglatbbox::PyLngLatBbox;
-use pyutiles::pytile::PyTile;
+use pyutiles::PyBbox;
+use pyutiles::PyLngLat;
+use pyutiles::PyLngLatBbox;
+use pyutiles::PyTile;
 use utiles::tile_type;
 
 mod cli;

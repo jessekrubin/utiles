@@ -11,6 +11,14 @@ pub fn pragma_page_count(conn: &Connection) -> SqliteResult<i64> {
     Ok(count)
 }
 
+pub fn pragma_freelist_count(conn: &Connection) -> SqliteResult<i64> {
+    let mut stmt = conn.prepare("PRAGMA freelist_count")?;
+    let mut rows = stmt.query([])?;
+    let row = rows.next()?.ok_or(RusqliteError::QueryReturnedNoRows)?;
+    let count: i64 = row.get(0)?;
+    Ok(count)
+}
+
 pub fn pragma_page_size(
     conn: &Connection,
     page_size: Option<i64>,

@@ -16,7 +16,11 @@ use utiles::bbox::BBox;
 pub struct PyLngLatBbox {
     pub bbox: BBox,
 }
-
+impl From<PyLngLatBbox> for BBox {
+    fn from(val: PyLngLatBbox) -> Self {
+        val.bbox
+    }
+}
 #[pymethods]
 impl PyLngLatBbox {
     #[new]

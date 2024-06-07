@@ -30,6 +30,7 @@ def test_touch(tmp_path: Path, test_data_root: Path) -> None:
         "nzooms": 0,
         "page_count": 6,
         "page_size": 512,
+        "freelist_count": 0,
         "minzoom": None,
         "maxzoom": None,
         "zooms": [],
@@ -57,6 +58,7 @@ def test_touch_page_size_4096(tmp_path: Path) -> None:
         "nzooms": 0,
         "page_count": 5,
         "page_size": 4096,
+        "freelist_count": 0,
         "minzoom": None,
         "maxzoom": None,
         "zooms": [],
@@ -84,6 +86,7 @@ def test_mbtiles_info(test_data_root: Path) -> None:
         "nzooms": 5,
         "page_count": 384,
         "page_size": 4096,
+        "freelist_count": 0,
         "minzoom": 0,
         "maxzoom": 4,
         "zooms": [

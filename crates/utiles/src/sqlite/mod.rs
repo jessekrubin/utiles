@@ -17,3 +17,5 @@ mod sqlike3;
 
 pub use errors::{SqliteError, SqliteResult};
 pub use page_size::{is_valid_page_size, pragma_page_size_get};
+
+pub type AsyncSqliteResult<T> = Result<T, async_sqlite::Error>;

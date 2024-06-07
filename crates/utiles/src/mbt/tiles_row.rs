@@ -1,7 +1,7 @@
 use utiles_core::Tile;
 
-use crate::tile_type::tiletype_str;
-use crate::{flipy, TileLike};
+use crate::core::tile_type::tiletype_str;
+use crate::core::{flipy, TileLike};
 
 /// Mbtiles Tile Row struct
 #[derive(Debug, Clone)]

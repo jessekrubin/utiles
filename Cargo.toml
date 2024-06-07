@@ -3,7 +3,7 @@ resolver = "2"
 members = [
     "crates/utiles-core",
     "crates/utiles",
-    "utiles-pyo3"
+    "utiles-pyo3", 
 ]
 
 [workspace.package]
