@@ -1,29 +1,26 @@
-use pyo3::prelude::*;
+use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeMap, HashMap};
-
-use crate::pyutiles::pyiters::IntIterator;
-use crate::pyutiles::pytile_tuple::TileTuple;
-use crate::pyutiles::tuple_slice;
-use utiles::tile::Tile;
-
-use utiles;
+use std::hash::{Hash, Hasher};
 
 use pyo3::basic::CompareOp;
-use pyo3::types::PyType;
-
 use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
+use pyo3::types::PyType;
 use pyo3::{
     exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
     PyResult, Python,
 };
-use serde::{Deserialize, Serialize};
-use std::collections::hash_map::DefaultHasher;
+use serde::Serialize;
 
+use utiles::bbox::BBox;
+use utiles::tile::Tile;
+use utiles::TileLike;
+
+use crate::pyutiles::pyiters::IntIterator;
 use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
-use std::hash::{Hash, Hasher};
-use utiles::bbox::BBox;
-use utiles::TileLike;
+use crate::pyutiles::pytile_tuple::TileTuple;
+use crate::pyutiles::tuple_slice;
 
 /// `PyTile` macro to create a new tile.
 ///  - do you need this? probably not
@@ -38,7 +35,7 @@ macro_rules! pytile {
 }
 
 #[pyclass(name = "Tile", sequence)]
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Hash, Copy)]
+#[derive(Clone, Debug, PartialEq, Serialize, Eq, Hash, Copy)]
 pub struct PyTile {
     pub xyz: Tile,
 }
@@ -241,12 +238,9 @@ impl PyTile {
                 Ok(m)
             }
             tuple_slice::SliceOrInt::Int(idx) => match idx {
-                0 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.x)),
-                1 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.y)),
-                2 => Ok(tuple_slice::TupleSliceResult::It(u32::from(self.xyz.z))),
-                -1 => Ok(tuple_slice::TupleSliceResult::It(u32::from(self.xyz.z))),
-                -2 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.y)),
-                -3 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.x)),
+                0 | -3 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.x)),
+                1 | -2 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.y)),
+                2 | -1 => Ok(tuple_slice::TupleSliceResult::It(u32::from(self.xyz.z))),
                 3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
                 _ => panic!("Index {idx} out of range for tile"),
             },

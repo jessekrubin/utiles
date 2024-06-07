@@ -2,13 +2,19 @@
 #![deny(clippy::perf)]
 #![deny(dead_code)]
 #![warn(clippy::style)]
-// #![deny(clippy::pedantic)]
+#![deny(clippy::pedantic)]
 #![warn(clippy::unnecessary_wraps)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::too_many_lines)]
+// road to clippy pedantic
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_sign_loss)]
+#![allow(clippy::float_cmp)]
+#![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::unused_self)]
 
 use pyo3::prelude::*;
 

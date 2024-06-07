@@ -3,7 +3,6 @@ use pyo3::class::basic::CompareOp;
 use pyo3::exceptions::{self};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use utiles;
 
 #[pyclass(name = "LngLat")]
 pub struct PyLngLat {
@@ -103,10 +102,8 @@ impl PyLngLat {
 
     pub fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
         match idx {
-            0 => Ok(self._lng()),
-            1 => Ok(self._lat()),
-            -1 => Ok(self._lat()),
-            -2 => Ok(self._lng()),
+            0 | -2 => Ok(self._lng()),
+            1 | -1 => Ok(self._lat()),
             2 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
 
             _ => panic!("Index {idx} out of range for tile"),
