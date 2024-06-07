@@ -6,8 +6,7 @@ use pyo3::{
     exceptions, pyclass, pymethods, IntoPy, PyAny, PyErr, PyObject, PyRef, PyResult,
     Python,
 };
-use utiles;
-use utiles::bbox::BBox;
+use utiles::BBox;
 
 #[pyclass(name = "Bbox")]
 #[derive(Clone)]

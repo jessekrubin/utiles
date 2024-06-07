@@ -3,10 +3,9 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::debug;
 
-use utiles_core::mbutiles::metadata2map;
-
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 use crate::errors::UtilesResult;
+use crate::mbt::{metadata2map, metadata2map_val, MbtilesMetadataRowParsed};
 use crate::utilesqlite::Mbtiles;
 
 pub fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
@@ -24,17 +23,26 @@ pub fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
         filepath = filepath.display()
     );
     let mbtiles: Mbtiles = Mbtiles::from(filepath);
-    let metadata_rows = mbtiles.metadata().unwrap();
+    let metadata_rows = mbtiles.metadata()?;
 
-    let json_val = if args.obj {
-        let m = metadata2map(&metadata_rows);
-        serde_json::to_value(m).unwrap()
-
-        // serde_json::to_value(&metadata_rows).unwrap()
-    } else {
-        serde_json::to_value(&metadata_rows).unwrap()
+    let json_val = match (args.raw, args.obj) {
+        (true, true) => {
+            let m = metadata2map(&metadata_rows);
+            serde_json::to_value(m)?
+        }
+        (false, true) => {
+            let values_map = metadata2map_val(&metadata_rows);
+            serde_json::to_value(values_map)?
+        }
+        (true, false) => serde_json::to_value(metadata_rows)?,
+        (false, false) => {
+            let parsed_values_vec: Vec<MbtilesMetadataRowParsed> = metadata_rows
+                .into_iter()
+                .map(MbtilesMetadataRowParsed::from)
+                .collect();
+            serde_json::to_value(parsed_values_vec)?
+        }
     };
-
     let out_str = if args.common.min {
         serde_json::to_string::<serde_json::Value>(&json_val).unwrap()
     } else {
@@ -111,30 +119,6 @@ pub fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
                     to: Some(value.clone()),
                 })
             }
-            // match current_value {
-            //     Some(v) => {
-            //         if value != &v {
-            //             let r = mbtiles.metadata_set(&args.key, value).unwrap();
-            //             debug!("metadata rows updated: {:?}", r);
-            //             Some(MetadataChangeFromTo {
-            //                 name: args.key.clone(),
-            //                 from: Some(v),
-            //                 to: Some(value.clone()),
-            //             })
-            //         } else {
-            //             None
-            //         }
-            //     }
-            //     None => {
-            //         let r = mbtiles.metadata_set(&args.key, value).unwrap();
-            //         debug!("metadata rows updated: {:?}", r);
-            //         Some(MetadataChangeFromTo {
-            //             name: args.key.clone(),
-            //             from: None,
-            //             to: Some(value.clone()),
-            //         })
-            //     }
-            // }
         }
         None => {
             if current_value.is_some() {

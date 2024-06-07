@@ -1,3 +1,5 @@
+//! Utiles traits
+
 /// `BoundingBox` like trait
 pub trait BoundingBoxLike {
     /// Returns west/left bound

@@ -44,7 +44,17 @@ sort-all:
 black:
     black {{pyut}}/python {{pyut}}/tests
 
-fmt: cargo-fmt black
+# format python
+fmtpy:
+    ruff format
+    ruff check --select "I" --show-fixes --fix .
+
+# format-check
+fmtcpy:
+    ruff format --check
+    ruff check --select "I" --show-fixes .
+
+fmt: cargo-fmt fmtpy
 
 mypy:
     mypy --config-file {{pyut}}/pyproject.toml {{pyut}}/python {{pyut}}/tests

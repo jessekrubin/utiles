@@ -1,76 +1,50 @@
-use std::collections::HashMap;
-use std::path::Path;
+use crate::sqlite::errors::{SqliteError, SqliteResult};
+use crate::sqlite::page_size::{is_valid_page_size, pragma_page_size_get};
 
-use rusqlite::{Connection, Result as RusqliteResult};
+use rusqlite::{Connection, Error as RusqliteError, Result as RusqliteResult};
 
-use crate::errors::UtilesResult;
-use crate::UtilesError;
+pub fn pragma_page_count(conn: &Connection) -> SqliteResult<i64> {
+    let mut stmt = conn.prepare("PRAGMA page_count")?;
+    let mut rows = stmt.query([])?;
+    let row = rows.next()?.ok_or(RusqliteError::QueryReturnedNoRows)?;
+    let count: i64 = row.get(0)?;
+    Ok(count)
+}
 
-pub trait Sqlike3 {
-    fn conn(&self) -> &Connection;
-    // fn open_existing<P: AsRef<Path>>(path: P) -> RusqliteResult<Self>;
+pub fn pragma_freelist_count(conn: &Connection) -> SqliteResult<i64> {
+    let mut stmt = conn.prepare("PRAGMA freelist_count")?;
+    let mut rows = stmt.query([])?;
+    let row = rows.next()?.ok_or(RusqliteError::QueryReturnedNoRows)?;
+    let count: i64 = row.get(0)?;
+    Ok(count)
+}
 
-    fn is_empty_db(&self) -> RusqliteResult<bool> {
-        is_empty_db(self.conn())
-    }
-
-    fn vacuum(&self) -> RusqliteResult<usize> {
-        vacuum(self.conn())
-    }
-
-    fn vacuum_into(&self, dst: String) -> RusqliteResult<usize> {
-        vacuum_into(self.conn(), dst)
-    }
-
-    fn analyze(&self) -> RusqliteResult<usize> {
-        analyze(self.conn())
+pub fn pragma_page_size(
+    conn: &Connection,
+    page_size: Option<i64>,
+) -> SqliteResult<i64> {
+    if let Some(page_size) = page_size {
+        pragma_page_size_set(conn, page_size)
+    } else {
+        pragma_page_size_get(conn)
     }
 }
 
-pub struct SqliteDb {
-    pub conn: Connection,
-}
-
-impl Sqlike3 for SqliteDb {
-    fn conn(&self) -> &Connection {
-        &self.conn
+pub fn pragma_page_size_set(conn: &Connection, page_size: i64) -> SqliteResult<i64> {
+    if is_valid_page_size(page_size) {
+        // set page size
+        let current_page_size = pragma_page_size_get(conn)?;
+        if current_page_size == page_size {
+            return Ok(page_size);
+        }
+        let stmt_str = format!("PRAGMA page_size = {page_size}");
+        conn.execute(&stmt_str, [])?;
+        Ok(page_size)
+    } else {
+        Err(SqliteError::InvalidPageSize(format!(
+            "Invalid page size: {page_size}",
+        )))
     }
-}
-
-impl SqliteDb {
-    pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
-        let conn = open_existing(path)?;
-        Ok(SqliteDb { conn })
-    }
-}
-
-impl From<Connection> for SqliteDb {
-    fn from(conn: Connection) -> Self {
-        SqliteDb { conn }
-    }
-}
-
-pub fn open(path: &str) -> RusqliteResult<Connection> {
-    let conn = Connection::open(path)?;
-    Ok(conn)
-}
-
-pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Connection> {
-    let filepath = path.as_ref();
-
-    let fspath = filepath
-        .to_str()
-        .unwrap_or("unknown.could not convert path to string")
-        .to_string();
-    // metadata
-    if !filepath.exists() {
-        return Err(UtilesError::FileDoesNotExist(fspath));
-    }
-    if !filepath.is_file() {
-        return Err(UtilesError::NotAFile(fspath));
-    }
-    let db = Connection::open(filepath)?;
-    Ok(db)
 }
 
 #[derive(Debug)]
@@ -256,84 +230,4 @@ pub fn pragma_index_info(
     })?;
     let rows = mapped_rows.collect::<RusqliteResult<Vec<PragmaIndexInfoRow>>>()?;
     Ok(rows)
-}
-
-pub fn pragma_index_list_all_tables(
-    conn: &Connection,
-) -> RusqliteResult<HashMap<String, Vec<PragmaIndexListRow>>> {
-    let mut stmt = conn.prepare("SELECT name FROM sqlite_schema WHERE type='table'")?;
-    let rows = stmt.query_map([], |row| {
-        let name: String = row.get(0)?;
-        Ok(name)
-    })?;
-    let tables = rows.collect::<RusqliteResult<Vec<String>>>()?;
-    let mut index_map = HashMap::new();
-    for table in tables {
-        let rows = pragma_index_list(conn, &table)?;
-        index_map.insert(table, rows);
-    }
-    Ok(index_map)
-}
-
-pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
-    let mut stmt = conn.prepare("PRAGMA application_id")?;
-    let mut rows = stmt.query([])?;
-    let row = rows
-        .next()?
-        .expect("'PRAGMA application_id' -- should return row but did not");
-    let app_id: u32 = row.get(0)?;
-    Ok(app_id)
-}
-
-pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {
-    let mut stmt = conn.prepare("PRAGMA journal_mode")?;
-    let mut rows = stmt.query([])?;
-    let row = rows
-        .next()?
-        .expect("'PRAGMA journal_mode' -- should return row but did not");
-    let jm: String = row.get(0)?;
-    Ok(jm)
-}
-
-pub fn magic_number(conn: &Connection) -> RusqliteResult<u32> {
-    application_id(conn)
-}
-
-pub fn query_db_fspath(conn: &Connection) -> RusqliteResult<Option<String>> {
-    let rows = pragma_database_list(conn)?;
-    let row = rows.iter().find_map(|r| {
-        if r.name == "main" {
-            Some(r.file.clone())
-        } else {
-            None
-        }
-    });
-    Ok(row)
-}
-
-pub fn is_empty_db(connection: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = connection.prepare("SELECT COUNT(*) FROM sqlite_schema")?;
-    let rows = stmt.query_row([], |row| {
-        let count: i64 = row.get(0)?;
-        Ok(count)
-    })?;
-    Ok(rows == 0_i64)
-}
-
-pub fn vacuum(conn: &Connection) -> RusqliteResult<usize> {
-    let mut stmt = conn.prepare_cached("VACUUM")?;
-    let r = stmt.execute([])?;
-    Ok(r)
-}
-
-pub fn vacuum_into(conn: &Connection, dst: String) -> RusqliteResult<usize> {
-    let mut stmt = conn.prepare_cached("VACUUM INTO ?")?;
-    let r = stmt.execute([dst])?;
-    Ok(r)
-}
-
-pub fn analyze(conn: &Connection) -> RusqliteResult<usize> {
-    let mut stmt = conn.prepare_cached("ANALYZE")?;
-    let r = stmt.execute([])?;
-    Ok(r)
 }

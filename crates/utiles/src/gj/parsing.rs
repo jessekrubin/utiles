@@ -18,7 +18,7 @@ pub fn parse_bbox_geojson(string: &str) -> UtilesResult<BBox> {
         // if it has a "bbox" key, use that
         if v["bbox"].is_array() {
             let bbox: (f64, f64, f64, f64) = serde_json::from_value(v["bbox"].clone())
-                .map_err(UtilesError::SerdeError)?;
+                .map_err(UtilesError::SerdeJsonError)?;
             return Ok(BBox::from(bbox));
         }
         return geojson_bounds(s);

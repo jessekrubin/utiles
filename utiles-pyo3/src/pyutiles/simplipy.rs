@@ -30,16 +30,16 @@ fn merge(merge_set: &HashSet<PyTile>) -> (HashSet<PyTile>, bool) {
 #[pyo3(signature = (* args))]
 pub fn simplify(args: &Bound<'_, PyTuple>) -> PyResult<HashSet<PyTile>> {
     // Parse tiles from the input sequence
-    let tiles = parse_tiles(args)?;
-    let mut _tiles = tiles.into_iter().collect::<Vec<PyTile>>();
+    let tiles_parsed = parse_tiles(args)?;
+    let mut tiles = tiles_parsed.into_iter().collect::<Vec<PyTile>>();
 
-    _tiles.sort_by_key(|t| t.xyz.z);
+    tiles.sort_by_key(|t| t.xyz.z);
 
     // Check to see if a tile and its parent both already exist.
     // Ensure that tiles are sorted by zoom so parents are encountered first.
     // If so, discard the child (it's covered in the parent)
     let mut root_set: HashSet<PyTile> = HashSet::new();
-    for tile in &_tiles {
+    for tile in &tiles {
         let mut is_new_tile = true;
         for i in 0..tile.xyz.z {
             let supertile = tile.parent(Some(i));

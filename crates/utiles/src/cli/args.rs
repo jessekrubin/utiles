@@ -1,14 +1,17 @@
 use clap::{Args, Parser, Subcommand};
+
 use utiles_core::bbox::BBox;
 use utiles_core::parsing::parse_bbox_ext;
 use utiles_core::zoom;
+use utiles_core::zoom::ZoomSet;
 use utiles_core::LngLat;
+use utiles_core::VERSION;
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
-
-use utiles_core::VERSION;
+use crate::tile_strfmt::TileStringFormatter;
+// use crate::cli::commands::WebpifyArgs;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
 /// ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝
@@ -47,23 +50,75 @@ pub struct TileInputStreamArgs {
     pub input: Option<String>,
 }
 
+fn tile_fmt_string_long_help() -> String {
+    r#"Format string for tiles (default: `{json_arr}`)
+Example:
+    > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+    http://thingy.com/1/0/0.png
+    http://thingy.com/1/0/1.png
+    http://thingy.com/1/1/0.png
+    http://thingy.com/1/1/1.png
+
+fmt-tokens:
+    `{json_arr}`/`{json}`  -> [x, y, z]
+    `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
+    `{quadkey}`/`{qk}`     -> quadkey string
+    `{pmtileid}`/`{pmid}`  -> pmtile-id
+    `{x}`                  -> x tile coord
+    `{y}`                  -> y tile coord
+    `{z}`                  -> z/zoom level
+    `{-y}`/`{yup}`         -> y tile coord flipped/tms
+    `{zxy}`                -> z/x/y
+    "#
+    .to_string()
+}
 #[derive(Debug, Parser)]
 pub struct TileFmtOptions {
     /// Write tiles as RS-delimited JSON sequence
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub seq: bool,
 
-    /// Format tiles as json objects
+    /// Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub obj: bool,
+
+    /// Format string for tiles (default: `{json_arr}`)
+    #[arg(
+        required = false,
+        long,
+        alias = "fmt",
+        short = 'F',
+        conflicts_with = "obj",
+        help = tile_fmt_string_long_help()
+    )]
+    pub fmt: Option<String>,
+}
+
+impl TileFmtOptions {
+    #[must_use]
+    pub fn formatter(&self) -> TileStringFormatter {
+        if let Some(fmt) = &self.fmt {
+            TileStringFormatter::new(fmt)
+        } else if self.obj {
+            TileStringFormatter::new("{json_obj}")
+        } else {
+            TileStringFormatter::default()
+        }
+    }
+}
+impl From<&TileFmtOptions> for TileStringFormatter {
+    fn from(opts: &TileFmtOptions) -> Self {
+        opts.formatter()
+    }
 }
 
 #[derive(Debug, Parser)]
 pub struct TilesArgs {
-    /// Zoom level (0-32)
+    /// Zoom level (0-30)
     #[arg(required = true)]
     pub zoom: u8,
 
+    #[arg()]
     #[command(flatten)]
     pub inargs: TileInputStreamArgs,
 
@@ -108,6 +163,10 @@ pub struct TouchArgs {
     /// mbtiles filepath
     #[arg(required = true)]
     pub filepath: String,
+
+    /// page size (default: 4096)
+    #[arg(required = false, long)]
+    pub page_size: Option<i64>,
 }
 
 #[derive(Debug, Parser)]
@@ -118,6 +177,10 @@ pub struct VacuumArgs {
     /// fspath to vacuum db into
     #[arg(required = false)]
     pub into: Option<String>,
+
+    /// Analyze db after vacuum
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub analyze: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -128,6 +191,10 @@ pub struct MetadataArgs {
     /// Output as json object not array
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub obj: bool,
+
+    /// Output as json string for values (default: false)
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue, default_value = "false")]
+    pub raw: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -166,7 +233,7 @@ pub struct LintArgs {
 }
 
 #[derive(Debug, Parser)]
-pub struct MbtilesStatsArgs {
+pub struct InfoArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
@@ -219,8 +286,8 @@ pub enum Commands {
     Rimraf(RimrafArgs),
 
     /// Echo mbtiles info/stats
-    #[command(name = "mbinfo")]
-    Mbinfo(MbtilesStatsArgs),
+    #[command(name = "info")]
+    Info(InfoArgs),
 
     /// VACUUM sqlite db
     #[command(name = "vacuum", visible_alias = "vac")]
@@ -380,6 +447,9 @@ pub enum Commands {
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
+    // /// Convert raster mbtiles to webp format
+    // #[command(name = "webpify", about = "Convert raster mbtiles to webp format")]
+    // Webpify(WebpifyArgs),
     /// utiles server (wip)
     #[command(name = "serve", hide = true)]
     Serve(ServeArgs),
@@ -411,32 +481,32 @@ pub struct RimrafArgs {
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false, id = "minmaxzoom")]
 pub struct MinMaxZoom {
-    /// min zoom level (0-32)
+    /// min zoom level (0-30)
     #[arg(long)]
     minzoom: Option<u8>,
 
-    /// max zoom level (0-32)
+    /// max zoom level (0-30)
     #[arg(long)]
     maxzoom: Option<u8>,
 }
 
-// #[group(required = false, multiple = false, id = "zooms")]
 #[derive(Debug, Parser)]
 pub struct ZoomArgGroup {
-    /// Zoom level (0-32)
+    /// Zoom level (0-30)
     #[arg(short, long, required = false, value_delimiter = ',', value_parser = zoom::parse_zooms)]
     pub zoom: Option<Vec<Vec<u8>>>,
 
-    /// min zoom level (0-32)
+    /// min zoom level (0-30)
     #[arg(long, conflicts_with = "zoom")]
     pub minzoom: Option<u8>,
 
-    /// max zoom level (0-32)
+    /// max zoom level (0-30)
     #[arg(long, conflicts_with = "zoom")]
     pub maxzoom: Option<u8>,
 }
 
 impl ZoomArgGroup {
+    #[must_use]
     pub fn zooms(&self) -> Option<Vec<u8>> {
         match &self.zoom {
             Some(zooms) => Some(zooms.iter().flatten().copied().collect()),
@@ -478,10 +548,21 @@ pub struct CopyArgs {
 }
 
 impl CopyArgs {
+    #[must_use]
     pub fn zooms(&self) -> Option<Vec<u8>> {
         match &self.zoom {
             Some(zoom) => zoom.zooms(),
             None => None,
         }
+    }
+
+    #[must_use]
+    pub fn zoom_set(&self) -> Option<zoom::ZoomSet> {
+        self.zooms().map(|zooms| ZoomSet::from_zooms(&zooms))
+    }
+
+    #[must_use]
+    pub fn bboxes(&self) -> Option<Vec<BBox>> {
+        self.bbox.as_ref().map(|bbox| vec![*bbox])
     }
 }

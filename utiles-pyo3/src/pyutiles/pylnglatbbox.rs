@@ -8,13 +8,18 @@ use pyo3::{
     exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
     PyResult, Python,
 };
-use utiles;
 use utiles::bbox::BBox;
 
 #[pyclass(name = "LngLatBbox")]
 #[derive(Clone)]
 pub struct PyLngLatBbox {
     pub bbox: BBox,
+}
+
+impl From<PyLngLatBbox> for BBox {
+    fn from(val: PyLngLatBbox) -> Self {
+        val.bbox
+    }
 }
 
 #[pymethods]
@@ -97,16 +102,11 @@ impl PyLngLatBbox {
 
     pub fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
         match idx {
-            0 => Ok(self.bbox.west),
-            1 => Ok(self.bbox.south),
-            2 => Ok(self.bbox.east),
-            3 => Ok(self.bbox.north),
-            -1 => Ok(self.bbox.north),
-            -2 => Ok(self.bbox.east),
-            -3 => Ok(self.bbox.south),
-            -4 => Ok(self.bbox.west),
+            0 | -4 => Ok(self.bbox.west),
+            1 | -3 => Ok(self.bbox.south),
+            2 | -2 => Ok(self.bbox.east),
+            3 | -1 => Ok(self.bbox.north),
             4 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-
             _ => panic!("Index {idx} out of range for tile"),
         }
     }

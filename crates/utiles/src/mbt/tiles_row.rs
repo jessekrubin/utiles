@@ -1,5 +1,7 @@
-use crate::tile_type::tiletype_str;
-use crate::{flipy, TileLike};
+use utiles_core::Tile;
+
+use crate::core::tile_type::tiletype_str;
+use crate::core::{flipy, TileLike};
 
 /// Mbtiles Tile Row struct
 #[derive(Debug, Clone)]
@@ -51,5 +53,11 @@ impl MbtTileRow {
     #[must_use]
     pub fn extension(&self) -> String {
         tiletype_str(&self.tile_data)
+    }
+}
+
+impl From<MbtTileRow> for Tile {
+    fn from(row: MbtTileRow) -> Self {
+        row.tile()
     }
 }

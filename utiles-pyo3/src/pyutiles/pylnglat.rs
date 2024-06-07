@@ -3,7 +3,6 @@ use pyo3::class::basic::CompareOp;
 use pyo3::exceptions::{self};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use utiles;
 
 #[pyclass(name = "LngLat")]
 pub struct PyLngLat {
@@ -57,8 +56,26 @@ impl PyLngLat {
         op: CompareOp,
         py: Python<'_>,
     ) -> PyObject {
-        let maybetuple = other.extract::<(f64, f64)>();
-        if let Ok(tuple) = maybetuple {
+        let is_lnglat = other.is_instance_of::<PyLngLat>();
+        if is_lnglat {
+            let maybe_lnglat = other.extract::<PyRef<PyLngLat>>();
+            if let Ok(lnglat) = maybe_lnglat {
+                match op {
+                    CompareOp::Eq => (self._lng() == lnglat._lng()
+                        && self._lat() == lnglat._lat())
+                    .into_py(py),
+                    CompareOp::Ne => (self._lng() != lnglat._lng()
+                        || self._lat() != lnglat._lat())
+                    .into_py(py),
+                    CompareOp::Lt => (self._lng() < lnglat._lng()
+                        || self._lat() < lnglat._lat())
+                    .into_py(py),
+                    _ => py.NotImplemented(),
+                }
+            } else {
+                py.NotImplemented()
+            }
+        } else if let Ok(tuple) = other.extract::<(f64, f64)>() {
             match op {
                 CompareOp::Eq => {
                     (self._lng() == tuple.0 && self._lat() == tuple.1).into_py(py)
@@ -72,22 +89,9 @@ impl PyLngLat {
                 _ => py.NotImplemented(),
             }
         } else {
-            let other = other.extract::<PyRef<PyLngLat>>().unwrap();
-            match op {
-                CompareOp::Eq => (self._lng() == other._lng()
-                    && self._lat() == other._lat())
-                .into_py(py),
-                CompareOp::Ne => (self._lng() != other._lng()
-                    || self._lat() != other._lat())
-                .into_py(py),
-                CompareOp::Lt => (self._lng() < other._lng()
-                    || self._lat() < other._lat())
-                .into_py(py),
-                _ => py.NotImplemented(),
-            }
+            py.NotImplemented()
         }
     }
-
     pub fn __len__(&self) -> usize {
         2
     }
@@ -98,10 +102,8 @@ impl PyLngLat {
 
     pub fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
         match idx {
-            0 => Ok(self._lng()),
-            1 => Ok(self._lat()),
-            -1 => Ok(self._lat()),
-            -2 => Ok(self._lng()),
+            0 | -2 => Ok(self._lng()),
+            1 | -1 => Ok(self._lat()),
             2 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
 
             _ => panic!("Index {idx} out of range for tile"),

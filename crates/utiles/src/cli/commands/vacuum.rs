@@ -3,7 +3,7 @@ use tracing::{error, info, warn};
 
 use crate::cli::args::VacuumArgs;
 use crate::errors::UtilesResult;
-use crate::utilesqlite::squealite::{Sqlike3, SqliteDb};
+use crate::sqlite::{Sqlike3, SqliteDb};
 use crate::UtilesError;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -51,16 +51,20 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     }
     let vacuum_time_ms = vacuum_start_time.elapsed().as_millis();
 
-    let analyze_start_time = std::time::Instant::now();
-    if let Some(dst) = &args.into {
-        let dst_db = SqliteDb::open_existing(dst)?;
-        info!("analyzing: {}", dst);
-        dst_db.analyze()?;
-    } else {
-        info!("analyzing: {}", args.common.filepath);
-        db.analyze()?;
+    let mut analyze_time_ms = 0;
+
+    if args.analyze {
+        let analyze_start_time = std::time::Instant::now();
+        if let Some(dst) = &args.into {
+            let dst_db = SqliteDb::open_existing(dst)?;
+            info!("analyzing: {}", dst);
+            dst_db.analyze()?;
+        } else {
+            info!("analyzing: {}", args.common.filepath);
+            db.analyze()?;
+        }
+        analyze_time_ms = analyze_start_time.elapsed().as_millis();
     }
-    let analyze_time_ms = analyze_start_time.elapsed().as_millis();
 
     // get file size from filepath
     let vacuumed_file_size = match &args.into {

@@ -10,10 +10,9 @@ use rusqlite::{Connection, OpenFlags};
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
 
-use utiles_core::mbutiles::metadata_row::MbtilesMetadataRow;
-use utiles_core::mbutiles::MinZoomMaxZoom;
-
 use crate::errors::UtilesResult;
+use crate::mbt::{MbtMetadataRow, MinZoomMaxZoom};
+use crate::sqlite::{journal_mode, magic_number};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
@@ -22,7 +21,6 @@ use crate::utilesqlite::mbtiles::{
     register_utiles_sqlite_functions, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
-use crate::utilesqlite::squealite::{journal_mode, magic_number};
 use crate::UtilesError;
 
 #[derive(Clone)]
@@ -239,6 +237,7 @@ where
         }
 
         let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
+
         debug!(
             target: "is-mbtiles",
             "has_zoom_row_col_index: {}",
@@ -260,7 +259,7 @@ where
         Ok(magic_number)
     }
 
-    async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>> {
+    async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>> {
         let metadata = self
             .conn(mbtiles_metadata)
             .await
@@ -268,10 +267,7 @@ where
         Ok(metadata)
     }
 
-    async fn metadata_row(
-        &self,
-        name: &str,
-    ) -> UtilesResult<Option<MbtilesMetadataRow>> {
+    async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>> {
         let name_str = name.to_string();
         let row = self
             .conn(move |conn| mbtiles_metadata_row(conn, &name_str))
@@ -352,21 +348,31 @@ where
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
         let mut metadata = self.metadata_rows().await?;
         // if no 'minzoom' or 'maxzoom' are found we gotta wuery them...
-        let minzoom_or_maxzoom_missing = metadata
-            .iter()
-            .any(|m| m.name == "minzoom" || m.name == "maxzoom");
 
-        // query minzoom maxzoom
-        if minzoom_or_maxzoom_missing {
+        // check if minzoom or maxzoom are missing
+        let minzoom_value = metadata.iter().find(|m| m.name == "minzoom");
+        let maxzoom_value = metadata.iter().find(|m| m.name == "maxzoom");
+
+        // check if minzoom and maxzoom are present and valid
+        let minzoom_maxzoom_status = match (minzoom_value, maxzoom_value) {
+            (Some(minzoom), Some(maxzoom)) => {
+                let minzoom = minzoom.value.parse::<u8>();
+                let maxzoom = maxzoom.value.parse::<u8>();
+                matches!((minzoom, maxzoom), (Ok(_), Ok(_)))
+            }
+            _ => false,
+        };
+
+        if !minzoom_maxzoom_status {
             warn!("minzoom/maxzoom missing from metadata: {}", self.filepath());
             let minmax = self.query_minzoom_maxzoom().await?;
             match minmax {
                 Some(mm) => {
-                    let minzoom = MbtilesMetadataRow {
+                    let minzoom = MbtMetadataRow {
                         name: "minzoom".to_string(),
                         value: mm.minzoom.to_string(),
                     };
-                    let maxzoom = MbtilesMetadataRow {
+                    let maxzoom = MbtMetadataRow {
                         name: "maxzoom".to_string(),
                         value: mm.maxzoom.to_string(),
                     };
@@ -378,7 +384,6 @@ where
                 }
             }
         }
-
         let tj = metadata2tilejson(metadata);
         match tj {
             Ok(t) => Ok(t),

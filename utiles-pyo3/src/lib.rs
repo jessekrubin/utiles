@@ -2,23 +2,30 @@
 #![deny(clippy::perf)]
 #![deny(dead_code)]
 #![warn(clippy::style)]
-// #![deny(clippy::pedantic)]
+#![deny(clippy::pedantic)]
 #![warn(clippy::unnecessary_wraps)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::similar_names)]
 #![allow(clippy::too_many_lines)]
+// road to clippy pedantic
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_sign_loss)]
+#![allow(clippy::float_cmp)]
+#![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::unused_self)]
 
 use pyo3::prelude::*;
 
-use pyutiles::pybbox::PyBbox;
-use pyutiles::pylnglat::PyLngLat;
-use pyutiles::pylnglatbbox::PyLngLatBbox;
-use pyutiles::pytile::PyTile;
+use pyutiles::PyBbox;
+use pyutiles::PyLngLat;
+use pyutiles::PyLngLatBbox;
+use pyutiles::PyTile;
 use utiles::tile_type;
 
 mod cli;
+mod fmt_nbytes;
 mod pyutiles;
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -98,6 +105,9 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // rust-cli
     m.add_function(wrap_pyfunction!(cli::ut_cli, m)?)?;
+
+    // misc
+    m.add_function(wrap_pyfunction!(fmt_nbytes::fmt_nbytes, m)?)?;
 
     Ok(())
 }

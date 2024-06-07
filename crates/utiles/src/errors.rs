@@ -1,8 +1,15 @@
-use async_sqlite;
-
-use rusqlite;
 use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
+
+pub type UtilesResult<T> = Result<T, UtilesError>;
+#[derive(Error, Debug)]
+pub enum UtilesCopyError {
+    #[error("src and dst are the same")]
+    SrcDstSame(String),
+
+    #[error("src does not exist: {0}")]
+    SrcNotExists(String),
+}
 
 #[derive(Error, Debug)]
 pub enum UtilesError {
@@ -14,6 +21,9 @@ pub enum UtilesError {
 
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
+
+    #[error("Path already exists: {0}")]
+    PathExistsError(String),
 
     #[error("Not a file: {0}")]
     NotAFile(String),
@@ -33,6 +43,9 @@ pub enum UtilesError {
     #[error("unknown utiles error: {0}")]
     Unknown(String),
 
+    #[error("path conversion error: {0}")]
+    PathConversionError(String),
+
     // ===============================================================
     // EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL
     // ===============================================================
@@ -40,13 +53,21 @@ pub enum UtilesError {
     #[error("utiles-core error: {0}")]
     CoreError(#[from] utiles_core::UtilesCoreError),
 
+    /// Error from `utiles::copy`
+    #[error("utiles-copy error: {0}")]
+    CopyError(#[from] UtilesCopyError),
+
     /// Error from `std::io`
     #[error("io error: {0}")]
     IoError(#[from] std::io::Error),
 
+    /// Error from `sqlite` module
+    #[error("sqlite error: {0}")]
+    SqliteError(#[from] crate::sqlite::SqliteError),
+
     /// Error from rusqlite
-    #[error("sqlite err: {0}")]
-    SqliteError(#[from] rusqlite::Error),
+    #[error("rusqlite err: {0}")]
+    RusqliteError(#[from] rusqlite::Error),
 
     /// Error from `async_sqlite`
     #[error("sqlite err: {0}")]
@@ -58,16 +79,14 @@ pub enum UtilesError {
 
     /// Error from `serde_json`
     #[error("serde error: {0}")]
-    SerdeError(#[from] serde_json::Error),
+    SerdeJsonError(#[from] serde_json::Error),
 }
-
-pub type UtilesResult<T> = Result<T, UtilesError>;
 
 impl From<RusqliteResult<()>> for UtilesError {
     fn from(e: RusqliteResult<()>) -> Self {
         match e {
             Ok(()) => UtilesError::Unknown("unknown error".to_string()),
-            Err(e) => UtilesError::SqliteError(e),
+            Err(e) => UtilesError::RusqliteError(e),
         }
     }
 }

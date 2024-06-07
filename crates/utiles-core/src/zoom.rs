@@ -1,51 +1,91 @@
-use crate::errors::UtilesCoreResult;
-use crate::UtilesCoreError;
+//! Zoom levels, zoom-collections and ranges oh my!
+use crate::constants::MAX_ZOOM;
+use serde::Serialize;
 use std::num::ParseIntError;
 use std::ops::BitAnd;
 
+use crate::errors::UtilesCoreResult;
+use crate::UtilesCoreError;
 use crate::UtilesCoreError::InvalidZoom;
 
 type Zooms = Vec<u8>;
 
 /// `ZoomSet` is a set of zoom levels represented as a 32-bit unsigned integer
-/// where each bit represents a zoom level (0 to 31). The least significant bit
-/// represents zoom level 31 and the most significant bit represents zoom level 0.
+/// where each bit represents a zoom level (0 <= z <= 30). BY DEFAULT: The
+/// least significant bit represents zoom level 0 and the SECOND most significant
+/// bit represents zoom level 30. BUT if the MOST significant bit is 1, then the
+/// order is reversed.
 ///
 /// # Examples
 /// ```
 /// use utiles_core::zoom::ZoomSet;
-/// let zset = ZoomSet::new(0b11100000_00000000_00000000_00000000);
-/// let zooms_vec: Vec<u8> = zset.into();
-/// assert_eq!(zooms_vec, vec![0, 1, 2]);
+/// let zset_int_fwd = ZoomSet::new(0b0000_0000_0000_0000_0000_0000_0000_0111);
+/// //                            ^ is 1 so the order is forward/default
+/// let zset_int_rev = ZoomSet::new(0b1111_0000_0000_0000_0000_0000_0000_0000);
+/// //                            ^ is 1 so the order is reversed
+/// let zooms_fwd_vec: Vec<u8> = zset_int_fwd.into();
+/// assert_eq!(zooms_fwd_vec, vec![0, 1, 2]);
+/// let zooms_rev_vec: Vec<u8> = zset_int_rev.into();
+/// assert_eq!(zooms_rev_vec, vec![0, 1, 2]);
 /// ```
-#[derive(Debug, Clone, Eq, PartialEq, Default)]
+#[derive(Debug, Clone, Eq, PartialEq, Default, Serialize)]
 pub struct ZoomSet(u32);
 
 /// Return a vector of zoom levels from a zoom-set u32
+///
+/// # Examples
+///
+/// ```
+/// use utiles_core::zoom::zset2zvec;
+/// let zset: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0111;
+/// let zvec: Vec<u8> = zset2zvec(zset);
+/// assert_eq!(zvec, vec![0, 1, 2]);
+/// ```
+///
+/// ```
+/// use utiles_core::zoom::zset2zvec;
+/// let zset: u32 = 0b1111_0000_0000_0000_0000_0000_0000_0000;
+/// let zvec: Vec<u8> = zset2zvec(zset);
+/// assert_eq!(zvec, vec![0, 1, 2]);
+/// ```
 #[must_use]
 pub fn zset2zvec(zset: u32) -> Vec<u8> {
-    (0u8..32)
-        .rev()
-        .filter(|&i| (zset & (1u32 << i)) != 0)
-        .map(|i| 31 - i) // Convert bit index to zoom level
-        .collect()
+    // if the most significant bit is 1, then the order is reversed
+    if zset & (1 << 31) != 0 {
+        zset2zvec(zset.reverse_bits() >> 1)
+    } else {
+        (0u8..31).filter(|&i| (zset & (1u32 << i)) != 0).collect()
+    }
+}
+
+/// Return a zoom-set u32 from a vector of zoom levels
+///
+/// # Examples
+/// ```
+/// use utiles_core::zoom::zvec2zset;
+/// let zvec: Vec<u8> = vec![0, 1, 2];
+/// let zset_int: u32 = zvec2zset(&zvec);
+/// assert_eq!(zset_int, 0b0000_0000_0000_0000_0000_0000_0000_0111);
+/// ```
+#[must_use]
+pub fn zvec2zset(zvec: &[u8]) -> u32 {
+    zvec.iter().fold(0, |acc, &z| acc | (1 << z))
+}
+
+/// Return a vector of zoom levels from a reversed-zoom-set u32
+///
+#[must_use]
+pub fn zset2zvec_rev(zset: u32) -> Vec<u8> {
+    zset2zvec(zset.reverse_bits() >> 1)
 }
 
 /// Return a zoom-set u32 from a vector of zoom levels
 #[must_use]
-pub fn zvec2zset(zvec: &[u8]) -> u32 {
+pub fn zvec2zset_rev(zvec: &[u8]) -> u32 {
     zvec.iter().fold(0, |acc, &z| acc | (1 << (31 - z)))
 }
 
-/// `ZoomSet` is a set of zoom levels represented as 32-unsigned integer
-///
-/// # Examples
-/// ```
-/// use utiles_core::zoom::ZoomSet;
-/// let zset = ZoomSet::new(0b11100000_00000000_00000000_00000000);
-/// let zooms_vec: Vec<u8> = zset.into();
-/// assert_eq!(zooms_vec, vec![0, 1, 2]);
-/// ```
+/// `ZoomSet` implementation
 impl ZoomSet {
     /// Create a new `ZoomSet` from a u32
     #[must_use]
@@ -64,11 +104,41 @@ impl ZoomSet {
     pub fn to_zooms(&self) -> Vec<u8> {
         zset2zvec(self.0)
     }
+
+    #[must_use]
+    pub fn all() -> Self {
+        Self(0b0111_1111_1111_1111_1111_1111_1111_1111)
+    }
+
+    #[must_use]
+    pub fn zoom_ranges(&self) -> Vec<ZoomRange> {
+        let mut ranges: Vec<ZoomRange> = vec![];
+        let mut min: u8 = 0;
+        let mut max: u8 = 0;
+        let mut i: u8 = 0;
+        while i < MAX_ZOOM {
+            if self.0 & (1 << i) != 0 {
+                if min == 0 {
+                    min = i;
+                }
+                max = i;
+            } else if min != 0 {
+                ranges.push(ZoomRange::new(min, max));
+                min = 0;
+                max = 0;
+            }
+            i += 1;
+        }
+        if min != 0 {
+            ranges.push(ZoomRange::new(min, max));
+        }
+        ranges
+    }
 }
 
 impl From<u8> for ZoomSet {
     fn from(zoom: u8) -> Self {
-        ZoomSet(1 << (31 - zoom))
+        ZoomSet(1 << zoom)
     }
 }
 
@@ -78,15 +148,21 @@ impl From<u32> for ZoomSet {
     }
 }
 
+impl From<ZoomSet> for Vec<u8> {
+    fn from(zset: ZoomSet) -> Self {
+        zset2zvec(zset.0)
+    }
+}
+
 impl TryFrom<Vec<u8>> for ZoomSet {
     type Error = UtilesCoreError;
 
     fn try_from(zvec: Vec<u8>) -> Result<Self, Self::Error> {
         let result = zvec.iter().try_fold(0u32, |acc, &z| {
-            if z > 31 {
+            if z > MAX_ZOOM {
                 Err(InvalidZoom(z.to_string()))
             } else {
-                Ok(acc | (1 << (31 - z)))
+                Ok(acc | (1 << z))
             }
         })?;
         Ok(ZoomSet::new(result)) // Replace with actual construction method
@@ -125,12 +201,6 @@ impl BitAnd<u8> for ZoomSet {
     }
 }
 
-impl From<ZoomSet> for Vec<u8> {
-    fn from(zset: ZoomSet) -> Self {
-        zset2zvec(zset.0)
-    }
-}
-
 type ZoomsSetInt = u32;
 
 /// Struct representing zoom level range (min, max)
@@ -145,7 +215,10 @@ pub struct ZoomRange {
 // default zoom range
 impl Default for ZoomRange {
     fn default() -> Self {
-        Self { min: 0, max: 31 }
+        Self {
+            min: 0,
+            max: MAX_ZOOM,
+        }
     }
 }
 
@@ -162,57 +235,37 @@ impl ZoomRange {
         Self { min: 0, max }
     }
 
-    /// Create a new `ZoomRange` from a minimum zoom level (min to 31)
+    /// Create a new `ZoomRange` from a minimum zoom level (min to 30)
     #[must_use]
     pub fn from_min(min: u8) -> Self {
-        Self { min, max: 31 }
+        Self { min, max: 30 }
     }
 }
 
-/// convert range of zoom levels to a set of zoom levels
+impl IntoIterator for ZoomRange {
+    type Item = u8;
+    type IntoIter = std::ops::RangeInclusive<u8>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.min..=self.max
+    }
+}
+
+/// Convert range of zoom levels to a set of zoom levels
 ///
 /// # Examples
 /// ```
 /// use utiles_core::zoom::{ZoomRange, ZoomSet};
 /// let zrange = ZoomRange::new(0, 7);
 /// let zset: ZoomSet = zrange.into();
-/// assert_eq!(zset, ZoomSet::new(0b11111111_00000000_00000000_00000000));
+/// assert_eq!(zset, ZoomSet::new(0b0000_0000_0000_0000_0000_0000_1111_1111));
 /// ```
 impl From<ZoomRange> for ZoomSet {
     fn from(zoom_range: ZoomRange) -> Self {
-        ZoomSet(
-            (zoom_range.min..=zoom_range.max)
-                .rev()
-                .fold(0, |acc, z| acc | (1 << (31 - z))),
-        )
+        ZoomSet(zoom_range.into_iter().fold(0, |acc, z| acc | (1 << z)))
     }
 }
 
-/// parse a string of zoom levels to a vector of zoom levels
-/// # Examples
-/// ```
-/// use utiles_core::zoom::parse_zooms;
-/// let zvec = parse_zooms("0,1,2,3,4,5,6,7");
-/// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
-/// ```
-///
-/// ```
-/// use utiles_core::zoom::parse_zooms;
-/// let zvec = parse_zooms("0-7");
-/// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
-/// ```
-///
-/// ```
-/// use utiles_core::zoom::parse_zooms;
-/// let zvec = parse_zooms("0-2,4-7");
-/// assert_eq!(zvec.unwrap(), vec![0, 1, 2, 4, 5, 6, 7]);
-/// ```
-///
-/// ```
-/// use utiles_core::zoom::parse_zooms;
-/// let zvec = parse_zooms("1,2,3,4,4,4,4,4");
-/// assert_eq!(zvec.unwrap(), vec![1, 2, 3, 4]);
-/// ```
 pub fn parse_zooms(zstr: &str) -> UtilesCoreResult<Vec<u8>> {
     let mut zvec: Vec<u8> = vec![];
     for z in zstr.split(',') {
@@ -282,7 +335,7 @@ impl From<ZoomOrZooms> for ZoomsSetInt {
     fn from(zoom_or_zooms: ZoomOrZooms) -> Self {
         match zoom_or_zooms {
             ZoomOrZooms::Zoom(zoom) => 1 << (31 - zoom),
-            ZoomOrZooms::Zooms(zooms) => zvec2zset(&zooms),
+            ZoomOrZooms::Zooms(zooms) => zvec2zset_rev(&zooms),
         }
     }
 }
@@ -293,71 +346,66 @@ mod tests {
 
     #[test]
     fn zset2zvec_none() {
-        let zset: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
+        let zset: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000;
         let zvec: Vec<u8> = vec![];
         assert_eq!(zset2zvec(zset), zvec);
+        assert_eq!(zset2zvec_rev(zset), zvec);
+        assert_eq!(zset, 0);
     }
 
     #[test]
     fn zset2zvec_0_1_2() {
-        let zset: u32 = 0b1110_0000_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
+        let zset_fwd: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0111;
+        let zset_rev: u32 = 0b1111_0000_0000_0000_0000_0000_0000_0000;
         let zvec: Vec<u8> = vec![0, 1, 2];
-
-        assert_eq!(zset2zvec(zset), zvec);
+        assert_eq!(zset2zvec(zset_fwd), zvec);
+        assert_eq!(zset_fwd, 7);
+        assert_eq!(zset2zvec_rev(zset_rev), zvec);
     }
 
     #[test]
     fn zset2zvec_all() {
-        let zset: u32 = 0b1111_1111_1111_1111_1111_1111_1111_1111; // Example, zoom levels 2 and 4 are set
+        let zset_int_fwd: u32 = 0b0111_1111_1111_1111_1111_1111_1111_1111;
+        let zset_int_rev: u32 = 0b1111_1111_1111_1111_1111_1111_1111_1111;
         let zvec: Vec<u8> = vec![
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
         ];
-        assert_eq!(zset2zvec(zset), zvec);
+        assert_eq!(zset2zvec(zset_int_fwd), zvec);
+        assert_eq!(zset2zvec_rev(zset_int_rev), zvec);
     }
 
     #[test]
     fn zvec2zset_none() {
-        let zset: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
-        let zvec: Vec<u8> = vec![];
-        assert_eq!(zvec2zset(&zvec), zset);
+        let zset_int: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000;
+        assert!(zset2zvec(zset_int).is_empty());
+        assert!(zset2zvec_rev(zset_int).is_empty());
     }
 
     #[test]
     fn zvec2zset_0_1_2() {
-        let zset: u32 = 0b1110_0000_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
+        let zset_int: u32 = 0b1110_0000_0000_0000_0000_0000_0000_0000;
         let zvec: Vec<u8> = vec![0, 1, 2];
 
-        assert_eq!(zvec2zset(&zvec), zset);
-    }
-
-    #[test]
-    fn zvec2zset_all() {
-        let zset: u32 = 0b1111_1111_1111_1111_1111_1111_1111_1111; // Example, zoom levels 2 and 4 are set
-        let zvec: Vec<u8> = vec![
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-        ];
-        assert_eq!(zvec2zset(&zvec), zset);
+        assert_eq!(zvec2zset_rev(&zvec), zset_int);
     }
 
     #[test]
     fn zvec2zset_0_1_2_3_4_5_6_7() {
-        let zset: u32 = 0b1111_1111_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
+        let zset_int: u32 = 0b1111_1111_0000_0000_0000_0000_0000_0000;
         let zvec: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
-        let zset_from_zvec = zvec2zset(&zvec);
-        assert_eq!(zset_from_zvec, zset);
+        let zset_from_zvec = zvec2zset_rev(&zvec);
+        assert_eq!(zset_from_zvec, zset_int);
     }
 
     #[test]
     fn zoom_set_into_zoom_vec() {
-        let zset_int: u32 = 0b1111_1111_0000_0000_0000_0000_0000_0000; // Example, zoom levels 2 and 4 are set
-        let zset: ZoomSet = zset_int.into();
+        let zset_int_fwd: u32 = 0b0000_0000_0000_0000_0000_0000_1111_1111;
+        let zet_fwd_vec: Vec<u8> = ZoomSet::from(zset_int_fwd).into();
+        assert_eq!(zet_fwd_vec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
+        let zset_int_rev: u32 = 0b1111_1111_1000_0000_0000_0000_0000_0000;
+        let zset: ZoomSet = zset_int_rev.into();
         let zvec = Vec::from(zset);
         assert_eq!(zvec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
-
-        // let zvec: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
-        // let zset_from_zvec = zvec2zset(zvec);
-        // assert_eq!(zset_from_zvec, zset);
     }
 }

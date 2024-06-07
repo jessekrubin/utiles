@@ -3,7 +3,7 @@ resolver = "2"
 members = [
     "crates/utiles-core",
     "crates/utiles",
-    "utiles-pyo3"
+    "utiles-pyo3", 
 ]
 
 [workspace.package]
@@ -30,6 +30,7 @@ tilejson = "0.4.1"
 tokio = { version = "1.37.0", features = ["full"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
+size = { version = "=0.5.0-preview2", features = ["default"] }
 
 
 [profile.dev]

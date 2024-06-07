@@ -66,6 +66,16 @@ class CliResult:
         """Parse json"""
         return json_loads(self.stdout)
 
+    def print(self) -> None:
+        """Print"""
+        print(f"args: {self.args}")
+        print(f"stdout: {self.stdout}")
+        print(f"stderr: {self.stderr}")
+        print(f"returncode: {self.returncode}")
+        print(f"dt: {self.dt}")
+        print(f"input: {self.input}")
+        print(f"completed_process: {self.completed_process}")
+
 
 def run_cli(
     args: list[str] | None,
@@ -83,6 +93,12 @@ def run_cli(
         check=False,
     )
     tf = time_ns()
+    if completed_process.returncode != 0:
+        print(f"completed_process: {completed_process}")
+        print(f"completed_process.stdout: {completed_process.stdout}")
+        print(f"completed_process.stderr: {completed_process.stderr}")
+        print(f"completed_process.returncode: {completed_process.returncode}")
+        print(f"input: {input}")
     return CliResult(
         args=_args,
         stdout=completed_process.stdout,

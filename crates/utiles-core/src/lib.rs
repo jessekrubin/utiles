@@ -19,11 +19,11 @@ pub use tile::Tile;
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
 
-pub use crate::errors::UtilesCoreError;
 pub use crate::fns::*;
 pub use crate::quadkey::*;
+pub use errors::{UtilesCoreError, UtilesCoreResult};
 
-pub mod errors;
+mod errors;
 
 pub mod bbox;
 pub mod constants;
@@ -32,7 +32,6 @@ pub mod fns;
 pub mod gdal;
 pub mod geostats;
 pub mod lnglat;
-pub mod mbutiles;
 pub mod parsing;
 pub mod pmtiles;
 pub mod point;
@@ -60,6 +59,13 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 macro_rules! utile {
     ($x:expr, $y:expr, $z:expr) => {
         Tile::new($x, $y, $z)
+    };
+}
+
+#[macro_export]
+macro_rules! utile_yup {
+    ($x:expr, $y:expr, $z:expr) => {
+        Tile::new($x, flipy($y, $z), $z)
     };
 }
 
