@@ -8,6 +8,7 @@ use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 use crate::UtilesCoreError::InvalidZoom;
 
+pub struct Zoom(());
 type Zooms = Vec<u8>;
 
 /// `ZoomSet` is a set of zoom levels represented as a 32-bit unsigned integer

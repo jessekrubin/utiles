@@ -378,7 +378,7 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
     } else {
         (lng, lat)
     };
-    let sinlat = (lat.to_radians()).sin();
+    let sinlat = lat.to_radians().sin();
     let yish = (1.0 + sinlat) / (1.0 - sinlat);
     match yish.classify() {
         FpCategory::Infinite | FpCategory::Nan => {

@@ -1,3 +1,5 @@
+use crate::int_2_offset_zoom;
+
 /// Convert x,y,z to pmtile-id.
 #[must_use]
 pub fn xyz2pmid(x: u32, y: u32, z: u8) -> u64 {
@@ -16,33 +18,13 @@ pub fn zxy2pmid(z: u8, x: u32, y: u32) -> u64 {
     xyz2pmid(x, y, z)
 }
 
-/// Calculate the index of the tile for the zoom level as well as the zoom level.
-///
-/// h stands for
-#[must_use]
-pub fn calculate_h_o(i: u64) -> (u64, u8) {
-    if i == 0 {
-        return (0, 0);
-    }
-    let mut acc: u64 = 0;
-    let mut z: u8 = 0;
-    loop {
-        let num_tiles: u64 = (1 << z) * (1 << z);
-        if acc + num_tiles > i {
-            return (i - acc, z);
-        }
-        acc += num_tiles;
-        z += 1;
-    }
-}
-
 /// Convert pmtile-id to (x, y, z).
 #[must_use]
 pub fn pmid2xyz(i: u64) -> (u32, u32, u8) {
     if i == 0 {
         return (0, 0, 0);
     }
-    let (i_o, z) = calculate_h_o(i);
+    let (i_o, z) = int_2_offset_zoom(i);
     let (x, y) = fast_hilbert::h2xy(i_o, z);
     (x, y, z)
 }

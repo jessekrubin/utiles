@@ -4,7 +4,7 @@ use std::ops::{Add, Sub};
 use serde::{Deserialize, Serialize};
 
 /// Point2d struct for 2d points
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Point2d<T: Copy + PartialOrd + PartialEq + Debug + Add + Sub> {
     /// x value
     pub x: T,
@@ -14,7 +14,7 @@ pub struct Point2d<T: Copy + PartialOrd + PartialEq + Debug + Add + Sub> {
 }
 
 /// Point3d struct for 3d points
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Point3d<T: Copy + PartialOrd + PartialEq + Debug + Add + Sub> {
     /// x value
     pub x: T,

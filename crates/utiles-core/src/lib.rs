@@ -5,6 +5,8 @@
 #![deny(clippy::panic)]
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
+#![deny(clippy::suspicious)]
+#![deny(clippy::complexity)]
 #![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::module_name_repetitions)]
@@ -12,21 +14,21 @@
 #![allow(clippy::similar_names)]
 
 pub use bbox::BBox;
+pub use errors::{UtilesCoreError, UtilesCoreResult};
 pub use gdal::geotransform2optzoom;
 pub use lnglat::LngLat;
 pub use point::{Point2d, Point3d};
 pub use tile::Tile;
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
+pub use traits::{Coord2dLike, IsOk, LngLatLike};
 
 pub use crate::fns::*;
 pub use crate::quadkey::*;
-pub use errors::{UtilesCoreError, UtilesCoreResult};
-
-mod errors;
 
 pub mod bbox;
 pub mod constants;
+mod errors;
 pub mod fns;
 
 pub mod gdal;
@@ -47,7 +49,7 @@ mod tile_tuple;
 pub mod tile_type;
 pub mod tile_zbox;
 mod tilecrz;
-pub mod traits;
+mod traits;
 pub mod zoom;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
