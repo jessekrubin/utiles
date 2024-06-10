@@ -9,10 +9,13 @@ pub use crate::mbt::metadata_row::{
     MbtMetadataRow, MbtilesMetadataRowParsed, MbtilesMetadataRows,
 };
 pub use crate::mbt::minzoom_maxzoom::MinZoomMaxZoom;
+pub use mbtype::MbtType;
 
 mod mbt_stats;
+mod mbtype;
 mod metadata;
 mod metadata2map;
 mod metadata_row;
 mod minzoom_maxzoom;
+pub mod query;
 mod tiles_row;

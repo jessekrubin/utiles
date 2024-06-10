@@ -12,7 +12,10 @@ use utiles_core::UtilesCoreResult;
 use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom};
+use crate::mbt::query::query_mbtiles_type;
+use crate::mbt::{
+    MbtMetadataRow, MbtType, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom,
+};
 use crate::sqlite::InsertStrategy;
 use crate::sqlite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
@@ -23,7 +26,6 @@ use crate::utilesqlite::add_ut_functions;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::utilesqlite::hash_types::HashType;
 
-use crate::utilesqlite::mbtype::MbtilesType;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
 use crate::UtilesError;
 
@@ -93,7 +95,7 @@ impl Mbtiles {
 
     pub fn create<P: AsRef<Path>>(
         path: P,
-        mbtype: Option<MbtilesType>,
+        mbtype: Option<MbtType>,
     ) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(&path)?;
         let res = create_mbtiles_file(&path, &mbtype.unwrap_or_default())?;
@@ -257,6 +259,10 @@ impl Mbtiles {
         self.application_id()
     }
 
+    pub fn query_mbt_type(&self) -> UtilesResult<MbtType> {
+        query_mbtiles_type(&self.conn)
+    }
+
     pub fn mbt_stats(&self) -> UtilesResult<MbtilesStats> {
         let query_ti = std::time::Instant::now();
         let filesize = self.db_filesize()?;
@@ -267,10 +273,11 @@ impl Mbtiles {
         let zoom_stats = self.zoom_stats()?;
         let query_dt = query_ti.elapsed();
         debug!("Finished zoom_stats query in {:?}", query_dt);
-
+        let mbt_type = self.query_mbt_type()?;
         if zoom_stats.is_empty() {
             return Ok(MbtilesStats {
                 filesize,
+                mbtype: mbt_type,
                 page_count,
                 page_size,
                 freelist_count,
@@ -291,6 +298,7 @@ impl Mbtiles {
         Ok(MbtilesStats {
             ntiles: zoom_stats.iter().map(|r| r.ntiles).sum(),
             filesize,
+            mbtype: mbt_type,
             page_count,
             page_size,
             freelist_count,
@@ -737,14 +745,14 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
 
 pub fn create_mbtiles_file<P: AsRef<Path>>(
     fspath: P,
-    mbtype: &MbtilesType,
+    mbtype: &MbtType,
 ) -> UtilesCoreResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
         let emsg = format!("Error opening mbtiles file: {e}");
         UtilesCoreError::Unknown(emsg)
     })?;
     match mbtype {
-        MbtilesType::Flat => {
+        MbtType::Flat => {
             let r = init_flat_mbtiles(&mut conn);
             match r {
                 Ok(()) => Ok(conn),

@@ -7,7 +7,6 @@ pub mod hash_types;
 pub mod mbtiles;
 pub mod mbtiles_async;
 pub mod mbtiles_async_sqlite;
-mod mbtype;
 mod sql_schemas;
 pub use fns::*;
 pub use mbtiles::Mbtiles;
