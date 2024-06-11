@@ -1,5 +1,5 @@
 use std::path::Path;
-use tracing::{debug, error};
+use tracing::debug;
 
 use crate::errors::UtilesResult;
 use crate::utilesqlite::Mbtiles;
@@ -23,12 +23,8 @@ pub fn contains_main(filepath: &str, lnglat: LngLat) -> UtilesResult<()> {
         filepath = filepath.display()
     );
     let mbtiles: Mbtiles = Mbtiles::from(filepath);
-    let contains = mbtiles.contains(lnglat);
-    if contains.is_err() {
-        error!("contains error: {:?}", contains);
-        println!("contains error: {contains:?}");
-    } else {
-        println!("{}", contains.unwrap());
-    }
+    let contains = mbtiles.contains(lnglat)?;
+    debug!("contains: {contains}");
+    println!("{contains}");
     Ok(())
 }

@@ -4,8 +4,8 @@ use tilejson::TileJSON;
 use utiles_core::{Tile, TileLike};
 
 use crate::errors::UtilesResult;
-use crate::mbt::MbtMetadataRow;
 use crate::mbt::MinZoomMaxZoom;
+use crate::mbt::{MbtMetadataRow, MbtType};
 
 #[async_trait]
 pub trait MbtilesAsync: Sized {
@@ -38,4 +38,6 @@ pub trait MbtilesAsync: Sized {
         self.query_zxy(tile.z(), tile.x(), tile.y()).await
     }
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON>;
+
+    async fn query_mbt_type(&self) -> UtilesResult<MbtType>;
 }

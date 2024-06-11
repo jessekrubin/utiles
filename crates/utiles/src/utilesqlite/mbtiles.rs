@@ -184,7 +184,7 @@ impl Mbtiles {
         }
     }
 
-    pub fn bbox(&self) -> Result<BBox, Box<dyn Error>> {
+    pub fn bbox(&self) -> UtilesResult<BBox> {
         let bounding = self.tilejson()?.bounds;
         match bounding {
             Some(bounds) => Ok(BBox::new(
@@ -193,11 +193,13 @@ impl Mbtiles {
                 bounds.right,
                 bounds.top,
             )),
-            None => Err("Error parsing metadata to TileJSON: no data available".into()),
+            None => Err(UtilesError::ParsingError(
+                "Error parsing metadata to BBox: no bounds".into(),
+            )),
         }
     }
 
-    pub fn contains(&self, lnglat: LngLat) -> Result<bool, Box<dyn Error>> {
+    pub fn contains(&self, lnglat: LngLat) -> UtilesResult<bool> {
         let bbox = self.bbox()?;
         let contains = bbox.contains_lnglat(&lnglat);
         // return false if not ok
@@ -333,19 +335,13 @@ impl Mbtiles {
     }
 }
 
-impl<P: AsRef<std::path::Path>> From<P> for Mbtiles {
+impl<P: AsRef<Path>> From<P> for Mbtiles {
     // TODO: fix uses of this
     #[allow(clippy::unwrap_used)]
     fn from(p: P) -> Self {
         Mbtiles::open_existing(p).unwrap()
     }
 }
-
-// impl From<&Path> for Mbtiles {
-//     fn from(path: &Path) -> Self {
-//         Mbtiles::open_existing(path).unwrap()
-//     }
-// }
 
 // =========================================================================
 // SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS

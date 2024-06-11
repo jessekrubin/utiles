@@ -1,4 +1,5 @@
 #![allow(clippy::unwrap_used)]
+pub use about::about_main;
 pub use children_parent::{children_main, parent_main};
 pub use contains::contains_main;
 pub use copy::copy_main;
@@ -10,15 +11,15 @@ pub use rimraf::rimraf_main;
 pub use serve::serve_main;
 pub use shapes::shapes_main;
 pub use tile_stream_cmds::{
-    bounding_tile_main, neighbors_main, pmtileid_main, quadkey_main,
+    bounding_tile_main, fmtstr_main, neighbors_main, pmtileid_main, quadkey_main,
 };
 pub use tilejson::tilejson_main;
 pub use tiles::tiles_main;
 pub use touch::touch_main;
 pub use update::update_main;
 pub use vacuum::vacuum_main;
-// pub use webpify::{webpify_main, WebpifyArgs};
 
+mod about;
 mod children_parent;
 mod contains;
 pub mod copy;
@@ -35,4 +36,3 @@ pub mod tiles;
 mod touch;
 mod update;
 mod vacuum;
-// mod webpify;

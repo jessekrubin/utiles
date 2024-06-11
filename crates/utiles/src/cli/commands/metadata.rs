@@ -58,25 +58,6 @@ pub struct MetadataChangeFromTo {
     pub from: Option<String>,
     pub to: Option<String>,
 }
-//
-// pub enum MetadataDiffType {
-//     Insert,
-//     Update,
-//     Delete,
-// }
-// #[derive(Debug, Serialize)]
-// struct MetadataInsert {
-//     #[serde(rename = "type")]
-//     pub type_: MetadataDiffType,
-//     pub name: String,
-//     pub value: String,
-// }
-//
-// #[derive(Debug, Serialize)]
-// struct MetadataChange {
-//     pub name: String,
-//     pub value: Option<String>,
-// }
 
 pub fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
