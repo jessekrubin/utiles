@@ -22,7 +22,7 @@ pub fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
         "Not a file: {filepath}",
         filepath = filepath.display()
     );
-    let mbtiles: Mbtiles = Mbtiles::from(filepath);
+    let mbtiles: Mbtiles = Mbtiles::open_existing(filepath)?;
     let metadata_rows = mbtiles.metadata()?;
 
     let json_val = match (args.raw, args.obj) {
