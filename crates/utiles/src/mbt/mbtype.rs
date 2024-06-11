@@ -8,6 +8,7 @@ pub enum MbtType {
     Flat,
     Hash,
     Norm,
+    Tippecanoe,
     Unknown,
 }
 
@@ -18,6 +19,7 @@ impl MbtType {
             MbtType::Flat => "flat",
             MbtType::Hash => "hash",
             MbtType::Norm => "norm",
+            MbtType::Tippecanoe => "tippecanoe",
             MbtType::Unknown => "unknown",
         }
     }
@@ -37,6 +39,7 @@ impl FromStr for MbtType {
             "flat" => MbtType::Flat,
             "hash" | "flat-with-hash" => MbtType::Hash,
             "norm" | "normalized" => MbtType::Norm,
+            "tippecanoe" => MbtType::Tippecanoe,
             _ => MbtType::Unknown,
         };
         Ok(t)

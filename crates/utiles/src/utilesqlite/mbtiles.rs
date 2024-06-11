@@ -21,8 +21,8 @@ use crate::sqlite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
     pragma_table_list, query_db_fspath, Sqlike3,
 };
+use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::add_ut_functions;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::utilesqlite::hash_types::HashType;
 
@@ -195,7 +195,6 @@ impl Mbtiles {
             )),
             None => Err("Error parsing metadata to TileJSON: no data available".into()),
         }
-        // convert boundsd to BBox
     }
 
     pub fn contains(&self, lnglat: LngLat) -> Result<bool, Box<dyn Error>> {
