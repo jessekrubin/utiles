@@ -10,6 +10,7 @@ use utiles_core::VERSION;
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
+use crate::mbt::MbtType;
 use crate::tile_strfmt::TileStringFormatter;
 // use crate::cli::commands::WebpifyArgs;
 
@@ -173,15 +174,43 @@ pub struct SqliteDbCommonArgs {
     pub min: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone, clap::ValueEnum)]
+pub enum DbtypeOption {
+    Flat,
+    Hash,
+    Norm,
+}
+
+impl From<&DbtypeOption> for MbtType {
+    fn from(opt: &DbtypeOption) -> Self {
+        match opt {
+            DbtypeOption::Flat => MbtType::Flat,
+            DbtypeOption::Hash => MbtType::Hash,
+            DbtypeOption::Norm => MbtType::Norm,
+        }
+    }
+}
+
+#[derive(Debug, Parser, Clone)]
 pub struct TouchArgs {
     /// mbtiles filepath
     #[arg(required = true)]
     pub filepath: String,
 
-    /// page size (default: 4096)
+    /// page size (default: 512)
     #[arg(required = false, long)]
     pub page_size: Option<i64>,
+
+    /// db-type (default: flat)
+    #[arg(required = false, long = "dbtype", default_value = "flat")]
+    pub dbtype: Option<DbtypeOption>,
+}
+
+impl TouchArgs {
+    #[must_use]
+    pub fn mbtype(&self) -> MbtType {
+        self.dbtype.as_ref().map_or(MbtType::Flat, |opt| opt.into())
+    }
 }
 
 #[derive(Debug, Parser)]

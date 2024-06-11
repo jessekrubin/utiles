@@ -12,6 +12,7 @@
 #![allow(clippy::cast_possible_truncation)]
 // road to clippy::pedantic
 #![deny(clippy::pedantic)]
+#![allow(clippy::redundant_closure_for_method_calls)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]

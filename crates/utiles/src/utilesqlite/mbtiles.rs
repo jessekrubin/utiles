@@ -8,7 +8,6 @@ use tracing::{debug, error, warn};
 
 use utiles_core::bbox::BBox;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::UtilesCoreResult;
 use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;
@@ -741,7 +740,7 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
 pub fn create_mbtiles_file<P: AsRef<Path>>(
     fspath: P,
     mbtype: &MbtType,
-) -> UtilesCoreResult<Connection> {
+) -> UtilesResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
         let emsg = format!("Error opening mbtiles file: {e}");
         UtilesCoreError::Unknown(emsg)
@@ -754,11 +753,11 @@ pub fn create_mbtiles_file<P: AsRef<Path>>(
                 Err(e) => {
                     error!("Error creating flat mbtiles file: {}", e);
                     let emsg = format!("Error creating flat mbtiles file: {e}");
-                    Err(UtilesCoreError::Unknown(emsg))
+                    Err(UtilesError::Unknown(emsg))
                 }
             }
         }
-        _ => Err(UtilesCoreError::Unimplemented(
+        _ => Err(UtilesError::Unimplemented(
             "create_mbtiles_file: only flat mbtiles is implemented".to_string(),
         )),
     }
