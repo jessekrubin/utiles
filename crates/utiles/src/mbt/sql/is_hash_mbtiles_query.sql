@@ -13,7 +13,7 @@ SELECT (
 ) AND (
   -- Has a 'tiles_with_hash' table
   SELECT COUNT(*) = 1
-  FROM sqlite_master
+  FROM sqlite_schema
   WHERE name = 'tiles_with_hash' AND type = 'table'
   --
 ) as is_hash_mbtiles;

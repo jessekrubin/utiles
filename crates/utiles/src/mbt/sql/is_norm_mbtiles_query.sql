@@ -1,9 +1,9 @@
 SELECT (
      -- Has a 'map' table
      SELECT COUNT(*) = 1
-     FROM sqlite_master
+     FROM sqlite_schema
      WHERE name = 'map'
-         AND type = 'table'
+       AND type = 'table'
      --
  ) AND (
      -- 'map' table's columns and their types are as expected:
@@ -19,9 +19,9 @@ SELECT (
  ) AND (
      -- Has a 'images' table
      SELECT COUNT(*) = 1
-     FROM sqlite_master
+     FROM sqlite_schema
      WHERE name = 'images'
-         AND type = 'table'
+       AND type = 'table'
      --
  ) AND (
      -- 'images' table's columns and their types are as expected:

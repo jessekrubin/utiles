@@ -1,9 +1,9 @@
 SELECT (
      -- Has a 'tiles' table
      SELECT COUNT(*) = 1
-     FROM sqlite_master
+     FROM sqlite_schema
      WHERE name = 'tiles'
-     AND type = 'table'
+       AND type = 'table'
      --
  ) AND (
      -- 'tiles' table's columns and their types are as expected:
