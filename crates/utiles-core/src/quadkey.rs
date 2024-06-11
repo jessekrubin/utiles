@@ -108,3 +108,19 @@ pub fn quadkey2tile(quadkey: &str) -> UtilesCoreResult<Tile> {
     let xyz = quadkey2xyz(quadkey)?;
     Ok(Tile::new(xyz.0, xyz.1, xyz.2))
 }
+
+/// Return y-flipped quadkey
+#[must_use]
+pub fn quadkey_flipy(quadkey: &str) -> String {
+    let mut quadkey_flipped = String::new();
+    for c in quadkey.chars() {
+        quadkey_flipped.push(match c {
+            '0' => '2',
+            '1' => '3',
+            '2' => '0',
+            '3' => '1',
+            _ => return String::new(),
+        });
+    }
+    quadkey_flipped
+}
