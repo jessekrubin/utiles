@@ -49,21 +49,20 @@ pub fn is_tippecanoe_mbtiles(conn: &Connection) -> RusqliteResult<bool> {
 
 pub fn query_mbtiles_type(conn: &Connection) -> UtilesResult<MbtType> {
     let is_tippecanoe =
-        is_tippecanoe_mbtiles(conn).map_err(|e| UtilesError::RusqliteError(e))?;
+        is_tippecanoe_mbtiles(conn).map_err(UtilesError::RusqliteError)?;
     if is_tippecanoe {
         return Ok(MbtType::Tippecanoe);
     }
-    let is_norm = is_norm_mbtiles(conn).map_err(|e| UtilesError::RusqliteError(e))?;
+    let is_norm = is_norm_mbtiles(conn).map_err(UtilesError::RusqliteError)?;
     if is_norm {
         return Ok(MbtType::Norm);
     }
-    let is_hash =
-        is_tiles_with_hash(conn).map_err(|e| UtilesError::RusqliteError(e))?;
+    let is_hash = is_tiles_with_hash(conn).map_err(UtilesError::RusqliteError)?;
 
     if is_hash {
         return Ok(MbtType::Hash);
     }
-    let is_flat = is_flat_mbtiles(conn).map_err(|e| UtilesError::RusqliteError(e))?;
+    let is_flat = is_flat_mbtiles(conn).map_err(UtilesError::RusqliteError)?;
     Ok(if is_flat {
         MbtType::Flat
     } else {
