@@ -8,9 +8,6 @@ use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 use crate::UtilesCoreError::InvalidZoom;
 
-pub struct Zoom(());
-type Zooms = Vec<u8>;
-
 /// `ZoomSet` is a set of zoom levels represented as a 32-bit unsigned integer
 /// where each bit represents a zoom level (0 <= z <= 30). BY DEFAULT: The
 /// least significant bit represents zoom level 0 and the SECOND most significant
@@ -320,15 +317,6 @@ impl From<u8> for ZoomOrZooms {
 impl From<Vec<u8>> for ZoomOrZooms {
     fn from(zooms: Vec<u8>) -> Self {
         ZoomOrZooms::Zooms(zooms)
-    }
-}
-
-impl From<ZoomOrZooms> for Zooms {
-    fn from(zoom_or_zooms: ZoomOrZooms) -> Self {
-        match zoom_or_zooms {
-            ZoomOrZooms::Zoom(zoom) => vec![zoom],
-            ZoomOrZooms::Zooms(zooms) => zooms,
-        }
     }
 }
 
