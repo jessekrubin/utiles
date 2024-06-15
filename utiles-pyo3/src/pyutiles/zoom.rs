@@ -1,12 +1,5 @@
 use pyo3::FromPyObject;
 use utiles::zoom::ZoomOrZooms;
-
-#[derive(FromPyObject)]
-pub enum ZoomsOrInt {
-    Zooms(Vec<u8>),
-    Int(u8),
-}
-
 #[derive(FromPyObject)]
 pub enum PyZoomOrZooms {
     #[pyo3(transparent, annotation = "int")]

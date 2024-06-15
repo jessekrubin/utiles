@@ -40,11 +40,11 @@ pub struct PyTile {
     pub xyz: Tile,
 }
 
-#[derive(FromPyObject)]
-pub enum PyTileOrTuple {
-    Tile(PyTile),
-    Tuple(TileTuple),
-}
+// #[derive(FromPyObject)]
+// pub enum PyTileOrTuple {
+//     Tile(PyTile),
+//     Tuple(TileTuple),
+// }
 
 #[pymethods]
 impl PyTile {
