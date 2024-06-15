@@ -245,25 +245,13 @@ pub fn bounds(x: u32, y: u32, z: u8) -> (f64, f64, f64, f64) {
 /// Truncate a longitude to the valid range of -180 to 180.
 #[must_use]
 pub fn truncate_lng(lng: f64) -> f64 {
-    if lng > 180.0 {
-        180.0
-    } else if lng < -180.0 {
-        -180.0
-    } else {
-        lng
-    }
+    lng.clamp(-180.0, 180.0)
 }
 
 /// Truncate a latitude to the valid range of -90 to 90.
 #[must_use]
 pub fn truncate_lat(lat: f64) -> f64 {
-    if lat > 90.0 {
-        90.0
-    } else if lat < -90.0 {
-        -90.0
-    } else {
-        lat
-    }
+    lat.clamp(-90.0, 90.0)
 }
 
 /// Truncate a `LngLat` to valid range of longitude and latitude.
@@ -378,7 +366,7 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
     } else {
         (lng, lat)
     };
-    let sinlat = (lat.to_radians()).sin();
+    let sinlat = lat.to_radians().sin();
     let yish = (1.0 + sinlat) / (1.0 - sinlat);
     match yish.classify() {
         FpCategory::Infinite | FpCategory::Nan => {

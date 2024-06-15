@@ -50,6 +50,16 @@ pub async fn update_mbtiles(
                         .await?;
                 }
             }
+        } else {
+            changes.push(MetadataChangeFromTo {
+                name: "minzoom".to_string(),
+                from: None,
+                to: Some(minzoom_maxzoom.minzoom.to_string()),
+            });
+            if !dryrun {
+                mbt.metadata_set("minzoom", &minzoom_maxzoom.minzoom.to_string())
+                    .await?;
+            }
         }
     }
 
@@ -66,6 +76,16 @@ pub async fn update_mbtiles(
                     mbt.metadata_set("maxzoom", &minzoom_maxzoom.maxzoom.to_string())
                         .await?;
                 }
+            }
+        } else {
+            changes.push(MetadataChangeFromTo {
+                name: "maxzoom".to_string(),
+                from: None,
+                to: Some(minzoom_maxzoom.maxzoom.to_string()),
+            });
+            if !dryrun {
+                mbt.metadata_set("maxzoom", &minzoom_maxzoom.maxzoom.to_string())
+                    .await?;
             }
         }
     }

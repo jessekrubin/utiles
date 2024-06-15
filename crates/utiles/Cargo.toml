@@ -20,7 +20,7 @@ name = "utiles"
 path = "src/bin.rs"
 
 [dependencies]
-utiles-core = { path = "../utiles-core", version = "0.4.2" }
+utiles-core = { path = "../utiles-core", version = "0.5.0" }
 fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
@@ -51,11 +51,12 @@ tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id"] }
 tokio-signal = "0.2.9"
 colored = "2.1.0"
+log = "0.4.21"
+chrono = "0.4.38"
 #image = "0.25.1"
 
 [dev-dependencies]
 criterion = "0.5.1"
-#deadpool-sqlite = { version = "0.7.0", features = ["tracing"] }
 
 [[bench]]
 name = "bench"

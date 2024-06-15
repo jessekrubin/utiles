@@ -12,6 +12,7 @@
 #![allow(clippy::cast_possible_truncation)]
 // road to clippy::pedantic
 #![deny(clippy::pedantic)]
+#![allow(clippy::redundant_closure_for_method_calls)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
@@ -34,15 +35,14 @@ pub mod lint;
 pub mod mbt;
 pub mod server;
 pub mod sqlite;
+pub mod sqlite_utiles;
 mod tile_strfmt;
 pub mod utilejson;
 pub mod utilesqlite;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Tile macro to create a new tile.
-///  - do you need this? probably not
-///  - Did I write to to figure out how to write a macro? yes
+/// Tile macro to create a new tile from x, y, z
 #[macro_export]
 macro_rules! utile {
     ($x:expr, $y:expr, $z:expr) => {
@@ -50,7 +50,7 @@ macro_rules! utile {
     };
 }
 
-/// point2d macro to create a new point.
+/// macro to create a new point.
 /// Replacement for coord! macro from geo-types
 ///
 /// # Examples

@@ -20,6 +20,14 @@ pub enum UtilesCoreError {
     #[error("invalid bbox: {0}")]
     InvalidBbox(String),
 
+    /// Error for invalid `LngLat`
+    #[error("invalid lnglat: {0}")]
+    InvalidLngLat(String),
+
+    /// Error for invalid SRTM string
+    #[error("invalid SRTM string: {0}")]
+    InvalidSrtmString(String),
+
     /// Error for invalid zoom between 0 and 32
     #[error("invalid zoom(s): {0}")]
     InvalidZoom(String),

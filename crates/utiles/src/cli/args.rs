@@ -10,6 +10,7 @@ use utiles_core::VERSION;
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
+use crate::mbt::MbtType;
 use crate::tile_strfmt::TileStringFormatter;
 // use crate::cli::commands::WebpifyArgs;
 
@@ -52,12 +53,18 @@ pub struct TileInputStreamArgs {
 
 fn tile_fmt_string_long_help() -> String {
     r#"Format string for tiles (default: `{json_arr}`)
+
 Example:
     > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
     http://thingy.com/1/0/0.png
     http://thingy.com/1/0/1.png
     http://thingy.com/1/1/0.png
     http://thingy.com/1/1/1.png
+    > utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column = {x} AND tile_row = {-y};"
+    SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+    SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+    SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+    SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
 
 fmt-tokens:
     `{json_arr}`/`{json}`  -> [x, y, z]
@@ -82,14 +89,14 @@ pub struct TileFmtOptions {
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub obj: bool,
 
-    /// Format string for tiles (default: `{json_arr}`)
+    /// Format string for tiles (default: `{json_arr}`); see --help for more
     #[arg(
         required = false,
         long,
         alias = "fmt",
         short = 'F',
         conflicts_with = "obj",
-        help = tile_fmt_string_long_help()
+        long_help = tile_fmt_string_long_help()
     )]
     pub fmt: Option<String>,
 }
@@ -136,6 +143,15 @@ pub struct TileFmtArgs {
 }
 
 #[derive(Debug, Parser)]
+pub struct FmtStrArgs {
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
+
+#[derive(Debug, Parser)]
 pub struct ParentChildrenArgs {
     #[command(flatten)]
     pub inargs: TileInputStreamArgs,
@@ -158,15 +174,43 @@ pub struct SqliteDbCommonArgs {
     pub min: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone, clap::ValueEnum)]
+pub enum DbtypeOption {
+    Flat,
+    Hash,
+    Norm,
+}
+
+impl From<&DbtypeOption> for MbtType {
+    fn from(opt: &DbtypeOption) -> Self {
+        match opt {
+            DbtypeOption::Flat => MbtType::Flat,
+            DbtypeOption::Hash => MbtType::Hash,
+            DbtypeOption::Norm => MbtType::Norm,
+        }
+    }
+}
+
+#[derive(Debug, Parser, Clone)]
 pub struct TouchArgs {
     /// mbtiles filepath
     #[arg(required = true)]
     pub filepath: String,
 
-    /// page size (default: 4096)
+    /// page size (default: 512)
     #[arg(required = false, long)]
     pub page_size: Option<i64>,
+
+    /// db-type (default: flat)
+    #[arg(required = false, long = "dbtype", default_value = "flat")]
+    pub dbtype: Option<DbtypeOption>,
+}
+
+impl TouchArgs {
+    #[must_use]
+    pub fn mbtype(&self) -> MbtType {
+        self.dbtype.as_ref().map_or(MbtType::Flat, |opt| opt.into())
+    }
 }
 
 #[derive(Debug, Parser)]
@@ -207,7 +251,7 @@ pub struct MetadataSetArgs {
     pub key: String,
 
     /// value
-    #[arg(required = true)]
+    #[arg(required = false)]
     pub value: Option<String>,
 }
 
@@ -253,6 +297,13 @@ pub struct UpdateArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    // Alias `aboot` for possible Canadian users as they will not understand
+    // `about` -- similarly I often alias `math` to `maths` for british
+    // colleagues who would otherwise have no idea what I'm talking about
+    /// Echo info about utiles
+    #[command(name = "about", visible_alias = "aboot")]
+    About,
+
     /// Echo the `tile.json` for mbtiles file
     #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes")]
     Tilejson(TilejsonArgs),
@@ -310,6 +361,37 @@ pub enum Commands {
     TILE CLI UTILS - MERCANTILE LIKE CLI
     ========================================================================
     */
+    /// Format json-tiles format-string
+    ///
+    /// fmt-tokens:
+    ///     `{json_arr}`/`{json}`  -> [x, y, z]
+    ///     `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
+    ///     `{quadkey}`/`{qk}`     -> quadkey string
+    ///     `{pmtileid}`/`{pmid}`  -> pmtile-id
+    ///     `{x}`                  -> x tile coord
+    ///     `{y}`                  -> y tile coord
+    ///     `{z}`                  -> z/zoom level
+    ///     `{-y}`/`{yup}`         -> y tile coord flipped/tms
+    ///     `{zxy}`                -> z/x/y
+    ///     
+    ///
+    /// Example:
+    ///     ```
+    ///     > echo "[486, 332, 10]" | utiles fmtstr
+    ///     [486, 332, 10]
+    ///     > echo "[486, 332, 10]" | utiles fmtstr --fmt "{x},{y},{z}"
+    ///     486,332,10
+    ///     > echo "[486, 332, 10]" | utiles fmt --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column = {x} AND tile_row = {y};"
+    ///     SELECT * FROM tiles WHERE zoom_level = 10 AND tile_column = 486 AND tile_row = 332;
+    ///     ```
+    ///
+    #[command(
+        name = "fmtstr",
+        aliases = &["fmt", "xt"],
+        verbatim_doc_comment,
+    )]
+    Fmt(TileFmtArgs),
+
     /// Echo the Web Mercator tile at ZOOM level bounding `GeoJSON` [west, south,
     /// east, north] bounding boxes, features, or collections read from stdin.
     ///

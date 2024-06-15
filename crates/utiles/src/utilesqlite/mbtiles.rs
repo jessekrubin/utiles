@@ -8,22 +8,23 @@ use tracing::{debug, error, warn};
 
 use utiles_core::bbox::BBox;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::UtilesCoreResult;
 use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom};
+use crate::mbt::query::query_mbtiles_type;
+use crate::mbt::{
+    MbtMetadataRow, MbtType, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom,
+};
 use crate::sqlite::InsertStrategy;
 use crate::sqlite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
     pragma_table_list, query_db_fspath, Sqlike3,
 };
+use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::add_ut_functions;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::utilesqlite::hash_types::HashType;
 
-use crate::utilesqlite::mbtype::MbtilesType;
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
 use crate::UtilesError;
 
@@ -93,7 +94,7 @@ impl Mbtiles {
 
     pub fn create<P: AsRef<Path>>(
         path: P,
-        mbtype: Option<MbtilesType>,
+        mbtype: Option<MbtType>,
     ) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(&path)?;
         let res = create_mbtiles_file(&path, &mbtype.unwrap_or_default())?;
@@ -182,7 +183,7 @@ impl Mbtiles {
         }
     }
 
-    pub fn bbox(&self) -> Result<BBox, Box<dyn Error>> {
+    pub fn bbox(&self) -> UtilesResult<BBox> {
         let bounding = self.tilejson()?.bounds;
         match bounding {
             Some(bounds) => Ok(BBox::new(
@@ -191,12 +192,13 @@ impl Mbtiles {
                 bounds.right,
                 bounds.top,
             )),
-            None => Err("Error parsing metadata to TileJSON: no data available".into()),
+            None => Err(UtilesError::ParsingError(
+                "Error parsing metadata to BBox: no bounds".into(),
+            )),
         }
-        // convert boundsd to BBox
     }
 
-    pub fn contains(&self, lnglat: LngLat) -> Result<bool, Box<dyn Error>> {
+    pub fn contains(&self, lnglat: LngLat) -> UtilesResult<bool> {
         let bbox = self.bbox()?;
         let contains = bbox.contains_lnglat(&lnglat);
         // return false if not ok
@@ -257,6 +259,10 @@ impl Mbtiles {
         self.application_id()
     }
 
+    pub fn query_mbt_type(&self) -> UtilesResult<MbtType> {
+        query_mbtiles_type(&self.conn)
+    }
+
     pub fn mbt_stats(&self) -> UtilesResult<MbtilesStats> {
         let query_ti = std::time::Instant::now();
         let filesize = self.db_filesize()?;
@@ -267,10 +273,11 @@ impl Mbtiles {
         let zoom_stats = self.zoom_stats()?;
         let query_dt = query_ti.elapsed();
         debug!("Finished zoom_stats query in {:?}", query_dt);
-
+        let mbt_type = self.query_mbt_type()?;
         if zoom_stats.is_empty() {
             return Ok(MbtilesStats {
                 filesize,
+                mbtype: mbt_type,
                 page_count,
                 page_size,
                 freelist_count,
@@ -291,6 +298,7 @@ impl Mbtiles {
         Ok(MbtilesStats {
             ntiles: zoom_stats.iter().map(|r| r.ntiles).sum(),
             filesize,
+            mbtype: mbt_type,
             page_count,
             page_size,
             freelist_count,
@@ -326,19 +334,13 @@ impl Mbtiles {
     }
 }
 
-impl<P: AsRef<std::path::Path>> From<P> for Mbtiles {
+impl<P: AsRef<Path>> From<P> for Mbtiles {
     // TODO: fix uses of this
     #[allow(clippy::unwrap_used)]
     fn from(p: P) -> Self {
         Mbtiles::open_existing(p).unwrap()
     }
 }
-
-// impl From<&Path> for Mbtiles {
-//     fn from(path: &Path) -> Self {
-//         Mbtiles::open_existing(path).unwrap()
-//     }
-// }
 
 // =========================================================================
 // SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS
@@ -737,25 +739,25 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
 
 pub fn create_mbtiles_file<P: AsRef<Path>>(
     fspath: P,
-    mbtype: &MbtilesType,
-) -> UtilesCoreResult<Connection> {
+    mbtype: &MbtType,
+) -> UtilesResult<Connection> {
     let mut conn = Connection::open(fspath).map_err(|e| {
         let emsg = format!("Error opening mbtiles file: {e}");
         UtilesCoreError::Unknown(emsg)
     })?;
     match mbtype {
-        MbtilesType::Flat => {
+        MbtType::Flat => {
             let r = init_flat_mbtiles(&mut conn);
             match r {
                 Ok(()) => Ok(conn),
                 Err(e) => {
                     error!("Error creating flat mbtiles file: {}", e);
                     let emsg = format!("Error creating flat mbtiles file: {e}");
-                    Err(UtilesCoreError::Unknown(emsg))
+                    Err(UtilesError::Unknown(emsg))
                 }
             }
         }
-        _ => Err(UtilesCoreError::Unimplemented(
+        _ => Err(UtilesError::Unimplemented(
             "create_mbtiles_file: only flat mbtiles is implemented".to_string(),
         )),
     }

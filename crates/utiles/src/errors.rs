@@ -19,6 +19,9 @@ pub enum UtilesError {
     #[error("invalid fspath: {0}")]
     InvalidFspath(String),
 
+    #[error("No fspath extension: {0}")]
+    NoFspathExtension(String),
+
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 

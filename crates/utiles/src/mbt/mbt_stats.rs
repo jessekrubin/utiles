@@ -1,3 +1,4 @@
+use crate::mbt::MbtType;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -15,6 +16,7 @@ pub struct MbtilesZoomStats {
 #[derive(Debug, Serialize)]
 pub struct MbtilesStats {
     pub filesize: u64,
+    pub mbtype: MbtType,
     pub ntiles: u64,
     pub nzooms: u32,
     pub page_count: i64,

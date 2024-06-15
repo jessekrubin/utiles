@@ -1,28 +1,41 @@
 //! Utiles traits
 
-/// `BoundingBox` like trait
-pub trait BoundingBoxLike {
-    /// Returns west/left bound
-    fn west(&self) -> f64;
+/// `IsOk` trait for checking if a value is Ok and returns a result
+/// of self or an error
+pub trait IsOk: Sized {
+    /// Returns `Ok` if the value is `Ok` or an error
+    fn ok(&self) -> Result<Self, crate::UtilesCoreError>;
+}
 
-    /// Returns south/bottom bound
-    fn south(&self) -> f64;
+/// `Coord2d` like trait for 2D coordinates has x/y getters
+pub trait Coord2dLike {
+    /// Returns the x value
+    fn x(&self) -> f64;
 
-    /// Returns east/right bound
-    fn east(&self) -> f64;
+    /// Returns the y value
+    fn y(&self) -> f64;
+}
 
-    /// Returns north/top bound
-    fn north(&self) -> f64;
+/// `LngLat` like trait
+pub trait LngLatLike: Coord2dLike {
+    /// Returns the longitude value
+    fn lng(&self) -> f64;
 
-    /// Returns the width of the bounding box
-    fn left(&self) -> f64;
+    /// Returns the longitude value
+    fn lon(&self) -> f64 {
+        self.lng()
+    }
 
-    /// Returns the height of the bounding box
-    fn bottom(&self) -> f64;
+    /// Returns the longitude value
+    fn longitude(&self) -> f64 {
+        self.lat()
+    }
 
-    /// Returns the width of the bounding box
-    fn right(&self) -> f64;
+    /// Returns the latitude value
+    fn lat(&self) -> f64;
 
-    /// Returns the height of the bounding box
-    fn top(&self) -> f64;
+    /// Returns the latitude value
+    fn latitude(&self) -> f64 {
+        self.lat()
+    }
 }

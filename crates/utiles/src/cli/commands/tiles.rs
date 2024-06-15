@@ -39,16 +39,16 @@ pub fn tiles_main(args: TilesArgs, loop_fn: Option<&dyn Fn()>) -> UtilesResult<(
     for (i, tile) in tiles {
         let tile_str = formatter.fmt_tile(&tile);
         let out_str = format!("{rs}{tile_str}\n");
-        buf.write_all(out_str.as_bytes()).unwrap();
+        buf.write_all(out_str.as_bytes())?;
         // writeln!(stdout, "{}{}", rs, tile_fmt.format_tile(&tile)).unwrap();
         // call loop_fn if it's defined every 1000 iterations for signal break
         if i % 1024 == 0 {
-            stdout.flush().unwrap();
+            stdout.flush()?;
             if let Some(f) = loop_fn {
                 f();
             }
         }
     }
-    stdout.flush().unwrap();
+    stdout.flush()?;
     Ok(())
 }

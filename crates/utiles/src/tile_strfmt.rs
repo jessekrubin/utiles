@@ -1,3 +1,4 @@
+//! Tile string formatting
 use std::fmt::{Display, Formatter};
 use utiles_core::TileLike;
 

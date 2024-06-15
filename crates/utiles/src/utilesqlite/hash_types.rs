@@ -42,3 +42,38 @@ impl FromStr for HashType {
         }
     }
 }
+
+impl HashType {
+    #[must_use]
+    pub fn sqlite_fn_name(&self) -> &'static str {
+        match self {
+            HashType::Md5 => "md5",
+            HashType::Fnv1a => "fnv1a",
+            HashType::Xxh32 => "xxh32",
+            HashType::Xxh64 => "xxh64",
+            HashType::Xxh3_64 => "xxh3_64",
+            HashType::Xxh3_128 => "xxh3_128",
+        }
+    }
+
+    #[must_use]
+    pub fn sqlite_hex_fn_name(&self) -> &'static str {
+        match self {
+            HashType::Md5 => "md5_hex",
+            HashType::Fnv1a => "fnv1a_hex",
+            HashType::Xxh32 => "xxh32_hex",
+            HashType::Xxh64 => "xxh64_hex",
+            HashType::Xxh3_64 => "xxh3_64_hex",
+            HashType::Xxh3_128 => "xxh3_128_hex",
+        }
+    }
+
+    #[must_use]
+    pub fn digest_size(&self) -> usize {
+        match self {
+            HashType::Xxh32 => 4,
+            HashType::Md5 | HashType::Xxh3_128 => 16,
+            HashType::Fnv1a | HashType::Xxh64 | HashType::Xxh3_64 => 8,
+        }
+    }
+}

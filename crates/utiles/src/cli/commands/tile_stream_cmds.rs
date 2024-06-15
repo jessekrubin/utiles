@@ -6,6 +6,20 @@ use crate::cli::args::TileFmtArgs;
 use crate::cli::stdinterator_filter;
 use crate::errors::UtilesResult;
 use crate::gj::parsing::parse_bbox_geojson;
+use crate::TileStringFormatter;
+
+pub fn fmtstr_main(args: TileFmtArgs) -> UtilesResult<()> {
+    let tile_formatter = TileStringFormatter::from(&args.fmtopts);
+    let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
+    for line_res in lines {
+        let line = line_res?;
+        let tile = Tile::from_json(&line)?;
+        let tile_str = tile_formatter.fmt_tile(&tile);
+        let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
+        println!("{rs}{tile_str}");
+    }
+    Ok(())
+}
 
 pub fn neighbors_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);

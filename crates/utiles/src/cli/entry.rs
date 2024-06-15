@@ -7,10 +7,10 @@ use tracing_subscriber::EnvFilter;
 
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
-    bounding_tile_main, children_main, contains_main, copy_main, dev_main, info_main,
-    lint_main, metadata_main, metadata_set_main, neighbors_main, parent_main,
-    pmtileid_main, quadkey_main, rimraf_main, serve_main, shapes_main, tilejson_main,
-    tiles_main, touch_main, update_main, vacuum_main,
+    about_main, bounding_tile_main, children_main, contains_main, copy_main, dev_main,
+    fmtstr_main, info_main, lint_main, metadata_main, metadata_set_main,
+    neighbors_main, parent_main, pmtileid_main, quadkey_main, rimraf_main, serve_main,
+    shapes_main, tilejson_main, tiles_main, touch_main, update_main, vacuum_main,
 };
 use crate::errors::UtilesResult;
 
@@ -84,6 +84,7 @@ pub async fn cli_main(
     debug!("args: {:?}", args);
 
     let res: UtilesResult<()> = match args.command {
+        Commands::About => about_main(),
         Commands::Lint(args) => lint_main(&args).await,
         Commands::Touch(args) => touch_main(&args),
         Commands::Vacuum(args) => vacuum_main(&args),
@@ -97,6 +98,7 @@ pub async fn cli_main(
         Commands::Rimraf(args) => rimraf_main(args).await,
         Commands::Contains { filepath, lnglat } => contains_main(&filepath, lnglat),
         // mercantile cli like
+        Commands::Fmt(args) => fmtstr_main(args),
         Commands::Quadkey(args) => quadkey_main(args),
         Commands::Pmtileid(args) => pmtileid_main(args),
         Commands::BoundingTile(args) => bounding_tile_main(args),

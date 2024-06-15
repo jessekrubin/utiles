@@ -11,7 +11,8 @@ use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
 
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MinZoomMaxZoom};
+use crate::mbt::query::query_mbtiles_type;
+use crate::mbt::{MbtMetadataRow, MbtType, MinZoomMaxZoom};
 use crate::sqlite::{journal_mode, magic_number};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
@@ -347,7 +348,7 @@ where
 
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
         let mut metadata = self.metadata_rows().await?;
-        // if no 'minzoom' or 'maxzoom' are found we gotta wuery them...
+        // if no 'minzoom' or 'maxzoom' are found we gotta query them...
 
         // check if minzoom or maxzoom are missing
         let minzoom_value = metadata.iter().find(|m| m.name == "minzoom");
@@ -401,6 +402,10 @@ where
             .map_err(UtilesError::AsyncSqliteError)?;
 
         Ok(tile)
+    }
+
+    async fn query_mbt_type(&self) -> UtilesResult<MbtType> {
+        self.conn(|conn| Ok(query_mbtiles_type(conn))).await?
     }
 }
 

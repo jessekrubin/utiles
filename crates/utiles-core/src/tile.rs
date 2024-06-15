@@ -15,7 +15,7 @@ use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
-use crate::{pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey};
+use crate::{pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey, IsOk};
 
 /// Tile X-Y-Z struct
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -112,25 +112,21 @@ impl FromStr for Tile {
         if s.starts_with('{') {
             // if '{' assume its an obj
             let r = Tile::from_json_obj(s);
-            match r {
-                Ok(tile) => return Ok(tile),
+            return match r {
+                Ok(tile) => Ok(tile),
                 Err(_e) => {
-                    return Err(Box::from(UtilesCoreError::TileParseError(
-                        s.to_string(),
-                    )));
+                    Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
                 }
-            }
+            };
         } else if s.starts_with('[') {
             // if '[' assume its an arr
             let r = Tile::from_json_arr(s);
-            match r {
-                Ok(tile) => return Ok(tile),
+            return match r {
+                Ok(tile) => Ok(tile),
                 Err(_e) => {
-                    return Err(Box::from(UtilesCoreError::TileParseError(
-                        s.to_string(),
-                    )));
+                    Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
                 }
-            }
+            };
         }
 
         // assume its a quadkey
@@ -552,6 +548,27 @@ impl Tile {
             properties,
         };
         Ok(tile_feature)
+    }
+}
+
+impl IsOk for Tile {
+    fn ok(&self) -> UtilesCoreResult<Self> {
+        if self.z > 30 {
+            Err(UtilesCoreError::InvalidTile(format!(
+                "({},{},{}) 0 <= zoom <= 30",
+                self.x, self.y, self.z
+            )))
+        } else {
+            let z2 = 2_u32.pow(u32::from(self.z));
+            if self.x >= z2 || self.y >= z2 {
+                Err(UtilesCoreError::InvalidTile(format!(
+                    "({},{},{}) x < 2^z and y < 2^z",
+                    self.x, self.y, self.z
+                )))
+            } else {
+                Ok(*self)
+            }
+        }
     }
 }
 
