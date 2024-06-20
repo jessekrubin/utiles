@@ -373,7 +373,7 @@ pub enum Commands {
     ///     `{z}`                  -> z/zoom level
     ///     `{-y}`/`{yup}`         -> y tile coord flipped/tms
     ///     `{zxy}`                -> z/x/y
-    ///     
+    ///
     ///
     /// Example:
     ///     ```
@@ -627,6 +627,10 @@ pub struct CopyArgs {
     /// bbox (west, south, east, north)
     #[arg(required = false, long, value_parser = parse_bbox_ext, allow_hyphen_values = true)]
     pub bbox: Option<BBox>,
+
+    /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
+    #[arg(required = false, long, short)]
+    pub jobs: Option<u8>,
 }
 
 impl CopyArgs {

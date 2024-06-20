@@ -53,6 +53,7 @@ tokio-signal = "0.2.9"
 colored = "2.1.0"
 log = "0.4.21"
 chrono = "0.4.38"
+num_cpus = "1.16.0"
 #image = "0.25.1"
 
 [dev-dependencies]

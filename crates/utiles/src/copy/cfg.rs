@@ -17,6 +17,7 @@ pub struct CopyConfig {
     pub verbose: bool,
     pub dryrun: bool,
     pub force: bool,
+    pub jobs: Option<u8>,
 }
 
 impl CopyConfig {
@@ -100,6 +101,21 @@ impl CopyConfig {
         self.check_src_exists()?;
         self.check_src_dst_same()?;
         Ok(())
+    }
+
+    pub fn njobs(&self) -> u8 {
+        if let Some(j) = self.jobs {
+            j
+        } else {
+            let ncpus = num_cpus::get();
+            // if less than 4 cpus then use 1 job otherwise just default to 4 to
+            // not throttle errything
+            if ncpus < 4 {
+                1
+            } else {
+                4
+            }
+        }
     }
 }
 

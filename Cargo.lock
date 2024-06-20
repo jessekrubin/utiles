@@ -2198,6 +2198,7 @@ dependencies = [
  "http-body-util",
  "imagesize",
  "log",
+ "num_cpus",
  "rusqlite",
  "serde",
  "serde_json",

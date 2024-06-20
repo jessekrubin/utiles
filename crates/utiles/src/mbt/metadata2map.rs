@@ -21,6 +21,16 @@ pub fn metadata2duplicates(
         .filter(|(_k, v)| v.len() > 1)
         .collect()
 }
+#[must_use]
+pub fn metadata_vec_has_duplicates(rows: &[MbtMetadataRow]) -> bool {
+    rows.iter()
+        .fold(BTreeMap::new(), |mut acc: BTreeMap<String, usize>, row| {
+            *acc.entry(row.name.clone()).or_default() += 1;
+            acc
+        })
+        .into_iter()
+        .any(|(_k, v)| v > 1)
+}
 
 /// Convert a `MbtilesMetadataRows` to a `HashMap<String, String>`
 #[must_use]
