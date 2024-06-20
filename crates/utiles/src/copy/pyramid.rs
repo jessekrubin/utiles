@@ -1,6 +1,7 @@
 use std::cell::Cell;
 use std::path::{Path, PathBuf};
 
+use crate::mbt::{metadata2map_val, metadata_vec_has_duplicates};
 use futures::stream::{self, StreamExt};
 use tokio::fs;
 use tracing::{debug, info, warn};
@@ -89,7 +90,14 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
         warn!("e: {e:?}");
         vec![]
     });
-    let metadata_str = serde_json::to_string_pretty(&metadata_vec)?;
+    let metadata_str = if metadata_vec_has_duplicates(&metadata_vec) {
+        warn!("metadata has duplicates writing as array...");
+        serde_json::to_string_pretty(&metadata_vec)?
+    } else {
+        let metadata_obj = metadata2map_val(&metadata_vec);
+        serde_json::to_string_pretty(&metadata_obj)?
+    };
+    // serde_json::to_string_pretty(&metadata_vec)?;
     // ensure output_dir exists
     fs::create_dir_all(&output_dir).await?;
     // write metadata-json to output_dir/metadata.json
@@ -114,7 +122,7 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
     let zx_stream = stream::iter(zx_iter);
 
     zx_stream
-        .for_each_concurrent(10, |zx| async {
+        .for_each_concurrent(Some(cfg.njobs().into()), |zx| async {
             let zx = zx;
             match zx {
                 Ok(zx) => {

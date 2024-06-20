@@ -1,5 +1,4 @@
 use std::path::{Path, PathBuf};
-
 use tracing::warn;
 
 use crate::cli::args::CopyArgs;
@@ -50,6 +49,7 @@ fn get_tile_dst(dst: &str) -> UtilesResult<Destination> {
 
 pub async fn copy_main(args: CopyArgs) -> UtilesResult<()> {
     warn!("experimental command: copy/cp");
+
     let copy_cfg = CopyConfig {
         src: PathBuf::from(&args.src),
         dst: PathBuf::from(&args.dst),
@@ -59,6 +59,7 @@ pub async fn copy_main(args: CopyArgs) -> UtilesResult<()> {
         bboxes: args.bboxes(),
         force: false,
         dryrun: false,
+        jobs: args.jobs,
     };
     copy(&copy_cfg).await?;
 

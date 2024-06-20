@@ -62,13 +62,14 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
         }
     }
 
-    let (tx, mut rx) = mpsc::channel(64);
+    let (tile_load_tx, mut tile_load_rx) = mpsc::channel(64);
+    let (tile2load_tx, mut tile2load_rx) = mpsc::channel::<String>(64);
 
     // Database insertion task
-    let db_task = task::spawn(async move {
+    let db_inserter = task::spawn(async move {
         let mut tiles = Vec::with_capacity(999);
         let mut nwritten = 0;
-        while let Some(tile_data) = rx.recv().await {
+        while let Some(tile_data) = tile_load_rx.recv().await {
             tiles.push(tile_data);
             if tiles.len() >= 999 {
                 debug!("inserting tiles: {:?}", tiles.len());
@@ -89,46 +90,91 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
         debug!("nwritten: {:?}", nwritten);
     });
 
-    // File processing tasks
-    for entry in walker.into_iter().filter_map(Result::ok) {
-        let path = entry.path().to_owned();
-        let tx_clone = tx.clone();
-        let tile_xyz = fspath2xyz(&path);
-        match tile_xyz {
-            Ok(tile_xyz) => {
-                task::spawn(async move {
-                    let data = fs::read(&path).await;
-                    match data {
-                        Ok(data) => {
-                            let tile_data = TileData::new(
-                                Tile::new(tile_xyz.0, tile_xyz.1, tile_xyz.2),
-                                data,
-                            );
-                            match tx_clone.send(tile_data).await {
-                                Ok(()) => {
-                                    debug!("sent tile: {:?}", tile_xyz);
-                                }
-                                Err(e) => {
-                                    warn!("e: {e:?}");
+    let tile_loader_task = task::spawn(async move {
+        while let Some(path_str) = tile2load_rx.recv().await {
+            let tx_clone = tile_load_tx.clone();
+            let path = Path::new(&path_str);
+            let tile_xyz = fspath2xyz(path);
+            match tile_xyz {
+                Ok(tile_xyz) => {
+                    task::spawn(async move {
+                        let data = fs::read(path_str).await;
+                        match data {
+                            Ok(data) => {
+                                let tile_data = TileData::new(
+                                    Tile::new(tile_xyz.0, tile_xyz.1, tile_xyz.2),
+                                    data,
+                                );
+                                match tx_clone.send(tile_data).await {
+                                    Ok(()) => {
+                                        debug!("sent tile: {:?}", tile_xyz);
+                                    }
+                                    Err(e) => {
+                                        warn!("e: {e:?}");
+                                    }
                                 }
                             }
+                            Err(e) => {
+                                warn!("e: {e:?}");
+                            }
                         }
-                        Err(e) => {
-                            warn!("e: {e:?}");
-                        }
-                    }
-                });
-            }
-            Err(e) => {
-                warn!("e: {e:?}");
+                    });
+                }
+                Err(e) => {
+                    warn!("e: {e:?}");
+                }
             }
         }
+    });
+
+    // File processing tasks
+    // for entry in walker.into_iter().filter_map(Result::ok) {
+    //     let path = entry.path().to_owned();
+    //     let tx_clone = tile_load_tx.clone();
+    //     let tile_xyz = fspath2xyz(&path);
+    //     match tile_xyz {
+    //         Ok(tile_xyz) => {
+    //             task::spawn(async move {
+    //                 let data = fs::read(&path).await;
+    //                 match data {
+    //                     Ok(data) => {
+    //                         let tile_data = TileData::new(
+    //                             Tile::new(tile_xyz.0, tile_xyz.1, tile_xyz.2),
+    //                             data,
+    //                         );
+    //                         match tx_clone.send(tile_data).await {
+    //                             Ok(()) => {
+    //                                 debug!("sent tile: {:?}", tile_xyz);
+    //                             }
+    //                             Err(e) => {
+    //                                 warn!("e: {e:?}");
+    //                             }
+    //                         }
+    //                     }
+    //                     Err(e) => {
+    //                         warn!("e: {e:?}");
+    //                     }
+    //                 }
+    //             });
+    //         }
+    //         Err(e) => {
+    //             warn!("e: {e:?}");
+    //         }
+    //     }
+    // }
+    for entry in walker.into_iter().filter_map(Result::ok) {
+        let fspath_string: String = entry.path().to_string_lossy().into_owned();
+        tile2load_tx.send(fspath_string).await.map_err(|e| {
+            UtilesError::Unknown(format!("tile2load_tx.send error: {e:?}"))
+        })?;
     }
     debug!("dropping tx");
     // drop tx to close the channel
-    drop(tx);
-    // Wait for the database task to complete
-    db_task
+    drop(tile2load_tx);
+    tile_loader_task
+        .await
+        .map_err(|e| UtilesError::Unknown(format!("tile_loader_task error: {e:?}")))?;
+    db_inserter
         .await
         .map_err(|e| UtilesError::Unknown(format!("db_task error: {e:?}")))?;
     Ok(())
