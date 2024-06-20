@@ -863,9 +863,9 @@ dependencies = [
 
 [[package]]
 name = "httparse"
-version = "1.9.3"
+version = "1.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0e7a4dd27b9476dc40cb050d3632d3bba3a70ddbff012285f7f8559a1e7e545"
+checksum = "0fcc0b4a115bf80b728eb8ea024ad5bd707b615bfed49e0665b6e0f86fd082d9"
 
 [[package]]
 name = "httpdate"
@@ -1116,9 +1116,9 @@ checksum = "6877bb514081ee2a7ff5ef9de3281f14a4dd4bceac4c09388074a6b5df8a139a"
 
 [[package]]
 name = "miniz_oxide"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87dfd01fe195c66b572b37921ad8803d010623c0aca821bea2302239d155cdae"
+checksum = "b8a240ddb74feaf34a79a7add65a741f3167852fba007066dcac1ca548d89c08"
 dependencies = [
  "adler",
 ]
@@ -1189,9 +1189,9 @@ dependencies = [
 
 [[package]]
 name = "noncrypto-digests"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab36a8c9c2f5750c015e9d567e4d64a66383b464f8b1a52b705c5025b4c52fdb"
+checksum = "3f69de4f1f8ec114a91b5a4ced1424074578db8d7cc4e4e0b01987804b78bb5b"
 dependencies = [
  "digest",
  "fnv",
@@ -1468,7 +1468,7 @@ dependencies = [
 
 [[package]]
 name = "pyutiles"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "pyo3",
  "pyo3-build-config",
@@ -1785,9 +1785,9 @@ dependencies = [
 
 [[package]]
 name = "sqlite-hashes"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16e525595f5f7d0b78daecb5d4fbf347d876a1d17d4486e3aba587891bb26333"
+checksum = "39e59834cb3c95e0993b5768ca9f408e8aecda5c9489d3f1f4a05fe848c4f77d"
 dependencies = [
  "digest",
  "hex",
@@ -2181,7 +2181,7 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "utiles"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "async-sqlite",
  "async-trait",
@@ -2219,7 +2219,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-core"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "fast_hilbert",
  "serde",
