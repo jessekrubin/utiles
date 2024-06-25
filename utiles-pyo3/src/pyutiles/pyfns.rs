@@ -30,11 +30,13 @@ pub fn ul(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLat> {
 }
 
 #[pyfunction]
+#[pyo3(signature = (lng, lat, truncate = None))]
 pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
     utiles::xy(lng, lat, truncate)
 }
 
 #[pyfunction]
+#[pyo3(signature = (lng, lat, truncate = None))]
 pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
     let trunc = truncate.unwrap_or(false);
     if !trunc && (lat <= -90.0 || lat >= 90.0) {
@@ -52,6 +54,7 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
 }
 
 #[pyfunction]
+#[pyo3(signature = (x, y, truncate = None))]
 pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
     // let trunc = truncate.unwrap_or(false);
     let lnglat = utiles::lnglat(x, y, truncate);
@@ -101,6 +104,7 @@ pub fn from_tuple(tile: TileTuple) -> PyTile {
     PyTile::new(tile.0, tile.1, tile.2)
 }
 #[pyfunction]
+#[pyo3(signature = (tile, fid = None, props = None, projected = None, buffer = None, precision = None))]
 pub fn feature(
     py: Python,
     tile: PyTileLike,
@@ -156,6 +160,7 @@ pub fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
 }
 
 #[pyfunction]
+#[pyo3(signature = (lng, lat, zoom, truncate=None))]
 pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<PyTile> {
     if lat <= -90.0 || lat >= 90.0 {
         Err(PyErr::new::<PyValueError, _>(format!(
@@ -283,6 +288,7 @@ pub fn truncate_lnglat(lng: f64, lat: f64) -> (f64, f64) {
 }
 
 #[pyfunction]
+#[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
 pub fn tiles_count(
     west: f64,
     south: f64,
@@ -299,6 +305,7 @@ pub fn tiles_count(
 }
 
 #[pyfunction]
+#[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
 pub fn tiles(
     west: f64,
     south: f64,
@@ -329,6 +336,7 @@ pub fn tiles(
 }
 
 #[pyfunction]
+#[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
 pub fn tiles_list(
     west: f64,
     south: f64,
