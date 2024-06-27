@@ -39,6 +39,10 @@ impl DbPath {
             filename: ":memory:".to_string(),
         }
     }
+
+    pub fn fspath_exists(&self) -> bool {
+        PathBuf::from(&self.fspath).exists()
+    }
 }
 
 // try from for dbpath

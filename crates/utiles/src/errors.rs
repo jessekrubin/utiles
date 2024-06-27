@@ -85,11 +85,12 @@ pub enum UtilesError {
     SerdeJsonError(#[from] serde_json::Error),
 }
 
-impl From<RusqliteResult<()>> for UtilesError {
-    fn from(e: RusqliteResult<()>) -> Self {
-        match e {
-            Ok(()) => UtilesError::Unknown("unknown error".to_string()),
-            Err(e) => UtilesError::RusqliteError(e),
-        }
-    }
-}
+// impl<T> From<RusqliteResult<T>> for UtilesError {
+//     fn from(e: RusqliteResult<T>) -> Self {
+//         match e {
+//             Ok(T) => UtilesError::Unknown("unknown error".to_string()),
+//             Err(e) => UtilesError::RusqliteError(e),
+//         }
+//     }
+// }
+//

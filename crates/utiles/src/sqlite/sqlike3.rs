@@ -1,9 +1,9 @@
 use crate::sqlite::errors::SqliteResult;
 use crate::sqlite::page_size::pragma_page_size_get;
 use crate::sqlite::{
-    analyze, is_empty_db, pragma_freelist_count, pragma_index_list, pragma_page_count,
-    pragma_page_size_set, pragma_table_list, vacuum, vacuum_into, PragmaIndexListRow,
-    PragmaTableListRow,
+    analyze, attach_db, detach_db, is_empty_db, pragma_freelist_count,
+    pragma_index_list, pragma_page_count, pragma_page_size_set, pragma_table_list,
+    vacuum, vacuum_into, PragmaIndexListRow, PragmaTableListRow,
 };
 
 macro_rules! sqlike3_methods {
@@ -35,5 +35,7 @@ sqlike3_methods! {
         pragma_table_list() -> SqliteResult<Vec<PragmaTableListRow>> => pragma_table_list;
         vacuum() -> SqliteResult<usize> => vacuum;
         vacuum_into(dst: String) -> SqliteResult<usize> => vacuum_into;
+        attach_db(db: &str, as_: &str) -> SqliteResult<()> => attach_db;
+        detach_db(db: &str) -> SqliteResult<()> => detach_db;
     }
 }

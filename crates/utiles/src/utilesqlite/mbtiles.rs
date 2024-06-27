@@ -260,7 +260,7 @@ impl Mbtiles {
     }
 
     pub fn query_mbt_type(&self) -> UtilesResult<MbtType> {
-        query_mbtiles_type(&self.conn)
+        query_mbtiles_type(&self.conn).map_err(|e| e.into())
     }
 
     pub fn mbt_stats(&self) -> UtilesResult<MbtilesStats> {

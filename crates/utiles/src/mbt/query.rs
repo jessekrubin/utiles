@@ -1,4 +1,3 @@
-use crate::UtilesError;
 use rusqlite::Connection;
 
 use crate::mbt::MbtType;
@@ -47,22 +46,21 @@ pub fn is_tippecanoe_mbtiles(conn: &Connection) -> RusqliteResult<bool> {
     Ok(r == 1)
 }
 
-pub fn query_mbtiles_type(conn: &Connection) -> UtilesResult<MbtType> {
-    let is_tippecanoe =
-        is_tippecanoe_mbtiles(conn).map_err(UtilesError::RusqliteError)?;
+pub fn query_mbtiles_type(conn: &Connection) -> RusqliteResult<MbtType> {
+    let is_tippecanoe = is_tippecanoe_mbtiles(conn)?;
     if is_tippecanoe {
         return Ok(MbtType::Tippecanoe);
     }
-    let is_norm = is_norm_mbtiles(conn).map_err(UtilesError::RusqliteError)?;
+    let is_norm = is_norm_mbtiles(conn)?;
     if is_norm {
         return Ok(MbtType::Norm);
     }
-    let is_hash = is_tiles_with_hash(conn).map_err(UtilesError::RusqliteError)?;
+    let is_hash = is_tiles_with_hash(conn)?;
 
     if is_hash {
         return Ok(MbtType::Hash);
     }
-    let is_flat = is_flat_mbtiles(conn).map_err(UtilesError::RusqliteError)?;
+    let is_flat = is_flat_mbtiles(conn)?;
     Ok(if is_flat {
         MbtType::Flat
     } else {
