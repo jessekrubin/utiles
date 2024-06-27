@@ -25,10 +25,10 @@ fn mbinfo(filepath: &str) -> UtilesResult<MbtilesStats> {
 pub fn info_main(args: &InfoArgs) -> UtilesResult<()> {
     let stats = mbinfo(&args.common.filepath)?;
     let str = if args.common.min {
-        serde_json::to_string(&stats).unwrap()
+        serde_json::to_string(&stats)
     } else {
-        serde_json::to_string_pretty(&stats).unwrap()
-    };
+        serde_json::to_string_pretty(&stats)
+    }?;
     println!("{str}");
     Ok(())
 }

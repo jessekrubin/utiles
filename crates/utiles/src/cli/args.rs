@@ -122,10 +122,9 @@ impl From<&TileFmtOptions> for TileStringFormatter {
 #[derive(Debug, Parser)]
 pub struct TilesArgs {
     /// Zoom level (0-30)
-    #[arg(required = true)]
+    #[arg(required = true, value_parser = clap::value_parser!(u8).range(0..=30))]
     pub zoom: u8,
 
-    #[arg()]
     #[command(flatten)]
     pub inargs: TileInputStreamArgs,
 

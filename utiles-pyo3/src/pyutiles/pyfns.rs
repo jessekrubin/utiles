@@ -150,12 +150,12 @@ pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
 #[pyo3(signature = (* args))]
 pub fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
     let tile = pyparsing::parse_tile_arg(args)?;
-    let pybbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
+    let web_bbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
     Ok(PyBbox::new(
-        pybbox.left,
-        pybbox.bottom,
-        pybbox.right,
-        pybbox.top,
+        web_bbox.left(),
+        web_bbox.bottom(),
+        web_bbox.right(),
+        web_bbox.top(),
     ))
 }
 

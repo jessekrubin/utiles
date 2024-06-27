@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use tilejson::TileJSON;
 
-use utiles_core::{Tile, TileLike};
+use utiles_core::{BBox, Tile, TileLike};
 
 use crate::errors::UtilesResult;
 use crate::mbt::MinZoomMaxZoom;
@@ -40,4 +40,5 @@ pub trait MbtilesAsync: Sized {
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON>;
 
     async fn query_mbt_type(&self) -> UtilesResult<MbtType>;
+    async fn bbox(&self) -> UtilesResult<BBox>;
 }

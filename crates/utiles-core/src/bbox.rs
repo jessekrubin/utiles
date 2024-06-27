@@ -3,6 +3,7 @@ use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
 use crate::tile_like::TileLike;
+use crate::{xy, Point2d};
 use serde::{Deserialize, Serialize};
 
 /// Bounding box tuple
@@ -24,15 +25,12 @@ pub struct BBox {
 
 /// Web Mercator Bounding box struct
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct WebMercatorBbox {
-    /// left/west boundary
-    pub left: f64,
-    /// bottom/south boundary
-    pub bottom: f64,
-    /// right/east boundary
-    pub right: f64,
-    /// top/north boundary
-    pub top: f64,
+pub struct WebBBox {
+    /// lower-left corner (west, south)/(left, bottom)
+    min: Point2d<f64>,
+
+    /// upper-right corner (east, north)/(right, top)
+    max: Point2d<f64>,
 }
 
 /// Bounding box containable enum
@@ -161,6 +159,32 @@ impl BBox {
     #[must_use]
     pub fn left(&self) -> f64 {
         self.west
+    }
+
+    /// Returns the geojson tuple/array representation of the bounding box
+    #[must_use]
+    #[inline]
+    pub fn json_arr(&self) -> String {
+        format!(
+            "[{},{},{},{}]",
+            self.west(),
+            self.south(),
+            self.east(),
+            self.north()
+        )
+    }
+
+    /// Returns the gdal-ish string representation of the bounding box
+    #[must_use]
+    #[inline]
+    pub fn projwin_str(&self) -> String {
+        format!(
+            "{},{},{},{}",
+            self.west(),
+            self.north(),
+            self.east(),
+            self.south()
+        )
     }
 
     /// Returns the center of the bounding box as a `LngLat`
@@ -329,20 +353,119 @@ impl TryFrom<&str> for BBox {
     }
 }
 
-// impl From<&str> for BBox {
-//     fn from(s: &str) -> Self {
-//         parse_bbox(s).unwrap()
-//     }
-// }
+impl WebBBox {
+    #[must_use]
+    pub fn new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
+        WebBBox {
+            min: Point2d::new(left, bottom),
+            max: Point2d::new(right, top),
+        }
+    }
 
-// impl From<String> for BBox {
-//     fn from(s: String) -> Self {
-//         self::BBox::from(&s)
-//     }
-// }
+    #[must_use]
+    #[inline]
+    pub fn min(&self) -> Point2d<f64> {
+        self.min
+    }
 
-// // impl From<Tile> for WebMercatorBbox {
-// //     fn from(tile: Tile) -> Self {
-// //         crate::xyz2bbox(tile.x, tile.y, tile.z)
-// //     }
-// // }
+    #[must_use]
+    #[inline]
+    pub fn max(&self) -> Point2d<f64> {
+        self.max
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn left(&self) -> f64 {
+        self.min.x
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn bottom(&self) -> f64 {
+        self.min.y
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn right(&self) -> f64 {
+        self.max.x
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn top(&self) -> f64 {
+        self.max.y
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn width(&self) -> f64 {
+        self.max.x - self.min.x
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn west(&self) -> f64 {
+        self.min.x
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn south(&self) -> f64 {
+        self.min.y
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn east(&self) -> f64 {
+        self.max.x
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn north(&self) -> f64 {
+        self.max.y
+    }
+
+    /// Returns the geojson tuple/array representation of the bounding box
+    #[must_use]
+    #[inline]
+    pub fn json_arr(&self) -> String {
+        format!(
+            "[{},{},{},{}]",
+            self.west(),
+            self.south(),
+            self.east(),
+            self.north()
+        )
+    }
+
+    /// Returns the gdal-ish string representation of the bounding box
+    #[must_use]
+    #[inline]
+    pub fn projwin_str(&self) -> String {
+        format!(
+            "{},{},{},{}",
+            self.west(),
+            self.north(),
+            self.east(),
+            self.south()
+        )
+    }
+}
+
+impl From<BBox> for WebBBox {
+    fn from(bbox: BBox) -> Self {
+        let (west_merc, south_merc) = xy(bbox.west(), bbox.south(), None);
+        let (east_merc, north_merc) = xy(bbox.east(), bbox.north(), None);
+        WebBBox::new(west_merc, south_merc, east_merc, north_merc)
+    }
+}
+
+impl From<Tile> for WebBBox {
+    fn from(tile: Tile) -> Self {
+        let bbox = tile.geobbox();
+        WebBBox::new(bbox.west, bbox.south, bbox.east, bbox.north)
+    }
+}
