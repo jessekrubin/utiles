@@ -34,6 +34,7 @@ mod globster;
 pub mod lint;
 pub mod mbt;
 pub mod server;
+mod signal;
 pub mod sqlite;
 pub mod sqlite_utiles;
 mod tile_strfmt;

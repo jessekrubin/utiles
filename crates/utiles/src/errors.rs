@@ -1,6 +1,8 @@
 use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
 
+use utiles_core::UtilesCoreResult;
+
 pub type UtilesResult<T> = Result<T, UtilesError>;
 #[derive(Error, Debug)]
 pub enum UtilesCopyError {

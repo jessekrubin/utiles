@@ -1,11 +1,11 @@
 use std::io::{self};
 
 use clap::Parser;
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
-use crate::cli::args::{Cli, Commands};
+use crate::cli::args::{Cli, Commands, TilesArgs};
 use crate::cli::commands::{
     about_main, bounding_tile_main, children_main, contains_main, copy_main, dev_main,
     fmtstr_main, info_main, lint_main, metadata_main, metadata_set_main,
@@ -13,6 +13,8 @@ use crate::cli::commands::{
     shapes_main, tilejson_main, tiles_main, touch_main, update_main, vacuum_main,
 };
 use crate::errors::UtilesResult;
+use crate::signal::shutdown_signal;
+use crate::UtilesError;
 
 struct LogConfig {
     pub debug: bool,
@@ -53,8 +55,45 @@ fn init_tracing(log_config: &LogConfig) {
     }
 }
 
-#[allow(clippy::unused_async)]
 pub async fn cli_main(
+    argv: Option<Vec<String>>,
+    loop_fn: Option<&dyn Fn()>,
+) -> UtilesResult<u8> {
+    let r = tokio::select! {
+        res = async {
+            cli_main_inner(argv, loop_fn).await
+        } => {
+            debug!("Done. :)");
+            res
+        }
+        _ = async {
+            shutdown_signal().await
+        } => {
+            debug!("Aborted. :(");
+            Err(
+                UtilesError::Error(
+                    "Aborted.".to_string()
+                ).into()
+            )
+        }
+    };
+    r
+    // cli_main_inner(argv, loop_fn).await
+}
+
+pub async fn sleep(args: TilesArgs, loop_fn: Option<&dyn Fn()>) -> UtilesResult<()> {
+    for i in 0..5 {
+        info!("sleeping... {}", i);
+        if let Some(f) = loop_fn {
+            f();
+        }
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    }
+    Ok(())
+}
+
+#[allow(clippy::unused_async)]
+pub async fn cli_main_inner(
     argv: Option<Vec<String>>,
     loop_fn: Option<&dyn Fn()>,
 ) -> UtilesResult<u8> {
@@ -96,13 +135,16 @@ pub async fn cli_main(
         Commands::Info(args) => info_main(&args),
         Commands::Dev(args) => dev_main(args).await,
         Commands::Rimraf(args) => rimraf_main(args).await,
-        Commands::Contains { filepath, lnglat } => contains_main(&filepath, lnglat),
+        Commands::Contains { filepath, lnglat } => {
+            contains_main(&filepath, lnglat).await
+        }
         // mercantile cli like
         Commands::Fmt(args) => fmtstr_main(args),
         Commands::Quadkey(args) => quadkey_main(args),
         Commands::Pmtileid(args) => pmtileid_main(args),
         Commands::BoundingTile(args) => bounding_tile_main(args),
-        Commands::Tiles(args) => tiles_main(args, loop_fn),
+        Commands::Tiles(args) => tiles_main(args, None).await,
+        // Commands::Tiles(args) => sleep(args, None).await,
         Commands::Neighbors(args) => neighbors_main(args),
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),

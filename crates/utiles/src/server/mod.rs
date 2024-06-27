@@ -30,14 +30,14 @@ use tower_http::{
 };
 use tracing::{debug, info, warn};
 
+use crate::errors::UtilesResult;
+use crate::globster::find_filepaths;
+use crate::signal::shutdown_signal;
+use crate::utilesqlite::mbtiles_async::MbtilesAsync;
+use crate::utilesqlite::MbtilesAsyncSqliteClient;
 use request_id::Radix36MakeRequestId;
 use utiles_core::tile_type::blob2headers;
 use utiles_core::{quadkey2tile, utile, Tile};
-
-use crate::errors::UtilesResult;
-use crate::globster::find_filepaths;
-use crate::utilesqlite::mbtiles_async::MbtilesAsync;
-use crate::utilesqlite::MbtilesAsyncSqliteClient;
 
 pub mod radix36;
 mod request_id;
@@ -184,36 +184,9 @@ pub async fn utiles_serve(
         .expect("Failed to bind to address");
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
-        .await
-        .unwrap();
+        .await?;
     Ok(())
 }
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        () = ctrl_c => {},
-        () = terminate => {},
-    }
-    info!("SIGTERM received ~ shutting down... :(");
-}
-
 // =============
 // REQUEST ID
 // =============

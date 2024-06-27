@@ -1,4 +1,5 @@
-use crate::{flipy, pmtiles, xyz2rmid, LngLat, Tile};
+use crate::bbox::WebBBox;
+use crate::{flipy, pmtiles, xyz2rmid, BBox, LngLat, Tile};
 
 /// Trait def for tile-like objects/structs/things/whatevers
 pub trait TileLike {
@@ -72,7 +73,6 @@ pub trait TileLike {
     }
 
     /// Return the lr (lower right) corner of the tile
-
     #[must_use]
     fn lr(&self) -> LngLat {
         crate::ul(self.x() + 1, self.y() + 1, self.z())
@@ -126,6 +126,24 @@ pub trait TileLike {
         let ul = self.ul();
         let lr = self.lr();
         (ul.lng(), lr.lat(), lr.lng(), ul.lat())
+    }
+
+    #[must_use]
+    fn geobbox(&self) -> BBox {
+        let ul = self.ul();
+        let lr = self.lr();
+        BBox::new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
+    }
+
+    #[must_use]
+    fn webbbox(&self) -> WebBBox {
+        self.geobbox().into()
+    }
+
+    #[must_use]
+    fn bbox_string(&self) -> String {
+        let (w, s, e, n) = self.bbox();
+        format!("[{},{},{},{}]", w, s, e, n)
     }
 
     /// Return the center of the tile as a `LngLat`
