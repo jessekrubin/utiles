@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::f64::consts::PI;
 use std::num::FpCategory;
 
-use crate::bbox::{BBox, WebBBox, WebMercatorBbox};
+use crate::bbox::{BBox, WebBBox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesCoreResult;
 use crate::point2d;

@@ -2,7 +2,7 @@ use std::path::Path;
 use tracing::debug;
 
 use crate::errors::UtilesResult;
-use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
+use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use utiles_core::LngLat;
 
 /// Check if a mbtiles file contains a lnglat

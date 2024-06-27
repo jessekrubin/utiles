@@ -20,7 +20,6 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tilejson::TileJSON;
-use tokio::signal;
 use tower::ServiceBuilder;
 use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
 use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};

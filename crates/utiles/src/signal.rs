@@ -1,5 +1,5 @@
 use tokio::signal;
-use tracing::{debug, info};
+use tracing::debug;
 
 pub async fn shutdown_signal() {
     let ctrl_c = async {

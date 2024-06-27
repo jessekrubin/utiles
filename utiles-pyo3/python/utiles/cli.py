@@ -10,14 +10,17 @@ from utiles import ut_cli
 logger = logging.getLogger(__name__)
 
 
-def cli() -> None:
-    args = sys.argv[1:]
+def cli(
+    args: list[str | int | float | bool | None] | None = None,
+) -> None:
+    _args = args or sys.argv[1:]
 
     # if first arg is "utiles" then remove it
-    if args and (args[0] == "utiles" or args[0] == "ut"):
-        args = args[1:]
+    if _args and (_args[0] == "utiles" or _args[0] == "ut"):
+        _args = _args[1:]
+
     try:
-        ut_cli(["ut", *args])
+        ut_cli(["ut", *map(str, _args)])
     except Exception as e:
         logger.error(e)
         raise e from e

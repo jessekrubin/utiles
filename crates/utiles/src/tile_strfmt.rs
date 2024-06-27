@@ -36,8 +36,6 @@ impl Display for FormatTokens {
             FormatTokens::Projwin => "{projwin}",
             FormatTokens::BBoxWeb => "{bbox_web}",
             FormatTokens::ProjwinWeb => "{projwin_web}",
-            FormatTokens::Projwin => "{projwin}",
-            FormatTokens::BBoxWeb => "{bbox_web}",
         })
     }
 }

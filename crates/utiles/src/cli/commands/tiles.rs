@@ -34,13 +34,13 @@ pub async fn tiles_main(
             }
         })
         .flat_map(|s| {
-            s.and_then(|s| {
-                Ok(parse_bbox_ext(&s)
+            s.map(|s| {
+                parse_bbox_ext(&s)
                     .or_else(|_| parse_bbox_geojson(&s))
                     .map_err(|e| {
                         error!("Error parsing bbox: {:?}", e);
                         e
-                    }))
+                    })
             })
         })
         .map(|result| result.unwrap())

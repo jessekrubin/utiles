@@ -6,7 +6,6 @@ use utiles_core::{BBox, Tile, TileLike};
 use crate::errors::UtilesResult;
 use crate::mbt::MinZoomMaxZoom;
 use crate::mbt::{MbtMetadataRow, MbtType};
-use crate::UtilesError;
 
 #[async_trait]
 pub trait MbtilesAsync: Sized {

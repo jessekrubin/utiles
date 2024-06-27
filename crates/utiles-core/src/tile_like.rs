@@ -143,7 +143,7 @@ pub trait TileLike {
     #[must_use]
     fn bbox_string(&self) -> String {
         let (w, s, e, n) = self.bbox();
-        format!("[{},{},{},{}]", w, s, e, n)
+        format!("[{w},{s},{e},{n}]")
     }
 
     /// Return the center of the tile as a `LngLat`

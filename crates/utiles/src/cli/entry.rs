@@ -1,11 +1,11 @@
 use std::io::{self};
 
 use clap::Parser;
-use tracing::{debug, error, info};
+use tracing::{debug, error};
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
-use crate::cli::args::{Cli, Commands, TilesArgs};
+use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
     about_main, bounding_tile_main, children_main, contains_main, copy_main, dev_main,
     fmtstr_main, info_main, lint_main, metadata_main, metadata_set_main,
@@ -57,46 +57,30 @@ fn init_tracing(log_config: &LogConfig) {
 
 pub async fn cli_main(
     argv: Option<Vec<String>>,
-    loop_fn: Option<&dyn Fn()>,
+    // loop_fn: Option<&dyn Fn()>,
 ) -> UtilesResult<u8> {
-    let r = tokio::select! {
+    tokio::select! {
         res = async {
-            cli_main_inner(argv, loop_fn).await
+            cli_main_inner(argv).await
         } => {
             debug!("Done. :)");
             res
         }
-        _ = async {
-            shutdown_signal().await
+        () = async {
+            shutdown_signal().await;
         } => {
             debug!("Aborted. :(");
             Err(
                 UtilesError::Error(
                     "Aborted.".to_string()
-                ).into()
+                )
             )
         }
-    };
-    r
-    // cli_main_inner(argv, loop_fn).await
-}
-
-pub async fn sleep(args: TilesArgs, loop_fn: Option<&dyn Fn()>) -> UtilesResult<()> {
-    for i in 0..5 {
-        info!("sleeping... {}", i);
-        if let Some(f) = loop_fn {
-            f();
-        }
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     }
-    Ok(())
 }
 
 #[allow(clippy::unused_async)]
-pub async fn cli_main_inner(
-    argv: Option<Vec<String>>,
-    loop_fn: Option<&dyn Fn()>,
-) -> UtilesResult<u8> {
+pub async fn cli_main_inner(argv: Option<Vec<String>>) -> UtilesResult<u8> {
     // print args
     let argv = argv.unwrap_or_else(|| std::env::args().collect::<Vec<_>>());
 
@@ -166,7 +150,7 @@ pub async fn cli_main_inner(
 // not sure why this is needed... cargo thinks it's unused???
 pub fn cli_main_sync(
     argv: Option<Vec<String>>,
-    loop_fn: Option<&dyn Fn()>,
+    // loop_fn: Option<&dyn Fn()>,
 ) -> UtilesResult<u8> {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -174,7 +158,7 @@ pub fn cli_main_sync(
         .expect(
             "tokio::runtime::Builder::new_multi_thread().enable_all().build() failed.",
         )
-        .block_on(async { cli_main(argv, loop_fn).await })
+        .block_on(async { cli_main(argv).await })
 }
 
 #[cfg(test)]

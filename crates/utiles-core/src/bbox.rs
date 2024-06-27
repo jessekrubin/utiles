@@ -25,15 +25,12 @@ pub struct BBox {
 
 /// Web Mercator Bounding box struct
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct WebMercatorBbox {
-    /// left/west boundary
-    pub left: f64,
-    /// bottom/south boundary
-    pub bottom: f64,
-    /// right/east boundary
-    pub right: f64,
-    /// top/north boundary
-    pub top: f64,
+pub struct WebBBox {
+    /// lower-left corner (west, south)/(left, bottom)
+    min: Point2d<f64>,
+
+    /// upper-right corner (east, north)/(right, top)
+    max: Point2d<f64>,
 }
 
 /// Bounding box containable enum
@@ -356,12 +353,8 @@ impl TryFrom<&str> for BBox {
     }
 }
 
-pub struct WebBBox {
-    min: Point2d<f64>,
-    max: Point2d<f64>,
-}
-
 impl WebBBox {
+    #[must_use]
     pub fn new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
         WebBBox {
             min: Point2d::new(left, bottom),
