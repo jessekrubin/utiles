@@ -33,6 +33,7 @@ pub mod gj;
 mod globster;
 pub mod lint;
 pub mod mbt;
+mod pmt;
 pub mod server;
 mod signal;
 pub mod sqlite;
