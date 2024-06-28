@@ -78,3 +78,6 @@ ci:
     cargo fmt -- --check
     cargo clippy --all-targets --all-features -- -D warnings
     cargo test
+
+pipsync:
+    uv pip sync ./utiles-pyo3/requirements/dev.txt
