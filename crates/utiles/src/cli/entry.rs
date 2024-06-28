@@ -13,6 +13,8 @@ use crate::cli::commands::{
     shapes_main, tilejson_main, tiles_main, touch_main, update_main, vacuum_main,
 };
 use crate::errors::UtilesResult;
+use crate::signal::shutdown_signal;
+use crate::UtilesError;
 
 struct LogConfig {
     pub debug: bool,
@@ -53,11 +55,32 @@ fn init_tracing(log_config: &LogConfig) {
     }
 }
 
-#[allow(clippy::unused_async)]
 pub async fn cli_main(
     argv: Option<Vec<String>>,
-    loop_fn: Option<&dyn Fn()>,
+    // loop_fn: Option<&dyn Fn()>,
 ) -> UtilesResult<u8> {
+    tokio::select! {
+        res = async {
+            cli_main_inner(argv).await
+        } => {
+            debug!("Done. :)");
+            res
+        }
+        () = async {
+            shutdown_signal().await;
+        } => {
+            debug!("Aborted. :(");
+            Err(
+                UtilesError::Error(
+                    "Aborted.".to_string()
+                )
+            )
+        }
+    }
+}
+
+#[allow(clippy::unused_async)]
+pub async fn cli_main_inner(argv: Option<Vec<String>>) -> UtilesResult<u8> {
     // print args
     let argv = argv.unwrap_or_else(|| std::env::args().collect::<Vec<_>>());
 
@@ -96,13 +119,16 @@ pub async fn cli_main(
         Commands::Info(args) => info_main(&args),
         Commands::Dev(args) => dev_main(args).await,
         Commands::Rimraf(args) => rimraf_main(args).await,
-        Commands::Contains { filepath, lnglat } => contains_main(&filepath, lnglat),
+        Commands::Contains { filepath, lnglat } => {
+            contains_main(&filepath, lnglat).await
+        }
         // mercantile cli like
         Commands::Fmt(args) => fmtstr_main(args),
         Commands::Quadkey(args) => quadkey_main(args),
         Commands::Pmtileid(args) => pmtileid_main(args),
         Commands::BoundingTile(args) => bounding_tile_main(args),
-        Commands::Tiles(args) => tiles_main(args, loop_fn),
+        Commands::Tiles(args) => tiles_main(args, None).await,
+        // Commands::Tiles(args) => sleep(args, None).await,
         Commands::Neighbors(args) => neighbors_main(args),
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),
@@ -124,7 +150,7 @@ pub async fn cli_main(
 // not sure why this is needed... cargo thinks it's unused???
 pub fn cli_main_sync(
     argv: Option<Vec<String>>,
-    loop_fn: Option<&dyn Fn()>,
+    // loop_fn: Option<&dyn Fn()>,
 ) -> UtilesResult<u8> {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -132,7 +158,7 @@ pub fn cli_main_sync(
         .expect(
             "tokio::runtime::Builder::new_multi_thread().enable_all().build() failed.",
         )
-        .block_on(async { cli_main(argv, loop_fn).await })
+        .block_on(async { cli_main(argv).await })
 }
 
 #[cfg(test)]

@@ -2,14 +2,6 @@ use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
 
-use async_sqlite::{
-    Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
-};
-use async_trait::async_trait;
-use rusqlite::{Connection, OpenFlags};
-use tilejson::TileJSON;
-use tracing::{debug, error, info, warn};
-
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::{MbtMetadataRow, MbtType, MinZoomMaxZoom};
@@ -23,6 +15,14 @@ use crate::utilesqlite::mbtiles::{
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
+use async_sqlite::{
+    Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
+};
+use async_trait::async_trait;
+use rusqlite::{Connection, OpenFlags};
+use tilejson::TileJSON;
+use tracing::{debug, error, info, warn};
+use utiles_core::BBox;
 
 #[derive(Clone)]
 pub struct MbtilesAsyncSqliteClient {
@@ -338,6 +338,21 @@ where
         }
     }
 
+    async fn bbox(&self) -> UtilesResult<BBox> {
+        let tilejson = self.tilejson().await?;
+        let bounding = tilejson.bounds;
+        match bounding {
+            Some(bounds) => Ok(BBox::new(
+                bounds.left,
+                bounds.bottom,
+                bounds.right,
+                bounds.top,
+            )),
+            None => Err(UtilesError::ParsingError(
+                "Error parsing metadata to BBox: no bounds".into(),
+            )),
+        }
+    }
     async fn query_minzoom_maxzoom(&self) -> UtilesResult<Option<MinZoomMaxZoom>> {
         let t = self
             .conn(minzoom_maxzoom)

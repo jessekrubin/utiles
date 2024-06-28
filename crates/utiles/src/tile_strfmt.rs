@@ -1,6 +1,7 @@
 //! Tile string formatting
 use std::fmt::{Display, Formatter};
-use utiles_core::TileLike;
+use utiles_core::bbox::WebBBox;
+use utiles_core::{BBox, TileLike};
 
 #[derive(Debug, PartialEq)]
 pub enum FormatTokens {
@@ -13,6 +14,10 @@ pub enum FormatTokens {
     PmtileId,
     JsonObj,
     JsonArr,
+    GeoBBox,
+    Projwin,
+    BBoxWeb,
+    ProjwinWeb,
 }
 
 impl Display for FormatTokens {
@@ -27,6 +32,10 @@ impl Display for FormatTokens {
             FormatTokens::PmtileId => "{pmtileid}",
             FormatTokens::JsonObj => "{json_obj}",
             FormatTokens::JsonArr => "{json_arr}",
+            FormatTokens::GeoBBox => "{bbox}",
+            FormatTokens::Projwin => "{projwin}",
+            FormatTokens::BBoxWeb => "{bbox_web}",
+            FormatTokens::ProjwinWeb => "{projwin_web}",
         })
     }
 }
@@ -49,6 +58,10 @@ impl From<FormatTokens> for &'static str {
             FormatTokens::PmtileId => "{pmtileid}",
             FormatTokens::JsonObj => "{json_obj}",
             FormatTokens::JsonArr => "{json_arr}",
+            FormatTokens::GeoBBox => "{bbox}",
+            FormatTokens::Projwin => "{projwin}",
+            FormatTokens::BBoxWeb => "{bbox_web}",
+            FormatTokens::ProjwinWeb => "{projwin_web}",
         }
     }
 }
@@ -65,6 +78,11 @@ impl From<&str> for FormatParts {
             "pmtileid" | "pmid" => FormatParts::Token(FormatTokens::PmtileId),
             "json" | "json_arr" => FormatParts::Token(FormatTokens::JsonArr),
             "json_obj" | "obj" => FormatParts::Token(FormatTokens::JsonObj),
+            "bbox" => FormatParts::Token(FormatTokens::GeoBBox),
+            "projwin" => FormatParts::Token(FormatTokens::Projwin),
+            "bbox_web" => FormatParts::Token(FormatTokens::BBoxWeb),
+            "projwin_web" => FormatParts::Token(FormatTokens::ProjwinWeb),
+
             _ => FormatParts::Str(s.to_string()),
         }
     }
@@ -82,6 +100,10 @@ impl From<&FormatTokens> for String {
             FormatTokens::PmtileId => "{pmtileid}".to_string(),
             FormatTokens::JsonObj => "{json_obj}".to_string(),
             FormatTokens::JsonArr => "{json_arr}".to_string(),
+            FormatTokens::GeoBBox => "{bbox}".to_string(),
+            FormatTokens::Projwin => "{projwin}".to_string(),
+            FormatTokens::BBoxWeb => "{bbox_web}".to_string(),
+            FormatTokens::ProjwinWeb => "{projwin_web}".to_string(),
         }
     }
 }
@@ -212,6 +234,31 @@ impl TileStringFormatter {
                     }
                     FormatTokens::JsonObj => {
                         parts.push(Part::Dynamic(|tile| tile.json_obj()));
+                    }
+                    FormatTokens::GeoBBox => {
+                        parts.push(Part::Dynamic(|tile| {
+                            let b: BBox = tile.bbox().into();
+                            b.json_arr()
+                        }));
+                    }
+                    FormatTokens::Projwin => {
+                        parts.push(Part::Dynamic(|tile| {
+                            let b: BBox = tile.bbox().into();
+                            b.projwin_str()
+                        }));
+                    }
+
+                    FormatTokens::ProjwinWeb => {
+                        parts.push(Part::Dynamic(|tile| {
+                            let b: WebBBox = tile.webbbox();
+                            b.projwin_str()
+                        }));
+                    }
+                    FormatTokens::BBoxWeb => {
+                        parts.push(Part::Dynamic(|tile| {
+                            let b: WebBBox = tile.webbbox();
+                            b.json_arr()
+                        }));
                     }
                 },
             }
