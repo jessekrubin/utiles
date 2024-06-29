@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## Unreleased/Future
+
+- lint/copy overhaul
+
+___
+
+
+## 0.6.0 (2024-06-28)
+
+- Upgrade pyo3 to `v0.22.0` -- had to add signatures to all fns with optional args/kwargs
+- Update python dev deps
+- Added `{bbox}`, `{projwin}`, `{bbox_web}` and `{projwin_web}` format tokens to tile-formatter (those projwins are handy for gdaling)
+
+___
+
 ## 0.5.1 (2024-06-19)
 
 - Fixed backpressure issue when `unpyramiding` direcotry to mbtiles; the loading of tiles was happening too fast and could cause memory issues on large tile-pyramids... (this was previously not an issue b/c I would run those jobs on my work machine which had 512gb or ram, but that machine died... RIP titus)

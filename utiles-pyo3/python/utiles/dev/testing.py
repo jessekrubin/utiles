@@ -68,7 +68,6 @@ class CliResult:
         """Parse json"""
         return json_loads(self.stdout)
 
-
     def fmt(self) -> str:
         return "\n".join(
             (
