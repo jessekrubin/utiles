@@ -31,7 +31,7 @@ test-release: build-release
     cd {{pyut}}
     pytest --benchmark-disable --config-file={{pyut_pyproject_toml}} {{pyut}}
 
-bench: build-release
+bench: dev-rel
     cd {{pyut}}
     pytest -vv --benchmark-only --config-file={{pyut_pyproject_toml}} {{pyut}}
 

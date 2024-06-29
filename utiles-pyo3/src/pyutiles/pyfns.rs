@@ -110,7 +110,7 @@ pub fn feature(
     tile: PyTileLike,
     // (u32, u32, u8),
     fid: Option<String>,
-    props: Option<HashMap<String, &PyAny>>,
+    props: Option<HashMap<String, Bound<PyAny>>>,
     projected: Option<String>,
     buffer: Option<f64>,
     precision: Option<i32>,

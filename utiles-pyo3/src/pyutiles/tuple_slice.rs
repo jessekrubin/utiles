@@ -6,7 +6,7 @@ use pyo3::{IntoPy, PyObject};
 
 #[derive(FromPyObject)]
 pub enum SliceOrInt<'a> {
-    Slice(&'a PySlice),
+    Slice(Bound<'a, PySlice>),
     Int(isize),
 }
 

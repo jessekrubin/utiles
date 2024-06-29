@@ -12,11 +12,11 @@ pub enum CoordsExtractor<'a> {
     VecF64(Vec<f64>),
     IntTuple3d((i32, i32, i32)),
     IntTuple2d((i32, i32)),
-    List(Vec<&'a PyAny>),
-    Tuple(Vec<&'a PyAny>),
-    Dict(HashMap<String, &'a PyAny>),
+    List(Vec<Bound<'a, PyAny>>),
+    Tuple(Vec<Bound<'a, PyAny>>),
+    Dict(HashMap<String, Bound<'a, PyAny>>),
     #[pyo3(transparent)]
-    CatchAll(&'a PyAny), // This extraction never fails
+    CatchAll(Bound<'a, PyAny>), // This extraction never fails
 }
 
 #[pyfunction]
@@ -87,19 +87,19 @@ pub fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
         CoordsExtractor::Dict(d) => {
             // extract the sub dict key 'coordinates'
             if let Some(coords) = d.get("coordinates") {
-                let c = *coords;
+                let c = coords;
                 let res = _coords(&c.as_borrowed());
                 return res;
             }
             // extract the sub dict
             if let Some(geom) = d.get("geometry") {
                 // recurse around again
-                let geom_ref = *geom;
+                let geom_ref = geom;
                 let res = _coords(&geom_ref.as_borrowed());
                 return Ok(res.unwrap());
             }
             if let Some(features) = d.get("features") {
-                if let Ok(features) = features.extract::<Vec<&PyDict>>() {
+                if let Ok(features) = features.extract::<Vec<Bound<PyDict>>>() {
                     // chain the iterators
                     let mut coords = vec![];
                     for feature in features {
