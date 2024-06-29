@@ -61,10 +61,7 @@ impl PyTile {
 
     pub fn json_obj(&self) -> String {
         let json = serde_json::to_string(&self.xyz);
-        match json {
-            Ok(json) => json,
-            Err(e) => format!("Error: {e}"),
-        }
+        json.unwrap_or_else(|e| format!("Error: {e}"))
     }
 
     pub fn json_arr(&self) -> String {
@@ -72,6 +69,7 @@ impl PyTile {
         s
     }
 
+    #[pyo3(signature = (obj = true))]
     pub fn json(&self, obj: Option<bool>) -> String {
         if obj.unwrap_or(true) {
             self.json_obj()
@@ -97,10 +95,12 @@ impl PyTile {
         Py::new(slf.py(), iter)
     }
 
+    #[pyo3(signature = (sep=None))]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
         self.xyz.fmt_zxy(sep)
     }
 
+    #[pyo3(signature = (ext="", sep=None))]
     pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
         self.xyz.fmt_zxy_ext(ext, sep)
     }
@@ -166,6 +166,7 @@ impl PyTile {
     }
 
     #[classmethod]
+    #[pyo3(signature = (lng, lat, zoom, truncate=None))]
     pub fn from_lnglat_zoom(
         _cls: &Bound<'_, PyType>,
         lng: f64,
@@ -357,10 +358,12 @@ impl PyTile {
         self.xyz.center().into()
     }
 
+    #[pyo3(signature = (n=None))]
     pub fn parent(&self, n: Option<u8>) -> Self {
         self.xyz.parent(n).into()
     }
 
+    #[pyo3(signature = (zoom=None))]
     pub fn children(&self, zoom: Option<u8>) -> Vec<Self> {
         let xyzs = self.xyz.children(zoom);
         xyzs.into_iter().map(Self::from).collect()
@@ -378,13 +381,14 @@ impl PyTile {
         self.xyz.into()
     }
 
+    #[pyo3(signature = (fid=None, props=None, projected=None, buffer=None, precision=None))]
     pub fn feature(
         &self,
         py: Python,
         // tile:  PyTileLike,
         // (u32, u32, u8),
         fid: Option<String>,
-        props: Option<HashMap<String, &PyAny>>,
+        props: Option<HashMap<String, Bound<PyAny>>>,
         projected: Option<String>,
         buffer: Option<f64>,
         precision: Option<i32>,

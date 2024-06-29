@@ -3,6 +3,7 @@ use pyo3::{pyfunction, PyResult};
 use utiles::cli::cli_main_sync;
 
 #[pyfunction]
+#[pyo3(signature = (args = None))]
 pub fn ut_cli(args: Option<Vec<String>>) -> PyResult<u8> {
     let argv = args.unwrap_or_else(|| std::env::args().collect());
 

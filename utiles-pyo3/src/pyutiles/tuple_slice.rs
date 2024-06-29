@@ -1,11 +1,12 @@
+use pyo3::prelude::*;
 use pyo3::types::{PySlice, PyTuple};
-use pyo3::{prelude::*, IntoPy, PyObject};
+use pyo3::{IntoPy, PyObject};
 
 // https://users.rust-lang.org/t/solved-slice-protocol-and-custom-conversions-for-a-rust-object-exposed-to-python-via-pyo3/77633
 
 #[derive(FromPyObject)]
 pub enum SliceOrInt<'a> {
-    Slice(&'a PySlice),
+    Slice(Bound<'a, PySlice>),
     Int(isize),
 }
 
