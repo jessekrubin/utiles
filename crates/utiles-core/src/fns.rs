@@ -274,20 +274,92 @@ pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
         parent(x >> 1, y >> 1, z - 1, Some(n - 1))
     }
 }
-
-/// Return the children of a tile given x, y, z, and zoom.
+/// Return the children of a tile given x, y, z, and zoom in z-order.
+///
+/// # Examples
+/// ```
+/// use utiles_core::{children_zorder, utile, Tile};
+/// let children = children_zorder(0, 0, 0, Some(1));
+/// assert_eq!(children.len(), 4);
+/// assert_eq!(children, vec![
+///     utile!(0, 0, 1),
+///     utile!(1, 0, 1),
+///     utile!(0, 1, 1),
+///     utile!(1, 1, 1),
+/// ]);
+/// ```
+///
+/// ```
+/// use utiles_core::{children_zorder, utile, Tile};
+/// let children = children_zorder(0, 0, 0, Some(2));
+/// assert_eq!(children.len(), 16);
+/// let expected = [
+///     utile!(0,0,2),
+///     utile!(1,0,2),
+///     utile!(0,1,2),
+///     utile!(1,1,2),
+///     utile!(2,0,2),
+///     utile!(3,0,2),
+///     utile!(2,1,2),
+///     utile!(3,1,2),
+///     utile!(0,2,2),
+///     utile!(1,2,2),
+///     utile!(0,3,2),
+///     utile!(1,3,2),
+///     utile!(2,2,2),
+///     utile!(3,2,2),
+///     utile!(2,3,2),
+///     utile!(3,3,2),
+/// ];
+/// assert_eq!(children, expected);
+/// ```
+///
 #[must_use]
-pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
+pub fn children_zorder(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
     let zoom = zoom.unwrap_or(z + 1);
-    let tile = Tile { x, y, z };
+    let tile = utile!(x, y, z);
     let mut tiles = vec![tile];
     while tiles[0].z < zoom {
         let (xtile, ytile, ztile) = (tiles[0].x, tiles[0].y, tiles[0].z);
         tiles.append(&mut vec![
-            utile!(xtile * 2, ytile * 2, ztile + 1),
-            utile!(xtile * 2 + 1, ytile * 2, ztile + 1),
-            utile!(xtile * 2 + 1, ytile * 2 + 1, ztile + 1),
-            utile!(xtile * 2, ytile * 2 + 1, ztile + 1),
+            utile!(xtile * 2, ytile * 2, ztile + 1), // top-left
+            utile!(xtile * 2 + 1, ytile * 2, ztile + 1), // top-right
+            utile!(xtile * 2, ytile * 2 + 1, ztile + 1), // bottom-left
+            utile!(xtile * 2 + 1, ytile * 2 + 1, ztile + 1), // bottom-right
+        ]);
+        tiles.remove(0);
+    }
+    tiles
+}
+
+/// Return the children of a tile given x, y, z, and zoom; returns children
+/// in stupid `a, b, d, c` orderl; but this is the mercantile way... and I
+/// am not gonna fix it right now
+///
+/// # Examples
+/// ```
+/// use utiles_core::{children, utile, Tile};
+/// let children = children(0, 0, 0, Some(1));
+/// assert_eq!(children.len(), 4);
+/// assert_eq!(children, vec![
+///     utile!(0, 0, 1),
+///     utile!(1, 0, 1),
+///     utile!(1, 1, 1),
+///     utile!(0, 1, 1),
+/// ]);
+/// ```
+#[must_use]
+pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
+    let zoom = zoom.unwrap_or(z + 1);
+    let tile = utile!(x, y, z);
+    let mut tiles = vec![tile];
+    while tiles[0].z < zoom {
+        let (xtile, ytile, ztile) = (tiles[0].x, tiles[0].y, tiles[0].z);
+        tiles.append(&mut vec![
+            utile!(xtile * 2, ytile * 2, ztile + 1), // top-left
+            utile!(xtile * 2 + 1, ytile * 2, ztile + 1), // top-right
+            utile!(xtile * 2 + 1, ytile * 2 + 1, ztile + 1), // bottom-right
+            utile!(xtile * 2, ytile * 2 + 1, ztile + 1), // bottom-left
         ]);
         tiles.remove(0);
     }

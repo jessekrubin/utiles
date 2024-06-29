@@ -78,12 +78,6 @@ fn test_macro() {
 
 #[test]
 fn test_simplify() {
-    let children = utile!(243, 166, 9).children(Some(12));
-    assert_eq!(children.len(), 64);
-    let mut children = children.into_iter().collect::<Vec<Tile>>();
-    children.truncate(61);
-    children.push(children[0]);
-    let simplified = simplify(children.into_iter().collect::<HashSet<Tile>>());
     let targets = vec![
         utile!(487, 332, 10),
         utile!(486, 332, 10),
@@ -93,6 +87,13 @@ fn test_simplify() {
         utile!(972, 666, 11),
         utile!(1944, 1334, 12),
     ];
+
+    let mut children = vec![];
+    for t in &targets {
+        children.extend(t.children(Some(12)));
+    }
+    // children.push(children[0]);
+    let simplified = simplify(children.into_iter().collect::<HashSet<Tile>>());
     for target in targets {
         assert!(simplified.contains(&target));
     }

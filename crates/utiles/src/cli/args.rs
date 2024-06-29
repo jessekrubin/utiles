@@ -76,6 +76,10 @@ fmt-tokens:
     `{z}`                  -> z/zoom level
     `{-y}`/`{yup}`         -> y tile coord flipped/tms
     `{zxy}`                -> z/x/y
+    `{bbox}`               -> [w, s, e, n] bbox lnglat (wgs84)
+    `{projwin}`            -> ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+    `{bbox_web}`           -> [w, s, e, n] bbox web-mercator (epsg:3857)
+    `{projwin_web}`        -> ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
     "#
     .to_string()
 }
