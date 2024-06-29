@@ -1,10 +1,9 @@
 use pyo3::exceptions::PyException;
-use pyo3::{pyfunction, PyResult, Python};
-
+use pyo3::{pyfunction, PyResult};
 use utiles::cli::cli_main_sync;
 
 #[pyfunction]
-pub fn ut_cli(py: Python, args: Option<Vec<String>>) -> PyResult<u8> {
+pub fn ut_cli(args: Option<Vec<String>>) -> PyResult<u8> {
     let argv = args.unwrap_or_else(|| std::env::args().collect());
 
     // clap needs the program name as first argument "utiles" or "ut"
@@ -26,12 +25,13 @@ pub fn ut_cli(py: Python, args: Option<Vec<String>>) -> PyResult<u8> {
         let v = vec!["utiles".to_string()];
         v
     };
-    let rc = cli_main_sync(
-        Some(utiles_argv),
-        Some(&|| {
-            py.check_signals().unwrap();
-        }),
-    );
+    // previously we had a loop_fn argument that was a reference to a function
+    // that was called in the loop, to break the cli...
+    // like this: loop_fn: Option<&dyn Fn()>,
+    // Some(&|| {
+    //     py.check_signals().unwrap();
+    // }),
+    let rc = cli_main_sync(Some(utiles_argv));
     match rc {
         Ok(_) => Ok(0),
         Err(e) => {

@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::f64::consts::PI;
 use std::num::FpCategory;
 
-use crate::bbox::{BBox, WebMercatorBbox};
+use crate::bbox::{BBox, WebBBox};
 use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesCoreResult;
 use crate::point2d;
@@ -575,16 +575,12 @@ pub fn bounding_tile(
 
 /// Return web-mercator bbox from x, y, z.
 #[must_use]
-pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebMercatorBbox {
+pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebBBox {
     let tile_size = EARTH_CIRCUMFERENCE / 2.0_f64.powi(i32::from(z));
     let left = f64::from(x) * tile_size - EARTH_CIRCUMFERENCE / 2.0;
     let top = EARTH_CIRCUMFERENCE / 2.0 - f64::from(y) * tile_size;
-    WebMercatorBbox {
-        left,
-        bottom: top - tile_size,
-        right: left + tile_size,
-        top,
-    }
+
+    WebBBox::new(left, top - tile_size, left + tile_size, top)
 }
 
 /// Return zooms-vec from a `ZoomOrZooms` enum
