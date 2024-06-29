@@ -903,9 +903,20 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(
 pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
     let mut stmt = conn.prepare_cached(
-        "SELECT zoom_level, COUNT(*), MIN(tile_row), MAX(tile_row), MIN(tile_column), MAX(tile_column), SUM(OCTET_LENGTH(tile_data)) as nbytes
-         FROM tiles
-         GROUP BY zoom_level"
+        r"
+        SELECT
+            zoom_level,
+            COUNT(*) AS ntiles,
+            MIN(tile_row) AS min_tile_row,
+            MAX(tile_row) AS max_tile_row,
+            MIN(tile_column) AS min_tile_column,
+            MAX(tile_column) AS max_tile_column,
+            SUM(OCTET_LENGTH(tile_data)) AS nbytes
+        FROM
+            tiles
+        GROUP BY
+            zoom_level
+    ",
     )?;
 
     let rows = stmt

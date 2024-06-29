@@ -10,6 +10,9 @@ const IS_HASH_MBTILES_QUERY: &str = include_str!("sql/is-hash-mbtiles-query.sql"
 const IS_TIPPECANOE_MBTILES_QUERY: &str =
     include_str!("sql/is-tippecanoe-mbtiles-query.sql");
 
+const IS_PLANETILER_MBTILES_QUERY: &str =
+    include_str!("sql/is-planetiler-mbtiles-query.sql");
+
 pub fn is_tiles_with_hash(conn: &Connection) -> RusqliteResult<bool> {
     let mut stmt = conn.prepare(IS_HASH_MBTILES_QUERY)?;
     let r = stmt.query_row([], |row| {
@@ -46,10 +49,23 @@ pub fn is_tippecanoe_mbtiles(conn: &Connection) -> RusqliteResult<bool> {
     Ok(r == 1)
 }
 
+pub fn is_planetiler_mbtiles(conn: &Connection) -> RusqliteResult<bool> {
+    let mut stmt = conn.prepare(IS_PLANETILER_MBTILES_QUERY)?;
+    let r = stmt.query_row([], |row| {
+        let a: i64 = row.get(0)?;
+        Ok(a)
+    })?;
+    Ok(r == 1)
+}
+
 pub fn query_mbtiles_type(conn: &Connection) -> RusqliteResult<MbtType> {
     let is_tippecanoe = is_tippecanoe_mbtiles(conn)?;
     if is_tippecanoe {
         return Ok(MbtType::Tippecanoe);
+    }
+    let is_planetiler = is_planetiler_mbtiles(conn)?;
+    if is_planetiler {
+        return Ok(MbtType::Planetiler);
     }
     let is_norm = is_norm_mbtiles(conn)?;
     if is_norm {
