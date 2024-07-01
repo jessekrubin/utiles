@@ -7,6 +7,12 @@
 ___
 
 
+## 0.6.1 (2024-07-01)
+
+- Fix calling `utiles.ut_cli` multiple times causing tracing-subscriber crash
+
+___
+
 ## 0.6.0 (2024-06-28)
 
 - Upgrade pyo3 to `v0.22.0` -- had to add signatures to all fns with optional args/kwargs
