@@ -1,7 +1,7 @@
 use std::io::{self};
 
 use clap::Parser;
-use tracing::{debug, error};
+use tracing::{debug, error, warn};
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
@@ -22,7 +22,7 @@ struct LogConfig {
     pub json: bool,
 }
 
-fn init_tracing(log_config: &LogConfig) {
+fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
     let filter = if log_config.trace {
         EnvFilter::new("TRACE")
     } else if log_config.debug {
@@ -39,8 +39,10 @@ fn init_tracing(log_config: &LogConfig) {
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
                 .finish();
-            tracing::subscriber::set_global_default(subscriber)
-                .expect("tracing::subscriber::set_global_default(...) failed.");
+            let set_global_res = tracing::subscriber::set_global_default(subscriber);
+            if let Err(e) = set_global_res {
+                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
+            }
         }
         false => {
             let subscriber = fmt::Subscriber::builder()
@@ -49,10 +51,13 @@ fn init_tracing(log_config: &LogConfig) {
                 .with_writer(io::stderr)
                 .with_target(debug_or_trace)
                 .finish();
-            tracing::subscriber::set_global_default(subscriber)
-                .expect("tracing::subscriber::set_global_default(...) failed.");
+            let set_global_res = tracing::subscriber::set_global_default(subscriber);
+            if let Err(e) = set_global_res {
+                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
+            }
         }
     }
+    Ok(())
 }
 
 pub async fn cli_main(
@@ -101,7 +106,7 @@ pub async fn cli_main_inner(argv: Option<Vec<String>>) -> UtilesResult<u8> {
             json: args.log_json,
         }
     };
-    init_tracing(&logcfg);
+    init_tracing(&logcfg)?;
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);
     debug!("args: {:?}", args);
