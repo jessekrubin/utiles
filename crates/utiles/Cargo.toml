@@ -33,7 +33,7 @@ tilejson.workspace = true
 tracing.workspace = true
 tokio = { workspace = true, features = ["fs"] }
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
-clap = { version = "4.4.7", features = ["derive", "color", "wrap_help"] }
+clap = { version = "4.5.8", features = ["derive", "color", "wrap_help"] }
 globset = "0.4.13"
 tokio-stream = "0.1.14"
 futures = "0.3.29"
@@ -41,17 +41,17 @@ walkdir = "2.4.0"
 time = "0.3.36"
 # utilesqlite dependencies
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
-sqlite-hashes = { version = "0.7", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.7.3", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 imagesize = "0.13.0"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 http-body-util = "0.1.0"
 async-trait = "0.1.80"
-async-sqlite = { version = "0.2.1", features = ["bundled", "functions", "trace", ] }
+#async-sqlite = { version = "0.2.2", features = ["bundled", "functions", "trace", ] }
+async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id"] }
 tokio-signal = "0.2.9"
 colored = "2.1.0"
-log = "0.4.21"
 chrono = "0.4.38"
 num_cpus = "1.16.0"
 #image = "0.25.1"
