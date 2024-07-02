@@ -4,8 +4,9 @@ use std::path::Path;
 
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
+use crate::mbt::zxyify::zxyify;
 use crate::mbt::{MbtMetadataRow, MbtType, MinZoomMaxZoom};
-use crate::sqlite::{journal_mode, magic_number};
+use crate::sqlite::{journal_mode, magic_number, RowsAffected};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
@@ -296,6 +297,16 @@ where
         Ok(has_zoom_row_col_index)
     }
 
+    async fn assert_mbtiles(&self) -> UtilesResult<()> {
+        let is_mbtiles = self.is_mbtiles().await?;
+
+        if !is_mbtiles {
+            Err(UtilesError::NotMbtilesLike(self.filepath().to_string()))
+        } else {
+            Ok(())
+        }
+    }
+
     async fn tiles_is_empty(&self) -> UtilesResult<bool> {
         let tiles_is_empty = self
             .conn(tiles_is_empty)
@@ -492,6 +503,11 @@ where
     async fn query_mbt_type(&self) -> UtilesResult<MbtType> {
         let mbt = self.conn(query_mbtiles_type).await?;
         Ok(mbt)
+    }
+
+    async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>> {
+        let r = self.conn(|conn| zxyify(conn)).await?;
+        Ok(r)
     }
 }
 

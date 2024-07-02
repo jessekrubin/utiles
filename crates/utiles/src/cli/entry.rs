@@ -11,6 +11,7 @@ use crate::cli::commands::{
     fmtstr_main, info_main, lint_main, metadata_main, metadata_set_main,
     neighbors_main, parent_main, pmtileid_main, quadkey_main, rimraf_main, serve_main,
     shapes_main, tilejson_main, tiles_main, touch_main, update_main, vacuum_main,
+    zxyify_main,
 };
 use crate::errors::UtilesResult;
 use crate::signal::shutdown_signal;
@@ -127,6 +128,7 @@ pub async fn cli_main_inner(argv: Option<Vec<String>>) -> UtilesResult<u8> {
         Commands::Contains { filepath, lnglat } => {
             contains_main(&filepath, lnglat).await
         }
+        Commands::Zxyify(args) => zxyify_main(args).await,
         // mercantile cli like
         Commands::Fmt(args) => fmtstr_main(args),
         Commands::Quadkey(args) => quadkey_main(args),

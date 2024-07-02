@@ -22,3 +22,4 @@ mod metadata_row;
 mod minzoom_maxzoom;
 pub mod query;
 mod tiles_row;
+pub mod zxyify;

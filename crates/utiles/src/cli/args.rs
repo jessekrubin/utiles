@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::{Args, Parser, Subcommand};
 
 use utiles_core::bbox::BBox;
@@ -10,8 +12,10 @@ use utiles_core::VERSION;
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
+use crate::copy::CopyConfig;
 use crate::mbt::MbtType;
 use crate::tile_strfmt::TileStringFormatter;
+
 // use crate::cli::commands::WebpifyArgs;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
@@ -81,7 +85,7 @@ fmt-tokens:
     `{bbox_web}`           -> [w, s, e, n] bbox web-mercator (epsg:3857)
     `{projwin_web}`        -> ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
     "#
-    .to_string()
+        .to_string()
 }
 #[derive(Debug, Parser)]
 pub struct TileFmtOptions {
@@ -126,7 +130,7 @@ impl From<&TileFmtOptions> for TileStringFormatter {
 #[derive(Debug, Parser)]
 pub struct TilesArgs {
     /// Zoom level (0-30)
-    #[arg(required = true, value_parser = clap::value_parser!(u8).range(0..=30))]
+    #[arg(required = true, value_parser = clap::value_parser ! (u8).range(0..=30))]
     pub zoom: u8,
 
     #[command(flatten)]
@@ -297,7 +301,15 @@ pub struct UpdateArgs {
     #[arg(required = false, long, short = 'n', action = clap::ArgAction::SetTrue)]
     pub(crate) dryrun: bool,
 }
+#[derive(Debug, Parser)]
+pub struct ZxyifyArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
 
+    /// un-zxyify a db
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub(crate) rm: bool,
+}
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     // Alias `aboot` for possible Canadian users as they will not understand
@@ -359,6 +371,12 @@ pub enum Commands {
         lnglat: LngLat,
     },
 
+    /// zxyify/unzxyify tiles-db
+    ///
+    /// Adds/removes `z/x/y` table/view for querying tiles not inverted
+    #[command(name = "zxyify", aliases = ["xyzify"])]
+    Zxyify(ZxyifyArgs),
+
     /*
     ========================================================================
     TILE CLI UTILS - MERCANTILE LIKE CLI
@@ -390,7 +408,7 @@ pub enum Commands {
     ///
     #[command(
         name = "fmtstr",
-        aliases = &["fmt", "xt"],
+        aliases = & ["fmt", "xt"],
         verbatim_doc_comment,
     )]
     Fmt(TileFmtArgs),
@@ -653,5 +671,22 @@ impl CopyArgs {
     #[must_use]
     pub fn bboxes(&self) -> Option<Vec<BBox>> {
         self.bbox.as_ref().map(|bbox| vec![*bbox])
+    }
+}
+
+impl From<&CopyArgs> for CopyConfig {
+    fn from(args: &CopyArgs) -> CopyConfig {
+        let copy_cfg = CopyConfig {
+            src: PathBuf::from(&args.src),
+            dst: PathBuf::from(&args.dst),
+            zset: args.zoom_set(),
+            zooms: args.zooms(),
+            verbose: true,
+            bboxes: args.bboxes(),
+            force: false,
+            dryrun: false,
+            jobs: args.jobs,
+        };
+        copy_cfg
     }
 }

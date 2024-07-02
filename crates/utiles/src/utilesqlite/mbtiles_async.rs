@@ -6,6 +6,7 @@ use utiles_core::{BBox, Tile, TileLike};
 use crate::errors::UtilesResult;
 use crate::mbt::MinZoomMaxZoom;
 use crate::mbt::{MbtMetadataRow, MbtType};
+use crate::sqlite::RowsAffected;
 
 #[async_trait]
 pub trait MbtilesAsync: Sized {
@@ -14,6 +15,7 @@ pub trait MbtilesAsync: Sized {
 
     async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()>;
     async fn is_mbtiles(&self) -> UtilesResult<bool>;
+    async fn assert_mbtiles(&self) -> UtilesResult<()>;
     async fn magic_number(&self) -> UtilesResult<u32>;
     async fn tilejson(&self) -> UtilesResult<TileJSON>;
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>>;
@@ -43,4 +45,6 @@ pub trait MbtilesAsync: Sized {
     async fn bbox(&self) -> UtilesResult<BBox>;
     async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize>;
     async fn detach(&self, dbname: &str) -> UtilesResult<usize>;
+
+    async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>>;
 }

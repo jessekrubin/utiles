@@ -36,6 +36,9 @@ pub enum UtilesError {
     #[error("parsing error: {0}")]
     ParsingError(String),
 
+    #[error("Not mbtiles-like: {0}")]
+    NotMbtilesLike(String),
+
     #[error("utiles error: {0}")]
     Error(String),
 

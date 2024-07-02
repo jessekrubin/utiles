@@ -18,6 +18,7 @@ pub use tiles::tiles_main;
 pub use touch::touch_main;
 pub use update::update_main;
 pub use vacuum::vacuum_main;
+pub use zxyify::zxyify_main;
 
 mod about;
 mod children_parent;
@@ -36,3 +37,4 @@ pub mod tiles;
 mod touch;
 mod update;
 mod vacuum;
+mod zxyify;
