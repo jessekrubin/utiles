@@ -23,6 +23,8 @@ impl CopyPasta {
 
     pub fn preflight_check(&self) -> UtilesResult<()> {
         // do the thing
+        debug!("Preflight check: {:?}", self.cfg);
+
         Ok(())
     }
 
@@ -81,18 +83,17 @@ impl CopyPasta {
         let n_tiles_inserted = dst_db.conn(
             move |x| {
                 let insert_statement = &format!(
-                        "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) SELECT zoom_level, tile_column, tile_row, tile_data FROM {}.tiles {}",
-                        src_db_name, where_clause);
+                        "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) SELECT zoom_level, tile_column, tile_row, tile_data FROM {src_db_name}.tiles {where_clause}");
 
                 debug!("Executing tiles insert: {:?}", insert_statement);
-                let e_res = x.execute(
+                
+                x.execute(
                     insert_statement,
                     [],
-                );
-                e_res
+                )
             }
         ).await.map_err(
-            |e| UtilesError::AsyncSqliteError(e)
+            UtilesError::AsyncSqliteError
         )?;
         if n_tiles_inserted == 0 {
             warn!("No tiles inserted!");
@@ -112,15 +113,15 @@ impl CopyPasta {
 
         let src_db_name = "src";
 
-        let src_db_path = self.cfg.src.to_str();
-        if src_db_path.is_none() {
-            return Err(UtilesError::PathConversionError(
-                "src db path conversion error".to_string(),
-            ));
-        }
-        let src_db_path = src_db_path.unwrap();
+        // let src_db_path = self.cfg.src.to_str();
+        // if src_db_path.is_none() {
+        //     return Err(UtilesError::PathConversionError(
+        //         "src db path conversion error".to_string(),
+        //     ));
+        // }
+        let src_db_path = self.cfg.src_dbpath_str();
 
-        dst_db.attach(src_db_path, src_db_name).await?;
+        dst_db.attach(&src_db_path, src_db_name).await?;
         let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
 
         debug!("n_tiles_inserted: {:?}", n_tiles_inserted);

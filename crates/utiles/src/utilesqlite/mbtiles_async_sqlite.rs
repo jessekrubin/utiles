@@ -89,17 +89,12 @@ impl AsyncSqlite for MbtilesAsyncSqlitePool {
 
 impl MbtilesAsyncSqliteClient {
     pub async fn new(dbpath: DbPath, client: Client) -> UtilesResult<Self> {
-        let mbtype = client
-            .conn(|conn| {
-                let a = query_mbtiles_type(conn);
-                a.into()
-            })
-            .await?;
+        let mbtype = client.conn(|conn| query_mbtiles_type(conn)).await?;
 
         Ok(MbtilesAsyncSqliteClient {
             dbpath,
-            client,
             mbtype,
+            client,
         })
     }
     pub async fn open_new<P: AsRef<Path>>(
@@ -113,7 +108,7 @@ impl MbtilesAsyncSqliteClient {
         // make sure the path don't exist
         let dbpath = pathlike2dbpath(path)?;
         if dbpath.fspath_exists() {
-            return Err(UtilesError::PathExistsError(dbpath.fspath));
+            Err(UtilesError::PathExistsError(dbpath.fspath))
         } else {
             debug!("Creating new mbtiles file with client: {}", dbpath);
             let client = ClientBuilder::new()
@@ -126,7 +121,7 @@ impl MbtilesAsyncSqliteClient {
                 )
                 .open()
                 .await?;
-            client.conn_mut(|conn| init_flat_mbtiles(conn)).await?;
+            client.conn_mut(init_flat_mbtiles).await?;
 
             MbtilesAsyncSqliteClient::new(dbpath, client).await
         }
@@ -185,16 +180,11 @@ impl MbtilesAsyncSqliteClient {
 // pub async fn conn<F, T>(&self, func: F) -> Result<T, Error> where     F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,     T: Send + 'static,
 impl MbtilesAsyncSqlitePool {
     pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
-        let mbtype = pool
-            .conn(|conn| {
-                let a = query_mbtiles_type(conn);
-                a.into()
-            })
-            .await?;
+        let mbtype = pool.conn(|conn| query_mbtiles_type(conn)).await?;
         Ok(MbtilesAsyncSqlitePool {
             dbpath,
-            pool,
             mbtype,
+            pool,
         })
     }
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -500,12 +490,7 @@ where
     }
 
     async fn query_mbt_type(&self) -> UtilesResult<MbtType> {
-        let mbt = self
-            .conn(|conn| {
-                let a = query_mbtiles_type(conn);
-                a.into()
-            })
-            .await?;
+        let mbt = self.conn(|conn| query_mbtiles_type(conn)).await?;
         Ok(mbt)
     }
 }

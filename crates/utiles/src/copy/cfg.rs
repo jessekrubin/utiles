@@ -21,6 +21,9 @@ pub struct CopyConfig {
 }
 
 impl CopyConfig {
+    pub fn src_dbpath_str(&self) -> String {
+        self.src.to_string_lossy().to_string()
+    }
     pub fn mbtiles_sql_where(
         &self,
         // zoom_levels: Option<Vec<u8>>,
