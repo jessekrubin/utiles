@@ -300,10 +300,10 @@ where
     async fn assert_mbtiles(&self) -> UtilesResult<()> {
         let is_mbtiles = self.is_mbtiles().await?;
 
-        if !is_mbtiles {
-            Err(UtilesError::NotMbtilesLike(self.filepath().to_string()))
-        } else {
+        if is_mbtiles {
             Ok(())
+        } else {
+            Err(UtilesError::NotMbtilesLike(self.filepath().to_string()))
         }
     }
 

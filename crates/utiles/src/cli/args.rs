@@ -676,7 +676,6 @@ impl CopyArgs {
 
 impl From<&CopyArgs> for CopyConfig {
     fn from(args: &CopyArgs) -> CopyConfig {
-        
         CopyConfig {
             src: PathBuf::from(&args.src),
             dst: PathBuf::from(&args.dst),
