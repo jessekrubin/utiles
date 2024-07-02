@@ -103,7 +103,7 @@ pub async fn update_mbtiles(
     let queryfmt = mbt
         .conn(
             // whatever clone it!
-            move |c| query_distinct_tiletype_fast(c, minmax.clone()),
+            move |c| query_distinct_tiletype_fast(c, minmax),
         )
         .await?;
     match queryfmt.len() {

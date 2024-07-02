@@ -1016,7 +1016,7 @@ pub fn query_distinct_tiletype_zoom_limit(
     )?;
 
     let tile_format: Vec<String> = stmt
-        .query_map([zoom, limit as u32], |row| row.get(0))?
+        .query_map([zoom, u32::from(limit)], |row| row.get(0))?
         .collect::<RusqliteResult<Vec<String>, rusqlite::Error>>()?;
     Ok(tile_format)
 }
@@ -1027,7 +1027,7 @@ pub fn query_distinct_tiletype_fast(
 ) -> RusqliteResult<Vec<String>> {
     let mut tile_types_set = HashSet::new();
     for z in min_max_zoom.minzoom..=min_max_zoom.maxzoom {
-        let a = query_distinct_tiletype_zoom_limit(conn, z as u32, 10)?;
+        let a = query_distinct_tiletype_zoom_limit(conn, u32::from(z), 10)?;
         for t in a {
             tile_types_set.insert(t);
         }

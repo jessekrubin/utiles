@@ -506,7 +506,7 @@ where
     }
 
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>> {
-        let r = self.conn(|conn| zxyify(conn)).await?;
+        let r = self.conn(zxyify).await?;
         Ok(r)
     }
 }

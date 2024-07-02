@@ -676,7 +676,8 @@ impl CopyArgs {
 
 impl From<&CopyArgs> for CopyConfig {
     fn from(args: &CopyArgs) -> CopyConfig {
-        let copy_cfg = CopyConfig {
+        
+        CopyConfig {
             src: PathBuf::from(&args.src),
             dst: PathBuf::from(&args.dst),
             zset: args.zoom_set(),
@@ -686,7 +687,6 @@ impl From<&CopyArgs> for CopyConfig {
             force: false,
             dryrun: false,
             jobs: args.jobs,
-        };
-        copy_cfg
+        }
     }
 }
