@@ -31,6 +31,9 @@ tokio = { version = "1.37.0", features = ["full"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
 size = { version = "=0.5.0-preview2", features = ["default"] }
+strum = { version = "0.26.3", features = ["derive"] }
+strum_macros = "0.26.3"
+xxhash-rust = { version = "0.8.10", features = [ "xxh32", "xxh64", "xxh3", "const_xxh32",  "const_xxh64", "const_xxh3"] }
 # GIT DEP
 #async-sqlite = { git = "https://github.com/ryanfowler/async-sqlite.git" , features = ["bundled", "functions", "trace"] }
 async-sqlite = { version = "0.2.2", features = ["bundled", "functions", "trace", ] }

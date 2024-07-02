@@ -1,4 +1,3 @@
-use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
 
 pub type UtilesResult<T> = Result<T, UtilesError>;
@@ -84,13 +83,3 @@ pub enum UtilesError {
     #[error("serde error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
 }
-
-// impl<T> From<RusqliteResult<T>> for UtilesError {
-//     fn from(e: RusqliteResult<T>) -> Self {
-//         match e {
-//             Ok(T) => UtilesError::Unknown("unknown error".to_string()),
-//             Err(e) => UtilesError::RusqliteError(e),
-//         }
-//     }
-// }
-//

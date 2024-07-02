@@ -1,9 +1,10 @@
-use crate::errors::UtilesResult;
 use clap::Parser;
 use tracing::{debug, warn};
 
-use crate::utilesqlite::hash_types::HashType;
-use crate::utilesqlite::mbtiles::{add_functions, mbt_agg_tiles_hash};
+use crate::errors::UtilesResult;
+use crate::mbt::hash_types::HashType;
+use crate::mbt::mbt_agg_tiles_hash;
+use crate::utilesqlite::mbtiles::add_functions;
 use crate::utilesqlite::Mbtiles;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗      ██████╗ ███████╗██╗   ██╗

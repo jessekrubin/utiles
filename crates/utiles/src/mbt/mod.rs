@@ -9,8 +9,11 @@ pub use crate::mbt::metadata_row::{
     MbtMetadataRow, MbtilesMetadataRowParsed, MbtilesMetadataRows,
 };
 pub use crate::mbt::minzoom_maxzoom::MinZoomMaxZoom;
+pub use agg_tiles_hash::mbt_agg_tiles_hash;
 pub use mbtype::MbtType;
 
+mod agg_tiles_hash;
+pub mod hash_types;
 mod mbt_stats;
 mod mbtype;
 mod metadata;

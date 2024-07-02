@@ -1,12 +1,13 @@
 #![allow(dead_code)]
 
-use log::warn;
-use tracing::debug;
+use tracing::{debug, warn};
 
 use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
 use crate::mbt::MbtType;
-use crate::utilesqlite::MbtilesAsyncSqliteClient;
+use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
+use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
+use crate::UtilesError;
 
 #[derive(Debug)]
 pub struct CopyPasta {
@@ -57,6 +58,50 @@ impl CopyPasta {
         Ok(dst_db)
     }
 
+    pub async fn copy_metadata(
+        &self,
+        dst_db: &MbtilesAsyncSqliteClient,
+    ) -> UtilesResult<usize> {
+        let src_db = self.get_src_db().await?;
+        let metadata_rows = src_db.metadata_rows().await?;
+        let mut n_metadata_inserted = 0;
+        for row in metadata_rows {
+            let res = dst_db.metadata_set(&row.name, &row.value).await?;
+            n_metadata_inserted += res;
+        }
+        Ok(n_metadata_inserted)
+    }
+
+    pub async fn copy_tiles_zbox(
+        &self,
+        dst_db: &MbtilesAsyncSqliteClient,
+    ) -> UtilesResult<usize> {
+        let src_db_name = "src";
+        let where_clause = self.cfg.mbtiles_sql_where()?;
+        let n_tiles_inserted = dst_db.conn(
+            move |x| {
+                let insert_statement = &format!(
+                        "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) SELECT zoom_level, tile_column, tile_row, tile_data FROM {}.tiles {}",
+                        src_db_name, where_clause);
+
+                debug!("Executing tiles insert: {:?}", insert_statement);
+                let e_res = x.execute(
+                    insert_statement,
+                    [],
+                );
+                e_res
+            }
+        ).await.map_err(
+            |e| UtilesError::AsyncSqliteError(e)
+        )?;
+        if n_tiles_inserted == 0 {
+            warn!("No tiles inserted!");
+        } else {
+            debug!("n_tiles_inserted: {:?}", n_tiles_inserted);
+        }
+        Ok(n_tiles_inserted)
+    }
+
     pub async fn run(&self) -> UtilesResult<()> {
         warn!("mbtiles-2-mbtiles copy is a WIP");
         // doing preflight check
@@ -65,6 +110,24 @@ impl CopyPasta {
 
         let dst_db = self.get_dst_db().await?;
 
+        let src_db_name = "src";
+
+        let src_db_path = self.cfg.src.to_str();
+        if src_db_path.is_none() {
+            return Err(UtilesError::PathConversionError(
+                "src db path conversion error".to_string(),
+            ));
+        }
+        let src_db_path = src_db_path.unwrap();
+
+        dst_db.attach(src_db_path, src_db_name).await?;
+        let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
+
+        debug!("n_tiles_inserted: {:?}", n_tiles_inserted);
+
+        debug!("Detaching src db...");
+        dst_db.detach(src_db_name).await?;
+        debug!("Detached src db!");
         Ok(())
     }
 }

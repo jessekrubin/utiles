@@ -1,6 +1,5 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use tracing::warn;
 use tracing::{debug, info};
 
 pub use cfg::CopyConfig;

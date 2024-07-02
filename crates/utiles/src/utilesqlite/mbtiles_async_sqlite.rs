@@ -327,6 +327,27 @@ where
         Ok(metadata)
     }
 
+    async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize> {
+        let path_string = path.to_string();
+        let as_string = dbname.to_string();
+        let rows = self
+            .conn(move |conn| {
+                conn.execute("ATTACH DATABASE ?1 AS ?2", [&path_string, &as_string])
+            })
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+        Ok(rows)
+    }
+
+    async fn detach(&self, dbname: &str) -> UtilesResult<usize> {
+        let as_string = dbname.to_string();
+        let rows = self
+            .conn(move |conn| conn.execute("DETACH DATABASE ?1", [&as_string]))
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+        Ok(rows)
+    }
+
     async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>> {
         let name_str = name.to_string();
         let row = self
