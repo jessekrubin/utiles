@@ -8,6 +8,7 @@ use crate::errors::UtilesResult;
 use crate::utilesqlite::mbtiles::query_distinct_tiletype_fast;
 use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
+use crate::UtilesError;
 
 pub async fn update_mbtiles(
     filepath: &str,
@@ -93,11 +94,18 @@ pub async fn update_mbtiles(
     // =====================================================================
     // FORMAT ~ FORMAT ~ FORMAT ~ FORMAT ~ FORMAT ~ FORMAT ~ FORMAT ~ FORMAT
     // =====================================================================
+    let minmax = minzoom_maxzoom
+        .ok_or(UtilesError::Error("minzoom_maxzoom is None".to_string()))?;
 
     // register the fn
     mbt.register_utiles_sqlite_functions().await?;
     let format = mbt.metadata_row("format").await?;
-    let queryfmt = mbt.conn(query_distinct_tiletype_fast).await?;
+    let queryfmt = mbt
+        .conn(
+            // whatever clone it!
+            move |c| query_distinct_tiletype_fast(c, minmax.clone()),
+        )
+        .await?;
     match queryfmt.len() {
         0 => {
             warn!("no format found: {}", filepath);

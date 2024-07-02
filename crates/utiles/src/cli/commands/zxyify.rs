@@ -1,5 +1,3 @@
-use tracing::{debug, warn};
-
 use crate::cli::args::ZxyifyArgs;
 use crate::mbt::zxyify::unzxyify;
 use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;

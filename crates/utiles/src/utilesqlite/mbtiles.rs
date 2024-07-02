@@ -1,7 +1,7 @@
+use std::collections::HashSet;
 use std::error::Error;
 use std::path::Path;
 
-use crate::sqlite::RusqliteResult;
 use rusqlite::{params, Connection, OptionalExtension};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
@@ -16,6 +16,7 @@ use crate::mbt::{
     MbtMetadataRow, MbtType, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom,
 };
 use crate::sqlite::InsertStrategy;
+use crate::sqlite::RusqliteResult;
 use crate::sqlite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
     pragma_table_list, query_db_fspath, Sqlike3,
@@ -261,14 +262,17 @@ impl Mbtiles {
         query_mbtiles_type(&self.conn).map_err(|e| e.into())
     }
 
-    pub fn mbt_stats(&self) -> UtilesResult<MbtilesStats> {
+    pub fn mbt_stats(&self, full: Option<bool>) -> UtilesResult<MbtilesStats> {
         let query_ti = std::time::Instant::now();
         let filesize = self.db_filesize()?;
+        let zoom_stats_full = full.unwrap_or(false) || filesize < 10_000_000_000;
         debug!("Started zoom_stats query");
         let page_count = self.pragma_page_count()?;
         let page_size = self.pragma_page_size()?;
         let freelist_count = self.pragma_freelist_count()?;
-        let zoom_stats = self.zoom_stats()?;
+        // if the file is over 10gb and full is None or false just don't do the
+        // zoom_stats query that counts size... bc it is slow af
+        let zoom_stats = self.zoom_stats(zoom_stats_full)?;
         debug!("zoom_stats: {:?}", zoom_stats);
         let query_dt = query_ti.elapsed();
         debug!("Finished zoom_stats query in {:?}", query_dt);
@@ -308,8 +312,12 @@ impl Mbtiles {
         })
     }
 
-    pub fn zoom_stats(&self) -> RusqliteResult<Vec<MbtilesZoomStats>> {
-        zoom_stats(&self.conn)
+    pub fn zoom_stats(&self, full: bool) -> RusqliteResult<Vec<MbtilesZoomStats>> {
+        if full {
+            zoom_stats_full(&self.conn)
+        } else {
+            zoom_stats(&self.conn)
+        }
     }
 
     pub fn tiles_count(&self) -> RusqliteResult<usize> {
@@ -897,9 +905,8 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(
         None => Ok(0),
     }
 }
-
 #[allow(clippy::cast_precision_loss)]
-pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
+pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
     let mut stmt = conn.prepare_cached(
         r"
@@ -940,8 +947,55 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
                 xmax: max_tile_column as u32,
                 ymin,
                 ymax,
-                nbytes,
-                nbytes_avg,
+                nbytes: Some(nbytes),
+                nbytes_avg: Some(nbytes_avg),
+            })
+        })?
+        .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()?;
+    Ok(rows)
+}
+#[allow(clippy::cast_precision_loss)]
+pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
+    // total tiles
+    let mut stmt = conn.prepare_cached(
+        r"
+        SELECT
+            zoom_level,
+            COUNT(*) AS ntiles,
+            MIN(tile_row) AS min_tile_row,
+            MAX(tile_row) AS max_tile_row,
+            MIN(tile_column) AS min_tile_column,
+            MAX(tile_column) AS max_tile_column
+        FROM
+            tiles
+        GROUP BY
+            zoom_level
+    ",
+    )?;
+
+    let rows = stmt
+        .query_map([], |row| {
+            let zoom: u32 = row.get(0)?;
+
+            let ntiles = row.get(1)?;
+            let min_tile_column: i64 = row.get(4)?;
+            let max_tile_column: i64 = row.get(5)?;
+            let min_tile_row: i64 = row.get(2)?;
+            let max_tile_row: i64 = row.get(3)?;
+            // flip the stuff
+            let zu8 = zoom as u8;
+            let ymin = yflip(max_tile_row as u32, zu8);
+            let ymax = yflip(min_tile_row as u32, zu8);
+
+            Ok(MbtilesZoomStats {
+                zoom,
+                ntiles,
+                xmin: min_tile_column as u32,
+                xmax: max_tile_column as u32,
+                ymin,
+                ymax,
+                nbytes: None,
+                nbytes_avg: None,
             })
         })?
         .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()?;
@@ -951,19 +1005,48 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
 // =================================================================
 // queries with sqlite extension functions
 // =================================================================
-
-pub fn query_distinct_tiletype_fast(conn: &Connection) -> RusqliteResult<Vec<String>> {
-    let mut stmt = conn.prepare(
+pub fn query_distinct_tiletype_zoom_limit(
+    conn: &Connection,
+    zoom: u32,
+    limit: u8,
+) -> RusqliteResult<Vec<String>> {
+    let mut stmt = conn.prepare_cached(
         //     for each zoom get 1 random row and then get the distinct tiletypes
-        "SELECT DISTINCT ut_tiletype(tile_data) AS tile_type FROM (SELECT zoom_level, tile_data FROM tiles GROUP BY zoom_level) GROUP BY zoom_level;"
+        "SELECT DISTINCT ut_tiletype(tile_data) FROM tiles WHERE zoom_level=?1 LIMIT ?2"
     )?;
 
-    let tile_format: Vec<String> =
-        stmt.query_map([], |row| row.get(0))?
-            .collect::<RusqliteResult<Vec<String>, rusqlite::Error>>()?;
+    let tile_format: Vec<String> = stmt
+        .query_map([zoom, limit as u32], |row| row.get(0))?
+        .collect::<RusqliteResult<Vec<String>, rusqlite::Error>>()?;
     Ok(tile_format)
 }
 
+pub fn query_distinct_tiletype_fast(
+    conn: &Connection,
+    min_max_zoom: MinZoomMaxZoom,
+) -> RusqliteResult<Vec<String>> {
+    let mut tile_types_set = HashSet::new();
+    for z in min_max_zoom.minzoom..=min_max_zoom.maxzoom {
+        let a = query_distinct_tiletype_zoom_limit(conn, z as u32, 10)?;
+        for t in a {
+            tile_types_set.insert(t);
+        }
+    }
+    let tile_types_vec: Vec<String> = tile_types_set.into_iter().collect();
+    Ok(tile_types_vec)
+}
+
+pub fn query_distinct_tiletype_limit(
+    conn: &Connection,
+    limit: u32,
+) -> RusqliteResult<Vec<String>> {
+    let mut stmt =
+        conn.prepare("SELECT DISTINCT ut_tiletype(tile_data) FROM tiles LIMIT ?1")?;
+    let tile_format: Vec<String> =
+        stmt.query_map([limit], |row| row.get(0))?
+            .collect::<RusqliteResult<Vec<String>, rusqlite::Error>>()?;
+    Ok(tile_format)
+}
 pub fn query_distinct_tiletype(conn: &Connection) -> RusqliteResult<Vec<String>> {
     let mut stmt = conn.prepare("SELECT DISTINCT ut_tiletype(tile_data) FROM tiles")?;
     let tile_format: Vec<String> =

@@ -9,8 +9,10 @@ pub struct MbtilesZoomStats {
     pub xmax: u32,
     pub ymin: u32,
     pub ymax: u32,
-    pub nbytes: u64,
-    pub nbytes_avg: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub nbytes: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub nbytes_avg: Option<f64>,
 }
 
 #[derive(Debug, Serialize)]

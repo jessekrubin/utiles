@@ -18,7 +18,7 @@ fn mbinfo(filepath: &str) -> UtilesResult<MbtilesStats> {
         filepath = filepath.display()
     );
     let mbtiles: Mbtiles = Mbtiles::from(filepath);
-    let stats = mbtiles.mbt_stats()?;
+    let stats = mbtiles.mbt_stats(None)?;
     Ok(stats)
 }
 

@@ -1,9 +1,5 @@
-use std::io::{self};
-
 use clap::Parser;
-use tracing::{debug, error, warn};
-use tracing_subscriber::fmt::{self};
-use tracing_subscriber::EnvFilter;
+use tracing::{debug, error};
 
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
@@ -14,52 +10,9 @@ use crate::cli::commands::{
     zxyify_main,
 };
 use crate::errors::UtilesResult;
+use crate::lager::{init_tracing, LogConfig};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
-
-struct LogConfig {
-    pub debug: bool,
-    pub trace: bool,
-    pub json: bool,
-}
-
-fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
-    let filter = if log_config.trace {
-        EnvFilter::new("TRACE")
-    } else if log_config.debug {
-        EnvFilter::new("DEBUG")
-    } else {
-        EnvFilter::new("INFO")
-    };
-    let debug_or_trace = log_config.debug || log_config.trace;
-    #[allow(clippy::match_bool)]
-    match log_config.json {
-        true => {
-            let subscriber = fmt::Subscriber::builder()
-                .json()
-                .with_env_filter(filter)
-                .with_writer(io::stderr)
-                .finish();
-            let set_global_res = tracing::subscriber::set_global_default(subscriber);
-            if let Err(e) = set_global_res {
-                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
-            }
-        }
-        false => {
-            let subscriber = fmt::Subscriber::builder()
-                .compact()
-                .with_env_filter(filter)
-                .with_writer(io::stderr)
-                .with_target(debug_or_trace)
-                .finish();
-            let set_global_res = tracing::subscriber::set_global_default(subscriber);
-            if let Err(e) = set_global_res {
-                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
-            }
-        }
-    }
-    Ok(())
-}
 
 pub async fn cli_main(
     argv: Option<Vec<String>>,
