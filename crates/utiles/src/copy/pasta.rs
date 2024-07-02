@@ -83,10 +83,10 @@ impl CopyPasta {
         let n_tiles_inserted = dst_db.conn(
             move |x| {
                 let insert_statement = &format!(
-                        "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) SELECT zoom_level, tile_column, tile_row, tile_data FROM {src_db_name}.tiles {where_clause}");
-
+                    "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) SELECT zoom_level, tile_column, tile_row, tile_data FROM {src_db_name}.tiles {where_clause}"
+                );
                 debug!("Executing tiles insert: {:?}", insert_statement);
-                
+
                 x.execute(
                     insert_statement,
                     [],

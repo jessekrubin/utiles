@@ -89,7 +89,7 @@ impl AsyncSqlite for MbtilesAsyncSqlitePool {
 
 impl MbtilesAsyncSqliteClient {
     pub async fn new(dbpath: DbPath, client: Client) -> UtilesResult<Self> {
-        let mbtype = client.conn(|conn| query_mbtiles_type(conn)).await?;
+        let mbtype = client.conn(query_mbtiles_type).await?;
 
         Ok(MbtilesAsyncSqliteClient {
             dbpath,
@@ -180,7 +180,7 @@ impl MbtilesAsyncSqliteClient {
 // pub async fn conn<F, T>(&self, func: F) -> Result<T, Error> where     F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,     T: Send + 'static,
 impl MbtilesAsyncSqlitePool {
     pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
-        let mbtype = pool.conn(|conn| query_mbtiles_type(conn)).await?;
+        let mbtype = pool.conn(query_mbtiles_type).await?;
         Ok(MbtilesAsyncSqlitePool {
             dbpath,
             mbtype,
@@ -490,7 +490,7 @@ where
     }
 
     async fn query_mbt_type(&self) -> UtilesResult<MbtType> {
-        let mbt = self.conn(|conn| query_mbtiles_type(conn)).await?;
+        let mbt = self.conn(query_mbtiles_type).await?;
         Ok(mbt)
     }
 }
