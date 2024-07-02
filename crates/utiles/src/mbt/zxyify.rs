@@ -108,7 +108,7 @@ pub fn zxyify(conn: &Connection) -> RusqliteResult<Vec<RowsAffected>> {
             type_: AffectedType::Insert,
             table: Some("_zy_map".to_string()),
             count: zy_rows,
-        })
+        });
     }
     debug!("Creating zxy view");
     create_zxy_view(conn).ok();

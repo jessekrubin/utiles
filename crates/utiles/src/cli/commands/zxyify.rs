@@ -17,7 +17,7 @@ pub async fn zxyify_main(args: ZxyifyArgs) -> UtilesResult<()> {
     } else {
         let zxy_rows_changed = mbt.zxyify().await?;
         let json_string = serde_json::to_string_pretty(&zxy_rows_changed)?;
-        println!("{}", json_string);
+        println!("{json_string}");
     }
     Ok(())
 }
