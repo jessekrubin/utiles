@@ -2,11 +2,21 @@ use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
 
+use async_sqlite::{Client, ClientBuilder, Pool, PoolBuilder};
+use async_trait::async_trait;
+use rusqlite::{params, Connection, OpenFlags};
+use tilejson::TileJSON;
+use tracing::{debug, error, info, warn};
+
+use utiles_core::{BBox, Tile, TileLike};
+
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
 use crate::mbt::{MbtMetadataRow, MbtType, MinZoomMaxZoom};
-use crate::sqlite::{journal_mode, magic_number, RowsAffected};
+use crate::sqlite::{
+    journal_mode, magic_number, AsyncSqliteError, RowsAffected, RusqliteResult,
+};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
@@ -16,14 +26,6 @@ use crate::utilesqlite::mbtiles::{
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
-use async_sqlite::{
-    Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
-};
-use async_trait::async_trait;
-use rusqlite::{Connection, OpenFlags};
-use tilejson::TileJSON;
-use tracing::{debug, error, info, warn};
-use utiles_core::BBox;
 
 #[derive(Clone)]
 pub struct MbtilesAsyncSqliteClient {
@@ -64,6 +66,11 @@ pub trait AsyncSqlite: Send + Sync {
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static;
+
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    where
+        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+        T: Send + 'static;
 }
 
 #[async_trait]
@@ -75,6 +82,14 @@ impl AsyncSqlite for MbtilesAsyncSqliteClient {
     {
         self.client.conn(func).await
     }
+
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    where
+        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+        T: Send + 'static,
+    {
+        self.client.conn_mut(func).await
+    }
 }
 
 #[async_trait]
@@ -85,6 +100,14 @@ impl AsyncSqlite for MbtilesAsyncSqlitePool {
         T: Send + 'static,
     {
         self.pool.conn(func).await
+    }
+
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    where
+        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+        T: Send + 'static,
+    {
+        self.pool.conn_mut(func).await
     }
 }
 
@@ -508,6 +531,20 @@ where
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>> {
         let r = self.conn(zxyify).await?;
         Ok(r)
+    }
+
+    async fn put_tile(&self, tile: Tile, data: Vec<u8>) -> UtilesResult<RowsAffected> {
+        let r = self
+            .conn(move |conn| -> RusqliteResult<usize> {
+                let mut stmt = conn.prepare("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
+                let r = stmt.execute(
+                    params![tile.z(), tile.x(), tile.y(), data]
+                )?;
+                Ok(r)
+            })
+            .await?;
+        let ra = RowsAffected::insert(r, Some(String::from("tiles")));
+        Ok(ra)
     }
 }
 

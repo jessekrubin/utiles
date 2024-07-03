@@ -47,4 +47,6 @@ pub trait MbtilesAsync: Sized {
     async fn detach(&self, dbname: &str) -> UtilesResult<usize>;
 
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>>;
+
+    async fn put_tile(&self, tile: Tile, data: Vec<u8>) -> UtilesResult<RowsAffected>;
 }

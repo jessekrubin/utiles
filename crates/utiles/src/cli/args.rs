@@ -310,6 +310,13 @@ pub struct ZxyifyArgs {
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub(crate) rm: bool,
 }
+
+#[derive(Debug, Parser)]
+pub struct WebpifyArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     // Alias `aboot` for possible Canadian users as they will not understand
@@ -376,6 +383,10 @@ pub enum Commands {
     /// Adds/removes `z/x/y` table/view for querying tiles not inverted
     #[command(name = "zxyify", aliases = ["xyzify"])]
     Zxyify(ZxyifyArgs),
+
+    /// webpify tiles-db
+    #[command(name = "webpify", hide = true)]
+    Webpify(WebpifyArgs),
 
     /*
     ========================================================================

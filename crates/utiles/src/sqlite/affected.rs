@@ -16,3 +16,13 @@ pub struct RowsAffected {
     pub table: Option<String>,
     pub count: usize,
 }
+
+impl RowsAffected {
+    pub fn insert(count: usize, table: Option<String>) -> Self {
+        Self {
+            type_: AffectedType::Insert,
+            table,
+            count,
+        }
+    }
+}

@@ -85,4 +85,8 @@ pub enum UtilesError {
     /// Error from `serde_json`
     #[error("serde error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
+
+    /// Image error
+    #[error("image error: {0}")]
+    ImageError(#[from] image::ImageError),
 }

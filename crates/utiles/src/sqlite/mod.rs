@@ -22,3 +22,4 @@ mod pragma;
 mod sqlike3;
 
 pub type AsyncSqliteResult<T> = Result<T, async_sqlite::Error>;
+pub type AsyncSqliteError = async_sqlite::Error;

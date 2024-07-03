@@ -1,8 +1,8 @@
+use async_sqlite::ClientBuilder;
+use rusqlite::{params, Connection, OpenFlags, OptionalExtension};
 use std::collections::HashSet;
 use std::error::Error;
 use std::path::Path;
-
-use rusqlite::{params, Connection, OptionalExtension};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
@@ -25,6 +25,7 @@ use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
+use crate::utilesqlite::MbtilesAsyncSqliteClient;
 use crate::UtilesError;
 
 pub struct Mbtiles {
@@ -71,6 +72,24 @@ impl Mbtiles {
         match c {
             Ok(c) => Mbtiles::from_conn(c),
             Err(e) => Err(e),
+        }
+    }
+
+    pub fn open_new<P: AsRef<Path>>(
+        path: P,
+        mbtype: Option<MbtType>,
+    ) -> UtilesResult<Self> {
+        let mbtype = mbtype.unwrap_or(MbtType::Flat);
+        if mbtype != MbtType::Flat {
+            return Err(UtilesError::Unimplemented(mbtype.to_string()));
+        }
+        // make sure the path don't exist
+        let dbpath = pathlike2dbpath(path)?;
+        if dbpath.fspath_exists() {
+            Err(UtilesError::PathExistsError(dbpath.fspath))
+        } else {
+            debug!("Creating new mbtiles file with client: {}", dbpath);
+            Mbtiles::create(&dbpath.fspath, Some(mbtype))
         }
     }
 
