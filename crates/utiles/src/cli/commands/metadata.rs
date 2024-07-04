@@ -73,13 +73,8 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     let c = match &args.value {
         Some(value) => {
             let mut mdjson = current_metadata_json.clone();
-
-            println!("BOOM");
             mdjson.insert(&args.key, value);
-
-            let (forward, inverse, data) =
-                current_metadata_json.diff(&mdjson, false)?;
-
+            let (forward, inverse, data) = current_metadata_json.diff(&mdjson, true)?;
             MetadataChange::from_forward_reverse_data(forward, inverse, data)
         }
         None => {
