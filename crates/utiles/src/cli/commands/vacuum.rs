@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tracing::{error, info, warn};
+use tracing::{debug, error, info, warn};
 
 use crate::cli::args::VacuumArgs;
 use crate::errors::UtilesResult;
@@ -24,10 +24,17 @@ pub struct VacuumInfo {
 pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     // check that the file exists
     let db = SqliteDb::open_existing(&args.common.filepath)?;
-
-    // get file size from filepath
     let pre_vac_file_size = std::fs::metadata(&args.common.filepath)?.len();
-    // .unwrap().len();
+
+    if args.page_size.is_some() {
+        let current_page_size = db.pragma_page_size()?;
+        if let Some(page_size) = args.page_size {
+            if current_page_size != page_size {
+                debug!("setting page size: {} -> {}", current_page_size, page_size);
+                db.pragma_page_size_set(page_size)?;
+            }
+        }
+    }
 
     // do the vacuum
     let vacuum_start_time = std::time::Instant::now();

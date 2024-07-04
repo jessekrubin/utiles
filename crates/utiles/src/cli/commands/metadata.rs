@@ -1,15 +1,16 @@
 use std::path::Path;
 
-use serde::Serialize;
-use tracing::debug;
-
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
+use crate::cli::stdin2string::stdin2string;
 use crate::errors::UtilesResult;
 use crate::mbt::{
-    metadata2map, metadata2map_val, read_metadata_json, MbtilesMetadataRowParsed,
-    MetadataChange,
+    metadata2map, metadata2map_val, read_metadata_json, MbtilesMetadataJson,
+    MbtilesMetadataRowParsed, MetadataChange,
 };
 use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
+use serde::Serialize;
+use tracing::warn;
+use tracing::{debug, info};
 
 pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
@@ -68,117 +69,7 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     );
 
     let mbtiles: Mbtiles = Mbtiles::from(filepath);
-
     let current_metadata_json = mbtiles.metadata_json()?;
-    // let current_value = mbtiles.metadata_get(&args.key).unwrap();
-    //
-    // let c = match &args.value {
-    //     Some(value) => {
-    //         let mut mdjson = current_metadata_json.clone();
-    //
-    //         println!("BOOM");
-    //         mdjson.insert(&args.key, value);
-    //
-    //         let (forward, inverse, data) = current_metadata_json.diff(&mdjson, false)?;
-    //         let change = MetadataChange::from_forward_reverse_data(forward, inverse, data);
-    //
-    //         let change_json_str = serde_json::to_string_pretty(&change)?;
-    //         println!("{change_json_str}");
-    //
-    //
-    //         if let Some(v) = current_value {
-    //             if value == &v {
-    //                 None
-    //             } else {
-    //                 let r = mbtiles.metadata_set(&args.key, value).unwrap();
-    //                 debug!("metadata rows updated: {:?}", r);
-    //                 Some(MetadataChangeFromTo {
-    //                     name: args.key.clone(),
-    //                     from: Some(v),
-    //                     to: Some(value.clone()),
-    //                 })
-    //             }
-    //         } else {
-    //             let r = mbtiles.metadata_set(&args.key, value).unwrap();
-    //             debug!("metadata rows updated: {:?}", r);
-    //             Some(MetadataChangeFromTo {
-    //                 name: args.key.clone(),
-    //                 from: None,
-    //                 to: Some(value.clone()),
-    //             })
-    //         }
-    //     }
-    //     None => {
-    //         // check if key is filepath ending in .json then load and
-    //         // update from there!
-    //
-    //         if args.key.to_lowercase().ends_with(".json") {
-    //             // get metadata from json file...
-    //
-    //             let mdjson = read_metadata_json(&args.key).await?;
-    //             let (forward, inverse, data) = current_metadata_json.diff(&mdjson, true)?;
-    //             let change = MetadataChange::from_forward_reverse_data(forward, inverse, data);
-    //
-    //
-    //             // debug!("forward: {:?}", forward);
-    //             // debug!("inverse: {:?}", inverse);
-    //             //
-    //             // let string = serde_json::to_string_pretty(&mdjson)?;
-    //             // println!("{string}");
-    //             // let forward_string = serde_json::to_string_pretty(&forward)?;
-    //             // println!("forward: {forward_string}");
-    //             // let inverse_string = serde_json::to_string_pretty(&inverse)?;
-    //             // println!("inverse: {inverse_string}");
-    //
-    //
-    //             // // debug!("metadata rows updated: {:?}", r);
-    //             // Some(MetadataChangeFromTo {
-    //             //     name: args.key.clone(),
-    //             //     from: current_value,
-    //             //     to: Some(json_str),
-    //             // })
-    //             None
-    //         } else {
-    //             let mut mdjson = current_metadata_json.clone();
-    //             mdjson.delete(&args.key);
-    //
-    //
-    //             let (forward, inverse) = current_metadata_json.diff(&mdjson, false)?;
-    //             let string = serde_json::to_string_pretty(&mdjson)?;
-    //             println!("{string}");
-    //             let forward_string = serde_json::to_string_pretty(&forward)?;
-    //             println!("forward: {forward_string}");
-    //             let inverse_string = serde_json::to_string_pretty(&inverse)?;
-    //             println!("inverse: {inverse_string}");
-    //
-    //
-    //             if current_value.is_some() {
-    //                 let r = mbtiles.metadata_delete(&args.key).unwrap();
-    //                 debug!("metadata rows deleted: {:?}", r);
-    //                 Some(MetadataChangeFromTo {
-    //                     name: args.key.clone(),
-    //                     from: current_value,
-    //                     to: None,
-    //                 })
-    //             } else {
-    //                 None
-    //             }
-    //         }
-    //         // if args.key.ends_with(".json") {
-    //         //     let json_str = std::fs::read_to_string(&args.key).unwrap();
-    //         //     let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
-    //         //     let r = mbtiles.metadata_set_json(&args.key, &json).unwrap();
-    //         //     debug!("metadata rows updated: {:?}", r);
-    //         //     Some(MetadataChangeFromTo {
-    //         //         name: args.key.clone(),
-    //         //         from: current_value,
-    //         //         to: Some(json_str),
-    //         //     })
-    //         // } else
-    //     }
-    // };
-    //
-
     let c = match &args.value {
         Some(value) => {
             let mut mdjson = current_metadata_json.clone();
@@ -203,6 +94,15 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
                     current_metadata_json.diff(&mdjson, true)?;
 
                 MetadataChange::from_forward_reverse_data(forward, inverse, data)
+            } else if args.key.to_lowercase() == "-" || args.key.to_lowercase() == "--"
+            {
+                // get metadata from stdin...
+                let stdin_str = stdin2string()?;
+                let mdjson = serde_json::from_str::<MbtilesMetadataJson>(&stdin_str)?;
+                let (forward, inverse, data) =
+                    current_metadata_json.diff(&mdjson, true)?;
+
+                MetadataChange::from_forward_reverse_data(forward, inverse, data)
             } else {
                 let mut mdjson = current_metadata_json.clone();
                 mdjson.delete(&args.key);
@@ -216,14 +116,16 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     };
 
     if c.is_empty() {
-        eprintln!("No change");
+        info!("No change");
     } else {
-        println!("metadata change: {c:?}");
+        debug!("metadata change: {c:?}");
         let stringy = serde_json::to_string_pretty(&c)?;
-
-        MetadataChange::apply_changes_to_connection(&mbtiles.conn, &vec![c])?;
         println!("{stringy}");
-        // print to stderr
+        if args.dryrun {
+            warn!("Dryrun: no changes made");
+        } else {
+            MetadataChange::apply_changes_to_connection(&mbtiles.conn, &vec![c])?;
+        }
     }
     Ok(())
 }

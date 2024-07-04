@@ -31,7 +31,6 @@ pub fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
                 .json()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
-                .without_time()
                 .finish();
             let set_global_res = tracing::subscriber::set_global_default(subscriber);
             if let Err(e) = set_global_res {
@@ -40,11 +39,9 @@ pub fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
         }
         false => {
             let subscriber = fmt::Subscriber::builder()
-                .compact()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
                 .with_target(debug_or_trace)
-                .without_time()
                 .finish();
             let set_global_res = tracing::subscriber::set_global_default(subscriber);
             if let Err(e) = set_global_res {

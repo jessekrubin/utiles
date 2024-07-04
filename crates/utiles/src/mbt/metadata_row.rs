@@ -159,16 +159,11 @@ impl MbtilesMetadataJson {
         other: &MbtilesMetadataJson,
         merge: bool,
     ) -> UtilesResult<(Patch, Patch, Value)> {
-        // let self_value= serde_json::to_value(self)?;
         let self_value = serde_json::to_value(self)?;
         let mut other_value = serde_json::to_value(other)?;
         if merge {
-            println!("merged: {self_value:?}");
-            // json_patch::merge(&mut self_value, &other_value);
             json_patch::merge(&mut other_value, &self_value);
-            println!("merged: {self_value:?}");
         }
-
         let forward_patch = json_patch::diff(&self_value, &other_value);
         let reverse_patch = json_patch::diff(&other_value, &self_value);
         let mut patched_data = self_value.clone();

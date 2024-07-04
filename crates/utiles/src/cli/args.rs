@@ -232,6 +232,10 @@ pub struct VacuumArgs {
     /// Analyze db after vacuum
     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
     pub analyze: bool,
+
+    /// page size to set
+    #[arg(required = false, long)]
+    pub page_size: Option<i64>,
 }
 
 #[derive(Debug, Parser)]
@@ -254,12 +258,16 @@ pub struct MetadataSetArgs {
     pub common: SqliteDbCommonArgs,
 
     /// key or json-fspath
-    #[arg(required = true)]
+    #[arg(required = true, value_name = "KEY/FSPATH")]
     pub key: String,
 
     /// value
     #[arg(required = false)]
     pub value: Option<String>,
+
+    /// dryrun (don't actually set)
+    #[arg(required = false, long , aliases = ["dry-run"], short = 'n', action = clap::ArgAction::SetTrue)]
+    pub dryrun: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -339,7 +347,7 @@ pub enum Commands {
     #[command(name = "metadata", visible_aliases = ["meta", "md"])]
     Metadata(MetadataArgs),
 
-    /// Set metadata key/value
+    /// Set metadata key/value or from `json` file if key is fspath
     #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"])]
     MetadataSet(MetadataSetArgs),
 
