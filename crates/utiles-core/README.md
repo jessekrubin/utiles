@@ -1,3 +1,3 @@
-# utiles library
+# utiles-core ~ web map util(e)ities
 
-map tiles utilities rust library
+Core web-map/spherical-mercator/slippy-map/xyz-tiles utilities library.

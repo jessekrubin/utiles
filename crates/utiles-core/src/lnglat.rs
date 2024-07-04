@@ -1,3 +1,4 @@
+//! Longitude and Latitude coordinates
 use std::fmt::Display;
 use std::str::FromStr;
 

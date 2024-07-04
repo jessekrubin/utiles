@@ -1,3 +1,4 @@
+//! Coordinate projection
 use crate::UtilesCoreError;
 use serde::{Deserialize, Serialize};
 use std::fmt;

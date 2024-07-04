@@ -1,3 +1,4 @@
+//! Quadkey conversion util(e)ities.
 use crate::errors::{UtilesCoreError, UtilesCoreResult};
 use crate::Tile;
 

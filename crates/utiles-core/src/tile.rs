@@ -1,3 +1,4 @@
+//! XYZ-Tile core struct and methods
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::error::Error;
