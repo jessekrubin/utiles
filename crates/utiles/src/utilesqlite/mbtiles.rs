@@ -426,7 +426,6 @@ pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
         let count: i64 = row.get(0)?;
         Ok(count)
     })?;
-    println!("nrows: {:?}", nrows);
     Ok(nrows == 1_i64)
 }
 
