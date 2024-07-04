@@ -3,7 +3,6 @@ use std::error::Error;
 use std::path::Path;
 
 use rusqlite::{params, Connection, OptionalExtension};
-use serde_json::{Map, Value};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
@@ -14,8 +13,8 @@ use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::{
-    metadata2map_val, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
-    MbtilesZoomStats, MinZoomMaxZoom,
+    MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats, MbtilesZoomStats,
+    MinZoomMaxZoom,
 };
 use crate::sqlite::InsertStrategy;
 use crate::sqlite::RusqliteResult;

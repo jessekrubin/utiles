@@ -1,6 +1,4 @@
 use async_trait::async_trait;
-use serde_json::{Map, Value};
-use std::collections::BTreeMap;
 use tilejson::TileJSON;
 
 use utiles_core::{BBox, Tile, TileLike};

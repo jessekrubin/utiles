@@ -1,6 +1,5 @@
-use crate::mbt::metadata_vec_has_duplicates;
 use crate::UtilesResult;
-use json_patch::{patch, Patch};
+use json_patch::Patch;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -63,6 +62,7 @@ impl From<&MbtMetadataRow> for MbtilesMetadataRowParsed {
 }
 
 impl MbtilesMetadataJson {
+    #[must_use]
     pub fn from_key_value(key: &str, value: &str) -> MbtilesMetadataJson {
         let mut obj = BTreeMap::new();
         // try and parse the value...
@@ -103,6 +103,7 @@ impl MbtilesMetadataJson {
         }
     }
 
+    #[must_use]
     pub fn as_obj(&self) -> BTreeMap<String, Value> {
         match self {
             MbtilesMetadataJson::Obj(obj) => obj.clone(),
@@ -117,6 +118,7 @@ impl MbtilesMetadataJson {
         }
     }
 
+    #[must_use]
     pub fn as_arr(&self) -> Vec<MbtilesMetadataRowParsed> {
         match self {
             MbtilesMetadataJson::Arr(arr) => arr.clone(),
@@ -158,19 +160,19 @@ impl MbtilesMetadataJson {
         merge: bool,
     ) -> UtilesResult<(Patch, Patch, Value)> {
         // let self_value= serde_json::to_value(self)?;
-        let mut self_value = serde_json::to_value(self)?;
+        let self_value = serde_json::to_value(self)?;
         let mut other_value = serde_json::to_value(other)?;
         if merge {
-            println!("merged: {:?}", self_value);
+            println!("merged: {self_value:?}");
             // json_patch::merge(&mut self_value, &other_value);
             json_patch::merge(&mut other_value, &self_value);
-            println!("merged: {:?}", self_value);
+            println!("merged: {self_value:?}");
         }
 
         let forward_patch = json_patch::diff(&self_value, &other_value);
         let reverse_patch = json_patch::diff(&other_value, &self_value);
         let mut patched_data = self_value.clone();
-        json_patch::patch(&mut patched_data, &forward_patch).unwrap();
+        json_patch::patch(&mut patched_data, &forward_patch)?;
         Ok((forward_patch, reverse_patch, patched_data))
     }
 }
@@ -200,10 +202,8 @@ impl From<&Vec<MbtMetadataRow>> for MbtilesMetadataJsonRaw {
 }
 impl From<&Vec<MbtMetadataRow>> for MbtilesMetadataJson {
     fn from(rows: &Vec<MbtMetadataRow>) -> Self {
-        let arr: Vec<MbtilesMetadataRowParsed> = rows
-            .into_iter()
-            .map(MbtilesMetadataRowParsed::from)
-            .collect();
+        let arr: Vec<MbtilesMetadataRowParsed> =
+            rows.iter().map(MbtilesMetadataRowParsed::from).collect();
         let has_duplicates = arr
             .iter()
             .fold(BTreeMap::new(), |mut acc: BTreeMap<String, usize>, row| {

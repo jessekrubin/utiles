@@ -85,4 +85,8 @@ pub enum UtilesError {
     /// Error from `serde_json`
     #[error("serde error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
+
+    /// Error from `json_patch`
+    #[error("json_patch error: {0}")]
+    JsonPatchError(#[from] json_patch::PatchError),
 }

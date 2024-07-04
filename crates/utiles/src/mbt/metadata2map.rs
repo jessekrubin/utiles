@@ -22,16 +22,6 @@ pub fn metadata2duplicates(
         .collect()
 }
 
-pub fn metadata_keys_has_duplicates(keys: &[String]) -> bool {
-    keys.iter()
-        .fold(BTreeMap::new(), |mut acc: BTreeMap<String, usize>, key| {
-            *acc.entry(key.clone()).or_default() += 1;
-            acc
-        })
-        .into_iter()
-        .any(|(_k, v)| v > 1)
-}
-
 #[must_use]
 pub fn metadata_vec_has_duplicates(rows: &[MbtMetadataRow]) -> bool {
     rows.iter()

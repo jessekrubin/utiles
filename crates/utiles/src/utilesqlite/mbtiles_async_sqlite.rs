@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
@@ -6,9 +5,7 @@ use std::path::Path;
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
-use crate::mbt::{
-    MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesMetadataRows, MinZoomMaxZoom,
-};
+use crate::mbt::{MbtMetadataRow, MbtType, MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::{journal_mode, magic_number, RowsAffected};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
@@ -24,7 +21,6 @@ use async_sqlite::{
 };
 use async_trait::async_trait;
 use rusqlite::{Connection, OpenFlags};
-use serde_json::Value;
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
 use utiles_core::BBox;
@@ -363,7 +359,7 @@ where
     }
 
     async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
-        let data = self.conn(|c| metadata_json(c)).await?;
+        let data = self.conn(metadata_json).await?;
         Ok(data)
     }
 
