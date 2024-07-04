@@ -2,12 +2,12 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 
-use utiles_core::bbox::BBox;
-use utiles_core::parsing::parse_bbox_ext;
-use utiles_core::zoom::ZoomSet;
-use utiles_core::LngLat;
-use utiles_core::VERSION;
 use utiles_core::{geobbox_merge, zoom};
+use utiles_core::bbox::BBox;
+use utiles_core::LngLat;
+use utiles_core::parsing::parse_bbox_ext;
+use utiles_core::VERSION;
+use utiles_core::zoom::ZoomSet;
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
@@ -221,6 +221,16 @@ impl TouchArgs {
 }
 
 #[derive(Debug, Parser)]
+pub struct AnalyzeArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    analysis_limit: Option<usize>,
+}
+
+
+#[derive(Debug, Parser)]
 pub struct VacuumArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -266,7 +276,9 @@ pub struct MetadataSetArgs {
     pub value: Option<String>,
 
     /// dryrun (don't actually set)
-    #[arg(required = false, long , aliases = ["dry-run"], short = 'n', action = clap::ArgAction::SetTrue)]
+    #[arg(
+        required = false, long, aliases = ["dry-run"], short = 'n', action = clap::ArgAction::SetTrue
+    )]
     pub dryrun: bool,
 }
 

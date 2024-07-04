@@ -2,7 +2,7 @@
 
 use rusqlite::Connection;
 
-use crate::sqlite::errors::SqliteResult;
+use crate::sqlite::RusqliteResult;
 
 /// Return true if `page_size` is valid; power of 2 between 512 and 65536.
 ///
@@ -20,7 +20,7 @@ pub fn is_valid_page_size(page_size: i64) -> bool {
         || page_size == 65536
 }
 
-pub fn pragma_page_size_get(conn: &Connection) -> SqliteResult<i64> {
+pub fn pragma_page_size_get(conn: &Connection) -> RusqliteResult<i64> {
     let mut stmt = conn.prepare("PRAGMA page_size")?;
     let mut rows = stmt.query([])?;
     let row = rows

@@ -5,7 +5,7 @@ use tracing::{debug, warn};
 use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
 use crate::mbt::MbtType;
-use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
+use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
 
@@ -54,7 +54,7 @@ impl CopyPasta {
                     // todo!
                     None,
                 )
-                .await?;
+                    .await?;
                 (db, true)
             }
         };
@@ -124,7 +124,7 @@ impl CopyPasta {
 
         let src_db_path = self.cfg.src_dbpath_str();
 
-        dst_db.attach(&src_db_path, src_db_name).await?;
+        dst_db.attach_db(&src_db_path, src_db_name).await?;
         let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
         debug!("n_tiles_inserted: {:?}", n_tiles_inserted);
 
@@ -134,7 +134,7 @@ impl CopyPasta {
         }
 
         debug!("Detaching src db...");
-        dst_db.detach(src_db_name).await?;
+        dst_db.detach_db(src_db_name).await?;
         debug!("Detached src db!");
         Ok(())
     }

@@ -1,9 +1,8 @@
-use crate::sqlite::errors::{SqliteError, SqliteResult};
-use crate::sqlite::page_size::{is_valid_page_size, pragma_page_size_get};
-
 use rusqlite::{Connection, Error as RusqliteError, Result as RusqliteResult};
 
-pub fn pragma_page_count(conn: &Connection) -> SqliteResult<i64> {
+use crate::sqlite::page_size::pragma_page_size_get;
+
+pub fn pragma_page_count(conn: &Connection) -> RusqliteResult<i64> {
     let mut stmt = conn.prepare("PRAGMA page_count")?;
     let mut rows = stmt.query([])?;
     let row = rows.next()?.ok_or(RusqliteError::QueryReturnedNoRows)?;
@@ -11,7 +10,7 @@ pub fn pragma_page_count(conn: &Connection) -> SqliteResult<i64> {
     Ok(count)
 }
 
-pub fn pragma_freelist_count(conn: &Connection) -> SqliteResult<i64> {
+pub fn pragma_freelist_count(conn: &Connection) -> RusqliteResult<i64> {
     let mut stmt = conn.prepare("PRAGMA freelist_count")?;
     let mut rows = stmt.query([])?;
     let row = rows.next()?.ok_or(RusqliteError::QueryReturnedNoRows)?;
@@ -22,7 +21,7 @@ pub fn pragma_freelist_count(conn: &Connection) -> SqliteResult<i64> {
 pub fn pragma_page_size(
     conn: &Connection,
     page_size: Option<i64>,
-) -> SqliteResult<i64> {
+) -> RusqliteResult<i64> {
     if let Some(page_size) = page_size {
         pragma_page_size_set(conn, page_size)
     } else {
@@ -30,21 +29,15 @@ pub fn pragma_page_size(
     }
 }
 
-pub fn pragma_page_size_set(conn: &Connection, page_size: i64) -> SqliteResult<i64> {
-    if is_valid_page_size(page_size) {
-        // set page size
-        let current_page_size = pragma_page_size_get(conn)?;
-        if current_page_size == page_size {
-            return Ok(page_size);
-        }
-        let stmt_str = format!("PRAGMA page_size = {page_size}");
-        conn.execute(&stmt_str, [])?;
-        Ok(page_size)
-    } else {
-        Err(SqliteError::InvalidPageSize(format!(
-            "Invalid page size: {page_size}",
-        )))
+pub fn pragma_page_size_set(conn: &Connection, page_size: i64) -> RusqliteResult<i64> {
+    // set page size
+    let current_page_size = pragma_page_size_get(conn)?;
+    if current_page_size == page_size {
+        return Ok(page_size);
     }
+    let stmt_str = format!("PRAGMA page_size = {page_size}");
+    conn.execute(&stmt_str, [])?;
+    Ok(page_size)
 }
 
 #[derive(Debug)]

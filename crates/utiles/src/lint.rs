@@ -9,6 +9,7 @@ use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::{utilesqlite, UtilesError};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
+use crate::sqlite::AsyncSqliteConn;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 5] =
     ["bounds", "format", "maxzoom", "minzoom", "name"];
