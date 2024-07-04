@@ -51,6 +51,27 @@ impl LngLat {
     pub fn y(&self) -> f64 {
         self.xy.y
     }
+
+    /// Return wrapped lnglat
+    #[must_use]
+    pub fn geo_wrap(&self) -> LngLat {
+        LngLat {
+            xy: Point2d::new(Self::geo_wrap_lng(self.xy.x), self.xy.y),
+        }
+    }
+
+    /// Return wrapped longitude
+    /// -180.0 <= lng <= 180.0
+    #[must_use]
+    pub fn geo_wrap_lng(lng: f64) -> f64 {
+        if lng < -180.0 {
+            lng + 360.0
+        } else if lng > 180.0 {
+            lng - 360.0
+        } else {
+            lng
+        }
+    }
 }
 
 impl Coord2dLike for LngLat {

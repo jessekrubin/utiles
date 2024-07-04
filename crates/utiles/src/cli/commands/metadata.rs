@@ -90,9 +90,9 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
                 // get metadata from json file...
 
                 let mdjson = read_metadata_json(&args.key).await?;
+                debug!("mdjson: {:?}", mdjson);
                 let (forward, inverse, data) =
                     current_metadata_json.diff(&mdjson, true)?;
-
                 MetadataChange::from_forward_reverse_data(forward, inverse, data)
             } else if args.key.to_lowercase() == "-" || args.key.to_lowercase() == "--"
             {
@@ -115,6 +115,7 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
         }
     };
 
+    debug!("metadata change: {:?}", c);
     if c.is_empty() {
         info!("No change");
     } else {

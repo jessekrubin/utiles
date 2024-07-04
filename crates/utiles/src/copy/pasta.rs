@@ -41,20 +41,21 @@ impl CopyPasta {
         Ok(src_db.mbtype)
     }
 
-    pub async fn get_dst_db(&self) -> UtilesResult<MbtilesAsyncSqliteClient> {
+    /// Returns the destination db and a bool indicating if it was created
+    pub async fn get_dst_db(&self) -> UtilesResult<(MbtilesAsyncSqliteClient, bool)> {
         // if the dst is a file... we gotta get it...
         let dst_db_res = MbtilesAsyncSqliteClient::open_existing(&self.cfg.dst).await;
-
         let dst_db = match dst_db_res {
-            Ok(db) => db,
+            Ok(db) => (db, false),
             Err(e) => {
                 debug!("dst_db_res: {:?}", e);
-                MbtilesAsyncSqliteClient::open_new(
+                let db = MbtilesAsyncSqliteClient::open_new(
                     &self.cfg.dst,
                     // todo!
                     None,
                 )
-                .await?
+                .await?;
+                (db, true)
             }
         };
         Ok(dst_db)
@@ -65,10 +66,18 @@ impl CopyPasta {
         dst_db: &MbtilesAsyncSqliteClient,
     ) -> UtilesResult<usize> {
         let src_db = self.get_src_db().await?;
-        let metadata_rows = src_db.metadata_rows().await?;
+        let metadata_rows = src_db.metadata_json().await?.as_obj();
+        // if we have any bboxes... should set them...
         let mut n_metadata_inserted = 0;
         for row in metadata_rows {
-            let res = dst_db.metadata_set(&row.name, &row.value).await?;
+            let (name, value) = row;
+            let value_string = if let serde_json::Value::String(s) = value {
+                s
+            } else {
+                serde_json::to_string(&value)?
+            };
+            debug!("metadata: {:?} -> {:?}", name, value_string);
+            let res = dst_db.metadata_set(&name, &value_string).await?;
             n_metadata_inserted += res;
         }
         Ok(n_metadata_inserted)
@@ -109,22 +118,20 @@ impl CopyPasta {
         debug!("Preflight check");
         self.preflight_check()?;
 
-        let dst_db = self.get_dst_db().await?;
+        let (dst_db, is_new) = self.get_dst_db().await?;
 
         let src_db_name = "src";
 
-        // let src_db_path = self.cfg.src.to_str();
-        // if src_db_path.is_none() {
-        //     return Err(UtilesError::PathConversionError(
-        //         "src db path conversion error".to_string(),
-        //     ));
-        // }
         let src_db_path = self.cfg.src_dbpath_str();
 
         dst_db.attach(&src_db_path, src_db_name).await?;
         let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
-
         debug!("n_tiles_inserted: {:?}", n_tiles_inserted);
+
+        if is_new {
+            let n_metadata_inserted = self.copy_metadata(&dst_db).await?;
+            debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
+        }
 
         debug!("Detaching src db...");
         dst_db.detach(src_db_name).await?;

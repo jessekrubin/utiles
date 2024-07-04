@@ -3,7 +3,7 @@ use thiserror::Error;
 pub type UtilesResult<T> = Result<T, UtilesError>;
 #[derive(Error, Debug)]
 pub enum UtilesCopyError {
-    #[error("src and dst are the same")]
+    #[error("src and dst: {0}")]
     SrcDstSame(String),
 
     #[error("src does not exist: {0}")]

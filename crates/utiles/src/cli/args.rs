@@ -4,10 +4,10 @@ use clap::{Args, Parser, Subcommand};
 
 use utiles_core::bbox::BBox;
 use utiles_core::parsing::parse_bbox_ext;
-use utiles_core::zoom;
 use utiles_core::zoom::ZoomSet;
 use utiles_core::LngLat;
 use utiles_core::VERSION;
+use utiles_core::{geobbox_merge, zoom};
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
@@ -680,6 +680,16 @@ impl CopyArgs {
     pub fn bboxes(&self) -> Option<Vec<BBox>> {
         self.bbox.as_ref().map(|bbox| vec![*bbox])
     }
+
+    #[must_use]
+    pub fn bounds(&self) -> Option<String> {
+        if let Some(bboxes) = self.bboxes() {
+            let new_bbox = geobbox_merge(&bboxes);
+            Some(new_bbox.mbt_bounds())
+        } else {
+            None
+        }
+    }
 }
 
 impl From<&CopyArgs> for CopyConfig {
@@ -691,6 +701,7 @@ impl From<&CopyArgs> for CopyConfig {
             zooms: args.zooms(),
             verbose: true,
             bboxes: args.bboxes(),
+            bounds_string: args.bounds(),
             force: false,
             dryrun: false,
             jobs: args.jobs,

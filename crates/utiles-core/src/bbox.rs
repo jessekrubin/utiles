@@ -101,6 +101,44 @@ impl BBox {
         }
     }
 
+    #[must_use]
+    pub fn clamp_web(&self) -> Self {
+        BBox {
+            west: self.west.max(-180.0),
+            south: self.south.max(-85.051_129),
+            east: self.east.min(180.0),
+            north: self.north.min(85.051_129),
+        }
+    }
+
+    #[must_use]
+    pub fn clamp(&self, o: &BBox) -> Self {
+        BBox {
+            west: self.west.max(o.west),
+            south: self.south.max(o.south),
+            east: self.east.min(o.east),
+            north: self.north.min(o.north),
+        }
+    }
+
+    #[must_use]
+    pub fn geo_wrap(&self) -> Self {
+        let east = LngLat::geo_wrap_lng(self.east);
+        let west = LngLat::geo_wrap_lng(self.west);
+
+        BBox {
+            west,
+            south: self.south,
+            east,
+            north: self.north,
+        }
+    }
+
+    #[must_use]
+    pub fn is_antimeridian(&self) -> bool {
+        self.west > self.east
+    }
+
     /// Returns true if the bounding box crosses the antimeridian (the 180-degree meridian).
     #[must_use]
     pub fn crosses_antimeridian(&self) -> bool {
@@ -219,10 +257,29 @@ impl BBox {
     /// Returns true if the current instance contains the given `BBox`
     #[must_use]
     pub fn contains_bbox(&self, other: &BBox) -> bool {
-        self.north >= other.north
-            && self.south <= other.south
-            && self.east >= other.east
-            && self.west <= other.west
+        if self.is_antimeridian() {
+            // BBox crosses the antimeridian
+            if other.is_antimeridian() {
+                // Other BBox also crosses the antimeridian
+                if self.west <= other.west && self.east >= other.east {
+                    // The current BBox contains the other BBox
+                    self.south <= other.south && self.north >= other.north
+                } else {
+                    false
+                }
+                // Other BBox does not cross the antimeridian
+            } else if self.west <= other.west || self.east >= other.east {
+                // The current BBox contains the other BBox
+                self.south <= other.south && self.north >= other.north
+            } else {
+                false
+            }
+        } else {
+            self.north >= other.north
+                && self.south <= other.south
+                && self.east >= other.east
+                && self.west <= other.west
+        }
     }
 
     /// Returns true if the current instance contains the given `BBoxContainable` object.
@@ -323,6 +380,44 @@ impl BBox {
     pub fn ll(&self) -> LngLat {
         LngLat::new(self.west, self.south)
     }
+
+    /// Mbt metadata bounds string
+    #[must_use]
+    pub fn mbt_bounds(&self) -> String {
+        format!("{},{},{},{}", self.west, self.south, self.east, self.north)
+    }
+}
+
+/// Merge a vector of bboxes into a single bbox handling antimeridian
+#[must_use]
+pub fn geobbox_merge(bboxes: &[BBox]) -> BBox {
+    if bboxes.is_empty() {
+        return BBox::world_planet();
+    }
+    if bboxes.len() == 1 {
+        return bboxes[0];
+    }
+    // TODO: Figure this out at somepoint...
+    // let any_crosses_antimeridian = bboxes.iter().any(|bbox| bbox.crosses_antimeridian());
+    let mut west = f64::INFINITY;
+    let mut south = f64::INFINITY;
+    let mut east = f64::NEG_INFINITY;
+    let mut north = f64::NEG_INFINITY;
+    for bbox in bboxes {
+        if bbox.west < west {
+            west = bbox.west;
+        }
+        if bbox.south < south {
+            south = bbox.south;
+        }
+        if bbox.east > east {
+            east = bbox.east;
+        }
+        if bbox.north > north {
+            north = bbox.north;
+        }
+    }
+    BBox::new(west, south, east, north).geo_wrap()
 }
 
 impl From<BBox> for BBoxTuple {
@@ -468,4 +563,51 @@ impl From<Tile> for WebBBox {
         let bbox = tile.geobbox();
         WebBBox::new(bbox.west, bbox.south, bbox.east, bbox.north)
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_merge_bboxes_non_crossing() {
+        let bboxes = vec![
+            BBox::new(-100.0, -10.0, -90.0, 10.0), // Does not cross the anti-meridian
+            BBox::new(-120.0, -5.0, -100.0, 5.0),  // Does not cross the anti-meridian
+        ];
+
+        let expected = BBox::new(-120.0, -10.0, -90.0, 10.0);
+        let result = geobbox_merge(&bboxes);
+
+        assert_eq!(result, expected);
+    }
+
+    // =========================================================================
+    // TODO - Antimeridian bbox... it's not as straight forward as I thought...
+    // =========================================================================
+    // #[test]
+    // fn test_merge_bboxes_antimeridian() {
+    //     let bboxes = vec![
+    //         BBox::new(170.0, -10.0, -170.0, 10.0), // Crosses the anti-meridian
+    //         BBox::new(160.0, -5.0, 170.0, 5.0),    // Crosses the anti-meridian
+    //     ];
+    //
+    //     let expected = BBox::new(160.0, -10.0, -170.0, 10.0);
+    //     let result = geobbox_merge(&bboxes);
+    //
+    //     assert_eq!(result, expected);
+    // }
+
+    // #[test]
+    // fn test_merge_mixed_bboxes() {
+    //     let bboxes = vec![
+    //         BBox::new(170.0, -10.0, -170.0, 10.0), // Crosses the anti-meridian
+    //         BBox::new(-100.0, -20.0, 100.0, 20.0), // Does not cross the anti-meridian
+    //     ];
+    //
+    //     let expected = BBox::new(-100.0, -20.0, -170.0, 20.0);
+    //     let result = geobbox_merge(&bboxes);
+    //
+    //     assert_eq!(result, expected);
+    // }
 }

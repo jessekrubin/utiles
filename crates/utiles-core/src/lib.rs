@@ -17,7 +17,7 @@
 pub use crate::fns::*;
 #[doc(inline)]
 pub use crate::quadkey::*;
-pub use bbox::BBox;
+pub use bbox::{geobbox_merge, BBox};
 #[doc(inline)]
 pub use errors::{UtilesCoreError, UtilesCoreResult};
 #[doc(inline)]
