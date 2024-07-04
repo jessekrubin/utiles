@@ -1,11 +1,13 @@
 use async_trait::async_trait;
+use serde_json::{Map, Value};
+use std::collections::BTreeMap;
 use tilejson::TileJSON;
 
 use utiles_core::{BBox, Tile, TileLike};
 
 use crate::errors::UtilesResult;
-use crate::mbt::MinZoomMaxZoom;
 use crate::mbt::{MbtMetadataRow, MbtType};
+use crate::mbt::{MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::RowsAffected;
 
 #[async_trait]
@@ -19,6 +21,8 @@ pub trait MbtilesAsync: Sized {
     async fn magic_number(&self) -> UtilesResult<u32>;
     async fn tilejson(&self) -> UtilesResult<TileJSON>;
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>>;
+
+    async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson>;
     async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>>;
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize>;
     async fn tiles_is_empty(&self) -> UtilesResult<bool>;

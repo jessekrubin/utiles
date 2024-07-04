@@ -1,8 +1,9 @@
-use std::collections::HashSet;
+use std::collections::{HashSet};
 use std::error::Error;
 use std::path::Path;
 
 use rusqlite::{params, Connection, OptionalExtension};
+use serde_json::{Map, Value};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
@@ -13,7 +14,8 @@ use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::{
-    MbtMetadataRow, MbtType, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom,
+    metadata2map_val, MbtMetadataRow, MbtType, MbtilesMetadataJson,
+    MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom,
 };
 use crate::sqlite::InsertStrategy;
 use crate::sqlite::RusqliteResult;
@@ -126,11 +128,7 @@ impl Mbtiles {
     }
 
     pub fn metadata_delete(&self, name: &str) -> RusqliteResult<usize> {
-        let mut stmt = self
-            .conn
-            .prepare_cached("DELETE FROM metadata WHERE name=?1")?;
-        let r = stmt.execute(params![name])?;
-        Ok(r)
+        metadata_delete(&self.conn, name)
     }
 
     pub fn metadata_set_from_vec(
@@ -169,6 +167,14 @@ impl Mbtiles {
             }
         }
     }
+
+    pub fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
+        metadata_json(&self.conn).map_err(|e| e.into())
+    }
+
+    // pub fn metadata_update(&self, name: &str, value: &str) -> RusqliteResult<usize> {
+    //     metadata_update(&self.conn, name, value)
+    // }
 
     pub fn tilejson(&self) -> UtilesResult<TileJSON> {
         let metadata = self.metadata()?;
@@ -388,6 +394,14 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtMetadataRow>
             Err(e)
         }
     }
+}
+
+
+/// Return a Map<String, Value> of metadata
+pub fn metadata_json(conn: &Connection) -> RusqliteResult<MbtilesMetadataJson> {
+    let mdata = mbtiles_metadata(conn)?;
+    let md_json = MbtilesMetadataJson::from(&mdata);
+    Ok(md_json)
 }
 
 pub fn mbtiles_metadata_row(
@@ -854,6 +868,15 @@ pub fn metadata_set_many(
         naff += r;
     }
     Ok(naff)
+}
+
+pub fn metadata_delete(conn: &Connection
+                       , name: &str) -> RusqliteResult<usize> {
+    let mut stmt =
+        conn
+            .prepare_cached("DELETE FROM metadata WHERE name=?1")?;
+    let r = stmt.execute(params![name])?;
+    Ok(r)
 }
 
 pub fn update_metadata_minzoom_from_tiles(conn: &Connection) -> RusqliteResult<usize> {

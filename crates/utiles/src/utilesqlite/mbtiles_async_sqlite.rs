@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
@@ -5,14 +6,16 @@ use std::path::Path;
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
-use crate::mbt::{MbtMetadataRow, MbtType, MinZoomMaxZoom};
+use crate::mbt::{
+    MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesMetadataRows, MinZoomMaxZoom,
+};
 use crate::sqlite::{journal_mode, magic_number, RowsAffected};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
     has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
-    init_flat_mbtiles, mbtiles_metadata, mbtiles_metadata_row, minzoom_maxzoom,
-    query_zxy, register_utiles_sqlite_functions, tiles_is_empty,
+    init_flat_mbtiles, mbtiles_metadata, mbtiles_metadata_row, metadata_json,
+    minzoom_maxzoom, query_zxy, register_utiles_sqlite_functions, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
@@ -21,6 +24,7 @@ use async_sqlite::{
 };
 use async_trait::async_trait;
 use rusqlite::{Connection, OpenFlags};
+use serde_json::Value;
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
 use utiles_core::BBox;
@@ -356,6 +360,11 @@ where
             .await
             .map_err(UtilesError::AsyncSqliteError)?;
         Ok(row)
+    }
+
+    async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
+        let data = self.conn(|c| metadata_json(c)).await?;
+        Ok(data)
     }
 
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize> {

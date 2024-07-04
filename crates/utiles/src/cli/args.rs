@@ -253,7 +253,7 @@ pub struct MetadataSetArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    /// key
+    /// key or json-fspath
     #[arg(required = true)]
     pub key: String,
 

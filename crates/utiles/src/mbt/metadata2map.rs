@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 use crate::mbt::metadata_row::{MbtMetadataRow, MbtilesMetadataRows};
 
@@ -21,6 +21,17 @@ pub fn metadata2duplicates(
         .filter(|(_k, v)| v.len() > 1)
         .collect()
 }
+
+pub fn metadata_keys_has_duplicates(keys: &[String]) -> bool {
+    keys.iter()
+        .fold(BTreeMap::new(), |mut acc: BTreeMap<String, usize>, key| {
+            *acc.entry(key.clone()).or_default() += 1;
+            acc
+        })
+        .into_iter()
+        .any(|(_k, v)| v > 1)
+}
+
 #[must_use]
 pub fn metadata_vec_has_duplicates(rows: &[MbtMetadataRow]) -> bool {
     rows.iter()
@@ -35,20 +46,17 @@ pub fn metadata_vec_has_duplicates(rows: &[MbtMetadataRow]) -> bool {
 /// Convert a `MbtilesMetadataRows` to a `HashMap<String, String>`
 #[must_use]
 pub fn metadata2map(rows: &MbtilesMetadataRows) -> BTreeMap<String, String> {
-    // return HashMap::from_iter(
-    //     // rows.iter().map(|row| (row.name.clone(), row.value.clone())),
-    // );
     rows.iter()
         .map(|row| (row.name.clone(), row.value.clone()))
         .collect::<BTreeMap<_, _>>()
 }
 
-/// Convert `MbtilesMetadataRows` to a `HashMap<String, Value>`
+/// Convert `MbtilesMetadataRows` to a `BTreeMap<String, Value>`
 /// where `Value` is a `serde_json::Value`
 #[must_use]
 pub fn metadata2map_val(
     rows: &MbtilesMetadataRows,
-) -> BTreeMap<String, serde_json::Value> {
+) -> Map<String, Value> {
     rows.iter()
         .map(|row| {
             let v = match row.value.parse::<Value>() {
