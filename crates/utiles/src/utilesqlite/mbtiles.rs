@@ -1,4 +1,4 @@
-use std::collections::{HashSet};
+use std::collections::HashSet;
 use std::error::Error;
 use std::path::Path;
 
@@ -14,8 +14,8 @@ use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::{
-    metadata2map_val, MbtMetadataRow, MbtType, MbtilesMetadataJson,
-    MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom,
+    metadata2map_val, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
+    MbtilesZoomStats, MinZoomMaxZoom,
 };
 use crate::sqlite::InsertStrategy;
 use crate::sqlite::RusqliteResult;
@@ -395,7 +395,6 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtMetadataRow>
         }
     }
 }
-
 
 /// Return a Map<String, Value> of metadata
 pub fn metadata_json(conn: &Connection) -> RusqliteResult<MbtilesMetadataJson> {
@@ -870,11 +869,8 @@ pub fn metadata_set_many(
     Ok(naff)
 }
 
-pub fn metadata_delete(conn: &Connection
-                       , name: &str) -> RusqliteResult<usize> {
-    let mut stmt =
-        conn
-            .prepare_cached("DELETE FROM metadata WHERE name=?1")?;
+pub fn metadata_delete(conn: &Connection, name: &str) -> RusqliteResult<usize> {
+    let mut stmt = conn.prepare_cached("DELETE FROM metadata WHERE name=?1")?;
     let r = stmt.execute(params![name])?;
     Ok(r)
 }

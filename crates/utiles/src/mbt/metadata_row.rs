@@ -1,9 +1,9 @@
 use crate::mbt::metadata_vec_has_duplicates;
+use crate::UtilesResult;
+use json_patch::{patch, Patch};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
-use json_patch::{Patch, patch};
-use crate::UtilesResult;
 
 /// Metadata row struct for `mbtiles` metadata table
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -107,9 +107,8 @@ impl MbtilesMetadataJson {
         match self {
             MbtilesMetadataJson::Obj(obj) => obj.clone(),
             MbtilesMetadataJson::Arr(arr) => {
-                let obj: BTreeMap<String, Value> = arr
-                    .iter()
-                    .fold(BTreeMap::new(), |mut acc, row| {
+                let obj: BTreeMap<String, Value> =
+                    arr.iter().fold(BTreeMap::new(), |mut acc, row| {
                         acc.insert(row.name.clone(), row.value.clone());
                         acc
                     });
@@ -134,10 +133,7 @@ impl MbtilesMetadataJson {
         }
     }
 
-    pub fn stringify(
-        &self,
-        pretty: bool,
-    ) -> Result<String, serde_json::Error> {
+    pub fn stringify(&self, pretty: bool) -> Result<String, serde_json::Error> {
         match self {
             MbtilesMetadataJson::Obj(obj) => {
                 if pretty {
@@ -156,8 +152,11 @@ impl MbtilesMetadataJson {
         }
     }
 
-
-    pub fn diff(&self, other: &MbtilesMetadataJson, merge: bool) -> UtilesResult<(Patch, Patch, Value)> {
+    pub fn diff(
+        &self,
+        other: &MbtilesMetadataJson,
+        merge: bool,
+    ) -> UtilesResult<(Patch, Patch, Value)> {
         // let self_value= serde_json::to_value(self)?;
         let mut self_value = serde_json::to_value(self)?;
         let mut other_value = serde_json::to_value(other)?;
@@ -172,16 +171,8 @@ impl MbtilesMetadataJson {
         let reverse_patch = json_patch::diff(&other_value, &self_value);
         let mut patched_data = self_value.clone();
         json_patch::patch(&mut patched_data, &forward_patch).unwrap();
-        Ok(
-            (
-                forward_patch,
-                reverse_patch,
-                patched_data
-            )
-        )
+        Ok((forward_patch, reverse_patch, patched_data))
     }
-    
-    
 }
 
 impl From<&Vec<MbtMetadataRow>> for MbtilesMetadataJsonRaw {

@@ -54,9 +54,7 @@ pub fn metadata2map(rows: &MbtilesMetadataRows) -> BTreeMap<String, String> {
 /// Convert `MbtilesMetadataRows` to a `BTreeMap<String, Value>`
 /// where `Value` is a `serde_json::Value`
 #[must_use]
-pub fn metadata2map_val(
-    rows: &MbtilesMetadataRows,
-) -> Map<String, Value> {
+pub fn metadata2map_val(rows: &MbtilesMetadataRows) -> Map<String, Value> {
     rows.iter()
         .map(|row| {
             let v = match row.value.parse::<Value>() {

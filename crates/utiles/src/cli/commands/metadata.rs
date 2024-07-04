@@ -5,9 +5,12 @@ use tracing::debug;
 
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 use crate::errors::UtilesResult;
-use crate::mbt::{metadata2map, metadata2map_val, MbtilesMetadataRowParsed, read_metadata_json, MbtilesMetadataJson, MetadataChange};
-use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
+use crate::mbt::{
+    metadata2map, metadata2map_val, read_metadata_json, MbtilesMetadataJson,
+    MbtilesMetadataRowParsed, MetadataChange,
+};
 use crate::utilesqlite::mbtiles::metadata_json;
+use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
 
 pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
@@ -29,9 +32,7 @@ pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
         (false, false) => {
             let parsed_values_vec: Vec<MbtilesMetadataRowParsed> = metadata_rows
                 .into_iter()
-                .map(
-                    |row| MbtilesMetadataRowParsed::from(&row)
-                )
+                .map(|row| MbtilesMetadataRowParsed::from(&row))
                 .collect();
             serde_json::to_value(parsed_values_vec)?
         }
@@ -51,7 +52,6 @@ pub struct MetadataChangeFromTo {
     pub from: Option<String>,
     pub to: Option<String>,
 }
-
 
 pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
@@ -180,7 +180,6 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     // };
     //
 
-
     let c = match &args.value {
         Some(value) => {
             let mut mdjson = current_metadata_json.clone();
@@ -188,8 +187,10 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
             println!("BOOM");
             mdjson.insert(&args.key, value);
 
-            let (forward, inverse, data) = current_metadata_json.diff(&mdjson, false)?;
-            let change = MetadataChange::from_forward_reverse_data(forward, inverse, data);
+            let (forward, inverse, data) =
+                current_metadata_json.diff(&mdjson, false)?;
+            let change =
+                MetadataChange::from_forward_reverse_data(forward, inverse, data);
             change
         }
         None => {
@@ -200,24 +201,24 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
                 // get metadata from json file...
 
                 let mdjson = read_metadata_json(&args.key).await?;
-                let (forward, inverse, data) = current_metadata_json.diff(&mdjson, true)?;
-                let change = MetadataChange::from_forward_reverse_data(forward, inverse, data);
+                let (forward, inverse, data) =
+                    current_metadata_json.diff(&mdjson, true)?;
+                let change =
+                    MetadataChange::from_forward_reverse_data(forward, inverse, data);
                 change
-
             } else {
                 let mut mdjson = current_metadata_json.clone();
                 mdjson.delete(&args.key);
 
-
-                let (forward, inverse, data) = current_metadata_json.diff(&mdjson, false)?;
-                let change = MetadataChange::from_forward_reverse_data(forward, inverse, data);
+                let (forward, inverse, data) =
+                    current_metadata_json.diff(&mdjson, false)?;
+                let change =
+                    MetadataChange::from_forward_reverse_data(forward, inverse, data);
 
                 change
             }
-
         }
     };
-
 
     if c.is_empty() {
         eprintln!("No change");
