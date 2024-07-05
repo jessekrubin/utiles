@@ -334,6 +334,10 @@ pub struct ZxyifyArgs {
 pub struct WebpifyArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
+
+    /// destination dataset fspath (mbtiles, dirpath)
+    #[arg(required = true)]
+    pub dst: String,
 }
 
 #[derive(Debug, Subcommand)]

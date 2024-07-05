@@ -2854,7 +2854,6 @@ dependencies = [
  "image",
  "imagesize",
  "json-patch",
- "log",
  "num_cpus",
  "rusqlite",
  "serde",

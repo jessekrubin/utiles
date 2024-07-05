@@ -270,6 +270,13 @@ impl Mbtiles {
         insert_tiles_flat_mbtiles(&mut self.conn, tiles, Some(InsertStrategy::Ignore))
     }
 
+    // pub fn insert_tiles_flat_tuple(
+    //     &mut self,
+    //     tiles: &Vec<(Tile, Vec<u8>>,
+    // ) -> RusqliteResult<usize> {
+    //     insert_tiles_flat_mbtiles(&mut self.conn, tiles, Some(InsertStrategy::Ignore))
+    // }
+
     pub fn insert_tile_flat<T: TileLike>(
         &mut self,
         tile: &T,
