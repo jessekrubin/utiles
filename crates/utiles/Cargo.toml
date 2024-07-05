@@ -25,7 +25,7 @@ fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
 serde.workspace = true
-serde_json.workspace = true
+serde_json= { workspace = true, features = ["preserve_order"] }
 thiserror.workspace = true
 tilejson.workspace = true
 strum.workspace = true
@@ -58,7 +58,8 @@ colored = "2.1.0"
 chrono = "0.4.38"
 num_cpus = "1.16.0"
 image = "0.25.1"
-#image = "0.25.1"
+json-patch = "2.0.0"
+log = "0.4.22"
 
 [dev-dependencies]
 criterion = "0.5.1"

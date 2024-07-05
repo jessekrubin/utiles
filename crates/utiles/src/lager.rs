@@ -1,7 +1,7 @@
 use std::io::{self};
 
 use clap::Parser;
-use tracing::warn;
+use tracing::debug;
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
@@ -31,24 +31,21 @@ pub fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
                 .json()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
-                .without_time()
                 .finish();
             let set_global_res = tracing::subscriber::set_global_default(subscriber);
             if let Err(e) = set_global_res {
-                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
+                debug!("tracing::subscriber::set_global_default(...) failed: {}", e);
             }
         }
         false => {
             let subscriber = fmt::Subscriber::builder()
-                .compact()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
                 .with_target(debug_or_trace)
-                .without_time()
                 .finish();
             let set_global_res = tracing::subscriber::set_global_default(subscriber);
             if let Err(e) = set_global_res {
-                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
+                debug!("tracing::subscriber::set_global_default(...) failed: {}", e);
             }
         }
     }

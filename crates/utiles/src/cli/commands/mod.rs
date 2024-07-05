@@ -25,6 +25,7 @@ mod about;
 mod children_parent;
 mod contains;
 pub mod copy;
+mod db;
 pub mod dev;
 mod info;
 pub mod lint;

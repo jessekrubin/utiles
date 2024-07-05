@@ -1,3 +1,4 @@
+//! Child index as related to its parent/sibling-tiles
 use crate::tile::Tile;
 
 /// Sibling relationship for tiles

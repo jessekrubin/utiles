@@ -4,10 +4,9 @@ use tilejson::TileJSON;
 use utiles_core::{BBox, Tile, TileLike};
 
 use crate::errors::UtilesResult;
-use crate::mbt::MinZoomMaxZoom;
 use crate::mbt::{MbtMetadataRow, MbtType};
+use crate::mbt::{MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::RowsAffected;
-
 #[async_trait]
 pub trait MbtilesAsync: Sized {
     fn filepath(&self) -> &str;
@@ -19,6 +18,8 @@ pub trait MbtilesAsync: Sized {
     async fn magic_number(&self) -> UtilesResult<u32>;
     async fn tilejson(&self) -> UtilesResult<TileJSON>;
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>>;
+
+    async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson>;
     async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>>;
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize>;
     async fn tiles_is_empty(&self) -> UtilesResult<bool>;
@@ -43,8 +44,8 @@ pub trait MbtilesAsync: Sized {
 
     async fn query_mbt_type(&self) -> UtilesResult<MbtType>;
     async fn bbox(&self) -> UtilesResult<BBox>;
-    async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize>;
-    async fn detach(&self, dbname: &str) -> UtilesResult<usize>;
+    // async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize>;
+    // async fn detach(&self, dbname: &str) -> UtilesResult<usize>;
 
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>>;
 

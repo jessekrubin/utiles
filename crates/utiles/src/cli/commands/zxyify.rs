@@ -1,6 +1,6 @@
 use crate::cli::args::ZxyifyArgs;
 use crate::mbt::zxyify::unzxyify;
-use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
+use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesResult;
 

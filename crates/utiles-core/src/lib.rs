@@ -1,4 +1,4 @@
-//! utiles-core ~ core util(e)ities
+#![doc = include_str!("../README.md")]
 #![deny(clippy::pedantic)]
 #![deny(clippy::all)]
 #![deny(clippy::correctness)]
@@ -13,21 +13,29 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::similar_names)]
 
-pub use bbox::BBox;
+#[doc(inline)]
+pub use crate::fns::*;
+#[doc(inline)]
+pub use crate::quadkey::*;
+pub use bbox::{geobbox_merge, BBox};
+#[doc(inline)]
 pub use errors::{UtilesCoreError, UtilesCoreResult};
+#[doc(inline)]
 pub use gdal::geotransform2optzoom;
 pub use lnglat::LngLat;
 pub use point::{Point2d, Point3d};
+#[doc(inline)]
 pub use tile::Tile;
+#[doc(inline)]
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
+#[doc(inline)]
 pub use traits::{Coord2dLike, IsOk, LngLatLike};
-
-pub use crate::fns::*;
-pub use crate::quadkey::*;
+pub use zoom::*;
 
 pub mod bbox;
 pub mod constants;
+
 mod errors;
 pub mod fns;
 

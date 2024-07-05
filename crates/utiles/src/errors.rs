@@ -3,7 +3,7 @@ use thiserror::Error;
 pub type UtilesResult<T> = Result<T, UtilesError>;
 #[derive(Error, Debug)]
 pub enum UtilesCopyError {
-    #[error("src and dst are the same")]
+    #[error("src and dst: {0}")]
     SrcDstSame(String),
 
     #[error("src does not exist: {0}")]
@@ -89,4 +89,8 @@ pub enum UtilesError {
     /// Image error
     #[error("image error: {0}")]
     ImageError(#[from] image::ImageError),
+
+    /// Error from `json_patch`
+    #[error("json_patch error: {0}")]
+    JsonPatchError(#[from] json_patch::PatchError),
 }

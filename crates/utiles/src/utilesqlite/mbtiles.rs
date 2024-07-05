@@ -13,7 +13,8 @@ use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::{
-    MbtMetadataRow, MbtType, MbtilesStats, MbtilesZoomStats, MinZoomMaxZoom,
+    MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats, MbtilesZoomStats,
+    MinZoomMaxZoom,
 };
 use crate::sqlite::InsertStrategy;
 use crate::sqlite::RusqliteResult;
@@ -145,11 +146,7 @@ impl Mbtiles {
     }
 
     pub fn metadata_delete(&self, name: &str) -> RusqliteResult<usize> {
-        let mut stmt = self
-            .conn
-            .prepare_cached("DELETE FROM metadata WHERE name=?1")?;
-        let r = stmt.execute(params![name])?;
-        Ok(r)
+        metadata_delete(&self.conn, name)
     }
 
     pub fn metadata_set_from_vec(
@@ -188,6 +185,14 @@ impl Mbtiles {
             }
         }
     }
+
+    pub fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
+        metadata_json(&self.conn).map_err(|e| e.into())
+    }
+
+    // pub fn metadata_update(&self, name: &str, value: &str) -> RusqliteResult<usize> {
+    //     metadata_update(&self.conn, name, value)
+    // }
 
     pub fn tilejson(&self) -> UtilesResult<TileJSON> {
         let metadata = self.metadata()?;
@@ -409,6 +414,13 @@ pub fn mbtiles_metadata(conn: &Connection) -> RusqliteResult<Vec<MbtMetadataRow>
     }
 }
 
+/// Return a Map<String, Value> of metadata
+pub fn metadata_json(conn: &Connection) -> RusqliteResult<MbtilesMetadataJson> {
+    let mdata = mbtiles_metadata(conn)?;
+    let md_json = MbtilesMetadataJson::from(&mdata);
+    Ok(md_json)
+}
+
 pub fn mbtiles_metadata_row(
     conn: &Connection,
     name: &str,
@@ -428,7 +440,7 @@ pub fn mbtiles_metadata_row(
 
 /// Return true/false if metadata table has a unique index on 'name'
 pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
-    let mut stmt = conn.prepare("SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND tbl_name='metadata' AND name='name'")?;
+    let mut stmt = conn.prepare("SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND tbl_name='metadata' AND sql LIKE '%UNIQUE%'")?;
     let nrows = stmt.query_row([], |row| {
         let count: i64 = row.get(0)?;
         Ok(count)
@@ -873,6 +885,12 @@ pub fn metadata_set_many(
         naff += r;
     }
     Ok(naff)
+}
+
+pub fn metadata_delete(conn: &Connection, name: &str) -> RusqliteResult<usize> {
+    let mut stmt = conn.prepare_cached("DELETE FROM metadata WHERE name=?1")?;
+    let r = stmt.execute(params![name])?;
+    Ok(r)
 }
 
 pub fn update_metadata_minzoom_from_tiles(conn: &Connection) -> RusqliteResult<usize> {

@@ -4,10 +4,10 @@ use clap::{Args, Parser, Subcommand};
 
 use utiles_core::bbox::BBox;
 use utiles_core::parsing::parse_bbox_ext;
-use utiles_core::zoom;
 use utiles_core::zoom::ZoomSet;
 use utiles_core::LngLat;
 use utiles_core::VERSION;
+use utiles_core::{geobbox_merge, zoom};
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
@@ -204,7 +204,7 @@ pub struct TouchArgs {
     #[arg(required = true)]
     pub filepath: String,
 
-    /// page size (default: 512)
+    /// page size
     #[arg(required = false, long)]
     pub page_size: Option<i64>,
 
@@ -221,6 +221,15 @@ impl TouchArgs {
 }
 
 #[derive(Debug, Parser)]
+pub struct AnalyzeArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    analysis_limit: Option<usize>,
+}
+
+#[derive(Debug, Parser)]
 pub struct VacuumArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -232,6 +241,10 @@ pub struct VacuumArgs {
     /// Analyze db after vacuum
     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
     pub analyze: bool,
+
+    /// page size to set
+    #[arg(required = false, long)]
+    pub page_size: Option<i64>,
 }
 
 #[derive(Debug, Parser)]
@@ -253,13 +266,19 @@ pub struct MetadataSetArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    /// key
-    #[arg(required = true)]
+    /// key or json-fspath
+    #[arg(required = true, value_name = "KEY/FSPATH")]
     pub key: String,
 
     /// value
     #[arg(required = false)]
     pub value: Option<String>,
+
+    /// dryrun (don't actually set)
+    #[arg(
+        required = false, long, aliases = ["dry-run"], short = 'n', action = clap::ArgAction::SetTrue
+    )]
+    pub dryrun: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -346,7 +365,7 @@ pub enum Commands {
     #[command(name = "metadata", visible_aliases = ["meta", "md"])]
     Metadata(MetadataArgs),
 
-    /// Set metadata key/value
+    /// Set metadata key/value or from `json` file if key is fspath
     #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"])]
     MetadataSet(MetadataSetArgs),
 
@@ -683,6 +702,16 @@ impl CopyArgs {
     pub fn bboxes(&self) -> Option<Vec<BBox>> {
         self.bbox.as_ref().map(|bbox| vec![*bbox])
     }
+
+    #[must_use]
+    pub fn bounds(&self) -> Option<String> {
+        if let Some(bboxes) = self.bboxes() {
+            let new_bbox = geobbox_merge(&bboxes);
+            Some(new_bbox.mbt_bounds())
+        } else {
+            None
+        }
+    }
 }
 
 impl From<&CopyArgs> for CopyConfig {
@@ -694,6 +723,7 @@ impl From<&CopyArgs> for CopyConfig {
             zooms: args.zooms(),
             verbose: true,
             bboxes: args.bboxes(),
+            bounds_string: args.bounds(),
             force: false,
             dryrun: false,
             jobs: args.jobs,

@@ -85,9 +85,9 @@ pub fn query_mbtiles_type(conn: &Connection) -> RusqliteResult<MbtType> {
 }
 
 pub fn default_mbtiles_settings(conn: &Connection) -> UtilesResult<()> {
-    // page size 512
+    // page size...
     {
-        conn.execute_batch("PRAGMA page_size = 512;")?;
+        conn.execute_batch("PRAGMA page_size = 4096;")?;
     }
     // encoding UTF-8
     {

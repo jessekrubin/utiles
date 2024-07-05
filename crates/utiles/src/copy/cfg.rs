@@ -14,6 +14,7 @@ pub struct CopyConfig {
     pub zset: Option<ZoomSet>,
     pub zooms: Option<Vec<u8>>,
     pub bboxes: Option<Vec<BBox>>,
+    pub bounds_string: Option<String>,
     pub verbose: bool,
     pub dryrun: bool,
     pub force: bool,
@@ -82,11 +83,10 @@ impl CopyConfig {
     }
     pub fn check_src_dst_same(&self) -> UtilesResult<()> {
         if self.src == self.dst {
-            Err(UtilesCopyError::SrcDstSame(format!(
-                "src: {:?}, dst: {:?}",
-                self.src, self.dst
-            ))
-            .into())
+            Err(
+                UtilesCopyError::SrcDstSame(self.src.to_string_lossy().to_string())
+                    .into(),
+            )
         } else {
             Ok(())
         }

@@ -13,16 +13,17 @@ use utiles_core::{BBox, Tile, TileLike};
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
-use crate::mbt::{MbtMetadataRow, MbtType, MinZoomMaxZoom};
+use crate::mbt::{MbtMetadataRow, MbtType, MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::{
-    journal_mode, magic_number, AsyncSqliteError, RowsAffected, RusqliteResult,
+    journal_mode, magic_number, AsyncSqliteConn, AsyncSqliteError, RowsAffected,
+    RusqliteResult,
 };
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
     has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
-    init_flat_mbtiles, mbtiles_metadata, mbtiles_metadata_row, minzoom_maxzoom,
-    query_zxy, register_utiles_sqlite_functions, tiles_is_empty,
+    init_flat_mbtiles, mbtiles_metadata, mbtiles_metadata_row, metadata_json,
+    minzoom_maxzoom, query_zxy, register_utiles_sqlite_functions, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
@@ -74,7 +75,7 @@ pub trait AsyncSqlite: Send + Sync {
 }
 
 #[async_trait]
-impl AsyncSqlite for MbtilesAsyncSqliteClient {
+impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -93,7 +94,7 @@ impl AsyncSqlite for MbtilesAsyncSqliteClient {
 }
 
 #[async_trait]
-impl AsyncSqlite for MbtilesAsyncSqlitePool {
+impl AsyncSqliteConn for MbtilesAsyncSqlitePool {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -271,7 +272,7 @@ impl DbPathTrait for MbtilesAsyncSqlitePool {
 #[async_trait]
 impl<T> MbtilesAsync for T
 where
-    T: AsyncSqlite + DbPathTrait + Debug,
+    T: AsyncSqliteConn + DbPathTrait + Debug,
 {
     fn filepath(&self) -> &str {
         &self.db_path().fspath
@@ -351,26 +352,26 @@ where
         Ok(metadata)
     }
 
-    async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize> {
-        let path_string = path.to_string();
-        let as_string = dbname.to_string();
-        let rows = self
-            .conn(move |conn| {
-                conn.execute("ATTACH DATABASE ?1 AS ?2", [&path_string, &as_string])
-            })
-            .await
-            .map_err(UtilesError::AsyncSqliteError)?;
-        Ok(rows)
-    }
-
-    async fn detach(&self, dbname: &str) -> UtilesResult<usize> {
-        let as_string = dbname.to_string();
-        let rows = self
-            .conn(move |conn| conn.execute("DETACH DATABASE ?1", [&as_string]))
-            .await
-            .map_err(UtilesError::AsyncSqliteError)?;
-        Ok(rows)
-    }
+    // async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize> {
+    //     let path_string = path.to_string();
+    //     let as_string = dbname.to_string();
+    //     let rows = self
+    //         .conn(move |conn| {
+    //             conn.execute("ATTACH DATABASE ?1 AS ?2", [&path_string, &as_string])
+    //         })
+    //         .await
+    //         .map_err(UtilesError::AsyncSqliteError)?;
+    //     Ok(rows)
+    // }
+    //
+    // async fn detach(&self, dbname: &str) -> UtilesResult<usize> {
+    //     let as_string = dbname.to_string();
+    //     let rows = self
+    //         .conn(move |conn| conn.execute("DETACH DATABASE ?1", [&as_string]))
+    //         .await
+    //         .map_err(UtilesError::AsyncSqliteError)?;
+    //     Ok(rows)
+    // }
 
     async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>> {
         let name_str = name.to_string();
@@ -379,6 +380,11 @@ where
             .await
             .map_err(UtilesError::AsyncSqliteError)?;
         Ok(row)
+    }
+
+    async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
+        let data = self.conn(metadata_json).await?;
+        Ok(data)
     }
 
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize> {

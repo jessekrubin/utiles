@@ -98,28 +98,14 @@ mod tests {
         "format": "png"
     }
     "#;
-        let rows = parse_metadata_json(json_data).unwrap();
+        let rows_parsed = parse_metadata_json(json_data).unwrap();
+        // oy vey gotta sort by name bc of the old test(s) I wrote...
+        let rows = {
+            let mut rows = rows_parsed;
+            rows.sort_by(|a, b| a.name.cmp(&b.name));
+            rows
+        };
         assert_eq!(rows.len(), 6,);
-        // let expected = [
-        //     MbtilesMetadataRow { name: "format", value: "\"png\"" },
-        //     MbtilesMetadataRow { name: "maxzoom", value: "12" },
-        //     MbtilesMetadataRow { name: "minzoom", value: "\"9\"" },
-        //     MbtilesMetadataRow { name: "name", value: "\"stuff\"" },
-        //     MbtilesMetadataRow { name: "tilejson", value: "\"3.0.0\"" },
-        //     MbtilesMetadataRow { name: "tilesize", value: "256" }
-        // ];
-        // let expected = vec![
-        //     MbtilesMetadataRow::new("format", "png"),
-        //     MbtilesMetadataRow::new("maxzoom", "12"),
-        //     MbtilesMetadataRow::new("minzoom", "\"9\""),
-        //     MbtilesMetadataRow::new("name", "\"stuff\""),
-        //     MbtilesMetadataRow::new("tilejson", "\"3.0.0\""),
-        //     MbtilesMetadataRow::new("tilesize", "256"),
-        // ];
-        // assert_eq!(
-        //     rows,
-        //     expected,
-        // );
 
         let expected_json = r#"
         [
@@ -149,17 +135,13 @@ mod tests {
           }
         ]
         "#;
-        // let pjson = serde_json::to_string_pretty(&rows).unwrap();
-        // println!("{}", pjson);
-
-        println!("{rows:?}");
-
         // have to parse then serialize to compare...
         let expected_rows: Vec<MbtMetadataRow> =
             serde_json::from_str(expected_json).unwrap();
         let expected_rows_json = serde_json::to_string_pretty(&expected_rows).unwrap();
         // stringify the rows
-        let rows_json = serde_json::to_string_pretty(&rows).unwrap();
+        let rows_value = serde_json::to_value(&rows).unwrap();
+        let rows_json = serde_json::to_string_pretty(&rows_value).unwrap();
         assert_eq!(rows_json, expected_rows_json,);
     }
 
@@ -228,9 +210,6 @@ mod tests {
         let expected_rows_json = serde_json::to_string_pretty(&expected_rows).unwrap();
         // stringify the rows
         let rows_json = serde_json::to_string_pretty(&rows).unwrap();
-
-        // print not escaped if running with `cargo test -- --nocapture`
-        // println!("{}", rows_json);
         assert_eq!(rows_json, expected_rows_json,);
     }
 }

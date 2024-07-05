@@ -47,9 +47,7 @@ impl TilePyramidFsWriter {
                 fs::create_dir_all(dp).await?;
                 Ok(())
             }
-            None => Err(UtilesError::PathConversionError(format!(
-                "path conversion error: {dp:?}"
-            ))),
+            None => Err(UtilesError::PathConversionError(format!("{dp:?}"))),
         }
     }
 
