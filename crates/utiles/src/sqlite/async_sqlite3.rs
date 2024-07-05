@@ -11,7 +11,6 @@ use crate::sqlite::{
     pragma_table_list, vacuum, vacuum_into, PragmaIndexListRow, PragmaTableListRow,
     SqliteResult,
 };
-use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
 
 pub struct SqliteDbAsyncClient {
     pub client: Client,
@@ -42,13 +41,11 @@ where
     T: AsyncSqliteConn + Debug,
 {
     async fn analyze(&self) -> SqliteResult<usize> {
-        self.conn(|conn| analyze(conn)).await.map_err(Into::into)
+        self.conn(analyze).await.map_err(Into::into)
     }
 
     async fn is_empty_db(&self) -> SqliteResult<bool> {
-        self.conn(|conn| is_empty_db(conn))
-            .await
-            .map_err(Into::into)
+        self.conn(is_empty_db).await.map_err(Into::into)
     }
 
     async fn pragma_index_list(
@@ -62,15 +59,11 @@ where
     }
 
     async fn pragma_page_count(&self) -> SqliteResult<i64> {
-        self.conn(|conn| pragma_page_count(conn))
-            .await
-            .map_err(Into::into)
+        self.conn(pragma_page_count).await.map_err(Into::into)
     }
 
     async fn pragma_freelist_count(&self) -> SqliteResult<i64> {
-        self.conn(|conn| pragma_freelist_count(conn))
-            .await
-            .map_err(Into::into)
+        self.conn(pragma_freelist_count).await.map_err(Into::into)
     }
 
     async fn pragma_page_size(&self) -> SqliteResult<i64> {
@@ -80,20 +73,17 @@ where
     }
 
     async fn pragma_page_size_set(&self, page_size: i64) -> SqliteResult<i64> {
-        let page_size = page_size;
         self.conn(move |conn| pragma_page_size_set(conn, page_size))
             .await
             .map_err(Into::into)
     }
 
     async fn pragma_table_list(&self) -> SqliteResult<Vec<PragmaTableListRow>> {
-        self.conn(|conn| pragma_table_list(conn))
-            .await
-            .map_err(Into::into)
+        self.conn(pragma_table_list).await.map_err(Into::into)
     }
 
     async fn vacuum(&self) -> SqliteResult<usize> {
-        self.conn(|conn| vacuum(conn)).await.map_err(Into::into)
+        self.conn(vacuum).await.map_err(Into::into)
     }
 
     async fn vacuum_into(&self, dst: String) -> SqliteResult<usize> {

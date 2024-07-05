@@ -31,6 +31,6 @@ pub fn pragma_page_size_get(conn: &Connection) -> RusqliteResult<i64> {
             let page_size: i64 = row.get(0)?;
             Ok(page_size)
         }
-        None => Err(rusqlite::Error::QueryReturnedNoRows.into()),
+        None => Err(rusqlite::Error::QueryReturnedNoRows),
     }
 }
