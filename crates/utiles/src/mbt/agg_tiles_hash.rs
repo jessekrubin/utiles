@@ -5,6 +5,20 @@ use rusqlite::Connection;
 // =================================================================
 // HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS
 // =================================================================
+// pub fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
+//     let sql = format!(
+//         "SELECT coalesce(
+//             {hash_type}_concat_hex(
+//                 cast(zoom_level AS text),
+//                 cast(tile_column AS text),
+//                 cast(tile_row AS text),
+//                 tile_data
+//                 ORDER BY zoom_level, tile_column, tile_row),
+//             {hash_type}_hex(''))
+//         FROM tiles"
+//     );
+//     sql
+// }
 pub fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
     let sql = format!(
         "SELECT coalesce(

@@ -204,7 +204,7 @@ pub struct TouchArgs {
     #[arg(required = true)]
     pub filepath: String,
 
-    /// page size (default: 512)
+    /// page size
     #[arg(required = false, long)]
     pub page_size: Option<i64>,
 

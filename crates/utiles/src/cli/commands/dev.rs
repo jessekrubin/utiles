@@ -20,6 +20,9 @@ pub struct DevArgs {
     fspath: Option<String>,
 }
 
+
+
+
 #[allow(clippy::unused_async)]
 async fn dev(args: DevArgs) -> UtilesResult<()> {
     // DEV START
@@ -27,7 +30,6 @@ async fn dev(args: DevArgs) -> UtilesResult<()> {
     let filepath = args.fspath.unwrap();
     let mbt = Mbtiles::open(filepath)?;
     add_functions(&mbt.conn)?;
-
     let hashes = vec![
         HashType::Xxh3_128,
         HashType::Xxh3_64,
@@ -36,7 +38,6 @@ async fn dev(args: DevArgs) -> UtilesResult<()> {
         HashType::Fnv1a,
         HashType::Md5,
     ];
-
     for hash in hashes {
         let start_time = std::time::Instant::now();
         let agg_tile_hash = mbt_agg_tiles_hash(&mbt.conn, hash)?;
