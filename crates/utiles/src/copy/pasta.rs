@@ -54,7 +54,7 @@ impl CopyPasta {
                     // todo!
                     None,
                 )
-                    .await?;
+                .await?;
                 (db, true)
             }
         };

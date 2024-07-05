@@ -6,7 +6,7 @@ use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
 use crate::mbt::{MbtMetadataRow, MbtType, MbtilesMetadataJson, MinZoomMaxZoom};
-use crate::sqlite::{AsyncSqliteConn, journal_mode, magic_number, RowsAffected};
+use crate::sqlite::{journal_mode, magic_number, AsyncSqliteConn, RowsAffected};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
@@ -339,7 +339,7 @@ where
     //         .map_err(UtilesError::AsyncSqliteError)?;
     //     Ok(rows)
     // }
-    // 
+    //
     // async fn detach(&self, dbname: &str) -> UtilesResult<usize> {
     //     let as_string = dbname.to_string();
     //     let rows = self

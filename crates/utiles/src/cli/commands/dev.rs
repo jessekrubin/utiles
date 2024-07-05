@@ -20,9 +20,6 @@ pub struct DevArgs {
     fspath: Option<String>,
 }
 
-
-
-
 #[allow(clippy::unused_async)]
 async fn dev(args: DevArgs) -> UtilesResult<()> {
     // DEV START
