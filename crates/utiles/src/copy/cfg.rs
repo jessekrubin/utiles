@@ -6,6 +6,8 @@ use utiles_core::zoom::{ZoomOrZooms, ZoomSet};
 use utiles_core::{tile_ranges, BBox};
 
 use crate::errors::{UtilesCopyError, UtilesResult};
+use crate::mbt::MbtType;
+use crate::sqlite::InsertStrategy;
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CopyConfig {
@@ -19,6 +21,8 @@ pub struct CopyConfig {
     pub dryrun: bool,
     pub force: bool,
     pub jobs: Option<u8>,
+    pub istrat: InsertStrategy,
+    pub dbtype: Option<MbtType>,
 }
 
 impl CopyConfig {

@@ -8,6 +8,9 @@ pub enum UtilesCopyError {
 
     #[error("src does not exist: {0}")]
     SrcNotExists(String),
+
+    #[error("Conflict: {0}")]
+    Conflict(String),
 }
 
 #[derive(Error, Debug)]

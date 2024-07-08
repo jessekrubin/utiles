@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
+use strum_macros::AsRefStr;
 
 use utiles_core::bbox::BBox;
 use utiles_core::parsing::parse_bbox_ext;
@@ -14,6 +15,7 @@ use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
 use crate::copy::CopyConfig;
 use crate::mbt::MbtType;
+use crate::sqlite::InsertStrategy;
 use crate::tile_strfmt::TileStringFormatter;
 
 // use crate::cli::commands::WebpifyArgs;
@@ -642,6 +644,33 @@ impl ZoomArgGroup {
     }
 }
 
+#[derive(Debug, Copy, Parser, Clone, clap::ValueEnum, strum::EnumString, AsRefStr)]
+pub enum ConflictStrategy {
+    Undefined,
+    Ignore,
+    Replace,
+    Abort,
+    Fail,
+}
+
+impl Default for ConflictStrategy {
+    fn default() -> Self {
+        ConflictStrategy::Undefined
+    }
+}
+
+impl From<ConflictStrategy> for InsertStrategy {
+    fn from(cs: ConflictStrategy) -> Self {
+        match cs {
+            ConflictStrategy::Undefined => InsertStrategy::None,
+            ConflictStrategy::Ignore => InsertStrategy::Ignore,
+            ConflictStrategy::Replace => InsertStrategy::Replace,
+            ConflictStrategy::Abort => InsertStrategy::Abort,
+            ConflictStrategy::Fail => InsertStrategy::Fail,
+        }
+    }
+}
+
 #[derive(Debug, Parser)]
 #[command(name = "copy", about = "Copy tiles from src -> dst")]
 pub struct CopyArgs {
@@ -667,6 +696,14 @@ pub struct CopyArgs {
     /// bbox (west, south, east, north)
     #[arg(required = false, long, value_parser = parse_bbox_ext, allow_hyphen_values = true)]
     pub bbox: Option<BBox>,
+
+    /// conflict strategy when copying tiles
+    #[arg(required = false, long, short, default_value = "undefined")]
+    pub conflict: ConflictStrategy,
+
+    /// db-type
+    #[arg(required = false, long)]
+    pub dbtype: Option<DbtypeOption>,
 
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
@@ -705,6 +742,10 @@ impl CopyArgs {
 
 impl From<&CopyArgs> for CopyConfig {
     fn from(args: &CopyArgs) -> CopyConfig {
+        let dbtype = match &args.dbtype {
+            Some(dbtype) => Some(dbtype.into()),
+            None => None,
+        };
         CopyConfig {
             src: PathBuf::from(&args.src),
             dst: PathBuf::from(&args.dst),
@@ -716,6 +757,8 @@ impl From<&CopyArgs> for CopyConfig {
             force: false,
             dryrun: false,
             jobs: args.jobs,
+            istrat: args.conflict.into(),
+            dbtype,
         }
     }
 }

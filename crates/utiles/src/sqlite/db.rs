@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use rusqlite::Connection;
-
 use crate::errors::UtilesResult;
 use crate::sqlite::{
     pragma_database_list, pragma_index_list, PragmaIndexListRow, RusqliteResult,
     Sqlike3,
 };
 use crate::UtilesError;
+use rusqlite::Connection;
+use tracing::debug;
 
 pub struct SqliteDb {
     pub conn: Connection,
@@ -81,6 +81,23 @@ pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
         .expect("'PRAGMA application_id' -- should return row but did not");
     let app_id: u32 = row.get(0)?;
     Ok(app_id)
+}
+
+pub fn application_id_set(conn: &Connection, app_id: u32) -> RusqliteResult<u32> {
+    let current_app_id = application_id(conn)?;
+    if current_app_id == app_id {
+        debug!("application_id_set: current app_id == app_id: {}", app_id);
+        Ok(current_app_id)
+    } else {
+        debug!(
+            "application_id_set: current app_id != app_id: {} != {}",
+            current_app_id, app_id
+        );
+        let sql = format!("PRAGMA application_id = {}", app_id);
+        let mut stmt = conn.prepare(&sql)?;
+        stmt.execute([])?;
+        Ok(app_id)
+    }
 }
 
 pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {

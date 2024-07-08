@@ -10,12 +10,14 @@ use crate::sqlite::{journal_mode, magic_number, AsyncSqliteConn, RowsAffected};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
-    has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
-    init_flat_mbtiles, mbtiles_metadata, mbtiles_metadata_row, metadata_json,
-    minzoom_maxzoom, query_zxy, register_utiles_sqlite_functions, tiles_is_empty,
+    add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
+    has_zoom_row_col_index, init_flat_mbtiles, init_mbtiles, mbtiles_metadata,
+    mbtiles_metadata_row, metadata_json, minzoom_maxzoom, query_zxy,
+    register_utiles_sqlite_functions, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
+use crate::UtilesError::RusqliteError;
 use async_sqlite::{
     Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
 };
@@ -103,9 +105,6 @@ impl MbtilesAsyncSqliteClient {
         mbtype: Option<MbtType>,
     ) -> UtilesResult<Self> {
         let mbtype = mbtype.unwrap_or(MbtType::Flat);
-        if mbtype != MbtType::Flat {
-            return Err(UtilesError::Unimplemented(mbtype.to_string()));
-        }
         // make sure the path don't exist
         let dbpath = pathlike2dbpath(path)?;
         if dbpath.fspath_exists() {
@@ -122,7 +121,16 @@ impl MbtilesAsyncSqliteClient {
                 )
                 .open()
                 .await?;
-            client.conn_mut(init_flat_mbtiles).await?;
+
+            debug!("db-type is: {:?}", mbtype);
+
+            client
+                .conn_mut(move |conn| {
+                    init_mbtiles(conn, &mbtype)
+                        .map_err(|e| rusqlite::Error::InvalidQuery)?;
+                    Ok(())
+                })
+                .await?;
 
             MbtilesAsyncSqliteClient::new(dbpath, client).await
         }
@@ -259,7 +267,7 @@ where
     }
 
     async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()> {
-        let r = self.conn(register_utiles_sqlite_functions).await?;
+        let r = self.conn(add_functions).await?;
         Ok(r)
     }
 

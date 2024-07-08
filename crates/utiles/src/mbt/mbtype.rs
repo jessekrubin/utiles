@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::str::FromStr;
 
-#[derive(Debug, Default, Serialize, PartialEq, Clone)]
+#[derive(Debug, Default, Copy, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "kebab-case")]
 #[derive(clap::ValueEnum)]
 pub enum MbtType {
