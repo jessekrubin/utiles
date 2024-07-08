@@ -14,7 +14,8 @@ SELECT (
      WHERE ((name = 'zoom_level' AND type = 'INTEGER')
          OR (name = 'tile_column' AND type = 'INTEGER')
          OR (name = 'tile_row' AND type = 'INTEGER')
-         OR (name = 'tile_id' AND type = 'TEXT'))
+         OR (name = 'tile_id' AND type = 'TEXT')
+         OR (name = 'tile_id' AND type = 'INTEGER'))
      --
  ) AND (
      -- Has a 'images' table
@@ -30,6 +31,7 @@ SELECT (
      SELECT COUNT(*) = 2
      FROM pragma_table_info('images')
      WHERE ((name = 'tile_id' AND type = 'TEXT')
+         OR (name = 'tile_id' AND type = 'INTEGER')
          OR (name = 'tile_data' AND type = 'BLOB'))
      --
  ) AS is_norm_mbtiles;
