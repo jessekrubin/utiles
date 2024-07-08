@@ -45,7 +45,7 @@ sqlite-hashes = { version = "0.7.3", default-features = false, features = ["hex"
 imagesize = "0.13.0"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 http-body-util = "0.1.0"
-async-trait = "0.1.80"
+async-trait = "0.1.81"
 #async-sqlite = { version = "0.2.2", features = ["bundled", "functions", "trace", ] }
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 tower = { version = "0.4.13", features = ["timeout"] }
