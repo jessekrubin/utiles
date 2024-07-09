@@ -1,14 +1,16 @@
-use rusqlite::Result as RusqliteResult;
 use thiserror::Error;
 
 pub type UtilesResult<T> = Result<T, UtilesError>;
 #[derive(Error, Debug)]
 pub enum UtilesCopyError {
-    #[error("src and dst are the same")]
+    #[error("src and dst: {0}")]
     SrcDstSame(String),
 
     #[error("src does not exist: {0}")]
     SrcNotExists(String),
+
+    #[error("Conflict: {0}")]
+    Conflict(String),
 }
 
 #[derive(Error, Debug)]
@@ -36,6 +38,9 @@ pub enum UtilesError {
 
     #[error("parsing error: {0}")]
     ParsingError(String),
+
+    #[error("Not mbtiles-like: {0}")]
+    NotMbtilesLike(String),
 
     #[error("utiles error: {0}")]
     Error(String),
@@ -83,13 +88,8 @@ pub enum UtilesError {
     /// Error from `serde_json`
     #[error("serde error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
-}
 
-impl From<RusqliteResult<()>> for UtilesError {
-    fn from(e: RusqliteResult<()>) -> Self {
-        match e {
-            Ok(()) => UtilesError::Unknown("unknown error".to_string()),
-            Err(e) => UtilesError::RusqliteError(e),
-        }
-    }
+    /// Error from `json_patch`
+    #[error("json_patch error: {0}")]
+    JsonPatchError(#[from] json_patch::PatchError),
 }

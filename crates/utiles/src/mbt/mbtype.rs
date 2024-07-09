@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::str::FromStr;
 
-#[derive(Debug, Default, Serialize, Clone)]
+#[derive(Debug, Default, Copy, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "kebab-case")]
 #[derive(clap::ValueEnum)]
 pub enum MbtType {
@@ -10,6 +10,7 @@ pub enum MbtType {
     Hash,
     Norm,
     Tippecanoe,
+    Planetiler,
     Unknown,
 }
 
@@ -21,6 +22,7 @@ impl MbtType {
             MbtType::Hash => "hash",
             MbtType::Norm => "norm",
             MbtType::Tippecanoe => "tippecanoe",
+            MbtType::Planetiler => "planetiler",
             MbtType::Unknown => "unknown",
         }
     }
@@ -41,6 +43,7 @@ impl FromStr for MbtType {
             "hash" | "flat-with-hash" => MbtType::Hash,
             "norm" | "normalized" => MbtType::Norm,
             "tippecanoe" => MbtType::Tippecanoe,
+            "planetiler" => MbtType::Planetiler,
             _ => MbtType::Unknown,
         };
         Ok(t)

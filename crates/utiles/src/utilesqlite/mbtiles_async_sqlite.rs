@@ -4,14 +4,15 @@ use std::path::Path;
 
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
-use crate::mbt::{MbtMetadataRow, MbtType, MinZoomMaxZoom};
-use crate::sqlite::{journal_mode, magic_number};
+use crate::mbt::zxyify::zxyify;
+use crate::mbt::{MbtMetadataRow, MbtType, MbtilesMetadataJson, MinZoomMaxZoom};
+use crate::sqlite::{journal_mode, magic_number, AsyncSqliteConn, RowsAffected};
 use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
-    has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
-    mbtiles_metadata, mbtiles_metadata_row, minzoom_maxzoom, query_zxy,
-    register_utiles_sqlite_functions, tiles_is_empty,
+    add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
+    has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
+    metadata_json, minzoom_maxzoom, query_zxy, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
@@ -27,12 +28,14 @@ use utiles_core::BBox;
 #[derive(Clone)]
 pub struct MbtilesAsyncSqliteClient {
     pub dbpath: DbPath,
+    pub mbtype: MbtType,
     pub client: Client,
 }
 
 #[derive(Clone)]
 pub struct MbtilesAsyncSqlitePool {
     pub dbpath: DbPath,
+    pub mbtype: MbtType,
     pub pool: Pool,
 }
 
@@ -64,7 +67,7 @@ pub trait AsyncSqlite: Send + Sync {
 }
 
 #[async_trait]
-impl AsyncSqlite for MbtilesAsyncSqliteClient {
+impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -75,7 +78,7 @@ impl AsyncSqlite for MbtilesAsyncSqliteClient {
 }
 
 #[async_trait]
-impl AsyncSqlite for MbtilesAsyncSqlitePool {
+impl AsyncSqliteConn for MbtilesAsyncSqlitePool {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -86,11 +89,56 @@ impl AsyncSqlite for MbtilesAsyncSqlitePool {
 }
 
 impl MbtilesAsyncSqliteClient {
+    pub async fn new(dbpath: DbPath, client: Client) -> UtilesResult<Self> {
+        let mbtype = client.conn(query_mbtiles_type).await?;
+
+        Ok(MbtilesAsyncSqliteClient {
+            dbpath,
+            mbtype,
+            client,
+        })
+    }
+    pub async fn open_new<P: AsRef<Path>>(
+        path: P,
+        mbtype: Option<MbtType>,
+    ) -> UtilesResult<Self> {
+        let mbtype = mbtype.unwrap_or(MbtType::Flat);
+        // make sure the path don't exist
+        let dbpath = pathlike2dbpath(path)?;
+        if dbpath.fspath_exists() {
+            Err(UtilesError::PathExistsError(dbpath.fspath))
+        } else {
+            debug!("Creating new mbtiles file with client: {}", dbpath);
+            let client = ClientBuilder::new()
+                .path(&dbpath.fspath)
+                .flags(
+                    OpenFlags::SQLITE_OPEN_READ_WRITE
+                        | OpenFlags::SQLITE_OPEN_CREATE
+                        | OpenFlags::SQLITE_OPEN_NO_MUTEX
+                        | OpenFlags::SQLITE_OPEN_URI,
+                )
+                .open()
+                .await?;
+
+            debug!("db-type is: {:?}", mbtype);
+
+            client
+                .conn_mut(move |conn| {
+                    init_mbtiles(conn, &mbtype)
+                        // TODO: fix this and don't ignore the error...
+                        .map_err(|_e| rusqlite::Error::InvalidQuery)?;
+                    Ok(())
+                })
+                .await?;
+
+            MbtilesAsyncSqliteClient::new(dbpath, client).await
+        }
+    }
     pub async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(path)?;
         debug!("Opening mbtiles file with client: {}", dbpath);
         let client = ClientBuilder::new().path(&dbpath.fspath).open().await?;
-        Ok(MbtilesAsyncSqliteClient { dbpath, client })
+        MbtilesAsyncSqliteClient::new(dbpath, client).await
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -105,8 +153,9 @@ impl MbtilesAsyncSqliteClient {
             )
             .open()
             .await?;
-        Ok(MbtilesAsyncSqliteClient { dbpath, client })
+        MbtilesAsyncSqliteClient::new(dbpath, client).await
     }
+
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
@@ -118,7 +167,7 @@ impl MbtilesAsyncSqliteClient {
             .flags(flags)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqliteClient { dbpath, client })
+        MbtilesAsyncSqliteClient::new(dbpath, client).await
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {
@@ -138,6 +187,14 @@ impl MbtilesAsyncSqliteClient {
 // impl Client
 // pub async fn conn<F, T>(&self, func: F) -> Result<T, Error> where     F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,     T: Send + 'static,
 impl MbtilesAsyncSqlitePool {
+    pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
+        let mbtype = pool.conn(query_mbtiles_type).await?;
+        Ok(MbtilesAsyncSqlitePool {
+            dbpath,
+            mbtype,
+            pool,
+        })
+    }
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
@@ -150,7 +207,7 @@ impl MbtilesAsyncSqlitePool {
             .num_conns(2)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqlitePool { dbpath, pool })
+        MbtilesAsyncSqlitePool::new(dbpath, pool).await
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -166,7 +223,7 @@ impl MbtilesAsyncSqlitePool {
             .num_conns(2)
             .open()
             .await?;
-        Ok(MbtilesAsyncSqlitePool { dbpath, pool })
+        MbtilesAsyncSqlitePool::new(dbpath, pool).await
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {
@@ -198,7 +255,7 @@ impl DbPathTrait for MbtilesAsyncSqlitePool {
 #[async_trait]
 impl<T> MbtilesAsync for T
 where
-    T: AsyncSqlite + DbPathTrait + Debug,
+    T: AsyncSqliteConn + DbPathTrait + Debug,
 {
     fn filepath(&self) -> &str {
         &self.db_path().fspath
@@ -209,7 +266,7 @@ where
     }
 
     async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()> {
-        let r = self.conn(register_utiles_sqlite_functions).await?;
+        let r = self.conn(add_functions).await?;
         Ok(r)
     }
 
@@ -247,6 +304,16 @@ where
         Ok(has_zoom_row_col_index)
     }
 
+    async fn assert_mbtiles(&self) -> UtilesResult<()> {
+        let is_mbtiles = self.is_mbtiles().await?;
+
+        if is_mbtiles {
+            Ok(())
+        } else {
+            Err(UtilesError::NotMbtilesLike(self.filepath().to_string()))
+        }
+    }
+
     async fn tiles_is_empty(&self) -> UtilesResult<bool> {
         let tiles_is_empty = self
             .conn(tiles_is_empty)
@@ -268,6 +335,27 @@ where
         Ok(metadata)
     }
 
+    // async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize> {
+    //     let path_string = path.to_string();
+    //     let as_string = dbname.to_string();
+    //     let rows = self
+    //         .conn(move |conn| {
+    //             conn.execute("ATTACH DATABASE ?1 AS ?2", [&path_string, &as_string])
+    //         })
+    //         .await
+    //         .map_err(UtilesError::AsyncSqliteError)?;
+    //     Ok(rows)
+    // }
+    //
+    // async fn detach(&self, dbname: &str) -> UtilesResult<usize> {
+    //     let as_string = dbname.to_string();
+    //     let rows = self
+    //         .conn(move |conn| conn.execute("DETACH DATABASE ?1", [&as_string]))
+    //         .await
+    //         .map_err(UtilesError::AsyncSqliteError)?;
+    //     Ok(rows)
+    // }
+
     async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>> {
         let name_str = name.to_string();
         let row = self
@@ -275,6 +363,11 @@ where
             .await
             .map_err(UtilesError::AsyncSqliteError)?;
         Ok(row)
+    }
+
+    async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
+        let data = self.conn(metadata_json).await?;
+        Ok(data)
     }
 
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize> {
@@ -420,7 +513,13 @@ where
     }
 
     async fn query_mbt_type(&self) -> UtilesResult<MbtType> {
-        self.conn(|conn| Ok(query_mbtiles_type(conn))).await?
+        let mbt = self.conn(query_mbtiles_type).await?;
+        Ok(mbt)
+    }
+
+    async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>> {
+        let r = self.conn(zxyify).await?;
+        Ok(r)
     }
 }
 

@@ -1,17 +1,23 @@
+use std::path::PathBuf;
+
 use clap::{Args, Parser, Subcommand};
+use strum_macros::AsRefStr;
 
 use utiles_core::bbox::BBox;
 use utiles_core::parsing::parse_bbox_ext;
-use utiles_core::zoom;
 use utiles_core::zoom::ZoomSet;
 use utiles_core::LngLat;
 use utiles_core::VERSION;
+use utiles_core::{geobbox_merge, zoom};
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
+use crate::copy::CopyConfig;
 use crate::mbt::MbtType;
+use crate::sqlite::InsertStrategy;
 use crate::tile_strfmt::TileStringFormatter;
+
 // use crate::cli::commands::WebpifyArgs;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
@@ -81,7 +87,7 @@ fmt-tokens:
     `{bbox_web}`           -> [w, s, e, n] bbox web-mercator (epsg:3857)
     `{projwin_web}`        -> ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
     "#
-    .to_string()
+        .to_string()
 }
 #[derive(Debug, Parser)]
 pub struct TileFmtOptions {
@@ -126,7 +132,7 @@ impl From<&TileFmtOptions> for TileStringFormatter {
 #[derive(Debug, Parser)]
 pub struct TilesArgs {
     /// Zoom level (0-30)
-    #[arg(required = true, value_parser = clap::value_parser!(u8).range(0..=30))]
+    #[arg(required = true, value_parser = clap::value_parser ! (u8).range(0..=30))]
     pub zoom: u8,
 
     #[command(flatten)]
@@ -200,7 +206,7 @@ pub struct TouchArgs {
     #[arg(required = true)]
     pub filepath: String,
 
-    /// page size (default: 512)
+    /// page size
     #[arg(required = false, long)]
     pub page_size: Option<i64>,
 
@@ -217,6 +223,15 @@ impl TouchArgs {
 }
 
 #[derive(Debug, Parser)]
+pub struct AnalyzeArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    analysis_limit: Option<usize>,
+}
+
+#[derive(Debug, Parser)]
 pub struct VacuumArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -228,6 +243,10 @@ pub struct VacuumArgs {
     /// Analyze db after vacuum
     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
     pub analyze: bool,
+
+    /// page size to set
+    #[arg(required = false, long)]
+    pub page_size: Option<i64>,
 }
 
 #[derive(Debug, Parser)]
@@ -249,13 +268,19 @@ pub struct MetadataSetArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    /// key
-    #[arg(required = true)]
+    /// key or json-fspath
+    #[arg(required = true, value_name = "KEY/FSPATH")]
     pub key: String,
 
     /// value
     #[arg(required = false)]
     pub value: Option<String>,
+
+    /// dryrun (don't actually set)
+    #[arg(
+        required = false, long, aliases = ["dry-run"], short = 'n', action = clap::ArgAction::SetTrue
+    )]
+    pub dryrun: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -297,7 +322,15 @@ pub struct UpdateArgs {
     #[arg(required = false, long, short = 'n', action = clap::ArgAction::SetTrue)]
     pub(crate) dryrun: bool,
 }
+#[derive(Debug, Parser)]
+pub struct ZxyifyArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
 
+    /// un-zxyify a db
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    pub(crate) rm: bool,
+}
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     // Alias `aboot` for possible Canadian users as they will not understand
@@ -327,7 +360,7 @@ pub enum Commands {
     #[command(name = "metadata", visible_aliases = ["meta", "md"])]
     Metadata(MetadataArgs),
 
-    /// Set metadata key/value
+    /// Set metadata key/value or from `json` file if key is fspath
     #[command(name = "metadata-set", visible_aliases = ["meta-set", "mds"])]
     MetadataSet(MetadataSetArgs),
 
@@ -358,6 +391,12 @@ pub enum Commands {
         #[arg(required = true)]
         lnglat: LngLat,
     },
+
+    /// zxyify/unzxyify tiles-db
+    ///
+    /// Adds/removes `z/x/y` table/view for querying tiles not inverted
+    #[command(name = "zxyify", aliases = ["xyzify"])]
+    Zxyify(ZxyifyArgs),
 
     /*
     ========================================================================
@@ -390,7 +429,7 @@ pub enum Commands {
     ///
     #[command(
         name = "fmtstr",
-        aliases = &["fmt", "xt"],
+        aliases = & ["fmt", "xt"],
         verbatim_doc_comment,
     )]
     Fmt(TileFmtArgs),
@@ -605,6 +644,30 @@ impl ZoomArgGroup {
     }
 }
 
+#[derive(
+    Debug, Copy, Parser, Clone, clap::ValueEnum, strum::EnumString, AsRefStr, Default,
+)]
+pub enum ConflictStrategy {
+    #[default]
+    Undefined,
+    Ignore,
+    Replace,
+    Abort,
+    Fail,
+}
+
+impl From<ConflictStrategy> for InsertStrategy {
+    fn from(cs: ConflictStrategy) -> Self {
+        match cs {
+            ConflictStrategy::Undefined => InsertStrategy::None,
+            ConflictStrategy::Ignore => InsertStrategy::Ignore,
+            ConflictStrategy::Replace => InsertStrategy::Replace,
+            ConflictStrategy::Abort => InsertStrategy::Abort,
+            ConflictStrategy::Fail => InsertStrategy::Fail,
+        }
+    }
+}
+
 #[derive(Debug, Parser)]
 #[command(name = "copy", about = "Copy tiles from src -> dst")]
 pub struct CopyArgs {
@@ -631,6 +694,14 @@ pub struct CopyArgs {
     #[arg(required = false, long, value_parser = parse_bbox_ext, allow_hyphen_values = true)]
     pub bbox: Option<BBox>,
 
+    /// conflict strategy when copying tiles
+    #[arg(required = false, long, short, default_value = "undefined")]
+    pub conflict: ConflictStrategy,
+
+    /// db-type
+    #[arg(required = false, long)]
+    pub dbtype: Option<DbtypeOption>,
+
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
     pub jobs: Option<u8>,
@@ -653,5 +724,35 @@ impl CopyArgs {
     #[must_use]
     pub fn bboxes(&self) -> Option<Vec<BBox>> {
         self.bbox.as_ref().map(|bbox| vec![*bbox])
+    }
+
+    #[must_use]
+    pub fn bounds(&self) -> Option<String> {
+        if let Some(bboxes) = self.bboxes() {
+            let new_bbox = geobbox_merge(&bboxes);
+            Some(new_bbox.mbt_bounds())
+        } else {
+            None
+        }
+    }
+}
+
+impl From<&CopyArgs> for CopyConfig {
+    fn from(args: &CopyArgs) -> CopyConfig {
+        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
+        CopyConfig {
+            src: PathBuf::from(&args.src),
+            dst: PathBuf::from(&args.dst),
+            zset: args.zoom_set(),
+            zooms: args.zooms(),
+            verbose: true,
+            bboxes: args.bboxes(),
+            bounds_string: args.bounds(),
+            force: false,
+            dryrun: false,
+            jobs: args.jobs,
+            istrat: args.conflict.into(),
+            dbtype,
+        }
     }
 }

@@ -26,7 +26,7 @@ use crate::UtilesCoreError::InvalidZoom;
 /// let zooms_rev_vec: Vec<u8> = zset_int_rev.into();
 /// assert_eq!(zooms_rev_vec, vec![0, 1, 2]);
 /// ```
-#[derive(Debug, Clone, Eq, PartialEq, Default, Serialize)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, Serialize)]
 pub struct ZoomSet(u32);
 
 /// Return a vector of zoom levels from a zoom-set u32

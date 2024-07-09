@@ -10,6 +10,7 @@
 pub mod args;
 mod commands;
 mod entry;
+mod stdin2string;
 mod stdinterator;
 mod stdinterator_filter;
 

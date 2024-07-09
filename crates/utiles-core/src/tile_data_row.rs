@@ -1,3 +1,4 @@
+//! Tile + blob data container
 use crate::tile::Tile;
 use crate::TileLike;
 

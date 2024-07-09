@@ -1,16 +1,21 @@
-mod tilesize;
-mod tiletype;
-
 use rusqlite::{Connection, Result};
 use tracing::debug;
 
+use crate::sqlite_utiles::hash_int::{add_function_xxh3_int, add_function_xxh64_int};
 use crate::sqlite_utiles::tilesize::add_function_ut_tilesize;
 use crate::sqlite_utiles::tiletype::add_function_ut_tiletype;
+
+mod hash_int;
+mod tilesize;
+mod tiletype;
 
 pub fn add_ut_functions(db: &Connection) -> Result<()> {
     debug!("registering sqlite-utiles functions...");
     add_function_ut_tiletype(db)?;
     add_function_ut_tilesize(db)?;
+
+    add_function_xxh3_int(db)?;
+    add_function_xxh64_int(db)?;
     debug!("registered sqlite-utiles functions!");
     Ok(())
 }

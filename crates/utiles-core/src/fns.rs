@@ -274,6 +274,7 @@ pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
         parent(x >> 1, y >> 1, z - 1, Some(n - 1))
     }
 }
+
 /// Return the children of a tile given x, y, z, and zoom in z-order.
 ///
 /// # Examples

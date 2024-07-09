@@ -25,12 +25,12 @@ def test_touch(tmp_path: Path, test_data_root: Path) -> None:
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
-        "filesize": 3072,
+        "filesize": 16384,
         "mbtype": "flat",
         "ntiles": 0,
         "nzooms": 0,
-        "page_count": 6,
-        "page_size": 512,
+        "page_count": 4,
+        "page_size": 4096,
         "freelist_count": 0,
         "minzoom": None,
         "maxzoom": None,
@@ -39,10 +39,10 @@ def test_touch(tmp_path: Path, test_data_root: Path) -> None:
     assert parsed_data == expected_info_json
 
 
-def test_touch_page_size_4096(tmp_path: Path) -> None:
+def test_touch_page_size_512(tmp_path: Path) -> None:
     # make a new file
     new_mbtiles = tmp_path / "new.mbtiles"
-    result = _run_cli(["touch", str(new_mbtiles), "--page-size", "4096"])
+    result = _run_cli(["touch", str(new_mbtiles), "--page-size", "512"])
     assert result.returncode == 0
     assert new_mbtiles.exists()
     assert new_mbtiles.is_file()
@@ -54,12 +54,12 @@ def test_touch_page_size_4096(tmp_path: Path) -> None:
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
-        "filesize": 20480,
+        "filesize": 2560,
         "mbtype": "flat",
         "ntiles": 0,
         "nzooms": 0,
         "page_count": 5,
-        "page_size": 4096,
+        "page_size": 512,
         "freelist_count": 0,
         "minzoom": None,
         "maxzoom": None,

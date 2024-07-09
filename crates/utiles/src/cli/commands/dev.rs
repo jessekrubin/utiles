@@ -1,9 +1,10 @@
-use crate::errors::UtilesResult;
 use clap::Parser;
 use tracing::{debug, warn};
 
-use crate::utilesqlite::hash_types::HashType;
-use crate::utilesqlite::mbtiles::{add_functions, mbt_agg_tiles_hash};
+use crate::errors::UtilesResult;
+use crate::mbt::hash_types::HashType;
+use crate::mbt::mbt_agg_tiles_hash;
+use crate::utilesqlite::mbtiles::add_functions;
 use crate::utilesqlite::Mbtiles;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗      ██████╗ ███████╗██╗   ██╗
@@ -26,7 +27,6 @@ async fn dev(args: DevArgs) -> UtilesResult<()> {
     let filepath = args.fspath.unwrap();
     let mbt = Mbtiles::open(filepath)?;
     add_functions(&mbt.conn)?;
-
     let hashes = vec![
         HashType::Xxh3_128,
         HashType::Xxh3_64,
@@ -35,7 +35,6 @@ async fn dev(args: DevArgs) -> UtilesResult<()> {
         HashType::Fnv1a,
         HashType::Md5,
     ];
-
     for hash in hashes {
         let start_time = std::time::Instant::now();
         let agg_tile_hash = mbt_agg_tiles_hash(&mbt.conn, hash)?;

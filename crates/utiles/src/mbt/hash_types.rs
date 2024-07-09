@@ -31,7 +31,7 @@ impl FromStr for HashType {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
             "md5" => Ok(HashType::Md5),
-            "fnv1a" | "fnv1a64" => Ok(HashType::Fnv1a),
+            "fnv" | "fnv1a" | "fnv1a64" => Ok(HashType::Fnv1a),
             "xxh32" => Ok(HashType::Xxh32),
             "xxh64" => Ok(HashType::Xxh64),
             "xxh3_64" => Ok(HashType::Xxh3_64),

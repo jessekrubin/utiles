@@ -1,8 +1,16 @@
 # CHANGELOG
 
+## TODO
+ 
+- lint/copy overhaul
+- `webpify` command for converting images to webp
+
 ## Unreleased/Future
 
 - lint/copy overhaul
+- Added `--page-size` to vacuum command
+- Using `json-patch` for metadata updates
+- Allow setting metadata value(s) from file if no value is provided (`-`/`--`) for stdin
 
 ___
 

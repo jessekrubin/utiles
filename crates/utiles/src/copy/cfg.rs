@@ -6,6 +6,8 @@ use utiles_core::zoom::{ZoomOrZooms, ZoomSet};
 use utiles_core::{tile_ranges, BBox};
 
 use crate::errors::{UtilesCopyError, UtilesResult};
+use crate::mbt::MbtType;
+use crate::sqlite::InsertStrategy;
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CopyConfig {
@@ -14,13 +16,19 @@ pub struct CopyConfig {
     pub zset: Option<ZoomSet>,
     pub zooms: Option<Vec<u8>>,
     pub bboxes: Option<Vec<BBox>>,
+    pub bounds_string: Option<String>,
     pub verbose: bool,
     pub dryrun: bool,
     pub force: bool,
     pub jobs: Option<u8>,
+    pub istrat: InsertStrategy,
+    pub dbtype: Option<MbtType>,
 }
 
 impl CopyConfig {
+    pub fn src_dbpath_str(&self) -> String {
+        self.src.to_string_lossy().to_string()
+    }
     pub fn mbtiles_sql_where(
         &self,
         // zoom_levels: Option<Vec<u8>>,
@@ -79,11 +87,10 @@ impl CopyConfig {
     }
     pub fn check_src_dst_same(&self) -> UtilesResult<()> {
         if self.src == self.dst {
-            Err(UtilesCopyError::SrcDstSame(format!(
-                "src: {:?}, dst: {:?}",
-                self.src, self.dst
-            ))
-            .into())
+            Err(
+                UtilesCopyError::SrcDstSame(self.src.to_string_lossy().to_string())
+                    .into(),
+            )
         } else {
             Ok(())
         }

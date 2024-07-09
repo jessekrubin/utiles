@@ -1,3 +1,4 @@
+//! 2d/3d points
 use std::fmt::Debug;
 use std::ops::{Add, Sub};
 

@@ -25,9 +25,12 @@ fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
 serde.workspace = true
-serde_json.workspace = true
+serde_json= { workspace = true, features = ["preserve_order"] }
 thiserror.workspace = true
 tilejson.workspace = true
+strum.workspace = true
+strum_macros.workspace = true
+xxhash-rust = {workspace = true , features = ["const_xxh3",  "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32" ]}
 
 # CLI dependencies
 tracing.workspace = true
@@ -54,6 +57,8 @@ tokio-signal = "0.2.9"
 colored = "2.1.0"
 chrono = "0.4.38"
 num_cpus = "1.16.0"
+json-patch = "2.0.0"
+log = "0.4.22"
 #image = "0.25.1"
 
 [dev-dependencies]

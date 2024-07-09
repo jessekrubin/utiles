@@ -1,9 +1,5 @@
-use std::io::{self};
-
 use clap::Parser;
-use tracing::{debug, error, warn};
-use tracing_subscriber::fmt::{self};
-use tracing_subscriber::EnvFilter;
+use tracing::{debug, error};
 
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
@@ -11,54 +7,12 @@ use crate::cli::commands::{
     fmtstr_main, info_main, lint_main, metadata_main, metadata_set_main,
     neighbors_main, parent_main, pmtileid_main, quadkey_main, rimraf_main, serve_main,
     shapes_main, tilejson_main, tiles_main, touch_main, update_main, vacuum_main,
+    zxyify_main,
 };
 use crate::errors::UtilesResult;
+use crate::lager::{init_tracing, LogConfig};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
-
-struct LogConfig {
-    pub debug: bool,
-    pub trace: bool,
-    pub json: bool,
-}
-
-fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
-    let filter = if log_config.trace {
-        EnvFilter::new("TRACE")
-    } else if log_config.debug {
-        EnvFilter::new("DEBUG")
-    } else {
-        EnvFilter::new("INFO")
-    };
-    let debug_or_trace = log_config.debug || log_config.trace;
-    #[allow(clippy::match_bool)]
-    match log_config.json {
-        true => {
-            let subscriber = fmt::Subscriber::builder()
-                .json()
-                .with_env_filter(filter)
-                .with_writer(io::stderr)
-                .finish();
-            let set_global_res = tracing::subscriber::set_global_default(subscriber);
-            if let Err(e) = set_global_res {
-                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
-            }
-        }
-        false => {
-            let subscriber = fmt::Subscriber::builder()
-                .compact()
-                .with_env_filter(filter)
-                .with_writer(io::stderr)
-                .with_target(debug_or_trace)
-                .finish();
-            let set_global_res = tracing::subscriber::set_global_default(subscriber);
-            if let Err(e) = set_global_res {
-                warn!("tracing::subscriber::set_global_default(...) failed: {}", e);
-            }
-        }
-    }
-    Ok(())
-}
 
 pub async fn cli_main(
     argv: Option<Vec<String>>,
@@ -116,8 +70,8 @@ pub async fn cli_main_inner(argv: Option<Vec<String>>) -> UtilesResult<u8> {
         Commands::Lint(args) => lint_main(&args).await,
         Commands::Touch(args) => touch_main(&args),
         Commands::Vacuum(args) => vacuum_main(&args),
-        Commands::Metadata(args) => metadata_main(&args),
-        Commands::MetadataSet(args) => metadata_set_main(&args),
+        Commands::Metadata(args) => metadata_main(&args).await,
+        Commands::MetadataSet(args) => metadata_set_main(&args).await,
         Commands::Update(args) => update_main(&args).await,
         Commands::Tilejson(args) => tilejson_main(&args),
         Commands::Copy(args) => copy_main(args).await,
@@ -127,6 +81,7 @@ pub async fn cli_main_inner(argv: Option<Vec<String>>) -> UtilesResult<u8> {
         Commands::Contains { filepath, lnglat } => {
             contains_main(&filepath, lnglat).await
         }
+        Commands::Zxyify(args) => zxyify_main(args).await,
         // mercantile cli like
         Commands::Fmt(args) => fmtstr_main(args),
         Commands::Quadkey(args) => quadkey_main(args),
