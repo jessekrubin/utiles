@@ -26,13 +26,6 @@ impl InsertStrategy {
 
     #[must_use]
     pub fn requires_check(&self) -> bool {
-        match self {
-            InsertStrategy::None => true,
-            InsertStrategy::Replace => false,
-            InsertStrategy::Ignore => false,
-            InsertStrategy::Rollback => true,
-            InsertStrategy::Abort => true,
-            InsertStrategy::Fail => true,
-        }
+        !matches!(self, InsertStrategy::Replace | InsertStrategy::Ignore)
     }
 }

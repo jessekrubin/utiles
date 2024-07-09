@@ -221,8 +221,7 @@ impl CopyPasta {
             _ => {
                 // do the thing
                 debug!("Copying tiles from src to dst: {:?}", self.cfg);
-                let emsg =
-                    format!("Unsupported/unimplemented db-type {:?}", dst_db_type);
+                let emsg = format!("Unsupported/unimplemented db-type {dst_db_type:?}");
                 Err(UtilesCoreError::Unimplemented(emsg).into())
             }
         }?;
@@ -255,7 +254,7 @@ impl CopyPasta {
                 );
 
                 debug!("Executing check_statement: {:?}", check_statement);
-                let a = c.query_row(
+                c.query_row(
                     check_statement,
                     [],
                     |row| {
@@ -263,8 +262,7 @@ impl CopyPasta {
 
                         Ok(r)
                     },
-                );
-                a
+                )
             }
         ).await.map_err(
             UtilesError::AsyncSqliteError

@@ -740,7 +740,7 @@ pub fn init_mbtiles(conn: &mut Connection, mbt: &MbtType) -> UtilesResult<()> {
         MbtType::Hash => init_mbtiles_hash(conn).map_err(|e| e.into()),
         MbtType::Norm => init_mbtiles_normalized(conn).map_err(|e| e.into()),
         _ => {
-            let emsg = format!("init_mbtiles: {} not implemented", mbt);
+            let emsg = format!("init_mbtiles: {mbt} not implemented");
             Err(UtilesError::Unimplemented(emsg))
         }
     };
@@ -755,7 +755,7 @@ pub fn create_mbtiles_file<P: AsRef<Path>>(
         let emsg = format!("Error opening mbtiles file: {e}");
         UtilesCoreError::Unknown(emsg)
     })?;
-    application_id_set(&mut conn, MBTILES_MAGIC_NUMBER)?;
+    application_id_set(&conn, MBTILES_MAGIC_NUMBER)?;
     match mbtype {
         MbtType::Flat => {
             init_flat_mbtiles(&mut conn)?;

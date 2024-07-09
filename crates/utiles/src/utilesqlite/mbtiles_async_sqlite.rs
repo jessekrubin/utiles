@@ -11,13 +11,11 @@ use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
     add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
-    has_zoom_row_col_index, init_flat_mbtiles, init_mbtiles, mbtiles_metadata,
-    mbtiles_metadata_row, metadata_json, minzoom_maxzoom, query_zxy,
-    register_utiles_sqlite_functions, tiles_is_empty,
+    has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
+    metadata_json, minzoom_maxzoom, query_zxy, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
-use crate::UtilesError::RusqliteError;
 use async_sqlite::{
     Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
 };
@@ -127,7 +125,8 @@ impl MbtilesAsyncSqliteClient {
             client
                 .conn_mut(move |conn| {
                     init_mbtiles(conn, &mbtype)
-                        .map_err(|e| rusqlite::Error::InvalidQuery)?;
+                        // TODO: fix this and don't ignore the error...
+                        .map_err(|_e| rusqlite::Error::InvalidQuery)?;
                     Ok(())
                 })
                 .await?;

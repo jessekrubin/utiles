@@ -41,7 +41,7 @@ pub fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
             let subscriber = fmt::Subscriber::builder()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
-                // .with_target(debug_or_trace)
+                .with_target(debug_or_trace)
                 .finish();
             let set_global_res = tracing::subscriber::set_global_default(subscriber);
             if let Err(e) = set_global_res {

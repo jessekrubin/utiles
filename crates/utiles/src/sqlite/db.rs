@@ -93,7 +93,7 @@ pub fn application_id_set(conn: &Connection, app_id: u32) -> RusqliteResult<u32>
             "application_id_set: current app_id != app_id: {} != {}",
             current_app_id, app_id
         );
-        let sql = format!("PRAGMA application_id = {}", app_id);
+        let sql = format!("PRAGMA application_id = {app_id}");
         let mut stmt = conn.prepare(&sql)?;
         stmt.execute([])?;
         Ok(app_id)

@@ -644,19 +644,16 @@ impl ZoomArgGroup {
     }
 }
 
-#[derive(Debug, Copy, Parser, Clone, clap::ValueEnum, strum::EnumString, AsRefStr)]
+#[derive(
+    Debug, Copy, Parser, Clone, clap::ValueEnum, strum::EnumString, AsRefStr, Default,
+)]
 pub enum ConflictStrategy {
+    #[default]
     Undefined,
     Ignore,
     Replace,
     Abort,
     Fail,
-}
-
-impl Default for ConflictStrategy {
-    fn default() -> Self {
-        ConflictStrategy::Undefined
-    }
 }
 
 impl From<ConflictStrategy> for InsertStrategy {
@@ -742,10 +739,7 @@ impl CopyArgs {
 
 impl From<&CopyArgs> for CopyConfig {
     fn from(args: &CopyArgs) -> CopyConfig {
-        let dbtype = match &args.dbtype {
-            Some(dbtype) => Some(dbtype.into()),
-            None => None,
-        };
+        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
         CopyConfig {
             src: PathBuf::from(&args.src),
             dst: PathBuf::from(&args.dst),
