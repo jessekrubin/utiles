@@ -1,6 +1,8 @@
-use crate::mbt::hash_types::HashType;
-use crate::sqlite::RusqliteResult;
 use rusqlite::Connection;
+
+use crate::mbt::hash_types::HashType;
+use crate::mbt::TilesFilter;
+use crate::UtilesResult;
 
 // =================================================================
 // HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS
@@ -19,7 +21,16 @@ use rusqlite::Connection;
 //     );
 //     sql
 // }
-pub fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
+pub fn mbt_agg_tile_hash_query(
+    hash_type: HashType,
+    prefix: Option<&str>,
+    filter: &Option<TilesFilter>,
+) -> UtilesResult<String> {
+    let where_clause = if let Some(filter) = filter {
+        filter.mbtiles_sql_where(prefix)?
+    } else {
+        String::new()
+    };
     let sql = format!(
         "SELECT coalesce(
             {hash_type}_concat_hex(
@@ -29,16 +40,19 @@ pub fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
                 tile_data
                 ORDER BY zoom_level, tile_column, tile_row),
             {hash_type}_hex(''))
-        FROM tiles"
+        FROM tiles {where_clause}",
     );
-    sql
+    Ok(sql)
 }
 
 pub fn mbt_agg_tiles_hash(
     conn: &Connection,
     hash_type: HashType,
-) -> RusqliteResult<String> {
-    let mut stmt = conn.prepare_cached(mbt_agg_tile_hash_query(hash_type).as_str())?;
+    prefix: Option<&str>,
+    filter: &Option<TilesFilter>,
+) -> UtilesResult<String> {
+    let sql = mbt_agg_tile_hash_query(hash_type, prefix, filter)?;
+    let mut stmt = conn.prepare_cached(&sql)?;
     let agg_tiles_hash_str: String = stmt.query_row([], |row| row.get(0))?;
     Ok(agg_tiles_hash_str)
 }

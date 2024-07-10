@@ -6,6 +6,7 @@ use crate::mbt::MbtType;
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
+use tracing::field::debug;
 use tracing::{debug, info, warn};
 use utiles_core::UtilesCoreError;
 
@@ -35,7 +36,9 @@ impl CopyPasta {
     }
 
     /// Returns the destination db and a bool indicating if it was created
-    pub async fn get_dst_db(&self) -> UtilesResult<(MbtilesAsyncSqliteClient, bool)> {
+    pub async fn get_dst_db(
+        &self,
+    ) -> UtilesResult<(MbtilesAsyncSqliteClient, bool, MbtType)> {
         // if the dst is a file... we gotta get it...
         let dst_db_res = MbtilesAsyncSqliteClient::open_existing(&self.cfg.dst).await;
         let (dst_db, is_new) = match dst_db_res {
@@ -55,7 +58,8 @@ impl CopyPasta {
             }
         };
         dst_db.register_utiles_sqlite_functions().await?;
-        Ok((dst_db, is_new))
+        let db_type_queried = dst_db.query_mbt_type().await?;
+        Ok((dst_db, is_new, db_type_queried))
     }
 
     pub async fn copy_metadata(
@@ -117,12 +121,12 @@ impl CopyPasta {
         let src_db_name = "src";
         let where_clause = self.cfg.mbtiles_sql_where()?;
         let insert_strat = self.cfg.istrat.sql_prefix().to_string();
-        let hash_type = "md5_hex";
-
+        let hash_type_fn_string =
+            self.cfg.hash.unwrap_or_default().sqlite_hex_fn_name();
         let n_tiles_inserted = dst_db.conn(
             move |x| {
                 let insert_statement = &format!(
-                    "{insert_strat} INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) SELECT zoom_level, tile_column, tile_row, tile_data, {hash_type}(tile_data) as tile_hash FROM {src_db_name}.tiles {where_clause}"
+                    "{insert_strat} INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) SELECT zoom_level, tile_column, tile_row, tile_data, {hash_type_fn_string}(tile_data) as tile_hash FROM {src_db_name}.tiles {where_clause}"
                 );
                 debug!("Executing tiles insert: {:?}", insert_statement);
                 x.execute(
@@ -147,7 +151,9 @@ impl CopyPasta {
         let src_db_name = "src";
         let where_clause = self.cfg.mbtiles_sql_where()?;
         let insert_strat = self.cfg.istrat.sql_prefix().to_string();
-        let hash_type = "md5_hex";
+        let hash_type_fn_string =
+            self.cfg.hash.unwrap_or_default().sqlite_hex_fn_name();
+        debug!("hash fn: {}", hash_type_fn_string);
 
         let n_tiles_inserted = dst_db
             .conn(move |x| {
@@ -155,10 +161,10 @@ impl CopyPasta {
                     "
 {insert_strat} INTO map (zoom_level, tile_column, tile_row, tile_id)
 SELECT
-    zoom_level,
-    tile_column,
-    tile_row,
-    {hash_type}(tile_data) AS tile_id
+    zoom_level as zoom_level,
+    tile_column as tile_column,
+    tile_row as tile_row,
+    {hash_type_fn_string}(tile_data) AS tile_id
 FROM
     {src_db_name}.tiles
 {where_clause};
@@ -288,7 +294,7 @@ LIMIT 1;
         // doing preflight check
         debug!("Preflight check");
         self.preflight_check()?;
-        let (dst_db, is_new) = self.get_dst_db().await?;
+        let (dst_db, is_new, db_type) = self.get_dst_db().await?;
 
         let src_db_name = "src";
 
@@ -324,6 +330,21 @@ LIMIT 1;
         if is_new {
             let n_metadata_inserted = self.copy_metadata(&dst_db).await?;
             debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
+        }
+
+        dst_db.metadata_set("dbtype", db_type.as_str()).await?;
+        if db_type == MbtType::Hash || db_type == MbtType::Norm {
+            dst_db
+                .metadata_set(
+                    "tileid",
+                    self.cfg
+                        .hash
+                        .unwrap_or_default()
+                        .to_string()
+                        .to_string()
+                        .as_str(),
+                )
+                .await?;
         }
 
         debug!("Detaching src db...");

@@ -1,5 +1,6 @@
 #![allow(clippy::unwrap_used)]
 pub use about::about_main;
+pub use agg_hash::agg_hash_main;
 pub use children_parent::{children_main, parent_main};
 pub use contains::contains_main;
 pub use copy::copy_main;
@@ -21,6 +22,7 @@ pub use vacuum::vacuum_main;
 pub use zxyify::zxyify_main;
 
 mod about;
+mod agg_hash;
 mod children_parent;
 mod contains;
 pub mod copy;

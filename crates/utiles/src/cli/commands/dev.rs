@@ -37,7 +37,7 @@ async fn dev(args: DevArgs) -> UtilesResult<()> {
     ];
     for hash in hashes {
         let start_time = std::time::Instant::now();
-        let agg_tile_hash = mbt_agg_tiles_hash(&mbt.conn, hash)?;
+        let agg_tile_hash = mbt_agg_tiles_hash(&mbt.conn, hash, None, &None)?;
         let elapsed = start_time.elapsed();
         debug!("---------------------");
         debug!("hash: {:?}, agg_tile_hash: {:?}", hash, agg_tile_hash);

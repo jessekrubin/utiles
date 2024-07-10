@@ -102,10 +102,10 @@ impl TileZBox {
             && tile.y() <= self.max.y
     }
 
-    /// Return the SQL `WHERE` clause for an mbtiles database
+    /// Return the SQL `WHERE` clause for tms mbtiles like db with optional prefix for column names
     #[must_use]
-    pub fn mbtiles_sql_where_prefix(&self, col_prefix: Option<String>) -> String {
-        let col_prefix = col_prefix.unwrap_or_default();
+    pub fn mbtiles_sql_where_prefix(&self, prefix: Option<&str>) -> String {
+        let col_prefix = prefix.unwrap_or_default();
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
         let miny = crate::fns::flipy(self.min.y, self.zoom);
@@ -219,10 +219,10 @@ impl TileZBoxes {
 
     /// Return the size of the `TileZBoxes` in tiles
     #[must_use]
-    pub fn mbtiles_sql_where(&self) -> String {
+    pub fn mbtiles_sql_where(&self, prefix: Option<&str>) -> String {
         self.ranges
             .iter()
-            .map(TileZBox::mbtiles_sql_where)
+            .map(move |r| r.mbtiles_sql_where_prefix(prefix))
             .collect::<Vec<String>>()
             .join(" OR ")
     }

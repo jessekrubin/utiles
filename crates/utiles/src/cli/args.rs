@@ -14,7 +14,8 @@ use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
 use crate::copy::CopyConfig;
-use crate::mbt::MbtType;
+use crate::mbt::hash_types::HashType;
+use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
 use crate::tile_strfmt::TileStringFormatter;
 
@@ -181,6 +182,43 @@ pub struct SqliteDbCommonArgs {
     pub min: bool,
 }
 
+#[derive(Debug, Parser)]
+pub struct TilesFilterArgs {
+    /// bbox(es) (west, south, east, north)
+    #[arg(required = false, long, value_parser = parse_bbox_ext, allow_hyphen_values = true)]
+    pub bbox: Option<Vec<BBox>>,
+
+    #[command(flatten)]
+    pub zoom: Option<ZoomArgGroup>,
+}
+
+impl TilesFilterArgs {
+    #[must_use]
+    pub fn zooms(&self) -> Option<Vec<u8>> {
+        match &self.zoom {
+            Some(zoom) => zoom.zooms(),
+            None => None,
+        }
+    }
+
+    #[must_use]
+    pub fn bboxes(&self) -> Option<Vec<BBox>> {
+        match &self.bbox {
+            Some(bboxes) => Some(bboxes.clone()),
+            None => None,
+        }
+    }
+
+    #[must_use]
+    pub fn tiles_filter_maybe(&self) -> Option<TilesFilter> {
+        if self.bbox.is_none() && self.zoom.is_none() {
+            None
+        } else {
+            Some(TilesFilter::new(self.bboxes(), self.zooms()))
+        }
+    }
+}
+
 #[derive(Debug, Parser, Clone, clap::ValueEnum)]
 pub enum DbtypeOption {
     Flat,
@@ -314,6 +352,21 @@ pub struct InfoArgs {
 }
 
 #[derive(Debug, Parser)]
+pub struct AggHashArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    #[command(flatten)]
+    pub filter_args: TilesFilterArgs,
+    // /// bbox(es) (west, south, east, north)
+    // #[arg(required = false, long, value_parser = parse_bbox_ext, allow_hyphen_values = true)]
+    // pub bbox: Option<Vec<BBox>>,
+    /// hash to use for blob-id if copying to normal/hash db type
+    #[arg(required = false, long)]
+    pub hash: Option<HashType>,
+}
+
+#[derive(Debug, Parser)]
 pub struct UpdateArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -355,6 +408,10 @@ pub enum Commands {
     /// Lint mbtiles file(s) (wip)
     #[command(name = "lint")]
     Lint(LintArgs),
+
+    /// Agg hash db
+    #[command(name = "agg-hash")]
+    AggHash(AggHashArgs),
 
     /// Echo metadata (table) as json arr/obj
     #[command(name = "metadata", visible_aliases = ["meta", "md"])]
@@ -621,11 +678,11 @@ pub struct ZoomArgGroup {
     pub zoom: Option<Vec<Vec<u8>>>,
 
     /// min zoom level (0-30)
-    #[arg(long, conflicts_with = "zoom")]
+    #[arg(long, conflicts_with = "zoom", aliases = ["min-zoom", "min-z"])]
     pub minzoom: Option<u8>,
 
     /// max zoom level (0-30)
-    #[arg(long, conflicts_with = "zoom")]
+    #[arg(long, conflicts_with = "zoom", aliases = ["max-zoom", "max-z"])]
     pub maxzoom: Option<u8>,
 }
 
@@ -703,6 +760,10 @@ pub struct CopyArgs {
     #[arg(required = false, long = "dbtype", aliases = ["db-type", "mbtype", "mbt-type"])]
     pub dbtype: Option<DbtypeOption>,
 
+    /// hash to use for blob-id if copying to normal/hash db type
+    #[arg(required = false, long)]
+    pub hash: Option<HashType>,
+
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
     pub jobs: Option<u8>,
@@ -753,6 +814,7 @@ impl From<&CopyArgs> for CopyConfig {
             dryrun: false,
             jobs: args.jobs,
             istrat: InsertStrategy::from(args.conflict),
+            hash: args.hash,
             dbtype,
         }
     }
