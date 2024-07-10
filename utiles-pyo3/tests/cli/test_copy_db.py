@@ -160,3 +160,52 @@ def test_copy_mbtiles_conflict_with_strategy_not_overlapping(
         ]
     )
     assert copy_result_b.returncode == 0
+
+
+def test_copy_mbtiles_bbox(tmp_path: Path, test_data_root: Path, db_type: str) -> None:
+    _mbtiles_filepath = _osm_standard_z0z4_mbtiles(test_data_root)
+    out_path = tmp_path / "copied.mbtiles"
+    west_half_o_world_args = [
+        "cp",
+        str(_mbtiles_filepath),
+        str(out_path),
+        "--dbtype",
+        db_type,
+        "--minzoom",
+        "3",
+        "--maxzoom",
+        "4",
+        "--bbox",
+        "-180,-90,0,90",
+    ]
+    print(" ".join(west_half_o_world_args))
+    copy_result_a = _run_cli(west_half_o_world_args)
+
+    assert copy_result_a.returncode == 0
+
+    info_result = _run_cli(["info", str(out_path)])
+    info_dict = info_result.parse_json
+    expected_ntiles_total = ((2 << (3 - 1)) ** 2) + ((2 << (4 - 1)) ** 2)
+    assert info_dict["ntiles"] == expected_ntiles_total // 2
+
+    # no specifying of the zooms...
+    east_half_o_world_args = [
+        "cp",
+        str(_mbtiles_filepath),
+        str(out_path),
+        "--dbtype",
+        db_type,
+        "--minzoom",
+        "3",
+        "--maxzoom",
+        "4",
+        "--bbox",
+        "0,-90,180,90",
+    ]
+    copy_result_b = _run_cli(east_half_o_world_args)
+    assert copy_result_b.returncode == 0
+
+    info_result_final = _run_cli(["info", str(out_path)])
+    info_dict_final = info_result_final.parse_json
+    print(info_dict_final)
+    assert info_dict_final["ntiles"] == expected_ntiles_total

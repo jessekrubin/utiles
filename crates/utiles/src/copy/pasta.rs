@@ -309,7 +309,7 @@ LIMIT 1;
             }
         } else {
             if is_new {
-                debug!("dst db is new; not checking for conflict")
+                debug!("dst db is new; not checking for conflict");
             } else {
                 debug!(
                     "No check required for conflict strategy: {}",
