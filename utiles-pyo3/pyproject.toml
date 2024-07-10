@@ -7,21 +7,21 @@ name = "utiles"
 description = "utiles = (utils + tiles) * rust"
 requires-python = ">=3.8"
 classifiers = [
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
-    "Programming Language :: Python",
-    "Programming Language :: Rust",
-    "Typing :: Typed",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Programming Language :: Python",
+  "Programming Language :: Rust",
+  "Typing :: Typed",
 ]
 authors = [{ name = "jesse rubin", email = "jessekrubin@gmail.com" }]
 maintainers = [{ name = "jesse rubin", email = "jessekrubin@gmail.com" }]
@@ -51,34 +51,33 @@ module-name = "utiles._utiles"
 
 [tool.pytest.ini_options]
 testpaths = [
-    "tests",
+  "tests",
 ]
 addopts = [
-    "--doctest-modules",
-    # "--benchmark-disable",
+  "--doctest-modules",
+  # "--benchmark-disable",
 ]
 norecursedirs = [
-    ".git",
-    ".nox",
-    ".pytest_cache",
-    ".venv",
-    "build",
-    "dist",
-    "scratch",
-    "node_modules",
-    "venv",
-    "*.bak",
-    "*.egg-info",
-    "*.egg",
-    ".*",
-    "target",
-    "utiles-cli", # in testing I write out a bunch of stuff to this dir...
+  ".git",
+  ".nox",
+  ".pytest_cache",
+  ".venv",
+  "build",
+  "dist",
+  "scratch",
+  "node_modules",
+  "venv",
+  "*.bak",
+  "*.egg-info",
+  "*.egg",
+  ".*",
+  "target",
+  "utiles-cli", # in testing I write out a bunch of stuff to this dir...
 ]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "bench"
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "bench",
 ]
-
 
 [tool.black]
 target-version = ["py38"]
@@ -88,87 +87,93 @@ line-length = 88
 target-version = "py38"
 line-length = 88
 include = [
-    "python/utiles/**/*.{py,pyi}",
-    "tests/**/*.{py,pyi}",
-    "bench/**/*.{py,pyi}"
+  "python/utiles/**/*.{py,pyi}",
+  "tests/**/*.{py,pyi}",
+  "bench/**/*.{py,pyi}",
 ]
 exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
 ]
 
 [tool.ruff.lint]
 select = [
-    "A",
-    "ARG",
-    "B",
-    "C",
-    "DTZ",
-    "E",
-    "EM",
-    "F",
-    #  "FBT",
-    "I",
-    "ICN",
-    "N",
-    "PLC",
-    #"ERA001",
-    "PLE",
-    "PLR",
-    "PLW",
-    "Q",
-    "RUF",
-    "S",
-    "T",
-    "TID",
-    "UP",
-    "W",
-    "YTT",
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  #  "FBT",
+  "I",
+  "ICN",
+  "N",
+  "PLC",
+  # "ERA001",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
 ]
 ignore = [
-    "TID252",
-    "A003",
-    # Allow non-abstract empty methods in abstract base classes
-    "B027",
-    # Allow boolean positional values in function calls, like `dict.get(... True)`
-    "FBT003",
-    # Ignore checks for possible passwords
-    "S105", "S106", "S107",
-    # Ignore complexity
-    "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
-    #  shadowing builtins
-    "A002",
-    "E501", # line length
-    # type annotations union
-    "UP007",
-    # todo figure out if this is needed
-    "UP006",
-    # magic value cmp super annoying
-    "PLR2004",
-    "PLW0120",
+  "TID252",
+  "A003",
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105",
+  "S106",
+  "S107",
+  # Ignore complexity
+  "C901",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+  "PLR0915",
+  #  shadowing builtins
+  "A002",
+  "E501", # line length
+  # type annotations union
+  "UP007",
+  # todo figure out if this is needed
+  "UP006",
+  # magic value cmp super annoying
+  "PLR2004",
+  "PLW0120",
 ]
 unfixable = [
-    # Don't touch unused imports
-    "F401",
+  # Don't touch unused imports
+  "F401",
 ]
 
 [tool.ruff.lint.isort]
@@ -190,7 +195,7 @@ source_pkgs = ["utiles", "tests"]
 branch = true
 parallel = true
 omit = [
-    "python/utiles/__about__.py",
+  "python/utiles/__about__.py",
 ]
 
 [tool.coverage.paths]
@@ -199,9 +204,9 @@ tests = ["tests", "*/utiles/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
-    "no cov",
-    "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
 ]
 
 [tool.mypy]

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{Args, CommandFactory, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use strum_macros::AsRefStr;
 
 use utiles_core::bbox::BBox;
@@ -17,8 +17,6 @@ use crate::copy::CopyConfig;
 use crate::mbt::MbtType;
 use crate::sqlite::InsertStrategy;
 use crate::tile_strfmt::TileStringFormatter;
-
-// use crate::cli::commands::WebpifyArgs;
 
 /// ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
 /// ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝
@@ -211,7 +209,7 @@ pub struct TouchArgs {
     pub page_size: Option<i64>,
 
     /// db-type (default: flat)
-    #[arg(required = false, long = "dbtype", default_value = "flat")]
+    #[arg(required = false, long = "dbtype", aliases = ["db-type", "mbtype", "mbt-type"], default_value = "flat")]
     pub dbtype: Option<DbtypeOption>,
 }
 

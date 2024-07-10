@@ -137,11 +137,10 @@ test_ul_bench[mercantile-(486, 332, 20)]     1,099.9938 (5.38)     107,300.0021 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ```
 
-
 ## TODO:
 
-- [X] benchmark against mercantile
-- [X] Re-write cli in rust with clap
+- [x] benchmark against mercantile
+- [x] Re-write cli in rust with clap
 - **Maybe:**
-    - [] Mbtiles support??
-    - [] Reading/writing mvt files?
+  - [] Mbtiles support??
+  - [] Reading/writing mvt files?

@@ -10,7 +10,7 @@ use crate::errors::UtilesResult;
 use crate::lager::{init_tracing, LogConfig};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
-use clap::{Args, Command, CommandFactory, FromArgMatches, Parser, Subcommand};
+use clap::{CommandFactory, FromArgMatches};
 use tracing::{debug, error};
 use utiles_core::VERSION;
 
@@ -29,6 +29,7 @@ impl Default for CliOpts {
 }
 
 impl CliOpts {
+    #[must_use]
     pub fn aboot_str(&self) -> String {
         format!(
             "utiles cli ({}) ~ v{}",

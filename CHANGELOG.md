@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## TODO
- 
+
 - lint/copy overhaul
 - `webpify` command for converting images to webp
 
@@ -12,14 +12,13 @@
 - Using `json-patch` for metadata updates
 - Allow setting metadata value(s) from file if no value is provided (`-`/`--`) for stdin
 
-___
-
+---
 
 ## 0.6.1 (2024-07-01)
 
 - Fix calling `utiles.ut_cli` multiple times causing tracing-subscriber crash
 
-___
+---
 
 ## 0.6.0 (2024-06-28)
 
@@ -27,7 +26,7 @@ ___
 - Update python dev deps
 - Added `{bbox}`, `{projwin}`, `{bbox_web}` and `{projwin_web}` format tokens to tile-formatter (those projwins are handy for gdaling)
 
-___
+---
 
 ## 0.5.1 (2024-06-19)
 
@@ -35,7 +34,7 @@ ___
 - Write out `metadata.json` when `pyramid-ing` mbtiles to directory if the metadata of the mbtiles does not conatin duplicate keys (which it should not)
 - Limit jobs/concurrency when `pyramid-ing` mbtiles to directory to 4 (if not specified by `--jobs`/`-j` option) to prevent nuking machines
 
-___
+---
 
 ## 0.5.0 (2024-06-14)
 
@@ -77,7 +76,7 @@ Example:
    SELECT * FROM tiles WHERE zoom_level = 10 AND tile_column = 486 AND tile_row = 332;
 ```
 
-___
+---
 
 ## 0.4.1 (2024-04-04)
 
@@ -90,7 +89,7 @@ ___
 - General spring cleaning!
 - Hid the `utiles tilejson` cli alias `trader-joes`
 
-___
+---
 
 ## 0.3.1 (2024-01-30)
 
@@ -100,7 +99,7 @@ ___
 
 - Expanded utiles cli with several more commands
 
-___ 
+---
 
 ## 0.2.0 (2023-11-10)
 
@@ -109,7 +108,7 @@ ___
 - Added tilejson/tj command to rust cli to write out tilejson files for mbtiles
 - Added meta command to rust cli to write out json of metadata table for mbtiles
 
-___
+---
 
 ## 0.1.0 (2023-10-27)
 
@@ -117,7 +116,7 @@ ___
 - Update pyo3 to 0.20.0
 - Added rasterio/rio entry points ('utiles' and 'ut' alias bc why type `rio utiles` over `rio ut`)
 
-___
+---
 
 ## 0.0.2
 

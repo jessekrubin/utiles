@@ -9,7 +9,7 @@ use tracing::{debug, error, warn};
 use utiles_core::bbox::BBox;
 use utiles_core::constants::MBTILES_MAGIC_NUMBER;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
+use utiles_core::{yflip, LngLat, Tile, TileLike};
 
 use crate::errors::UtilesResult;
 use crate::mbt::query::{
@@ -739,7 +739,7 @@ pub fn init_mbtiles_normalized(conn: &mut Connection) -> RusqliteResult<()> {
 }
 
 pub fn init_mbtiles(conn: &mut Connection, mbt: &MbtType) -> UtilesResult<()> {
-    application_id_set(&conn, MBTILES_MAGIC_NUMBER)?;
+    application_id_set(conn, MBTILES_MAGIC_NUMBER)?;
     let r: UtilesResult<()> = match mbt {
         MbtType::Flat => init_flat_mbtiles(conn).map_err(|e| e.into()),
         MbtType::Hash => init_mbtiles_hash(conn).map_err(|e| e.into()),

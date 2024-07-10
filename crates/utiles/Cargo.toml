@@ -1,15 +1,15 @@
 [package]
 name = "utiles"
 version.workspace = true
-edition.workspace = true
-license.workspace = true
 authors.workspace = true
-description = "Map tile utilities aka utiles"
-readme = "README.md"
 categories = ["science::geo"]
-keywords = ["map", "geo", "mercator", "tile"]
+edition.workspace = true
 homepage = "https://github.com/jessekrubin/utiles"
+keywords = ["map", "geo", "mercator", "tile"]
+license.workspace = true
+readme = "README.md"
 repository = "https://github.com/jessekrubin/utiles"
+description = "Web map tile utils (aka utiles)"
 
 [lib]
 name = "utiles"
@@ -20,46 +20,47 @@ name = "utiles"
 path = "src/bin.rs"
 
 [dependencies]
-utiles-core = { path = "../utiles-core", version = "0.6.0" }
 fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
 serde.workspace = true
-serde_json= { workspace = true, features = ["preserve_order"] }
-thiserror.workspace = true
-tilejson.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
 strum.workspace = true
 strum_macros.workspace = true
-xxhash-rust = {workspace = true , features = ["const_xxh3",  "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32" ]}
+thiserror.workspace = true
+tilejson.workspace = true
+utiles-core = { path = "../utiles-core", version = "0.6.0" }
+xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
 
 # CLI dependencies
-tracing.workspace = true
-tokio = { workspace = true, features = ["fs"] }
-tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
+# async-sqlite = { version = "0.2.2", features = ["bundled", "functions", "trace", ] }
+async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
+async-trait = "0.1.80"
+axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
+chrono = "0.4.38"
 clap = { version = "4.5.8", features = ["derive", "color", "wrap_help"] }
-globset = "0.4.13"
-tokio-stream = "0.1.14"
+colored = "2.1.0"
 futures = "0.3.29"
-walkdir = "2.4.0"
-time = "0.3.36"
+globset = "0.4.13"
+http-body-util = "0.1.0"
+imagesize = "0.13.0"
+indoc = { workspace = true }
+json-patch = "2.0.0"
+log = "0.4.22"
+num_cpus = "1.16.0"
 # utilesqlite dependencies
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
 sqlite-hashes = { version = "0.7.3", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
-imagesize = "0.13.0"
-axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
-http-body-util = "0.1.0"
-async-trait = "0.1.80"
-#async-sqlite = { version = "0.2.2", features = ["bundled", "functions", "trace", ] }
-async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
+time = "0.3.36"
+tokio = { workspace = true, features = ["fs"] }
+tokio-signal = "0.2.9"
+tokio-stream = "0.1.14"
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id"] }
-tokio-signal = "0.2.9"
-colored = "2.1.0"
-chrono = "0.4.38"
-num_cpus = "1.16.0"
-json-patch = "2.0.0"
-log = "0.4.22"
-#image = "0.25.1"
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
+walkdir = "2.4.0"
+# image = "0.25.1"
 
 [dev-dependencies]
 criterion = "0.5.1"

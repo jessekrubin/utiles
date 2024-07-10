@@ -1,43 +1,46 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/utiles-core",
-    "crates/utiles",
-    "utiles-pyo3",
+  "crates/utiles",
+  "crates/utiles-core",
+  "utiles-pyo3",
 ]
 
 [workspace.package]
-edition = "2021"
 version = "0.6.1"
-homepage = "https://github.com/jessekrubin/utiles"
+authors = [
+  "Jesse Rubin <jessekrubin@gmail.com>",
+  "Dan Costello <dan.costello2@gmail.com>",
+]
 documentation = "https://github.com/jessekrubin/utiles"
-repository = "https://github.com/jessekrubin/utiles"
-authors = ["Jesse K. Rubin <jessekrubin@gmail.com>"]
+edition = "2021"
+homepage = "https://github.com/jessekrubin/utiles"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/jessekrubin/utiles"
 
 [workspace.dependencies]
 anyhow = "1.0.75"
 fast_hilbert = "2.0.0"
 geo-types = "0.7.9"
 geojson = "0.24.1"
+indoc = "2.0.5"
 pyo3 = "0.22.0"
 pyo3-build-config = "0.22.0"
 rusqlite = { version = "0.31.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.119", features = ["preserve_order"] }
 
+# GIT DEP
+async-sqlite = { version = "0.3.0", features = ["bundled", "functions", "trace"] }
+size = { version = "=0.5.0-preview2", features = ["default"] }
+strum = { version = "0.26.3", features = ["derive"] }
+strum_macros = "0.26.3"
 thiserror = "1.0.50"
 tilejson = "0.4.1"
 tokio = { version = "1.37.0", features = ["full"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
-size = { version = "=0.5.0-preview2", features = ["default"] }
-strum = { version = "0.26.3", features = ["derive"] }
-strum_macros = "0.26.3"
-xxhash-rust = { version = "0.8.10", features = [ "xxh32", "xxh64", "xxh3", "const_xxh32",  "const_xxh64", "const_xxh3"] }
-# GIT DEP
-async-sqlite = { version = "0.3.0", features = ["bundled", "functions", "trace", ] }
-
+xxhash-rust = { version = "0.8.10", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
 
 [profile.dev]
 opt-level = 0
@@ -45,5 +48,5 @@ opt-level = 0
 [profile.release]
 opt-level = 3
 strip = true
-#lto = "thin"
+# lto = "thin"
 lto = "fat"

@@ -1,3 +1,10 @@
+//! utiles-sqlite ~ sqlite extension function(s) for utiles
+//!
+//! Adds the following functions:
+//!   - `ut_tiletype(blob)`   - returns the tile type of the blob
+//!   - `ut_tilesize(blob)`   - returns the size of raster tile or None
+//!   - `xxh3_int(blob|str)`  - returns xxh3 hash as `i64` big-endian view
+//!   - `xxh64_int(blob|str)` - returns xxh64 hash as `i64` big-endian view
 use rusqlite::{Connection, Result};
 use tracing::debug;
 
