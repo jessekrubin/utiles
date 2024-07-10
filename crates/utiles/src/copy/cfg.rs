@@ -29,10 +29,8 @@ impl CopyConfig {
     pub fn src_dbpath_str(&self) -> String {
         self.src.to_string_lossy().to_string()
     }
-    pub fn mbtiles_sql_where(
-        &self,
-        // zoom_levels: Option<Vec<u8>>,
-    ) -> UtilesResult<String> {
+
+    pub fn mbtiles_sql_where(&self) -> UtilesResult<String> {
         let pred = match (&self.bboxes, &self.zooms) {
             (Some(bbox), Some(zooms)) => {
                 // let zooms =  self.zooms.unwrap_or(ZoomSet::all().into());

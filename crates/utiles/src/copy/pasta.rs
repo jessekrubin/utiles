@@ -6,7 +6,7 @@ use crate::mbt::MbtType;
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
 use utiles_core::UtilesCoreError;
 
 #[derive(Debug)]
@@ -149,34 +149,46 @@ impl CopyPasta {
         let insert_strat = self.cfg.istrat.sql_prefix().to_string();
         let hash_type = "md5_hex";
 
-        let n_tiles_inserted = dst_db.conn(
-            move |x| {
+        let n_tiles_inserted = dst_db
+            .conn(move |x| {
                 let insert_statement = &format!(
-                    "{insert_strat} INTO map (zoom_level, tile_column, tile_row, tile_id) SELECT zoom_level, tile_column, tile_row, {hash_type}(tile_data) as tile_id FROM {src_db_name}.tiles {where_clause}"
+                    "
+{insert_strat} INTO map (zoom_level, tile_column, tile_row, tile_id)
+SELECT
+    zoom_level,
+    tile_column,
+    tile_row,
+    {hash_type}(tile_data) AS tile_id
+FROM
+    {src_db_name}.tiles
+{where_clause};
+"
                 );
                 debug!("Executing tiles insert: {:?}", insert_statement);
-                let changes = x.execute(
-                    insert_statement,
-                    [],
-                )?;
+                let changes = x.execute(insert_statement, [])?;
 
                 // now just join and insert the images...
                 let insert_statement = &format!(
                     "
-                    INSERT OR IGNORE INTO images (tile_id, tile_data)
-                    SELECT map.tile_id, tiles.tile_data
-                    FROM map
-                    JOIN {src_db_name}.tiles ON map.zoom_level = {src_db_name}.tiles.zoom_level AND map.tile_column = {src_db_name}.tiles.tile_column AND map.tile_row = {src_db_name}.tiles.tile_row
+INSERT OR IGNORE INTO images (tile_id, tile_data)
+SELECT
+    map.tile_id,
+    tiles.tile_data
+FROM
+    map
+JOIN
+    {src_db_name}.tiles
+ON
+    map.zoom_level = {src_db_name}.tiles.zoom_level
+    AND map.tile_column = {src_db_name}.tiles.tile_column
+    AND map.tile_row = {src_db_name}.tiles.tile_row;
                     "
                 );
                 debug!("Executing images insert: {:?}", insert_statement);
-                let changes2 = x.execute(
-                    insert_statement,
-                    [],
-                )?;
+                let changes2 = x.execute(insert_statement, [])?;
                 Ok(changes + changes2)
-            }
-        ).await?;
+            })
+            .await?;
 
         if n_tiles_inserted == 0 {
             warn!("No tiles inserted!");
@@ -206,17 +218,11 @@ impl CopyPasta {
                 // do the thing
                 debug!("Copying tiles from src to dst: {:?}", self.cfg);
                 self.copy_tiles_zbox_hash(dst_db).await
-                // self.copy_tiles_normal(dst_db, src_db_name, &where_clause, &insert_strat).await
-                // let emsg = format!("Unsupported/unimplemented db-type {:?}", dst_db_type);
-                // Err(UtilesCoreError::Unimplemented(emsg).into())
             }
             MbtType::Norm => {
                 // do the thing
                 debug!("Copying tiles from src to dst: {:?}", self.cfg);
                 self.copy_tiles_zbox_norm(dst_db).await
-                // self.copy_tiles_normal(dst_db, src_db_name, &where_clause, &insert_strat).await
-                // let emsg = format!("Unsupported/unimplemented db-type {:?}", dst_db_type);
-                // Err(UtilesCoreError::Unimplemented(emsg).into())
             }
             _ => {
                 // do the thing
@@ -245,28 +251,35 @@ impl CopyPasta {
         // join on zoom_level, tile_column, tile_row for src and dst and
         // see if there is any overlap
 
+        let where_clause = self.cfg.mbtiles_sql_where()?;
         // TODO: check if minzoom and maxzoom overlap
-        let has_conflict = dst_db.conn(
-            move |c| {
+        let has_conflict = dst_db
+            .conn(move |c| {
                 let src_db_name = "src";
                 let check_statement = &format!(
-                    "SELECT COUNT(*) FROM tiles JOIN {src_db_name}.tiles ON main.tiles.zoom_level = {src_db_name}.tiles.zoom_level AND main.tiles.tile_column = {src_db_name}.tiles.tile_column AND main.tiles.tile_row = {src_db_name}.tiles.tile_row LIMIT 1"
+                    r"
+SELECT COUNT(*)
+FROM (
+    SELECT main.tiles.zoom_level, main.tiles.tile_column, main.tiles.tile_row
+    FROM main.tiles
+    {where_clause}
+) AS filtered_tiles
+JOIN {src_db_name}.tiles ON
+    filtered_tiles.zoom_level = {src_db_name}.tiles.zoom_level
+    AND filtered_tiles.tile_column = {src_db_name}.tiles.tile_column
+    AND filtered_tiles.tile_row = {src_db_name}.tiles.tile_row
+LIMIT 1;
+                "
                 );
-
                 debug!("Executing check_statement: {:?}", check_statement);
-                c.query_row(
-                    check_statement,
-                    [],
-                    |row| {
-                        let r: i64 = row.get(0)?;
+                c.query_row(check_statement, [], |row| {
+                    let r: i64 = row.get(0)?;
 
-                        Ok(r)
-                    },
-                )
-            }
-        ).await.map_err(
-            UtilesError::AsyncSqliteError
-        )?;
+                    Ok(r)
+                })
+            })
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
         Ok(has_conflict > 0)
     }
 
@@ -285,6 +298,7 @@ impl CopyPasta {
         dst_db.attach_db(&src_db_path, src_db_name).await?;
         debug!("OK: Attached src db");
         if !is_new && self.cfg.istrat.requires_check() {
+            info!("No conflict strategy provided; checking for conflict");
             let has_conflict = self.check_conflict(&dst_db).await?;
             if has_conflict {
                 warn!("Conflict detected!");
@@ -292,6 +306,15 @@ impl CopyPasta {
                     "Conflict detected, no on-duplicate condition provided".to_string(),
                 )
                 .into());
+            }
+        } else {
+            if is_new {
+                debug!("dst db is new; not checking for conflict")
+            } else {
+                debug!(
+                    "No check required for conflict strategy: {}",
+                    self.cfg.istrat.to_string()
+                );
             }
         }
 

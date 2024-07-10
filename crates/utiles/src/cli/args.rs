@@ -209,7 +209,9 @@ pub struct TouchArgs {
     pub page_size: Option<i64>,
 
     /// db-type (default: flat)
-    #[arg(required = false, long = "dbtype", aliases = ["db-type", "mbtype", "mbt-type"], default_value = "flat")]
+    #[arg(
+        required = false, long = "dbtype", aliases = ["db-type", "mbtype", "mbt-type"], default_value = "flat"
+    )]
     pub dbtype: Option<DbtypeOption>,
 }
 
@@ -645,6 +647,7 @@ impl ZoomArgGroup {
 #[derive(
     Debug, Copy, Parser, Clone, clap::ValueEnum, strum::EnumString, AsRefStr, Default,
 )]
+#[strum(serialize_all = "kebab-case")]
 pub enum ConflictStrategy {
     #[default]
     Undefined,
@@ -696,8 +699,8 @@ pub struct CopyArgs {
     #[arg(required = false, long, short, default_value = "undefined")]
     pub conflict: ConflictStrategy,
 
-    /// db-type
-    #[arg(required = false, long)]
+    /// db-type (default: src type)
+    #[arg(required = false, long = "dbtype", aliases = ["db-type", "mbtype", "mbt-type"])]
     pub dbtype: Option<DbtypeOption>,
 
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
@@ -749,7 +752,7 @@ impl From<&CopyArgs> for CopyConfig {
             force: false,
             dryrun: false,
             jobs: args.jobs,
-            istrat: args.conflict.into(),
+            istrat: InsertStrategy::from(args.conflict),
             dbtype,
         }
     }

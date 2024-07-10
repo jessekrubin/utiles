@@ -104,17 +104,34 @@ impl TileZBox {
 
     /// Return the SQL `WHERE` clause for an mbtiles database
     #[must_use]
-    pub fn mbtiles_sql_where(&self) -> String {
+    pub fn mbtiles_sql_where_prefix(&self, col_prefix: Option<String>) -> String {
+        let col_prefix = col_prefix.unwrap_or("".to_string());
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
         let miny = crate::fns::flipy(self.min.y, self.zoom);
         let maxy = crate::fns::flipy(self.max.y, self.zoom);
         format!(
-            "(zoom_level = {} AND tile_column >= {} AND tile_column <= {} AND tile_row >= {} AND tile_row <= {})",
+            "(zoom_level = {} AND {}tile_column >= {} AND {}tile_column <= {} AND {}tile_row >= {} AND {}tile_row <= {})",
             self.zoom,
-            self.min.x, self.max.x,
-            maxy, miny
+            col_prefix, self.min.x, col_prefix, self.max.x,
+            col_prefix, maxy, col_prefix, miny
         )
+    }
+
+    /// Return the SQL `WHERE` clause for an mbtiles database
+    #[must_use]
+    pub fn mbtiles_sql_where(&self) -> String {
+        // // classic mbtiles sqlite query:
+        // // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
+        // let miny = crate::fns::flipy(self.min.y, self.zoom);
+        // let maxy = crate::fns::flipy(self.max.y, self.zoom);
+        // format!(
+        //     "(zoom_level = {} AND tile_column >= {} AND tile_column <= {} AND tile_row >= {} AND tile_row <= {})",
+        //     self.zoom,
+        //     self.min.x, self.max.x,
+        //     maxy, miny
+        // )
+        self.mbtiles_sql_where_prefix(None)
     }
 }
 
