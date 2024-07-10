@@ -1,15 +1,17 @@
 use std::path::{Path, PathBuf};
 
-use colored::Colorize;
-use thiserror::Error;
-
 use crate::mbt::metadata2duplicates;
-use crate::sqlite::AsyncSqliteConn;
+use crate::mbt::query::metadata_duplicates_json_query;
+use crate::sqlite::{AsyncSqliteConn, AsyncSqliteConnMut};
 use crate::utilesqlite::mbtiles::{
     has_unique_index_on_metadata, metadata_table_name_is_primary_key,
 };
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::{utilesqlite, UtilesError};
+use colored::Colorize;
+use serde::de::Unexpected::Option;
+use thiserror::Error;
+use tracing::{info, warn};
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 5] =
     ["bounds", "format", "maxzoom", "minzoom", "name"];
@@ -235,6 +237,28 @@ impl MbtilesLinter {
 
     pub async fn lint(&self) -> UtilesLintResult<Vec<UtilesLintError>> {
         let mbt = self.open_mbtiles().await?;
+
+        let r = mbt
+            .conn_mut(|c| {
+                c.trace(Some(|s| {
+                    warn!("stmt: {}", s);
+                }));
+                Ok(())
+            })
+            .await;
+        info!("trace: {:?}", r);
+
+        let prof = mbt
+            .conn_mut(|c| {
+                c.profile(Some(|s, durr| {
+                    info!("SQL (dt: {:?}): {}", durr, s);
+                }));
+                Ok(())
+            })
+            .await;
+        info!("trace: {:?}", r);
+        let query_res = mbt.conn(metadata_duplicates_json_query).await;
+        info!("query_res: {:?}", query_res);
         if !mbt.is_mbtiles().await? {
             let pth = self.path.to_str().unwrap_or("unknown-path");
             return Err(UtilesLintError::NotAMbtilesDb(pth.to_string()));

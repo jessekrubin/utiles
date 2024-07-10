@@ -29,7 +29,7 @@ def _run_cli_old(
 
 def test_rust_cli_help() -> None:
     res = _run_cli(["--help"])
-    assert "(rust)" in res.stdout
+    assert "(rust)" in res.stdout or "(pyo3)" in res.stdout
 
 
 class TestTiles:

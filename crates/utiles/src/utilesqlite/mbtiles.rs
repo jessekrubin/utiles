@@ -42,17 +42,21 @@ impl Sqlike3 for Mbtiles {
     fn conn(&self) -> &Connection {
         &self.conn
     }
+
+    fn conn_mut(&mut self) -> &mut Connection {
+        &mut self.conn
+    }
 }
 
 impl Mbtiles {
     pub fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         // if it is ':memory:' then open_in_memory
         let dbpath = pathlike2dbpath(path)?;
-        let conn_res = Connection::open(&dbpath.fspath);
-        match conn_res {
-            Ok(c) => Ok(Mbtiles { conn: c, dbpath }),
-            Err(e) => Err(UtilesError::RusqliteError(e)),
-        }
+        let conn_res = Connection::open(&dbpath.fspath)?;
+        Ok(Mbtiles {
+            conn: conn_res,
+            dbpath,
+        })
     }
 
     pub fn open_with_flags<P: AsRef<Path>>(
@@ -735,6 +739,7 @@ pub fn init_mbtiles_normalized(conn: &mut Connection) -> RusqliteResult<()> {
 }
 
 pub fn init_mbtiles(conn: &mut Connection, mbt: &MbtType) -> UtilesResult<()> {
+    application_id_set(&conn, MBTILES_MAGIC_NUMBER)?;
     let r: UtilesResult<()> = match mbt {
         MbtType::Flat => init_flat_mbtiles(conn).map_err(|e| e.into()),
         MbtType::Hash => init_mbtiles_hash(conn).map_err(|e| e.into()),
@@ -751,28 +756,9 @@ pub fn create_mbtiles_file<P: AsRef<Path>>(
     fspath: P,
     mbtype: &MbtType,
 ) -> UtilesResult<Connection> {
-    let mut conn = Connection::open(fspath).map_err(|e| {
-        let emsg = format!("Error opening mbtiles file: {e}");
-        UtilesCoreError::Unknown(emsg)
-    })?;
-    application_id_set(&conn, MBTILES_MAGIC_NUMBER)?;
-    match mbtype {
-        MbtType::Flat => {
-            init_flat_mbtiles(&mut conn)?;
-            Ok(conn)
-        }
-        MbtType::Hash => {
-            init_mbtiles_hash(&mut conn)?;
-            Ok(conn)
-        }
-        MbtType::Norm => {
-            init_mbtiles_normalized(&mut conn)?;
-            Ok(conn)
-        }
-        _ => Err(UtilesError::Unimplemented(
-            "create_mbtiles_file: only flat mbtiles is implemented".to_string(),
-        )),
-    }
+    let mut conn = Connection::open(fspath)?;
+    init_mbtiles(&mut conn, mbtype)?;
+    Ok(conn)
 }
 
 pub fn insert_tile_flat_mbtiles<T: TileLike>(

@@ -1,14 +1,15 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use rusqlite::Connection;
+use tracing::debug;
+
 use crate::errors::UtilesResult;
 use crate::sqlite::{
     pragma_database_list, pragma_index_list, PragmaIndexListRow, RusqliteResult,
     Sqlike3,
 };
 use crate::UtilesError;
-use rusqlite::Connection;
-use tracing::debug;
 
 pub struct SqliteDb {
     pub conn: Connection,
@@ -17,6 +18,10 @@ pub struct SqliteDb {
 impl Sqlike3 for SqliteDb {
     fn conn(&self) -> &Connection {
         &self.conn
+    }
+
+    fn conn_mut(&mut self) -> &mut Connection {
+        &mut self.conn
     }
 }
 

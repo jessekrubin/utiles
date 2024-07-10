@@ -13,6 +13,9 @@ const IS_TIPPECANOE_MBTILES_QUERY: &str =
 const IS_PLANETILER_MBTILES_QUERY: &str =
     include_str!("sql/is-planetiler-mbtiles-query.sql");
 
+const METADATA_DUPLICATES_JSON_QUERY: &str =
+    include_str!("sql/mbt-metadata-duplicates-json.sql");
+
 pub fn is_tiles_with_hash(conn: &Connection) -> RusqliteResult<bool> {
     let mut stmt = conn.prepare(IS_HASH_MBTILES_QUERY)?;
     let r = stmt.query_row([], |row| {
@@ -277,4 +280,13 @@ pub fn create_mbtiles_tiles_view_norm(conn: &Connection) -> RusqliteResult<()> {
                 ON images.tile_id = map.tile_id;",
     )?;
     Ok(())
+}
+
+pub fn metadata_duplicates_json_query(conn: &Connection) -> RusqliteResult<String> {
+    let mut stmt = conn.prepare(METADATA_DUPLICATES_JSON_QUERY)?;
+    let r = stmt.query_row([], |row| {
+        let a: String = row.get(0)?;
+        Ok(a)
+    })?;
+    Ok(r)
 }

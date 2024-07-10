@@ -25,6 +25,14 @@ pub trait AsyncSqliteConn: Send + Sync {
 }
 
 #[async_trait]
+pub trait AsyncSqliteConnMut: Send + Sync {
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    where
+        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+        T: Send + 'static;
+}
+
+#[async_trait]
 impl AsyncSqliteConn for SqliteDbAsyncClient {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
@@ -32,6 +40,17 @@ impl AsyncSqliteConn for SqliteDbAsyncClient {
         T: Send + 'static,
     {
         self.client.conn(func).await
+    }
+}
+
+#[async_trait]
+impl AsyncSqliteConnMut for SqliteDbAsyncClient {
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    where
+        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+        T: Send + 'static,
+    {
+        self.client.conn_mut(func).await
     }
 }
 

@@ -4,7 +4,7 @@
 pub use rusqlite::{Connection, Result as RusqliteResult};
 
 pub use affected::{AffectedType, RowsAffected};
-pub use async_sqlite3::{AsyncSqliteConn, SqliteDbAsyncClient};
+pub use async_sqlite3::{AsyncSqliteConn, AsyncSqliteConnMut, SqliteDbAsyncClient};
 pub use attach::{attach_db, detach_db};
 pub use db::*;
 pub use errors::{SqliteError, SqliteResult};
