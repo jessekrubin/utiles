@@ -1,14 +1,15 @@
 #![allow(dead_code)]
 
+use tracing::{debug, info, warn};
+
+use utiles_core::UtilesCoreError;
+
 use crate::copy::CopyConfig;
 use crate::errors::{UtilesCopyError, UtilesResult};
 use crate::mbt::MbtType;
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
-use tracing::field::debug;
-use tracing::{debug, info, warn};
-use utiles_core::UtilesCoreError;
 
 #[derive(Debug)]
 pub struct CopyPasta {
@@ -323,7 +324,7 @@ LIMIT 1;
                 );
             }
         }
-
+        info!("Copying tiles: {:?} -> {:?}", self.cfg.src, self.cfg.dst);
         let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
         debug!("n_tiles_inserted: {:?}", n_tiles_inserted);
 
