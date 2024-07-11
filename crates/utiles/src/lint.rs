@@ -1,20 +1,18 @@
 use std::path::{Path, PathBuf};
 
+use colored::Colorize;
+use thiserror::Error;
+
 use crate::mbt::metadata2duplicates;
-use crate::mbt::query::metadata_duplicates_json_query;
 use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::mbtiles::{
     has_unique_index_on_metadata, metadata_table_name_is_primary_key,
 };
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::{utilesqlite, UtilesError};
-use colored::Colorize;
-use thiserror::Error;
-use tracing::info;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 5] =
     ["bounds", "format", "maxzoom", "minzoom", "name"];
-// pub const RECCOMENDED_METADATA_FIELDS: [&str; 4] = ["center", "description", "version", "attribution", "type"];
 
 #[derive(Error, Debug)]
 pub enum UtilesLintWarning {
@@ -256,8 +254,8 @@ impl MbtilesLinter {
         //     })
         //     .await;
 
-        let query_res = mbt.conn(metadata_duplicates_json_query).await;
-        info!("query_res: {:?}", query_res);
+        // let query_res = mbt.conn(metadata_duplicates_json_query).await;
+        // info!("query_res: {:?}", query_res);
         if !mbt.is_mbtiles_like().await? {
             let pth = self.path.to_str().unwrap_or("unknown-path");
             return Err(UtilesLintError::NotAMbtilesDb(pth.to_string()));
