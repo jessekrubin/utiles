@@ -203,10 +203,7 @@ impl TilesFilterArgs {
 
     #[must_use]
     pub fn bboxes(&self) -> Option<Vec<BBox>> {
-        match &self.bbox {
-            Some(bboxes) => Some(bboxes.clone()),
-            None => None,
-        }
+        self.bbox.clone()
     }
 
     #[must_use]

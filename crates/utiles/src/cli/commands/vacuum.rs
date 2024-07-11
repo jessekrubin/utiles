@@ -3,7 +3,8 @@ use tracing::{debug, error, info, warn};
 
 use crate::cli::args::VacuumArgs;
 use crate::errors::UtilesResult;
-use crate::sqlite::{Sqlike3, SqliteDb};
+use crate::fs_async::filesize_async;
+use crate::sqlite::{Sqlike3Async, SqliteDb, SqliteDbAsyncClient};
 use crate::UtilesError;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -21,17 +22,17 @@ pub struct VacuumInfo {
     pub size_diff: i64,
 }
 
-pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
+pub async fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     // check that the file exists
-    let db = SqliteDb::open_existing(&args.common.filepath)?;
+    let db = SqliteDbAsyncClient::open_existing(&args.common.filepath, None).await?;
     let pre_vac_file_size = std::fs::metadata(&args.common.filepath)?.len();
 
     if args.page_size.is_some() {
-        let current_page_size = db.pragma_page_size()?;
+        let current_page_size = db.pragma_page_size().await?;
         if let Some(page_size) = args.page_size {
             if current_page_size != page_size {
                 debug!("setting page size: {} -> {}", current_page_size, page_size);
-                db.pragma_page_size_set(page_size)?;
+                db.pragma_page_size_set(page_size).await?;
             }
         }
     }
@@ -51,10 +52,10 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
             }
         }
         info!("vacuuming: {} -> {}", args.common.filepath, dst);
-        db.vacuum_into(dst.clone())?;
+        db.vacuum_into(dst.clone()).await?;
     } else {
         info!("vacuuming: {}", args.common.filepath);
-        db.vacuum()?;
+        db.vacuum().await?;
     }
     let vacuum_time_ms = vacuum_start_time.elapsed().as_millis();
 
@@ -63,20 +64,20 @@ pub fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     if args.analyze {
         let analyze_start_time = std::time::Instant::now();
         if let Some(dst) = &args.into {
-            let dst_db = SqliteDb::open_existing(dst)?;
+            let dst_db = SqliteDbAsyncClient::open_existing(dst, None).await?;
             info!("analyzing: {}", dst);
-            dst_db.analyze()?;
+            dst_db.analyze().await?;
         } else {
             info!("analyzing: {}", args.common.filepath);
-            db.analyze()?;
+            db.analyze().await?;
         }
         analyze_time_ms = analyze_start_time.elapsed().as_millis();
     }
 
     // get file size from filepath
     let vacuumed_file_size = match &args.into {
-        Some(dst) => std::fs::metadata(dst)?.len(),
-        None => std::fs::metadata(&args.common.filepath)?.len(),
+        Some(dst) => filesize_async(dst).await.unwrap_or(0),
+        None => filesize_async(&args.common.filepath).await.unwrap_or(0),
     };
     let info = VacuumInfo {
         fspath: args.common.filepath.clone(),

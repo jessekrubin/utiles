@@ -314,15 +314,13 @@ LIMIT 1;
                 )
                 .into());
             }
+        } else if is_new {
+            debug!("dst db is new; not checking for conflict");
         } else {
-            if is_new {
-                debug!("dst db is new; not checking for conflict");
-            } else {
-                debug!(
-                    "No check required for conflict strategy: {}",
-                    self.cfg.istrat.to_string()
-                );
-            }
+            debug!(
+                "No check required for conflict strategy: {}",
+                self.cfg.istrat.to_string()
+            );
         }
         info!("Copying tiles: {:?} -> {:?}", self.cfg.src, self.cfg.dst);
         let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;

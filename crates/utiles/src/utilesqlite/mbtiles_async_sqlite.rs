@@ -19,8 +19,8 @@ use crate::mbt::{MbtMetadataRow, MbtType, MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::{
     journal_mode, magic_number, AsyncSqliteConn, AsyncSqliteConnMut, RowsAffected,
 };
+use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
     add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
     has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,

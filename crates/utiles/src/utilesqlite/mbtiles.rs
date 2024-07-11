@@ -28,9 +28,9 @@ use crate::sqlite::{
     pragma_table_list, query_db_fspath, Sqlike3,
 };
 use crate::sqlite::{application_id_set, InsertStrategy};
+use crate::sqlite::{pathlike2dbpath, DbPath};
 use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
 use crate::UtilesError;
 
 pub struct Mbtiles {

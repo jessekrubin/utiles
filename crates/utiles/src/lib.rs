@@ -21,6 +21,7 @@
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::cast_possible_wrap)]
 pub mod core;
+mod fs_async;
 pub use core::*;
 pub use errors::{UtilesError, UtilesResult};
 pub use tile_strfmt::TileStringFormatter;
