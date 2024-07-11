@@ -31,7 +31,7 @@ impl Debug for SqliteDbAsyncClient {
 impl SqliteDbAsyncClient {
     pub async fn new(client: Client, dbpath: Option<DbPath>) -> SqliteResult<Self> {
         if let Some(dbpath) = dbpath {
-            Ok(Self { client, dbpath })
+            Ok(Self { dbpath, client })
         } else {
             let path = client
                 .conn(|conn| {
@@ -88,8 +88,7 @@ impl SqliteDbAsyncClient {
         if !file_exists(&path).await {
             return Err(SqliteError::FileDoesNotExist(
                 path.as_ref().display().to_string(),
-            )
-            .into());
+            ));
         }
         SqliteDbAsyncClient::open(path, flags).await
     }

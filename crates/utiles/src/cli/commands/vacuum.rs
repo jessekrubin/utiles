@@ -4,7 +4,7 @@ use tracing::{debug, error, info, warn};
 use crate::cli::args::VacuumArgs;
 use crate::errors::UtilesResult;
 use crate::fs_async::filesize_async;
-use crate::sqlite::{Sqlike3Async, SqliteDb, SqliteDbAsyncClient};
+use crate::sqlite::{Sqlike3Async, SqliteDbAsyncClient};
 use crate::UtilesError;
 
 #[derive(Debug, Serialize, Deserialize)]
