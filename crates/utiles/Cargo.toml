@@ -29,7 +29,7 @@ strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
 tilejson.workspace = true
-utiles-core = { path = "../utiles-core", version = "0.6.0" }
+utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
 
 # CLI dependencies
