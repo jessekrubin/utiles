@@ -128,7 +128,7 @@ impl MbtilesLinter {
     }
 
     pub async fn lint(&self) -> UtilesResult<Vec<crate::lint::UtilesLintError>> {
-        if !self.fix {
+        if self.fix {
             warn!("Fix not implemented (yet)");
         }
         let mbt = self.open_mbtiles().await?;
