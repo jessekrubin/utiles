@@ -2,10 +2,13 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
-use utiles_core::zoom::{ZoomOrZooms, ZoomSet};
-use utiles_core::{tile_ranges, BBox};
+use utiles_core::zoom::ZoomSet;
+use utiles_core::BBox;
 
 use crate::errors::{UtilesCopyError, UtilesResult};
+use crate::mbt::hash_types::HashType;
+use crate::mbt::{MbtType, TilesFilter};
+use crate::sqlite::InsertStrategy;
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CopyConfig {
@@ -19,67 +22,71 @@ pub struct CopyConfig {
     pub dryrun: bool,
     pub force: bool,
     pub jobs: Option<u8>,
+    pub istrat: InsertStrategy,
+    pub dbtype: Option<MbtType>,
+    pub hash: Option<HashType>,
 }
 
 impl CopyConfig {
     pub fn src_dbpath_str(&self) -> String {
         self.src.to_string_lossy().to_string()
     }
-    pub fn mbtiles_sql_where(
-        &self,
-        // zoom_levels: Option<Vec<u8>>,
-    ) -> UtilesResult<String> {
-        let pred = match (&self.bboxes, &self.zooms) {
-            (Some(bbox), Some(zooms)) => {
-                // let zooms =  self.zooms.unwrap_or(ZoomSet::all().into());
-                let zboxes = bbox
-                    .iter()
-                    .flat_map(|b| {
-                        tile_ranges(b.tuple(), ZoomOrZooms::Zooms(zooms.clone()))
-                    })
-                    .collect::<Vec<_>>();
-                let pred = zboxes
-                    .iter()
-                    .map(utiles_core::tile_zbox::TileZBoxes::mbtiles_sql_where)
-                    .collect::<Vec<_>>()
-                    .join(" OR ");
-                format!("({pred})")
-            }
-            (Some(bbox), None) => {
-                let zboxes = bbox
-                    .iter()
-                    .flat_map(|b| {
-                        tile_ranges(
-                            b.tuple(),
-                            ZoomOrZooms::Zooms(ZoomSet::all().into()),
-                        )
-                    })
-                    .collect::<Vec<_>>();
-                let pred = zboxes
-                    .iter()
-                    .map(utiles_core::tile_zbox::TileZBoxes::mbtiles_sql_where)
-                    .collect::<Vec<_>>()
-                    .join(" OR ");
-                format!("({pred})")
-            }
-            (None, Some(zooms)) => {
-                format!(
-                    "zoom_level IN ({zooms})",
-                    zooms = zooms
-                        .iter()
-                        .map(std::string::ToString::to_string)
-                        .collect::<Vec<String>>()
-                        .join(",")
-                )
-            }
-            (None, None) => String::new(),
-        };
-        // attach 'WHERE'
-        if pred.is_empty() {
-            Ok(pred)
-        } else {
-            Ok(format!("WHERE {pred}"))
-        }
+
+    pub fn mbtiles_sql_where(&self) -> UtilesResult<String> {
+        let tf = TilesFilter::new(self.bboxes.clone(), self.zooms.clone());
+        tf.mbtiles_sql_where(None)
+        // tiles_where_clause(&self.bboxes, &self.zooms)
+        // let pred = match (&self.bboxes, &self.zooms) {
+        //     (Some(bbox), Some(zooms)) => {
+        //         // let zooms =  self.zooms.unwrap_or(ZoomSet::all().into());
+        //         let zboxes = bbox
+        //             .iter()
+        //             .flat_map(|b| {
+        //                 tile_ranges(b.tuple(), ZoomOrZooms::Zooms(zooms.clone()))
+        //             })
+        //             .collect::<Vec<_>>();
+        //         let pred = zboxes
+        //             .iter()
+        //             .map(utiles_core::tile_zbox::TileZBoxes::mbtiles_sql_where)
+        //             .collect::<Vec<_>>()
+        //             .join(" OR ");
+        //         format!("({pred})")
+        //     }
+        //     (Some(bbox), None) => {
+        //         let zboxes = bbox
+        //             .iter()
+        //             .flat_map(|b| {
+        //                 tile_ranges(
+        //                     b.tuple(),
+        //                     ZoomOrZooms::Zooms(ZoomSet::all().into()),
+        //                 )
+        //             })
+        //             .collect::<Vec<_>>();
+        //         let pred = zboxes
+        //             .iter()
+        //             .map(utiles_core::tile_zbox::TileZBoxes::mbtiles_sql_where)
+        //             .collect::<Vec<_>>()
+        //             .join(" OR ");
+        //         format!("({pred})")
+        //     }
+        //     (None, Some(zooms)) => {
+        //         format!(
+        //             "zoom_level IN ({zooms})",
+        //             zooms = zooms
+        //                 .iter()
+        //                 .map(std::string::ToString::to_string)
+        //                 .collect::<Vec<String>>()
+        //                 .join(",")
+        //         )
+        //     }
+        //     (None, None) => String::new(),
+        // };
+        // // attach 'WHERE'
+        // if pred.is_empty() {
+        //     Ok(pred)
+        // } else {
+        //     Ok(format!("WHERE {pred}"))
+        // }
     }
     pub fn check_src_dst_same(&self) -> UtilesResult<()> {
         if self.src == self.dst {

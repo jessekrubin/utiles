@@ -1,20 +1,19 @@
 [package]
 name = "utiles-core"
 version.workspace = true
-edition.workspace = true
-license.workspace = true
 authors.workspace = true
-description = "Map tile utilities aka utiles"
-readme = "README.md"
 categories = ["science::geo"]
-keywords = ["map", "geo", "mercator", "tile"]
+edition.workspace = true
 homepage = "https://github.com/jessekrubin/utiles"
+keywords = ["map", "geo", "mercator", "tile"]
+license.workspace = true
+readme = "README.md"
 repository = "https://github.com/jessekrubin/utiles"
+description = "Map tile utilities aka utiles"
 
 [dependencies]
-thiserror.workspace = true
-serde.workspace = true
-serde_json.workspace = true
 # Not going to get rid of fast_hilbert
 fast_hilbert.workspace = true
-
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

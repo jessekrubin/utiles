@@ -16,6 +16,7 @@ macro_rules! sqlike3_methods {
     ) => {
         pub trait $trait_name {
             fn conn(&self) -> &rusqlite::Connection;
+            fn conn_mut(&mut self) -> &mut rusqlite::Connection;
 
             $(
                 fn $fn_name(&self, $($arg_name: $arg_type),*) -> $ret_type {

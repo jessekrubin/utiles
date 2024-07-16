@@ -2,7 +2,6 @@
 
 utiles = utils + tiles
 
-
 ## Installation
 
 ```bash
@@ -29,7 +28,7 @@ a less slim crate with a lib/cli (`utiles`), and the python wrapper package.
 
 For more details on the python package see: [./utiles-pyo3](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
 
-### Why? 
+### Why?
 
 I use mercantile regularly and wished it were a bit more ergonomic, had type annotations, and was faster, but overall
 it's a great library.
@@ -47,34 +46,34 @@ Not quite, but it's close. utiles doesn't throw the same exceptions as mercantil
 
 There might be other differences, but I have been using it instead of mercantile for a bit now and it works pretty decent, tho I am open to suggestions!
 
-___
+---
 
 # dev
 
-##  Contributing
+## Contributing
 
- - Please do! Would love some feedback!
- - Be kind!
- - I will happily accept PRs, and add you to the currently (5/26/2023) non-existent contributors list.
+- Please do! Would love some feedback!
+- Be kind!
+- I will happily accept PRs, and add you to the currently (5/26/2023) non-existent contributors list.
 
 ## TODO:
- 
- - [X] benchmark against mercantile
- - **Maybe:**
-   - [X] Split library into `utiles` (rust lib) and `utiles-python` (python/pip package)?
-   - [] Mbtiles support??
-   - [] Reading/writing mvt files?
-   - [] Re-write cli in rust with clap?
 
-___
+- [x] benchmark against mercantile
+- **Maybe:**
+  - [x] Split library into `utiles` (rust lib) and `utiles-python` (python/pip package)?
+  - [] Mbtiles support??
+  - [] Reading/writing mvt files?
+  - [] Re-write cli in rust with clap?
 
-## MISC 
+---
+
+## MISC
 
 <details>
 <summary>zoom info</summary>
 
 | zoom |                    ntiles |                     total |  rowcol_range |    max_rowcol |
-|-----:|--------------------------:|--------------------------:|--------------:|--------------:|
+| ---: | ------------------------: | ------------------------: | ------------: | ------------: |
 |    0 |                         1 |                         1 |             0 |             1 |
 |    1 |                         4 |                         5 |             1 |             2 |
 |    2 |                        16 |                        21 |             3 |             4 |
@@ -109,7 +108,6 @@ ___
 |   31 | 4_611_686_018_427_387_904 | 6_148_914_691_236_517_205 | 2_147_483_647 | 2_147_483_648 |
 
 </details>
-
 
 Zoom levels
 

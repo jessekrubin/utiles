@@ -2,28 +2,29 @@ use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
 
-use async_sqlite::{Client, ClientBuilder, Pool, PoolBuilder};
+use async_sqlite::{
+    Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
+};
 use async_trait::async_trait;
-use rusqlite::{params, Connection, OpenFlags};
+use rusqlite::{Connection, OpenFlags};
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
 
-use utiles_core::{BBox, Tile, TileLike};
+use utiles_core::BBox;
 
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
 use crate::mbt::{MbtMetadataRow, MbtType, MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::{
-    journal_mode, magic_number, AsyncSqliteConn, AsyncSqliteError, RowsAffected,
-    RusqliteResult,
+    journal_mode, magic_number, AsyncSqliteConn, AsyncSqliteConnMut, RowsAffected,
 };
+use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilesqlite::mbtiles::{
-    has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
-    init_flat_mbtiles, mbtiles_metadata, mbtiles_metadata_row, metadata_json,
-    minzoom_maxzoom, query_zxy, register_utiles_sqlite_functions, tiles_is_empty,
+    add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
+    has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
+    metadata_json, minzoom_maxzoom, query_zxy, tiles_is_empty,
 };
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
@@ -62,19 +63,6 @@ impl Debug for MbtilesAsyncSqliteClient {
 }
 
 #[async_trait]
-pub trait AsyncSqlite: Send + Sync {
-    async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
-    where
-        F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
-        T: Send + 'static;
-
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
-    where
-        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
-        T: Send + 'static;
-}
-
-#[async_trait]
 impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
@@ -83,14 +71,14 @@ impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
     {
         self.client.conn(func).await
     }
-
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
-    where
-        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
-        T: Send + 'static,
-    {
-        self.client.conn_mut(func).await
-    }
+    //
+    // async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    // where
+    //     F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+    //     T: Send + 'static,
+    // {
+    //     self.client.conn_mut(func).await
+    // }
 }
 
 #[async_trait]
@@ -103,6 +91,28 @@ impl AsyncSqliteConn for MbtilesAsyncSqlitePool {
         self.pool.conn(func).await
     }
 
+    // async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    // where
+    //     F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+    //     T: Send + 'static,
+    // {
+    //     self.pool.conn_mut(func).await
+    // }
+}
+
+#[async_trait]
+impl AsyncSqliteConnMut for MbtilesAsyncSqliteClient {
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    where
+        F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+        T: Send + 'static,
+    {
+        self.client.conn_mut(func).await
+    }
+}
+
+#[async_trait]
+impl AsyncSqliteConnMut for MbtilesAsyncSqlitePool {
     async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -127,9 +137,6 @@ impl MbtilesAsyncSqliteClient {
         mbtype: Option<MbtType>,
     ) -> UtilesResult<Self> {
         let mbtype = mbtype.unwrap_or(MbtType::Flat);
-        if mbtype != MbtType::Flat {
-            return Err(UtilesError::Unimplemented(mbtype.to_string()));
-        }
         // make sure the path don't exist
         let dbpath = pathlike2dbpath(path)?;
         if dbpath.fspath_exists() {
@@ -146,7 +153,17 @@ impl MbtilesAsyncSqliteClient {
                 )
                 .open()
                 .await?;
-            client.conn_mut(init_flat_mbtiles).await?;
+
+            debug!("db-type is: {:?}", mbtype);
+
+            client
+                .conn_mut(move |conn| {
+                    init_mbtiles(conn, &mbtype)
+                        // TODO: fix this and don't ignore the error...
+                        .map_err(|_e| rusqlite::Error::InvalidQuery)?;
+                    Ok(())
+                })
+                .await?;
 
             MbtilesAsyncSqliteClient::new(dbpath, client).await
         }
@@ -283,12 +300,11 @@ where
     }
 
     async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()> {
-        let r = self.conn(register_utiles_sqlite_functions).await?;
+        let r = self.conn(add_functions).await?;
         Ok(r)
     }
 
-    #[tracing::instrument]
-    async fn is_mbtiles(&self) -> UtilesResult<bool> {
+    async fn is_mbtiles_like(&self) -> UtilesResult<bool> {
         let has_metadata_table_or_view = self.conn(has_metadata_table_or_view).await?;
         debug!("has-metadata-table-or-view: {}", has_metadata_table_or_view);
         let has_tiles_table_or_view = self.conn(has_tiles_table_or_view).await?;
@@ -297,28 +313,30 @@ where
             debug!("Not a mbtiles file: {}", self.filepath());
             return Ok(false);
         }
+        Ok(true)
+    }
+
+    async fn is_mbtiles(&self) -> UtilesResult<bool> {
+        let is_mbtiles_like = self.is_mbtiles_like().await?;
+        if !is_mbtiles_like {
+            return Ok(false);
+        }
         // assert tiles is not empty
         let tiles_is_empty = self
             .conn(tiles_is_empty)
             .await
-            .map_err(UtilesError::AsyncSqliteError);
-        if let Ok(true) = tiles_is_empty {
-            debug!("Empty tiles table: {}", self.filepath());
-            return Ok(false);
+            .map_err(UtilesError::AsyncSqliteError)?;
+        if tiles_is_empty {
+            Ok(false)
+        } else {
+            let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
+            debug!(
+                target: "is-mbtiles",
+                "has_zoom_row_col_index: {}",
+                has_zoom_row_col_index,
+            );
+            Ok(has_zoom_row_col_index)
         }
-        if let Err(e) = tiles_is_empty {
-            error!("Error checking if tiles table is empty: {}", e);
-            return Err(e);
-        }
-
-        let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
-
-        debug!(
-            target: "is-mbtiles",
-            "has_zoom_row_col_index: {}",
-            has_zoom_row_col_index,
-        );
-        Ok(has_zoom_row_col_index)
     }
 
     async fn assert_mbtiles(&self) -> UtilesResult<()> {
@@ -537,20 +555,6 @@ where
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>> {
         let r = self.conn(zxyify).await?;
         Ok(r)
-    }
-
-    async fn put_tile(&self, tile: Tile, data: Vec<u8>) -> UtilesResult<RowsAffected> {
-        let r = self
-            .conn(move |conn| -> RusqliteResult<usize> {
-                let mut stmt = conn.prepare("INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)")?;
-                let r = stmt.execute(
-                    params![tile.z(), tile.x(), tile.y(), data]
-                )?;
-                Ok(r)
-            })
-            .await?;
-        let ra = RowsAffected::insert(r, Some(String::from("tiles")));
-        Ok(ra)
     }
 }
 

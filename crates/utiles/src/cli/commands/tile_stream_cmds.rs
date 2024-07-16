@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use tracing::error;
 
 use utiles_core::{bounding_tile, Tile, TileLike};

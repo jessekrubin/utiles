@@ -18,6 +18,7 @@ impl std::fmt::Display for DbPath {
 }
 
 impl DbPath {
+    #[must_use]
     pub fn new(fspath: &str) -> Self {
         let p = PathBuf::from(fspath);
         let filename = p
@@ -33,6 +34,7 @@ impl DbPath {
                 .to_string(),
         }
     }
+    #[must_use]
     pub fn memory() -> Self {
         DbPath {
             fspath: ":memory:".to_string(),
@@ -40,6 +42,7 @@ impl DbPath {
         }
     }
 
+    #[must_use]
     pub fn fspath_exists(&self) -> bool {
         PathBuf::from(&self.fspath).exists()
     }

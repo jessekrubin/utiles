@@ -13,6 +13,7 @@ pub trait MbtilesAsync: Sized {
     fn filename(&self) -> &str;
 
     async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()>;
+    async fn is_mbtiles_like(&self) -> UtilesResult<bool>;
     async fn is_mbtiles(&self) -> UtilesResult<bool>;
     async fn assert_mbtiles(&self) -> UtilesResult<()>;
     async fn magic_number(&self) -> UtilesResult<u32>;
@@ -48,6 +49,4 @@ pub trait MbtilesAsync: Sized {
     // async fn detach(&self, dbname: &str) -> UtilesResult<usize>;
 
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>>;
-
-    async fn put_tile(&self, tile: Tile, data: Vec<u8>) -> UtilesResult<RowsAffected>;
 }

@@ -8,6 +8,9 @@ pub enum UtilesCopyError {
 
     #[error("src does not exist: {0}")]
     SrcNotExists(String),
+
+    #[error("Conflict: {0}")]
+    Conflict(String),
 }
 
 #[derive(Error, Debug)]
@@ -21,6 +24,9 @@ pub enum UtilesError {
     #[error("No fspath extension: {0}")]
     NoFspathExtension(String),
 
+    #[error("No fspath stem: {0}")]
+    NoFspathStem(String),
+
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 
@@ -29,6 +35,9 @@ pub enum UtilesError {
 
     #[error("Not a file: {0}")]
     NotAFile(String),
+
+    #[error("Non mbtiles sqlite db: {0}")]
+    NonMbtilesSqliteDb(String),
 
     #[error("parse int error: {0}")]
     ParseIntError(#[from] std::num::ParseIntError),

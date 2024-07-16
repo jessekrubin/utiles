@@ -1,4 +1,8 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+use serde::Serialize;
+
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, strum_macros::Display,
+)]
 pub enum InsertStrategy {
     #[default]
     None,
@@ -20,5 +24,10 @@ impl InsertStrategy {
             InsertStrategy::Abort => "INSERT OR ABORT",
             InsertStrategy::Fail => "INSERT OR FAIL",
         }
+    }
+
+    #[must_use]
+    pub fn requires_check(&self) -> bool {
+        !matches!(self, InsertStrategy::Replace | InsertStrategy::Ignore)
     }
 }

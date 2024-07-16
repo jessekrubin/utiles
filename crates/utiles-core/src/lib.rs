@@ -64,7 +64,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Tile macro to create a new tile.
 ///  - do you need this? probably not
-///  - Did I write to to figure out how to write a macro? yes
+///  - Did I write to figure out how to write a macro? yes
 #[macro_export]
 macro_rules! utile {
     ($x:expr, $y:expr, $z:expr) => {

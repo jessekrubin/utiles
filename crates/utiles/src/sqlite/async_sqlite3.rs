@@ -1,28 +1,108 @@
-use std::fmt::Debug;
-
-use async_sqlite::{Client, Error as AsyncSqliteError};
-use async_trait::async_trait;
-use rusqlite::Connection;
-
+use crate::fs_async::file_exists;
 use crate::sqlite::sqlike3::Sqlike3Async;
 use crate::sqlite::{
     analyze, attach_db, detach_db, is_empty_db, pragma_freelist_count,
     pragma_index_list, pragma_page_count, pragma_page_size, pragma_page_size_set,
-    pragma_table_list, vacuum, vacuum_into, PragmaIndexListRow, PragmaTableListRow,
-    SqliteResult,
+    pragma_table_list, vacuum, vacuum_into, DbPath, PragmaIndexListRow,
+    PragmaTableListRow, SqliteError, SqliteResult,
 };
+use async_sqlite::{Client, ClientBuilder, Error as AsyncSqliteError};
+use async_trait::async_trait;
+use rusqlite::{Connection, OpenFlags};
+use std::fmt;
+use std::fmt::Debug;
+use std::path::Path;
+use tracing::debug;
 
 pub struct SqliteDbAsyncClient {
+    pub dbpath: DbPath,
     pub client: Client,
 }
+#[allow(clippy::missing_fields_in_debug)]
+impl Debug for SqliteDbAsyncClient {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        //     use the dbpath to debug
+        f.debug_struct("SqliteDbAsyncClient")
+            .field("fspath", &self.dbpath.fspath)
+            .finish()
+    }
+}
 
+impl SqliteDbAsyncClient {
+    pub async fn new(client: Client, dbpath: Option<DbPath>) -> SqliteResult<Self> {
+        if let Some(dbpath) = dbpath {
+            Ok(Self { dbpath, client })
+        } else {
+            let path = client
+                .conn(|conn| {
+                    let maybe_path = conn.path();
+
+                    let path = maybe_path.unwrap_or("unknown").to_string();
+                    Ok(path)
+                })
+                .await?;
+            Ok(Self {
+                client,
+                dbpath: DbPath::new(&path),
+            })
+        }
+    }
+
+    pub async fn open<P: AsRef<Path>>(
+        path: P,
+        open_flags: Option<OpenFlags>,
+    ) -> SqliteResult<Self> {
+        debug!("Opening sqlite db with client: {}", path.as_ref().display());
+        let client = ClientBuilder::new()
+            .path(&path)
+            .flags(open_flags.unwrap_or_default())
+            .open()
+            .await?;
+        Ok({
+            Self {
+                dbpath: DbPath::new(path.as_ref().to_str().unwrap_or_default()),
+                client,
+            }
+        })
+    }
+
+    pub async fn open_readonly<P: AsRef<Path>>(path: P) -> SqliteResult<Self> {
+        let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
+            | OpenFlags::SQLITE_OPEN_NO_MUTEX
+            | OpenFlags::SQLITE_OPEN_URI;
+        debug!(
+            "Opening sqlite db readonly with client: {}",
+            path.as_ref().display()
+        );
+        SqliteDbAsyncClient::open(path, Some(flags)).await
+    }
+
+    pub async fn open_existing<P: AsRef<Path>>(
+        path: P,
+        flags: Option<OpenFlags>,
+    ) -> SqliteResult<Self> {
+        debug!(
+            "Opening sqlite db existing with client: {}",
+            path.as_ref().display()
+        );
+        if !file_exists(&path).await {
+            return Err(SqliteError::FileDoesNotExist(
+                path.as_ref().display().to_string(),
+            ));
+        }
+        SqliteDbAsyncClient::open(path, flags).await
+    }
+}
 #[async_trait]
 pub trait AsyncSqliteConn: Send + Sync {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static;
+}
 
+#[async_trait]
+pub trait AsyncSqliteConnMut: Send + Sync {
     async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -38,7 +118,10 @@ impl AsyncSqliteConn for SqliteDbAsyncClient {
     {
         self.client.conn(func).await
     }
+}
 
+#[async_trait]
+impl AsyncSqliteConnMut for SqliteDbAsyncClient {
     async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,

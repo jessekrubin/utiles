@@ -1,32 +1,36 @@
-use async_sqlite::ClientBuilder;
-use rusqlite::{params, Connection, OpenFlags, OptionalExtension};
 use std::collections::HashSet;
 use std::error::Error;
 use std::path::Path;
+
+use rusqlite::{params, Connection, OptionalExtension};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
 use utiles_core::bbox::BBox;
+use utiles_core::constants::MBTILES_MAGIC_NUMBER;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::{yflip, LngLat, Tile, TileLike, UtilesCoreError};
+use utiles_core::{yflip, LngLat, Tile, TileLike};
 
 use crate::errors::UtilesResult;
-use crate::mbt::query::query_mbtiles_type;
+use crate::mbt::query::{
+    create_mbtiles_indexes_norm, create_mbtiles_tables_norm,
+    create_mbtiles_tiles_view_norm, create_metadata_table_pk, create_tiles_index_hash,
+    create_tiles_table_flat, create_tiles_table_hash, create_tiles_view_hash,
+    query_mbtiles_type,
+};
 use crate::mbt::{
     MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats, MbtilesZoomStats,
     MinZoomMaxZoom,
 };
-use crate::sqlite::InsertStrategy;
 use crate::sqlite::RusqliteResult;
 use crate::sqlite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
     pragma_table_list, query_db_fspath, Sqlike3,
 };
+use crate::sqlite::{application_id_set, InsertStrategy};
+use crate::sqlite::{pathlike2dbpath, DbPath};
 use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::dbpath::{pathlike2dbpath, DbPath};
-use crate::utilesqlite::sql_schemas::MBTILES_FLAT_SQLITE_SCHEMA;
-use crate::utilesqlite::MbtilesAsyncSqliteClient;
 use crate::UtilesError;
 
 pub struct Mbtiles {
@@ -38,17 +42,21 @@ impl Sqlike3 for Mbtiles {
     fn conn(&self) -> &Connection {
         &self.conn
     }
+
+    fn conn_mut(&mut self) -> &mut Connection {
+        &mut self.conn
+    }
 }
 
 impl Mbtiles {
     pub fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         // if it is ':memory:' then open_in_memory
         let dbpath = pathlike2dbpath(path)?;
-        let conn_res = Connection::open(&dbpath.fspath);
-        match conn_res {
-            Ok(c) => Ok(Mbtiles { conn: c, dbpath }),
-            Err(e) => Err(UtilesError::RusqliteError(e)),
-        }
+        let conn_res = Connection::open(&dbpath.fspath)?;
+        Ok(Mbtiles {
+            conn: conn_res,
+            dbpath,
+        })
     }
 
     pub fn open_with_flags<P: AsRef<Path>>(
@@ -729,83 +737,53 @@ pub fn tiles_count_at_zoom(connection: &Connection, zoom: u8) -> RusqliteResult<
 }
 
 pub fn init_mbtiles_hash(conn: &mut Connection) -> RusqliteResult<()> {
-    let script = "
-        -- metadata table
-        CREATE TABLE metadata
-        (
-            name  TEXT NOT NULL PRIMARY KEY,
-            value TEXT
-        );
-        -- unique index on name
-        CREATE UNIQUE INDEX metadata_name_index ON metadata (name);
-        -- tiles table
-        CREATE TABLE tiles
-        (
-            zoom_level  INTEGER NOT NULL,
-            tile_column INTEGER NOT NULL,
-            tile_row    INTEGER NOT NULL,
-            tile_data   BLOB
-        );
-        -- unique index on zoom_level, tile_column, tile_row
-        CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);
-    ";
-    let tx = conn.transaction();
-    match tx {
-        Ok(tx) => {
-            let script_res = tx.execute_batch(script);
-            debug!("init_flat_mbtiles: script_res: {:?}", script_res);
-            let r = tx.commit();
-            debug!("init_flat_mbtiles: r: {:?}", r);
-            Ok(())
-        }
-        Err(e) => {
-            error!("Error creating transaction: {}", e);
-            Err(e)
-        }
-    }
+    let tx = conn.transaction()?;
+    create_metadata_table_pk(&tx)?;
+    create_tiles_table_hash(&tx, false)?;
+    create_tiles_index_hash(&tx)?;
+    create_tiles_view_hash(&tx)?;
+    tx.commit()
 }
 
 pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
-    let tx = conn.transaction();
-    match tx {
-        Ok(tx) => {
-            let script_res = tx.execute_batch(MBTILES_FLAT_SQLITE_SCHEMA);
-            debug!("init_flat_mbtiles: script_res: {:?}", script_res);
-            let r = tx.commit();
-            debug!("init_flat_mbtiles: r: {:?}", r);
-            Ok(())
+    let tx = conn.transaction()?;
+    debug!("creating metadata table");
+    create_metadata_table_pk(&tx)?;
+    debug!("creating tiles table");
+    create_tiles_table_flat(&tx, false)?;
+    tx.commit()
+}
+
+pub fn init_mbtiles_normalized(conn: &mut Connection) -> RusqliteResult<()> {
+    let tx = conn.transaction()?;
+    create_metadata_table_pk(&tx)?;
+    create_mbtiles_tables_norm(&tx)?;
+    create_mbtiles_indexes_norm(&tx)?;
+    create_mbtiles_tiles_view_norm(&tx)?;
+    tx.commit()
+}
+
+pub fn init_mbtiles(conn: &mut Connection, mbt: &MbtType) -> UtilesResult<()> {
+    application_id_set(conn, MBTILES_MAGIC_NUMBER)?;
+    let r: UtilesResult<()> = match mbt {
+        MbtType::Flat => init_flat_mbtiles(conn).map_err(|e| e.into()),
+        MbtType::Hash => init_mbtiles_hash(conn).map_err(|e| e.into()),
+        MbtType::Norm => init_mbtiles_normalized(conn).map_err(|e| e.into()),
+        _ => {
+            let emsg = format!("init_mbtiles: {mbt} not implemented");
+            Err(UtilesError::Unimplemented(emsg))
         }
-        Err(e) => {
-            error!("Error creating transaction: {}", e);
-            Err(e)
-        }
-    }
+    };
+    r
 }
 
 pub fn create_mbtiles_file<P: AsRef<Path>>(
     fspath: P,
     mbtype: &MbtType,
 ) -> UtilesResult<Connection> {
-    let mut conn = Connection::open(fspath).map_err(|e| {
-        let emsg = format!("Error opening mbtiles file: {e}");
-        UtilesCoreError::Unknown(emsg)
-    })?;
-    match mbtype {
-        MbtType::Flat => {
-            let r = init_flat_mbtiles(&mut conn);
-            match r {
-                Ok(()) => Ok(conn),
-                Err(e) => {
-                    error!("Error creating flat mbtiles file: {}", e);
-                    let emsg = format!("Error creating flat mbtiles file: {e}");
-                    Err(UtilesError::Unknown(emsg))
-                }
-            }
-        }
-        _ => Err(UtilesError::Unimplemented(
-            "create_mbtiles_file: only flat mbtiles is implemented".to_string(),
-        )),
-    }
+    let mut conn = Connection::open(fspath)?;
+    init_mbtiles(&mut conn, mbtype)?;
+    Ok(conn)
 }
 
 pub fn insert_tile_flat_mbtiles<T: TileLike>(

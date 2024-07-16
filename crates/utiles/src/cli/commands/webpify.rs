@@ -10,7 +10,7 @@ use utiles_core::{utile, utile_yup};
 
 use crate::cli::args::WebpifyArgs;
 use crate::sqlite::{AsyncSqliteConn, AsyncSqliteResult, RusqliteResult};
-use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
+use crate::utilesqlite::mbtiles_async_sqlite;
 use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesResult;
 

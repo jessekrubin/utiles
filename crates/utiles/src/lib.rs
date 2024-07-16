@@ -21,18 +21,20 @@
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::cast_possible_wrap)]
 pub mod core;
+mod fs_async;
 pub use core::*;
 pub use errors::{UtilesError, UtilesResult};
 pub use tile_strfmt::TileStringFormatter;
 
 pub mod cli;
+mod config;
 mod copy;
 pub mod dev;
 pub(crate) mod errors;
 pub mod gj;
 mod globster;
 mod lager;
-pub mod lint;
+mod lint;
 pub mod mbt;
 mod pmt;
 pub mod server;

@@ -1,11 +1,16 @@
 use crate::UtilesError;
+use clap::ValueEnum;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
+#[serde(rename_all = "kebab-case")]
+#[derive(Default)]
 pub enum HashType {
     Md5,
     Fnv1a,
     Xxh32,
+    #[default]
     Xxh64,
     Xxh3_64,
     Xxh3_128,
