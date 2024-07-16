@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use std::io;
 use std::io::Write;
 

@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
 use tracing::{debug, error};

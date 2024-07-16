@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use utiles_core::{Tile, TileLike};
 
 use crate::cli::args::ParentChildrenArgs;

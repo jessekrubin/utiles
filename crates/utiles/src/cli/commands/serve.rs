@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use crate::errors::UtilesResult;
 use clap::Parser;
 use tracing::{debug, warn};

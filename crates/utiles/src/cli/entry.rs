@@ -104,7 +104,7 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
     let res: UtilesResult<()> = match args.command {
         Commands::About => about_main(),
         Commands::Lint(args) => lint_main(&args).await,
-        Commands::Touch(args) => touch_main(&args),
+        Commands::Touch(args) => touch_main(&args).await,
         Commands::Vacuum(args) => vacuum_main(&args).await,
         Commands::Metadata(args) => metadata_main(&args).await,
         Commands::MetadataSet(args) => metadata_set_main(&args).await,

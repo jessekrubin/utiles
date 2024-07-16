@@ -1,4 +1,4 @@
-#![allow(clippy::unwrap_used)]
+// #![allow(clippy::unwrap_used)]
 pub use about::about_main;
 pub use agg_hash::agg_hash_main;
 pub use children_parent::{children_main, parent_main};
