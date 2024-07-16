@@ -27,6 +27,7 @@ pub use errors::{UtilesError, UtilesResult};
 pub use tile_strfmt::TileStringFormatter;
 
 pub mod cli;
+mod config;
 mod copy;
 pub mod dev;
 pub(crate) mod errors;

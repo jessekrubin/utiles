@@ -33,6 +33,9 @@ pub enum UtilesError {
     #[error("Not a file: {0}")]
     NotAFile(String),
 
+    #[error("Non mbtiles sqlite db: {0}")]
+    NonMbtilesSqliteDb(String),
+
     #[error("parse int error: {0}")]
     ParseIntError(#[from] std::num::ParseIntError),
 
