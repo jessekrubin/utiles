@@ -2,7 +2,7 @@ pyut := "utiles-pyo3"
 pyut_manifest := pyut / "Cargo.toml"
 pyut_pyproject_toml := pyut / "pyproject.toml"
 
-dev: develop test
+dev: fmt develop pytest cargo-test
 
 develop:
     cd {{pyut}}
@@ -23,7 +23,7 @@ dev-rel:
     cd {{pyut}}
     maturin develop --release -m {{pyut_manifest}}
 
-test:
+pytest:
     cd {{pyut}}
     pytest --benchmark-disable --config-file={{pyut_pyproject_toml}} {{pyut}}
 

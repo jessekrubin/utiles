@@ -4,9 +4,10 @@ use tilejson::TileJSON;
 use utiles_core::{BBox, Tile, TileLike};
 
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MbtType};
+use crate::mbt::{MbtMetadataRow, MbtType, MbtilesStats};
 use crate::mbt::{MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::RowsAffected;
+
 #[async_trait]
 pub trait MbtilesAsync: Sized {
     fn filepath(&self) -> &str;
@@ -49,4 +50,6 @@ pub trait MbtilesAsync: Sized {
     // async fn detach(&self, dbname: &str) -> UtilesResult<usize>;
 
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>>;
+
+    async fn mbt_stats(&self, full: Option<bool>) -> UtilesResult<MbtilesStats>;
 }

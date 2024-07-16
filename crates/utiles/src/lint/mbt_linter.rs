@@ -1,3 +1,4 @@
+use crate::lint::UtilesLintError;
 use crate::mbt::metadata2duplicates;
 use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::mbtiles::{
@@ -54,7 +55,7 @@ impl MbtilesLinter {
     }
     pub async fn check_metadata_rows(
         mbt: &MbtilesAsyncSqliteClient,
-    ) -> UtilesResult<Option<crate::lint::UtilesLintError>> {
+    ) -> UtilesResult<Vec<UtilesLintError>> {
         let metadata_rows = mbt.metadata_rows().await?;
         let metadata_keys = metadata_rows
             .iter()
@@ -65,22 +66,16 @@ impl MbtilesLinter {
             .filter(|k| !metadata_keys.contains(&(**k).to_string()))
             .map(|k| (*k).to_string())
             .collect::<Vec<String>>();
-        if missing_metadata_keys.is_empty() {
-            Ok(Some(crate::lint::UtilesLintError::MbtMissingMetadataKv(
-                "metadata".to_string(),
-            )))
-        } else {
-            let errs = missing_metadata_keys
-                .iter()
-                .map(|k| crate::lint::UtilesLintError::MbtMissingMetadataKv(k.clone()))
-                .collect::<Vec<crate::lint::UtilesLintError>>();
-            Ok(Some(crate::lint::UtilesLintError::LintErrors(errs)))
-        }
+        let errs = missing_metadata_keys
+            .iter()
+            .map(|k| crate::lint::UtilesLintError::MbtMissingMetadataKv(k.clone()))
+            .collect::<Vec<crate::lint::UtilesLintError>>();
+        Ok(errs)
     }
 
     pub async fn check_metadata(
         mbt: &MbtilesAsyncSqliteClient,
-    ) -> UtilesResult<Vec<crate::lint::UtilesLintError>> {
+    ) -> UtilesResult<Vec<UtilesLintError>> {
         // that metadata table exists
         let has_unique_index_on_metadata_name = mbt
             .conn(has_unique_index_on_metadata)
@@ -99,31 +94,18 @@ impl MbtilesLinter {
                 errs.extend(
                     duplicate_rows
                         .keys()
-                        .map(|k| {
-                            crate::lint::UtilesLintError::DuplicateMetadataKey(
-                                k.clone(),
-                            )
-                        })
-                        .collect::<Vec<crate::lint::UtilesLintError>>(),
+                        .map(|k| UtilesLintError::DuplicateMetadataKey(k.clone()))
+                        .collect::<Vec<UtilesLintError>>(),
                 );
             }
         } else {
-            errs.push(crate::lint::UtilesLintError::MissingUniqueIndex(
+            errs.push(UtilesLintError::MissingUniqueIndex(
                 "metadata.name".to_string(),
             ));
         }
 
-        // let rows_errs = MbtilesLinter::check_metadata_rows(mbt).await?;
-        if let Some(e) = MbtilesLinter::check_metadata_rows(mbt).await? {
-            match e {
-                crate::lint::UtilesLintError::LintErrors(es) => {
-                    errs.extend(es);
-                }
-                _ => {
-                    errs.push(e);
-                }
-            }
-        }
+        let rows_errors = MbtilesLinter::check_metadata_rows(mbt).await?;
+        errs.extend(rows_errors);
         Ok(errs)
     }
 
