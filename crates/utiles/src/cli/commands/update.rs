@@ -7,7 +7,6 @@ use crate::cli::commands::metadata::MetadataChangeFromTo;
 use crate::errors::UtilesResult;
 use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::mbtiles::query_distinct_tiletype_fast;
-// use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
 
