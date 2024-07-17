@@ -15,6 +15,6 @@ pub async fn lint_main(args: &LintArgs) -> UtilesResult<()> {
         warn!("No files found");
         return Ok(());
     }
-    lint_filepaths(filepaths, args.fix).await;
+    lint_filepaths(filepaths, args.fix).await?;
     Ok(())
 }

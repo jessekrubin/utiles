@@ -1,18 +1,22 @@
 use std::path::PathBuf;
+use std::time::Duration;
 
 use colored::Colorize;
-use futures::{stream, StreamExt};
+use futures::{stream, Stream, StreamExt};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::{debug, warn};
 
 use mbt_linter::MbtilesLinter;
+
+use crate::UtilesResult;
 
 mod mbt_linter;
 
 pub const REQUIRED_METADATA_FIELDS: [&str; 5] =
     ["bounds", "format", "maxzoom", "minzoom", "name"];
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone, Deserialize, Serialize)]
 pub enum UtilesLintError {
     #[error("not a sqlite database error: {0}")]
     NotASqliteDb(String),
@@ -59,36 +63,78 @@ impl UtilesLintError {
 }
 pub type UtilesLintResult<T> = Result<T, UtilesLintError>;
 
-pub async fn lint_filepaths(fspaths: Vec<PathBuf>, fix: bool) {
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct FileLintResults {
+    fspath: String,
+    errors: Option<Vec<UtilesLintError>>,
+    dt: Duration,
+}
+pub async fn lint_filepaths_stream(
+    fspaths: &Vec<PathBuf>,
+    fix: bool,
+) -> impl Stream<Item=FileLintResults> + '_ {
     stream::iter(fspaths)
-        .for_each_concurrent(4, |path| async move {
+        .map(move |path| {
             let linter = MbtilesLinter::new(&path, fix);
-            let lint_results = linter.lint().await;
-            match lint_results {
-                Ok(r) => {
-                    debug!("r: {:?}", r);
-                    // print each err....
-                    if r.is_empty() {
-                        debug!("OK: {}", path.display());
-                    } else {
-                        debug!("{} - {} errors found", path.display(), r.len());
-                        // let agg_err = UtilesLintError::LintErrors(r);
-                        let strings = r
-                            .iter()
-                            .map(|e| e.format_error(&path.display().to_string()))
-                            .collect::<Vec<String>>();
-                        let joined = strings.join("\n");
-                        println!("{joined}");
-                        for err in r {
-                            debug!("{}", err.to_string());
+            async move {
+                debug!("linting: {}", path.display());
+                let start_time = std::time::Instant::now();
+
+                let lint_results = linter.lint().await;
+                let elapsed = start_time.elapsed();
+                let file_results = match lint_results {
+                    Ok(r) => FileLintResults {
+                        fspath: path.display().to_string(),
+                        errors: Some(r),
+                        dt: elapsed,
+                    },
+                    Err(e) => {
+                        warn!("lint error: {}", e);
+                        FileLintResults {
+                            fspath: path.display().to_string(),
+                            errors: None,
+                            dt: elapsed,
                         }
                     }
-                }
-                Err(e) => {
-                    let e_msg = format!("{}: {}", path.display(), e);
-                    warn!("{}", e_msg);
-                }
+                };
+                file_results
             }
         })
-        .await;
+        .buffer_unordered(12)
+}
+pub async fn lint_filepaths(
+    fspaths: Vec<PathBuf>,
+    fix: bool,
+) -> UtilesResult<Vec<FileLintResults>> {
+    let mut results = lint_filepaths_stream(&fspaths, fix).await;
+    let all_lints = Vec::new();
+    // let mut errors = Vec::new();
+    while let Some(file_res) = results.next().await {
+        // let json_string = serde_json::to_string(&file_res).unwrap();
+        // println!("{json_string}");
+        match file_res.errors {
+            Some(r) => {
+                debug!("r: {:?}", r);
+                if r.is_empty() {
+                    debug!("OK: {}", file_res.fspath);
+                } else {
+                    debug!("{} - {} errors found", file_res.fspath, r.len());
+                    let strings = r
+                        .iter()
+                        .map(|e| e.format_error(&file_res.fspath.to_string()))
+                        .collect::<Vec<String>>();
+                    let joined = strings.join("\n");
+                    println!("{joined}");
+
+                    for err in &r {
+                        debug!("{}", err.to_string());
+                    }
+                }
+            }
+            None => {
+                debug!("OK: {}", file_res.fspath);
+            }
+        }
+    }
+    Ok(all_lints)
 }
