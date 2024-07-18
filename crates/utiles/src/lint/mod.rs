@@ -72,7 +72,7 @@ pub struct FileLintResults {
 pub async fn lint_filepaths_stream(
     fspaths: &Vec<PathBuf>,
     fix: bool,
-) -> impl Stream<Item=FileLintResults> + '_ {
+) -> impl Stream<Item = FileLintResults> + '_ {
     stream::iter(fspaths)
         .map(move |path| {
             let linter = MbtilesLinter::new(&path, fix);
