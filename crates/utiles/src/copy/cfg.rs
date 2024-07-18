@@ -2,13 +2,14 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
-use utiles_core::zoom::ZoomSet;
-use utiles_core::BBox;
-
-use crate::errors::{UtilesCopyError, UtilesResult};
+use crate::cli::args::CopyArgs;
+use crate::errors::UtilesCopyError;
+use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
+use utiles_core::zoom::ZoomSet;
+use utiles_core::BBox;
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CopyConfig {
@@ -27,6 +28,27 @@ pub struct CopyConfig {
     pub hash: Option<HashType>,
 }
 
+impl From<&CopyArgs> for CopyConfig {
+    fn from(args: &CopyArgs) -> CopyConfig {
+        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
+        CopyConfig {
+            src: PathBuf::from(&args.src),
+            dst: PathBuf::from(&args.dst),
+            zset: args.zoom_set(),
+            zooms: args.zooms(),
+            verbose: true,
+            bboxes: args.bboxes(),
+            bounds_string: args.bounds(),
+            force: false,
+            dryrun: false,
+            jobs: args.jobs,
+            istrat: InsertStrategy::from(args.conflict),
+            hash: args.hash,
+            dbtype,
+        }
+    }
+}
+
 impl CopyConfig {
     pub fn src_dbpath_str(&self) -> String {
         self.src.to_string_lossy().to_string()
@@ -35,59 +57,8 @@ impl CopyConfig {
     pub fn mbtiles_sql_where(&self) -> UtilesResult<String> {
         let tf = TilesFilter::new(self.bboxes.clone(), self.zooms.clone());
         tf.mbtiles_sql_where(None)
-        // tiles_where_clause(&self.bboxes, &self.zooms)
-        // let pred = match (&self.bboxes, &self.zooms) {
-        //     (Some(bbox), Some(zooms)) => {
-        //         // let zooms =  self.zooms.unwrap_or(ZoomSet::all().into());
-        //         let zboxes = bbox
-        //             .iter()
-        //             .flat_map(|b| {
-        //                 tile_ranges(b.tuple(), ZoomOrZooms::Zooms(zooms.clone()))
-        //             })
-        //             .collect::<Vec<_>>();
-        //         let pred = zboxes
-        //             .iter()
-        //             .map(utiles_core::tile_zbox::TileZBoxes::mbtiles_sql_where)
-        //             .collect::<Vec<_>>()
-        //             .join(" OR ");
-        //         format!("({pred})")
-        //     }
-        //     (Some(bbox), None) => {
-        //         let zboxes = bbox
-        //             .iter()
-        //             .flat_map(|b| {
-        //                 tile_ranges(
-        //                     b.tuple(),
-        //                     ZoomOrZooms::Zooms(ZoomSet::all().into()),
-        //                 )
-        //             })
-        //             .collect::<Vec<_>>();
-        //         let pred = zboxes
-        //             .iter()
-        //             .map(utiles_core::tile_zbox::TileZBoxes::mbtiles_sql_where)
-        //             .collect::<Vec<_>>()
-        //             .join(" OR ");
-        //         format!("({pred})")
-        //     }
-        //     (None, Some(zooms)) => {
-        //         format!(
-        //             "zoom_level IN ({zooms})",
-        //             zooms = zooms
-        //                 .iter()
-        //                 .map(std::string::ToString::to_string)
-        //                 .collect::<Vec<String>>()
-        //                 .join(",")
-        //         )
-        //     }
-        //     (None, None) => String::new(),
-        // };
-        // // attach 'WHERE'
-        // if pred.is_empty() {
-        //     Ok(pred)
-        // } else {
-        //     Ok(format!("WHERE {pred}"))
-        // }
     }
+
     pub fn check_src_dst_same(&self) -> UtilesResult<()> {
         if self.src == self.dst {
             Err(
@@ -128,79 +99,3 @@ impl CopyConfig {
         }
     }
 }
-
-//
-// impl crate::cli::commands::copy::CopyConfigV1 {
-//     pub fn new(
-//         src: crate::cli::commands::copy::Source,
-//         dst: crate::cli::commands::copy::Destination,
-//         zooms: Option<Vec<u8>>,
-//         bbox: Option<BBox>,
-//     ) -> Self {
-//         Self {
-//             src,
-//             dst,
-//             zooms,
-//             bbox,
-//         }
-//     }
-//
-//     // pub fn sql_where_for_zoom(&self, zoom: u8) -> String {
-//     //     let pred = match &self.bbox {
-//     //         Some(bbox) => {
-//     //             let trange = tile_ranges(bbox.tuple(), vec![zoom].into());
-//     //             trange.sql_where(Some(true))
-//     //         }
-//     //         None => {
-//     //             format!("zoom_level = {zoom}")
-//     //         }
-//     //     };
-//     //     // attach 'WHERE'
-//     //     if pred.is_empty() {
-//     //         pred
-//     //     } else {
-//     //         format!("WHERE {pred}")
-//     //     }
-//     // }
-//
-//     pub fn mbtiles_sql_where(
-//         &self,
-//         zoom_levels: Option<Vec<u8>>,
-//     ) -> UtilesResult<String> {
-//         let pred = match (&self.bbox, &self.zooms) {
-//             (Some(bbox), Some(zooms)) => {
-//                 let trange = tile_ranges(
-//                     bbox.tuple(),
-//                     zoom_levels.unwrap_or(zooms.clone()).into(),
-//                 )?;
-//                 trange.mbtiles_sql_where()
-//             }
-//             (Some(bbox), None) => {
-//                 let trange = tile_ranges(
-//                     bbox.tuple(),
-//                     zoom_levels
-//                         .unwrap_or((0..28).map(|z| z as u8).collect::<Vec<u8>>())
-//                         .into(),
-//                 )?;
-//                 trange.mbtiles_sql_where()
-//             }
-//             (None, Some(zooms)) => {
-//                 format!(
-//                     "zoom_level IN ({zooms})",
-//                     zooms = zooms
-//                         .iter()
-//                         .map(std::string::ToString::to_string)
-//                         .collect::<Vec<String>>()
-//                         .join(",")
-//                 )
-//             }
-//             (None, None) => String::new(),
-//         };
-//         // attach 'WHERE'
-//         if pred.is_empty() {
-//             Ok(pred)
-//         } else {
-//             Ok(format!("WHERE {pred}"))
-//         }
-//     }
-// }

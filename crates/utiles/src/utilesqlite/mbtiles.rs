@@ -164,17 +164,15 @@ impl Mbtiles {
         metadata_set_many(&self.conn, metadata)
     }
 
-    pub fn metadata_get(&self, name: &str) -> RusqliteResult<Option<String>> {
+    pub fn metadata_get(&self, name: &str) -> UtilesResult<Option<String>> {
         let rows = metadata_get(&self.conn, name)?;
         if rows.is_empty() {
             return Ok(None);
         }
         if rows.len() > 1 {
             error!(
-                "metadata has more than one row for name: {} - {}",
-                name,
-                serde_json::to_string(&rows)
-                    .expect("metadata_get: error serializing metadata rows")
+                "metadata has more than one row for name: {} - {:?}",
+                name, rows,
             );
             // return the first one
             let row = rows.first();
@@ -755,8 +753,7 @@ pub fn insert_tiles_flat_mbtiles(
     tiles: &Vec<TileData>,
     insert_strategy: Option<InsertStrategy>,
 ) -> RusqliteResult<usize> {
-    let tx = conn.transaction().expect("Error creating transaction");
-
+    let tx = conn.transaction()?;
     let insert_strat = insert_strategy.unwrap_or_default();
     let insert_clause = insert_strat.sql_prefix();
     // TODO - use batch insert
@@ -778,7 +775,7 @@ pub fn insert_tiles_flat_mbtiles(
             naff += r;
         }
     }
-    tx.commit().expect("Error committing transaction");
+    tx.commit()?;
     Ok(naff)
 }
 

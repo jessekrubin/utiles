@@ -10,7 +10,7 @@ pub use db::*;
 pub use dbpath::*;
 pub use errors::{SqliteError, SqliteResult};
 pub use insert_strategy::InsertStrategy;
-pub use page_size::{is_valid_page_size, pragma_page_size_get};
+pub use page_size::is_valid_page_size;
 pub use pragma::*;
 pub use sqlike3::{Sqlike3, Sqlike3Async};
 

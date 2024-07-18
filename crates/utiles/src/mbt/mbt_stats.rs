@@ -1,11 +1,12 @@
+use rusqlite::Connection;
+use serde::Serialize;
+use tracing::debug;
+
+use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::MbtType;
 use crate::sqlite::{pragma_freelist_count, pragma_page_count, pragma_page_size};
 use crate::utilesqlite::mbtiles::{zoom_stats, zoom_stats_full};
-use crate::UtilesResult;
-use rusqlite::Connection;
-use serde::Serialize;
-use tracing::debug;
 
 #[derive(Debug, Serialize)]
 pub struct MbtilesZoomStats {
@@ -30,8 +31,8 @@ pub struct MbtilesStats {
     pub page_count: i64,
     pub page_size: i64,
     pub freelist_count: i64,
-    pub minzoom: Option<u8>,
-    pub maxzoom: Option<u8>,
+    pub minzoom: Option<u32>,
+    pub maxzoom: Option<u32>,
     pub zooms: Vec<MbtilesZoomStats>,
 }
 
@@ -82,10 +83,6 @@ pub fn query_mbt_stats(
 
     let minzoom = zoom_stats.iter().map(|r| r.zoom).min();
     let maxzoom = zoom_stats.iter().map(|r| r.zoom).max();
-    let minzoom_u8: Option<u8> = minzoom
-        .map(|minzoom| minzoom.try_into().expect("Error converting minzoom to u8"));
-    let maxzoom_u8: Option<u8> = maxzoom
-        .map(|maxzoom| maxzoom.try_into().expect("Error converting maxzoom to u8"));
     Ok(MbtilesStats {
         ntiles: zoom_stats.iter().map(|r| r.ntiles).sum(),
         filesize,
@@ -93,8 +90,8 @@ pub fn query_mbt_stats(
         page_count,
         page_size,
         freelist_count,
-        minzoom: minzoom_u8,
-        maxzoom: maxzoom_u8,
+        minzoom,
+        maxzoom,
         nzooms: zoom_stats.len() as u32,
         zooms: zoom_stats,
     })

@@ -1,19 +1,15 @@
-use std::path::PathBuf;
-
 use clap::{Args, Parser, Subcommand};
 use strum_macros::AsRefStr;
 
-use utiles_core::bbox::BBox;
-use utiles_core::parsing::parse_bbox_ext;
-use utiles_core::zoom::ZoomSet;
-use utiles_core::LngLat;
-use utiles_core::VERSION;
-use utiles_core::{geobbox_merge, zoom};
+use utiles_core::{
+    geobbox_merge, parsing::parse_bbox_ext, zoom, BBox, LngLat, ZoomSet, VERSION,
+};
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
-use crate::copy::CopyConfig;
+use crate::cli::commands::{analyze_main, vacuum_main};
+use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
@@ -257,6 +253,22 @@ impl TouchArgs {
     }
 }
 
+#[derive(Debug, Subcommand)]
+/// sqlite utils/cmds
+pub enum DbCommands {
+    Analyze(AnalyzeArgs),
+    Vacuum(VacuumArgs),
+}
+
+impl DbCommands {
+    pub async fn run(&self) -> UtilesResult<()> {
+        match self {
+            DbCommands::Analyze(args) => analyze_main(args).await,
+            DbCommands::Vacuum(args) => vacuum_main(args).await,
+        }
+    }
+}
+
 #[derive(Debug, Parser)]
 pub struct AnalyzeArgs {
     #[command(flatten)]
@@ -267,6 +279,7 @@ pub struct AnalyzeArgs {
 }
 
 #[derive(Debug, Parser)]
+/// vacuum sqlite db inplace/into
 pub struct VacuumArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -401,6 +414,9 @@ pub enum Commands {
     #[command(name = "about", visible_alias = "aboot")]
     About,
 
+    #[command(subcommand)]
+    Db(DbCommands),
+
     /// Echo the `tile.json` for mbtiles file
     #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes")]
     Tilejson(TilejsonArgs),
@@ -441,7 +457,6 @@ pub enum Commands {
     #[command(name = "info")]
     Info(InfoArgs),
 
-    /// VACUUM sqlite db
     #[command(name = "vacuum", visible_alias = "vac")]
     Vacuum(VacuumArgs),
 
@@ -803,27 +818,6 @@ impl CopyArgs {
             Some(new_bbox.mbt_bounds())
         } else {
             None
-        }
-    }
-}
-
-impl From<&CopyArgs> for CopyConfig {
-    fn from(args: &CopyArgs) -> CopyConfig {
-        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
-        CopyConfig {
-            src: PathBuf::from(&args.src),
-            dst: PathBuf::from(&args.dst),
-            zset: args.zoom_set(),
-            zooms: args.zooms(),
-            verbose: true,
-            bboxes: args.bboxes(),
-            bounds_string: args.bounds(),
-            force: false,
-            dryrun: false,
-            jobs: args.jobs,
-            istrat: InsertStrategy::from(args.conflict),
-            hash: args.hash,
-            dbtype,
         }
     }
 }

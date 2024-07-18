@@ -4,6 +4,7 @@ pub use agg_hash::agg_hash_main;
 pub use children_parent::{children_main, parent_main};
 pub use contains::contains_main;
 pub use copy::copy_main;
+pub use db::analyze_main;
 pub use dev::dev_main;
 pub use info::info_main;
 pub use lint::lint_main;

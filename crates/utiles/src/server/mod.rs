@@ -124,12 +124,9 @@ async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     Ok(Datasets { mbtiles: datasets })
 }
 
-pub async fn utiles_serve(
-    cfg: UtilesServerConfig,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     info!("__UTILES_SERVE__");
-    let utiles_serve_config_json = serde_json::to_string_pretty(&cfg)
-        .expect("Failed to serialize utiles_serve_config_json");
+    let utiles_serve_config_json = serde_json::to_string_pretty(&cfg)?;
     info!("config:\n{}", utiles_serve_config_json);
 
     let addr = cfg.addr();
@@ -185,9 +182,7 @@ pub async fn utiles_serve(
 
     // let addr = cfg.addr();
     info!("Listening on: {}", addr);
-    let listener = tokio::net::TcpListener::bind(addr)
-        .await
-        .expect("Failed to bind to address");
+    let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;

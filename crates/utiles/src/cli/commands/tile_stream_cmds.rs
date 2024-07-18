@@ -83,7 +83,9 @@ pub fn quadkey_main(args: TileFmtArgs) -> UtilesResult<()> {
         // if the line begins w/ '['/'{' treat as json-tile
         // otherwise treat as quadkey
         let lstr = line.unwrap();
-        let first_char = lstr.chars().next().unwrap();
+        let maybe_first_char = lstr.chars().next();
+        let first_char = maybe_first_char.unwrap();
+        // .unwrap();
         match first_char {
             '[' | '{' => {
                 // treat as tile

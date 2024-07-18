@@ -1,3 +1,4 @@
+use crate::errors::UtilesResult;
 use crate::lint::UtilesLintError;
 use crate::mbt::metadata2duplicates;
 use crate::sqlite::AsyncSqliteConn;
@@ -5,7 +6,7 @@ use crate::utilesqlite::mbtiles::{
     has_unique_index_on_metadata, metadata_table_name_is_primary_key,
 };
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
-use crate::{utilesqlite, UtilesError, UtilesResult};
+use crate::{utilesqlite, UtilesError};
 use std::path::{Path, PathBuf};
 use tracing::warn;
 

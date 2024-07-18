@@ -1,11 +1,10 @@
 use async_trait::async_trait;
 
 use crate::sqlite::errors::SqliteResult;
-use crate::sqlite::page_size::pragma_page_size_get;
 use crate::sqlite::{
     analyze, attach_db, detach_db, is_empty_db, pragma_freelist_count,
-    pragma_index_list, pragma_page_count, pragma_page_size_set, pragma_table_list,
-    vacuum, vacuum_into, PragmaIndexListRow, PragmaTableListRow,
+    pragma_index_list, pragma_page_count, pragma_page_size_get, pragma_page_size_set,
+    pragma_table_list, vacuum, vacuum_into, PragmaIndexListRow, PragmaTableListRow,
 };
 
 macro_rules! sqlike3_methods {

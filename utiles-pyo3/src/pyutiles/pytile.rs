@@ -11,9 +11,9 @@ use pyo3::{
     PyResult, Python,
 };
 use serde::Serialize;
-
 use utiles::bbox::BBox;
-use utiles::tile::Tile;
+use utiles::projection::Projection;
+use utiles::tile::{FeatureOptions, Tile};
 use utiles::TileLike;
 
 use crate::pyutiles::pyiters::IntIterator;
@@ -95,12 +95,12 @@ impl PyTile {
         Py::new(slf.py(), iter)
     }
 
-    #[pyo3(signature = (sep=None))]
+    #[pyo3(signature = (sep = None))]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
         self.xyz.fmt_zxy(sep)
     }
 
-    #[pyo3(signature = (ext="", sep=None))]
+    #[pyo3(signature = (ext = "", sep = None))]
     pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
         self.xyz.fmt_zxy_ext(ext, sep)
     }
@@ -166,7 +166,7 @@ impl PyTile {
     }
 
     #[classmethod]
-    #[pyo3(signature = (lng, lat, zoom, truncate=None))]
+    #[pyo3(signature = (lng, lat, zoom, truncate = None))]
     pub fn from_lnglat_zoom(
         _cls: &Bound<'_, PyType>,
         lng: f64,
@@ -358,12 +358,12 @@ impl PyTile {
         self.xyz.center().into()
     }
 
-    #[pyo3(signature = (n=None))]
+    #[pyo3(signature = (n = None))]
     pub fn parent(&self, n: Option<u8>) -> Self {
         self.xyz.parent(n).into()
     }
 
-    #[pyo3(signature = (zoom=None))]
+    #[pyo3(signature = (zoom = None))]
     pub fn children(&self, zoom: Option<u8>) -> Vec<Self> {
         let xyzs = self.xyz.children(zoom);
         xyzs.into_iter().map(Self::from).collect()
@@ -381,107 +381,69 @@ impl PyTile {
         self.xyz.into()
     }
 
-    #[pyo3(signature = (fid=None, props=None, projected=None, buffer=None, precision=None))]
+    #[pyo3(
+        signature = (fid = None, props = None, projected = None, buffer = None, precision = None)
+    )]
     pub fn feature(
         &self,
         py: Python,
-        // tile:  PyTileLike,
-        // (u32, u32, u8),
         fid: Option<String>,
         props: Option<HashMap<String, Bound<PyAny>>>,
         projected: Option<String>,
         buffer: Option<f64>,
         precision: Option<i32>,
     ) -> PyResult<HashMap<String, PyObject>> {
-        // Convert the arguments to Rust values
-        // let pytile: PyTile = tile.into();
-        // let tile = pytile.tuple();
-        let (x, y, z) = self.tuple();
-        let fid = fid.unwrap_or_default();
-        let props = props.unwrap_or_default();
-        let projected = projected.unwrap_or_else(|| "geographic".to_string());
-        let buffer = buffer.unwrap_or(0.0);
-        let precision = precision.unwrap_or(-1);
-
-        // Compute the bounds
-        let (west, south, east, north) = utiles::bounds(x, y, z);
-
-        // Handle projected coordinates
-        let (mut west, mut south, mut east, mut north) = match projected.as_str() {
-            "mercator" => {
-                // let (east_merc, north_merc) = utiles::xy(east, north, Some(false));
-                let (west_merc, south_merc) = utiles::xy(west, south, None);
-                let (east_merc, north_merc) = utiles::xy(east, north, None);
-                (west_merc, south_merc, east_merc, north_merc)
-            }
-            _ => (west, south, east, north),
+        let projection = if let Some(projected) = projected {
+            Projection::try_from(projected)
+                .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?
+        } else {
+            Projection::Geographic
         };
+        let feature_opts = FeatureOptions {
+            buffer,
+            fid,
+            precision,
+            projection,
+            props: None,
+        };
+        let tfeat = self
+            .xyz
+            .feature(&feature_opts)
+            .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
 
-        // Apply buffer
-        west -= buffer;
-        south -= buffer;
-        east += buffer;
-        north += buffer;
-
-        // Apply precision
-        if precision >= 0 {
-            let precision_factor = 10_f64.powi(precision);
-            west = (west * precision_factor).round() / precision_factor;
-            south = (south * precision_factor).round() / precision_factor;
-            east = (east * precision_factor).round() / precision_factor;
-            north = (north * precision_factor).round() / precision_factor;
-        }
-
-        // Compute bbox and geometry
-        let bbox = [
-            west.min(east),
-            south.min(north),
-            west.max(east),
-            south.max(north),
-        ];
-        let geometry_coordinates = vec![vec![
-            [west, south],
-            [west, north],
-            [east, north],
-            [east, south],
-            [west, south],
-        ]];
-
+        // feature that will become python object
+        let mut feature_dict = HashMap::new();
+        let bbox_vec = vec![tfeat.bbox.0, tfeat.bbox.1, tfeat.bbox.2, tfeat.bbox.3];
         let geometry_items = vec![
-            ("type".to_string(), "Polygon".to_object(py)),
+            ("type".to_string(), tfeat.geometry.type_.to_object(py)),
             (
                 "coordinates".to_string(),
-                geometry_coordinates.to_object(py),
+                tfeat.geometry.coordinates.to_object(py),
             ),
         ]
         .into_iter()
         .collect::<HashMap<String, PyObject>>();
-
-        // Create the feature dictionary
-        let xyz = format!("({x}, {y}, {z})").into_py(py);
-        let mut feature_dict = HashMap::new();
-        feature_dict.insert("type".to_string(), "Feature".to_object(py));
-        feature_dict.insert("bbox".to_string(), bbox.to_object(py));
-        feature_dict.insert("id".to_string(), xyz.to_object(py));
-        feature_dict.insert("geometry".to_string(), geometry_items.to_object(py));
-
         // Create the properties dictionary
         let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
-        properties_dict
-            .insert("title".to_string(), format!("XYZ tile {xyz}").into_py(py));
-        if !props.is_empty() {
+        let (x, y, z) = self.tuple();
+        let xyz_tuple_string = format!("({x}, {y}, {z})").into_py(py);
+
+        properties_dict.insert(
+            "title".to_string(),
+            format!("XYZ tile {xyz_tuple_string}").into_py(py),
+        );
+        if let Some(props) = props {
             let props: PyResult<Vec<(String, Py<PyAny>)>> = props
                 .into_iter()
                 .map(|(k, v)| Ok((k, v.into_py(py))))
                 .collect();
             properties_dict.extend(props?);
         }
+        feature_dict.insert("type".to_string(), "Feature".to_object(py));
+        feature_dict.insert("bbox".to_string(), bbox_vec.to_object(py));
+        feature_dict.insert("id".to_string(), tfeat.id.to_object(py));
+        feature_dict.insert("geometry".to_string(), geometry_items.to_object(py));
         feature_dict.insert("properties".to_string(), properties_dict.to_object(py));
-
-        // Add the feature id if provided
-        if !fid.is_empty() {
-            feature_dict.insert("id".to_string(), fid.to_object(py));
-        }
         Ok(feature_dict)
     }
 }
