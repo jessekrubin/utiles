@@ -4,7 +4,7 @@ use tracing::{debug, warn};
 
 use crate::cli::args::UpdateArgs;
 use crate::errors::UtilesResult;
-use crate::mbt::{MetadataChange, MetadataChangeFromTo};
+use crate::mbt::{DbChangeType, DbChangeset, MetadataChange, MetadataChangeFromTo};
 use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::mbtiles::query_distinct_tiletype_fast;
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
@@ -13,7 +13,7 @@ use crate::UtilesError;
 pub async fn update_mbtiles(
     filepath: &str,
     dryrun: bool,
-) -> UtilesResult<Vec<MetadataChange>> {
+) -> UtilesResult<MetadataChange> {
     // check that filepath exists and is file
     let mbt = if dryrun {
         MbtilesAsyncSqliteClient::open_readonly(filepath).await?
@@ -118,30 +118,29 @@ pub async fn update_mbtiles(
         }
     }
 
-    let metadata_change = if !changes.is_empty() {
+    let metadata_change = if changes.is_empty() {
+        MetadataChange::new_empty()
+    } else {
         let mut updated_metadata = current_metadata.clone();
         for change in &changes {
             if let Some(new_val) = &change.to {
-                updated_metadata.insert(&*change.name, new_val);
+                updated_metadata.insert(&change.name, new_val);
             }
         }
-        let c = current_metadata.diff(&updated_metadata, true)?;
-        c
-    } else {
-        MetadataChange::new_empty()
+
+        current_metadata.diff(&updated_metadata, true)?
     };
-    let changes2apply = vec![metadata_change];
-    if !dryrun {
+    if dryrun {
+        warn!("Dryrun: no changes made");
+    } else {
         // todo fix cloning???
-        let changes2apply = changes2apply.clone(); // Explicit move to ensure ownership
+        let changes2apply = vec![metadata_change.clone()];
         mbt.conn(move |conn| {
             MetadataChange::apply_changes_to_connection(conn, &changes2apply)
         })
         .await?;
-    } else {
-        warn!("Dryrun: no changes made");
     }
-    Ok(changes2apply)
+    Ok(metadata_change)
 }
 
 pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
@@ -160,8 +159,9 @@ pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
     let changes = update_mbtiles(&args.common.filepath, args.dryrun).await?;
 
     debug!("changes: {:?}", changes);
-    let s = serde_json::to_string_pretty(&changes)
-        .expect("should not fail; changes is a Vec<MetadataChangeFromTo>");
-    println!("{s}");
+    let db_changes = DbChangeset::from(DbChangeType::from(changes));
+    let jsonstring =
+        serde_json::to_string_pretty(&db_changes).expect("should not fail");
+    println!("{jsonstring}");
     Ok(())
 }

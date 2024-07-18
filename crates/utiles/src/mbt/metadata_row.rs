@@ -1,7 +1,5 @@
 use std::collections::BTreeMap;
 
-use clap::builder::Str;
-use json_patch::Patch;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::debug;
@@ -129,7 +127,7 @@ impl MbtilesMetadataJson {
             MbtilesMetadataJson::Arr(arr) => {
                 // if key exists update value
                 if let Some(row) = arr.iter_mut().find(|row| row.name == key) {
-                    if &row.value != &val {
+                    if row.value != val {
                         row.value = val;
                     }
                 } else {
@@ -250,7 +248,7 @@ impl MbtilesMetadataJson {
         };
         let all_keys = from_map.keys().chain(to_map.keys());
         let changes = all_keys
-            .map(|k| {
+            .filter_map(|k| {
                 let from = from_map.get(k);
                 let to = to_map.get(k);
                 if from == to {
@@ -263,7 +261,6 @@ impl MbtilesMetadataJson {
                     })
                 }
             })
-            .flatten()
             .collect();
         Ok(changes)
     }

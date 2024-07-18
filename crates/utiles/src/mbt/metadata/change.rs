@@ -1,26 +1,24 @@
 use crate::utilesqlite::mbtiles::{metadata_delete, metadata_set};
 use json_patch::Patch;
-use serde::Serialize;
-use serde_json::map::Values;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use strum_macros::EnumString;
 use tracing::warn;
 
-#[derive(Debug, Serialize, strum_macros::EnumString)]
-#[strum(serialize_all = "snake_case")]
-pub enum DbChangeType {
-    Metadata,
-    Unknown,
-}
+// #[derive(Debug, Serialize, strum_macros::EnumString)]
+// #[strum(serialize_all = "snake_case")]
+// pub enum DbChangeType {
+//     Metadata,
+//     Unknown,
+// }
 
-#[derive(Debug, Serialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MetadataChangeFromTo {
     pub name: String,
     pub from: Option<String>,
     pub to: Option<String>,
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MetadataChange {
     pub changes: Vec<MetadataChangeFromTo>,
     pub forward: Patch,
@@ -28,14 +26,36 @@ pub struct MetadataChange {
     pub data: Value,
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "snake_case", tag = "type")]
-pub enum DbChange {
+pub enum DbChangeType {
     Metadata(MetadataChange),
     Unknown(Value),
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct DbChangeset {
+    pub timestamp: String,
+    pub changes: Vec<DbChangeType>,
+}
+
+impl From<MetadataChange> for DbChangeType {
+    fn from(change: MetadataChange) -> Self {
+        Self::Metadata(change)
+    }
+}
+
+impl From<DbChangeType> for DbChangeset {
+    fn from(change: DbChangeType) -> Self {
+        Self {
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            changes: vec![change],
+        }
+    }
+}
+
 impl MetadataChange {
+    #[must_use]
     pub fn new_empty() -> Self {
         Self {
             changes: vec![],
