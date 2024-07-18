@@ -1,12 +1,9 @@
 use clap::{Args, Parser, Subcommand};
 use strum_macros::AsRefStr;
 
-use utiles_core::bbox::BBox;
-use utiles_core::parsing::parse_bbox_ext;
-use utiles_core::zoom::ZoomSet;
-use utiles_core::LngLat;
-use utiles_core::VERSION;
-use utiles_core::{geobbox_merge, zoom};
+use utiles_core::{
+    geobbox_merge, parsing::parse_bbox_ext, zoom, BBox, LngLat, ZoomSet, VERSION,
+};
 
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
@@ -254,11 +251,6 @@ impl TouchArgs {
     pub fn mbtype(&self) -> MbtType {
         self.dbtype.as_ref().map_or(MbtType::Flat, |opt| opt.into())
     }
-}
-
-#[async_trait::async_trait]
-trait Runnable {
-    async fn run(&self) -> UtilesResult<()>;
 }
 
 #[derive(Debug, Subcommand)]
