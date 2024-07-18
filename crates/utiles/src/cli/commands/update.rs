@@ -6,9 +6,9 @@ use crate::cli::args::UpdateArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::{MetadataChange, MetadataChangeFromTo};
 use crate::sqlite::AsyncSqliteConn;
-use crate::UtilesError;
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::utilesqlite::mbtiles::query_distinct_tiletype_fast;
+use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
+use crate::UtilesError;
 
 pub async fn update_mbtiles(
     filepath: &str,
@@ -137,7 +137,7 @@ pub async fn update_mbtiles(
         mbt.conn(move |conn| {
             MetadataChange::apply_changes_to_connection(conn, &changes2apply)
         })
-            .await?;
+        .await?;
     } else {
         warn!("Dryrun: no changes made");
     }
