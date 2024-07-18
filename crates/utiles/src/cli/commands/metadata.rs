@@ -9,8 +9,7 @@ use crate::mbt::{
     MbtilesMetadataRowParsed, MetadataChange,
 };
 use crate::sqlite::AsyncSqliteConn;
-use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
-use serde::Serialize;
+use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use tracing::warn;
 use tracing::{debug, info};
 

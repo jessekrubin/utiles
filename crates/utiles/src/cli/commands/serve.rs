@@ -1,7 +1,7 @@
-use crate::errors::UtilesResult;
 use clap::Parser;
 use tracing::{debug, warn};
 
+use crate::errors::UtilesResult;
 use crate::server::{utiles_serve, UtilesServerConfig};
 
 #[derive(Debug, Parser)]
@@ -36,18 +36,17 @@ impl ServeArgs {
 #[allow(clippy::unused_async)]
 pub async fn serve_main(args: ServeArgs) -> UtilesResult<()> {
     debug!("args: {:?}", args);
-    match args.fspaths {
-        Some(ref fspaths) => {
-            if fspaths.is_empty() {
-                warn!("fspaths is empty");
-            }
-            for fspath in fspaths {
-                if !std::path::Path::new(fspath).exists() {
-                    warn!("fspath does not exist: {:?}", fspath);
-                }
+    if let Some(ref fspaths) = args.fspaths {
+        if fspaths.is_empty() {
+            warn!("fspaths is empty");
+        }
+        for fspath in fspaths {
+            if !std::path::Path::new(fspath).exists() {
+                warn!("fspath does not exist: {:?}", fspath);
             }
         }
-        None => warn!("no fspaths provided"),
+    } else {
+        warn!("no fspaths provided");
     }
     let cfg = args.to_cfg();
     utiles_serve(cfg).await?;
