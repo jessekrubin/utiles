@@ -69,13 +69,13 @@ pub struct FileLintResults {
     errors: Option<Vec<UtilesLintError>>,
     dt: Duration,
 }
-pub async fn lint_filepaths_stream(
+pub fn lint_filepaths_stream(
     fspaths: &Vec<PathBuf>,
     fix: bool,
 ) -> impl Stream<Item = FileLintResults> + '_ {
     stream::iter(fspaths)
         .map(move |path| {
-            let linter = MbtilesLinter::new(&path, fix);
+            let linter = MbtilesLinter::new(path, fix);
             async move {
                 debug!("linting: {}", path.display());
                 let start_time = std::time::Instant::now();
@@ -106,7 +106,7 @@ pub async fn lint_filepaths(
     fspaths: Vec<PathBuf>,
     fix: bool,
 ) -> UtilesResult<Vec<FileLintResults>> {
-    let mut results = lint_filepaths_stream(&fspaths, fix).await;
+    let mut results = lint_filepaths_stream(&fspaths, fix);
     let all_lints = Vec::new();
     // let mut errors = Vec::new();
     while let Some(file_res) = results.next().await {
