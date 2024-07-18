@@ -42,6 +42,7 @@ pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     } else {
         serde_json::to_string_pretty::<serde_json::Value>(&json_val)
     }?;
+
     println!("{out_str}");
     Ok(())
 }
@@ -57,8 +58,7 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
         Some(value) => {
             let mut mdjson = current_metadata_json.clone();
             mdjson.insert(&args.key, value);
-            let (forward, inverse, data) = current_metadata_json.diff(&mdjson, true)?;
-            MetadataChange::from_forward_reverse_data(forward, inverse, data)
+            current_metadata_json.diff(&mdjson, true)?
         }
         None => {
             // check if key is filepath ending in .json then load and
@@ -69,26 +69,17 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
 
                 let mdjson = read_metadata_json(&args.key).await?;
                 debug!("mdjson: {:?}", mdjson);
-                let (forward, inverse, data) =
-                    current_metadata_json.diff(&mdjson, true)?;
-                MetadataChange::from_forward_reverse_data(forward, inverse, data)
+                current_metadata_json.diff(&mdjson, true)?
             } else if args.key.to_lowercase() == "-" || args.key.to_lowercase() == "--"
             {
                 // get metadata from stdin...
                 let stdin_str = stdin2string()?;
                 let mdjson = serde_json::from_str::<MbtilesMetadataJson>(&stdin_str)?;
-                let (forward, inverse, data) =
-                    current_metadata_json.diff(&mdjson, true)?;
-
-                MetadataChange::from_forward_reverse_data(forward, inverse, data)
+                current_metadata_json.diff(&mdjson, true)?
             } else {
                 let mut mdjson = current_metadata_json.clone();
                 mdjson.delete(&args.key);
-
-                let (forward, inverse, data) =
-                    current_metadata_json.diff(&mdjson, false)?;
-
-                MetadataChange::from_forward_reverse_data(forward, inverse, data)
+                current_metadata_json.diff(&mdjson, true)?
             }
         }
     };

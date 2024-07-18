@@ -1,8 +1,17 @@
 use crate::utilesqlite::mbtiles::{metadata_delete, metadata_set};
 use json_patch::Patch;
 use serde::Serialize;
+use serde_json::map::Values;
 use serde_json::Value;
+use strum_macros::EnumString;
 use tracing::warn;
+
+#[derive(Debug, Serialize, strum_macros::EnumString)]
+#[strum(serialize_all = "snake_case")]
+pub enum DbChangeType {
+    Metadata,
+    Unknown,
+}
 
 #[derive(Debug, Serialize, Clone, PartialEq)]
 pub struct MetadataChangeFromTo {
@@ -11,26 +20,28 @@ pub struct MetadataChangeFromTo {
     pub to: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone, PartialEq)]
 pub struct MetadataChange {
-    pub timestamp: String,
+    pub changes: Vec<MetadataChangeFromTo>,
     pub forward: Patch,
     pub reverse: Patch,
     pub data: Value,
 }
 
+#[derive(Debug, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum DbChange {
+    Metadata(MetadataChange),
+    Unknown(Value),
+}
+
 impl MetadataChange {
-    #[must_use]
-    pub fn from_forward_reverse_data(
-        forward: Patch,
-        reverse: Patch,
-        data: Value,
-    ) -> Self {
-        MetadataChange {
-            timestamp: chrono::Utc::now().to_rfc3339(),
-            forward,
-            reverse,
-            data,
+    pub fn new_empty() -> Self {
+        Self {
+            changes: vec![],
+            forward: Patch(vec![]),
+            reverse: Patch(vec![]),
+            data: Value::Null,
         }
     }
 

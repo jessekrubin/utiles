@@ -8,6 +8,7 @@
 .venv/
 .tox/
 playground/
+__pycache__/
 f.py
 f.ts
 f.tsx

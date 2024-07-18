@@ -6,9 +6,10 @@ try:
     from orjson import loads as json_loads
 except ImportError:
     from json import loads as json_loads
-
 import sys
 from dataclasses import dataclass
+from pathlib import Path
+from sqlite3 import connect
 from subprocess import CompletedProcess, run
 from time import time_ns
 from typing import Any
@@ -118,3 +119,15 @@ def run_cli(
     if res.completed_process.returncode != 0:
         res.echo()
     return res
+
+
+def query_metadata_rows(
+    dbpath: str | Path,
+) -> list[dict[str, Any]]:
+    """Query metadata rows"""
+
+    with connect(dbpath) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM metadata;")
+        rows = cursor.fetchall()
+    return [dict(zip((d[0] for d in cursor.description), row)) for row in rows]
