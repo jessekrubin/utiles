@@ -9,7 +9,7 @@ use tracing::{debug, warn};
 
 use mbt_linter::MbtilesLinter;
 
-use crate::UtilesResult;
+use crate::errors::UtilesResult;
 
 mod mbt_linter;
 

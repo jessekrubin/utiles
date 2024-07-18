@@ -1,4 +1,4 @@
-use crate::UtilesResult;
+use crate::errors::UtilesResult;
 
 pub fn about_main() -> UtilesResult<()> {
     let current_exe =

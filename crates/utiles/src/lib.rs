@@ -20,17 +20,19 @@
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::cast_possible_wrap)]
-pub mod core;
-mod fs_async;
 pub use core::*;
-pub use errors::{UtilesError, UtilesResult};
+pub use errors::UtilesError;
+pub use errors::UtilesResult;
+pub use lager::init_tracing;
 pub use tile_strfmt::TileStringFormatter;
 
 pub mod cli;
 mod config;
 mod copy;
+pub mod core;
 pub mod dev;
 pub(crate) mod errors;
+mod fs_async;
 pub mod gj;
 mod globster;
 mod lager;
@@ -47,31 +49,31 @@ pub mod utilesqlite;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Tile macro to create a new tile from x, y, z
-#[macro_export]
-macro_rules! utile {
-    ($x:expr, $y:expr, $z:expr) => {
-        Tile::new($x, $y, $z)
-    };
-}
-
-/// macro to create a new point.
-/// Replacement for coord! macro from geo-types
-///
-/// # Examples
-///
-/// ```
-/// use utiles::{point2d, Point2d};
-/// let p = point2d!{ x: 1.0, y: 2.0 };
-/// assert_eq!(p.x(), 1.0);
-/// assert_eq!(p.y(), 2.0);
-/// ```
-#[macro_export]
-macro_rules! point2d {
-    { x: $x:expr, y: $y:expr } => {
-        Point2d::new($x, $y)
-    };
-}
+// /// Tile macro to create a new tile from x, y, z
+// #[macro_export]
+// macro_rules! utile {
+//     ($x:expr, $y:expr, $z:expr) => {
+//         Tile::new($x, $y, $z)
+//     };
+// }
+//
+// /// macro to create a new point.
+// /// Replacement for coord! macro from geo-types
+// ///
+// /// # Examples
+// ///
+// /// ```
+// /// use utiles::{point2d, Point2d};
+// /// let p = point2d!{ x: 1.0, y: 2.0 };
+// /// assert_eq!(p.x(), 1.0);
+// /// assert_eq!(p.y(), 2.0);
+// /// ```
+// #[macro_export]
+// macro_rules! point2d {
+//     { x: $x:expr, y: $y:expr } => {
+//         Point2d::new($x, $y)
+//     };
+// }
 
 #[cfg(test)]
 mod tests {

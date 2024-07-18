@@ -1,6 +1,5 @@
 use thiserror::Error;
 
-pub type UtilesResult<T> = Result<T, UtilesError>;
 #[derive(Error, Debug)]
 pub enum UtilesCopyError {
     #[error("src and dst: {0}")]
@@ -99,3 +98,5 @@ pub enum UtilesError {
     #[error("json_patch error: {0}")]
     JsonPatchError(#[from] json_patch::PatchError),
 }
+
+pub type UtilesResult<T, E = UtilesError> = Result<T, E>;

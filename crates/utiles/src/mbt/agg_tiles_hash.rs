@@ -1,6 +1,6 @@
+use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::TilesFilter;
-use crate::UtilesResult;
 use rusqlite::Connection;
 use serde::Serialize;
 #[derive(Debug, Serialize)]

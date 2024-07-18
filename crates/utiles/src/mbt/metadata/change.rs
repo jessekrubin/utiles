@@ -4,6 +4,13 @@ use serde::Serialize;
 use serde_json::Value;
 use tracing::warn;
 
+#[derive(Debug, Serialize, Clone, PartialEq)]
+pub struct MetadataChangeFromTo {
+    pub name: String,
+    pub from: Option<String>,
+    pub to: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
 pub struct MetadataChange {
     pub timestamp: String,
@@ -26,6 +33,7 @@ impl MetadataChange {
             data,
         }
     }
+
     #[must_use]
     pub fn forward_keys(&self) -> Vec<String> {
         self.forward

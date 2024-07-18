@@ -1,9 +1,9 @@
 use indoc::indoc;
 use rusqlite::Connection;
 
+use crate::errors::UtilesResult;
 use crate::mbt::MbtType;
 use crate::sqlite::RusqliteResult;
-use crate::UtilesResult;
 
 const IS_FLAT_MBTILES_QUERY: &str = include_str!("sql/is-flat-mbtiles-query.sql");
 const IS_NORM_MBTILES_QUERY: &str = include_str!("sql/is-norm-mbtiles-query.sql");

@@ -3,8 +3,8 @@ use std::path::Path;
 use tracing::{debug, warn};
 
 use crate::cli::args::UpdateArgs;
-use crate::cli::commands::metadata::MetadataChangeFromTo;
 use crate::errors::UtilesResult;
+use crate::mbt::MetadataChangeFromTo;
 use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::mbtiles::query_distinct_tiletype_fast;
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};

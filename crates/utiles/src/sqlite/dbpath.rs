@@ -1,4 +1,5 @@
 use crate::errors::UtilesResult;
+use crate::fs_async::file_exists;
 use crate::UtilesError;
 use std::path::PathBuf;
 use tracing::debug;
@@ -45,6 +46,11 @@ impl DbPath {
     #[must_use]
     pub fn fspath_exists(&self) -> bool {
         PathBuf::from(&self.fspath).exists()
+    }
+
+    #[must_use]
+    pub async fn fspath_exists_async(&self) -> bool {
+        file_exists(&self.fspath).await
     }
 }
 

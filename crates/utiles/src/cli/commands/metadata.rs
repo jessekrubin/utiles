@@ -1,13 +1,14 @@
-#![allow(clippy::unwrap_used)]
 use std::path::Path;
 
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 use crate::cli::stdin2string::stdin2string;
 use crate::errors::UtilesResult;
+use crate::fs_async::file_exists_err;
 use crate::mbt::{
     metadata2map, metadata2map_val, read_metadata_json, MbtilesMetadataJson,
     MbtilesMetadataRowParsed, MetadataChange,
 };
+use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
 use serde::Serialize;
 use tracing::warn;
@@ -19,7 +20,6 @@ pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     let filepath = Path::new(&args.common.filepath);
     let mbtiles = MbtilesAsyncSqliteClient::open_existing(filepath).await?;
     let metadata_rows = mbtiles.metadata_rows().await?;
-
     let json_val = match (args.raw, args.obj) {
         (true, true) => {
             let m = metadata2map(&metadata_rows);
@@ -39,38 +39,21 @@ pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
         }
     };
     let out_str = if args.common.min {
-        serde_json::to_string::<serde_json::Value>(&json_val).unwrap()
+        serde_json::to_string::<serde_json::Value>(&json_val)
     } else {
-        serde_json::to_string_pretty::<serde_json::Value>(&json_val).unwrap()
-    };
+        serde_json::to_string_pretty::<serde_json::Value>(&json_val)
+    }?;
     println!("{out_str}");
     Ok(())
-}
-
-#[derive(Debug, Serialize)]
-pub struct MetadataChangeFromTo {
-    pub name: String,
-    pub from: Option<String>,
-    pub to: Option<String>,
 }
 
 pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
-    assert!(
-        filepath.exists(),
-        "File does not exist: {}",
-        filepath.display()
-    );
-    assert!(
-        filepath.is_file(),
-        "Not a file: {filepath}",
-        filepath = filepath.display()
-    );
-
-    let mbtiles: Mbtiles = Mbtiles::from(filepath);
-    let current_metadata_json = mbtiles.metadata_json()?;
+    file_exists_err(filepath).await?;
+    let mbtiles = MbtilesAsyncSqliteClient::open_existing(filepath).await?;
+    let current_metadata_json = mbtiles.metadata_json().await?;
     let c = match &args.value {
         Some(value) => {
             let mut mdjson = current_metadata_json.clone();
@@ -121,7 +104,11 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
         if args.dryrun {
             warn!("Dryrun: no changes made");
         } else {
-            MetadataChange::apply_changes_to_connection(&mbtiles.conn, &vec![c])?;
+            mbtiles
+                .conn(|conn| {
+                    MetadataChange::apply_changes_to_connection(conn, &vec![c])
+                })
+                .await?;
         }
     }
     Ok(())

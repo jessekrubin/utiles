@@ -1,6 +1,6 @@
 use utiles_core::{tile_ranges, BBox, ZoomOrZooms, ZoomSet};
 
-use crate::UtilesResult;
+use crate::errors::UtilesResult;
 
 #[derive(Debug)]
 pub struct TilesFilter {

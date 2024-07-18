@@ -1,4 +1,4 @@
-use crate::cli::args::{Cli, Commands};
+use crate::cli::args::{Cli, Commands, DbCommands};
 use crate::cli::commands::{
     about_main, agg_hash_main, bounding_tile_main, children_main, contains_main,
     copy_main, dev_main, fmtstr_main, info_main, lint_main, metadata_main,
@@ -103,6 +103,7 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
 
     let res: UtilesResult<()> = match args.command {
         Commands::About => about_main(),
+        Commands::Db(dbcmds) => dbcmds.run().await,
         Commands::Lint(args) => lint_main(&args).await,
         Commands::Touch(args) => touch_main(&args).await,
         Commands::Vacuum(args) => vacuum_main(&args).await,

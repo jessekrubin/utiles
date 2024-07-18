@@ -126,7 +126,8 @@ impl MbtilesAsyncSqliteClient {
         let mbtype = mbtype.unwrap_or(MbtType::Flat);
         // make sure the path don't exist
         let dbpath = pathlike2dbpath(path)?;
-        if dbpath.fspath_exists() {
+
+        if dbpath.fspath_exists_async().await {
             Err(UtilesError::PathExistsError(dbpath.fspath))
         } else {
             debug!("Creating new mbtiles file with client: {}", dbpath);
@@ -140,9 +141,7 @@ impl MbtilesAsyncSqliteClient {
                 )
                 .open()
                 .await?;
-
             debug!("db-type is: {:?}", mbtype);
-
             client
                 .conn_mut(move |conn| {
                     init_mbtiles(conn, &mbtype)
@@ -204,9 +203,6 @@ impl MbtilesAsyncSqliteClient {
         Ok(jm)
     }
 }
-
-// impl Client
-// pub async fn conn<F, T>(&self, func: F) -> Result<T, Error> where     F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,     T: Send + 'static,
 impl MbtilesAsyncSqlitePool {
     pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
         let mbtype = pool.conn(query_mbtiles_type).await?;
@@ -552,110 +548,3 @@ where
         Ok(r)
     }
 }
-
-// =============================================================
-// =============================================================
-// NON GENERIC IMPLEMENTATION
-// =============================================================
-// =============================================================
-
-// #[async_trait]
-// impl MbtilesAsync for MbtilesAsyncSqliteClient {
-//     fn filepath(&self) -> &str {
-//         &self.dbpath.fspath
-//     }
-//
-//     fn filename(&self) -> &str {
-//         &self.dbpath.filename
-//     }
-//
-//
-//     async fn magic_number(&self) -> UtilesResult<u32> {
-//         self.client
-//             .conn(magic_number)
-//             .await
-//             .map_err(UtilesError::AsyncSqliteError)
-//     }
-//
-//     async fn tilejson(&self) -> Result<TileJSON, Box<dyn Error>> {
-//         let metadata = self.metadata_rows().await?;
-//         let tj = metadata2tilejson(metadata);
-//         match tj {
-//             Ok(t) => Ok(t),
-//             Err(e) => {
-//                 error!("Error parsing metadata to TileJSON: {}", e);
-//                 Err(e)
-//             }
-//         }
-//     }
-//
-//     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>> {
-//         self.client
-//             .conn(mbtiles_metadata)
-//             .await
-//             .map_err(UtilesError::AsyncSqliteError)
-//     }
-//
-//     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>> {
-//         self.client
-//             .conn(move |conn| query_zxy(conn, z, x, y))
-//             .await
-//             .map_err(UtilesError::AsyncSqliteError)
-//     }
-// }
-//
-// #[async_trait]
-// impl MbtilesAsync for MbtilesAsyncSqlitePool {
-//     fn filepath(&self) -> &str {
-//         &self.dbpath.fspath
-//     }
-//
-//     fn filename(&self) -> &str {
-//         &self.dbpath.filename
-//     }
-//
-//     // async fn open(path: &str) -> UtilesResult<Self> {
-//     //     let pool = PoolBuilder::new()
-//     //         .path(path)
-//     //         .journal_mode(JournalMode::Wal)
-//     //         .open()
-//     //         .await?;
-//     //     Ok(MbtilesAsyncSqlitePool {
-//     //         pool,
-//     //         dbpath: DbPath::new(path),
-//     //     })
-//     // }
-//
-//     async fn magic_number(&self) -> UtilesResult<u32> {
-//         self.pool
-//             .conn(magic_number)
-//             .await
-//             .map_err(UtilesError::AsyncSqliteError)
-//     }
-//
-//     async fn tilejson(&self) -> Result<TileJSON, Box<dyn Error>> {
-//         let metadata = self.metadata_rows().await?;
-//         let tj = metadata2tilejson(metadata);
-//         match tj {
-//             Ok(t) => Ok(t),
-//             Err(e) => {
-//                 error!("Error parsing metadata to TileJSON: {}", e);
-//                 Err(e)
-//             }
-//         }
-//     }
-//
-//     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtilesMetadataRow>> {
-//         self.pool
-//             .conn(mbtiles_metadata)
-//             .await
-//             .map_err(UtilesError::AsyncSqliteError)
-//     }
-//
-//     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>> {
-//         self.pool
-//             .conn(move |conn| query_zxy(conn, z, x, y))
-//             .await
-//             .map_err(UtilesError::AsyncSqliteError)
-//     }
-// }

@@ -1,4 +1,4 @@
-use crate::UtilesResult;
+use crate::errors::UtilesResult;
 use json_patch::Patch;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
