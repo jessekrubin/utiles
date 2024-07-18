@@ -6,7 +6,7 @@ use image::codecs::png::{CompressionType, FilterType, PngEncoder};
 use image::ImageEncoder;
 use rusqlite::{Connection, MappedRows, Row};
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::info;
+use tracing::{info, warn};
 
 use utiles_core::prelude::*;
 use utiles_core::{utile, utile_yup};
@@ -169,22 +169,39 @@ pub async fn make_tiles_stream2(
                 "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles;",
             )?;
 
-            let tiles_iters = s.query_map(rusqlite::params![], |row| {
+            let thingy = |row: &Row| {
                 let z: u8 = row.get(0)?;
                 let x: u32 = row.get(1)?;
                 let yup: u32 = row.get(2)?;
                 let tile = utile_yup!(x, yup, z);
                 let tile_data: Vec<u8> = row.get(3)?;
-                println!("sending tile: {:?}", tile);
-
                 // Clone tx to avoid moving it into closure
                 // let tx = tx.clone();
                 let tuple = (tile, tile_data);
                 if let Err(e) = tx.blocking_send(tuple) {
-                    println!("send_res: {:?}", e);
+                    warn!("send_res: {:?}", e);
+                    // println!("send_res: {:?}", e);
                 }
                 Ok(())
-            })?;
+            };
+            let tiles_iters = s.query_map(rusqlite::params![],
+            thingy,
+                                          // |row| {
+                                          //     let z: u8 = row.get(0)?;
+                                          //     let x: u32 = row.get(1)?;
+                                          //     let yup: u32 = row.get(2)?;
+                                          //     let tile = utile_yup!(x, yup, z);
+                                          //     let tile_data: Vec<u8> = row.get(3)?;
+                                          //     // Clone tx to avoid moving it into closure
+                                          //     // let tx = tx.clone();
+                                          //     let tuple = (tile, tile_data);
+                                          //     if let Err(e) = tx.blocking_send(tuple) {
+                                          //         warn!("send_res: {:?}", e);
+                                          //         // println!("send_res: {:?}", e);
+                                          //     }
+                                          //     Ok(())
+                                          // },
+            )?;
 
             // Consume the iterator
             for row in tiles_iters {
@@ -280,7 +297,7 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     // });
 
     let mut tiles_stream = make_tiles_stream(&mbt).await?;
-    let mut count  = 0;
+    let mut count = 0;
     while let Some(value) = tiles_stream.next().await {
         count += 1;
         println!("count: {}", count);
