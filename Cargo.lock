@@ -2318,6 +2318,7 @@ dependencies = [
  "colored",
  "criterion",
  "fast_hilbert",
+ "fnv",
  "futures 0.3.30",
  "geo-types",
  "geojson",

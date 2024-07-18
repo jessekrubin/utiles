@@ -182,9 +182,7 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
 
     // let addr = cfg.addr();
     info!("Listening on: {}", addr);
-    let listener = tokio::net::TcpListener::bind(addr)
-        .await
-        .expect("Failed to bind to address");
+    let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;

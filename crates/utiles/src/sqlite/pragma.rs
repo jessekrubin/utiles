@@ -1,7 +1,35 @@
-use rusqlite::{Connection, Error as RusqliteError, Result as RusqliteResult};
+use rusqlite::{
+    Connection, DatabaseName, Error as RusqliteError, Result as RusqliteResult,
+};
+use tracing::debug;
 
-use crate::sqlite::page_size::pragma_page_size_get;
+pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {
+    let jm = conn.pragma_query_value(None, "journal_mode", |row| row.get(0))?;
+    Ok(jm)
+}
 
+pub fn journal_mode_set(
+    conn: &Connection,
+    mode: &str,
+    schema_name: Option<DatabaseName>,
+) -> RusqliteResult<bool> {
+    let current_mode = conn.pragma_query_value(schema_name, "journal_mode", |row| {
+        let val: String = row.get(0)?;
+        Ok(val)
+    })?;
+
+    if current_mode == mode {
+        debug!("journal_mode_set: current mode == mode: {}", mode);
+        Ok(false)
+    } else {
+        debug!(
+            "journal_mode_set: current mode != mode: {} != {}",
+            current_mode, mode
+        );
+        conn.pragma_update(schema_name, "journal_mode", mode)?;
+        Ok(true)
+    }
+}
 pub fn pragma_page_count(conn: &Connection) -> RusqliteResult<i64> {
     let mut stmt = conn.prepare("PRAGMA page_count")?;
     let mut rows = stmt.query([])?;
@@ -10,12 +38,52 @@ pub fn pragma_page_count(conn: &Connection) -> RusqliteResult<i64> {
     Ok(count)
 }
 
+pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
+    let app_id = conn.pragma_query_value(None, "application_id", |row| row.get(0))?;
+    Ok(app_id)
+}
+
+pub fn application_id_set(conn: &Connection, app_id: u32) -> RusqliteResult<u32> {
+    let current_app_id = application_id(conn)?;
+    if current_app_id == app_id {
+        debug!("application_id_set: current app_id == app_id: {}", app_id);
+        Ok(current_app_id)
+    } else {
+        debug!(
+            "application_id_set: current app_id != app_id: {} != {}",
+            current_app_id, app_id
+        );
+        conn.pragma_update(None, "application_id", app_id)?;
+        Ok(app_id)
+    }
+}
+
+pub fn magic_number(conn: &Connection) -> RusqliteResult<u32> {
+    application_id(conn)
+}
+
 pub fn pragma_freelist_count(conn: &Connection) -> RusqliteResult<i64> {
-    let mut stmt = conn.prepare("PRAGMA freelist_count")?;
-    let mut rows = stmt.query([])?;
-    let row = rows.next()?.ok_or(RusqliteError::QueryReturnedNoRows)?;
-    let count: i64 = row.get(0)?;
-    Ok(count)
+    let freelist_count = conn.pragma_query_value(None, "freelist_count", |row| {
+        let count: i64 = row.get(0)?;
+        Ok(count)
+    })?;
+    Ok(freelist_count)
+}
+
+pub fn pragma_page_size_get(conn: &Connection) -> RusqliteResult<i64> {
+    let r = conn.pragma_query_value(None, "page_size", |row| row.get(0))?;
+    Ok(r)
+}
+
+pub fn pragma_page_size_set(conn: &Connection, page_size: i64) -> RusqliteResult<i64> {
+    // set page size
+    let current_page_size = pragma_page_size_get(conn)?;
+    if current_page_size == page_size {
+        Ok(page_size)
+    } else {
+        conn.pragma_update(None, "page_size", page_size)?;
+        Ok(page_size)
+    }
 }
 
 pub fn pragma_page_size(
@@ -27,17 +95,6 @@ pub fn pragma_page_size(
     } else {
         pragma_page_size_get(conn)
     }
-}
-
-pub fn pragma_page_size_set(conn: &Connection, page_size: i64) -> RusqliteResult<i64> {
-    // set page size
-    let current_page_size = pragma_page_size_get(conn)?;
-    if current_page_size == page_size {
-        return Ok(page_size);
-    }
-    let stmt_str = format!("PRAGMA page_size = {page_size}");
-    conn.execute(&stmt_str, [])?;
-    Ok(page_size)
 }
 
 #[derive(Debug)]
@@ -223,4 +280,39 @@ pub fn pragma_index_info(
     })?;
     let rows = mapped_rows.collect::<RusqliteResult<Vec<PragmaIndexInfoRow>>>()?;
     Ok(rows)
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used)]
+    use crate::sqlite::open;
+
+    use super::*;
+
+    #[test]
+    fn journal_mode_pragma() {
+        let conn = open(":memory:").unwrap();
+        let jm = journal_mode(&conn).unwrap();
+        assert_eq!(jm, "memory");
+        let jm_set_res = journal_mode_set(&conn, "wal", None).unwrap();
+        assert_eq!(jm_set_res, true);
+    }
+
+    #[test]
+    fn pragma_page_size_pragma() {
+        let conn = open(":memory:").unwrap();
+        let page_size = pragma_page_size(&conn, None).unwrap();
+        assert_eq!(page_size, 4096);
+        let page_size_set_res = pragma_page_size_set(&conn, 8192).unwrap();
+        assert_eq!(page_size_set_res, 8192);
+    }
+
+    #[test]
+    fn pragma_application_id_pragma() {
+        let conn = open(":memory:").unwrap();
+        let app_id = application_id(&conn).unwrap();
+        assert_eq!(app_id, 0);
+        let app_id_set_res = application_id_set(&conn, 1).unwrap();
+        assert_eq!(app_id_set_res, 1);
+    }
 }
