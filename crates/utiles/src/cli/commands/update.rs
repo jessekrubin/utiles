@@ -6,7 +6,9 @@ use crate::cli::args::UpdateArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::{DbChangeType, DbChangeset, MetadataChange, MetadataChangeFromTo};
 use crate::sqlite::AsyncSqliteConn;
-use crate::utilesqlite::mbtiles::query_distinct_tiletype_fast;
+use crate::utilesqlite::mbtiles::{
+    query_distinct_tilesize_fast, query_distinct_tiletype_fast,
+};
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
 
@@ -35,7 +37,6 @@ pub async fn update_mbtiles(
     // MINZOOM ~ MAXZOOM ~ MINZOOM ~ MAXZOOM ~ MINZOOM ~ MAXZOOM
     // =========================================================
     let minzoom_maxzoom = mbt.query_minzoom_maxzoom().await?;
-    debug!("minzoom_maxzoom: {:?}", minzoom_maxzoom);
     // updated_metadata
     // Updating metadata...
     let metdata_minzoom = mbt.metadata_minzoom().await?;
@@ -85,18 +86,18 @@ pub async fn update_mbtiles(
     // register the fn
     mbt.register_utiles_sqlite_functions().await?;
     let format = mbt.metadata_row("format").await?;
-    let queryfmt = mbt
+    let query_fmt = mbt
         .conn(
             // whatever clone it!
             move |c| query_distinct_tiletype_fast(c, minmax),
         )
         .await?;
-    match queryfmt.len() {
+    match query_fmt.len() {
         0 => {
             warn!("no format found: {}", filepath);
         }
         1 => {
-            let fmt = queryfmt[0].clone();
+            let fmt = query_fmt[0].clone();
             if let Some(format) = format {
                 if format.value != fmt {
                     changes.push(MetadataChangeFromTo {
@@ -114,7 +115,45 @@ pub async fn update_mbtiles(
             }
         }
         _ => {
-            warn!("NOT IMPLEMENTED multiple formats found: {:?}", queryfmt);
+            warn!("NOT IMPLEMENTED multiple formats found: {:?}", query_fmt);
+        }
+    }
+
+    let tilesize = mbt.metadata_row("tilesize").await?;
+    let query_tilesize = mbt
+        .conn(
+            // whatever clone it!
+            move |c| query_distinct_tilesize_fast(c, minmax),
+        )
+        .await?;
+    match query_tilesize.len() {
+        0 => {
+            warn!("no tilesize found: {}", filepath);
+        }
+        1 => {
+            let ts = query_tilesize[0].clone();
+            let ts_str: String = ts.to_string();
+            if let Some(tilesize) = tilesize {
+                if tilesize.value != ts_str {
+                    changes.push(MetadataChangeFromTo {
+                        name: "tilesize".to_string(),
+                        from: Some(tilesize.value.clone()),
+                        to: Some(ts_str),
+                    });
+                }
+            } else {
+                changes.push(MetadataChangeFromTo {
+                    name: "tilesize".to_string(),
+                    from: None,
+                    to: Some(ts_str),
+                });
+            }
+        }
+        _ => {
+            warn!(
+                "NOT IMPLEMENTED multiple tilesize found: {:?}",
+                query_tilesize
+            );
         }
     }
 

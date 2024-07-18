@@ -4,13 +4,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::warn;
 
-// #[derive(Debug, Serialize, strum_macros::EnumString)]
-// #[strum(serialize_all = "snake_case")]
-// pub enum DbChangeType {
-//     Metadata,
-//     Unknown,
-// }
-
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MetadataChangeFromTo {
     pub name: String,
