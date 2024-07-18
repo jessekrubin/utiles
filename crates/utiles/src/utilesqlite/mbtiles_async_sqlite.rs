@@ -15,7 +15,10 @@ use utiles_core::BBox;
 use crate::errors::UtilesResult;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
-use crate::mbt::{MbtMetadataRow, MbtType, MbtilesMetadataJson, MinZoomMaxZoom};
+use crate::mbt::{
+    query_mbt_stats, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
+    MinZoomMaxZoom,
+};
 use crate::sqlite::{
     journal_mode, magic_number, AsyncSqliteConn, AsyncSqliteConnMut, RowsAffected,
 };
@@ -314,6 +317,14 @@ where
             return Ok(false);
         }
         Ok(true)
+    }
+
+    async fn mbt_stats(&self, full: Option<bool>) -> UtilesResult<MbtilesStats> {
+        self.conn(move |conn| {
+            let r = query_mbt_stats(conn, full);
+            Ok(r)
+        })
+        .await?
     }
 
     async fn is_mbtiles(&self) -> UtilesResult<bool> {

@@ -111,7 +111,7 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
         Commands::Update(args) => update_main(&args).await,
         Commands::Tilejson(args) => tilejson_main(&args).await,
         Commands::Copy(args) => copy_main(args).await,
-        Commands::Info(args) => info_main(&args),
+        Commands::Info(args) => info_main(&args).await,
         Commands::AggHash(args) => agg_hash_main(&args).await,
         Commands::Dev(args) => dev_main(args).await,
         Commands::Rimraf(args) => rimraf_main(args).await,
