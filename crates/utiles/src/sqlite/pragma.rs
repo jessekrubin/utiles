@@ -295,7 +295,7 @@ mod tests {
         let jm = journal_mode(&conn).unwrap();
         assert_eq!(jm, "memory");
         let jm_set_res = journal_mode_set(&conn, "wal", None).unwrap();
-        assert_eq!(jm_set_res, true);
+        assert!(jm_set_res);
     }
 
     #[test]
