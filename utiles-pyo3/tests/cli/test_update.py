@@ -36,9 +36,6 @@ def test_update_metadata(tmp_path: Path, test_data_root: Path) -> None:
     for key in metadata_keys_to_delete:
         assert key not in metadata
 
-    # copy file to `D:\\utiles\\test.mbtiles`
-    copyfile(dbpath, "D:\\utiles\\test.mbtiles")
-
     # run update on the new mbt
     update_result = _run_cli(["update", str(dbpath), "--debug"])
     update_result.echo()
