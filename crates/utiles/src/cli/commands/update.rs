@@ -131,7 +131,7 @@ pub async fn update_mbtiles(
             warn!("no tilesize found: {}", filepath);
         }
         1 => {
-            let ts = query_tilesize[0].clone();
+            let ts = query_tilesize[0];
             let ts_str: String = ts.to_string();
             if let Some(tilesize) = tilesize {
                 if tilesize.value != ts_str {
