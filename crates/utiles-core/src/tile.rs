@@ -11,7 +11,6 @@ use crate::constants::EPSILON;
 use crate::errors::UtilesCoreError;
 use crate::errors::UtilesCoreResult;
 use crate::fns::{bounds, children, neighbors, parent, siblings, xy};
-// use crate::mbutiles::MbtTileRow;
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
@@ -484,10 +483,7 @@ impl Tile {
     }
 
     /// Return a `TileFeature` for the tile
-    pub fn feature(
-        &self,
-        opts: &FeatureOptions,
-    ) -> Result<TileFeature, Box<dyn Error>> {
+    pub fn feature(&self, opts: &FeatureOptions) -> UtilesCoreResult<TileFeature> {
         let buffer = opts.buffer.unwrap_or(0.0);
         let precision = opts.precision.unwrap_or(-1);
         // Compute the bounds

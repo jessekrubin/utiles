@@ -1,5 +1,5 @@
 use clap::Parser;
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
 
 use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
@@ -20,11 +20,7 @@ pub struct DevArgs {
     fspath: Option<String>,
 }
 
-#[allow(clippy::unused_async)]
-async fn dev(args: DevArgs) -> UtilesResult<()> {
-    // DEV START
-    debug!("args: {:?}", args);
-    let filepath = args.fspath.unwrap();
+fn _timing_agg_tiles_hash(filepath: &str) -> UtilesResult<()> {
     let mbt = Mbtiles::open(filepath)?;
     add_functions(&mbt.conn)?;
     let hashes = vec![
@@ -37,14 +33,29 @@ async fn dev(args: DevArgs) -> UtilesResult<()> {
     ];
     for hash in hashes {
         let start_time = std::time::Instant::now();
-        let agg_tile_hash = mbt_agg_tiles_hash(&mbt.conn, hash)?;
+        let agg_tile_hash = mbt_agg_tiles_hash(&mbt.conn, hash, None, &None)?;
         let elapsed = start_time.elapsed();
         debug!("---------------------");
         debug!("hash: {:?}, agg_tile_hash: {:?}", hash, agg_tile_hash);
         debug!("agg_tile_hash: {:?}", agg_tile_hash);
         debug!("elapsed: {:?}", elapsed);
     }
+    Ok(())
+}
 
+#[allow(clippy::unused_async)]
+async fn dev(args: DevArgs) -> UtilesResult<()> {
+    // DEV START
+    debug!("args: {:?}", args);
+    match args.fspath {
+        Some(filepath) => {
+            info!("fspath: {:?}", filepath);
+            // timing_agg_tiles_hash(&filepath)?;
+        }
+        None => {
+            warn!("no fspath provided");
+        }
+    }
     // DEV END
     Ok(())
 }

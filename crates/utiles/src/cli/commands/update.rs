@@ -3,18 +3,19 @@ use std::path::Path;
 use tracing::{debug, warn};
 
 use crate::cli::args::UpdateArgs;
-use crate::cli::commands::metadata::MetadataChangeFromTo;
 use crate::errors::UtilesResult;
+use crate::mbt::{DbChangeType, DbChangeset, MetadataChange, MetadataChangeFromTo};
 use crate::sqlite::AsyncSqliteConn;
-use crate::utilesqlite::mbtiles::query_distinct_tiletype_fast;
-// use crate::utilesqlite::mbtiles_async_sqlite::AsyncSqlite;
+use crate::utilesqlite::mbtiles::{
+    query_distinct_tilesize_fast, query_distinct_tiletype_fast,
+};
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
 
 pub async fn update_mbtiles(
     filepath: &str,
     dryrun: bool,
-) -> UtilesResult<Vec<MetadataChangeFromTo>> {
+) -> UtilesResult<MetadataChange> {
     // check that filepath exists and is file
     let mbt = if dryrun {
         MbtilesAsyncSqliteClient::open_readonly(filepath).await?
@@ -28,15 +29,15 @@ pub async fn update_mbtiles(
     if tiles_is_empty {
         warn!("tiles table/view is empty: {}", filepath);
     }
-
     let mut changes = vec![];
+
+    let current_metadata = mbt.metadata_json().await?;
 
     // =========================================================
     // MINZOOM ~ MAXZOOM ~ MINZOOM ~ MAXZOOM ~ MINZOOM ~ MAXZOOM
     // =========================================================
     let minzoom_maxzoom = mbt.query_minzoom_maxzoom().await?;
-    debug!("minzoom_maxzoom: {:?}", minzoom_maxzoom);
-
+    // updated_metadata
     // Updating metadata...
     let metdata_minzoom = mbt.metadata_minzoom().await?;
     if let Some(minzoom_maxzoom) = minzoom_maxzoom {
@@ -47,10 +48,6 @@ pub async fn update_mbtiles(
                     from: Some(metadata_minzoom.to_string()),
                     to: Some(minzoom_maxzoom.minzoom.to_string()),
                 });
-                if !dryrun {
-                    mbt.metadata_set("minzoom", &minzoom_maxzoom.minzoom.to_string())
-                        .await?;
-                }
             }
         } else {
             changes.push(MetadataChangeFromTo {
@@ -58,10 +55,6 @@ pub async fn update_mbtiles(
                 from: None,
                 to: Some(minzoom_maxzoom.minzoom.to_string()),
             });
-            if !dryrun {
-                mbt.metadata_set("minzoom", &minzoom_maxzoom.minzoom.to_string())
-                    .await?;
-            }
         }
     }
 
@@ -74,10 +67,6 @@ pub async fn update_mbtiles(
                     from: Some(metadata_maxzoom.to_string()),
                     to: Some(minzoom_maxzoom.maxzoom.to_string()),
                 });
-                if !dryrun {
-                    mbt.metadata_set("maxzoom", &minzoom_maxzoom.maxzoom.to_string())
-                        .await?;
-                }
             }
         } else {
             changes.push(MetadataChangeFromTo {
@@ -85,10 +74,6 @@ pub async fn update_mbtiles(
                 from: None,
                 to: Some(minzoom_maxzoom.maxzoom.to_string()),
             });
-            if !dryrun {
-                mbt.metadata_set("maxzoom", &minzoom_maxzoom.maxzoom.to_string())
-                    .await?;
-            }
         }
     }
 
@@ -101,18 +86,18 @@ pub async fn update_mbtiles(
     // register the fn
     mbt.register_utiles_sqlite_functions().await?;
     let format = mbt.metadata_row("format").await?;
-    let queryfmt = mbt
+    let query_fmt = mbt
         .conn(
             // whatever clone it!
             move |c| query_distinct_tiletype_fast(c, minmax),
         )
         .await?;
-    match queryfmt.len() {
+    match query_fmt.len() {
         0 => {
             warn!("no format found: {}", filepath);
         }
         1 => {
-            let fmt = queryfmt[0].clone();
+            let fmt = query_fmt[0].clone();
             if let Some(format) = format {
                 if format.value != fmt {
                     changes.push(MetadataChangeFromTo {
@@ -120,9 +105,6 @@ pub async fn update_mbtiles(
                         from: Some(format.value.clone()),
                         to: Some(fmt.clone()),
                     });
-                    if !dryrun {
-                        mbt.metadata_set("format", &fmt).await?;
-                    }
                 }
             } else {
                 changes.push(MetadataChangeFromTo {
@@ -130,19 +112,74 @@ pub async fn update_mbtiles(
                     from: None,
                     to: Some(fmt.clone()),
                 });
-                if !dryrun {
-                    mbt.metadata_set("format", &fmt).await?;
-                }
             }
         }
         _ => {
-            warn!("NOT IMPLEMENTED multiple formats found: {:?}", queryfmt);
+            warn!("NOT IMPLEMENTED multiple formats found: {:?}", query_fmt);
         }
     }
-    debug!("queryfmt: {:?}", queryfmt);
-    debug!("metadata changes: {:?}", changes);
-    debug!("metdata_minzoom: {:?}", metdata_minzoom);
-    Ok(changes)
+
+    let tilesize = mbt.metadata_row("tilesize").await?;
+    let query_tilesize = mbt
+        .conn(
+            // whatever clone it!
+            move |c| query_distinct_tilesize_fast(c, minmax),
+        )
+        .await?;
+    match query_tilesize.len() {
+        0 => {
+            warn!("no tilesize found: {}", filepath);
+        }
+        1 => {
+            let ts = query_tilesize[0];
+            let ts_str: String = ts.to_string();
+            if let Some(tilesize) = tilesize {
+                if tilesize.value != ts_str {
+                    changes.push(MetadataChangeFromTo {
+                        name: "tilesize".to_string(),
+                        from: Some(tilesize.value.clone()),
+                        to: Some(ts_str),
+                    });
+                }
+            } else {
+                changes.push(MetadataChangeFromTo {
+                    name: "tilesize".to_string(),
+                    from: None,
+                    to: Some(ts_str),
+                });
+            }
+        }
+        _ => {
+            warn!(
+                "NOT IMPLEMENTED multiple tilesize found: {:?}",
+                query_tilesize
+            );
+        }
+    }
+
+    let metadata_change = if changes.is_empty() {
+        MetadataChange::new_empty()
+    } else {
+        let mut updated_metadata = current_metadata.clone();
+        for change in &changes {
+            if let Some(new_val) = &change.to {
+                updated_metadata.insert(&change.name, new_val);
+            }
+        }
+
+        current_metadata.diff(&updated_metadata, true)?
+    };
+    if dryrun {
+        warn!("Dryrun: no changes made");
+    } else {
+        // todo fix cloning???
+        let changes2apply = vec![metadata_change.clone()];
+        mbt.conn(move |conn| {
+            MetadataChange::apply_changes_to_connection(conn, &changes2apply)
+        })
+        .await?;
+    }
+    Ok(metadata_change)
 }
 
 pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
@@ -159,9 +196,11 @@ pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
         filepath = filepath.display()
     );
     let changes = update_mbtiles(&args.common.filepath, args.dryrun).await?;
+
     debug!("changes: {:?}", changes);
-    let s = serde_json::to_string_pretty(&changes)
-        .expect("should not fail; changes is a Vec<MetadataChangeFromTo>");
-    println!("{s}");
+    let db_changes = DbChangeset::from(DbChangeType::from(changes));
+    let jsonstring =
+        serde_json::to_string_pretty(&db_changes).expect("should not fail");
+    println!("{jsonstring}");
     Ok(())
 }

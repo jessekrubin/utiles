@@ -1,4 +1,4 @@
-use crate::UtilesResult;
+use crate::errors::UtilesResult;
 use std::io::{self, Read};
 
 pub fn stdin2string() -> UtilesResult<String> {

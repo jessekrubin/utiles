@@ -15,6 +15,9 @@ pub enum SqliteError {
     #[allow(clippy::enum_variant_names)]
     #[error("sqlite err: {0}")]
     AsyncSqliteError(async_sqlite::Error),
+
+    #[error("File does not exist: {0}")]
+    FileDoesNotExist(String),
 }
 
 pub type SqliteResult<T> = Result<T, SqliteError>;

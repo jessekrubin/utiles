@@ -1,29 +1,30 @@
+use std::fs::canonicalize;
 use std::path::Path;
 
 use crate::cli::args::InfoArgs;
 use crate::errors::UtilesResult;
+use crate::fs_async::file_exists;
 use crate::mbt::MbtilesStats;
-use crate::utilesqlite::Mbtiles;
+use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 
-fn mbinfo(filepath: &str) -> UtilesResult<MbtilesStats> {
-    let filepath = Path::new(filepath);
-    assert!(
-        filepath.exists(),
-        "File does not exist: {}",
-        filepath.display()
-    );
-    assert!(
-        filepath.is_file(),
-        "Not a file: {filepath}",
-        filepath = filepath.display()
-    );
-    let mbtiles: Mbtiles = Mbtiles::from(filepath);
-    let stats = mbtiles.mbt_stats(None)?;
-    Ok(stats)
+async fn mbinfo(filepath: &str) -> UtilesResult<MbtilesStats> {
+    let fspath = Path::new(filepath);
+    let is_file = file_exists(filepath).await;
+    if is_file {
+        let mbt = MbtilesAsyncSqliteClient::open_existing(filepath).await?;
+        let stats = mbt.mbt_stats(None).await?;
+        Ok(stats)
+    } else {
+        let abspath = canonicalize(fspath)?;
+
+        Err(crate::errors::UtilesError::NotAFile(
+            abspath.to_string_lossy().to_string(),
+        ))
+    }
 }
 
-pub fn info_main(args: &InfoArgs) -> UtilesResult<()> {
-    let stats = mbinfo(&args.common.filepath)?;
+pub async fn info_main(args: &InfoArgs) -> UtilesResult<()> {
+    let stats = mbinfo(&args.common.filepath).await?;
     let str = if args.common.min {
         serde_json::to_string(&stats)
     } else {

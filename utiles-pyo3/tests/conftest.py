@@ -25,3 +25,9 @@ def repo_root() -> Path:
 @pytest.fixture
 def test_data_root(repo_root: Path) -> Path:
     return repo_root / "test-data"
+
+
+@pytest.fixture(params=["flat", "hash", "norm"])
+def db_type(request: pytest.FixtureRequest) -> str:
+    """Fixture for testing different db/schema types"""
+    return request.param

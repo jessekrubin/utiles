@@ -1,6 +1,7 @@
 use pyo3::exceptions::PyException;
 use pyo3::{pyfunction, PyResult};
-use utiles::cli::cli_main_sync;
+
+use utiles::cli::{cli_main_sync, CliOpts};
 
 #[pyfunction]
 #[pyo3(signature = (args = None))]
@@ -32,7 +33,10 @@ pub fn ut_cli(args: Option<Vec<String>>) -> PyResult<u8> {
     // Some(&|| {
     //     py.check_signals().unwrap();
     // }),
-    let rc = cli_main_sync(Some(utiles_argv));
+    let rc = cli_main_sync(Some(CliOpts {
+        argv: Some(utiles_argv),
+        clid: Some("pyo3"),
+    }));
     match rc {
         Ok(_) => Ok(0),
         Err(e) => {

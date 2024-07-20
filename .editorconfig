@@ -44,6 +44,9 @@ max_line_length = 80
 indent_size = 2
 indent_style = space
 
+[*.{toml}]
+indent_size = 2
+
 [*.{yml,yaml}]
 indent_style = space
 indent_size = 2

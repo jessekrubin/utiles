@@ -8,6 +8,7 @@
 .venv/
 .tox/
 playground/
+__pycache__/
 f.py
 f.ts
 f.tsx
@@ -175,9 +176,6 @@ cdk.out/
 .vscode/
 .vscode/*      # Maybe .vscode/**/* instead - see comments
 !.vscode/settings.json.default
-# !.vscode/tasks.json
-# !.vscode/launch.json
-# !.vscode/extensions.json
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
@@ -195,5 +193,8 @@ file.py
 
 # testing data
 blue-marble/
+crates/**/*.db
 crates/**/*.mbtiles
+crates/**/*.pmtiles
+crates/**/*.sqlite
 crates/**/*.utiles

@@ -1,4 +1,5 @@
 use crate::errors::UtilesResult;
+use crate::fs_async::file_exists;
 use crate::UtilesError;
 use std::path::PathBuf;
 use tracing::debug;
@@ -18,21 +19,19 @@ impl std::fmt::Display for DbPath {
 }
 
 impl DbPath {
+    #[must_use]
     pub fn new(fspath: &str) -> Self {
-        let p = PathBuf::from(fspath);
-        let filename = p
-            .file_name()
-            .expect("DbPath::new: invalid path, could not get filename from path");
-        DbPath {
-            fspath: fspath.to_string(),
-            filename: filename
-                .to_str()
-                .expect(
-                    "DbPath::new: invalid path, could not convert filename to string",
-                )
-                .to_string(),
-        }
+        // let p = PathBuf::from(fspath);
+        pathlike2dbpath(fspath).map_or(
+            DbPath {
+                fspath: "unknown".to_string(),
+                filename: "unknown".to_string(),
+            },
+            |a| a,
+        )
     }
+
+    #[must_use]
     pub fn memory() -> Self {
         DbPath {
             fspath: ":memory:".to_string(),
@@ -40,8 +39,14 @@ impl DbPath {
         }
     }
 
+    #[must_use]
     pub fn fspath_exists(&self) -> bool {
         PathBuf::from(&self.fspath).exists()
+    }
+
+    #[must_use]
+    pub async fn fspath_exists_async(&self) -> bool {
+        file_exists(&self.fspath).await
     }
 }
 

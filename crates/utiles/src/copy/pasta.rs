@@ -1,13 +1,16 @@
 #![allow(dead_code)]
 
+use tracing::{debug, info, warn};
+
+use utiles_core::UtilesCoreError;
+
 use crate::copy::CopyConfig;
-use crate::errors::{UtilesCopyError, UtilesResult};
+use crate::errors::UtilesCopyError;
+use crate::errors::UtilesResult;
 use crate::mbt::MbtType;
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
-use tracing::{debug, warn};
-use utiles_core::UtilesCoreError;
 
 #[derive(Debug)]
 pub struct CopyPasta {
@@ -35,7 +38,9 @@ impl CopyPasta {
     }
 
     /// Returns the destination db and a bool indicating if it was created
-    pub async fn get_dst_db(&self) -> UtilesResult<(MbtilesAsyncSqliteClient, bool)> {
+    pub async fn get_dst_db(
+        &self,
+    ) -> UtilesResult<(MbtilesAsyncSqliteClient, bool, MbtType)> {
         // if the dst is a file... we gotta get it...
         let dst_db_res = MbtilesAsyncSqliteClient::open_existing(&self.cfg.dst).await;
         let (dst_db, is_new) = match dst_db_res {
@@ -55,7 +60,8 @@ impl CopyPasta {
             }
         };
         dst_db.register_utiles_sqlite_functions().await?;
-        Ok((dst_db, is_new))
+        let db_type_queried = dst_db.query_mbt_type().await?;
+        Ok((dst_db, is_new, db_type_queried))
     }
 
     pub async fn copy_metadata(
@@ -117,12 +123,12 @@ impl CopyPasta {
         let src_db_name = "src";
         let where_clause = self.cfg.mbtiles_sql_where()?;
         let insert_strat = self.cfg.istrat.sql_prefix().to_string();
-        let hash_type = "md5_hex";
-
+        let hash_type_fn_string =
+            self.cfg.hash.unwrap_or_default().sqlite_hex_fn_name();
         let n_tiles_inserted = dst_db.conn(
             move |x| {
                 let insert_statement = &format!(
-                    "{insert_strat} INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) SELECT zoom_level, tile_column, tile_row, tile_data, {hash_type}(tile_data) as tile_hash FROM {src_db_name}.tiles {where_clause}"
+                    "{insert_strat} INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) SELECT zoom_level, tile_column, tile_row, tile_data, {hash_type_fn_string}(tile_data) as tile_hash FROM {src_db_name}.tiles {where_clause}"
                 );
                 debug!("Executing tiles insert: {:?}", insert_statement);
                 x.execute(
@@ -147,36 +153,50 @@ impl CopyPasta {
         let src_db_name = "src";
         let where_clause = self.cfg.mbtiles_sql_where()?;
         let insert_strat = self.cfg.istrat.sql_prefix().to_string();
-        let hash_type = "md5_hex";
+        let hash_type_fn_string =
+            self.cfg.hash.unwrap_or_default().sqlite_hex_fn_name();
+        debug!("hash fn: {}", hash_type_fn_string);
 
-        let n_tiles_inserted = dst_db.conn(
-            move |x| {
+        let n_tiles_inserted = dst_db
+            .conn(move |x| {
                 let insert_statement = &format!(
-                    "{insert_strat} INTO map (zoom_level, tile_column, tile_row, tile_id) SELECT zoom_level, tile_column, tile_row, {hash_type}(tile_data) as tile_id FROM {src_db_name}.tiles {where_clause}"
+                    "
+{insert_strat} INTO map (zoom_level, tile_column, tile_row, tile_id)
+SELECT
+    zoom_level as zoom_level,
+    tile_column as tile_column,
+    tile_row as tile_row,
+    {hash_type_fn_string}(tile_data) AS tile_id
+FROM
+    {src_db_name}.tiles
+{where_clause};
+"
                 );
                 debug!("Executing tiles insert: {:?}", insert_statement);
-                let changes = x.execute(
-                    insert_statement,
-                    [],
-                )?;
+                let changes = x.execute(insert_statement, [])?;
 
                 // now just join and insert the images...
                 let insert_statement = &format!(
                     "
-                    INSERT OR IGNORE INTO images (tile_id, tile_data)
-                    SELECT map.tile_id, tiles.tile_data
-                    FROM map
-                    JOIN {src_db_name}.tiles ON map.zoom_level = {src_db_name}.tiles.zoom_level AND map.tile_column = {src_db_name}.tiles.tile_column AND map.tile_row = {src_db_name}.tiles.tile_row
+INSERT OR IGNORE INTO images (tile_id, tile_data)
+SELECT
+    map.tile_id,
+    tiles.tile_data
+FROM
+    map
+JOIN
+    {src_db_name}.tiles
+ON
+    map.zoom_level = {src_db_name}.tiles.zoom_level
+    AND map.tile_column = {src_db_name}.tiles.tile_column
+    AND map.tile_row = {src_db_name}.tiles.tile_row;
                     "
                 );
                 debug!("Executing images insert: {:?}", insert_statement);
-                let changes2 = x.execute(
-                    insert_statement,
-                    [],
-                )?;
+                let changes2 = x.execute(insert_statement, [])?;
                 Ok(changes + changes2)
-            }
-        ).await?;
+            })
+            .await?;
 
         if n_tiles_inserted == 0 {
             warn!("No tiles inserted!");
@@ -206,17 +226,11 @@ impl CopyPasta {
                 // do the thing
                 debug!("Copying tiles from src to dst: {:?}", self.cfg);
                 self.copy_tiles_zbox_hash(dst_db).await
-                // self.copy_tiles_normal(dst_db, src_db_name, &where_clause, &insert_strat).await
-                // let emsg = format!("Unsupported/unimplemented db-type {:?}", dst_db_type);
-                // Err(UtilesCoreError::Unimplemented(emsg).into())
             }
             MbtType::Norm => {
                 // do the thing
                 debug!("Copying tiles from src to dst: {:?}", self.cfg);
                 self.copy_tiles_zbox_norm(dst_db).await
-                // self.copy_tiles_normal(dst_db, src_db_name, &where_clause, &insert_strat).await
-                // let emsg = format!("Unsupported/unimplemented db-type {:?}", dst_db_type);
-                // Err(UtilesCoreError::Unimplemented(emsg).into())
             }
             _ => {
                 // do the thing
@@ -245,28 +259,35 @@ impl CopyPasta {
         // join on zoom_level, tile_column, tile_row for src and dst and
         // see if there is any overlap
 
+        let where_clause = self.cfg.mbtiles_sql_where()?;
         // TODO: check if minzoom and maxzoom overlap
-        let has_conflict = dst_db.conn(
-            move |c| {
+        let has_conflict = dst_db
+            .conn(move |c| {
                 let src_db_name = "src";
                 let check_statement = &format!(
-                    "SELECT COUNT(*) FROM tiles JOIN {src_db_name}.tiles ON main.tiles.zoom_level = {src_db_name}.tiles.zoom_level AND main.tiles.tile_column = {src_db_name}.tiles.tile_column AND main.tiles.tile_row = {src_db_name}.tiles.tile_row LIMIT 1"
+                    r"
+SELECT COUNT(*)
+FROM (
+    SELECT main.tiles.zoom_level, main.tiles.tile_column, main.tiles.tile_row
+    FROM main.tiles
+    {where_clause}
+) AS filtered_tiles
+JOIN {src_db_name}.tiles ON
+    filtered_tiles.zoom_level = {src_db_name}.tiles.zoom_level
+    AND filtered_tiles.tile_column = {src_db_name}.tiles.tile_column
+    AND filtered_tiles.tile_row = {src_db_name}.tiles.tile_row
+LIMIT 1;
+                "
                 );
-
                 debug!("Executing check_statement: {:?}", check_statement);
-                c.query_row(
-                    check_statement,
-                    [],
-                    |row| {
-                        let r: i64 = row.get(0)?;
+                c.query_row(check_statement, [], |row| {
+                    let r: i64 = row.get(0)?;
 
-                        Ok(r)
-                    },
-                )
-            }
-        ).await.map_err(
-            UtilesError::AsyncSqliteError
-        )?;
+                    Ok(r)
+                })
+            })
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
         Ok(has_conflict > 0)
     }
 
@@ -275,7 +296,7 @@ impl CopyPasta {
         // doing preflight check
         debug!("Preflight check");
         self.preflight_check()?;
-        let (dst_db, is_new) = self.get_dst_db().await?;
+        let (dst_db, is_new, db_type) = self.get_dst_db().await?;
 
         let src_db_name = "src";
 
@@ -285,6 +306,7 @@ impl CopyPasta {
         dst_db.attach_db(&src_db_path, src_db_name).await?;
         debug!("OK: Attached src db");
         if !is_new && self.cfg.istrat.requires_check() {
+            info!("No conflict strategy provided; checking for conflict");
             let has_conflict = self.check_conflict(&dst_db).await?;
             if has_conflict {
                 warn!("Conflict detected!");
@@ -293,14 +315,36 @@ impl CopyPasta {
                 )
                 .into());
             }
+        } else if is_new {
+            debug!("dst db is new; not checking for conflict");
+        } else {
+            debug!(
+                "No check required for conflict strategy: {}",
+                self.cfg.istrat.to_string()
+            );
         }
-
+        info!("Copying tiles: {:?} -> {:?}", self.cfg.src, self.cfg.dst);
         let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
         debug!("n_tiles_inserted: {:?}", n_tiles_inserted);
 
         if is_new {
             let n_metadata_inserted = self.copy_metadata(&dst_db).await?;
             debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
+        }
+
+        dst_db.metadata_set("dbtype", db_type.as_str()).await?;
+        if db_type == MbtType::Hash || db_type == MbtType::Norm {
+            dst_db
+                .metadata_set(
+                    "tileid",
+                    self.cfg
+                        .hash
+                        .unwrap_or_default()
+                        .to_string()
+                        .to_string()
+                        .as_str(),
+                )
+                .await?;
         }
 
         debug!("Detaching src db...");

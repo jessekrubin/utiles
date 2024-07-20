@@ -1,6 +1,8 @@
 use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, strum_macros::Display,
+)]
 pub enum InsertStrategy {
     #[default]
     None,

@@ -1,12 +1,12 @@
 [package]
 name = "utiles-dev"
-edition.workspace = true
 version.workspace = true
-homepage.workspace = true
-documentation.workspace = true
-repository.workspace = true
 authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+homepage.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -18,22 +18,22 @@ name = "utdev"
 path = "src/main.rs"
 
 [dependencies]
-utiles = { path = "../utiles" }
-utilesqlite = { path = "../utilesqlite" }
-utiles-cli = { path = "../utiles-cli" }
 anyhow.workspace = true
+deadpool-sqlite = { version = "0.7.0", features = ["tracing"] }
 fast_hilbert.workspace = true
+futures = "0.3.29"
 geo-types.workspace = true
 geojson.workspace = true
+geozero = { version = "0.11.0", features = ["with-mvt", "with-wkb"] }
 rusqlite.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-thiserror.workspace= true
+sqlx = { version = "0.7.2", features = ["sqlite", "runtime-tokio", "macros"] }
+thiserror.workspace = true
 tilejson.workspace = true
 tokio.workspace = true
-tracing-subscriber.workspace = true
 tracing.workspace = true
-sqlx = { version = "0.7.2", features = ["sqlite", "runtime-tokio", "macros"] }
-futures = "0.3.29"
-geozero = { version = "0.11.0", features = ["with-mvt", "with-wkb"] }
-deadpool-sqlite = { version = "0.7.0", features = ["tracing"] }
+tracing-subscriber.workspace = true
+utiles = { path = "../utiles" }
+utiles-cli = { path = "../utiles-cli" }
+utilesqlite = { path = "../utilesqlite" }

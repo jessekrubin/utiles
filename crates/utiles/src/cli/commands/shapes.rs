@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
 use tracing::{debug, error};
@@ -7,7 +8,8 @@ use utiles_core::tile::FeatureOptions;
 use utiles_core::Tile;
 
 use crate::cli::stdinterator::StdInterator;
-use crate::errors::{UtilesError, UtilesResult};
+use crate::errors::UtilesError;
+use crate::errors::UtilesResult;
 
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]
@@ -152,28 +154,6 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
                 Err(UtilesError::Error(format!("Error parsing tile: {e}")))
             }
         }
-        // Some(
-        //     TileWithProperties {
-        //         tile: t,
-        //         id,
-        //         properties,
-        //     }
-        // )
-        // match t {
-        //     Ok(tile) => {
-        //         let tile_with_properties = TileWithProperties {
-        //             tile,
-        //             id,
-        //             properties,
-        //         };
-        //         Some(tile_with_properties)
-        //     }
-        //     Err(e) => {
-        //         error!("Error parsing tile: {}", e);
-        //         // throw the error here
-        //         panic!("Error parsing tile: {}", e);
-        //     }
-        // }
     });
     let feature_options: FeatureOptions = FeatureOptions {
         fid: None,

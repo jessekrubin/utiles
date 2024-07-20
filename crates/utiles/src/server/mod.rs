@@ -1,5 +1,4 @@
 #![allow(clippy::unwrap_used)]
-
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
@@ -21,6 +20,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tilejson::TileJSON;
 use tower::ServiceBuilder;
+use tower_http::compression::CompressionLayer;
 use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
 use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
 use tower_http::{
@@ -29,14 +29,15 @@ use tower_http::{
 };
 use tracing::{debug, info, warn};
 
+use request_id::Radix36MakeRequestId;
+use utiles_core::tile_type::blob2headers;
+use utiles_core::{quadkey2tile, utile, Tile};
+
 use crate::errors::UtilesResult;
 use crate::globster::find_filepaths;
 use crate::signal::shutdown_signal;
 use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::utilesqlite::MbtilesAsyncSqliteClient;
-use request_id::Radix36MakeRequestId;
-use utiles_core::tile_type::blob2headers;
-use utiles_core::{quadkey2tile, utile, Tile};
 
 pub mod radix36;
 mod request_id;
@@ -123,12 +124,9 @@ async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     Ok(Datasets { mbtiles: datasets })
 }
 
-pub async fn utiles_serve(
-    cfg: UtilesServerConfig,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     info!("__UTILES_SERVE__");
-    let utiles_serve_config_json = serde_json::to_string_pretty(&cfg)
-        .expect("Failed to serialize utiles_serve_config_json");
+    let utiles_serve_config_json = serde_json::to_string_pretty(&cfg)?;
     info!("config:\n{}", utiles_serve_config_json);
 
     let addr = cfg.addr();
@@ -143,7 +141,12 @@ pub async fn utiles_serve(
     // ...seems to be the idiomatic way to do this...
     let shared_state = Arc::new(state);
     let x_request_id = HeaderName::from_static("x-request-id");
-
+    let comression_layer: CompressionLayer = CompressionLayer::new()
+        // .br(true)
+        // .deflate(true)
+        .gzip(true)
+        .zstd(true);
+    // .compress_when(|_, _, _, _| true);
     // Build our middleware stack
     let middleware = ServiceBuilder::new()
         .layer(SetRequestIdLayer::new(
@@ -161,7 +164,8 @@ pub async fn utiles_serve(
         )
         // propagate `x-request-id` headers from request to response
         .layer(PropagateRequestIdLayer::new(x_request_id))
-        .layer(TimeoutLayer::new(Duration::from_secs(10)));
+        .layer(TimeoutLayer::new(Duration::from_secs(10)))
+        .layer(comression_layer);
 
     // Build the app/router!
     let app = Router::new()
@@ -178,9 +182,7 @@ pub async fn utiles_serve(
 
     // let addr = cfg.addr();
     info!("Listening on: {}", addr);
-    let listener = tokio::net::TcpListener::bind(addr)
-        .await
-        .expect("Failed to bind to address");
+    let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;

@@ -1,8 +1,12 @@
-use crate::UtilesResult;
-use json_patch::Patch;
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::BTreeMap;
+use tracing::debug;
+
+use crate::errors::UtilesResult;
+use crate::mbt::{MetadataChange, MetadataChangeFromTo};
+use crate::UtilesError;
 
 /// Metadata row struct for `mbtiles` metadata table
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -103,6 +107,39 @@ impl MbtilesMetadataJson {
         }
     }
 
+    pub fn update(&mut self, key: &str, value: &str) {
+        let val = match value.parse::<Value>() {
+            Ok(v) => v,
+            Err(_) => Value::String(value.to_string()),
+        };
+        match self {
+            MbtilesMetadataJson::Obj(obj) => {
+                // if key exists, and value is different update value
+                if let Some(v) = obj.get_mut(key) {
+                    if v != &val {
+                        *v = val;
+                    }
+                } else {
+                    // else insert new key value pair
+                    obj.insert(key.to_string(), val);
+                } // baboom
+            }
+            MbtilesMetadataJson::Arr(arr) => {
+                // if key exists update value
+                if let Some(row) = arr.iter_mut().find(|row| row.name == key) {
+                    if row.value != val {
+                        row.value = val;
+                    }
+                } else {
+                    // else insert new row
+                    arr.push(MbtilesMetadataRowParsed {
+                        name: key.to_string(),
+                        value: val,
+                    });
+                }
+            }
+        }
+    }
     #[must_use]
     pub fn as_obj(&self) -> BTreeMap<String, Value> {
         match self {
@@ -113,6 +150,39 @@ impl MbtilesMetadataJson {
                         acc.insert(row.name.clone(), row.value.clone());
                         acc
                     });
+                obj
+            }
+        }
+    }
+    /// Returns the raw object representation of the metadata
+    /// where the value is json-stringified if it is not a string
+    #[must_use]
+    pub fn as_obj_raw(&self) -> BTreeMap<String, String> {
+        match self {
+            MbtilesMetadataJson::Obj(obj) => {
+                let obj: BTreeMap<String, String> = obj
+                    .iter()
+                    .map(|(k, v)| {
+                        let val = match v {
+                            Value::String(s) => s.clone(),
+                            _ => serde_json::to_string(v).unwrap_or_default(),
+                        };
+                        (k.clone(), val)
+                    })
+                    .collect();
+                obj
+            }
+            MbtilesMetadataJson::Arr(arr) => {
+                let obj: BTreeMap<String, String> = arr
+                    .iter()
+                    .map(|row| {
+                        let val = match &row.value {
+                            Value::String(s) => s.clone(),
+                            _ => serde_json::to_string(&row.value).unwrap_or_default(),
+                        };
+                        (row.name.clone(), val)
+                    })
+                    .collect();
                 obj
             }
         }
@@ -154,22 +224,76 @@ impl MbtilesMetadataJson {
         }
     }
 
+    pub fn diff_changes(
+        &self,
+        other: &Value,
+    ) -> UtilesResult<Vec<MetadataChangeFromTo>> {
+        let from_map = self.as_obj_raw();
+        let to_map: BTreeMap<String, String> = match other {
+            Value::Object(obj) => obj
+                .iter()
+                .map(|(k, v)| {
+                    let val = match v {
+                        Value::String(s) => s.clone(),
+                        _ => serde_json::to_string(v).unwrap_or_default(),
+                    };
+                    (k.clone(), val)
+                })
+                .collect(),
+            _ => {
+                return Err(UtilesError::MetadataError(
+                    "Value is not an object".to_string(),
+                ))
+            }
+        };
+        let all_keys = from_map.keys().chain(to_map.keys());
+        let changes = all_keys
+            .filter_map(|k| {
+                let from = from_map.get(k);
+                let to = to_map.get(k);
+                if from == to {
+                    None
+                } else {
+                    Some(MetadataChangeFromTo {
+                        name: k.clone(),
+                        from: from.cloned(),
+                        to: to.cloned(),
+                    })
+                }
+            })
+            .collect();
+        Ok(changes)
+    }
+
     pub fn diff(
         &self,
         other: &MbtilesMetadataJson,
         merge: bool,
-    ) -> UtilesResult<(Patch, Patch, Value)> {
+    ) -> UtilesResult<MetadataChange> {
         let self_value = serde_json::to_value(self)?;
         let mut merged = self_value.clone();
         let other_value = serde_json::to_value(other)?;
+
+        let self_value_json_string = serde_json::to_string_pretty(&self_value)?;
+        let other_value_json_string = serde_json::to_string_pretty(&other_value)?;
+        debug!("self_value: {}", self_value_json_string);
+        debug!("other_value: {}", other_value_json_string);
         if merge {
+            debug!("merging...");
             json_patch::merge(&mut merged, &other_value);
         }
         let forward_patch = json_patch::diff(&self_value, &merged);
         let reverse_patch = json_patch::diff(&merged, &self_value);
         let mut patched_data = self_value.clone();
         json_patch::patch(&mut patched_data, &forward_patch)?;
-        Ok((forward_patch, reverse_patch, patched_data))
+        let changes = self.diff_changes(&patched_data)?;
+        debug!("calculated changes: {:?}", changes);
+        Ok(MetadataChange {
+            forward: forward_patch,
+            reverse: reverse_patch,
+            data: patched_data,
+            changes,
+        })
     }
 }
 

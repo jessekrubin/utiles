@@ -2,8 +2,8 @@ use std::path::Path;
 
 use tokio::fs::read_to_string;
 
+use crate::errors::UtilesResult;
 use crate::mbt::metadata_row::MbtilesMetadataJson;
-use crate::UtilesResult;
 
 // read metadata json from filepath...
 pub async fn read_metadata_json(

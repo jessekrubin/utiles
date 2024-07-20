@@ -70,14 +70,12 @@ pub async fn copy(cfg: &CopyConfig) -> UtilesResult<()> {
     // TODO: figure out what I was doing here there is some duplication
     //       of things happening...
     // make sure input file exists and is file...
-    let src =
-        get_tile_src(pasta.cfg.src.to_str().ok_or_else(|| {
-            UtilesError::Error("src is not a valid string".to_string())
-        })?)?;
-    let dst =
-        get_tile_dst(pasta.cfg.dst.to_str().ok_or_else(|| {
-            UtilesError::Error("dst is not a valid string".to_string())
-        })?)?;
+    let src = get_tile_src(pasta.cfg.src.to_str().ok_or_else(|| {
+        UtilesError::PathConversionError(pasta.cfg.src.to_string_lossy().to_string())
+    })?)?;
+    let dst = get_tile_dst(pasta.cfg.dst.to_str().ok_or_else(|| {
+        UtilesError::PathConversionError(pasta.cfg.dst.to_string_lossy().to_string())
+    })?)?;
 
     let srcdst = match (src, dst) {
         (Source::Mbtiles(_src), Destination::Fs(_dst)) => Ok(CopySrcDest::Mbtiles2Fs),

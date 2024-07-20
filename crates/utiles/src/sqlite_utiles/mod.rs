@@ -1,9 +1,17 @@
-use rusqlite::{Connection, Result};
-use tracing::debug;
-
-use crate::sqlite_utiles::hash_int::{add_function_xxh3_int, add_function_xxh64_int};
+//! utiles-sqlite ~ sqlite extension function(s) for utiles
+//!
+//! Adds the following functions:
+//!   - `ut_tiletype(blob)`   - returns the tile type of the blob
+//!   - `ut_tilesize(blob)`   - returns the size of raster tile or None
+//!   - `xxh3_int(blob|str)`  - returns xxh3 hash as `i64` big-endian view
+//!   - `xxh64_int(blob|str)` - returns xxh64 hash as `i64` big-endian view
+use crate::sqlite_utiles::hash_int::{
+    add_function_fnv_i64, add_function_xxh3_i64, add_function_xxh64_i64,
+};
 use crate::sqlite_utiles::tilesize::add_function_ut_tilesize;
 use crate::sqlite_utiles::tiletype::add_function_ut_tiletype;
+use rusqlite::{Connection, Result};
+use tracing::debug;
 
 mod hash_int;
 mod tilesize;
@@ -14,8 +22,9 @@ pub fn add_ut_functions(db: &Connection) -> Result<()> {
     add_function_ut_tiletype(db)?;
     add_function_ut_tilesize(db)?;
 
-    add_function_xxh3_int(db)?;
-    add_function_xxh64_int(db)?;
+    add_function_xxh3_i64(db)?;
+    add_function_xxh64_i64(db)?;
+    add_function_fnv_i64(db)?;
     debug!("registered sqlite-utiles functions!");
     Ok(())
 }

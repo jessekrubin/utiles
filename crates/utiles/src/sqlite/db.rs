@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use rusqlite::Connection;
+
 use crate::errors::UtilesResult;
 use crate::sqlite::{
     pragma_database_list, pragma_index_list, PragmaIndexListRow, RusqliteResult,
     Sqlike3,
 };
 use crate::UtilesError;
-use rusqlite::Connection;
-use tracing::debug;
 
 pub struct SqliteDb {
     pub conn: Connection,
@@ -17,6 +17,10 @@ pub struct SqliteDb {
 impl Sqlike3 for SqliteDb {
     fn conn(&self) -> &Connection {
         &self.conn
+    }
+
+    fn conn_mut(&mut self) -> &mut Connection {
+        &mut self.conn
     }
 }
 
@@ -72,48 +76,6 @@ pub fn pragma_index_list_all_tables(
     }
     Ok(index_map)
 }
-
-pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
-    let mut stmt = conn.prepare("PRAGMA application_id")?;
-    let mut rows = stmt.query([])?;
-    let row = rows
-        .next()?
-        .expect("'PRAGMA application_id' -- should return row but did not");
-    let app_id: u32 = row.get(0)?;
-    Ok(app_id)
-}
-
-pub fn application_id_set(conn: &Connection, app_id: u32) -> RusqliteResult<u32> {
-    let current_app_id = application_id(conn)?;
-    if current_app_id == app_id {
-        debug!("application_id_set: current app_id == app_id: {}", app_id);
-        Ok(current_app_id)
-    } else {
-        debug!(
-            "application_id_set: current app_id != app_id: {} != {}",
-            current_app_id, app_id
-        );
-        let sql = format!("PRAGMA application_id = {app_id}");
-        let mut stmt = conn.prepare(&sql)?;
-        stmt.execute([])?;
-        Ok(app_id)
-    }
-}
-
-pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {
-    let mut stmt = conn.prepare("PRAGMA journal_mode")?;
-    let mut rows = stmt.query([])?;
-    let row = rows
-        .next()?
-        .expect("'PRAGMA journal_mode' -- should return row but did not");
-    let jm: String = row.get(0)?;
-    Ok(jm)
-}
-
-pub fn magic_number(conn: &Connection) -> RusqliteResult<u32> {
-    application_id(conn)
-}
-
 pub fn query_db_fspath(conn: &Connection) -> RusqliteResult<Option<String>> {
     let rows = pragma_database_list(conn)?;
     let row = rows.iter().find_map(|r| {
@@ -125,7 +87,6 @@ pub fn query_db_fspath(conn: &Connection) -> RusqliteResult<Option<String>> {
     });
     Ok(row)
 }
-
 pub fn is_empty_db(connection: &Connection) -> RusqliteResult<bool> {
     let mut stmt = connection.prepare("SELECT COUNT(*) FROM sqlite_schema")?;
     let rows = stmt.query_row([], |row| {

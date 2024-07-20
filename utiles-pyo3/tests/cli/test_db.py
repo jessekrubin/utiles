@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from pytest import fixture
+
 from utiles.dev.testing import run_cli as _run_cli
 
 
@@ -39,6 +41,23 @@ def test_touch(tmp_path: Path, test_data_root: Path) -> None:
     assert parsed_data == expected_info_json
 
 
+def test_touch_db_type(tmp_path: Path, db_type: str) -> None:
+    # make a new file
+    new_mbtiles = tmp_path / "new.mbtiles"
+    result = _run_cli(["touch", str(new_mbtiles), "--db-type", db_type])
+    assert result.returncode == 0
+    assert new_mbtiles.exists()
+    assert new_mbtiles.is_file()
+    assert new_mbtiles.suffix == ".mbtiles"
+
+    result = _run_cli(["info", str(new_mbtiles)])
+    assert result.returncode == 0
+    result.print()
+    parsed_data = json.loads(result.stdout)
+    assert parsed_data["ntiles"] == 0
+    assert parsed_data["mbtype"] == db_type
+
+
 def test_touch_page_size_512(tmp_path: Path) -> None:
     # make a new file
     new_mbtiles = tmp_path / "new.mbtiles"
@@ -54,11 +73,11 @@ def test_touch_page_size_512(tmp_path: Path) -> None:
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
-        "filesize": 2560,
+        "filesize": 2048,
         "mbtype": "flat",
         "ntiles": 0,
         "nzooms": 0,
-        "page_count": 5,
+        "page_count": 4,
         "page_size": 512,
         "freelist_count": 0,
         "minzoom": None,

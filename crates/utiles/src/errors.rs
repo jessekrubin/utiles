@@ -1,6 +1,5 @@
 use thiserror::Error;
 
-pub type UtilesResult<T> = Result<T, UtilesError>;
 #[derive(Error, Debug)]
 pub enum UtilesCopyError {
     #[error("src and dst: {0}")]
@@ -24,14 +23,23 @@ pub enum UtilesError {
     #[error("No fspath extension: {0}")]
     NoFspathExtension(String),
 
+    #[error("No fspath stem: {0}")]
+    NoFspathStem(String),
+
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
+
+    #[error("metadata error: {0}")]
+    MetadataError(String),
 
     #[error("Path already exists: {0}")]
     PathExistsError(String),
 
     #[error("Not a file: {0}")]
     NotAFile(String),
+
+    #[error("Non mbtiles sqlite db: {0}")]
+    NonMbtilesSqliteDb(String),
 
     #[error("parse int error: {0}")]
     ParseIntError(#[from] std::num::ParseIntError),
@@ -93,3 +101,5 @@ pub enum UtilesError {
     #[error("json_patch error: {0}")]
     JsonPatchError(#[from] json_patch::PatchError),
 }
+
+pub type UtilesResult<T, E = UtilesError> = Result<T, E>;

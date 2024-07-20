@@ -1,7 +1,6 @@
 // allow dead code in this module
 // #![allow(dead_code)]
 
-mod dbpath;
 pub mod mbtiles;
 pub mod mbtiles_async;
 pub mod mbtiles_async_sqlite;
