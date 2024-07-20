@@ -2,7 +2,7 @@ use futures::StreamExt;
 use rusqlite::Connection;
 use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, info, warn};
+use tracing::{debug, error, info, warn};
 
 use utiles_core::prelude::*;
 
@@ -12,7 +12,7 @@ use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesResult;
 
-pub async fn make_tiles_rx(
+pub fn make_tiles_rx(
     mbt: &MbtilesAsyncSqliteClient,
 ) -> UtilesResult<tokio::sync::mpsc::Receiver<(Tile, Vec<u8>)>> {
     let (tx, rx) = tokio::sync::mpsc::channel(100);
@@ -22,58 +22,54 @@ pub async fn make_tiles_rx(
     tokio::spawn({
         let mbt = mbt.clone();
         async move {
-            mbt.conn(move |c: &Connection| -> RusqliteResult<()> {
-                let mut s = c.prepare(
+            let result = mbt
+                .conn(move |c: &Connection| -> RusqliteResult<()> {
+                    let mut s = c.prepare(
                     "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles;",
                 )?;
-                let tiles_iters = s.query_map(rusqlite::params![], |row| {
-                    let z: u8 = row.get(0)?;
-                    let x: u32 = row.get(1)?;
-                    let yup: u32 = row.get(2)?;
-                    let tile = utile_yup!(x, yup, z);
-                    let tile_data: Vec<u8> = row.get(3)?;
-                    // println!("sending tile: {:?}", tile);
+                    let tiles_iters = s.query_map(rusqlite::params![], |row| {
+                        let z: u8 = row.get(0)?;
+                        let x: u32 = row.get(1)?;
+                        let yup: u32 = row.get(2)?;
+                        let tile = utile_yup!(x, yup, z);
+                        let tile_data: Vec<u8> = row.get(3)?;
+                        // println!("sending tile: {:?}", tile);
 
-                    let tx = tx.clone();
-                    let tuple = (tile, tile_data);
-                    if let Err(e) = tx.blocking_send(tuple) {
-                        warn!("Blocking send error: {:?}", e);
+                        let tx = tx.clone();
+                        let tuple = (tile, tile_data);
+                        if let Err(e) = tx.blocking_send(tuple) {
+                            warn!("Blocking send error: {:?}", e);
+                        }
+                        Ok(())
+                    })?;
+                    // Consume the iterator
+                    for row in tiles_iters {
+                        let _ = row;
                     }
-                    Ok(())
-                })?;
-                // Consume the iterator
-                for row in tiles_iters {
-                    let _ = row;
-                }
 
-                Ok(())
-            })
-            .await
-            .unwrap();
+                    Ok(())
+                })
+                .await;
+            if let Err(e) = result {
+                error!("make_tiles_rx: {:?}", e);
+            }
         }
     });
     Ok(rx)
 }
-pub async fn make_tiles_stream(
+pub fn make_tiles_stream(
     mbt: &MbtilesAsyncSqliteClient,
 ) -> UtilesResult<ReceiverStream<(Tile, Vec<u8>)>> {
-    let rx = make_tiles_rx(mbt).await?;
-    return Ok(ReceiverStream::new(rx));
+    let rx = make_tiles_rx(mbt)?;
+    Ok(ReceiverStream::new(rx))
 }
 
+#[derive(Default)]
 pub struct WriterStats {
     pub count: usize,
     pub nbytes: usize,
 }
 
-impl Default for WriterStats {
-    fn default() -> Self {
-        Self {
-            count: 0,
-            nbytes: 0,
-        }
-    }
-}
 pub struct MbtStreamWriter {
     pub stream: ReceiverStream<(Tile, Vec<u8>)>,
     pub mbt: Mbtiles,
@@ -114,7 +110,6 @@ impl MbtStreamWriter {
 }
 
 pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
-    info!("WEBPIFY");
     let mbt =
         MbtilesAsyncSqliteClient::open_existing(args.common.filepath.as_str()).await?;
     mbt.assert_mbtiles().await?;
@@ -123,7 +118,7 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let dst_mbtiles = Mbtiles::open_new(args.dst, None)?;
     dst_mbtiles.metadata_set_many(&mbt_metadata)?;
     dst_mbtiles.metadata_set("format", "webp")?;
-    let tiles_stream = make_tiles_stream(&mbt).await?;
+    let tiles_stream = make_tiles_stream(&mbt)?;
 
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     let start_time = std::time::Instant::now();
@@ -138,11 +133,9 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
             .for_each_concurrent(4, |(tile, tile_data)| {
                 let tx_writer = tx_writer.clone();
                 async move {
-                    let blocking_res = tokio::task::spawn_blocking(move || {
-                        let webpify_result = webpify_image(&tile_data);
-                        webpify_result
-                    })
-                    .await;
+                    let blocking_res =
+                        tokio::task::spawn_blocking(move || webpify_image(&tile_data))
+                            .await;
                     match blocking_res {
                         Err(je) => {
                             warn!("join-error: {:?}", je);
@@ -161,7 +154,7 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
                     }
                 }
             })
-            .await
+            .await;
     });
 
     let (result, writer_result) = join!(proc_future, writer.write());

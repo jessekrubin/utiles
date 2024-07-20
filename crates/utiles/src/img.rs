@@ -2,8 +2,8 @@ use std::io::Cursor;
 
 use crate::UtilesResult;
 
-pub fn webpify_image(data: &Vec<u8>) -> UtilesResult<Vec<u8>> {
-    let img = image::load_from_memory(&data)?;
+pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
+    let img = image::load_from_memory(data)?;
     let mut buf = Vec::new();
     img.write_to(&mut Cursor::new(&mut buf), image::ImageFormat::WebP)?;
     Ok(buf)
