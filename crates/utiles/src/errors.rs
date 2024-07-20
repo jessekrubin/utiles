@@ -104,6 +104,10 @@ pub enum UtilesError {
     /// Error from `json_patch`
     #[error("json_patch error: {0}")]
     JsonPatchError(#[from] json_patch::PatchError),
+
+    /// Error from `tokio::task`
+    #[error("tokio::task::JoinError - {0}")]
+    TokioJoinError(#[from] tokio::task::JoinError),
 }
 
 pub type UtilesResult<T, E = UtilesError> = Result<T, E>;

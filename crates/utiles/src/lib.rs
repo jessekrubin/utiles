@@ -35,6 +35,7 @@ pub(crate) mod errors;
 mod fs_async;
 pub mod gj;
 mod globster;
+mod img;
 mod lager;
 mod lint;
 pub mod mbt;
@@ -46,7 +47,6 @@ pub mod sqlite_utiles;
 mod tile_strfmt;
 pub mod utilejson;
 pub mod utilesqlite;
-mod img;
 
 #[cfg(test)]
 mod tests;

@@ -153,7 +153,10 @@ impl Mbtiles {
         metadata_set(&self.conn, name, value)
     }
 
-    pub fn metadata_set_many(&self, metadata: &Vec<MbtMetadataRow>) -> RusqliteResult<usize> {
+    pub fn metadata_set_many(
+        &self,
+        metadata: &Vec<MbtMetadataRow>,
+    ) -> RusqliteResult<usize> {
         metadata_set_many(&self.conn, metadata)
     }
 
