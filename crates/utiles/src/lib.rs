@@ -46,6 +46,7 @@ pub mod sqlite_utiles;
 mod tile_strfmt;
 pub mod utilejson;
 pub mod utilesqlite;
+mod img;
 
 #[cfg(test)]
 mod tests;

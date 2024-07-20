@@ -153,6 +153,10 @@ impl Mbtiles {
         metadata_set(&self.conn, name, value)
     }
 
+    pub fn metadata_set_many(&self, metadata: &Vec<MbtMetadataRow>) -> RusqliteResult<usize> {
+        metadata_set_many(&self.conn, metadata)
+    }
+
     pub fn metadata_delete(&self, name: &str) -> RusqliteResult<usize> {
         metadata_delete(&self.conn, name)
     }
@@ -1026,4 +1030,34 @@ pub fn query_distinct_tiletype(conn: &Connection) -> RusqliteResult<Vec<String>>
         stmt.query_map([], |row| row.get(0))?
             .collect::<RusqliteResult<Vec<String>, rusqlite::Error>>()?;
     Ok(tile_format)
+}
+
+pub fn query_distinct_tilesize_zoom_limit(
+    conn: &Connection,
+    zoom: u32,
+    limit: u8,
+) -> RusqliteResult<Vec<i64>> {
+    let mut stmt = conn.prepare_cached(
+        "SELECT DISTINCT ut_tilesize(tile_data) FROM tiles WHERE zoom_level=?1 LIMIT ?2",
+    )?;
+
+    let tile_format: Vec<i64> = stmt
+        .query_map([zoom, u32::from(limit)], |row| row.get(0))?
+        .collect::<RusqliteResult<Vec<i64>, rusqlite::Error>>()?;
+    Ok(tile_format)
+}
+
+pub fn query_distinct_tilesize_fast(
+    conn: &Connection,
+    min_max_zoom: MinZoomMaxZoom,
+) -> RusqliteResult<Vec<i64>> {
+    let mut tile_types_set = HashSet::new();
+    for z in min_max_zoom.minzoom..=min_max_zoom.maxzoom {
+        let a = query_distinct_tilesize_zoom_limit(conn, u32::from(z), 10)?;
+        for t in a {
+            tile_types_set.insert(t);
+        }
+    }
+    let tile_types_vec: Vec<i64> = tile_types_set.into_iter().collect();
+    Ok(tile_types_vec)
 }

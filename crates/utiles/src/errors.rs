@@ -29,6 +29,9 @@ pub enum UtilesError {
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 
+    #[error("metadata error: {0}")]
+    MetadataError(String),
+
     #[error("Path already exists: {0}")]
     PathExistsError(String),
 

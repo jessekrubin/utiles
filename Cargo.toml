@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.0-alpha.1"
+version = "0.7.0-alpha.2"
 authors = [
   "Jesse Rubin <jessekrubin@gmail.com>",
   "Dan Costello <dan.costello2@gmail.com>",
@@ -50,5 +50,5 @@ opt-level = 2
 [profile.release]
 opt-level = 3
 strip = true
-# lto = "thin"
-lto = "fat"
+lto = "thin"
+# lto = "fat"

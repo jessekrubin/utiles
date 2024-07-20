@@ -68,6 +68,10 @@ ruffix:
 clippy:
     cargo clippy
 
+
+clippy-fix:
+    cargo clippy --all-targets --all-features --fix --allow-dirty -- -D warnings
+
 lintpy: ruff mypy
 
 lintrs: clippy

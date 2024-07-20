@@ -20,7 +20,7 @@ name = "utiles"
 path = "src/bin.rs"
 
 [dependencies]
-fast_hilbert.workspace = true
+# fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
 serde.workspace = true
@@ -42,19 +42,17 @@ clap = { version = "4.5.8", features = ["derive", "color", "wrap_help"] }
 colored = "2.1.0"
 futures = "0.3.29"
 globset = "0.4.13"
-http-body-util = "0.1.0"
 imagesize = "0.13.0"
 indoc = { workspace = true }
 json-patch = "2.0.0"
-log = "0.4.22"
 num_cpus = "1.16.0"
 # utilesqlite dependencies
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
 sqlite-hashes = { version = "0.7.3", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 time = "0.3.36"
 tokio = { workspace = true, features = ["fs"] }
-tokio-signal = "0.2.9"
-tokio-stream = "0.1.14"
+# tokio-signal = "0.2.9"
+# tokio-stream = "0.1.14"
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing.workspace = true
@@ -64,6 +62,7 @@ image = "0.25.1"
 fnv = "1.0.7"
 indicatif = "0.17.8"
 async-stream = "0.3.5"
+tokio-stream = "0.1.15"
 
 [dev-dependencies]
 criterion = "0.5.1"

@@ -158,20 +158,19 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
 
     // let count = 0;
     tiles_stream
-        .for_each_concurrent(Some(cfg.njobs().into())
-                             , |tile| async {
-                match tile {
-                    Ok(tile) => match twriter.write_tile(tile).await {
-                        Ok(()) => {}
-                        Err(e) => {
-                            warn!("tile error: {:?}", e);
-                        }
-                    },
+        .for_each_concurrent(Some(cfg.njobs().into()), |tile| async {
+            match tile {
+                Ok(tile) => match twriter.write_tile(tile).await {
+                    Ok(()) => {}
                     Err(e) => {
                         warn!("tile error: {:?}", e);
                     }
+                },
+                Err(e) => {
+                    warn!("tile error: {:?}", e);
                 }
-            })
+            }
+        })
         .await;
 
     let end_time = std::time::Instant::now();
