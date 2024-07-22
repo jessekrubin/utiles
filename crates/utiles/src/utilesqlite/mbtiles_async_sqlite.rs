@@ -74,6 +74,14 @@ impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
     {
         self.client.conn(func).await
     }
+    //
+    // async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    // where
+    //     F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+    //     T: Send + 'static,
+    // {
+    //     self.client.conn_mut(func).await
+    // }
 }
 
 #[async_trait]
@@ -85,6 +93,14 @@ impl AsyncSqliteConn for MbtilesAsyncSqlitePool {
     {
         self.pool.conn(func).await
     }
+
+    // async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    // where
+    //     F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
+    //     T: Send + 'static,
+    // {
+    //     self.pool.conn_mut(func).await
+    // }
 }
 
 #[async_trait]

@@ -1,8 +1,8 @@
+use indoc::indoc;
+use rusqlite::{params, Connection, OptionalExtension};
 use std::collections::HashSet;
 use std::error::Error;
 use std::path::Path;
-
-use rusqlite::{params, Connection, OptionalExtension};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
@@ -14,9 +14,9 @@ use utiles_core::{yflip, LngLat, Tile, TileLike};
 use crate::errors::UtilesResult;
 use crate::mbt::query::{
     create_mbtiles_indexes_norm, create_mbtiles_tables_norm,
-    create_mbtiles_tiles_view_norm, create_metadata_table_pk, create_tiles_index_hash,
-    create_tiles_table_flat, create_tiles_table_hash, create_tiles_view_hash,
-    query_mbtiles_type,
+    create_mbtiles_tiles_view_norm, create_metadata_table_pk, create_tiles_index_flat,
+    create_tiles_index_hash, create_tiles_table_flat, create_tiles_table_hash,
+    create_tiles_view_hash, query_mbtiles_type,
 };
 use crate::mbt::{
     query_mbt_stats, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
@@ -84,6 +84,24 @@ impl Mbtiles {
         }
     }
 
+    pub fn open_new<P: AsRef<Path>>(
+        path: P,
+        mbtype: Option<MbtType>,
+    ) -> UtilesResult<Self> {
+        let mbtype = mbtype.unwrap_or(MbtType::Flat);
+        if mbtype != MbtType::Flat {
+            return Err(UtilesError::Unimplemented(mbtype.to_string()));
+        }
+        // make sure the path don't exist
+        let dbpath = pathlike2dbpath(path)?;
+        if dbpath.fspath_exists() {
+            Err(UtilesError::PathExistsError(dbpath.fspath))
+        } else {
+            debug!("Creating new mbtiles file with client: {}", dbpath);
+            Mbtiles::create(&dbpath.fspath, Some(mbtype))
+        }
+    }
+
     pub fn db_filesize(&self) -> UtilesResult<u64> {
         let pth = Path::new(&self.dbpath.fspath);
         debug!("pth: {:?}", pth);
@@ -133,6 +151,13 @@ impl Mbtiles {
 
     pub fn metadata_set(&self, name: &str, value: &str) -> RusqliteResult<usize> {
         metadata_set(&self.conn, name, value)
+    }
+
+    pub fn metadata_set_many(
+        &self,
+        metadata: &Vec<MbtMetadataRow>,
+    ) -> RusqliteResult<usize> {
+        metadata_set_many(&self.conn, metadata)
     }
 
     pub fn metadata_delete(&self, name: &str) -> RusqliteResult<usize> {
@@ -257,6 +282,13 @@ impl Mbtiles {
     ) -> RusqliteResult<usize> {
         insert_tiles_flat_mbtiles(&mut self.conn, tiles, Some(InsertStrategy::Ignore))
     }
+
+    // pub fn insert_tiles_flat_tuple(
+    //     &mut self,
+    //     tiles: &Vec<(Tile, Vec<u8>>,
+    // ) -> RusqliteResult<usize> {
+    //     insert_tiles_flat_mbtiles(&mut self.conn, tiles, Some(InsertStrategy::Ignore))
+    // }
 
     pub fn insert_tile_flat<T: TileLike>(
         &mut self,
@@ -545,15 +577,13 @@ pub fn has_zoom_row_col_autoindex(connection: &Connection) -> RusqliteResult<boo
             }
         }
     }
-
-    warn!("No index/autoindex found for zoom_level, tile_column, tile_row");
     Ok(false)
 }
 
 pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
     // check that there is an index in the db that indexes columns named zoom_level, tile_column, tile_row
 
-    let q = "
+    let q = indoc! {"
         SELECT
             idx.name AS index_name,
             tbl.name AS table_name,
@@ -571,7 +601,7 @@ pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
                 idx.sql LIKE '%tile_column%' OR
                 idx.sql LIKE '%tile_row%'
             );
-    ";
+    "};
     let mut stmt = connection.prepare(q)?;
     let nrows = stmt
         .query_map([], |row| {
@@ -591,7 +621,6 @@ pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
         }
         _ => Ok(true),
     }
-    // Ok(nrows.len() > 0)
 }
 
 pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool> {
@@ -678,6 +707,7 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
     create_metadata_table_pk(&tx)?;
     debug!("creating tiles table");
     create_tiles_table_flat(&tx, false)?;
+    create_tiles_index_flat(&tx)?;
     tx.commit()
 }
 

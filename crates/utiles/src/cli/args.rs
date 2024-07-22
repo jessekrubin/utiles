@@ -348,7 +348,10 @@ pub struct LintArgs {
     pub(crate) fspaths: Vec<String>,
 
     /// fix lint errors (NOT IMPLEMENTED)
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue, default_value = "false")]
+    #[arg(
+        required = false, long, action = clap::ArgAction::SetTrue,
+        default_value = "false", hide = true
+    )]
     pub(crate) fix: bool,
 }
 
@@ -394,6 +397,28 @@ pub struct ZxyifyArgs {
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub(crate) rm: bool,
 }
+
+#[derive(Debug, Parser)]
+/// Optimize tiles-db
+pub struct OptimizeArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    /// destination dataset fspath (mbtiles, dirpath)
+    #[arg(required = true)]
+    pub dst: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct WebpifyArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    /// destination dataset fspath (mbtiles, dirpath)
+    #[arg(required = true)]
+    pub dst: String,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     // Alias `aboot` for possible Canadian users as they will not understand
@@ -640,9 +665,23 @@ pub enum Commands {
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
-    // /// Convert raster mbtiles to webp format
-    // #[command(name = "webpify", about = "Convert raster mbtiles to webp format")]
-    // Webpify(WebpifyArgs),
+    /// Convert raster mbtiles to webp format
+    #[command(
+        name = "webpify",
+        about = "Convert raster mbtiles to webp format",
+        hide = true
+    )]
+    Webpify(WebpifyArgs),
+
+    /// Convert raster mbtiles to webp format
+    #[command(
+        name = "optimize",
+        about = "Optimize tiles-db",
+        aliases = ["opt"],
+        hide = true
+    )]
+    Optimize(OptimizeArgs),
+
     /// utiles server (wip)
     #[command(name = "serve", hide = true)]
     Serve(ServeArgs),

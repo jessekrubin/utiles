@@ -27,11 +27,11 @@ def test_touch(tmp_path: Path, test_data_root: Path) -> None:
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
-        "filesize": 16384,
+        "filesize": 20480,
         "mbtype": "flat",
         "ntiles": 0,
         "nzooms": 0,
-        "page_count": 4,
+        "page_count": 5,
         "page_size": 4096,
         "freelist_count": 0,
         "minzoom": None,
@@ -73,11 +73,11 @@ def test_touch_page_size_512(tmp_path: Path) -> None:
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
-        "filesize": 2048,
+        "filesize": 3072,
         "mbtype": "flat",
         "ntiles": 0,
         "nzooms": 0,
-        "page_count": 4,
+        "page_count": 6,
         "page_size": 512,
         "freelist_count": 0,
         "minzoom": None,

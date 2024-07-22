@@ -96,3 +96,12 @@ macro_rules! point2d {
         Point2d::new($x, $y)
     };
 }
+
+pub mod prelude {
+    pub use crate::flipy;
+    pub use crate::point2d;
+    pub use crate::utile;
+    pub use crate::utile_yup;
+    pub use crate::Tile;
+    pub use crate::TileLike;
+}

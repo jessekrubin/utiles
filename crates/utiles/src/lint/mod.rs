@@ -61,8 +61,6 @@ impl UtilesLintError {
         e_str
     }
 }
-pub type UtilesLintResult<T> = Result<T, UtilesLintError>;
-
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct FileLintResults {
     fspath: String,

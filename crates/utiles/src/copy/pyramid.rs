@@ -74,8 +74,7 @@ impl TilePyramidFsWriter {
 pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
     let mbt_path = Path::new(&cfg.src);
     let output_dir = Path::new(&cfg.dst);
-    let mbt = Mbtiles::from(mbt_path);
-
+    let mbt = Mbtiles::open_existing(mbt_path)?;
     let where_clause = cfg.mbtiles_sql_where()?;
     info!("where_clause: {where_clause:?}");
     let start_time = std::time::Instant::now();
@@ -159,7 +158,7 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
 
     // let count = 0;
     tiles_stream
-        .for_each_concurrent(0, |tile| async {
+        .for_each_concurrent(Some(cfg.njobs().into()), |tile| async {
             match tile {
                 Ok(tile) => match twriter.write_tile(tile).await {
                     Ok(()) => {}

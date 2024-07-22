@@ -58,8 +58,9 @@ tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
 walkdir = "2.4.0"
+image = "0.25.1"
 fnv = "1.0.7"
-# image = "0.25.1"
+tokio-stream = "0.1.15"
 
 [dev-dependencies]
 criterion = "0.5.1"

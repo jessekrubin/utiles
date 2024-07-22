@@ -27,7 +27,6 @@ impl CopyPasta {
     pub async fn get_src_db(&self) -> UtilesResult<MbtilesAsyncSqliteClient> {
         // do the thing
         let src_db = MbtilesAsyncSqliteClient::open_existing(&self.cfg.src).await?;
-
         debug!("src_db: {:?}", src_db);
         Ok(src_db)
     }
