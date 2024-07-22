@@ -4,11 +4,13 @@ use tracing::warn;
 use utiles_core::tile_type::{tiletype, TileType};
 
 pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
-    match tiletype(&data) {
+    match tiletype(data) {
         TileType::Webp => Ok(data.to_vec()),
         TileType::Jpg | TileType::Png | TileType::Gif => {
             let img = image::load_from_memory(data)?;
+
             let mut buf = Vec::new();
+
             img.write_to(&mut Cursor::new(&mut buf), image::ImageFormat::WebP)?;
             Ok(buf)
         }
