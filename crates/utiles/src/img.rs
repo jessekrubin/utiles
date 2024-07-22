@@ -1,6 +1,5 @@
-use std::io::Cursor;
-
 use crate::UtilesResult;
+use std::io::Cursor;
 
 pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
     let img = image::load_from_memory(data)?;

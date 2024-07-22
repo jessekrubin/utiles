@@ -399,6 +399,17 @@ pub struct ZxyifyArgs {
 }
 
 #[derive(Debug, Parser)]
+/// Optimize tiles-db
+pub struct OptimizeArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    /// destination dataset fspath (mbtiles, dirpath)
+    #[arg(required = true)]
+    pub dst: String,
+}
+
+#[derive(Debug, Parser)]
 pub struct WebpifyArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
@@ -654,9 +665,23 @@ pub enum Commands {
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
-    // /// Convert raster mbtiles to webp format
-    #[command(name = "webpify", about = "Convert raster mbtiles to webp format")]
+    /// Convert raster mbtiles to webp format
+    #[command(
+        name = "webpify",
+        about = "Convert raster mbtiles to webp format",
+        hide = true
+    )]
     Webpify(WebpifyArgs),
+
+    /// Convert raster mbtiles to webp format
+    #[command(
+        name = "optimize",
+        about = "Optimize tiles-db",
+        aliases = ["opt"],
+        hide = true
+    )]
+    Optimize(OptimizeArgs),
+
     /// utiles server (wip)
     #[command(name = "serve", hide = true)]
     Serve(ServeArgs),

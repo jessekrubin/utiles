@@ -2,9 +2,9 @@ use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
     about_main, agg_hash_main, bounding_tile_main, children_main, contains_main,
     copy_main, dev_main, fmtstr_main, info_main, lint_main, metadata_main,
-    metadata_set_main, neighbors_main, parent_main, pmtileid_main, quadkey_main,
-    rimraf_main, serve_main, shapes_main, tilejson_main, tiles_main, touch_main,
-    update_main, vacuum_main, webpify_main, zxyify_main,
+    metadata_set_main, neighbors_main, optimize_main, parent_main, pmtileid_main,
+    quadkey_main, rimraf_main, serve_main, shapes_main, tilejson_main, tiles_main,
+    touch_main, update_main, vacuum_main, webpify_main, zxyify_main,
 };
 use crate::errors::UtilesResult;
 use crate::lager::{init_tracing, LogConfig};
@@ -130,6 +130,7 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
         Commands::Children(args) => children_main(args),
         Commands::Parent(args) => parent_main(args),
         Commands::Shapes(args) => shapes_main(args),
+        Commands::Optimize(args) => optimize_main(args).await,
         Commands::Webpify(args) => webpify_main(args).await,
         // server WIP
         Commands::Serve(args) => serve_main(args).await,

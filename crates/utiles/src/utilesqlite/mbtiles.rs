@@ -1,8 +1,8 @@
+use indoc::indoc;
+use rusqlite::{params, Connection, OptionalExtension};
 use std::collections::HashSet;
 use std::error::Error;
 use std::path::Path;
-
-use rusqlite::{params, Connection, OptionalExtension};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
@@ -14,9 +14,9 @@ use utiles_core::{yflip, LngLat, Tile, TileLike};
 use crate::errors::UtilesResult;
 use crate::mbt::query::{
     create_mbtiles_indexes_norm, create_mbtiles_tables_norm,
-    create_mbtiles_tiles_view_norm, create_metadata_table_pk, create_tiles_index_hash,
-    create_tiles_table_flat, create_tiles_table_hash, create_tiles_view_hash,
-    query_mbtiles_type,
+    create_mbtiles_tiles_view_norm, create_metadata_table_pk, create_tiles_index_flat,
+    create_tiles_index_hash, create_tiles_table_flat, create_tiles_table_hash,
+    create_tiles_view_hash, query_mbtiles_type,
 };
 use crate::mbt::{
     query_mbt_stats, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
@@ -577,15 +577,13 @@ pub fn has_zoom_row_col_autoindex(connection: &Connection) -> RusqliteResult<boo
             }
         }
     }
-
-    warn!("No index/autoindex found for zoom_level, tile_column, tile_row");
     Ok(false)
 }
 
 pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
     // check that there is an index in the db that indexes columns named zoom_level, tile_column, tile_row
 
-    let q = "
+    let q = indoc! {"
         SELECT
             idx.name AS index_name,
             tbl.name AS table_name,
@@ -603,7 +601,7 @@ pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
                 idx.sql LIKE '%tile_column%' OR
                 idx.sql LIKE '%tile_row%'
             );
-    ";
+    "};
     let mut stmt = connection.prepare(q)?;
     let nrows = stmt
         .query_map([], |row| {
@@ -623,7 +621,6 @@ pub fn has_zoom_row_col_index(connection: &Connection) -> RusqliteResult<bool> {
         }
         _ => Ok(true),
     }
-    // Ok(nrows.len() > 0)
 }
 
 pub fn is_mbtiles(connection: &Connection) -> RusqliteResult<bool> {
@@ -710,6 +707,7 @@ pub fn init_flat_mbtiles(conn: &mut Connection) -> RusqliteResult<()> {
     create_metadata_table_pk(&tx)?;
     debug!("creating tiles table");
     create_tiles_table_flat(&tx, false)?;
+    create_tiles_index_flat(&tx)?;
     tx.commit()
 }
 
