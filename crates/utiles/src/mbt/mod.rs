@@ -1,4 +1,7 @@
+pub use agg_tiles_hash::mbt_agg_tiles_hash;
+pub use mbtype::MbtType;
 pub use metadata::*;
+pub use stream_writer::{MbtStreamWriter, MbtWriterStats};
 pub use tiles_row::MbtTileRow;
 
 pub use crate::mbt::mbt_stats::{query_mbt_stats, MbtilesStats, MbtilesZoomStats};
@@ -11,8 +14,7 @@ pub use crate::mbt::metadata_row::{
 };
 pub use crate::mbt::minzoom_maxzoom::MinZoomMaxZoom;
 pub use crate::mbt::tiles_filter::TilesFilter;
-pub use agg_tiles_hash::mbt_agg_tiles_hash;
-pub use mbtype::MbtType;
+pub use tiles_stream::{make_tiles_rx, make_tiles_stream};
 
 mod agg_tiles_hash;
 pub mod hash_types;
@@ -23,6 +25,8 @@ mod metadata2map;
 mod metadata_row;
 mod minzoom_maxzoom;
 pub mod query;
+mod stream_writer;
 mod tiles_filter;
 mod tiles_row;
+mod tiles_stream;
 pub mod zxyify;

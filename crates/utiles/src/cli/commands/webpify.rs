@@ -1,113 +1,13 @@
 use futures::StreamExt;
-use rusqlite::Connection;
 use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, error, info, warn};
-
-use utiles_core::prelude::*;
+use tracing::{info, warn};
 
 use crate::cli::args::WebpifyArgs;
 use crate::img::webpify_image;
-use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
+use crate::mbt::{make_tiles_stream, MbtStreamWriter, MbtWriterStats};
 use crate::utilesqlite::{Mbtiles, MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesResult;
-
-pub fn make_tiles_rx(
-    mbt: &MbtilesAsyncSqliteClient,
-) -> UtilesResult<tokio::sync::mpsc::Receiver<(Tile, Vec<u8>)>> {
-    let (tx, rx) = tokio::sync::mpsc::channel(100);
-
-    // Here we create a stream of tiles from the source mbtiles,
-    // and then we process each tile and send progress updates
-    tokio::spawn({
-        let mbt = mbt.clone();
-        async move {
-            let result = mbt
-                .conn(move |c: &Connection| -> RusqliteResult<()> {
-                    let mut s = c.prepare(
-                    "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles;",
-                )?;
-                    let tiles_iters = s.query_map(rusqlite::params![], |row| {
-                        let z: u8 = row.get(0)?;
-                        let x: u32 = row.get(1)?;
-                        let yup: u32 = row.get(2)?;
-                        let tile = utile_yup!(x, yup, z);
-                        let tile_data: Vec<u8> = row.get(3)?;
-                        // println!("sending tile: {:?}", tile);
-
-                        let tx = tx.clone();
-                        let tuple = (tile, tile_data);
-                        if let Err(e) = tx.blocking_send(tuple) {
-                            warn!("Blocking send error: {:?}", e);
-                        }
-                        Ok(())
-                    })?;
-                    // Consume the iterator
-                    for row in tiles_iters {
-                        let _ = row;
-                    }
-
-                    Ok(())
-                })
-                .await;
-            if let Err(e) = result {
-                error!("make_tiles_rx: {:?}", e);
-            }
-        }
-    });
-    Ok(rx)
-}
-pub fn make_tiles_stream(
-    mbt: &MbtilesAsyncSqliteClient,
-) -> UtilesResult<ReceiverStream<(Tile, Vec<u8>)>> {
-    let rx = make_tiles_rx(mbt)?;
-    Ok(ReceiverStream::new(rx))
-}
-
-#[derive(Default)]
-pub struct WriterStats {
-    pub count: usize,
-    pub nbytes: usize,
-}
-
-pub struct MbtStreamWriter {
-    pub stream: ReceiverStream<(Tile, Vec<u8>)>,
-    pub mbt: Mbtiles,
-    pub stats: WriterStats,
-}
-
-impl MbtStreamWriter {
-    // pub fn new(rx:
-    //            tokio::sync::mpsc::Receiver<(Tile, Vec<u8>)>
-    //            , conn: Mbtiles) -> Self {
-    //     Self {
-    //         rx,
-    //         mbt: conn,
-    //         stats: WriterStats {
-    //             count: 0,
-    //         },
-    //     }
-    // }
-
-    pub async fn write(&mut self) -> UtilesResult<()> {
-        let mut stmt = self.mbt.conn.prepare(
-            "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);",
-        )?;
-        while let Some(value) = self.stream.next().await {
-            let (tile, tile_data) = value;
-            let insert_res =
-                stmt.execute(rusqlite::params![tile.z, tile.x, tile.y, tile_data]);
-            if let Err(e) = insert_res {
-                warn!("insert_res: {:?}", e);
-            } else {
-                self.stats.count += 1;
-                self.stats.nbytes += tile_data.len();
-                debug!("count: {}, nbytes: {}", self.stats.count, self.stats.nbytes);
-            }
-        }
-        Ok(())
-    }
-}
 
 pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let mbt =
@@ -125,7 +25,7 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let mut writer = MbtStreamWriter {
         stream: ReceiverStream::new(rx_writer),
         mbt: dst_mbtiles,
-        stats: WriterStats::default(),
+        stats: MbtWriterStats::default(),
     };
     let proc_future = tokio::spawn(async move {
         // TODO: cli flag for concurrency
@@ -162,6 +62,5 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     info!("elapsed: {:?}", elapsed);
     result?;
     writer_result?;
-    // join!(proc_future, writer.write());
     Ok(())
 }
