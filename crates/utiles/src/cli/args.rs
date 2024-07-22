@@ -348,7 +348,10 @@ pub struct LintArgs {
     pub(crate) fspaths: Vec<String>,
 
     /// fix lint errors (NOT IMPLEMENTED)
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue, default_value = "false")]
+    #[arg(
+        required = false, long, action = clap::ArgAction::SetTrue,
+        default_value = "false", hide = true
+    )]
     pub(crate) fix: bool,
 }
 
