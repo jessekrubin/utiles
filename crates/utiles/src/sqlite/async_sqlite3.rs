@@ -1,7 +1,7 @@
 use crate::fs_async::file_exists;
 use crate::sqlite::sqlike3::Sqlike3Async;
 use crate::sqlite::{
-    analyze, attach_db, detach_db, is_empty_db, pragma_freelist_count,
+    analysis_limit, analyze, attach_db, detach_db, is_empty_db, pragma_freelist_count,
     pragma_index_list, pragma_page_count, pragma_page_size, pragma_page_size_set,
     pragma_table_list, vacuum, vacuum_into, DbPath, PragmaIndexListRow,
     PragmaTableListRow, SqliteError, SqliteResult,
@@ -176,6 +176,10 @@ where
 
     async fn pragma_table_list(&self) -> SqliteResult<Vec<PragmaTableListRow>> {
         self.conn(pragma_table_list).await.map_err(Into::into)
+    }
+
+    async fn pragma_analysis_limit(&self) -> SqliteResult<usize> {
+        self.conn(analysis_limit).await.map_err(Into::into)
     }
 
     async fn vacuum(&self) -> SqliteResult<usize> {

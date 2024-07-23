@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::sqlite::errors::SqliteResult;
 use crate::sqlite::{
-    analyze, attach_db, detach_db, is_empty_db, pragma_freelist_count,
+    analysis_limit, analyze, attach_db, detach_db, is_empty_db, pragma_freelist_count,
     pragma_index_list, pragma_page_count, pragma_page_size_get, pragma_page_size_set,
     pragma_table_list, vacuum, vacuum_into, PragmaIndexListRow, PragmaTableListRow,
 };
@@ -35,6 +35,7 @@ sqlike3_methods! {
         pragma_page_size() -> SqliteResult<i64> => pragma_page_size_get;
         pragma_page_size_set(page_size: i64) -> SqliteResult<i64> => pragma_page_size_set;
         pragma_table_list() -> SqliteResult<Vec<PragmaTableListRow>> => pragma_table_list;
+        pragma_analysis_limit() -> SqliteResult<usize> => analysis_limit;
         vacuum() -> SqliteResult<usize> => vacuum;
         vacuum_into(dst: String) -> SqliteResult<usize> => vacuum_into;
         attach_db(db: &str, as_: &str) -> SqliteResult<()> => attach_db;
@@ -67,6 +68,7 @@ sqlike3_async_methods! {
         pragma_page_size() -> SqliteResult<i64> => pragma_page_size_get;
         pragma_page_size_set(page_size: i64) -> SqliteResult<i64> => pragma_page_size_set;
         pragma_table_list() -> SqliteResult<Vec<PragmaTableListRow>> => pragma_table_list;
+        pragma_analysis_limit() -> SqliteResult<usize> => pragma_analysis_limit;
         vacuum() -> SqliteResult<usize> => vacuum;
         vacuum_into(dst: String) -> SqliteResult<usize> => vacuum_into;
         attach_db(db: &str, as_: &str) -> SqliteResult<()> => attach_db;

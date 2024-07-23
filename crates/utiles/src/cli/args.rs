@@ -275,7 +275,7 @@ pub struct AnalyzeArgs {
     pub common: SqliteDbCommonArgs,
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    analysis_limit: Option<usize>,
+    pub analysis_limit: Option<usize>,
 }
 
 #[derive(Debug, Parser)]
@@ -407,6 +407,20 @@ pub struct OptimizeArgs {
     /// destination dataset fspath (mbtiles, dirpath)
     #[arg(required = true)]
     pub dst: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct OxipngArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
+
+    /// destination dataset fspath (mbtiles, dirpath)
+    #[arg(required = true)]
+    pub dst: String,
+
+    /// optimize level
+    #[arg(required = false, long, short, default_value = "2")]
+    pub(crate) opt: u8,
 }
 
 #[derive(Debug, Parser)]
@@ -672,6 +686,10 @@ pub enum Commands {
         hide = true
     )]
     Webpify(WebpifyArgs),
+
+    /// Optimize pngs with `oxipng` for raster tiles-db
+    #[command(name = "oxipng", hide = true)]
+    Oxipng(OxipngArgs),
 
     /// Convert raster mbtiles to webp format
     #[command(

@@ -19,6 +19,7 @@ pub use tiles_stream::{make_tiles_rx, make_tiles_stream};
 mod agg_tiles_hash;
 pub mod hash_types;
 mod mbt_stats;
+pub mod mbtiles_async;
 mod mbtype;
 mod metadata;
 mod metadata2map;

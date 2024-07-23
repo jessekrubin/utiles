@@ -1,4 +1,4 @@
-use crate::UtilesResult;
+use crate::{UtilesError, UtilesResult};
 use std::io::Cursor;
 use tracing::warn;
 use utiles_core::tile_type::{tiletype, TileType};
@@ -14,6 +14,17 @@ pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
             img.write_to(&mut Cursor::new(&mut buf), image::ImageFormat::WebP)?;
             Ok(buf)
         }
+        _ => {
+            warn!("Unsupported image type");
+            Ok(data.to_vec())
+        }
+    }
+}
+
+pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> UtilesResult<Vec<u8>> {
+    match tiletype(data) {
+        TileType::Png => oxipng::optimize_from_memory(data, options)
+            .map_err(|e| UtilesError::OxipngError(e)),
         _ => {
             warn!("Unsupported image type");
             Ok(data.to_vec())

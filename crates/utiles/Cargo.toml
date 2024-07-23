@@ -61,6 +61,7 @@ walkdir = "2.4.0"
 image = "0.25.1"
 fnv = "1.0.7"
 tokio-stream = "0.1.15"
+oxipng = "9.1.2"
 
 [dev-dependencies]
 criterion = "0.5.1"
