@@ -30,9 +30,9 @@ jobs:
           sccache: "true"
           manylinux: auto
           working-directory: ./utiles-pyo3
-          before-script-linux: | 
-            sudo apt-get update
-            sudo apt-get install -y clang
+          before-script-linux: |
+            yum install -y llvm-toolset-7-clang
+            source /opt/rh/llvm-toolset-7/enable 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
