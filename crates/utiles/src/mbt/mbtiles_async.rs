@@ -50,4 +50,6 @@ pub trait MbtilesAsync: Sized {
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>>;
 
     async fn mbt_stats(&self, full: Option<bool>) -> UtilesResult<MbtilesStats>;
+
+    async fn tiles_count(&self) -> UtilesResult<usize>;
 }

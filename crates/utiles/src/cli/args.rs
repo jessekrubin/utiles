@@ -421,6 +421,10 @@ pub struct OxipngArgs {
     /// optimize level
     #[arg(required = false, long, short, default_value = "2")]
     pub(crate) opt: u8,
+
+    /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
+    #[arg(required = false, long, short)]
+    pub jobs: Option<u8>,
 }
 
 #[derive(Debug, Parser)]

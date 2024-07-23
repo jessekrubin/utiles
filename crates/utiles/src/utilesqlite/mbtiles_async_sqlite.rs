@@ -28,7 +28,7 @@ use crate::utilejson::metadata2tilejson;
 use crate::utilesqlite::mbtiles::{
     add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
     has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
-    metadata_json, minzoom_maxzoom, query_zxy, tiles_is_empty,
+    metadata_json, minzoom_maxzoom, query_zxy, tiles_count, tiles_is_empty,
 };
 use crate::UtilesError;
 
@@ -74,14 +74,6 @@ impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
     {
         self.client.conn(func).await
     }
-    //
-    // async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
-    // where
-    //     F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
-    //     T: Send + 'static,
-    // {
-    //     self.client.conn_mut(func).await
-    // }
 }
 
 #[async_trait]
@@ -93,14 +85,6 @@ impl AsyncSqliteConn for MbtilesAsyncSqlitePool {
     {
         self.pool.conn(func).await
     }
-
-    // async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
-    // where
-    //     F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
-    //     T: Send + 'static,
-    // {
-    //     self.pool.conn_mut(func).await
-    // }
 }
 
 #[async_trait]
@@ -562,5 +546,9 @@ where
             Ok(r)
         })
         .await?
+    }
+
+    async fn tiles_count(&self) -> UtilesResult<usize> {
+        self.conn(tiles_count).await.map_err(UtilesError::from)
     }
 }
