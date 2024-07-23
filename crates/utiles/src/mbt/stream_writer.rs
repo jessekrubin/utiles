@@ -91,7 +91,7 @@ impl MbtStreamWriter {
                 .collect::<Vec<_>>()
                 .join(", ");
             let mut stmt = self.mbt.conn.prepare_cached(
-                &format!("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES {};", placeholders),
+                &format!("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES {placeholders};"),
             )?;
             let param_values: Vec<Value> = batch
                 .iter()
