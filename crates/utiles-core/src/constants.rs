@@ -18,5 +18,17 @@ pub const EPSILON: f64 = 1e-14;
 /// Episilon for floating point comparison for latlng
 pub const LL_EPSILON: f64 = 1e-11;
 
+/// Magic-number/application-id of geopackage
+pub const GPKG_MAGIC_NUMBER: u32 = 0x4750_4b47;
+
+/// Magic-number/application-id of geopackage v1
+pub const GPKG_MAGIC_NUMBER_V1: u32 = 0x4750_3110;
+
 /// Magic-number/application-id of mbtiles
 pub const MBTILES_MAGIC_NUMBER: u32 = 0x4d50_4258;
+
+/// Magic-number/application-id of utiles db (mbt magic + 1)
+pub const UTILES_MAGIC_NUMBER: u32 = 0x4d50_4259;
+
+/// Magic-number/application-id of mutiles (multi-utiles) db (mbt magic + 2)
+pub const MUTILES_MAGIC_NUMBER: u32 = 0x4d50_425a;

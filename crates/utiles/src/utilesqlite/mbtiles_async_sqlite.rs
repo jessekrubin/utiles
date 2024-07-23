@@ -13,6 +13,7 @@ use tracing::{debug, error, info, warn};
 use utiles_core::BBox;
 
 use crate::errors::UtilesResult;
+use crate::mbt::mbtiles_async::MbtilesAsync;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
 use crate::mbt::{
@@ -29,7 +30,6 @@ use crate::utilesqlite::mbtiles::{
     has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
     metadata_json, minzoom_maxzoom, query_zxy, tiles_is_empty,
 };
-use crate::utilesqlite::mbtiles_async::MbtilesAsync;
 use crate::UtilesError;
 
 #[derive(Clone)]
@@ -315,14 +315,6 @@ where
         Ok(true)
     }
 
-    async fn mbt_stats(&self, full: Option<bool>) -> UtilesResult<MbtilesStats> {
-        self.conn(move |conn| {
-            let r = query_mbt_stats(conn, full);
-            Ok(r)
-        })
-        .await?
-    }
-
     async fn is_mbtiles(&self) -> UtilesResult<bool> {
         let is_mbtiles_like = self.is_mbtiles_like().await?;
         if !is_mbtiles_like {
@@ -356,17 +348,21 @@ where
         }
     }
 
-    async fn tiles_is_empty(&self) -> UtilesResult<bool> {
-        let tiles_is_empty = self
-            .conn(tiles_is_empty)
-            .await
-            .map_err(UtilesError::AsyncSqliteError)?;
-        Ok(tiles_is_empty)
-    }
-
     async fn magic_number(&self) -> UtilesResult<u32> {
         let magic_number = self.conn(magic_number).await?;
         Ok(magic_number)
+    }
+
+    async fn tilejson(&self) -> UtilesResult<TileJSON> {
+        let metadata = self.metadata_rows().await?;
+        let tj = metadata2tilejson(metadata);
+        match tj {
+            Ok(t) => Ok(t),
+            Err(e) => {
+                error!("Error parsing metadata to TileJSON: {}", e);
+                Err(e)
+            }
+        }
     }
 
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>> {
@@ -375,6 +371,11 @@ where
             .await
             .map_err(UtilesError::AsyncSqliteError)?;
         Ok(metadata)
+    }
+
+    async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
+        let data = self.conn(metadata_json).await?;
+        Ok(data)
     }
 
     // async fn attach(&self, path: &str, dbname: &str) -> UtilesResult<usize> {
@@ -407,11 +408,6 @@ where
         Ok(row)
     }
 
-    async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
-        let data = self.conn(metadata_json).await?;
-        Ok(data)
-    }
-
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize> {
         let name_str = name.to_string();
         let value_str = value.to_string();
@@ -425,6 +421,14 @@ where
             .await
             .map_err(UtilesError::AsyncSqliteError)?;
         Ok(rows)
+    }
+
+    async fn tiles_is_empty(&self) -> UtilesResult<bool> {
+        let tiles_is_empty = self
+            .conn(tiles_is_empty)
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+        Ok(tiles_is_empty)
     }
 
     async fn metadata_minzoom(&self) -> UtilesResult<Option<u8>> {
@@ -461,33 +465,15 @@ where
         }
     }
 
-    async fn tilejson(&self) -> UtilesResult<TileJSON> {
-        let metadata = self.metadata_rows().await?;
-        let tj = metadata2tilejson(metadata);
-        match tj {
-            Ok(t) => Ok(t),
-            Err(e) => {
-                error!("Error parsing metadata to TileJSON: {}", e);
-                Err(e)
-            }
-        }
+    async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>> {
+        let tile = self
+            .conn(move |conn| query_zxy(conn, z, x, y))
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+
+        Ok(tile)
     }
 
-    async fn bbox(&self) -> UtilesResult<BBox> {
-        let tilejson = self.tilejson().await?;
-        let bounding = tilejson.bounds;
-        match bounding {
-            Some(bounds) => Ok(BBox::new(
-                bounds.left,
-                bounds.bottom,
-                bounds.right,
-                bounds.top,
-            )),
-            None => Err(UtilesError::ParsingError(
-                "Error parsing metadata to BBox: no bounds".into(),
-            )),
-        }
-    }
     async fn query_minzoom_maxzoom(&self) -> UtilesResult<Option<MinZoomMaxZoom>> {
         let t = self
             .conn(minzoom_maxzoom)
@@ -495,7 +481,6 @@ where
             .map_err(UtilesError::AsyncSqliteError)?;
         Ok(t)
     }
-
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
         let mut metadata = self.metadata_rows().await?;
         // if no 'minzoom' or 'maxzoom' are found we gotta query them...
@@ -545,22 +530,37 @@ where
         }
     }
 
-    async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>> {
-        let tile = self
-            .conn(move |conn| query_zxy(conn, z, x, y))
-            .await
-            .map_err(UtilesError::AsyncSqliteError)?;
-
-        Ok(tile)
-    }
-
     async fn query_mbt_type(&self) -> UtilesResult<MbtType> {
         let mbt = self.conn(query_mbtiles_type).await?;
         Ok(mbt)
     }
 
+    async fn bbox(&self) -> UtilesResult<BBox> {
+        let tilejson = self.tilejson().await?;
+        let bounding = tilejson.bounds;
+        match bounding {
+            Some(bounds) => Ok(BBox::new(
+                bounds.left,
+                bounds.bottom,
+                bounds.right,
+                bounds.top,
+            )),
+            None => Err(UtilesError::ParsingError(
+                "Error parsing metadata to BBox: no bounds".into(),
+            )),
+        }
+    }
+
     async fn zxyify(&self) -> UtilesResult<Vec<RowsAffected>> {
         let r = self.conn(zxyify).await?;
         Ok(r)
+    }
+
+    async fn mbt_stats(&self, full: Option<bool>) -> UtilesResult<MbtilesStats> {
+        self.conn(move |conn| {
+            let r = query_mbt_stats(conn, full);
+            Ok(r)
+        })
+        .await?
     }
 }

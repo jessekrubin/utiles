@@ -108,6 +108,14 @@ pub enum UtilesError {
     /// Error from `tokio::task`
     #[error("tokio::task::JoinError - {0}")]
     TokioJoinError(#[from] tokio::task::JoinError),
+
+    /// Error from `oxipng`
+    #[error("oxipng::PngError: {0}")]
+    OxipngError(#[from] oxipng::PngError),
+
+    /// Error from `pmtiles`
+    #[error("pmtiles error: {0}")]
+    PmtilesError(#[from] pmtiles::PmtError),
 }
 
 pub type UtilesResult<T, E = UtilesError> = Result<T, E>;

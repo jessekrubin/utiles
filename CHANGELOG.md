@@ -2,15 +2,26 @@
 
 ## TODO
 
-- lint/copy overhaul
-- `webpify` command for converting images to webp
+- Docs/readme update
+
 
 ## Unreleased/Future
 
+- New command(s):
+   - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
+   - `db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
+- `copy` and `touch`
+   - Now supports `flat`/`norm` (normalized)/`hash` (flat-with-hash) formats as standardized by the martin/maplibre people. Should also work with non-martin-conforming mbtiles schemas (appears to for me)
+- Dev/hidden commands:
+   - `webpify` command that converts all non-webp raster-tiles to webp (lossless only due to image-crate not supporting lossy encoding...)
+   - `oxipng` command that optimizes png(s) in mbtiles db(s) using `oxipng` crate
+- figured out how to make async tile-stream(s)
+- Removed even more `unwrap` usages
 - lint/copy overhaul
 - Added `--page-size` to vacuum command
 - Using `json-patch` for metadata updates
 - Allow setting metadata value(s) from file if no value is provided (`-`/`--`) for stdin
+- Figured out how to put the caller-site (eg `pyo3` in the cli help so you (likely me) can tell which utiles you are calling)
 
 ---
 

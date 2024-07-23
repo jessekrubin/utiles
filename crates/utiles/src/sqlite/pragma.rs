@@ -38,6 +38,26 @@ pub fn pragma_page_count(conn: &Connection) -> RusqliteResult<i64> {
     Ok(count)
 }
 
+pub fn analysis_limit(conn: &Connection) -> RusqliteResult<usize> {
+    let limit = conn.pragma_query_value(None, "analysis_limit", |row| row.get(0))?;
+    Ok(limit)
+}
+
+pub fn analysis_limit_set(conn: &Connection, limit: usize) -> RusqliteResult<usize> {
+    let current_limit = analysis_limit(conn)?;
+    if current_limit == limit {
+        debug!("analysis_limit_set: current limit == limit: {}", limit);
+        Ok(current_limit)
+    } else {
+        debug!(
+            "analysis_limit_set: current limit != limit: {} != {}",
+            current_limit, limit
+        );
+        conn.pragma_update(None, "analysis_limit", limit)?;
+        Ok(limit)
+    }
+}
+
 pub fn application_id(conn: &Connection) -> RusqliteResult<u32> {
     let app_id = conn.pragma_query_value(None, "application_id", |row| row.get(0))?;
     Ok(app_id)

@@ -14,11 +14,13 @@ pub use crate::mbt::metadata_row::{
 };
 pub use crate::mbt::minzoom_maxzoom::MinZoomMaxZoom;
 pub use crate::mbt::tiles_filter::TilesFilter;
+pub use info::mbinfo;
 pub use tiles_stream::{make_tiles_rx, make_tiles_stream};
-
 mod agg_tiles_hash;
 pub mod hash_types;
+mod info;
 mod mbt_stats;
+pub mod mbtiles_async;
 mod mbtype;
 mod metadata;
 mod metadata2map;
