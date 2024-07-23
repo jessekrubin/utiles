@@ -60,10 +60,9 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
 
                                 if let Err(e) = send_res {
                                     warn!("send_res: {:?}", e);
-                                } else {
-                                    if let Err(e) = tx_progress.send(size_diff).await {
-                                        warn!("send error tx_progress: {:?}", e);
-                                    }
+                                } else if let Err(e) = tx_progress.send(size_diff).await
+                                {
+                                    warn!("send error tx_progress: {:?}", e);
                                 }
                             }
                             Err(e) => {
@@ -99,12 +98,11 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
             pb.inc(1);
 
             let size_saved = size::Size::from_bytes(total_size_diff as u64).to_string();
-            pb.set_message(format!("size-diff: {}", size_saved));
+            pb.set_message(format!("size-diff: {size_saved}"));
         }
         let total_size_str = size::Size::from_bytes(total_size_diff as u64).to_string();
         pb.finish_with_message(format!(
-            "Processed {} tiles, saved {} ({}b)",
-            processed, total_size_str, total_size_diff
+            "Processed {processed} tiles, saved {total_size_str} ({total_size_diff}b)"
         ));
     });
 
