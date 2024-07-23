@@ -22,38 +22,38 @@ pub struct MbtStreamWriter {
 }
 
 impl MbtStreamWriter {
-    pub async fn preflight(&self) -> UtilesResult<()> {
+    pub fn preflight(&self) -> UtilesResult<()> {
         self.mbt
             .conn
             .execute_batch(
-                r#"
+                r"
             PRAGMA synchronous = OFF;
             PRAGMA journal_mode = WAL;
             PRAGMA locking_mode = EXCLUSIVE;
             PRAGMA temp_store = MEMORY;
             PRAGMA cache_size = 100000;
-            "#,
+            ",
             )
             .map_err(Into::into)
     }
 
-    pub async fn postflight(&self) -> UtilesResult<()> {
+    pub fn postflight(&self) -> UtilesResult<()> {
         self.mbt
             .conn
             .execute_batch(
-                r#"
+                r"
             PRAGMA synchronous = NORMAL;
             PRAGMA journal_mode = DELETE;
             PRAGMA locking_mode = NORMAL;
             PRAGMA temp_store = DEFAULT;
             PRAGMA cache_size = 2000;
-            "#,
+            ",
             )
             .map_err(Into::into)
     }
 
     pub async fn write(&mut self) -> UtilesResult<()> {
-        self.preflight().await?;
+        self.preflight()?;
         let mut stmt = self.mbt.conn.prepare(
             "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);",
         )?;
@@ -70,12 +70,12 @@ impl MbtStreamWriter {
             }
         }
 
-        self.postflight().await?;
+        self.postflight()?;
         Ok(())
     }
 
     pub async fn write_batched(&mut self) -> UtilesResult<()> {
-        self.preflight().await?;
+        self.preflight()?;
         let mut batch = vec![];
         while let Some(value) = self.stream.next().await {
             let (tile, tile_data) = value;
@@ -145,7 +145,7 @@ impl MbtStreamWriter {
                 debug!("count: {}, nbytes: {}", self.stats.count, self.stats.nbytes);
             }
         }
-        self.postflight().await?;
+        self.postflight()?;
         Ok(())
     }
 }
