@@ -22,11 +22,13 @@ pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
 }
 
 pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> UtilesResult<Vec<u8>> {
-    if let TileType::Png = tiletype(data) {
-        oxipng::optimize_from_memory(data, options).map_err(UtilesError::OxipngError)
-    } else {
-        warn!("Unsupported image type");
-        Ok(data.to_vec())
+    match tiletype(data) {
+        TileType::Png => oxipng::optimize_from_memory(data, options)
+            .map_err(|e| UtilesError::OxipngError(e)),
+        _ => {
+            warn!("Unsupported image type");
+            Ok(data.to_vec())
+        }
     }
 }
 

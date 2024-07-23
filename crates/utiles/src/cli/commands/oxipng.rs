@@ -65,7 +65,7 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
             .await;
     });
 
-    let (result, writer_result) = join!(proc_future, writer.write_batched());
+    let (result, writer_result) = join!(proc_future, writer.write());
     let elapsed = start_time.elapsed();
     info!("elapsed: {:?}", elapsed);
     result?;
