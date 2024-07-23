@@ -20,7 +20,6 @@ name = "utiles"
 path = "src/bin.rs"
 
 [dependencies]
-# fast_hilbert.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
 serde.workspace = true
@@ -31,9 +30,7 @@ thiserror.workspace = true
 tilejson.workspace = true
 utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
-
-# CLI dependencies
-# async-sqlite = { version = "0.2.2", features = ["bundled", "functions", "trace", ] }
+#
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
@@ -46,13 +43,10 @@ imagesize = "0.13.0"
 indoc = { workspace = true }
 json-patch = "2.0.0"
 num_cpus = "1.16.0"
-# utilesqlite dependencies
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
 sqlite-hashes = { version = "0.7.3", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 time = "0.3.36"
 tokio = { workspace = true, features = ["fs"] }
-# tokio-signal = "0.2.9"
-# tokio-stream = "0.1.14"
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing.workspace = true
@@ -62,6 +56,7 @@ image = "0.25.1"
 fnv = "1.0.7"
 tokio-stream = "0.1.15"
 oxipng = "9.1.2"
+pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"] }
 
 [dev-dependencies]
 criterion = "0.5.1"

@@ -209,16 +209,6 @@ macro_rules! utilejson {
             generator: None,
         }
     };
-
-    // ( tiles: $sources:expr $(, $tag:tt : $val:expr)* $(,)? ) => {
-    //     $crate::utilejson! {
-    //
-    //         tiles: $sources
-    //
-    //         $( $tag : $val , )*
-    //     }
-    // };
-    //
 }
 
 #[cfg(test)]
