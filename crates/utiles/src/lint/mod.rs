@@ -7,7 +7,7 @@ use colored::Colorize;
 use futures::{stream, Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tracing::{debug, info, warn};
+use tracing::{debug, warn};
 
 use mbt_linter::MbtilesLinter;
 
@@ -92,7 +92,7 @@ impl FileLintResults {
                     .collect::<Vec<String>>();
                 strings.join("\n")
             }
-            None => "".to_string(),
+            None => String::new(),
         }
     }
 }
@@ -136,7 +136,7 @@ pub async fn lint_filepaths(
     let mut results = lint_filepaths_stream(&fspaths, fix);
     let mut all_lints = Vec::new();
 
-    let mut stdout = io::stdout();
+    let stdout = io::stdout();
     let lock = stdout.lock();
     let mut buf = BufWriter::new(lock);
 

@@ -339,9 +339,7 @@ where
     }
 
     async fn pragma_encoding(&self) -> UtilesResult<String> {
-        self.conn(|conn| pragma_encoding(conn))
-            .await
-            .map_err(UtilesError::from)
+        self.conn(pragma_encoding).await.map_err(UtilesError::from)
     }
 
     async fn tilejson(&self) -> UtilesResult<TileJSON> {
