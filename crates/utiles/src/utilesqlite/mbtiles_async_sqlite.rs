@@ -21,7 +21,8 @@ use crate::mbt::{
     MinZoomMaxZoom,
 };
 use crate::sqlite::{
-    journal_mode, magic_number, AsyncSqliteConn, AsyncSqliteConnMut, RowsAffected,
+    journal_mode, magic_number, pragma_encoding, AsyncSqliteConn, AsyncSqliteConnMut,
+    RowsAffected,
 };
 use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilejson::metadata2tilejson;
@@ -335,6 +336,12 @@ where
     async fn magic_number(&self) -> UtilesResult<u32> {
         let magic_number = self.conn(magic_number).await?;
         Ok(magic_number)
+    }
+
+    async fn pragma_encoding(&self) -> UtilesResult<String> {
+        self.conn(|conn| pragma_encoding(conn))
+            .await
+            .map_err(UtilesError::from)
     }
 
     async fn tilejson(&self) -> UtilesResult<TileJSON> {

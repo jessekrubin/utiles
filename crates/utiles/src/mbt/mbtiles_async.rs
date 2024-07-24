@@ -52,4 +52,5 @@ pub trait MbtilesAsync: Sized {
     async fn mbt_stats(&self, full: Option<bool>) -> UtilesResult<MbtilesStats>;
 
     async fn tiles_count(&self) -> UtilesResult<usize>;
+    async fn pragma_encoding(&self) -> UtilesResult<String>;
 }

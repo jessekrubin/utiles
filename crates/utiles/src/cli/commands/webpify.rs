@@ -30,10 +30,12 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
         mbt: dst_mbtiles,
         stats: MbtWriterStats::default(),
     };
+    let jobs: usize = args.jobs.unwrap_or(4) as usize;
+    info!("webpify ~ total_count: {total_count} ~ jobs: {jobs}");
     let proc_future = tokio::spawn(async move {
         // TODO: cli flag for concurrency
         tiles_stream
-            .for_each_concurrent(4, |(tile, tile_data)| {
+            .for_each_concurrent(jobs, |(tile, tile_data)| {
                 let tx_writer = tx_writer.clone();
                 let tx_progress = tx_progress.clone();
                 let initial_size = tile_data.len();

@@ -1,5 +1,5 @@
 use crate::errors::UtilesResult;
-use crate::lint::UtilesLintError;
+use crate::lint::MbtLint;
 use crate::mbt::metadata2duplicates;
 use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::mbtiles::{
@@ -24,9 +24,7 @@ impl MbtilesLinter {
             fix,
         }
     }
-    async fn open_mbtiles(
-        &self,
-    ) -> UtilesResult<utilesqlite::MbtilesAsyncSqliteClient> {
+    async fn open_mbtiles(&self) -> UtilesResult<MbtilesAsyncSqliteClient> {
         let pth = self.path.to_str().map_or_else(
             || Err(UtilesError::PathConversionError("path".to_string())),
             Ok,
@@ -37,26 +35,35 @@ impl MbtilesLinter {
 
     pub async fn check_magic_number(
         mbt: &MbtilesAsyncSqliteClient,
-    ) -> UtilesResult<Option<crate::lint::UtilesLintError>> {
+    ) -> UtilesResult<Option<crate::lint::MbtLint>> {
         let magic_number_res = mbt.magic_number().await;
         match magic_number_res {
             Ok(magic_number) => {
                 if magic_number == 0x4d50_4258 {
                     Ok(None)
                 } else if magic_number == 0 {
-                    Ok(Some(crate::lint::UtilesLintError::MbtMissingMagicNumber))
+                    Ok(Some(crate::lint::MbtLint::MissingMagicNumber))
                 } else {
-                    Ok(Some(crate::lint::UtilesLintError::MbtUnknownMagicNumber(
-                        magic_number,
-                    )))
+                    Ok(Some(crate::lint::MbtLint::UnknownMagicNumber(magic_number)))
                 }
             }
             Err(e) => Err(e),
         }
     }
+
+    pub async fn check_encoding(
+        mbt: &MbtilesAsyncSqliteClient,
+    ) -> UtilesResult<Vec<MbtLint>> {
+        let encoding = mbt.pragma_encoding().await?;
+        if encoding.to_lowercase() != "utf-8" {
+            return Ok(vec![MbtLint::EncodingNotUtf8(encoding)]);
+        }
+        Ok(vec![])
+    }
+
     pub async fn check_metadata_rows(
         mbt: &MbtilesAsyncSqliteClient,
-    ) -> UtilesResult<Vec<UtilesLintError>> {
+    ) -> UtilesResult<Vec<MbtLint>> {
         let metadata_rows = mbt.metadata_rows().await?;
         let metadata_keys = metadata_rows
             .iter()
@@ -69,14 +76,14 @@ impl MbtilesLinter {
             .collect::<Vec<String>>();
         let errs = missing_metadata_keys
             .iter()
-            .map(|k| crate::lint::UtilesLintError::MbtMissingMetadataKv(k.clone()))
-            .collect::<Vec<crate::lint::UtilesLintError>>();
+            .map(|k| crate::lint::MbtLint::MissingMetadataKv(k.clone()))
+            .collect::<Vec<crate::lint::MbtLint>>();
         Ok(errs)
     }
 
     pub async fn check_metadata(
         mbt: &MbtilesAsyncSqliteClient,
-    ) -> UtilesResult<Vec<UtilesLintError>> {
+    ) -> UtilesResult<Vec<MbtLint>> {
         // that metadata table exists
         let has_unique_index_on_metadata_name = mbt
             .conn(has_unique_index_on_metadata)
@@ -95,14 +102,12 @@ impl MbtilesLinter {
                 errs.extend(
                     duplicate_rows
                         .keys()
-                        .map(|k| UtilesLintError::DuplicateMetadataKey(k.clone()))
-                        .collect::<Vec<UtilesLintError>>(),
+                        .map(|k| MbtLint::DuplicateMetadataKey(k.clone()))
+                        .collect::<Vec<MbtLint>>(),
                 );
             }
         } else {
-            errs.push(UtilesLintError::MissingUniqueIndex(
-                "metadata.name".to_string(),
-            ));
+            errs.push(MbtLint::MissingUniqueIndex("metadata.name".to_string()));
         }
 
         let rows_errors = MbtilesLinter::check_metadata_rows(mbt).await?;
@@ -110,7 +115,7 @@ impl MbtilesLinter {
         Ok(errs)
     }
 
-    pub async fn lint(&self) -> UtilesResult<Vec<crate::lint::UtilesLintError>> {
+    pub async fn lint(&self) -> UtilesResult<Vec<crate::lint::MbtLint>> {
         if self.fix {
             warn!("Fix not implemented (yet)");
         }
@@ -124,11 +129,15 @@ impl MbtilesLinter {
         if let Some(e) = magic_res {
             lint_results.push(e);
         }
+
+        let encoding_res = MbtilesLinter::check_encoding(&mbt).await?;
+        lint_results.extend(encoding_res);
+
         let metadata_res = MbtilesLinter::check_metadata(&mbt).await?;
         lint_results.extend(metadata_res);
         let lint_errors = lint_results
             .into_iter()
-            .collect::<Vec<crate::lint::UtilesLintError>>();
+            .collect::<Vec<crate::lint::MbtLint>>();
         Ok(lint_errors)
     }
 }

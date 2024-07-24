@@ -169,7 +169,7 @@ pub struct ParentChildrenArgs {
 
 #[derive(Debug, Parser)]
 pub struct SqliteDbCommonArgs {
-    /// mbtiles filepath
+    /// sqlite filepath
     #[arg(required = true)]
     pub filepath: String,
 
@@ -269,12 +269,18 @@ impl DbCommands {
     }
 }
 
+// #[derive(Debug, Parser)]
+// pub struct SqliteSchemaArgs {
+//     #[command(flatten)]
+//     pub common: SqliteDbCommonArgs,
+// }
+
 #[derive(Debug, Parser)]
 pub struct AnalyzeArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    #[arg(required = false, long)]
     pub analysis_limit: Option<usize>,
 }
 
@@ -435,6 +441,10 @@ pub struct WebpifyArgs {
     /// destination dataset fspath (mbtiles, dirpath)
     #[arg(required = true)]
     pub dst: String,
+
+    /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
+    #[arg(required = false, long, short)]
+    pub jobs: Option<u8>,
 }
 
 #[derive(Debug, Subcommand)]
