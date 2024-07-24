@@ -8,12 +8,6 @@ use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 use crate::utilesqlite::MbtilesAsyncSqliteClient;
 use crate::UtilesResult;
 
-pub struct StreamOpts {
-    order_clause: Option<String>,
-    limit_clause: Option<usize>,
-    where_clause: Option<String>,
-}
-
 pub fn make_tiles_rx(
     mbt: &MbtilesAsyncSqliteClient,
     // options: Option<StreamOpts>,

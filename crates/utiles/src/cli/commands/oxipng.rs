@@ -111,7 +111,7 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
     });
 
     let (cruncher_res, writer_res, progress_res) =
-        join!(proc_future, writer.write_batched(), progress_future);
+        join!(proc_future, writer.write(), progress_future);
     let elapsed = start_time.elapsed();
     info!("elapsed: {:?}", elapsed);
     cruncher_res?;
