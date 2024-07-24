@@ -1,4 +1,3 @@
-use rusqlite::vtab::OrderBy;
 use rusqlite::Connection;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{error, warn};

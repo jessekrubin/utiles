@@ -2,7 +2,6 @@ use crate::cli::args::AggHashArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::mbt_agg_tiles_hash_stream;
-use crate::sqlite::AsyncSqliteConn;
 use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 
 // pub async fn agg_hash_main(args: &AggHashArgs) -> UtilesResult<()> {
