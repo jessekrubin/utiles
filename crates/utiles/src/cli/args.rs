@@ -1,4 +1,5 @@
 use clap::{Args, Parser, Subcommand};
+use std::path::PathBuf;
 use strum_macros::AsRefStr;
 
 use utiles_core::{
@@ -9,6 +10,7 @@ use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
 use crate::cli::commands::{analyze_main, vacuum_main};
+use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
@@ -886,6 +888,27 @@ impl CopyArgs {
             Some(new_bbox.mbt_bounds())
         } else {
             None
+        }
+    }
+}
+
+impl From<&CopyArgs> for CopyConfig {
+    fn from(args: &CopyArgs) -> CopyConfig {
+        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
+        CopyConfig {
+            src: PathBuf::from(&args.src),
+            dst: PathBuf::from(&args.dst),
+            zset: args.zoom_set(),
+            zooms: args.zooms(),
+            verbose: true,
+            bboxes: args.bboxes(),
+            bounds_string: args.bounds(),
+            force: false,
+            dryrun: false,
+            jobs: args.jobs,
+            istrat: InsertStrategy::from(args.conflict),
+            hash: args.hash,
+            dbtype,
         }
     }
 }

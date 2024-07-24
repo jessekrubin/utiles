@@ -933,11 +933,12 @@ pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats
         .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()?;
     Ok(rows)
 }
+
 #[allow(clippy::cast_precision_loss)]
 pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
-    let mut stmt = conn.prepare_cached(
-        r"
+    let mut stmt = conn.prepare_cached(indoc! {
+    r"
         SELECT
             zoom_level,
             COUNT(*) AS ntiles,
@@ -950,7 +951,7 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
         GROUP BY
             zoom_level
     ",
-    )?;
+    })?;
 
     let rows = stmt
         .query_map([], |row| {

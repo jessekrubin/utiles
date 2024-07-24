@@ -18,6 +18,9 @@ path = "src/lib.rs"
 [[bin]]
 name = "utiles"
 path = "src/bin.rs"
+required-features = [
+    #    "cli"
+]
 
 [dependencies]
 geo-types.workspace = true
@@ -55,13 +58,13 @@ walkdir = "2.4.0"
 image = "0.25.1"
 fnv = "1.0.7"
 tokio-stream = "0.1.15"
-oxipng = {version = "9.1.2" , features = []}
-pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"] }
+oxipng = { version = "9.1.2", features = [] }
 indicatif = "0.17.8"
 size.workspace = true
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
 hex = "0.4.3"
+pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
 
 [dev-dependencies]
 criterion = "0.5.1"
@@ -69,3 +72,8 @@ criterion = "0.5.1"
 [[bench]]
 name = "bench"
 harness = false
+
+[features]
+default = []
+#cli = ["dep:clap"]
+pmtiles = ["dep:pmtiles"]

@@ -2,14 +2,14 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
-use crate::cli::args::CopyArgs;
+use utiles_core::zoom::ZoomSet;
+use utiles_core::BBox;
+
 use crate::errors::UtilesCopyError;
 use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
-use utiles_core::zoom::ZoomSet;
-use utiles_core::BBox;
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CopyConfig {
@@ -26,27 +26,6 @@ pub struct CopyConfig {
     pub istrat: InsertStrategy,
     pub dbtype: Option<MbtType>,
     pub hash: Option<HashType>,
-}
-
-impl From<&CopyArgs> for CopyConfig {
-    fn from(args: &CopyArgs) -> CopyConfig {
-        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
-        CopyConfig {
-            src: PathBuf::from(&args.src),
-            dst: PathBuf::from(&args.dst),
-            zset: args.zoom_set(),
-            zooms: args.zooms(),
-            verbose: true,
-            bboxes: args.bboxes(),
-            bounds_string: args.bounds(),
-            force: false,
-            dryrun: false,
-            jobs: args.jobs,
-            istrat: InsertStrategy::from(args.conflict),
-            hash: args.hash,
-            dbtype,
-        }
-    }
 }
 
 impl CopyConfig {
