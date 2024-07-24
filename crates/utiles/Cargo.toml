@@ -59,7 +59,9 @@ oxipng = {version = "9.1.2" , features = []}
 pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"] }
 indicatif = "0.17.8"
 size.workspace = true
-console-subscriber = "0.3.0"
+md-5 = "0.10.6"
+noncrypto-digests = "0.3.2"
+hex = "0.4.3"
 
 [dev-dependencies]
 criterion = "0.5.1"

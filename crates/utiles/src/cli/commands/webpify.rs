@@ -22,7 +22,7 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let dst_mbtiles = Mbtiles::open_new(args.dst, None)?;
     dst_mbtiles.metadata_set_many(&mbt_metadata)?;
     dst_mbtiles.metadata_set("format", "webp")?;
-    let tiles_stream = make_tiles_stream(&mbt)?;
+    let tiles_stream = make_tiles_stream(&mbt, None)?;
     let (tx_progress, mut rx_progress) = tokio::sync::mpsc::channel(100);
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     let start_time = std::time::Instant::now();

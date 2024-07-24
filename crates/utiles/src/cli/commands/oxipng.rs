@@ -21,7 +21,7 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
     let mbt_metadata = mbt.metadata_rows().await?;
     let dst_mbtiles = Mbtiles::open_new(args.dst, None)?;
     dst_mbtiles.metadata_set_many(&mbt_metadata)?;
-    let tiles_stream = make_tiles_stream(&mbt)?;
+    let tiles_stream = make_tiles_stream(&mbt, None)?;
 
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     let start_time = std::time::Instant::now();
