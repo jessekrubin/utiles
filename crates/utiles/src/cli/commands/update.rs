@@ -29,7 +29,7 @@ pub async fn update_mbtiles(
     if tiles_is_empty {
         warn!("tiles table/view is empty: {}", filepath);
     }
-    let mut changes = vec![];
+    let mut metadata_changes = vec![];
 
     let current_metadata = mbt.metadata_json().await?;
 
@@ -43,14 +43,14 @@ pub async fn update_mbtiles(
     if let Some(minzoom_maxzoom) = minzoom_maxzoom {
         if let Some(metadata_minzoom) = metdata_minzoom {
             if metadata_minzoom != minzoom_maxzoom.minzoom {
-                changes.push(MetadataChangeFromTo {
+                metadata_changes.push(MetadataChangeFromTo {
                     name: "minzoom".to_string(),
                     from: Some(metadata_minzoom.to_string()),
                     to: Some(minzoom_maxzoom.minzoom.to_string()),
                 });
             }
         } else {
-            changes.push(MetadataChangeFromTo {
+            metadata_changes.push(MetadataChangeFromTo {
                 name: "minzoom".to_string(),
                 from: None,
                 to: Some(minzoom_maxzoom.minzoom.to_string()),
@@ -62,14 +62,14 @@ pub async fn update_mbtiles(
     if let Some(minzoom_maxzoom) = minzoom_maxzoom {
         if let Some(metadata_maxzoom) = metdata_maxzoom {
             if metadata_maxzoom != minzoom_maxzoom.maxzoom {
-                changes.push(MetadataChangeFromTo {
+                metadata_changes.push(MetadataChangeFromTo {
                     name: "maxzoom".to_string(),
                     from: Some(metadata_maxzoom.to_string()),
                     to: Some(minzoom_maxzoom.maxzoom.to_string()),
                 });
             }
         } else {
-            changes.push(MetadataChangeFromTo {
+            metadata_changes.push(MetadataChangeFromTo {
                 name: "maxzoom".to_string(),
                 from: None,
                 to: Some(minzoom_maxzoom.maxzoom.to_string()),
@@ -100,14 +100,14 @@ pub async fn update_mbtiles(
             let fmt = query_fmt[0].clone();
             if let Some(format) = format {
                 if format.value != fmt {
-                    changes.push(MetadataChangeFromTo {
+                    metadata_changes.push(MetadataChangeFromTo {
                         name: "format".to_string(),
                         from: Some(format.value.clone()),
                         to: Some(fmt.clone()),
                     });
                 }
             } else {
-                changes.push(MetadataChangeFromTo {
+                metadata_changes.push(MetadataChangeFromTo {
                     name: "format".to_string(),
                     from: None,
                     to: Some(fmt.clone()),
@@ -135,14 +135,14 @@ pub async fn update_mbtiles(
             let ts_str: String = ts.to_string();
             if let Some(tilesize) = tilesize {
                 if tilesize.value != ts_str {
-                    changes.push(MetadataChangeFromTo {
+                    metadata_changes.push(MetadataChangeFromTo {
                         name: "tilesize".to_string(),
                         from: Some(tilesize.value.clone()),
                         to: Some(ts_str),
                     });
                 }
             } else {
-                changes.push(MetadataChangeFromTo {
+                metadata_changes.push(MetadataChangeFromTo {
                     name: "tilesize".to_string(),
                     from: None,
                     to: Some(ts_str),
@@ -157,11 +157,11 @@ pub async fn update_mbtiles(
         }
     }
 
-    let metadata_change = if changes.is_empty() {
+    let metadata_change = if metadata_changes.is_empty() {
         MetadataChange::new_empty()
     } else {
         let mut updated_metadata = current_metadata.clone();
-        for change in &changes {
+        for change in &metadata_changes {
             if let Some(new_val) = &change.to {
                 updated_metadata.insert(&change.name, new_val);
             }

@@ -1,6 +1,7 @@
+use std::time::Duration;
+
 use futures::StreamExt;
 use indicatif::ProgressStyle;
-use std::time::Duration;
 use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{info, warn};
@@ -38,7 +39,7 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
             .for_each_concurrent(jobs, |(tile, tile_data)| {
                 let tx_writer = tx_writer.clone();
                 let tx_progress = tx_progress.clone();
-                let initial_size = tile_data.len();
+                let initial_size = tile_data.len() as i64;
 
                 async move {
                     let blocking_res =
@@ -50,7 +51,8 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
                         }
                         Ok(webpify_result) => match webpify_result {
                             Ok(webp_bytes) => {
-                                let size_diff = initial_size - webp_bytes.len();
+                                let size_diff =
+                                    initial_size - (webp_bytes.len() as i64);
                                 let send_res = tx_writer.send((tile, webp_bytes)).await;
                                 if let Err(e) = send_res {
                                     warn!("send_res: {:?}", e);
@@ -74,10 +76,13 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
         let mut total_size_diff = 0;
         let mut processed = 0;
         let pb = indicatif::ProgressBar::new(total_count as u64);
-        pb.set_message("webpify");
         let pb_style = ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         );
+        if args.quiet {
+            pb.set_draw_target(indicatif::ProgressDrawTarget::hidden());
+        }
+        pb.set_message("webpify");
         match pb_style {
             Err(e) => {
                 warn!("pb_style error: {:?}", e);

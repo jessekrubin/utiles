@@ -431,6 +431,10 @@ pub struct OxipngArgs {
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
     pub jobs: Option<u8>,
+
+    /// quiet
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub(crate) quiet: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -445,6 +449,10 @@ pub struct WebpifyArgs {
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
     pub jobs: Option<u8>,
+
+    /// quiet
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub(crate) quiet: bool,
 }
 
 #[derive(Debug, Subcommand)]

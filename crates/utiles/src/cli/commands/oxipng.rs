@@ -54,7 +54,8 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
                         Ok(oxipngify_res) => match oxipngify_res {
                             Ok(img_result) => {
                                 let final_size = img_result.len();
-                                let size_diff = initial_size - final_size;
+                                let size_diff =
+                                    (initial_size as i64) - (final_size as i64);
                                 debug!("size_diff: {}", size_diff);
                                 let send_res = tx_writer.send((tile, img_result)).await;
 
@@ -83,6 +84,9 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
         let pb_style = ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         );
+        if args.quiet {
+            pb.set_draw_target(indicatif::ProgressDrawTarget::hidden());
+        }
         match pb_style {
             Err(e) => {
                 warn!("pb_style error: {:?}", e);
