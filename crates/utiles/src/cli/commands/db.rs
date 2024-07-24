@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use tracing::{info, trace};
 
 use crate::cli::args::AnalyzeArgs;

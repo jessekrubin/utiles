@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use tracing::{debug, info, warn};
 
 use utiles_core::UtilesCoreError;
@@ -17,6 +15,18 @@ pub struct CopyPasta {
     pub cfg: CopyConfig,
 }
 
+#[derive(Debug)]
+pub struct CopyPastaPreflightAnalysis {
+    pub dst_db_type: MbtType,
+    pub dst_db: MbtilesAsyncSqliteClient,
+
+    pub src_db_type: MbtType,
+    pub src_db: MbtilesAsyncSqliteClient,
+
+    pub dst_is_new: bool,
+    pub check_conflict: bool,
+}
+
 impl CopyPasta {
     pub fn new(cfg: CopyConfig) -> UtilesResult<CopyPasta> {
         cfg.check()?;
@@ -31,14 +41,10 @@ impl CopyPasta {
         Ok(src_db)
     }
 
-    pub async fn get_src_dbtype(&self) -> UtilesResult<MbtType> {
-        let src_db = self.get_src_db().await?;
-        Ok(src_db.mbtype)
-    }
-
     /// Returns the destination db and a bool indicating if it was created
     pub async fn get_dst_db(
         &self,
+        dst_db_type: Option<MbtType>,
     ) -> UtilesResult<(MbtilesAsyncSqliteClient, bool, MbtType)> {
         // if the dst is a file... we gotta get it...
         let dst_db_res = MbtilesAsyncSqliteClient::open_existing(&self.cfg.dst).await;
@@ -49,12 +55,8 @@ impl CopyPasta {
                 debug!("Creating new db... {:?}", self.cfg.dst);
                 // type is
                 debug!("dbtype: {:?}", self.cfg.dbtype);
-                let db = MbtilesAsyncSqliteClient::open_new(
-                    &self.cfg.dst,
-                    // todo!
-                    self.cfg.dbtype,
-                )
-                .await?;
+                let db = MbtilesAsyncSqliteClient::open_new(&self.cfg.dst, dst_db_type)
+                    .await?;
                 (db, true)
             }
         };
@@ -241,11 +243,30 @@ ON
         Ok(res)
     }
 
-    pub fn preflight_check(&self) -> UtilesResult<()> {
+    pub async fn preflight_check(&self) -> UtilesResult<CopyPastaPreflightAnalysis> {
         // do the thing
         debug!("Preflight check: {:?}", self.cfg);
+        let src_db = self.get_src_db().await?;
+        let src_db_type = src_db.mbtype;
 
-        Ok(())
+        // if dst exists... get it and type...
+        let (dst_db, is_new, db_type) = self
+            .get_dst_db(
+                self.cfg
+                    .dbtype
+                    .or(Some(src_db_type))
+                    .unwrap_or_default()
+                    .into(),
+            )
+            .await?;
+        Ok(CopyPastaPreflightAnalysis {
+            src_db_type,
+            src_db,
+            dst_db_type: db_type,
+            dst_db,
+            dst_is_new: is_new,
+            check_conflict: self.cfg.istrat.requires_check() && !is_new,
+        })
     }
 
     pub async fn check_conflict(
@@ -294,17 +315,26 @@ LIMIT 1;
         warn!("mbtiles-2-mbtiles copy is a WIP");
         // doing preflight check
         debug!("Preflight check");
-        self.preflight_check()?;
-        let (dst_db, is_new, db_type) = self.get_dst_db().await?;
+        let preflight = self.preflight_check().await?;
+        info!(
+            "Copying from {:?} ({}) -> {:?} {}",
+            preflight.src_db.filepath(),
+            preflight.src_db_type,
+            preflight.dst_db.filepath(),
+            preflight.dst_db_type
+        );
 
+        let dst_db = preflight.dst_db;
         let src_db_name = "src";
-
         let src_db_path = self.cfg.src_dbpath_str();
-
         debug!("Attaching src db ({:?}) to dst db...", src_db_path);
         dst_db.attach_db(&src_db_path, src_db_name).await?;
         debug!("OK: Attached src db");
-        if !is_new && self.cfg.istrat.requires_check() {
+
+        // ====================================================================
+        // CHECK FOR CONFLICT (IF REQUIRED)
+        // ====================================================================
+        if preflight.check_conflict {
             info!("No conflict strategy provided; checking for conflict");
             let has_conflict = self.check_conflict(&dst_db).await?;
             if has_conflict {
@@ -314,7 +344,7 @@ LIMIT 1;
                 )
                 .into());
             }
-        } else if is_new {
+        } else if preflight.dst_is_new {
             debug!("dst db is new; not checking for conflict");
         } else {
             debug!(
@@ -322,17 +352,31 @@ LIMIT 1;
                 self.cfg.istrat.to_string()
             );
         }
-        info!("Copying tiles: {:?} -> {:?}", self.cfg.src, self.cfg.dst);
-        let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
-        debug!("n_tiles_inserted: {:?}", n_tiles_inserted);
 
-        if is_new {
+        // ====================================================================
+        // COPY TILES
+        // ====================================================================
+        info!("Copying tiles: {:?} -> {:?}", self.cfg.src, self.cfg.dst);
+        let start = std::time::Instant::now();
+        let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
+        let elapsed = start.elapsed();
+        info!(
+            "Copied {} tiles from {:?} -> {:?} in {:?}",
+            n_tiles_inserted, self.cfg.src, self.cfg.dst, elapsed
+        );
+
+        // ====================================================================
+        // COPY TILES
+        // ====================================================================
+        if preflight.dst_is_new {
             let n_metadata_inserted = self.copy_metadata(&dst_db).await?;
             debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
         }
 
-        dst_db.metadata_set("dbtype", db_type.as_str()).await?;
-        if db_type == MbtType::Hash || db_type == MbtType::Norm {
+        dst_db
+            .metadata_set("dbtype", preflight.dst_db_type.as_str())
+            .await?;
+        if preflight.dst_db_type != MbtType::Flat {
             dst_db
                 .metadata_set(
                     "tileid",
@@ -345,7 +389,6 @@ LIMIT 1;
                 )
                 .await?;
         }
-
         debug!("Detaching src db...");
         dst_db.detach_db(src_db_name).await?;
         debug!("Detached src db!");
