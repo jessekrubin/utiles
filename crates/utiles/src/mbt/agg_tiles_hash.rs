@@ -1,18 +1,15 @@
-use futures::StreamExt;
-use hex::ToHex;
-use md5::Digest;
-use noncrypto_digests::Fnv;
-use rusqlite::Connection;
-use serde::Serialize;
-use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, warn};
-
-use utiles_core::{Tile, TileLike};
-
 use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::{make_tiles_stream, TilesFilter};
 use crate::utilesqlite::MbtilesAsyncSqliteClient;
+use futures::StreamExt;
+use hex::ToHex;
+use md5::Digest;
+use noncrypto_digests::Fnv;
+use serde::Serialize;
+use tokio_stream::wrappers::ReceiverStream;
+use tracing::debug;
+use utiles_core::{Tile, TileLike};
 
 #[derive(Debug, Serialize)]
 pub struct AggHashResult {
@@ -24,72 +21,58 @@ pub struct AggHashResult {
 // =================================================================
 // HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS ~ HASH FUNCTIONS
 // =================================================================
-// pub fn mbt_agg_tile_hash_query(hash_type: HashType) -> String {
+// pub fn mbt_agg_tile_hash_query(
+//     hash_type: HashType,
+//     prefix: Option<&str>,
+//     filter: &Option<TilesFilter>,
+// ) -> UtilesResult<String> {
+//     let where_clause = if let Some(filter) = filter {
+//         filter.mbtiles_sql_where(prefix)?
+//     } else {
+//         String::new()
+//     };
 //     let sql = format!(
-//         "SELECT coalesce(
-//             {hash_type}_concat_hex(
-//                 cast(zoom_level AS text),
-//                 cast(tile_column AS text),
-//                 cast(tile_row AS text),
-//                 tile_data
-//                 ORDER BY zoom_level, tile_column, tile_row),
-//             {hash_type}_hex(''))
-//         FROM tiles"
+//         "
+// SELECT
+//     coalesce(
+//         {hash_type}_concat_hex(
+//             cast(zoom_level AS text),
+//             cast(tile_column AS text),
+//             cast(tile_row AS text),
+//             tile_data
+//             ORDER BY zoom_level, tile_column, tile_row
+//         ),
+//         {hash_type}_hex('')
+//     ) AS concatenated_hash,
+//     COUNT(*) AS total_count
+// FROM tiles
+// {where_clause}
+//     ",
 //     );
-//     sql
+//     Ok(sql)
 // }
-pub fn mbt_agg_tile_hash_query(
-    hash_type: HashType,
-    prefix: Option<&str>,
-    filter: &Option<TilesFilter>,
-) -> UtilesResult<String> {
-    let where_clause = if let Some(filter) = filter {
-        filter.mbtiles_sql_where(prefix)?
-    } else {
-        String::new()
-    };
-    let sql = format!(
-        "
-SELECT
-    coalesce(
-        {hash_type}_concat_hex(
-            cast(zoom_level AS text),
-            cast(tile_column AS text),
-            cast(tile_row AS text),
-            tile_data
-            ORDER BY zoom_level, tile_column, tile_row
-        ),
-        {hash_type}_hex('')
-    ) AS concatenated_hash,
-    COUNT(*) AS total_count
-FROM tiles
-{where_clause}
-    ",
-    );
-    Ok(sql)
-}
-
-pub fn mbt_agg_tiles_hash_query(
-    conn: &Connection,
-    hash_type: HashType,
-    prefix: Option<&str>,
-    filter: &Option<TilesFilter>,
-) -> UtilesResult<AggHashResult> {
-    let sql = mbt_agg_tile_hash_query(hash_type, prefix, filter)?;
-    debug!("sql: {:?}", sql);
-    let mut stmt = conn.prepare_cached(&sql)?;
-    // start time
-    let ti = std::time::Instant::now();
-    let (agg_tiles_hash_str, count): (String, i64) =
-        stmt.query_row([], |row| Ok((row.get(0)?, row.get(1)?)))?;
-    let dt = ti.elapsed();
-    Ok(AggHashResult {
-        hash_type,
-        hash: agg_tiles_hash_str,
-        ntiles: count as usize,
-        dt,
-    })
-}
+//
+// pub fn mbt_agg_tiles_hash_query(
+//     conn: &Connection,
+//     hash_type: HashType,
+//     prefix: Option<&str>,
+//     filter: &Option<TilesFilter>,
+// ) -> UtilesResult<AggHashResult> {
+//     let sql = mbt_agg_tile_hash_query(hash_type, prefix, filter)?;
+//     debug!("sql: {:?}", sql);
+//     let mut stmt = conn.prepare_cached(&sql)?;
+//     // start time
+//     let ti = std::time::Instant::now();
+//     let (agg_tiles_hash_str, count): (String, i64) =
+//         stmt.query_row([], |row| Ok((row.get(0)?, row.get(1)?)))?;
+//     let dt = ti.elapsed();
+//     Ok(AggHashResult {
+//         hash_type,
+//         hash: agg_tiles_hash_str,
+//         ntiles: count as usize,
+//         dt,
+//     })
+// }
 
 pub async fn hash_stream<T: Digest>(
     mut data: ReceiverStream<Vec<u8>>,
