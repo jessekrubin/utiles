@@ -4,19 +4,15 @@ use anyhow::Result;
 use clap::Parser;
 use futures::StreamExt;
 use indicatif;
-use indicatif::ProgressStyle;
 use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 
 use utiles::{
-    mbt::{
-        MbtStreamWriter, MbtWriterStats, Mbtiles, MbtilesAsync,
-        MbtilesClientAsync,
-    },
-    tile_type::{tiletype, TileType},
     lager::{init_tracing, LagerConfig},
-    UtilesResult
+    mbt::{MbtStreamWriter, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync},
+    tile_type::{tiletype, TileType},
+    UtilesResult,
 };
 
 #[derive(Debug, Parser)]
@@ -143,7 +139,7 @@ async fn oxipng_main(args: Cli) -> UtilesResult<()> {
         let mut processed = 0;
         let pb = indicatif::ProgressBar::new(total_count as u64);
         pb.set_message("oxipng-ing");
-        let pb_style = ProgressStyle::with_template(
+        let pb_style = indicatif::ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         );
         if args.quiet {
