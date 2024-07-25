@@ -2,6 +2,7 @@ use indoc::indoc;
 use rusqlite::{params, Connection, OptionalExtension};
 use std::collections::HashSet;
 use std::error::Error;
+use std::fmt::Debug;
 use std::path::Path;
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
@@ -33,6 +34,7 @@ use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
 use crate::UtilesError;
 
+#[derive(Debug)]
 pub struct Mbtiles {
     pub dbpath: DbPath,
     pub(crate) conn: Connection,
@@ -126,6 +128,14 @@ impl Mbtiles {
         let dbpath = pathlike2dbpath(&path)?;
         let res = create_mbtiles_file(&path, &mbtype.unwrap_or_default())?;
         Ok(Mbtiles { conn: res, dbpath })
+    }
+
+    pub fn query_zxy(&self, z: u8, x: u32, y: u32) -> RusqliteResult<Option<Vec<u8>>> {
+        query_zxy(&self.conn, z, x, y)
+    }
+
+    pub fn query_tile<T: TileLike>(&self, tile: &T) -> RusqliteResult<Option<Vec<u8>>> {
+        query_tile(&self.conn, tile)
     }
 
     pub fn from_conn(conn: Connection) -> UtilesResult<Mbtiles> {

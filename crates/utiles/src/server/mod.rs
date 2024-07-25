@@ -221,7 +221,7 @@ async fn get_dataset_tile_zxy(
     }
     let t = utile!(path.x, path.y, path.z);
     let mbt_ds = mbtiles.unwrap();
-    let tile_data = mbt_ds.mbtiles.query_tile(t).await;
+    let tile_data = mbt_ds.mbtiles.query_tile(&t).await;
     match tile_data {
         Ok(data) => match data {
             Some(data) => {
@@ -270,7 +270,7 @@ async fn get_dataset_tile_quadkey(
         )
     })?;
     let mbt_ds = mbt_ds.unwrap();
-    let tile_data = mbt_ds.mbtiles.query_tile(parsed_tile).await.unwrap();
+    let tile_data = mbt_ds.mbtiles.query_tile(&parsed_tile).await.unwrap();
     match tile_data {
         Some(data) => Ok(Response::new(Body::from(data))),
         None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
