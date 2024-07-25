@@ -63,6 +63,7 @@ md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
 hex = "0.4.3"
 pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
+anyhow.workspace = true
 
 [dev-dependencies]
 criterion = "0.5.1"

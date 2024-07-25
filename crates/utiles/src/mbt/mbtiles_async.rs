@@ -31,7 +31,7 @@ pub trait MbtilesAsync: Sized {
 
     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>>;
 
-    async fn query_tile(&self, tile: Tile) -> UtilesResult<Option<Vec<u8>>> {
+    async fn query_tile(&self, tile: &Tile) -> UtilesResult<Option<Vec<u8>>> {
         self.query_zxy(tile.z(), tile.x(), tile.y()).await
     }
 
