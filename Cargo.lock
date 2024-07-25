@@ -2984,6 +2984,7 @@ name = "utiles-core"
 version = "0.7.0-alpha.2"
 dependencies = [
  "fast_hilbert",
+ "log",
  "serde",
  "serde_json",
  "thiserror",
