@@ -15,8 +15,9 @@ use utiles_core::BBox;
 use crate::errors::UtilesResult;
 use crate::mbt::mbtiles::{
     add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
-    has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
-    metadata_json, minzoom_maxzoom, query_zxy, tiles_count, tiles_is_empty,
+    has_zoom_row_col_index, has_zxy, init_mbtiles, mbtiles_metadata,
+    mbtiles_metadata_row, metadata_json, minzoom_maxzoom, query_zxy, tiles_count,
+    tiles_is_empty,
 };
 use crate::mbt::mbtiles_async::MbtilesAsync;
 use crate::mbt::query::query_mbtiles_type;
@@ -453,13 +454,19 @@ where
             None => Ok(None),
         }
     }
+    async fn has_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<bool> {
+        let res = self
+            .conn(move |conn| has_zxy(conn, z, x, y))
+            .await
+            .map_err(UtilesError::AsyncSqliteError)?;
+        Ok(res)
+    }
 
     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>> {
         let tile = self
             .conn(move |conn| query_zxy(conn, z, x, y))
             .await
             .map_err(UtilesError::AsyncSqliteError)?;
-
         Ok(tile)
     }
 

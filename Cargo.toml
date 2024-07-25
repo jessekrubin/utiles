@@ -1,16 +1,17 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/utiles",
-  "crates/utiles-core", "crates/utiles-oxipng",
-  "utiles-pyo3",
+    "crates/utiles",
+    "crates/utiles-core",
+    "crates/utiles-oxipng",
+    "utiles-pyo3",
 ]
 
 [workspace.package]
-version = "0.7.0-alpha.3"
+version = "0.7.0-alpha.4"
 authors = [
-  "Jesse Rubin <jessekrubin@gmail.com>",
-  "Dan Costello <dan.costello2@gmail.com>",
+    "Jesse Rubin <jessekrubin@gmail.com>",
+    "Dan Costello <dan.costello2@gmail.com>",
 ]
 documentation = "https://github.com/jessekrubin/utiles"
 edition = "2021"
@@ -44,6 +45,19 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
 xxhash-rust = { version = "0.8.10", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
 
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.19.1"
+# CI backends to support
+ci = "github"
+# The installers to generate for each app
+installers = []
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# Publish jobs to run in CI
+pr-run-mode = "plan"
+
 [profile.dev]
 opt-level = 0
 
@@ -53,5 +67,10 @@ opt-level = 2
 [profile.release]
 opt-level = 3
 strip = true
+lto = "thin"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
 lto = "thin"
 # lto = "fat"
