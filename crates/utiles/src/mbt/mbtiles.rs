@@ -10,7 +10,7 @@ use tracing::{debug, error, warn};
 use utiles_core::bbox::BBox;
 use utiles_core::constants::MBTILES_MAGIC_NUMBER;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::{yflip, LngLat, Tile, TileLike};
+use utiles_core::{flipy, yflip, LngLat, Tile, TileLike};
 
 use crate::errors::UtilesResult;
 use crate::mbt::query::{
@@ -647,10 +647,24 @@ pub fn query_zxy(
     y: u32,
 ) -> RusqliteResult<Option<Vec<u8>>> {
     let mut stmt = connection.prepare_cached("SELECT tile_data FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3")?;
+    let yup = flipy(y, z);
     let tile_data: Option<Vec<u8>> = stmt
-        .query_row(params![z, x, y], |row| row.get(0))
+        .query_row(params![z, x, yup], |row| row.get(0))
         .optional()?;
     Ok(tile_data)
+}
+
+pub fn has_zxy(connection: &Connection, z: u8, x: u32, y: u32) -> RusqliteResult<bool> {
+    let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3 LIMIT 1")?;
+    let yup = flipy(y, z);
+    let count: i64 = stmt.query_row(params![z, x, yup], |row| row.get(0))?;
+    Ok(count == 1)
+}
+pub fn has_tile<T: TileLike>(
+    connection: &Connection,
+    tile: &T,
+) -> RusqliteResult<bool> {
+    has_zxy(connection, tile.z(), tile.x(), tile.y())
 }
 
 pub fn query_tile<T: TileLike>(
@@ -664,12 +678,7 @@ pub fn tile_exists<T: TileLike>(
     connection: &Connection,
     tile: &T,
 ) -> RusqliteResult<bool> {
-    let mut stmt = connection.prepare_cached("SELECT COUNT(*) FROM tiles WHERE zoom_level=?1 AND tile_column=?2 AND tile_row=?3")?;
-    let rows = stmt.query_row(params![tile.z(), tile.x(), tile.flipy()], |row| {
-        let count: i64 = row.get(0)?;
-        Ok(count)
-    })?;
-    Ok(rows == 1_i64)
+    has_tile(connection, tile)
 }
 
 pub fn tiles_is_empty(connection: &Connection) -> RusqliteResult<bool> {

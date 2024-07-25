@@ -4,15 +4,15 @@ use crate::{Point2d, TileLike};
 /// A struct representing a bbox of tiles at a specific zoom level
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TileZBox {
-    zoom: u8,
-    min: Point2d<u32>,
-    max: Point2d<u32>,
+    pub zoom: u8,
+    pub min: Point2d<u32>,
+    pub max: Point2d<u32>,
 }
 
 /// A struct representing a set of `TileZBox`es
 #[derive(Debug)]
 pub struct TileZBoxes {
-    ranges: Vec<TileZBox>,
+    pub ranges: Vec<TileZBox>,
 }
 
 /// An iterator over a `TileZBox` that yields tiles

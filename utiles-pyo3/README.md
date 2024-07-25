@@ -4,7 +4,7 @@
 ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fjessekrubin%2Futiles%2Fmain%2Futiles-pyo3%2Fpyproject.toml&style=flat-square&logo=python&logoColor=white&color=blue)
 [![Wheel](https://img.shields.io/pypi/wheel/utiles.svg?style=flat-square)](https://img.shields.io/pypi/wheel/utiles.svg)
 
-utiles = utils + tiles
+`utiles = utils + tiles` OR `utiles = ultra-tiles` depending on the day.
 
 Fast spherical mercator geo/tile util(e)ities.
 
@@ -140,7 +140,8 @@ test_ul_bench[mercantile-(486, 332, 20)]     1,099.9938 (5.38)     107,300.0021 
 ## TODO:
 
 - [x] benchmark against mercantile
-- [x] Re-write cli in rust with clap
+- [x] Split library into `utiles` (rust lib) and `utiles-python` (python/pip package)?
+- [x] Re-write cli in rust with clap?
 - **Maybe:**
-  - [] Mbtiles support??
+  - [] Mbtiles support for the python lib??
   - [] Reading/writing mvt files?

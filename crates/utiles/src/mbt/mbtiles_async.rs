@@ -29,10 +29,15 @@ pub trait MbtilesAsync: Sized {
     async fn metadata_minzoom(&self) -> UtilesResult<Option<u8>>;
     async fn metadata_maxzoom(&self) -> UtilesResult<Option<u8>>;
 
+    async fn has_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<bool>;
     async fn query_zxy(&self, z: u8, x: u32, y: u32) -> UtilesResult<Option<Vec<u8>>>;
 
     async fn query_tile(&self, tile: &Tile) -> UtilesResult<Option<Vec<u8>>> {
         self.query_zxy(tile.z(), tile.x(), tile.y()).await
+    }
+
+    async fn has_tile(&self, tile: &Tile) -> UtilesResult<bool> {
+        self.has_zxy(tile.z(), tile.x(), tile.y()).await
     }
 
     async fn query_minzoom_maxzoom(&self) -> UtilesResult<Option<MinZoomMaxZoom>>;

@@ -321,7 +321,7 @@ impl BBox {
     /// containing a single `BBox` that represents the current instance itself.
     ///
     /// # Returns
-    /// - `Vec<BBox>`: A vector containing one `BBox` if the instance does not cross the antimeridian,
+    /// `Vec<BBox>`: A vector containing one `BBox` if the instance does not cross the antimeridian,
     /// or two `BBox`es if it does.
     ///
     /// # Examples

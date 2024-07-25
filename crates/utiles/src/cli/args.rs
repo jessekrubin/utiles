@@ -1,3 +1,4 @@
+// #![allow(clippy::doc_lazy_continuation)]
 use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
 use strum_macros::AsRefStr;

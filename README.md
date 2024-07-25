@@ -5,6 +5,15 @@ utiles = utils + tiles
 ## Installation
 
 ```bash
+# __CLI__
+# from crates
+cargo install utiles 
+# from source
+cargo install --git https://github.com/jessekrubin/utiles.git utiles # and/or utiles-oxipng
+# via the python package (which wrappers the rust-cli)
+pip install -U utiles
+
+# __LIBS__
 # python (python lib + rust-cli)
 pip install -U utiles 
 # rust-cli
@@ -13,38 +22,20 @@ cargo install utiles
 cargo add utiles-core utiles
 ```
 
-## python
-
-A mostly drop-in replacement for [mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several other util(e)ities
-
-[py-utiles](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
-
 ## About
 
 `utiles` started off as a python port of mapbox's web-mercator utils
 python-library [mercantile](https://github.com/mapbox/mercantile) written
 in rust. It has since been expanded into a slim rust crate (`utiles-core`)
-a less slim crate with a lib/cli (`utiles`), and the python wrapper package.
+a less slim crate with a lib/cli (`utiles`), that has a python package wrapper.
 
 For more details on the python package see: [./utiles-pyo3](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
 
-### Why?
+## python
 
-I use mercantile regularly and wished it were a bit more ergonomic, had type annotations, and was faster, but overall
-it's a great library.
+A mostly drop-in replacement for [mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several other util(e)ities
 
-This was an excuse to learn some more rust as well as pyo3.
-
-**Do I/you REALLY need a rust-port of mercantile?**
-
-I don't know, decide for yourself. `utiles` is certainly faster than `mercantile` for some things (see benchmarks below)
-
-**Is it really a drop in replacement for mercantile?**
-
-Not quite, but it's close. utiles doesn't throw the same exceptions as mercantile, instead it throws `ValueError`'s and
-`TypeError`'s.
-
-There might be other differences, but I have been using it instead of mercantile for a bit now and it works pretty decent, tho I am open to suggestions!
+[py-utiles](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
 
 ---
 
@@ -54,16 +45,8 @@ There might be other differences, but I have been using it instead of mercantile
 
 - Please do! Would love some feedback!
 - Be kind!
+- DO NOT USE the phrases `blazing fast`/`blazingly fast` in any PRs, issues or docs.
 - I will happily accept PRs, and add you to the currently (5/26/2023) non-existent contributors list.
-
-## TODO:
-
-- [x] benchmark against mercantile
-- **Maybe:**
-  - [x] Split library into `utiles` (rust lib) and `utiles-python` (python/pip package)?
-  - [] Mbtiles support??
-  - [] Reading/writing mvt files?
-  - [] Re-write cli in rust with clap?
 
 ---
 
