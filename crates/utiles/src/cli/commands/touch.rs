@@ -6,9 +6,9 @@ use tracing::{debug, info};
 use crate::cli::args::TouchArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::MbtType;
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::is_valid_page_size;
 use crate::sqlite::{Sqlike3Async, SqliteError};
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
 
 fn check_page_size(page_size: i64) -> UtilesResult<i64> {
@@ -50,8 +50,7 @@ pub async fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
                         }
                     };
                     let mbtiles =
-                        MbtilesAsyncSqliteClient::open_new(filepath, Some(dbtype))
-                            .await?;
+                        MbtilesClientAsync::open_new(filepath, Some(dbtype)).await?;
                     info!("Created mbtiles: {:?}", filepath);
                     mbtiles.metadata_set("name", &filename_no_ext).await?;
                     mbtiles.metadata_set("mbtype", dbtype_str.as_str()).await?;

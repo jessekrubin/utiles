@@ -1,0 +1,21 @@
+[package]
+name = "utiles-oxipng"
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+utiles = { path = "../utiles" }
+tokio = { workspace = true, features = ["fs"] }
+clap = { workspace = true, features = ["derive", "color", "wrap_help"] }
+indicatif.workspace = true
+oxipng = { version = "9.1.2", features = [] }
+tracing.workspace = true
+tokio-stream.workspace = true
+futures.workspace = true
+size.workspace = true

@@ -12,7 +12,7 @@ use crate::cli::commands::shapes::ShapesArgs;
 use crate::cli::commands::{analyze_main, vacuum_main};
 use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
-use crate::mbt::hash_types::HashType;
+use crate::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
 use crate::tile_strfmt::TileStringFormatter;
@@ -29,7 +29,7 @@ fn about() -> String {
 }
 
 #[derive(Debug, Parser)]
-#[command(name = "ut", about = about(), version = VERSION, author, max_term_width = 88)]
+#[command(name = "ut", about = about(), version = VERSION, author, max_term_width = 120)]
 pub struct Cli {
     /// debug mode (print/log more)
     #[arg(long, global = true, default_value = "false", action = clap::ArgAction::SetTrue)]

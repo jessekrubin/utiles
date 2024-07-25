@@ -18,6 +18,9 @@ f.cjs
 herm.*
 *.db
 *.db-journal
+*.db-wal
+*.sqlite-wal
+*.mbtiles-wal
 
 
 ##################
@@ -127,8 +130,6 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
-# Dependency directories
-node_modules/
 jspm_packages/
 
 # Optional npm cache directory
@@ -140,23 +141,14 @@ jspm_packages/
 # Optional REPL history
 .node_repl_history
 
-# Output of 'npm pack'
-*.tgz
-
 # Zip files
 *.zip
 
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-
 # next.js build output
 .next
-
-# OS X temporary files
-.DS_Store
 
 # Rush temporary files
 common/deploy/
@@ -187,8 +179,8 @@ third-party/
 
 deployment.tar.gz
 target/
-.hypothesis/ 
-file.py 
+.hypothesis/
+file.py
 *.so
 
 # testing data
@@ -198,3 +190,4 @@ crates/**/*.mbtiles
 crates/**/*.pmtiles
 crates/**/*.sqlite
 crates/**/*.utiles
+

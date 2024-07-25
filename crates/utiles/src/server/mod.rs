@@ -35,9 +35,9 @@ use utiles_core::{quadkey2tile, utile, Tile};
 
 use crate::errors::UtilesResult;
 use crate::globster::find_filepaths;
-use crate::mbt::mbtiles_async::MbtilesAsync;
+use crate::mbt::MbtilesAsync;
+use crate::mbt::MbtilesClientAsync;
 use crate::signal::shutdown_signal;
-use crate::utilesqlite::MbtilesAsyncSqliteClient;
 
 pub mod radix36;
 mod request_id;
@@ -45,7 +45,7 @@ mod request_id;
 //=============================================================================
 
 pub struct MbtilesDataset {
-    pub mbtiles: MbtilesAsyncSqliteClient,
+    pub mbtiles: MbtilesClientAsync,
     pub tilejson: TileJSON,
 }
 
@@ -93,7 +93,7 @@ async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     // let mut tilejsons = HashMap::new();
     for fspath in &filepaths {
         // let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
-        let pool = MbtilesAsyncSqliteClient::open_readonly(fspath).await?;
+        let pool = MbtilesClientAsync::open_readonly(fspath).await?;
         debug!("sanity check: {:?}", pool.filepath());
         let is_valid = pool.is_mbtiles().await;
         // if error or not a valid mbtiles file, skip it

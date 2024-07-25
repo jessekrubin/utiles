@@ -7,7 +7,7 @@ use utiles_core::BBox;
 
 use crate::errors::UtilesCopyError;
 use crate::errors::UtilesResult;
-use crate::mbt::hash_types::HashType;
+use crate::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
 

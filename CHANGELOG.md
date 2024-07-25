@@ -3,6 +3,8 @@
 ## TODO
 
 - Docs/readme update
+- Write/copy from planetiler/tippecanoe fails bc distinction between supported write schema and what is a recognized schema(s)
+- Move `utiles-oxipng` to own crate/bin
 
 
 ## Unreleased/Future

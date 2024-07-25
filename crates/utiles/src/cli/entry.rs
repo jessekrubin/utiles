@@ -7,7 +7,7 @@ use crate::cli::commands::{
     tiles_main, touch_main, update_main, vacuum_main, webpify_main, zxyify_main,
 };
 use crate::errors::UtilesResult;
-use crate::lager::{init_tracing, LogConfig};
+use crate::lager::{init_tracing, LagerConfig};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
 use clap::{CommandFactory, FromArgMatches};
@@ -83,13 +83,13 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
 
     // if the command is "dev" init tracing w/ debug
     let logcfg = if let Commands::Dev(_) = args.command {
-        LogConfig {
+        LagerConfig {
             trace: false,
             debug: true,
             json: args.log_json,
         }
     } else {
-        LogConfig {
+        LagerConfig {
             trace: args.trace,
             debug: args.debug,
             json: args.log_json,

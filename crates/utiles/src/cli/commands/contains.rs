@@ -2,7 +2,7 @@ use std::path::Path;
 use tracing::debug;
 
 use crate::errors::UtilesResult;
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use utiles_core::LngLat;
 
 /// Check if a mbtiles file contains a lnglat
@@ -22,7 +22,7 @@ pub async fn contains_main(filepath: &str, lnglat: LngLat) -> UtilesResult<()> {
         "Not a file: {filepath}",
         filepath = filepath.display()
     );
-    let mbtiles = MbtilesAsyncSqliteClient::open_existing(filepath).await?;
+    let mbtiles = MbtilesClientAsync::open_existing(filepath).await?;
     let bbox = mbtiles.bbox().await?;
     let contains = bbox.contains_lnglat(&lnglat);
     debug!("contains: {contains}");

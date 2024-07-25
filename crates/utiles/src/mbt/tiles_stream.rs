@@ -4,13 +4,13 @@ use tracing::{error, warn};
 
 use utiles_core::prelude::*;
 
+use crate::mbt::MbtilesClientAsync;
 use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
-use crate::utilesqlite::MbtilesAsyncSqliteClient;
+use crate::tile_stream::TileReceiverStream;
 use crate::UtilesResult;
 
 pub fn make_tiles_rx(
-    mbt: &MbtilesAsyncSqliteClient,
-    // options: Option<StreamOpts>,
+    mbt: &MbtilesClientAsync,
     query_override: Option<&str>,
 ) -> UtilesResult<tokio::sync::mpsc::Receiver<(Tile, Vec<u8>)>> {
     let (tx, rx) = tokio::sync::mpsc::channel(100);
@@ -64,9 +64,25 @@ pub fn make_tiles_rx(
 }
 
 pub fn make_tiles_stream(
-    mbt: &MbtilesAsyncSqliteClient,
+    mbt: &MbtilesClientAsync,
     query_override: Option<&str>,
-) -> UtilesResult<ReceiverStream<(Tile, Vec<u8>)>> {
+) -> UtilesResult<TileReceiverStream> {
     let rx = make_tiles_rx(mbt, query_override)?;
     Ok(ReceiverStream::new(rx))
+}
+
+impl MbtilesClientAsync {
+    pub fn tiles_rx(
+        &self,
+        query_override: Option<&str>,
+    ) -> UtilesResult<tokio::sync::mpsc::Receiver<(Tile, Vec<u8>)>> {
+        make_tiles_rx(self, query_override)
+    }
+    pub fn tiles_stream(
+        &self,
+        query_override: Option<&str>,
+    ) -> UtilesResult<TileReceiverStream> {
+        let rx = self.tiles_rx(query_override)?;
+        Ok(ReceiverStream::new(rx))
+    }
 }

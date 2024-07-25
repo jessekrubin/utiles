@@ -2991,6 +2991,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "utiles-oxipng"
+version = "0.7.0-alpha.2"
+dependencies = [
+ "anyhow",
+ "clap",
+ "futures",
+ "indicatif",
+ "oxipng",
+ "size",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "utiles",
+]
+
+[[package]]
 name = "uuid"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

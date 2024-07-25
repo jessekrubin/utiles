@@ -4,12 +4,10 @@ use tracing::{debug, warn};
 
 use crate::cli::args::UpdateArgs;
 use crate::errors::UtilesResult;
+use crate::mbt::mbtiles::{query_distinct_tilesize_fast, query_distinct_tiletype_fast};
 use crate::mbt::{DbChangeType, DbChangeset, MetadataChange, MetadataChangeFromTo};
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
-use crate::utilesqlite::mbtiles::{
-    query_distinct_tilesize_fast, query_distinct_tiletype_fast,
-};
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
 
 pub async fn update_mbtiles(
@@ -18,9 +16,9 @@ pub async fn update_mbtiles(
 ) -> UtilesResult<MetadataChange> {
     // check that filepath exists and is file
     let mbt = if dryrun {
-        MbtilesAsyncSqliteClient::open_readonly(filepath).await?
+        MbtilesClientAsync::open_readonly(filepath).await?
     } else {
-        MbtilesAsyncSqliteClient::open_existing(filepath).await?
+        MbtilesClientAsync::open_existing(filepath).await?
     };
 
     // check if tiles is empty...
