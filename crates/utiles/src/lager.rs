@@ -7,20 +7,11 @@ use tracing_subscriber::EnvFilter;
 
 use crate::errors::UtilesResult;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Default)]
 pub struct LagerConfig {
     pub debug: bool,
     pub trace: bool,
     pub json: bool,
-}
-impl Default for LagerConfig {
-    fn default() -> Self {
-        Self {
-            debug: false,
-            trace: false,
-            json: false,
-        }
-    }
 }
 
 pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {

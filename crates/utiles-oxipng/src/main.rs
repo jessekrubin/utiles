@@ -3,7 +3,6 @@ use std::time::Duration;
 use anyhow::Result;
 use clap::Parser;
 use futures::StreamExt;
-use indicatif;
 use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
@@ -184,7 +183,6 @@ async fn main() -> Result<()> {
     let args = Cli::parse();
     debug!("args: {:?}", args);
 
-    args.debug;
     init_tracing(&LagerConfig {
         debug: args.debug,
         ..Default::default()
