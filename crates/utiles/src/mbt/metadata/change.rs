@@ -1,4 +1,4 @@
-use crate::utilesqlite::mbtiles::{metadata_delete, metadata_set};
+use crate::mbt::mbtiles::{metadata_delete, metadata_set};
 use json_patch::Patch;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

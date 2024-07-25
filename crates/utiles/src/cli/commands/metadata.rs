@@ -8,8 +8,8 @@ use crate::mbt::{
     metadata2map, metadata2map_val, read_metadata_json, MbtilesMetadataJson,
     MbtilesMetadataRowParsed, MetadataChange,
 };
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use tracing::warn;
 use tracing::{debug, info};
 
@@ -17,7 +17,7 @@ pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
-    let mbtiles = MbtilesAsyncSqliteClient::open_existing(filepath).await?;
+    let mbtiles = MbtilesClientAsync::open_existing(filepath).await?;
     let metadata_rows = mbtiles.metadata_rows().await?;
     let json_val = match (args.raw, args.obj) {
         (true, true) => {
@@ -52,7 +52,7 @@ pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
     file_exists_err(filepath).await?;
-    let mbtiles = MbtilesAsyncSqliteClient::open_existing(filepath).await?;
+    let mbtiles = MbtilesClientAsync::open_existing(filepath).await?;
     let current_metadata_json = mbtiles.metadata_json().await?;
     let c = match &args.value {
         Some(value) => {

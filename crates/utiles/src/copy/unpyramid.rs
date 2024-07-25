@@ -11,7 +11,7 @@ use utiles_core::Tile;
 use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
 use crate::mbt::parse_metadata_json;
-use crate::utilesqlite::Mbtiles;
+use crate::mbt::Mbtiles;
 use crate::UtilesError;
 
 fn fspath2xyz(path: &Path) -> UtilesResult<(u32, u32, u8)> {

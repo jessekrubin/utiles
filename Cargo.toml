@@ -2,12 +2,12 @@
 resolver = "2"
 members = [
   "crates/utiles",
-  "crates/utiles-core",
+  "crates/utiles-core", "crates/utiles-oxipng",
   "utiles-pyo3",
 ]
 
 [workspace.package]
-version = "0.7.0-alpha.2"
+version = "0.7.0-alpha.3"
 authors = [
   "Jesse Rubin <jessekrubin@gmail.com>",
   "Dan Costello <dan.costello2@gmail.com>",
@@ -20,11 +20,13 @@ repository = "https://github.com/jessekrubin/utiles"
 
 [workspace.dependencies]
 anyhow = "1.0.75"
-# GIT DEP
-async-sqlite = { version = "0.3.0", features = ["bundled", "functions", "trace"] }
+async-sqlite = { version = "0.3.1", features = ["bundled", "functions", "trace"] }
+clap = { version = "4.5.8", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
+futures = "0.3.29"
 geo-types = "0.7.9"
 geojson = "0.24.1"
+indicatif = "0.17.8"
 indoc = "2.0.5"
 pyo3 = "0.22.0"
 pyo3-build-config = "0.22.0"
@@ -37,6 +39,7 @@ strum_macros = "0.26.3"
 thiserror = "1.0.63"
 tilejson = "0.4.1"
 tokio = { version = "1.38.1", features = ["full"] }
+tokio-stream = "0.1.15"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
 xxhash-rust = { version = "0.8.10", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }

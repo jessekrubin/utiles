@@ -1,14 +1,16 @@
+use std::path::{Path, PathBuf};
+
+use tracing::warn;
+
 use crate::errors::UtilesResult;
 use crate::lint::MbtLint;
-use crate::mbt::metadata2duplicates;
-use crate::sqlite::AsyncSqliteConn;
-use crate::utilesqlite::mbtiles::{
+use crate::mbt::mbtiles::{
     has_unique_index_on_metadata, metadata_table_name_is_primary_key,
 };
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
-use crate::{utilesqlite, UtilesError};
-use std::path::{Path, PathBuf};
-use tracing::warn;
+use crate::mbt::metadata2duplicates;
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
+use crate::sqlite::AsyncSqliteConn;
+use crate::UtilesError;
 
 #[derive(Debug)]
 pub struct MbtilesLinter {
@@ -24,17 +26,17 @@ impl MbtilesLinter {
             fix,
         }
     }
-    async fn open_mbtiles(&self) -> UtilesResult<MbtilesAsyncSqliteClient> {
+    async fn open_mbtiles(&self) -> UtilesResult<MbtilesClientAsync> {
         let pth = self.path.to_str().map_or_else(
             || Err(UtilesError::PathConversionError("path".to_string())),
             Ok,
         )?;
-        let mbtiles = utilesqlite::MbtilesAsyncSqliteClient::open_readonly(pth).await?;
+        let mbtiles = MbtilesClientAsync::open_readonly(pth).await?;
         Ok(mbtiles)
     }
 
     pub async fn check_magic_number(
-        mbt: &MbtilesAsyncSqliteClient,
+        mbt: &MbtilesClientAsync,
     ) -> UtilesResult<Option<crate::lint::MbtLint>> {
         let magic_number_res = mbt.magic_number().await;
         match magic_number_res {
@@ -52,7 +54,7 @@ impl MbtilesLinter {
     }
 
     pub async fn check_encoding(
-        mbt: &MbtilesAsyncSqliteClient,
+        mbt: &MbtilesClientAsync,
     ) -> UtilesResult<Vec<MbtLint>> {
         let encoding = mbt.pragma_encoding().await?;
         if encoding.to_lowercase() != "utf-8" {
@@ -62,7 +64,7 @@ impl MbtilesLinter {
     }
 
     pub async fn check_metadata_rows(
-        mbt: &MbtilesAsyncSqliteClient,
+        mbt: &MbtilesClientAsync,
     ) -> UtilesResult<Vec<MbtLint>> {
         let metadata_rows = mbt.metadata_rows().await?;
         let metadata_keys = metadata_rows
@@ -82,7 +84,7 @@ impl MbtilesLinter {
     }
 
     pub async fn check_metadata(
-        mbt: &MbtilesAsyncSqliteClient,
+        mbt: &MbtilesClientAsync,
     ) -> UtilesResult<Vec<MbtLint>> {
         // that metadata table exists
         let has_unique_index_on_metadata_name = mbt

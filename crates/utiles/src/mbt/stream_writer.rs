@@ -6,7 +6,7 @@ use tracing::{debug, warn};
 
 use utiles_core::{Tile, TileLike};
 
-use crate::utilesqlite::Mbtiles;
+use crate::mbt::Mbtiles;
 use crate::UtilesResult;
 
 #[derive(Default)]

@@ -7,14 +7,14 @@ use tracing_subscriber::EnvFilter;
 
 use crate::errors::UtilesResult;
 
-#[derive(Parser, Debug)]
-pub struct LogConfig {
+#[derive(Parser, Debug, Default)]
+pub struct LagerConfig {
     pub debug: bool,
     pub trace: bool,
     pub json: bool,
 }
 
-pub fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
+pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
     let filter = if log_config.trace {
         EnvFilter::new("TRACE")
     } else if log_config.debug {
@@ -39,6 +39,7 @@ pub fn init_tracing(log_config: &LogConfig) -> UtilesResult<()> {
         }
         false => {
             let subscriber = fmt::Subscriber::builder()
+                .without_time()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
                 .with_target(debug_or_trace)

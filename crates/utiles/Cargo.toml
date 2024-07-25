@@ -31,14 +31,15 @@ strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
 tilejson.workspace = true
+indicatif.workspace = true
+tokio-stream.workspace = true
 utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
-#
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 chrono = "0.4.38"
-clap = { version = "4.5.8", features = ["derive", "color", "wrap_help"] }
+clap = { workspace = true, features = ["derive", "color", "wrap_help"] }
 colored = "2.1.0"
 futures = "0.3.29"
 globset = "0.4.13"
@@ -57,9 +58,6 @@ tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"
 walkdir = "2.4.0"
 image = "0.25.1"
 fnv = "1.0.7"
-tokio-stream = "0.1.15"
-oxipng = { version = "9.1.2", features = [] }
-indicatif = "0.17.8"
 size.workspace = true
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"

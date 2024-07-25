@@ -1,15 +1,18 @@
-use crate::errors::UtilesResult;
-use crate::mbt::hash_types::HashType;
-use crate::mbt::{make_tiles_stream, TilesFilter};
-use crate::utilesqlite::MbtilesAsyncSqliteClient;
-use futures::StreamExt;
+use futures::{Stream, StreamExt};
 use hex::ToHex;
 use md5::Digest;
 use noncrypto_digests::Fnv;
 use serde::Serialize;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::debug;
-use utiles_core::{Tile, TileLike};
+
+use utiles_core::TileLike;
+
+use crate::errors::UtilesResult;
+use crate::hash_types::HashType;
+use crate::mbt::MbtilesClientAsync;
+use crate::mbt::TilesFilter;
+use crate::tile_stream::TileReceiverStream;
 
 #[derive(Debug, Serialize)]
 pub struct AggHashResult {
@@ -75,7 +78,7 @@ pub struct AggHashResult {
 // }
 
 pub async fn hash_stream<T: Digest>(
-    mut data: ReceiverStream<Vec<u8>>,
+    mut data: impl Stream<Item = Vec<u8>> + Unpin,
 ) -> (String, usize) {
     let mut hasher = T::new();
     let mut count = 0;
@@ -87,7 +90,7 @@ pub async fn hash_stream<T: Digest>(
     (hasher.finalize().to_vec().encode_hex_upper(), count)
 }
 pub fn tile_stream_to_bytes_stream(
-    mut data: ReceiverStream<(Tile, Vec<u8>)>,
+    mut data: TileReceiverStream,
 ) -> ReceiverStream<Vec<u8>> {
     let (tx, rx) = tokio::sync::mpsc::channel(100);
 
@@ -123,7 +126,7 @@ impl HashType {
 }
 
 pub async fn mbt_agg_tiles_hash_stream(
-    mbt: &MbtilesAsyncSqliteClient,
+    mbt: &MbtilesClientAsync,
     hash_type: HashType,
     prefix: Option<&str>,
     filter: &Option<TilesFilter>,
@@ -136,7 +139,7 @@ pub async fn mbt_agg_tiles_hash_stream(
     let query = format!(
         "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause} ORDER BY zoom_level, tile_column, tile_row;"
     );
-    let stream = make_tiles_stream(mbt, Some(query.as_str()))?;
+    let stream = mbt.tiles_stream(Some(query.as_str()))?;
     let bstream = tile_stream_to_bytes_stream(stream);
     let ti = std::time::Instant::now();
     let (agg_tiles_hash_str, ntiles) = hash_type.hash_stream(bstream).await;

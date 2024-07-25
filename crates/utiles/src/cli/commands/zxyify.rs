@@ -1,13 +1,12 @@
 use crate::cli::args::ZxyifyArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::zxyify::unzxyify;
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 
 #[tracing::instrument]
 pub async fn zxyify_main(args: ZxyifyArgs) -> UtilesResult<()> {
-    let mbt =
-        MbtilesAsyncSqliteClient::open_existing(args.common.filepath.as_str()).await?;
+    let mbt = MbtilesClientAsync::open_existing(args.common.filepath.as_str()).await?;
     mbt.assert_mbtiles().await?;
 
     if args.rm {

@@ -23,9 +23,7 @@
 pub use core::*;
 pub use errors::UtilesError;
 pub use errors::UtilesResult;
-pub use lager::init_tracing;
 pub use tile_strfmt::TileStringFormatter;
-
 pub mod cli;
 mod config;
 mod copy;
@@ -36,7 +34,7 @@ mod fs_async;
 pub mod gj;
 mod globster;
 mod img;
-mod lager;
+pub mod lager;
 mod lint;
 pub mod mbt;
 mod pmt;
@@ -46,9 +44,10 @@ pub mod sqlite;
 pub mod sqlite_utiles;
 mod tile_strfmt;
 pub mod utilejson;
-pub mod utilesqlite;
 
+pub mod hash_types;
 #[cfg(test)]
 mod tests;
+mod tile_stream;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

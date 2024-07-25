@@ -12,7 +12,7 @@ use crate::copy::CopyConfig;
 use crate::errors::UtilesError;
 use crate::errors::UtilesResult;
 use crate::mbt::MbtTileRow;
-use crate::utilesqlite::Mbtiles;
+use crate::mbt::Mbtiles;
 
 #[derive(Debug)]
 pub struct WriterStats {

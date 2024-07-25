@@ -1,9 +1,8 @@
 //! Parsing util(e)ities
-use serde_json::Value;
-
 use crate::bbox::BBox;
 use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
+use serde_json::Value;
 
 /// Parse a string into a `BBox`
 ///
@@ -162,7 +161,10 @@ pub fn parse_bbox(string: &str) -> UtilesCoreResult<BBox> {
 pub fn parse_bbox_ext(string: &str) -> UtilesCoreResult<BBox> {
     // match 'world' or 'planet'
     // match string/lower
-    let str_lower = string.to_lowercase();
+    let str_lower = string
+        .trim()
+        .trim_matches(|c| c == '\'' || c == '"')
+        .to_lowercase();
     let r = match str_lower.as_str() {
         "world" | "planet" | "all" | "*" => Ok(BBox::new(-180.0, -90.0, 180.0, 90.0)),
         "n" | "north" => Ok(BBox::new(-180.0, 0.0, 180.0, 90.0)),
@@ -173,7 +175,7 @@ pub fn parse_bbox_ext(string: &str) -> UtilesCoreResult<BBox> {
         "nw" | "northwest" => Ok(BBox::new(-180.0, 0.0, 0.0, 90.0)),
         "se" | "southeast" => Ok(BBox::new(0.0, -90.0, 180.0, 0.0)),
         "sw" | "southwest" => Ok(BBox::new(-180.0, -90.0, 0.0, 0.0)),
-        _ => parse_bbox(string),
+        _ => parse_bbox(&str_lower),
     };
     r
 }

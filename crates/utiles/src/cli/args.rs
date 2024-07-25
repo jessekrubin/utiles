@@ -12,7 +12,7 @@ use crate::cli::commands::shapes::ShapesArgs;
 use crate::cli::commands::{analyze_main, vacuum_main};
 use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
-use crate::mbt::hash_types::HashType;
+use crate::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
 use crate::tile_strfmt::TileStringFormatter;
@@ -29,7 +29,7 @@ fn about() -> String {
 }
 
 #[derive(Debug, Parser)]
-#[command(name = "ut", about = about(), version = VERSION, author, max_term_width = 88)]
+#[command(name = "ut", about = about(), version = VERSION, author, max_term_width = 120)]
 pub struct Cli {
     /// debug mode (print/log more)
     #[arg(long, global = true, default_value = "false", action = clap::ArgAction::SetTrue)]
@@ -417,27 +417,27 @@ pub struct OptimizeArgs {
     pub dst: String,
 }
 
-#[derive(Debug, Parser)]
-pub struct OxipngArgs {
-    #[command(flatten)]
-    pub common: SqliteDbCommonArgs,
-
-    /// destination dataset fspath (mbtiles, dirpath)
-    #[arg(required = true)]
-    pub dst: String,
-
-    /// optimize level
-    #[arg(required = false, long, short, default_value = "2")]
-    pub(crate) opt: u8,
-
-    /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
-    #[arg(required = false, long, short)]
-    pub jobs: Option<u8>,
-
-    /// quiet
-    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
-    pub(crate) quiet: bool,
-}
+// #[derive(Debug, Parser)]
+// pub struct OxipngArgs {
+//     #[command(flatten)]
+//     pub common: SqliteDbCommonArgs,
+//
+//     /// destination dataset fspath (mbtiles, dirpath)
+//     #[arg(required = true)]
+//     pub dst: String,
+//
+//     /// optimize level
+//     #[arg(required = false, long, short, default_value = "2")]
+//     pub(crate) opt: u8,
+//
+//     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
+//     #[arg(required = false, long, short)]
+//     pub jobs: Option<u8>,
+//
+//     /// quiet
+//     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+//     pub(crate) quiet: bool,
+// }
 
 #[derive(Debug, Parser)]
 pub struct WebpifyArgs {
@@ -711,10 +711,9 @@ pub enum Commands {
     )]
     Webpify(WebpifyArgs),
 
-    /// Optimize pngs with `oxipng` for raster tiles-db
-    #[command(name = "oxipng", hide = true)]
-    Oxipng(OxipngArgs),
-
+    // /// Optimize pngs with `oxipng` for raster tiles-db
+    // #[command(name = "oxipng", hide = true)]
+    // Oxipng(OxipngArgs),
     /// Convert raster mbtiles to webp format
     #[command(
         name = "optimize",

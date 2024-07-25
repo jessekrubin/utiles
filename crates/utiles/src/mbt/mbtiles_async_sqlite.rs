@@ -13,6 +13,11 @@ use tracing::{debug, error, info, warn};
 use utiles_core::BBox;
 
 use crate::errors::UtilesResult;
+use crate::mbt::mbtiles::{
+    add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
+    has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
+    metadata_json, minzoom_maxzoom, query_zxy, tiles_count, tiles_is_empty,
+};
 use crate::mbt::mbtiles_async::MbtilesAsync;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
@@ -26,29 +31,24 @@ use crate::sqlite::{
 };
 use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilejson::metadata2tilejson;
-use crate::utilesqlite::mbtiles::{
-    add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
-    has_zoom_row_col_index, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
-    metadata_json, minzoom_maxzoom, query_zxy, tiles_count, tiles_is_empty,
-};
 use crate::UtilesError;
 
 #[derive(Clone)]
-pub struct MbtilesAsyncSqliteClient {
+pub struct MbtilesClientAsync {
     pub dbpath: DbPath,
     pub mbtype: MbtType,
     pub client: Client,
 }
 
 #[derive(Clone)]
-pub struct MbtilesAsyncSqlitePool {
+pub struct MbtilesPoolAsync {
     pub dbpath: DbPath,
     pub mbtype: MbtType,
     pub pool: Pool,
 }
 
 #[allow(clippy::missing_fields_in_debug)]
-impl Debug for MbtilesAsyncSqlitePool {
+impl Debug for MbtilesPoolAsync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //     use the dbpath to debug
         f.debug_struct("MbtilesAsyncSqlitePool")
@@ -58,7 +58,7 @@ impl Debug for MbtilesAsyncSqlitePool {
 }
 
 #[allow(clippy::missing_fields_in_debug)]
-impl Debug for MbtilesAsyncSqliteClient {
+impl Debug for MbtilesClientAsync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("MbtilesAsyncSqliteClient")
             .field("fspath", &self.dbpath.fspath)
@@ -67,7 +67,7 @@ impl Debug for MbtilesAsyncSqliteClient {
 }
 
 #[async_trait]
-impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
+impl AsyncSqliteConn for MbtilesClientAsync {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -78,7 +78,7 @@ impl AsyncSqliteConn for MbtilesAsyncSqliteClient {
 }
 
 #[async_trait]
-impl AsyncSqliteConn for MbtilesAsyncSqlitePool {
+impl AsyncSqliteConn for MbtilesPoolAsync {
     async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -89,7 +89,7 @@ impl AsyncSqliteConn for MbtilesAsyncSqlitePool {
 }
 
 #[async_trait]
-impl AsyncSqliteConnMut for MbtilesAsyncSqliteClient {
+impl AsyncSqliteConnMut for MbtilesClientAsync {
     async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -100,7 +100,7 @@ impl AsyncSqliteConnMut for MbtilesAsyncSqliteClient {
 }
 
 #[async_trait]
-impl AsyncSqliteConnMut for MbtilesAsyncSqlitePool {
+impl AsyncSqliteConnMut for MbtilesPoolAsync {
     async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
@@ -110,11 +110,11 @@ impl AsyncSqliteConnMut for MbtilesAsyncSqlitePool {
     }
 }
 
-impl MbtilesAsyncSqliteClient {
+impl MbtilesClientAsync {
     pub async fn new(dbpath: DbPath, client: Client) -> UtilesResult<Self> {
         let mbtype = client.conn(query_mbtiles_type).await?;
 
-        Ok(MbtilesAsyncSqliteClient {
+        Ok(MbtilesClientAsync {
             dbpath,
             mbtype,
             client,
@@ -152,14 +152,14 @@ impl MbtilesAsyncSqliteClient {
                 })
                 .await?;
 
-            MbtilesAsyncSqliteClient::new(dbpath, client).await
+            MbtilesClientAsync::new(dbpath, client).await
         }
     }
     pub async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(path)?;
         debug!("Opening mbtiles file with client: {}", dbpath);
         let client = ClientBuilder::new().path(&dbpath.fspath).open().await?;
-        MbtilesAsyncSqliteClient::new(dbpath, client).await
+        MbtilesClientAsync::new(dbpath, client).await
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -174,7 +174,7 @@ impl MbtilesAsyncSqliteClient {
             )
             .open()
             .await?;
-        MbtilesAsyncSqliteClient::new(dbpath, client).await
+        MbtilesClientAsync::new(dbpath, client).await
     }
 
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -188,7 +188,7 @@ impl MbtilesAsyncSqliteClient {
             .flags(flags)
             .open()
             .await?;
-        MbtilesAsyncSqliteClient::new(dbpath, client).await
+        MbtilesClientAsync::new(dbpath, client).await
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {
@@ -204,10 +204,10 @@ impl MbtilesAsyncSqliteClient {
         Ok(jm)
     }
 }
-impl MbtilesAsyncSqlitePool {
+impl MbtilesPoolAsync {
     pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
         let mbtype = pool.conn(query_mbtiles_type).await?;
-        Ok(MbtilesAsyncSqlitePool {
+        Ok(MbtilesPoolAsync {
             dbpath,
             mbtype,
             pool,
@@ -225,7 +225,7 @@ impl MbtilesAsyncSqlitePool {
             .num_conns(2)
             .open()
             .await?;
-        MbtilesAsyncSqlitePool::new(dbpath, pool).await
+        MbtilesPoolAsync::new(dbpath, pool).await
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -241,7 +241,7 @@ impl MbtilesAsyncSqlitePool {
             .num_conns(2)
             .open()
             .await?;
-        MbtilesAsyncSqlitePool::new(dbpath, pool).await
+        MbtilesPoolAsync::new(dbpath, pool).await
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {
@@ -258,13 +258,13 @@ impl MbtilesAsyncSqlitePool {
     }
 }
 
-impl DbPathTrait for MbtilesAsyncSqliteClient {
+impl DbPathTrait for MbtilesClientAsync {
     fn db_path(&self) -> &DbPath {
         &self.dbpath
     }
 }
 
-impl DbPathTrait for MbtilesAsyncSqlitePool {
+impl DbPathTrait for MbtilesPoolAsync {
     fn db_path(&self) -> &DbPath {
         &self.dbpath
     }

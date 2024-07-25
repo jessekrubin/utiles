@@ -6,8 +6,8 @@ use crate::copy::CopyConfig;
 use crate::errors::UtilesCopyError;
 use crate::errors::UtilesResult;
 use crate::mbt::MbtType;
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
-use crate::utilesqlite::{MbtilesAsync, MbtilesAsyncSqliteClient};
 use crate::UtilesError;
 
 #[derive(Debug)]
@@ -18,10 +18,10 @@ pub struct CopyPasta {
 #[derive(Debug)]
 pub struct CopyPastaPreflightAnalysis {
     pub dst_db_type: MbtType,
-    pub dst_db: MbtilesAsyncSqliteClient,
+    pub dst_db: MbtilesClientAsync,
 
     pub src_db_type: MbtType,
-    pub src_db: MbtilesAsyncSqliteClient,
+    pub src_db: MbtilesClientAsync,
 
     pub dst_is_new: bool,
     pub check_conflict: bool,
@@ -34,9 +34,9 @@ impl CopyPasta {
         Ok(Self { cfg })
     }
 
-    pub async fn get_src_db(&self) -> UtilesResult<MbtilesAsyncSqliteClient> {
+    pub async fn get_src_db(&self) -> UtilesResult<MbtilesClientAsync> {
         // do the thing
-        let src_db = MbtilesAsyncSqliteClient::open_existing(&self.cfg.src).await?;
+        let src_db = MbtilesClientAsync::open_existing(&self.cfg.src).await?;
         debug!("src_db: {:?}", src_db);
         Ok(src_db)
     }
@@ -45,9 +45,9 @@ impl CopyPasta {
     pub async fn get_dst_db(
         &self,
         dst_db_type: Option<MbtType>,
-    ) -> UtilesResult<(MbtilesAsyncSqliteClient, bool, MbtType)> {
+    ) -> UtilesResult<(MbtilesClientAsync, bool, MbtType)> {
         // if the dst is a file... we gotta get it...
-        let dst_db_res = MbtilesAsyncSqliteClient::open_existing(&self.cfg.dst).await;
+        let dst_db_res = MbtilesClientAsync::open_existing(&self.cfg.dst).await;
         let (dst_db, is_new) = match dst_db_res {
             Ok(db) => (db, false),
             Err(e) => {
@@ -55,8 +55,8 @@ impl CopyPasta {
                 debug!("Creating new db... {:?}", self.cfg.dst);
                 // type is
                 debug!("dbtype: {:?}", self.cfg.dbtype);
-                let db = MbtilesAsyncSqliteClient::open_new(&self.cfg.dst, dst_db_type)
-                    .await?;
+                let db =
+                    MbtilesClientAsync::open_new(&self.cfg.dst, dst_db_type).await?;
                 (db, true)
             }
         };
@@ -67,7 +67,7 @@ impl CopyPasta {
 
     pub async fn copy_metadata(
         &self,
-        dst_db: &MbtilesAsyncSqliteClient,
+        dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
         let src_db = self.get_src_db().await?;
         let metadata_rows = src_db.metadata_json().await?.as_obj();
@@ -89,7 +89,7 @@ impl CopyPasta {
 
     pub async fn copy_tiles_zbox_flat(
         &self,
-        dst_db: &MbtilesAsyncSqliteClient,
+        dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
         let src_db_name = "src";
         let where_clause = self.cfg.mbtiles_sql_where()?;
@@ -119,7 +119,7 @@ impl CopyPasta {
 
     pub async fn copy_tiles_zbox_hash(
         &self,
-        dst_db: &MbtilesAsyncSqliteClient,
+        dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
         let src_db_name = "src";
         let where_clause = self.cfg.mbtiles_sql_where()?;
@@ -149,7 +149,7 @@ impl CopyPasta {
 
     pub async fn copy_tiles_zbox_norm(
         &self,
-        dst_db: &MbtilesAsyncSqliteClient,
+        dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
         let src_db_name = "src";
         let where_clause = self.cfg.mbtiles_sql_where()?;
@@ -209,7 +209,7 @@ ON
 
     pub async fn copy_tiles_zbox(
         &self,
-        dst_db: &MbtilesAsyncSqliteClient,
+        dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
         debug!("copy tiles zbox");
 
@@ -271,7 +271,7 @@ ON
 
     pub async fn check_conflict(
         &self,
-        dst_db: &MbtilesAsyncSqliteClient,
+        dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<bool> {
         // do the thing
         debug!("Check overlapping: {:?}", self.cfg);
