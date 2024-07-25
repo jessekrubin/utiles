@@ -35,7 +35,6 @@ indicatif.workspace = true
 tokio-stream.workspace = true
 utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
-#
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
