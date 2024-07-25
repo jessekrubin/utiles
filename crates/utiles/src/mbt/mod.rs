@@ -7,12 +7,8 @@ pub use mbtype::MbtType;
 pub use metadata::*;
 pub use stream_writer::{MbtStreamWriter, MbtWriterStats};
 pub use tiles_row::MbtTileRow;
-pub use tiles_stream::{make_tiles_rx, make_tiles_stream};
 
 pub use crate::mbt::mbt_stats::{query_mbt_stats, MbtilesStats, MbtilesZoomStats};
-pub use crate::mbt::metadata2map::{
-    metadata2duplicates, metadata2map, metadata2map_val, metadata_vec_has_duplicates,
-};
 pub use crate::mbt::metadata_row::{
     MbtMetadataRow, MbtilesMetadataJson, MbtilesMetadataJsonRaw,
     MbtilesMetadataRowParsed, MbtilesMetadataRows,
@@ -26,7 +22,6 @@ mod mbt_stats;
 mod mbtiles_async;
 mod mbtype;
 mod metadata;
-mod metadata2map;
 mod metadata_row;
 mod minzoom_maxzoom;
 

@@ -1,7 +1,10 @@
-use crate::{UtilesError, UtilesResult};
 use std::io::Cursor;
+
 use tracing::warn;
+
 use utiles_core::tile_type::{tiletype, TileType};
+
+use crate::UtilesResult;
 
 pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
     match tiletype(data) {
@@ -21,14 +24,14 @@ pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
     }
 }
 
-pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> UtilesResult<Vec<u8>> {
-    if let TileType::Png = tiletype(data) {
-        oxipng::optimize_from_memory(data, options).map_err(UtilesError::OxipngError)
-    } else {
-        warn!("Unsupported image type");
-        Ok(data.to_vec())
-    }
-}
+// pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> UtilesResult<Vec<u8>> {
+//     if let TileType::Png = tiletype(data) {
+//         oxipng::optimize_from_memory(data, options).map_err(UtilesError::OxipngError)
+//     } else {
+//         warn!("Unsupported image type");
+//         Ok(data.to_vec())
+//     }
+// }
 
 // TODO: Implement pngify_image
 // fn pngify_image(data: &Vec<u8>) -> UtilesResult<Vec<u8>> {

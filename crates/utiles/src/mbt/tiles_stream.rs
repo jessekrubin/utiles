@@ -63,14 +63,6 @@ pub fn make_tiles_rx(
     Ok(rx)
 }
 
-pub fn make_tiles_stream(
-    mbt: &MbtilesClientAsync,
-    query_override: Option<&str>,
-) -> UtilesResult<TileReceiverStream> {
-    let rx = make_tiles_rx(mbt, query_override)?;
-    Ok(ReceiverStream::new(rx))
-}
-
 impl MbtilesClientAsync {
     pub fn tiles_rx(
         &self,

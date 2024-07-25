@@ -417,27 +417,27 @@ pub struct OptimizeArgs {
     pub dst: String,
 }
 
-#[derive(Debug, Parser)]
-pub struct OxipngArgs {
-    #[command(flatten)]
-    pub common: SqliteDbCommonArgs,
-
-    /// destination dataset fspath (mbtiles, dirpath)
-    #[arg(required = true)]
-    pub dst: String,
-
-    /// optimize level
-    #[arg(required = false, long, short, default_value = "2")]
-    pub(crate) opt: u8,
-
-    /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
-    #[arg(required = false, long, short)]
-    pub jobs: Option<u8>,
-
-    /// quiet
-    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
-    pub(crate) quiet: bool,
-}
+// #[derive(Debug, Parser)]
+// pub struct OxipngArgs {
+//     #[command(flatten)]
+//     pub common: SqliteDbCommonArgs,
+//
+//     /// destination dataset fspath (mbtiles, dirpath)
+//     #[arg(required = true)]
+//     pub dst: String,
+//
+//     /// optimize level
+//     #[arg(required = false, long, short, default_value = "2")]
+//     pub(crate) opt: u8,
+//
+//     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
+//     #[arg(required = false, long, short)]
+//     pub jobs: Option<u8>,
+//
+//     /// quiet
+//     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+//     pub(crate) quiet: bool,
+// }
 
 #[derive(Debug, Parser)]
 pub struct WebpifyArgs {
@@ -711,10 +711,9 @@ pub enum Commands {
     )]
     Webpify(WebpifyArgs),
 
-    /// Optimize pngs with `oxipng` for raster tiles-db
-    #[command(name = "oxipng", hide = true)]
-    Oxipng(OxipngArgs),
-
+    // /// Optimize pngs with `oxipng` for raster tiles-db
+    // #[command(name = "oxipng", hide = true)]
+    // Oxipng(OxipngArgs),
     /// Convert raster mbtiles to webp format
     #[command(
         name = "optimize",

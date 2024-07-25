@@ -59,7 +59,7 @@ tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"
 walkdir = "2.4.0"
 image = "0.25.1"
 fnv = "1.0.7"
-oxipng = { version = "9.1.2", features = [] }
+# oxipng = { version = "9.1.2", features = [] }
 size.workspace = true
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
