@@ -1,6 +1,3 @@
-// allow dead code in this module
-// #![allow(dead_code)]
-
 pub mod mbtiles;
 pub mod mbtiles_async_sqlite;
 pub use crate::mbt::mbtiles_async::MbtilesAsync;

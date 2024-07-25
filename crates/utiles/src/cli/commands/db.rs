@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use tracing::{info, trace};
 
 use crate::cli::args::AnalyzeArgs;
@@ -25,3 +24,12 @@ pub async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {
     info!("Analyze time: {}ms", analyze_time_ms);
     Ok(())
 }
+
+//
+// pub async fn schema_main(args: &SqliteSchemaArgs) -> UtilesResult<()> {
+//     info!("Schema for sqlite file: {}", args.common.filepath);
+//     let db = SqliteDbAsyncClient::open_existing(&args.common.filepath, None).await?;
+//     let schema = db.schema().await?;
+//     println!("{}", schema);
+//     Ok(())
+// }

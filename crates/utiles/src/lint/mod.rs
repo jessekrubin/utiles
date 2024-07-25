@@ -1,3 +1,5 @@
+use std::io;
+use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -16,25 +18,27 @@ mod mbt_linter;
 pub const REQUIRED_METADATA_FIELDS: [&str; 5] =
     ["bounds", "format", "maxzoom", "minzoom", "name"];
 
-#[derive(Error, Debug, Clone, Deserialize, Serialize)]
-pub enum UtilesLintError {
+#[derive(Error, Debug, Clone, Deserialize, Serialize, strum_macros::AsRefStr)]
+#[strum(serialize_all = "kebab-case")]
+pub enum MbtLint {
     #[error("not a sqlite database error: {0}")]
     NotASqliteDb(String),
 
     #[error("not a mbtiles database error: {0}")]
     NotAMbtilesDb(String),
 
-    #[error("no tiles table/view")]
-    MbtMissingTiles,
-
-    #[error("no metadata table/view")]
-    MbtMissingMetadata,
-
+    // #[error("no tiles table/view")]
+    // MbtMissingTiles,
+    // #[error("no metadata table/view")]
+    // MbtMissingMetadata,
     #[error("missing mbtiles magic-number/application_id")]
-    MbtMissingMagicNumber,
+    MissingMagicNumber,
 
     #[error("Unrecognized mbtiles magic-number/application_id: {0} != 0x4d504258")]
-    MbtUnknownMagicNumber(u32),
+    UnknownMagicNumber(u32),
+
+    #[error("encoding-not-utf8: '{0}' ~ should be 'UTF-8'")]
+    EncodingNotUtf8(String),
 
     #[error("missing index: {0}")]
     MissingIndex(String),
@@ -46,26 +50,51 @@ pub enum UtilesLintError {
     DuplicateMetadataKey(String),
 
     #[error("metadata k/v missing: {0}")]
-    MbtMissingMetadataKv(String),
-
-    #[error("lint errors {0:?}")]
-    LintErrors(Vec<UtilesLintError>),
+    MissingMetadataKv(String),
 }
 
-impl UtilesLintError {
+impl MbtLint {
     #[must_use]
     pub fn format_error(&self, filepath: &str) -> String {
         let errcode = "MBT".red();
-        let errstr = format!("{errcode}: {self}");
-        let e_str = format!("{filepath}: {errstr}");
+        let lint_id = self.as_ref().yellow();
+        let filepath_bold = filepath.bold();
+        let errstr = format!("{errcode}::{lint_id} {self}");
+        let e_str = format!("{filepath_bold}: {errstr}");
         e_str
     }
 }
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct FileLintResults {
     fspath: String,
-    errors: Option<Vec<UtilesLintError>>,
+    errors: Option<Vec<MbtLint>>,
     dt: Duration,
+}
+
+impl FileLintResults {
+    #[must_use]
+    pub fn has_errors(&self) -> bool {
+        if let Some(e) = &self.errors {
+            !e.is_empty()
+        } else {
+            false
+        }
+    }
+
+    #[must_use]
+    pub fn err_str(&self) -> String {
+        match &self.errors {
+            Some(e) => {
+                let strings = e
+                    .iter()
+                    .map(|e| e.format_error(&self.fspath.to_string()))
+                    .collect::<Vec<String>>();
+                strings.join("\n")
+            }
+            None => String::new(),
+        }
+    }
 }
 pub fn lint_filepaths_stream(
     fspaths: &Vec<PathBuf>,
@@ -77,7 +106,6 @@ pub fn lint_filepaths_stream(
             async move {
                 debug!("linting: {}", path.display());
                 let start_time = std::time::Instant::now();
-
                 let lint_results = linter.lint().await;
                 let elapsed = start_time.elapsed();
                 let file_results = match lint_results {
@@ -98,41 +126,44 @@ pub fn lint_filepaths_stream(
                 file_results
             }
         })
-        .buffer_unordered(12)
+        .buffer_unordered(16)
 }
+
 pub async fn lint_filepaths(
     fspaths: Vec<PathBuf>,
     fix: bool,
 ) -> UtilesResult<Vec<FileLintResults>> {
     let mut results = lint_filepaths_stream(&fspaths, fix);
-    let all_lints = Vec::new();
-    // let mut errors = Vec::new();
-    while let Some(file_res) = results.next().await {
-        // let json_string = serde_json::to_string(&file_res).unwrap();
-        // println!("{json_string}");
-        match file_res.errors {
-            Some(r) => {
-                debug!("r: {:?}", r);
-                if r.is_empty() {
-                    debug!("OK: {}", file_res.fspath);
-                } else {
-                    debug!("{} - {} errors found", file_res.fspath, r.len());
-                    let strings = r
-                        .iter()
-                        .map(|e| e.format_error(&file_res.fspath.to_string()))
-                        .collect::<Vec<String>>();
-                    let joined = strings.join("\n");
-                    println!("{joined}");
+    let mut all_lints = Vec::new();
 
-                    for err in &r {
-                        debug!("{}", err.to_string());
-                    }
-                }
-            }
-            None => {
-                debug!("OK: {}", file_res.fspath);
-            }
+    let stdout = io::stdout();
+    let lock = stdout.lock();
+    let mut buf = BufWriter::new(lock);
+
+    while let Some(file_res) = results.next().await {
+        if file_res.has_errors() {
+            let msg = file_res.err_str();
+            // println!("{msg}");
+            writeln!(buf, "{msg}")?;
         }
+        all_lints.push(file_res);
     }
+    let n_violations = all_lints
+        .iter()
+        .map(
+            |r: &FileLintResults| {
+                if let Some(e) = &r.errors {
+                    e.len()
+                } else {
+                    0
+                }
+            },
+        )
+        .sum::<usize>();
+    // flush the buffer
+    buf.flush()?;
+
+    let msg = format!("Found {n_violations} problems");
+    println!("{msg}");
     Ok(all_lints)
 }

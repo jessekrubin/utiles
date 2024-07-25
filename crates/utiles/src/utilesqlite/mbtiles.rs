@@ -22,13 +22,13 @@ use crate::mbt::{
     query_mbt_stats, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
     MbtilesZoomStats, MinZoomMaxZoom,
 };
-use crate::sqlite::RusqliteResult;
 use crate::sqlite::{
     application_id, open_existing, pragma_index_info, pragma_index_list,
     pragma_table_list, query_db_fspath, Sqlike3,
 };
 use crate::sqlite::{application_id_set, InsertStrategy};
 use crate::sqlite::{pathlike2dbpath, DbPath};
+use crate::sqlite::{pragma_encoding_set, RusqliteResult};
 use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
 use crate::UtilesError;
@@ -722,6 +722,7 @@ pub fn init_mbtiles_normalized(conn: &mut Connection) -> RusqliteResult<()> {
 
 pub fn init_mbtiles(conn: &mut Connection, mbt: &MbtType) -> UtilesResult<()> {
     application_id_set(conn, MBTILES_MAGIC_NUMBER)?;
+    pragma_encoding_set(conn, "UTF-8")?;
     let r: UtilesResult<()> = match mbt {
         MbtType::Flat => init_flat_mbtiles(conn).map_err(|e| e.into()),
         MbtType::Hash => init_mbtiles_hash(conn).map_err(|e| e.into()),
@@ -932,11 +933,12 @@ pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats
         .collect::<RusqliteResult<Vec<MbtilesZoomStats>, rusqlite::Error>>()?;
     Ok(rows)
 }
+
 #[allow(clippy::cast_precision_loss)]
 pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
-    let mut stmt = conn.prepare_cached(
-        r"
+    let mut stmt = conn.prepare_cached(indoc! {
+    r"
         SELECT
             zoom_level,
             COUNT(*) AS ntiles,
@@ -949,7 +951,7 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
         GROUP BY
             zoom_level
     ",
-    )?;
+    })?;
 
     let rows = stmt
         .query_map([], |row| {

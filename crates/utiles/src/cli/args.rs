@@ -1,4 +1,5 @@
 use clap::{Args, Parser, Subcommand};
+use std::path::PathBuf;
 use strum_macros::AsRefStr;
 
 use utiles_core::{
@@ -9,6 +10,7 @@ use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
 use crate::cli::commands::{analyze_main, vacuum_main};
+use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
 use crate::mbt::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
@@ -169,7 +171,7 @@ pub struct ParentChildrenArgs {
 
 #[derive(Debug, Parser)]
 pub struct SqliteDbCommonArgs {
-    /// mbtiles filepath
+    /// sqlite filepath
     #[arg(required = true)]
     pub filepath: String,
 
@@ -269,12 +271,18 @@ impl DbCommands {
     }
 }
 
+// #[derive(Debug, Parser)]
+// pub struct SqliteSchemaArgs {
+//     #[command(flatten)]
+//     pub common: SqliteDbCommonArgs,
+// }
+
 #[derive(Debug, Parser)]
 pub struct AnalyzeArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    #[arg(required = false, long)]
     pub analysis_limit: Option<usize>,
 }
 
@@ -425,6 +433,10 @@ pub struct OxipngArgs {
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
     pub jobs: Option<u8>,
+
+    /// quiet
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub(crate) quiet: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -435,6 +447,14 @@ pub struct WebpifyArgs {
     /// destination dataset fspath (mbtiles, dirpath)
     #[arg(required = true)]
     pub dst: String,
+
+    /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
+    #[arg(required = false, long, short)]
+    pub jobs: Option<u8>,
+
+    /// quiet
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub(crate) quiet: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -868,6 +888,27 @@ impl CopyArgs {
             Some(new_bbox.mbt_bounds())
         } else {
             None
+        }
+    }
+}
+
+impl From<&CopyArgs> for CopyConfig {
+    fn from(args: &CopyArgs) -> CopyConfig {
+        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
+        CopyConfig {
+            src: PathBuf::from(&args.src),
+            dst: PathBuf::from(&args.dst),
+            zset: args.zoom_set(),
+            zooms: args.zooms(),
+            verbose: true,
+            bboxes: args.bboxes(),
+            bounds_string: args.bounds(),
+            force: false,
+            dryrun: false,
+            jobs: args.jobs,
+            istrat: InsertStrategy::from(args.conflict),
+            hash: args.hash,
+            dbtype,
         }
     }
 }

@@ -114,6 +114,7 @@ pub enum UtilesError {
     OxipngError(#[from] oxipng::PngError),
 
     /// Error from `pmtiles`
+    #[cfg(feature = "pmtiles")]
     #[error("pmtiles error: {0}")]
     PmtilesError(#[from] pmtiles::PmtError),
 }

@@ -1,4 +1,4 @@
-pub use agg_tiles_hash::mbt_agg_tiles_hash;
+pub use agg_tiles_hash::mbt_agg_tiles_hash_stream;
 pub use mbtype::MbtType;
 pub use metadata::*;
 pub use stream_writer::{MbtStreamWriter, MbtWriterStats};

@@ -21,7 +21,7 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
     let mbt_metadata = mbt.metadata_rows().await?;
     let dst_mbtiles = Mbtiles::open_new(args.dst, None)?;
     dst_mbtiles.metadata_set_many(&mbt_metadata)?;
-    let tiles_stream = make_tiles_stream(&mbt)?;
+    let tiles_stream = make_tiles_stream(&mbt, None)?;
 
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     let start_time = std::time::Instant::now();
@@ -54,7 +54,8 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
                         Ok(oxipngify_res) => match oxipngify_res {
                             Ok(img_result) => {
                                 let final_size = img_result.len();
-                                let size_diff = initial_size - final_size;
+                                let size_diff =
+                                    (initial_size as i64) - (final_size as i64);
                                 debug!("size_diff: {}", size_diff);
                                 let send_res = tx_writer.send((tile, img_result)).await;
 
@@ -83,6 +84,9 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
         let pb_style = ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
         );
+        if args.quiet {
+            pb.set_draw_target(indicatif::ProgressDrawTarget::hidden());
+        }
         match pb_style {
             Err(e) => {
                 warn!("pb_style error: {:?}", e);
@@ -107,7 +111,7 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
     });
 
     let (cruncher_res, writer_res, progress_res) =
-        join!(proc_future, writer.write_batched(), progress_future);
+        join!(proc_future, writer.write(), progress_future);
     let elapsed = start_time.elapsed();
     info!("elapsed: {:?}", elapsed);
     cruncher_res?;

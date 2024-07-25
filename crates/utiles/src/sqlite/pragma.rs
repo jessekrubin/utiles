@@ -78,6 +78,26 @@ pub fn application_id_set(conn: &Connection, app_id: u32) -> RusqliteResult<u32>
     }
 }
 
+pub fn pragma_encoding(conn: &Connection) -> RusqliteResult<String> {
+    let encoding = conn.pragma_query_value(None, "encoding", |row| row.get(0))?;
+    Ok(encoding)
+}
+
+pub fn pragma_encoding_set(conn: &Connection, encoding: &str) -> RusqliteResult<bool> {
+    let current_encoding = pragma_encoding(conn)?;
+    if current_encoding == encoding {
+        debug!("encoding_set: current encoding == encoding: {}", encoding);
+        Ok(false)
+    } else {
+        debug!(
+            "encoding_set: current encoding != encoding: {} != {}",
+            current_encoding, encoding
+        );
+        conn.pragma_update(None, "encoding", encoding)?;
+        Ok(true)
+    }
+}
+
 pub fn magic_number(conn: &Connection) -> RusqliteResult<u32> {
     application_id(conn)
 }
