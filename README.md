@@ -7,7 +7,7 @@ utiles = utils + tiles
 ```bash
 # __CLI__
 # from crates
-cargo install utiles
+cargo install utiles 
 # from source
 cargo install --git https://github.com/jessekrubin/utiles.git utiles # and/or utiles-oxipng
 # via the python package (which wrappers the rust-cli)
