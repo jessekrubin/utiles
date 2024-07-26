@@ -178,6 +178,11 @@ impl MbtilesClientAsync {
         MbtilesClientAsync::new(dbpath, client).await
     }
 
+    pub async fn close(self) -> UtilesResult<()> {
+        self.client.close().await?;
+        Ok(())
+    }
+
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
@@ -205,6 +210,7 @@ impl MbtilesClientAsync {
         Ok(jm)
     }
 }
+
 impl MbtilesPoolAsync {
     pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
         let mbtype = pool.conn(query_mbtiles_type).await?;

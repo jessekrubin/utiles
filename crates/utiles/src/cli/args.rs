@@ -863,7 +863,7 @@ pub struct CopyArgs {
 
     /// sqlite fast writing mode (default: false) WIP to use streams
     #[arg(required = false, long, hide = true, action = clap::ArgAction::SetTrue)]
-    pub fast: bool,
+    pub stream: bool,
 }
 
 impl CopyArgs {
@@ -913,7 +913,7 @@ impl From<&CopyArgs> for CopyConfig {
             istrat: InsertStrategy::from(args.conflict),
             hash: args.hash,
             dst_type: dbtype,
-            fast: args.fast,
+            stream: args.stream,
         }
     }
 }

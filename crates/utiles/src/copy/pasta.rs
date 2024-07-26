@@ -1,11 +1,16 @@
-use tracing::{debug, info, warn};
+use futures::StreamExt;
+use tokio_stream::wrappers::ReceiverStream;
+use tracing::{debug, error, info, warn};
 
 use utiles_core::UtilesCoreError;
 
 use crate::copy::CopyConfig;
 use crate::errors::UtilesCopyError;
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtType, MbtilesMetadataJson};
+use crate::hash::xxh64_be_hex_upper;
+use crate::mbt::{
+    MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesMetadataJson,
+};
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::UtilesError;
@@ -216,7 +221,7 @@ ON
         Ok(n_tiles_inserted)
     }
 
-    pub async fn copy_tiles_zbox(
+    pub async fn copy_tiles_with_attach(
         &self,
         dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
@@ -331,6 +336,76 @@ LIMIT 1;
         Ok(has_conflict > 0)
     }
 
+    pub async fn copy_tiles_stream(
+        &self,
+        src_db: &MbtilesClientAsync,
+        dst_db: MbtilesClientAsync,
+    ) -> UtilesResult<usize> {
+        // detach src db if it is attached
+        if let Err(e) = dst_db.detach_db("src").await {
+            warn!("Error detaching src db: {:?}", e);
+        } else {
+            debug!("Detached src db");
+        }
+
+        // let where_clause = self.cfg.mbtiles_sql_where()?;
+        let sql_query = self.cfg.tiles_stream_query()?;
+        let dst_mbt_sync = Mbtiles::open_existing(dst_db.filepath()).map_err(|e| {
+            error!("Error opening dst db: {:?}", e);
+            e
+        })?;
+        dst_db.close().await.map_err(|e| {
+            error!("Error closing dst db: {:?}", e);
+            e
+        })?;
+        let stream_o_tiles = src_db.tiles_stream(Some(&*sql_query))?;
+
+        let (tx2writer, rx) = tokio::sync::mpsc::channel(100);
+
+        let process_tiles = tokio::spawn(async move {
+            stream_o_tiles
+                .for_each_concurrent(8, |(tile, tile_data)| {
+                    let tx_writer = tx2writer.clone();
+                    async move {
+                        let hash_res = tokio::task::spawn_blocking(move || {
+                            let hash = xxh64_be_hex_upper(&tile_data);
+                            (tile_data, hash)
+                        })
+                        .await;
+                        match hash_res {
+                            Err(je) => {
+                                warn!("hash-join-error: {:?}", je);
+                            }
+                            Ok((tile_data, hash_hex)) => {
+                                if let Err(e) = tx_writer
+                                    .send((tile, tile_data, Some(hash_hex)))
+                                    .await
+                                {
+                                    warn!("send_res: {:?}", e);
+                                }
+                            }
+                        }
+                    }
+                })
+                .await;
+        });
+        let mut writer = MbtStreamWriterSync {
+            mbt: dst_mbt_sync,
+            stream: ReceiverStream::new(rx),
+            stats: MbtWriterStats::default(),
+        };
+        let write_task = writer.write();
+        let (process_tiles_res, write_task_res) =
+            tokio::join!(process_tiles, write_task);
+        if let Err(e) = process_tiles_res {
+            error!("process_tiles_res: {:?}", e);
+        }
+        if let Err(e) = write_task_res {
+            error!("write_task_res: {:?}", e);
+        }
+        Ok(0)
+    }
+
     pub async fn run(&self) -> UtilesResult<()> {
         warn!("mbtiles-2-mbtiles copy is a WIP");
         // doing preflight check
@@ -373,11 +448,30 @@ LIMIT 1;
         }
 
         // ====================================================================
+        // COPY TILES (STREAM) EXPERIMENTAL
+        // ====================================================================
+        if self.cfg.stream {
+            info!(
+                "Copying tiles via stream: {:?} -> {:?}",
+                self.cfg.src, self.cfg.dst
+            );
+            let start = std::time::Instant::now();
+            let n_tiles_inserted =
+                self.copy_tiles_stream(&preflight.src_db, dst_db).await?;
+            let elapsed = start.elapsed();
+            info!(
+                "Copied {} tiles from {:?} -> {:?} in {:?}",
+                n_tiles_inserted, self.cfg.src, self.cfg.dst, elapsed
+            );
+            return Ok(());
+        }
+
+        // ====================================================================
         // COPY TILES
         // ====================================================================
         info!("Copying tiles: {:?} -> {:?}", self.cfg.src, self.cfg.dst);
         let start = std::time::Instant::now();
-        let n_tiles_inserted = self.copy_tiles_zbox(&dst_db).await?;
+        let n_tiles_inserted = self.copy_tiles_with_attach(&dst_db).await?;
         let elapsed = start.elapsed();
         info!(
             "Copied {} tiles from {:?} -> {:?} in {:?}",

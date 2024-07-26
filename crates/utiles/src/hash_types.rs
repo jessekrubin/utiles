@@ -18,7 +18,6 @@ pub enum HashType {
     Xxh3_128,
 }
 
-// display for HashType
 impl std::fmt::Display for HashType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

@@ -27,7 +27,7 @@ pub struct CopyConfig {
     pub istrat: InsertStrategy,
     pub dst_type: Option<MbtType>,
     pub hash: Option<HashType>,
-    pub fast: bool,
+    pub stream: bool,
 }
 
 impl CopyConfig {
@@ -38,6 +38,12 @@ impl CopyConfig {
     pub fn mbtiles_sql_where(&self) -> UtilesResult<String> {
         let tf = TilesFilter::new(self.bboxes.clone(), self.zooms.clone());
         tf.mbtiles_sql_where(None)
+    }
+
+    pub fn tiles_stream_query(&self) -> UtilesResult<String> {
+        let where_clause = self.mbtiles_sql_where()?;
+        let sql = format!("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause}");
+        Ok(sql)
     }
 
     pub fn check_src_dst_same(&self) -> UtilesResult<()> {

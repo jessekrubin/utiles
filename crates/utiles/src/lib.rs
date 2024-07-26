@@ -51,4 +51,6 @@ pub mod hash_types;
 mod tests;
 mod tile_stream;
 
+pub mod hash;
+
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
