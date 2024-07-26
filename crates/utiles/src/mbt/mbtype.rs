@@ -1,8 +1,9 @@
 use serde::Serialize;
 use std::str::FromStr;
 
-#[derive(Debug, Default, Copy, Serialize, PartialEq, Clone)]
+#[derive(Debug, Default, Copy, Serialize, PartialEq, Clone, strum_macros::Display)]
 #[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 #[derive(clap::ValueEnum)]
 pub enum MbtType {
     #[default]
@@ -28,11 +29,11 @@ impl MbtType {
     }
 }
 
-impl std::fmt::Display for MbtType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
+// impl std::fmt::Display for MbtType {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(f, "{}", self.as_str())
+//     }
+// }
 
 impl FromStr for MbtType {
     type Err = ();

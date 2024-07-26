@@ -6,8 +6,8 @@ use tracing::{debug, warn};
 
 use utiles_core::{Tile, TileLike};
 
-use crate::mbt::Mbtiles;
-use crate::UtilesResult;
+use crate::mbt::{MbtType, Mbtiles};
+use crate::{UtilesError, UtilesResult};
 
 #[derive(Default)]
 pub struct MbtWriterStats {
@@ -15,13 +15,13 @@ pub struct MbtWriterStats {
     pub nbytes: usize,
 }
 
-pub struct MbtStreamWriter {
+pub struct MbtStreamWriterSync {
     pub stream: ReceiverStream<(Tile, Vec<u8>)>,
     pub mbt: Mbtiles,
     pub stats: MbtWriterStats,
 }
 
-impl MbtStreamWriter {
+impl MbtStreamWriterSync {
     pub fn preflight(&self) -> UtilesResult<()> {
         self.mbt
             .conn
@@ -52,12 +52,12 @@ impl MbtStreamWriter {
             .map_err(Into::into)
     }
 
-    pub async fn write(&mut self) -> UtilesResult<()> {
-        self.preflight()?;
+    pub async fn write_flat(&mut self) -> UtilesResult<()> {
         let mut stmt = self.mbt.conn.prepare(
             "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);",
         )?;
-        while let Some(value) = self.stream.next().await {
+        let stream = &mut self.stream;
+        while let Some(value) = stream.next().await {
             let (tile, tile_data) = value;
             let tile_params = rusqlite::params![tile.z, tile.x, tile.yup(), tile_data];
             let insert_res = stmt.execute(tile_params);
@@ -69,9 +69,24 @@ impl MbtStreamWriter {
                 debug!("count: {}, nbytes: {}", self.stats.count, self.stats.nbytes);
             }
         }
-
-        self.postflight()?;
         Ok(())
+    }
+
+    pub async fn write(&mut self) -> UtilesResult<()> {
+        // let db_type = self.mbt.query_mbt_type()?;
+        // self.preflight()?;
+        let db_type = MbtType::Flat;
+        let write_res = match db_type {
+            MbtType::Flat => self.write_flat().await,
+            MbtType::Hash | MbtType::Norm => Err(UtilesError::Unimplemented(
+                "write for Hash or Norm".to_string(),
+            )),
+            _ => Err(UtilesError::Unsupported(
+                "stream write for unknown db type".to_string(),
+            )),
+        }?;
+        // self.postflight()?;
+        Ok(write_res)
     }
 
     pub async fn write_batched(&mut self) -> UtilesResult<()> {

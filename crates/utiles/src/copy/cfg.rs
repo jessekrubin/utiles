@@ -24,8 +24,9 @@ pub struct CopyConfig {
     pub force: bool,
     pub jobs: Option<u8>,
     pub istrat: InsertStrategy,
-    pub dbtype: Option<MbtType>,
+    pub dst_type: Option<MbtType>,
     pub hash: Option<HashType>,
+    pub fast: bool,
 }
 
 impl CopyConfig {

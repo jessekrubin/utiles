@@ -5,7 +5,7 @@ use utiles_core::UtilesCoreError;
 use crate::copy::CopyConfig;
 use crate::errors::UtilesCopyError;
 use crate::errors::UtilesResult;
-use crate::mbt::MbtType;
+use crate::mbt::{MbtType, MbtilesMetadataJson};
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::UtilesError;
@@ -22,6 +22,7 @@ pub struct CopyPastaPreflightAnalysis {
 
     pub src_db_type: MbtType,
     pub src_db: MbtilesClientAsync,
+    pub src_db_metadata: Option<MbtilesMetadataJson>,
 
     pub dst_is_new: bool,
     pub check_conflict: bool,
@@ -54,7 +55,7 @@ impl CopyPasta {
                 debug!("dst_db_res: {:?}", e);
                 debug!("Creating new db... {:?}", self.cfg.dst);
                 // type is
-                debug!("dbtype: {:?}", self.cfg.dbtype);
+                debug!("dbtype: {:?}", self.cfg.dst_type);
                 let db =
                     MbtilesClientAsync::open_new(&self.cfg.dst, dst_db_type).await?;
                 (db, true)
@@ -65,12 +66,12 @@ impl CopyPasta {
         Ok((dst_db, is_new, db_type_queried))
     }
 
-    pub async fn copy_metadata(
+    pub async fn set_metadata(
         &self,
         dst_db: &MbtilesClientAsync,
+        metadata: MbtilesMetadataJson,
     ) -> UtilesResult<usize> {
-        let src_db = self.get_src_db().await?;
-        let metadata_rows = src_db.metadata_json().await?.as_obj();
+        let metadata_rows = metadata.as_obj();
         // if we have any bboxes... should set them...
         let mut n_metadata_inserted = 0;
         for row in metadata_rows {
@@ -86,6 +87,14 @@ impl CopyPasta {
         }
         Ok(n_metadata_inserted)
     }
+    // pub async fn copy_metadata(
+    //     &self,
+    //     dst_db: &MbtilesClientAsync,
+    // ) -> UtilesResult<usize> {
+    //     let src_db = self.get_src_db().await?;
+    //     let metadata_rows = src_db.metadata_json().await?;
+    //     self.set_metadata(dst_db, metadata_rows).await
+    // }
 
     pub async fn copy_tiles_zbox_flat(
         &self,
@@ -216,7 +225,6 @@ ON
         // TODO: check the dst type else where
         let dst_db_type = dst_db.query_mbt_type().await?;
         debug!("dst_db_type: {:?}", dst_db_type);
-
         let res = match dst_db_type {
             MbtType::Flat => {
                 // do the thing
@@ -240,6 +248,7 @@ ON
                 Err(UtilesCoreError::Unimplemented(emsg).into())
             }
         }?;
+        debug!("res: {:?}", res);
         Ok(res)
     }
 
@@ -247,23 +256,34 @@ ON
         // do the thing
         debug!("Preflight check: {:?}", self.cfg);
         let src_db = self.get_src_db().await?;
-        let src_db_type = src_db.mbtype;
+        let src_db_type = if (src_db.mbtype == MbtType::Planetiler
+            || src_db.mbtype == MbtType::Tippecanoe)
+            && (self.cfg.dst_type.is_none())
+        {
+            let msg = format!("No dst-type provided and src-type is {} which is an unimplemented dst-type", src_db.mbtype);
+            warn!("{msg}");
+            MbtType::Norm
+        } else {
+            src_db.mbtype
+        };
+        let src_db_metadata = match src_db.metadata_json().await {
+            Ok(m) => Some(m),
+            Err(_) => {
+                debug!("Error getting metadata from src db");
+                None
+            }
+        };
+        let dst_db_type_if_new = self.cfg.dst_type.or(Some(src_db_type));
+        info!("dst_db_type_if_new: {:?}", dst_db_type_if_new);
 
         // if dst exists... get it and type...
-        let (dst_db, is_new, db_type) = self
-            .get_dst_db(
-                self.cfg
-                    .dbtype
-                    .or(Some(src_db_type))
-                    .unwrap_or_default()
-                    .into(),
-            )
-            .await?;
+        let (dst_db, is_new, db_type) = self.get_dst_db(dst_db_type_if_new).await?;
         Ok(CopyPastaPreflightAnalysis {
-            src_db_type,
             src_db,
-            dst_db_type: db_type,
+            src_db_type,
+            src_db_metadata,
             dst_db,
+            dst_db_type: db_type,
             dst_is_new: is_new,
             check_conflict: self.cfg.istrat.requires_check() && !is_new,
         })
@@ -323,7 +343,6 @@ LIMIT 1;
             preflight.dst_db.filepath(),
             preflight.dst_db_type
         );
-
         let dst_db = preflight.dst_db;
         let src_db_name = "src";
         let src_db_path = self.cfg.src_dbpath_str();
@@ -366,13 +385,18 @@ LIMIT 1;
         );
 
         // ====================================================================
-        // COPY TILES
+        // COPY METADATA
         // ====================================================================
-        if preflight.dst_is_new {
-            let n_metadata_inserted = self.copy_metadata(&dst_db).await?;
-            debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
+        if let Some(src_db_metadata) = preflight.src_db_metadata {
+            if preflight.dst_is_new {
+                let n_metadata_inserted =
+                    self.set_metadata(&dst_db, src_db_metadata).await?;
+                debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
+            }
         }
 
+        // update metadata minzoom and maxzoom
+        dst_db.update_minzoom_maxzoom().await?;
         dst_db
             .metadata_set("dbtype", preflight.dst_db_type.as_str())
             .await?;

@@ -850,8 +850,8 @@ pub struct CopyArgs {
     pub conflict: ConflictStrategy,
 
     /// db-type (default: src type)
-    #[arg(required = false, long = "dbtype", aliases = ["db-type", "mbtype", "mbt-type"])]
-    pub dbtype: Option<DbtypeOption>,
+    #[arg(required = false, long = "dst-type", aliases = ["dbtype", "dsttype", "mbtype", "mbt-type", "mbtiles-type"])]
+    pub dst_type: Option<DbtypeOption>,
 
     /// hash to use for blob-id if copying to normal/hash db type
     #[arg(required = false, long)]
@@ -860,6 +860,10 @@ pub struct CopyArgs {
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
     pub jobs: Option<u8>,
+
+    /// sqlite fast writing mode (default: false) WIP to use streams
+    #[arg(required = false, long, hide = true, action = clap::ArgAction::SetTrue)]
+    pub fast: bool,
 }
 
 impl CopyArgs {
@@ -894,7 +898,7 @@ impl CopyArgs {
 
 impl From<&CopyArgs> for CopyConfig {
     fn from(args: &CopyArgs) -> CopyConfig {
-        let dbtype = args.dbtype.as_ref().map(|dbtype| dbtype.into());
+        let dbtype = args.dst_type.as_ref().map(|dbtype| dbtype.into());
         CopyConfig {
             src: PathBuf::from(&args.src),
             dst: PathBuf::from(&args.dst),
@@ -908,7 +912,8 @@ impl From<&CopyArgs> for CopyConfig {
             jobs: args.jobs,
             istrat: InsertStrategy::from(args.conflict),
             hash: args.hash,
-            dbtype,
+            dst_type: dbtype,
+            fast: args.fast,
         }
     }
 }

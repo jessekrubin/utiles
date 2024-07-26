@@ -8,7 +8,7 @@ use tracing::{info, warn};
 
 use crate::cli::args::WebpifyArgs;
 use crate::img::webpify_image;
-use crate::mbt::{MbtStreamWriter, MbtWriterStats};
+use crate::mbt::{MbtStreamWriterSync, MbtWriterStats};
 use crate::mbt::{Mbtiles, MbtilesAsync, MbtilesClientAsync};
 use crate::UtilesResult;
 
@@ -25,7 +25,7 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let (tx_progress, mut rx_progress) = tokio::sync::mpsc::channel(100);
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     let start_time = std::time::Instant::now();
-    let mut writer = MbtStreamWriter {
+    let mut writer = MbtStreamWriterSync {
         stream: ReceiverStream::new(rx_writer),
         mbt: dst_mbtiles,
         stats: MbtWriterStats::default(),

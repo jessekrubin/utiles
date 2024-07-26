@@ -4,7 +4,7 @@ use tilejson::TileJSON;
 use utiles_core::{BBox, Tile, TileLike};
 
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MbtType, MbtilesStats};
+use crate::mbt::{MbtMetadataRow, MbtType, MbtilesStats, MetadataChangeFromTo};
 use crate::mbt::{MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::RowsAffected;
 
@@ -58,4 +58,12 @@ pub trait MbtilesAsync: Sized {
 
     async fn tiles_count(&self) -> UtilesResult<usize>;
     async fn pragma_encoding(&self) -> UtilesResult<String>;
+    async fn metadata_update(
+        &self,
+        name: &str,
+        value: &str,
+    ) -> UtilesResult<Option<MetadataChangeFromTo>>;
+    async fn update_minzoom_maxzoom(
+        &self,
+    ) -> UtilesResult<Option<Vec<MetadataChangeFromTo>>>;
 }
