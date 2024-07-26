@@ -266,13 +266,13 @@ ON
         } else {
             src_db.mbtype
         };
-        let src_db_metadata = match src_db.metadata_json().await {
-            Ok(m) => Some(m),
-            Err(_) => {
-                debug!("Error getting metadata from src db");
-                None
-            }
+        let src_db_metadata = if let Ok(m) = src_db.metadata_json().await {
+            Some(m)
+        } else {
+            debug!("Error getting metadata from src db");
+            None
         };
+
         let dst_db_type_if_new = self.cfg.dst_type.or(Some(src_db_type));
         info!("dst_db_type_if_new: {:?}", dst_db_type_if_new);
 

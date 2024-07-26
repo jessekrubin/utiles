@@ -11,6 +11,7 @@ use crate::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
 
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CopyConfig {
     pub src: PathBuf,

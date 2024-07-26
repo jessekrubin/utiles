@@ -298,16 +298,16 @@ where
         let change: Option<MetadataChangeFromTo> = {
             // there is a current value
             if let Some(c) = current {
-                if c.value != value {
+                if c.value == value {
+                    // if the value is the same
+                    None
+                } else {
                     // if the value is different
                     Some(MetadataChangeFromTo {
                         name: name.to_string(),
                         from: c.value.into(),
                         to: value.to_string().into(),
                     })
-                } else {
-                    // if the value is the same
-                    None
                 }
             } else {
                 Some(MetadataChangeFromTo {

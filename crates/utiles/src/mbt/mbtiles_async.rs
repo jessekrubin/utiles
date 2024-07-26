@@ -22,6 +22,8 @@ pub trait MbtilesAsync: Sized {
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>>;
 
     async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson>;
+
+    /// Returns the metadata row struct for the given name
     async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>>;
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize>;
     async fn tiles_is_empty(&self) -> UtilesResult<bool>;

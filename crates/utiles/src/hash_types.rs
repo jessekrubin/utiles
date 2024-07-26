@@ -1,7 +1,9 @@
-use crate::UtilesError;
+use std::str::FromStr;
+
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+
+use crate::UtilesError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
 #[serde(rename_all = "kebab-case")]

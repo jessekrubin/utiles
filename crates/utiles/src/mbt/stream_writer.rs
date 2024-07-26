@@ -76,7 +76,7 @@ impl MbtStreamWriterSync {
         // let db_type = self.mbt.query_mbt_type()?;
         // self.preflight()?;
         let db_type = MbtType::Flat;
-        let write_res = match db_type {
+        match db_type {
             MbtType::Flat => self.write_flat().await,
             MbtType::Hash | MbtType::Norm => Err(UtilesError::Unimplemented(
                 "write for Hash or Norm".to_string(),
@@ -85,8 +85,18 @@ impl MbtStreamWriterSync {
                 "stream write for unknown db type".to_string(),
             )),
         }?;
-        // self.postflight()?;
-        Ok(write_res)
+        Ok(())
+        // let write_res = match db_type {
+        //     MbtType::Flat => self.write_flat().await,
+        //     MbtType::Hash | MbtType::Norm => Err(UtilesError::Unimplemented(
+        //         "write for Hash or Norm".to_string(),
+        //     )),
+        //     _ => Err(UtilesError::Unsupported(
+        //         "stream write for unknown db type".to_string(),
+        //     )),
+        // }?;
+        // // self.postflight()?;
+        // Ok(write_res)
     }
 
     pub async fn write_batched(&mut self) -> UtilesResult<()> {
