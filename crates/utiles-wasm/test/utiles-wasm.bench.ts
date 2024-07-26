@@ -2,11 +2,7 @@ import * as pmtiles from "pmtiles";
 import { bench, expect, test } from "vitest";
 import * as utw from "../pkg/utiles_wasm.js";
 
-function xyz2quadkey(
-  x: number,
-  y: number,
-  z: number,
-) {
+function xyz2quadkey(x: number, y: number, z: number) {
   let quadkey = "";
   for (let i = z; i > 0; i--) {
     let digit = 0;
@@ -27,11 +23,7 @@ bench("wasm-quadkey", () => {
 });
 
 bench("js-pmtile-id", () => {
-  pmtiles.zxyToTileId(
-    20,
-    486,
-    332,
-  );
+  pmtiles.zxyToTileId(20, 486, 332);
   // .pmtileId2(486, 332, 20)
 });
 

@@ -6,17 +6,16 @@
 - Write/copy from planetiler/tippecanoe fails bc distinction between supported write schema and what is a recognized schema(s)
 - Move `utiles-oxipng` to own crate/bin
 
-
 ## Unreleased/Future
 
 - New command(s):
-   - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
-   - `db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
+  - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
+  - `db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
 - `copy` and `touch`
-   - Now supports `flat`/`norm` (normalized)/`hash` (flat-with-hash) formats as standardized by the martin/maplibre people. Should also work with non-martin-conforming mbtiles schemas (appears to for me)
+  - Now supports `flat`/`norm` (normalized)/`hash` (flat-with-hash) formats as standardized by the martin/maplibre people. Should also work with non-martin-conforming mbtiles schemas (appears to for me)
 - Dev/hidden commands:
-   - `webpify` command that converts all non-webp raster-tiles to webp (lossless only due to image-crate not supporting lossy encoding...)
-   - `oxipng` command that optimizes png(s) in mbtiles db(s) using `oxipng` crate
+  - `webpify` command that converts all non-webp raster-tiles to webp (lossless only due to image-crate not supporting lossy encoding...)
+  - `oxipng` command that optimizes png(s) in mbtiles db(s) using `oxipng` crate
 - figured out how to make async tile-stream(s)
 - Removed even more `unwrap` usages
 - lint/copy overhaul
@@ -78,7 +77,7 @@ fmt-tokens:
    `{z}`                  -> z/zoom level
    `{-y}`/`{yup}`         -> y tile coord flipped/tms
    `{zxy}`                -> z/x/y
-   
+
 
 Example:
    > echo "[486, 332, 10]" | utiles fmtstr

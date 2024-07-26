@@ -1,0 +1,16 @@
+{
+  "name": "@jsse/utiles-dev",
+  "version": "0.0.1",
+  "description": "utiles rs repo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "(MIT OR Apache-2.0)",
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-sql-cst": "^0.11.5"
+  }
+}
