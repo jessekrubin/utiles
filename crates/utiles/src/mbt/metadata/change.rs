@@ -13,10 +13,11 @@ pub struct MetadataChangeFromTo {
 }
 
 fn escape_sql_string(value: &str) -> String {
-    value.replace("'", "''")
+    value.replace('\'', "''")
 }
 
 impl MetadataChangeFromTo {
+    #[must_use]
     pub fn sql_forward(&self) -> Option<String> {
         match (&self.from, &self.to) {
             (Some(from), Some(to)) => Some(format!(
@@ -39,6 +40,7 @@ impl MetadataChangeFromTo {
         }
     }
 
+    #[must_use]
     pub fn sql_reverse(&self) -> Option<String> {
         match (&self.from, &self.to) {
             (Some(from), Some(to)) => Some(format!(
@@ -90,19 +92,19 @@ impl DbChangeset {
         &self,
         conn: &rusqlite::Connection,
     ) -> Result<(), rusqlite::Error> {
-        for change in self.changes.iter() {
+        for change in &self.changes {
             match change {
                 DbChange::Pragma(pragma_change) => {
                     conn.execute(&pragma_change.forward, [])?;
                 }
                 DbChange::Metadata(metadata_change) => {
-                    for change in metadata_change.changes.iter() {
+                    for change in &metadata_change.changes {
                         match (&change.from, &change.to) {
                             (Some(_from), Some(to)) => {
-                                metadata_set(conn, &change.name, &to)?;
+                                metadata_set(conn, &change.name, to)?;
                             }
                             (None, Some(to)) => {
-                                metadata_set(conn, &change.name, &to)?;
+                                metadata_set(conn, &change.name, to)?;
                             }
                             (Some(_from), None) => {
                                 metadata_delete(conn, &change.name)?;
@@ -143,7 +145,7 @@ impl DbChangeset {
     pub fn sql_forward_reverse(&self) -> (String, String) {
         let mut sql_forward_str = String::new();
         let mut sql_reverse_str = String::new();
-        for change in self.changes.iter() {
+        for change in &self.changes {
             match change {
                 DbChange::Pragma(pragma_change) => {
                     sql_forward_str.push_str(&pragma_change.forward);
@@ -152,7 +154,7 @@ impl DbChangeset {
                     sql_reverse_str.push('\n');
                 }
                 DbChange::Metadata(metadata_change) => {
-                    for change in metadata_change.changes.iter() {
+                    for change in &metadata_change.changes {
                         if let Some(sql) = change.sql_forward() {
                             sql_forward_str.push_str(&sql);
                             sql_forward_str.push('\n');

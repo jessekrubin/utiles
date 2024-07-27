@@ -168,24 +168,24 @@ pub async fn update_mbtiles_magic(
     mbt: &MbtilesClientAsync,
 ) -> UtilesResult<Option<PragmaChange>> {
     let magic = mbt.magic_number().await?;
-    if magic != MBTILES_MAGIC_NUMBER {
+    if magic == MBTILES_MAGIC_NUMBER {
+        Ok(None)
+    } else {
         Ok(Some(PragmaChange {
             pragma: "application_id".to_string(),
             forward: "PRAGMA application_id = 0x4d504258;".to_string(),
-            reverse: format!("PRAGMA application_id = 0x{magic:x};", magic = magic),
+            reverse: format!("PRAGMA application_id = 0x{magic:x};"),
         }))
-    } else {
-        Ok(None)
     }
 }
 
 pub async fn update_mbtiles(mbt: &MbtilesClientAsync) -> UtilesResult<Vec<DbChange>> {
-    let magic_change = update_mbtiles_magic(&mbt).await?;
+    let magic_change = update_mbtiles_magic(mbt).await?;
     let mut changes = vec![];
     if let Some(magic_change) = magic_change {
         changes.push(DbChange::Pragma(magic_change));
     }
-    let metadata_change = update_mbt_metadata(&mbt).await?;
+    let metadata_change = update_mbt_metadata(mbt).await?;
 
     if !metadata_change.is_empty() {
         changes.push(DbChange::Metadata(metadata_change));
