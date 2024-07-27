@@ -1,31 +1,25 @@
 use std::path::Path;
 
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
+
+use utiles_core::constants::MBTILES_MAGIC_NUMBER;
 
 use crate::cli::args::UpdateArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::mbtiles::{query_distinct_tilesize_fast, query_distinct_tiletype_fast};
-use crate::mbt::{DbChangeType, DbChangeset, MetadataChange, MetadataChangeFromTo};
+use crate::mbt::{
+    DbChange, DbChangeset, MetadataChange, MetadataChangeFromTo, PragmaChange,
+};
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
 use crate::UtilesError;
 
-pub async fn update_mbtiles(
-    filepath: &str,
-    dryrun: bool,
-) -> UtilesResult<MetadataChange> {
-    // check that filepath exists and is file
-    let mbt = if dryrun {
-        MbtilesClientAsync::open_readonly(filepath).await?
-    } else {
-        MbtilesClientAsync::open_existing(filepath).await?
-    };
-
+async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataChange> {
+    let filepath = mbt.filepath();
     // check if tiles is empty...
     let tiles_is_empty = mbt.tiles_is_empty().await?;
-
     if tiles_is_empty {
-        warn!("tiles table/view is empty: {}", filepath);
+        info!("tiles table/view is empty: {}", filepath);
     }
     let mut metadata_changes = vec![];
 
@@ -167,17 +161,37 @@ pub async fn update_mbtiles(
 
         current_metadata.diff(&updated_metadata, true)?
     };
-    if dryrun {
-        warn!("Dryrun: no changes made");
-    } else {
-        // todo fix cloning???
-        let changes2apply = vec![metadata_change.clone()];
-        mbt.conn(move |conn| {
-            MetadataChange::apply_changes_to_connection(conn, &changes2apply)
-        })
-        .await?;
-    }
     Ok(metadata_change)
+}
+
+pub async fn update_mbtiles_magic(
+    mbt: &MbtilesClientAsync,
+) -> UtilesResult<Option<PragmaChange>> {
+    let magic = mbt.magic_number().await?;
+    if magic != MBTILES_MAGIC_NUMBER {
+        Ok(Some(PragmaChange {
+            pragma: "application_id".to_string(),
+            forward: "PRAGMA application_id = 0x4d504258;".to_string(),
+            reverse: format!("PRAGMA application_id = 0x{magic:x};", magic = magic),
+        }))
+    } else {
+        Ok(None)
+    }
+}
+
+pub async fn update_mbtiles(mbt: &MbtilesClientAsync) -> UtilesResult<Vec<DbChange>> {
+    let magic_change = update_mbtiles_magic(&mbt).await?;
+    let mut changes = vec![];
+    if let Some(magic_change) = magic_change {
+        changes.push(DbChange::Pragma(magic_change));
+    }
+    let metadata_change = update_mbt_metadata(&mbt).await?;
+
+    if !metadata_change.is_empty() {
+        changes.push(DbChange::Metadata(metadata_change));
+    }
+
+    Ok(changes)
 }
 
 pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
@@ -193,12 +207,57 @@ pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
         "Not a file: {filepath}",
         filepath = filepath.display()
     );
-    let changes = update_mbtiles(&args.common.filepath, args.dryrun).await?;
+
+    // check that filepath exists and is file
+    let mbt = if args.dryrun {
+        MbtilesClientAsync::open_readonly(filepath).await?
+    } else {
+        MbtilesClientAsync::open_existing(filepath).await?
+    };
+    let changes = update_mbtiles(&mbt).await?;
+
+    // if args.dryrun {
+    //     warn!("Dryrun: no changes made");
+    // } else {
+    //     for change in changes {
+    //         match change {
+    //             DbChangeType::PragmaChange(pragma_change) => {
+    //                 mbt.conn(move |conn| conn.execute_batch(&pragma_change.forward))
+    //                     .await?;
+    //             }
+    //             DbChangeType::Metadata(metadata_change) => {
+    //                 mbt.conn(move |conn| {
+    //                     MetadataChange::apply_changes_to_connection(
+    //                         conn,
+    //                         // TODO: fix clone
+    //                         &vec![metadata_change.clone()],
+    //                     )
+    //                 })
+    //                     .await?;
+    //             }
+    //
+    //             _ => {
+    //                 warn!("unimplemented change: {:?}", change);
+    //             }
+    //         }
+    //     }
+    // }
 
     debug!("changes: {:?}", changes);
-    let db_changes = DbChangeset::from(DbChangeType::from(changes));
+    let db_changes = DbChangeset::from_vec(changes);
     let jsonstring =
         serde_json::to_string_pretty(&db_changes).expect("should not fail");
+    if args.dryrun {
+        warn!("Dryrun: no changes made");
+    } else {
+        mbt.conn(move |conn| db_changes.apply_to_conn(conn)).await?;
+
+        // let (sql_forward, sql_reverse) = db_changes.sql_forward_reverse();
+        // info!("sql_forward:\n{}", sql_forward);
+        // info!("sql_reverse:\n{}", sql_reverse);
+        // mbt.conn(move |conn| conn.execute_batch(&sql_forward))
+        //     .await?;
+    }
     println!("{jsonstring}");
     Ok(())
 }
