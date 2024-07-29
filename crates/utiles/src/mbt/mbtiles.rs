@@ -1061,9 +1061,10 @@ pub fn query_distinct_tilesize_zoom_limit(
         "SELECT DISTINCT ut_tilesize(tile_data) FROM tiles WHERE zoom_level=?1 LIMIT ?2",
     )?;
 
-    let tile_format: Vec<i64> = stmt
+    let tile_format_opts: Vec<Option<i64>> = stmt
         .query_map([zoom, u32::from(limit)], |row| row.get(0))?
-        .collect::<RusqliteResult<Vec<i64>, rusqlite::Error>>()?;
+        .collect::<RusqliteResult<Vec<Option<i64>>, rusqlite::Error>>()?;
+    let tile_format: Vec<i64> = tile_format_opts.iter().filter_map(|x| *x).collect();
     Ok(tile_format)
 }
 

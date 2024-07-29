@@ -1,6 +1,6 @@
 use rusqlite::functions::FunctionFlags;
 use rusqlite::Connection;
-use tracing::{debug, error};
+use tracing::{debug, trace};
 
 /// Scalar function to return the size of a tile if it is a square image.
 ///
@@ -27,7 +27,7 @@ pub fn add_function_ut_tilesize(db: &Connection) -> rusqlite::Result<()> {
                     }
                 }
                 Err(e) => {
-                    error!("error getting image size: {}", e);
+                    trace!("ut_tilesize - error getting image size: {}", e);
                     None
                 }
             };

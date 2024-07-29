@@ -89,7 +89,13 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
             warn!("no format found: {}", filepath);
         }
         1 => {
-            let fmt = query_fmt[0].clone();
+            let mut fmt = query_fmt[0].clone();
+            fmt = if fmt == "pbfgz" {
+                "pbf".to_string()
+            } else {
+                fmt
+            };
+
             if let Some(format) = format {
                 if format.value != fmt {
                     metadata_changes.push(MetadataChangeFromTo {
@@ -118,9 +124,10 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
             move |c| query_distinct_tilesize_fast(c, minmax),
         )
         .await?;
+
     match query_tilesize.len() {
         0 => {
-            warn!("no tilesize found: {}", filepath);
+            debug!("no tilesize found: {}", filepath);
         }
         1 => {
             let ts = query_tilesize[0];
