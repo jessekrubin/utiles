@@ -15,6 +15,7 @@
 #![allow(clippy::float_cmp)]
 #![allow(clippy::needless_pass_by_value)]
 #![allow(clippy::unused_self)]
+#![deny(clippy::unwrap_used)]
 
 use pyo3::prelude::*;
 

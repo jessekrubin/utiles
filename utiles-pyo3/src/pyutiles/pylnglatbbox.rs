@@ -143,24 +143,27 @@ impl PyLngLatBbox {
                 _ => py.NotImplemented(),
             }
         } else {
-            let other = other.extract::<PyRef<PyLngLatBbox>>().unwrap();
-            match op {
-                CompareOp::Eq => (self.bbox.west() == other.bbox.west()
-                    && self.bbox.south() == other.bbox.south()
-                    && self.bbox.east() == other.bbox.east()
-                    && self.bbox.north() == other.bbox.north())
-                .into_py(py),
-                CompareOp::Ne => (self.bbox.west != other.bbox.west()
-                    || self.bbox.south() != other.bbox.south()
-                    || self.bbox.east() != other.bbox.east()
-                    || self.bbox.north() != other.bbox.north())
-                .into_py(py),
-                CompareOp::Lt => (self.bbox.west() < other.bbox.west()
-                    || self.bbox.south() < other.bbox.south()
-                    || self.bbox.east() < other.bbox.east()
-                    || self.bbox.north() < other.bbox.north())
-                .into_py(py),
-                _ => py.NotImplemented(),
+            let other = other.extract::<PyRef<PyLngLatBbox>>();
+            match other {
+                Ok(other) => match op {
+                    CompareOp::Eq => (self.bbox.west() == other.bbox.west()
+                        && self.bbox.south() == other.bbox.south()
+                        && self.bbox.east() == other.bbox.east()
+                        && self.bbox.north() == other.bbox.north())
+                    .into_py(py),
+                    CompareOp::Ne => (self.bbox.west != other.bbox.west()
+                        || self.bbox.south() != other.bbox.south()
+                        || self.bbox.east() != other.bbox.east()
+                        || self.bbox.north() != other.bbox.north())
+                    .into_py(py),
+                    CompareOp::Lt => (self.bbox.west() < other.bbox.west()
+                        || self.bbox.south() < other.bbox.south()
+                        || self.bbox.east() < other.bbox.east()
+                        || self.bbox.north() < other.bbox.north())
+                    .into_py(py),
+                    _ => py.NotImplemented(),
+                },
+                Err(_) => py.NotImplemented(),
             }
         }
     }
