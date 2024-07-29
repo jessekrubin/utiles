@@ -43,7 +43,7 @@ tokio = { version = "1.38.1", features = ["full"] }
 tokio-stream = "0.1.15"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
-xxhash-rust = { version = "0.8.10", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
+xxhash-rust = { version = "0.8.12", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
 
 # Config for 'cargo dist'
 [workspace.metadata.dist]
