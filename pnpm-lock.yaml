@@ -1,0 +1,32 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+devDependencies:
+  prettier:
+    specifier: ^3.3.3
+    version: 3.3.3
+  prettier-plugin-sql-cst:
+    specifier: ^0.11.5
+    version: 0.11.5
+
+packages:
+
+  /prettier-plugin-sql-cst@0.11.5:
+    resolution: {integrity: sha512-XwtwHSxNsOyyZdY+EaZoT5Sdd6nWF7U+8FE25kOomfISYwIXml/MMGnVIi3WiBhMbe5aclpys0n9rkgkyjnesA==}
+    dependencies:
+      prettier: 3.3.3
+      sql-parser-cst: 0.28.0
+    dev: true
+
+  /prettier@3.3.3:
+    resolution: {integrity: sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
+
+  /sql-parser-cst@0.28.0:
+    resolution: {integrity: sha512-LNxy0X6C04iXRx83DXbK6PVwIvj1deEVN9wZAf139KeD32/oEQfFBL2RmXyElrgqCO99hQLJKbbQL40j4yx/uw==}
+    dev: true

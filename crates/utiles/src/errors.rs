@@ -17,6 +17,10 @@ pub enum UtilesError {
     #[error("Unimplemented: {0}")]
     Unimplemented(String),
 
+    /// unsupported err for when a feature is not supported
+    #[error("Unsupported: {0}")]
+    Unsupported(String),
+
     #[error("invalid fspath: {0}")]
     InvalidFspath(String),
 

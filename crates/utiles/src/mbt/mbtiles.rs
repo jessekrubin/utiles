@@ -91,9 +91,7 @@ impl Mbtiles {
         mbtype: Option<MbtType>,
     ) -> UtilesResult<Self> {
         let mbtype = mbtype.unwrap_or(MbtType::Flat);
-        if mbtype != MbtType::Flat {
-            return Err(UtilesError::Unimplemented(mbtype.to_string()));
-        }
+
         // make sure the path don't exist
         let dbpath = pathlike2dbpath(path)?;
         if dbpath.fspath_exists() {

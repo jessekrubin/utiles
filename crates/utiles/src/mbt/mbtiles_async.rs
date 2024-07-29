@@ -4,7 +4,7 @@ use tilejson::TileJSON;
 use utiles_core::{BBox, Tile, TileLike};
 
 use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MbtType, MbtilesStats};
+use crate::mbt::{MbtMetadataRow, MbtType, MbtilesStats, MetadataChangeFromTo};
 use crate::mbt::{MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::RowsAffected;
 
@@ -22,6 +22,8 @@ pub trait MbtilesAsync: Sized {
     async fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>>;
 
     async fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson>;
+
+    /// Returns the metadata row struct for the given name
     async fn metadata_row(&self, name: &str) -> UtilesResult<Option<MbtMetadataRow>>;
     async fn metadata_set(&self, name: &str, value: &str) -> UtilesResult<usize>;
     async fn tiles_is_empty(&self) -> UtilesResult<bool>;
@@ -58,4 +60,12 @@ pub trait MbtilesAsync: Sized {
 
     async fn tiles_count(&self) -> UtilesResult<usize>;
     async fn pragma_encoding(&self) -> UtilesResult<String>;
+    async fn metadata_update(
+        &self,
+        name: &str,
+        value: &str,
+    ) -> UtilesResult<Option<MetadataChangeFromTo>>;
+    async fn update_minzoom_maxzoom(
+        &self,
+    ) -> UtilesResult<Option<Vec<MetadataChangeFromTo>>>;
 }

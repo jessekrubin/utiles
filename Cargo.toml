@@ -1,10 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/utiles",
-    "crates/utiles-core",
-    "crates/utiles-oxipng",
-    "utiles-pyo3",
+  "crates/utiles",
+  "crates/utiles-core",
+  "crates/utiles-oxipng",
+  "utiles-pyo3",
 ]
 
 [workspace.package]

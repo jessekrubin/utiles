@@ -24,7 +24,7 @@ use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
 use crate::mbt::{
     query_mbt_stats, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
-    MinZoomMaxZoom,
+    MetadataChangeFromTo, MinZoomMaxZoom,
 };
 use crate::sqlite::{
     journal_mode, magic_number, pragma_encoding, AsyncSqliteConn, AsyncSqliteConnMut,
@@ -178,6 +178,11 @@ impl MbtilesClientAsync {
         MbtilesClientAsync::new(dbpath, client).await
     }
 
+    pub async fn close(self) -> UtilesResult<()> {
+        self.client.close().await?;
+        Ok(())
+    }
+
     pub async fn open_readonly<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
@@ -205,6 +210,7 @@ impl MbtilesClientAsync {
         Ok(jm)
     }
 }
+
 impl MbtilesPoolAsync {
     pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
         let mbtype = pool.conn(query_mbtiles_type).await?;
@@ -287,6 +293,60 @@ where
     async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()> {
         let r = self.conn(add_functions).await?;
         Ok(r)
+    }
+
+    async fn metadata_update(
+        &self,
+        name: &str,
+        value: &str,
+    ) -> UtilesResult<Option<MetadataChangeFromTo>> {
+        let current = self.metadata_row(name).await?;
+        let change: Option<MetadataChangeFromTo> = {
+            // there is a current value
+            if let Some(c) = current {
+                if c.value == value {
+                    // if the value is the same
+                    None
+                } else {
+                    // if the value is different
+                    Some(MetadataChangeFromTo {
+                        name: name.to_string(),
+                        from: c.value.into(),
+                        to: value.to_string().into(),
+                    })
+                }
+            } else {
+                Some(MetadataChangeFromTo {
+                    name: name.to_string(),
+                    from: None,
+                    to: value.to_string().into(),
+                })
+            }
+        };
+        if let Some(c) = change {
+            let _ = self.metadata_set(name, value).await?;
+            Ok(Some(c))
+        } else {
+            Ok(None)
+        }
+    }
+
+    async fn update_minzoom_maxzoom(
+        &self,
+    ) -> UtilesResult<Option<Vec<MetadataChangeFromTo>>> {
+        let query_minmax = self.query_minzoom_maxzoom().await?;
+        if let Some(minmaxz) = query_minmax {
+            let minzoom_change = self
+                .metadata_update("minzoom", &minmaxz.minzoom.to_string())
+                .await?;
+            let maxzoom_change = self
+                .metadata_update("maxzoom", &minmaxz.maxzoom.to_string())
+                .await?;
+            let changes = vec![minzoom_change, maxzoom_change];
+            Ok(Some(changes.into_iter().flatten().collect()))
+        } else {
+            Ok(None)
+        }
     }
 
     async fn is_mbtiles_like(&self) -> UtilesResult<bool> {

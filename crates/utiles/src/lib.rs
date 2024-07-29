@@ -24,6 +24,7 @@ pub use core::*;
 pub use errors::UtilesError;
 pub use errors::UtilesResult;
 pub use tile_strfmt::TileStringFormatter;
+
 pub mod cli;
 mod config;
 mod copy;
@@ -49,5 +50,7 @@ pub mod hash_types;
 #[cfg(test)]
 mod tests;
 mod tile_stream;
+
+pub mod hash;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

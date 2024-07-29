@@ -5,7 +5,7 @@ pub use mbtiles_async::MbtilesAsync;
 pub use mbtiles_async_sqlite::{MbtilesClientAsync, MbtilesPoolAsync};
 pub use mbtype::MbtType;
 pub use metadata::*;
-pub use stream_writer::{MbtStreamWriter, MbtWriterStats};
+pub use stream_writer::{MbtStreamWriterSync, MbtWriterStats};
 pub use tiles_row::MbtTileRow;
 
 pub use crate::mbt::mbt_stats::{query_mbt_stats, MbtilesStats, MbtilesZoomStats};

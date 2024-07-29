@@ -9,7 +9,9 @@ use tracing::{debug, error, info, warn};
 
 use utiles::{
     lager::{init_tracing, LagerConfig},
-    mbt::{MbtStreamWriter, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync},
+    mbt::{
+        MbtStreamWriterSync, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync,
+    },
     tile_type::{tiletype, TileType},
     UtilesResult,
 };
@@ -75,7 +77,7 @@ async fn oxipng_main(args: Cli) -> UtilesResult<()> {
 
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     let start_time = std::time::Instant::now();
-    let mut writer = MbtStreamWriter {
+    let mut writer = MbtStreamWriterSync {
         stream: ReceiverStream::new(rx_writer),
         mbt: dst_mbtiles,
         stats: MbtWriterStats::default(),
@@ -114,7 +116,8 @@ async fn oxipng_main(args: Cli) -> UtilesResult<()> {
                                 let size_diff =
                                     (initial_size as i64) - (final_size as i64);
                                 debug!("size_diff: {}", size_diff);
-                                let send_res = tx_writer.send((tile, img_result)).await;
+                                let send_res =
+                                    tx_writer.send((tile, img_result, None)).await;
 
                                 if let Err(e) = send_res {
                                     warn!("send_res: {:?}", e);

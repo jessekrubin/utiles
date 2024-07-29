@@ -15,7 +15,7 @@ pip install -U utiles
 
 # __LIBS__
 # python (python lib + rust-cli)
-pip install -U utiles 
+pip install -U utiles
 # rust-cli
 cargo install utiles
 # rust-libs

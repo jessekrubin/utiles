@@ -36,7 +36,7 @@ pub async fn oxipng_main(args: OxipngArgs) -> UtilesResult<()> {
     let proc_future = tokio::spawn(async move {
         // TODO: cli flag for concurrency
         tiles_stream
-            .for_each_concurrent(jobs, |(tile, tile_data)| {
+            .for_each_concurrent(jobs, |(tile, tile_data, _)| {
                 let tx_writer = tx_writer.clone();
                 let tx_progress = tx_progress.clone();
                 let oxipng_options = oxipng::Options::from_preset(args.opt);

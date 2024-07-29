@@ -39,7 +39,6 @@ pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
         }
         false => {
             let subscriber = fmt::Subscriber::builder()
-                .without_time()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
                 .with_target(debug_or_trace)

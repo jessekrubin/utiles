@@ -18,7 +18,8 @@ pub fn make_tiles_rx(
     // Here we create a stream of tiles from the source mbtiles,
     // and then we process each tile and send progress updates
     tokio::spawn({
-        // TODO: figure out if this is bad... or problematic...
+        // TODONE: figure out if this is bad... or problematic...
+        // UPDATE: it's apparently very light weight
         let mbt = mbt.clone();
         let query_override = query_override
             .unwrap_or(

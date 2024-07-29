@@ -11,6 +11,7 @@ use crate::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
 
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CopyConfig {
     pub src: PathBuf,
@@ -24,8 +25,9 @@ pub struct CopyConfig {
     pub force: bool,
     pub jobs: Option<u8>,
     pub istrat: InsertStrategy,
-    pub dbtype: Option<MbtType>,
+    pub dst_type: Option<MbtType>,
     pub hash: Option<HashType>,
+    pub stream: bool,
 }
 
 impl CopyConfig {
@@ -36,6 +38,12 @@ impl CopyConfig {
     pub fn mbtiles_sql_where(&self) -> UtilesResult<String> {
         let tf = TilesFilter::new(self.bboxes.clone(), self.zooms.clone());
         tf.mbtiles_sql_where(None)
+    }
+
+    pub fn tiles_stream_query(&self) -> UtilesResult<String> {
+        let where_clause = self.mbtiles_sql_where()?;
+        let sql = format!("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause}");
+        Ok(sql)
     }
 
     pub fn check_src_dst_same(&self) -> UtilesResult<()> {

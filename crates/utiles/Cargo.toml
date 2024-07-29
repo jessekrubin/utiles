@@ -19,51 +19,53 @@ path = "src/lib.rs"
 name = "utiles"
 path = "src/bin.rs"
 required-features = [
-    #    "cli"
+
+
+  #    "cli"
 ]
 
 [dependencies]
-geo-types.workspace = true
-geojson.workspace = true
-serde.workspace = true
-serde_json = { workspace = true, features = ["preserve_order"] }
-strum.workspace = true
-strum_macros.workspace = true
-thiserror.workspace = true
-tilejson.workspace = true
-indicatif.workspace = true
-tokio-stream.workspace = true
-utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
-xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
+anyhow.workspace = true
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 chrono = "0.4.38"
 clap = { workspace = true, features = ["derive", "color", "wrap_help"] }
 colored = "2.1.0"
+fnv = "1.0.7"
 futures = "0.3.29"
+geo-types.workspace = true
+geojson.workspace = true
 globset = "0.4.13"
+hex = "0.4.3"
+image = "0.25.1"
 imagesize = "0.13.0"
+indicatif.workspace = true
 indoc = { workspace = true }
 json-patch = "2.0.0"
+md-5 = "0.10.6"
+noncrypto-digests = "0.3.2"
 num_cpus = "1.16.0"
+pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
+serde.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
+size.workspace = true
 sqlite-hashes = { version = "0.7.3", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+strum.workspace = true
+strum_macros.workspace = true
+thiserror.workspace = true
+tilejson.workspace = true
 time = "0.3.36"
 tokio = { workspace = true, features = ["fs"] }
+tokio-stream.workspace = true
 tower = { version = "0.4.13", features = ["timeout"] }
 tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
+utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
 walkdir = "2.4.0"
-image = "0.25.1"
-fnv = "1.0.7"
-size.workspace = true
-md-5 = "0.10.6"
-noncrypto-digests = "0.3.2"
-hex = "0.4.3"
-pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
-anyhow.workspace = true
+xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
 
 [dev-dependencies]
 criterion = "0.5.1"
@@ -74,5 +76,5 @@ harness = false
 
 [features]
 default = []
-#cli = ["dep:clap"]
+# cli = ["dep:clap"]
 pmtiles = ["dep:pmtiles"]

@@ -315,3 +315,26 @@ pub fn metadata_duplicates_json_query(conn: &Connection) -> RusqliteResult<Strin
     })?;
     Ok(r)
 }
+
+pub fn fast_write_pragmas(conn: &Connection) -> RusqliteResult<()> {
+    conn.execute_batch(indoc! {r"
+                PRAGMA synchronous = OFF;
+                PRAGMA journal_mode = WAL;
+                PRAGMA locking_mode = EXCLUSIVE;
+                PRAGMA temp_store = MEMORY;
+                PRAGMA cache_size = 100000;
+                "
+    })?;
+    Ok(())
+}
+
+pub fn unfast_write_pragmas(conn: &Connection) -> RusqliteResult<()> {
+    conn.execute_batch(indoc! {r"
+            PRAGMA synchronous = NORMAL;
+            PRAGMA journal_mode = DELETE;
+            PRAGMA locking_mode = NORMAL;
+            PRAGMA temp_store = DEFAULT;
+            PRAGMA cache_size = 2000;
+            "})?;
+    Ok(())
+}

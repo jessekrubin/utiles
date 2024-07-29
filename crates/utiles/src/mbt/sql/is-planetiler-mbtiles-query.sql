@@ -59,7 +59,7 @@ SELECT (
      -- 'images' table's columns and their types are as expected:
      -- 3 columns (tile_id, tile_data).
      -- The order is not important
-     SELECT COUNT(*) = 3
+     SELECT COUNT(*) = 2
         FROM pragma_table_info('tiles_data')
         WHERE ((name = 'tile_data_id' AND type = 'INTEGER')
             OR (name = 'tile_data' AND type = 'BLOB'))
