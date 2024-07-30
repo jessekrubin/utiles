@@ -143,24 +143,27 @@ impl PyBbox {
                 _ => py.NotImplemented(),
             }
         } else {
-            let other = other.extract::<PyRef<PyBbox>>().unwrap();
-            match op {
-                CompareOp::Eq => (self.bbox.left() == other.bbox.left()
-                    && self.bbox.bottom() == other.bbox.bottom()
-                    && self.bbox.right() == other.bbox.right()
-                    && self.bbox.top() == other.bbox.top())
-                .into_py(py),
-                CompareOp::Ne => (self.bbox.left() != other.bbox.left()
-                    || self.bbox.bottom() != other.bbox.bottom()
-                    || self.bbox.right() != other.bbox.right()
-                    || self.bbox.top() != other.bbox.top())
-                .into_py(py),
-                CompareOp::Lt => (self.bbox.left() < other.bbox.left()
-                    || self.bbox.bottom() < other.bbox.bottom()
-                    || self.bbox.right() < other.bbox.right()
-                    || self.bbox.top() < other.bbox.top())
-                .into_py(py),
-                _ => py.NotImplemented(),
+            let other = other.extract::<PyRef<PyBbox>>();
+            match other {
+                Ok(other) => match op {
+                    CompareOp::Eq => (self.bbox.left() == other.bbox.left()
+                        && self.bbox.bottom() == other.bbox.bottom()
+                        && self.bbox.right() == other.bbox.right()
+                        && self.bbox.top() == other.bbox.top())
+                    .into_py(py),
+                    CompareOp::Ne => (self.bbox.left() != other.bbox.left()
+                        || self.bbox.bottom() != other.bbox.bottom()
+                        || self.bbox.right() != other.bbox.right()
+                        || self.bbox.top() != other.bbox.top())
+                    .into_py(py),
+                    CompareOp::Lt => (self.bbox.left() < other.bbox.left()
+                        || self.bbox.bottom() < other.bbox.bottom()
+                        || self.bbox.right() < other.bbox.right()
+                        || self.bbox.top() < other.bbox.top())
+                    .into_py(py),
+                    _ => py.NotImplemented(),
+                },
+                Err(_) => py.NotImplemented(),
             }
         }
     }

@@ -56,7 +56,6 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
 #[pyfunction]
 #[pyo3(signature = (x, y, truncate = None))]
 pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
-    // let trunc = truncate.unwrap_or(false);
     let lnglat = utiles::lnglat(x, y, truncate);
     PyLngLat::new(lnglat.lng(), lnglat.lat())
 }
@@ -270,11 +269,11 @@ pub fn bounding_tile(
     args: &Bound<'_, PyTuple>,
     truncate: Option<bool>,
 ) -> PyResult<PyTile> {
-    let res = pyparsing::parse_bbox(args);
-    if res.is_err() {
-        return Err(res.err().unwrap());
-    }
-    let bbox = res.unwrap();
+    let bbox = pyparsing::parse_bbox(args)?;
+    // if res.is_err() {
+    //     return Err(res.err().unwrap());
+    // }
+    // let bbox = res;
     let res = utiles::bounding_tile(bbox.into(), truncate)
         .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
     Ok(PyTile::from(res))

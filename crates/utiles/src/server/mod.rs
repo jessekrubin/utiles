@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
@@ -12,7 +11,7 @@ use axum::{
         header::{HeaderMap, HeaderValue},
         StatusCode,
     },
-    response::{IntoResponse, Response},
+    response::IntoResponse,
     routing::get,
     Json, Router,
 };
@@ -92,26 +91,21 @@ async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     let mut datasets = BTreeMap::new();
     // let mut tilejsons = HashMap::new();
     for fspath in &filepaths {
-        // let pool = MbtilesAsyncSqlitePool::open_readonly(fspath).await.unwrap();
         let pool = MbtilesClientAsync::open_readonly(fspath).await?;
         debug!("sanity check: {:?}", pool.filepath());
         let is_valid = pool.is_mbtiles().await;
-        // if error or not a valid mbtiles file, skip it
-        if is_valid.is_err() || !is_valid.unwrap() {
+        if is_valid.is_ok() {
+            let tilejson = pool.tilejson_ext().await?;
+            let filename = pool.filename().to_string().replace(".mbtiles", "");
+            let mbt_ds = MbtilesDataset {
+                mbtiles: pool,
+                tilejson,
+            };
+            datasets.insert(filename, mbt_ds);
+        } else {
             warn!("Skipping non-mbtiles file: {:?}", fspath);
             continue;
         }
-        let tilejson = pool.tilejson_ext().await?;
-        let filename = pool.filename().to_string().replace(".mbtiles", "");
-        let mbt_ds = MbtilesDataset {
-            mbtiles: pool,
-            tilejson,
-        };
-        // datasets.insert(pool.filename().to_string().replace(".mbtiles", ""), mbt_ds);
-
-        datasets.insert(filename, mbt_ds);
-        // datasets.insert(pool.filename().to_string().replace(".mbtiles", ""), pool);
-        // tilejsons.insert(pool.filename().to_string().replace(".mbtiles", ""), tilejson);
     }
 
     // print the datasets
@@ -220,24 +214,39 @@ async fn get_dataset_tile_zxy(
         ));
     }
     let t = utile!(path.x, path.y, path.z);
-    let mbt_ds = mbtiles.unwrap();
-    let tile_data = mbt_ds.mbtiles.query_tile(&t).await;
-    match tile_data {
-        Ok(data) => match data {
-            Some(data) => {
-                let headers = blob2headers(&data);
-                let mut headers_map = HeaderMap::new();
-                for (k, v) in headers {
-                    headers_map.insert(k, HeaderValue::from_str(v).unwrap());
+    match mbtiles {
+        Some(mbt_ds) => {
+            let tile_data = mbt_ds.mbtiles.query_tile(&t).await;
+            match tile_data {
+                Ok(data) => match data {
+                    Some(data) => {
+                        let headers = blob2headers(&data);
+                        let mut headers_map = HeaderMap::new();
+
+                        for (k, v) in headers {
+                            if let Ok(hvalue) = HeaderValue::from_str(v) {
+                                headers_map.insert(k, hvalue);
+                            }
+                        }
+                        Ok((StatusCode::OK, headers_map, Body::from(data)))
+                    }
+                    None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
+                },
+                Err(e) => {
+                    warn!("Error querying tile: {:?}", e);
+                    Err((StatusCode::NOT_FOUND, "Tile not found".to_string()))
                 }
-                Ok((StatusCode::OK, headers_map, Body::from(data)))
             }
-            None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
-        },
-        Err(e) => {
-            warn!("Error querying tile: {:?}", e);
-            Err((StatusCode::NOT_FOUND, "Tile not found".to_string()))
         }
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "error": "Dataset not found",
+                "dataset": path.dataset,
+                "status": 404,
+            }))
+            .to_string(),
+        )),
     }
 }
 
@@ -269,11 +278,37 @@ async fn get_dataset_tile_quadkey(
             format!("Error parsing quadkey: {e}"),
         )
     })?;
-    let mbt_ds = mbt_ds.unwrap();
-    let tile_data = mbt_ds.mbtiles.query_tile(&parsed_tile).await.unwrap();
-    match tile_data {
-        Some(data) => Ok(Response::new(Body::from(data))),
-        None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
+    if let Some(mbt_ds) = mbt_ds {
+        let tile_data = mbt_ds.mbtiles.query_tile(&parsed_tile).await;
+        match tile_data {
+            Ok(data) => match data {
+                Some(data) => {
+                    let headers = blob2headers(&data);
+                    let mut headers_map = HeaderMap::new();
+                    for (k, v) in headers {
+                        if let Ok(hvalue) = HeaderValue::from_str(v) {
+                            headers_map.insert(k, hvalue);
+                        }
+                    }
+                    Ok((StatusCode::OK, headers_map, Body::from(data)))
+                }
+                None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
+            },
+            Err(e) => {
+                warn!("Error querying tile: {:?}", e);
+                Err((StatusCode::NOT_FOUND, "Tile not found".to_string()))
+            }
+        }
+    } else {
+        Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "error": "Dataset not found",
+                "dataset": path.dataset,
+                "status": 404,
+            }))
+            .to_string(),
+        ))
     }
 }
 
@@ -293,11 +328,29 @@ async fn get_dataset_tilejson(
     Path(path): Path<String>,
 ) -> impl IntoResponse {
     let dataset = path;
-    let ds = state.datasets.mbtiles.get(&dataset).unwrap();
-    let mut tilejson_with_tiles = ds.tilejson.clone();
-    let tiles_url = format!("http://{hostname}/tiles/{dataset}/{{z}}/{{x}}/{{y}}");
-    tilejson_with_tiles.tiles = vec![tiles_url];
-    Json(tilejson_with_tiles)
+    let ds = state.datasets.mbtiles.get(&dataset);
+    if let Some(ds) = ds {
+        let tilejson = ds.tilejson.clone();
+        let tiles_url = format!("http://{hostname}/tiles/{dataset}/{{z}}/{{x}}/{{y}}");
+        let tilejson_with_tiles = TileJSON {
+            tiles: vec![tiles_url],
+            ..tilejson
+        };
+        if let Ok(tjval) = serde_json::to_value(&tilejson_with_tiles) {
+            Json(tjval)
+        } else {
+            Json(json!({
+                "error": "Error serializing tilejson",
+                "status": 500,
+            }))
+        }
+    } else {
+        Json(json!({
+            "error": "Dataset not found",
+            "dataset": dataset,
+            "status": 404,
+        }))
+    }
 }
 
 // basic handler that responds with a static string
