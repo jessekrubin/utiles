@@ -118,7 +118,12 @@ pub fn metadata2tilejson(metadata: Vec<MbtMetadataRow>) -> UtilesResult<TileJSON
             "template" => tj.template = Some(value),
             "json" => json = to_val(serde_json::from_str(&value)),
             _ => {
-                tj.other.insert(name, Value::String(value));
+                let parsed = serde_json::from_str(&value);
+                if let Ok(parsed) = parsed {
+                    tj.other.insert(name, parsed);
+                } else {
+                    tj.other.insert(name, Value::String(value));
+                }
             }
         }
     }
