@@ -71,7 +71,7 @@ impl Rimrafer {
         }
         let path = file.path();
         match fs::remove_file(path).await {
-            Ok(_) => {
+            Ok(()) => {
                 self.stats.inc_nfiles();
                 self.print_stats_1000();
             }
