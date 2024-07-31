@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 use utiles_core::{Tile, TileLike};
 
 use crate::cli::args::ParentChildrenArgs;
@@ -7,8 +6,9 @@ use crate::errors::UtilesResult;
 
 pub fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
-    for tile in tiles {
+    for line in lines {
+        let lstr = line?.trim_matches(|c| c == '"' || c == '\'').to_string();
+        let tile = Tile::from_json(&lstr)?;
         let nup = i32::from(tile.z) - i32::from(args.depth);
         // error
         assert!(nup >= 0, "depth must be less than or equal to tile zoom");
@@ -21,8 +21,9 @@ pub fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
 
 pub fn children_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    let tiles = lines.map(|l| Tile::from_json(&l.unwrap()).unwrap());
-    for tile in tiles {
+    for line in lines {
+        let lstr = line?.trim_matches(|c| c == '"' || c == '\'').to_string();
+        let tile = Tile::from_json(&lstr)?;
         let children = tile.children(Option::from(tile.z + args.depth));
         for child in children {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };

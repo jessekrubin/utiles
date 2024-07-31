@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 use tracing::error;
 
 use utiles_core::{bounding_tile, Tile, TileLike};
@@ -38,7 +37,6 @@ pub fn neighbors_main(args: TileFmtArgs) -> UtilesResult<()> {
 
 pub fn bounding_tile_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-
     for line_res in lines {
         let line = line_res?;
         let bbox = parse_bbox_geojson(&line)?;
@@ -53,24 +51,20 @@ pub fn pmtileid_main(args: TileFmtArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     for line in lines {
         // if the line bgins w '[' treat as tile
-        let lstr = line
-            .unwrap() // remove the `"` and `'` chars from the beginning and end of the line
-            .trim_matches(|c| c == '"' || c == '\'')
-            .to_string();
+        let lstr = line?.trim_matches(|c| c == '"' || c == '\'').to_string();
         if lstr.starts_with('[') || lstr.starts_with('{') {
             // treat as tile
-            let tile = Tile::from_json(&lstr).unwrap();
+            let tile = Tile::from_json(&lstr)?;
             println!("{}", tile.pmtileid());
         } else {
             // treat as pmtileid
             let pmid = lstr.parse::<u64>();
-
-            if pmid.is_err() {
+            if let Ok(pmid) = pmid {
+                let tile = Tile::from_pmid(pmid);
+                println!("{}", tile.json_arr());
+            } else {
                 error!("Invalid pmtileid: {lstr}");
                 println!("Invalid pmtileid: {lstr}");
-            } else {
-                let tile = Tile::from_pmid(pmid.unwrap());
-                println!("{}", tile.json_arr());
             }
         }
     }
@@ -82,25 +76,27 @@ pub fn quadkey_main(args: TileFmtArgs) -> UtilesResult<()> {
     for line in lines {
         // if the line begins w/ '['/'{' treat as json-tile
         // otherwise treat as quadkey
-        let lstr = line.unwrap();
+        let lstr = line?
+            .trim_matches(|c| c == ' ' || c == '"' || c == '\'')
+            .to_string();
         let maybe_first_char = lstr.chars().next();
-        let first_char = maybe_first_char.unwrap();
-        // .unwrap();
-        match first_char {
-            '[' | '{' => {
-                // treat as tile
-                let tile = Tile::from_json(&lstr).unwrap();
-                println!("{}", tile.quadkey());
-            }
-            _ => {
-                // treat as quadkey
-                let qk = lstr;
-                let tile = Tile::from_quadkey(&qk);
-                if tile.is_err() {
-                    error!("Invalid quadkey: {qk}");
-                    println!("Invalid quadkey: {qk}");
-                } else {
-                    println!("{}", tile.unwrap().json_arr());
+        if let Some(first_char) = maybe_first_char {
+            match first_char {
+                '[' | '{' => {
+                    // treat as tile
+                    let tile = Tile::from_json(&lstr)?;
+                    println!("{}", tile.quadkey());
+                }
+                _ => {
+                    // treat as quadkey
+                    let qk = lstr;
+                    let tile = Tile::from_quadkey(&qk);
+                    if let Ok(tile) = tile {
+                        println!("{}", tile.json_arr());
+                    } else {
+                        error!("Invalid quadkey: {qk}");
+                        println!("Invalid quadkey: {qk}");
+                    }
                 }
             }
         }
