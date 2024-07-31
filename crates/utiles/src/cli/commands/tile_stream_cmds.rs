@@ -59,16 +59,12 @@ pub fn pmtileid_main(args: TileFmtArgs) -> UtilesResult<()> {
         } else {
             // treat as pmtileid
             let pmid = lstr.parse::<u64>();
-            match pmid {
-                Ok(pmid) => {
-                    println!("{}", lstr);
-                    let tile = Tile::from_pmid(pmid);
-                    println!("{}", tile.json_arr());
-                }
-                Err(_) => {
-                    error!("Invalid pmtileid: {lstr}");
-                    println!("Invalid pmtileid: {lstr}");
-                }
+            if let Ok(pmid) = pmid {
+                let tile = Tile::from_pmid(pmid);
+                println!("{}", tile.json_arr());
+            } else {
+                error!("Invalid pmtileid: {lstr}");
+                println!("Invalid pmtileid: {lstr}");
             }
         }
     }
@@ -95,14 +91,11 @@ pub fn quadkey_main(args: TileFmtArgs) -> UtilesResult<()> {
                     // treat as quadkey
                     let qk = lstr;
                     let tile = Tile::from_quadkey(&qk);
-                    match tile {
-                        Ok(tile) => {
-                            println!("{}", tile.json_arr());
-                        }
-                        Err(_) => {
-                            error!("Invalid quadkey: {qk}");
-                            println!("Invalid quadkey: {qk}");
-                        }
+                    if let Ok(tile) = tile {
+                        println!("{}", tile.json_arr());
+                    } else {
+                        error!("Invalid quadkey: {qk}");
+                        println!("Invalid quadkey: {qk}");
                     }
                 }
             }
