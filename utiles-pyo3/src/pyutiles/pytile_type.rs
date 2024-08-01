@@ -1,10 +1,10 @@
 use pyo3::types::PyType;
 use pyo3::{pyclass, pyfunction, pymethods, Bound};
 use utiles::tile_type;
-use utiles::tile_type::TileTypeV2;
+use utiles::tile_type::TileType;
 
 #[pyclass(name = "TileType")]
-pub struct PyTileType(TileTypeV2);
+pub struct PyTileType(TileType);
 
 #[pymethods]
 impl PyTileType {

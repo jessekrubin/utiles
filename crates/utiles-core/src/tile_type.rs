@@ -169,12 +169,12 @@ impl Display for TileEncoding {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct TileTypeV2 {
+pub struct TileType {
     pub encoding: TileEncoding,
     pub format: TileFormat,
 }
 
-impl TileTypeV2 {
+impl TileType {
     #[must_use]
     pub fn new(format: TileFormat, encoding: TileEncoding) -> Self {
         Self { encoding, format }
@@ -273,7 +273,7 @@ impl TileTypeV2 {
     }
 }
 
-impl Display for TileTypeV2 {
+impl Display for TileType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {}", self.format, self.encoding)
     }
@@ -284,7 +284,7 @@ impl Display for TileTypeV2 {
 ///////////////////////////////////////////////////////////////////////////////
 
 /// `TileType` or format of the tile data
-pub enum TileType {
+pub enum TileTypeV1 {
     /// Unknown format
     Unknown = 0,
 
@@ -309,24 +309,24 @@ pub enum TileType {
     /// `WebP` image
     Webp = 7,
 }
-impl TileType {
+impl TileTypeV1 {
     #[must_use]
     pub fn headers(&self) -> Vec<(&'static str, &'static str)> {
         match self {
-            TileType::Png => vec![("Content-Type", "image/png")],
-            TileType::Jpg => vec![("Content-Type", "image/jpeg")],
-            TileType::Json => vec![("Content-Type", "application/json")],
-            TileType::Gif => vec![("Content-Type", "image/gif")],
-            TileType::Webp => vec![("Content-Type", "image/webp")],
-            TileType::Pbf => vec![
+            TileTypeV1::Png => vec![("Content-Type", "image/png")],
+            TileTypeV1::Jpg => vec![("Content-Type", "image/jpeg")],
+            TileTypeV1::Json => vec![("Content-Type", "application/json")],
+            TileTypeV1::Gif => vec![("Content-Type", "image/gif")],
+            TileTypeV1::Webp => vec![("Content-Type", "image/webp")],
+            TileTypeV1::Pbf => vec![
                 ("Content-Type", "application/x-protobuf"),
                 ("Content-Encoding", "deflate"),
             ],
-            TileType::Pbfgz => vec![
+            TileTypeV1::Pbfgz => vec![
                 ("Content-Type", "application/x-protobuf"),
                 ("Content-Encoding", "gzip"),
             ],
-            TileType::Unknown => vec![],
+            TileTypeV1::Unknown => vec![],
         }
     }
 }
@@ -390,7 +390,7 @@ pub fn is_webp_buf(data: &[u8]) -> bool {
 
 /// Return type of the tile data from a buffer
 #[must_use]
-pub fn tiletype(buffer: &[u8]) -> TileTypeV2 {
+pub fn tiletype(buffer: &[u8]) -> TileType {
     // if buffer.len() >= 8 {
     //     match buffer {
     //         v if v.starts_with(b"\x1f\x8b") => return TileType::Pbfgz,
@@ -406,42 +406,42 @@ pub fn tiletype(buffer: &[u8]) -> TileTypeV2 {
     //     }
     // }
     // TileType::Unknown
-    TileTypeV2::from_bytes(buffer)
+    TileType::from_bytes(buffer)
 }
 
 /// Return the tile type as a constant
 #[must_use]
-pub fn enum2const(tiletype: &TileType) -> usize {
+pub fn enum2const(tiletype: &TileTypeV1) -> usize {
     match tiletype {
-        TileType::Unknown => TILETYPE_UNKNOWN,
-        TileType::Gif => TILETYPE_GIF,
-        TileType::Jpg => TILETYPE_JPG,
-        TileType::Json => TILETYPE_JSON,
-        TileType::Pbf => TILETYPE_PBF,
-        TileType::Pbfgz => TILETYPE_PBFGZ,
-        TileType::Png => TILETYPE_PNG,
-        TileType::Webp => TILETYPE_WEBP,
+        TileTypeV1::Unknown => TILETYPE_UNKNOWN,
+        TileTypeV1::Gif => TILETYPE_GIF,
+        TileTypeV1::Jpg => TILETYPE_JPG,
+        TileTypeV1::Json => TILETYPE_JSON,
+        TileTypeV1::Pbf => TILETYPE_PBF,
+        TileTypeV1::Pbfgz => TILETYPE_PBFGZ,
+        TileTypeV1::Png => TILETYPE_PNG,
+        TileTypeV1::Webp => TILETYPE_WEBP,
     }
 }
 
 /// Return the tile type as an enum
 #[must_use]
-pub fn const2enum(tiletype: usize) -> TileType {
+pub fn const2enum(tiletype: usize) -> TileTypeV1 {
     match tiletype {
-        TILETYPE_GIF => TileType::Gif,
-        TILETYPE_JPG => TileType::Jpg,
-        TILETYPE_JSON => TileType::Json,
-        TILETYPE_PBF => TileType::Pbf,
-        TILETYPE_PBFGZ => TileType::Pbfgz,
-        TILETYPE_PNG => TileType::Png,
-        TILETYPE_WEBP => TileType::Webp,
-        _ => TileType::Unknown,
+        TILETYPE_GIF => TileTypeV1::Gif,
+        TILETYPE_JPG => TileTypeV1::Jpg,
+        TILETYPE_JSON => TileTypeV1::Json,
+        TILETYPE_PBF => TileTypeV1::Pbf,
+        TILETYPE_PBFGZ => TileTypeV1::Pbfgz,
+        TILETYPE_PNG => TileTypeV1::Png,
+        TILETYPE_WEBP => TileTypeV1::Webp,
+        _ => TileTypeV1::Unknown,
     }
 }
 
 /// Return vector of http headers for a tile type
 #[must_use]
-pub fn headers(tiletype: &TileType) -> Vec<(&'static str, &'static str)> {
+pub fn headers(tiletype: &TileTypeV1) -> Vec<(&'static str, &'static str)> {
     tiletype.headers()
 }
 
