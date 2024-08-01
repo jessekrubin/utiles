@@ -7,12 +7,13 @@ use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 
+use utiles::tile_type::TileFormat;
 use utiles::{
     lager::{init_tracing, LagerConfig},
     mbt::{
         MbtStreamWriterSync, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync,
     },
-    tile_type::{tiletype, TileType},
+    tile_type::{tiletype, TileType, TileTypeV2},
     UtilesResult,
 };
 
@@ -57,7 +58,7 @@ struct Cli {
 }
 
 pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> Result<Vec<u8>> {
-    if let TileType::Png = tiletype(data) {
+    if let TileFormat::Png = tiletype(data).format {
         oxipng::optimize_from_memory(data, options).map_err(|e| e.into())
     } else {
         warn!("Unsupported image type");

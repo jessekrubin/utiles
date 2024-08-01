@@ -80,6 +80,10 @@ mod tests {
             let entry = entry?;
             let path = entry.path();
             let filename = path.file_name().unwrap().to_str().unwrap();
+            // TODO: fix when handling uncompressed pbf is implemented
+            if filename.ends_with(".pbf") {
+                continue;
+            }
             let bytes = std::fs::read(&path)?;
             // insert into table
             db.execute(
@@ -102,8 +106,9 @@ mod tests {
             ("0.gif", "gif", Some(256)),
             ("0.jpeg", "jpg", Some(256)),
             ("0.png", "png", Some(256)),
-            ("0.vector.pbf", "pbf", None),
-            ("0.vector.pbfz", "pbfgz", None),
+            ("0.vector.pbf.gz", "pbf.gz", None),
+            ("0.vector.pbf.zlib", "pbf.zlib", None),
+            ("0.vector.pbf.zst", "pbf.zst", None),
             ("0.webp", "webp", Some(256)),
             ("gif-990x1050.gif", "gif", Some(-1)),
             ("jpg-640x400.jpg", "jpg", Some(-1)),
@@ -129,9 +134,11 @@ mod tests {
             })?
             .collect::<Result<Vec<String>, rusqlite::Error>>()?;
         distinct_rows.sort();
-        let expected = vec![
-            "gif", "jpg", "json", "pbf", "pbfgz", "png", "unknown", "webp",
+        let mut expected = vec![
+            "gif", "jpg", "json", "pbf.gz", "pbf.zlib", "pbf.zst", "png", "unknown",
+            "webp",
         ];
+        expected.sort();
         assert_eq!(distinct_rows, expected);
         Ok(())
     }

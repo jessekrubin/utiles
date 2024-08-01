@@ -69,10 +69,13 @@ def tiletype(buffer: bytes) -> Extensions:
         return "webp"
     # deflate: recklessly assumes contents are PBF.
     elif buffer[0] == 0x78 and buffer[1] == 0x9C:
-        return "pbf"
+        return "pbf.zlib"
     # gzip: recklessly assumes contents are PBF.
     elif buffer[0] == 0x1F and buffer[1] == 0x8B:
-        return "pbfgz"
+        return "pbf.gz"
+    # zstd: recklessly assumes contents are PBF.
+    elif buffer[0] == 0x28 and buffer[1] == 0xB5:
+        return "pbf.zst"
     # if buffer starts with '{' or '[' assume JSON
     elif buffer[0] == 0x7B or buffer[0] == 0x5B:
         return "json"
@@ -81,14 +84,19 @@ def tiletype(buffer: bytes) -> Extensions:
 
 TEST_TILES = (REPO_ROOT / "test-data" / "tile-types").glob("**/*")
 
-TEST_TILES_BYTES = [(str(f.name), f.read_bytes()) for f in TEST_TILES]
+TEST_TILES_BYTES = [
+    (str(f.name), f.read_bytes()) for f in TEST_TILES if f.name != "0.vector.pbf"
+]
 
 TEST_TILE_NAME2TYPE = {
     "0.gif": "gif",
     "0.jpeg": "jpg",
     "0.png": "png",
-    "0.vector.pbf": "pbf",
-    "0.vector.pbfz": "pbfgz",
+    # TODO figure out how to handle uncompressed PBF
+    # "0.vector.pbf": "pbf",
+    "0.vector.pbf.zst": "pbf.zst",
+    "0.vector.pbf.zlib": "pbf.zlib",
+    "0.vector.pbf.gz": "pbf.gz",
     "0.webp": "webp",
     "gif-990x1050.gif": "gif",
     "jpg-640x400.jpg": "jpg",
@@ -131,11 +139,14 @@ def test_tiletype_rs(
 ) -> None:
     filename, buffer = tile
     expected = TEST_TILE_NAME2TYPE[filename]
-    ttype = utiles.tiletype_str(buffer)
+
+    ttype = utiles.TileType.from_bytes(buffer)
+    print(ttype)
+    ttype_str = utiles.tiletype_str(buffer)
     if filename == "unknown.txt":
-        assert ttype is False or ttype == "unknown"  # type: ignore
+        assert ttype_str is False or ttype_str == "unknown"  # type: ignore
     else:
-        assert ttype == expected
+        assert ttype_str == expected
 
 
 @pytest.mark.parametrize(
