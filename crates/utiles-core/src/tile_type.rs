@@ -1,4 +1,8 @@
-//! `TileType` module (needs work)
+//! tile-type module
+//!
+//! This is strongly influenced by the `TileInfo` struct from the `martin` crate.
+//! The original version of this module was written and much more aligned with
+//! the npm package `@mapbox/tiletype` and did not include `TileEncoding`.
 
 use std::fmt::Display;
 
@@ -41,7 +45,7 @@ pub enum TileFormat {
     /// JSON string
     Json,
 
-    /// GeoJSON string
+    /// `GeoJSON` string
     GeoJson,
 }
 
@@ -59,7 +63,7 @@ impl Display for TileFormat {
             Self::Tiff => "tiff",
             Self::Unknown => "unknown",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -80,10 +84,10 @@ impl TileFormat {
 
     #[must_use]
     pub fn is_img(&self) -> bool {
-        match self {
-            Self::Png | Self::Jpg | Self::Gif | Self::Webp | Self::Tiff => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            Self::Png | Self::Jpg | Self::Gif | Self::Webp | Self::Tiff
+        )
     }
 
     #[must_use]
@@ -160,7 +164,7 @@ impl TileEncoding {
 impl Display for TileEncoding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = self.as_str();
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -174,6 +178,25 @@ impl TileTypeV2 {
     #[must_use]
     pub fn new(format: TileFormat, encoding: TileEncoding) -> Self {
         Self { encoding, format }
+    }
+
+    #[must_use]
+    pub fn parse(s: &str) -> Option<Self> {
+        Some(match s.to_ascii_lowercase().as_str() {
+            "geojson" => Self::new(TileFormat::GeoJson, TileEncoding::Uncompressed),
+            "gif" => Self::new(TileFormat::Gif, TileEncoding::Internal),
+            "jpg" | "jpeg" => Self::new(TileFormat::Jpg, TileEncoding::Internal),
+            "json" => Self::new(TileFormat::Json, TileEncoding::Uncompressed),
+            "mlt" => Self::new(TileFormat::Mlt, TileEncoding::Uncompressed),
+            "pbf" | "mvt" => Self::new(TileFormat::Pbf, TileEncoding::Uncompressed),
+            "pbf.gz" => Self::new(TileFormat::Pbf, TileEncoding::Gzip),
+            "pbf.zlib" => Self::new(TileFormat::Pbf, TileEncoding::Zlib),
+            "pbf.zst" => Self::new(TileFormat::Pbf, TileEncoding::Zstd),
+            "png" => Self::new(TileFormat::Png, TileEncoding::Internal),
+            "tiff" => Self::new(TileFormat::Tiff, TileEncoding::Uncompressed),
+            "webp" => Self::new(TileFormat::Webp, TileEncoding::Internal),
+            _ => None?,
+        })
     }
 
     #[must_use]
@@ -202,7 +225,7 @@ impl TileTypeV2 {
                     Self::new(TileFormat::Gif, TileEncoding::Internal)
                 }
                 v if v.starts_with(b"{") || v.starts_with(b"[") => {
-                    return Self::new(TileFormat::Json, TileEncoding::Uncompressed)
+                    Self::new(TileFormat::Json, TileEncoding::Uncompressed)
                 }
                 _ => Self::new(TileFormat::Unknown, TileEncoding::Uncompressed),
             }
@@ -240,12 +263,11 @@ impl TileTypeV2 {
             fmt_ext
         } else {
             match self.encoding {
-                TileEncoding::Internal => fmt_ext,
-                TileEncoding::Gzip => format!("{}.gz", fmt_ext),
-                TileEncoding::Zlib => format!("{}.zlib", fmt_ext),
-                TileEncoding::Brotli => format!("{}.br", fmt_ext),
-                TileEncoding::Zstd => format!("{}.zst", fmt_ext),
-                _ => fmt_ext,
+                TileEncoding::Internal | TileEncoding::Uncompressed => fmt_ext,
+                TileEncoding::Gzip => format!("{fmt_ext}.gz"),
+                TileEncoding::Zlib => format!("{fmt_ext}.zlib"),
+                TileEncoding::Brotli => format!("{fmt_ext}.br"),
+                TileEncoding::Zstd => format!("{fmt_ext}.zst"),
             }
         }
     }

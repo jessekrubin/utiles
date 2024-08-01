@@ -13,7 +13,7 @@ use utiles::{
     mbt::{
         MbtStreamWriterSync, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync,
     },
-    tile_type::{tiletype, TileType, TileTypeV2},
+    tile_type::tiletype,
     UtilesResult,
 };
 

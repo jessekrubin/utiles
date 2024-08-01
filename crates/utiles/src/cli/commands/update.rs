@@ -90,7 +90,7 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
         }
         1 => {
             let mut fmt = query_fmt[0].clone();
-            fmt = if fmt == "pbfgz" {
+            fmt = if fmt == "pbf.gz" || fmt == "pbf.zst" || fmt == "pbf.zlib" {
                 "pbf".to_string()
             } else {
                 fmt

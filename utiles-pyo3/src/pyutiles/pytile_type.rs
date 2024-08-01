@@ -1,4 +1,3 @@
-use crate::pyutiles::PyTile;
 use pyo3::types::PyType;
 use pyo3::{pyclass, pyfunction, pymethods, Bound};
 use utiles::tile_type;
@@ -37,7 +36,6 @@ impl PyTileType {
     fn headers(&self) -> Vec<(&'static str, &'static str)> {
         self.0.headers_vec()
     }
-    // pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
 
     #[classmethod]
     fn from_bytes(_cls: &Bound<'_, PyType>, buffer: &[u8]) -> Self {
