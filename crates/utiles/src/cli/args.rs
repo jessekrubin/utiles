@@ -552,11 +552,11 @@ pub enum Commands {
     ///
     /// Example:
     ///     ```
-    ///     > echo "[486, 332, 10]" | utiles fmtstr
+    ///     \> echo "[486, 332, 10]" | utiles fmtstr
     ///     [486, 332, 10]
-    ///     > echo "[486, 332, 10]" | utiles fmtstr --fmt "{x},{y},{z}"
+    ///     \> echo "[486, 332, 10]" | utiles fmtstr --fmt "{x},{y},{z}"
     ///     486,332,10
-    ///     > echo "[486, 332, 10]" | utiles fmt --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column = {x} AND tile_row = {y};"
+    ///     \> echo "[486, 332, 10]" | utiles fmt --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column = {x} AND tile_row = {y};"
     ///     SELECT * FROM tiles WHERE zoom_level = 10 AND tile_column = 486 AND tile_row = 332;
     ///     ```
     ///
@@ -577,7 +577,7 @@ pub enum Commands {
     ///
     /// Examples:
     ///
-    ///   > echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
+    ///   \> echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
     ///   [426, 775, 11]
     #[command(
         name = "bounding-tile",
@@ -595,11 +595,11 @@ pub enum Commands {
     ///
     /// Examples:
     ///
-    ///   > echo "[486, 332, 10]" | utiles quadkey
+    ///   \> echo "[486, 332, 10]" | utiles quadkey
     ///   0313102310
-    ///   > echo "0313102310" | utiles quadkey
+    ///   \> echo "0313102310" | utiles quadkey
     ///   [486, 332, 10]
-    ///   > utiles quadkey 0313102310
+    ///   \> utiles quadkey 0313102310
     ///   [486, 332, 10]
     #[command(name = "quadkey", verbatim_doc_comment, visible_alias = "qk")]
     Quadkey(TileFmtArgs),
@@ -613,11 +613,11 @@ pub enum Commands {
     ///
     /// Examples:
     ///
-    ///   > echo "[486, 332, 10]" | utiles pmtileid
+    ///   \> echo "[486, 332, 10]" | utiles pmtileid
     ///   506307
-    ///   > echo "506307" | utiles pmtileid
+    ///   \> echo "506307" | utiles pmtileid
     ///   [486, 332, 10]
-    ///   > utiles pmtileid 506307
+    ///   \> utiles pmtileid 506307
     ///   [486, 332, 10]
     #[command(name = "pmtileid", verbatim_doc_comment, visible_alias = "pmid")]
     Pmtileid(TileFmtArgs),
@@ -646,12 +646,12 @@ pub enum Commands {
     ///
     /// Example:
     ///
-    ///   > echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
+    ///   \\> echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
     ///   [852, 1550, 12]
     ///   [852, 1551, 12]
     ///   [853, 1550, 12]
     ///   [853, 1551, 12]
-    ///   > utiles tiles 12 "[-105.05, 39.95, -105, 40]"
+    ///   \> utiles tiles 12 "[-105.05, 39.95, -105, 40]"
     ///   [852, 1550, 12]
     ///   [852, 1551, 12]
     ///   [853, 1550, 12]
@@ -681,7 +681,7 @@ pub enum Commands {
     ///
     /// Example:
     ///
-    ///   > echo "[486, 332, 10]" | utiles children
+    ///   \> echo "[486, 332, 10]" | utiles children
     ///   [972, 664, 11]
     #[command(name = "children", verbatim_doc_comment)]
     Children(ParentChildrenArgs),
@@ -699,7 +699,7 @@ pub enum Commands {
     ///
     /// Example:
     ///
-    ///   > echo "[486, 332, 10]" | utiles shapes --precision 4 --bbox
+    ///   \> echo "[486, 332, 10]" | utiles shapes --precision 4 --bbox
     ///   [-9.1406, 53.1204, -8.7891, 53.3309]
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
