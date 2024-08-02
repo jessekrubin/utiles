@@ -73,9 +73,9 @@ proc-macro2.opt-level = 3
 opt-level = 3
 strip = true
 lto = "thin"
+# lto = "fat"
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
 inherits = "release"
 lto = "thin"
-# lto = "fat"
