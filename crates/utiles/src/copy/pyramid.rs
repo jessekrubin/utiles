@@ -78,10 +78,11 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
     let where_clause = cfg.mbtiles_sql_where()?;
     info!("where_clause: {where_clause:?}");
     let start_time = std::time::Instant::now();
-    let count_query = &"SELECT count(*) FROM tiles".to_string();
-    let total_tiles: u32 = mbt.conn().query_row(count_query, [], |row| row.get(0))?;
-    debug!("total_tiles: {:?}", total_tiles);
-    info!("# tiles: {total_tiles:?} ~ {mbt_path:?} => {output_dir:?}");
+
+    // let count_query = &"SELECT count(*) FROM tiles".to_string();
+    // let total_tiles: u32 = mbt.conn().query_row(count_query, [], |row| row.get(0))?;
+    // debug!("total_tiles: {:?}", total_tiles);
+    // info!("# tiles: {total_tiles:?} ~ {mbt_path:?} => {output_dir:?}");
     let c = mbt.conn();
     let res_metadata_vec = mbt.metadata();
     let metadata_vec = res_metadata_vec.unwrap_or_else(|e| {
