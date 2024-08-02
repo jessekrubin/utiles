@@ -2,18 +2,16 @@ use std::io::Cursor;
 
 use tracing::warn;
 
-use utiles_core::tile_type::{tiletype, TileType};
+use utiles_core::tile_type::{tiletype, TileFormat};
 
 use crate::UtilesResult;
 
 pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
-    match tiletype(data) {
-        TileType::Webp => Ok(data.to_vec()),
-        TileType::Jpg | TileType::Png | TileType::Gif => {
+    match tiletype(data).format {
+        TileFormat::Webp => Ok(data.to_vec()),
+        TileFormat::Jpg | TileFormat::Png | TileFormat::Gif => {
             let img = image::load_from_memory(data)?;
-
             let mut buf = Vec::new();
-
             img.write_to(&mut Cursor::new(&mut buf), image::ImageFormat::WebP)?;
             Ok(buf)
         }
@@ -23,15 +21,6 @@ pub fn webpify_image(data: &[u8]) -> UtilesResult<Vec<u8>> {
         }
     }
 }
-
-// pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> UtilesResult<Vec<u8>> {
-//     if let TileType::Png = tiletype(data) {
-//         oxipng::optimize_from_memory(data, options).map_err(UtilesError::OxipngError)
-//     } else {
-//         warn!("Unsupported image type");
-//         Ok(data.to_vec())
-//     }
-// }
 
 // TODO: Implement pngify_image
 // fn pngify_image(data: &Vec<u8>) -> UtilesResult<Vec<u8>> {

@@ -34,6 +34,15 @@ class TileDict(TypedDict):
     y: int
     z: int
 
+class TileType:
+    @property
+    def format(self) -> str: ...
+    @property
+    def encoding(self) -> str: ...
+    def __eq__(self, other: Any) -> bool: ...
+    @classmethod
+    def from_bytes(self, buf: bytes) -> TileType: ...
+
 class LngLat:
     lat: float
     lng: float

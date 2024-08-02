@@ -1,4 +1,3 @@
-// #![allow(clippy::unwrap_used)]
 pub use about::about_main;
 pub use agg_hash::agg_hash_main;
 pub use children_parent::{children_main, parent_main};
@@ -10,7 +9,6 @@ pub use info::info_main;
 pub use lint::lint_main;
 pub use metadata::{metadata_main, metadata_set_main};
 pub use optimize::optimize_main;
-// pub use oxipng::oxipng_main;
 pub use rimraf::rimraf_main;
 pub use serve::serve_main;
 pub use shapes::shapes_main;

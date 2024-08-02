@@ -5,11 +5,9 @@ use tracing::{debug, error};
 
 use utiles_core::projection::Projection;
 use utiles_core::tile::FeatureOptions;
-use utiles_core::Tile;
+use utiles_core::{Tile, UtilesCoreError};
 
-use crate::cli::stdinterator::StdInterator;
-use crate::errors::UtilesError;
-use crate::errors::UtilesResult;
+use crate::{cli::stdinterator::StdInterator, errors::UtilesResult};
 
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]
@@ -124,7 +122,7 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
         .filter(|l| l.as_ref().unwrap() != "\x1e");
     let parsed_lines = lines.map(|l| {
         let ln = l.unwrap();
-        let val: Value = serde_json::from_str::<Value>(&ln).unwrap();
+        let val: Value = serde_json::from_str::<Value>(&ln)?;
         let properties: Option<Map<String, Value>> = if val["properties"].is_object() {
             let properties = val["properties"].as_object().unwrap().clone();
             Option::from(properties)
@@ -146,12 +144,14 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
                     properties,
                 };
                 Ok(tile_with_properties)
-                // Ok(Some(tile_with_properties))
             }
             Err(e) => {
                 error!("Error parsing tile: {}", e);
                 // throw the error here
-                Err(UtilesError::Error(format!("Error parsing tile: {e}")))
+                let e_str = e.to_string();
+                Err(UtilesCoreError::TileParseError(format!(
+                    "line: {ln}, error: {e_str}",
+                )))
             }
         }
     });
@@ -194,7 +194,8 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
         let tile_n_properties = tile_n_properties?;
         let tile = tile_n_properties.tile;
         let properties = tile_n_properties.properties;
-        let mut f = tile.feature(&feature_options).unwrap();
+
+        let mut f = tile.feature(&feature_options)?;
         if let Some(properties) = properties {
             f.properties.extend(properties);
         }

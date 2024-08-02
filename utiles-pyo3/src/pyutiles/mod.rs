@@ -3,7 +3,7 @@ pub use pyfns::*;
 pub use pylnglat::PyLngLat;
 pub use pylnglatbbox::PyLngLatBbox;
 pub use pytile::PyTile;
-pub use pytile_type::{tiletype, tiletype2headers, tiletype_str};
+pub use pytile_type::{tiletype, tiletype2headers, tiletype_str, PyTileType};
 pub use simplipy::simplify;
 
 mod pybbox;

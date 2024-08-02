@@ -19,6 +19,7 @@
 
 use pyo3::prelude::*;
 
+use crate::pyutiles::PyTileType;
 use pyutiles::PyBbox;
 use pyutiles::PyLngLat;
 use pyutiles::PyLngLatBbox;
@@ -82,6 +83,7 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(pyutiles::geotransform2optzoom, m)?)?;
 
     // tiletype
+    m.add_class::<PyTileType>()?;
     m.add_function(wrap_pyfunction!(pyutiles::tiletype, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::tiletype_str, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::tiletype2headers, m)?)?;

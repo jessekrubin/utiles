@@ -1,49 +1,15 @@
 #![allow(clippy::unwrap_used)]
 use std::cell::Cell;
-
 use std::path::Path;
 
 use futures::stream::{self, StreamExt};
 use tokio::fs;
-use tracing::error;
+use tracing::{error, trace};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::cli::args::RimrafArgs;
 use crate::errors::UtilesResult;
 use crate::UtilesError;
-
-#[allow(dead_code)]
-pub async fn rimraf_main2(args: RimrafArgs) {
-    println!("rimraf_main: args: {args:?}");
-    // check that dirpath exists
-    let dirpath = Path::new(&args.dirpath);
-    if !dirpath.exists() {
-        error!("dirpath does not exist: {:?}", dirpath);
-        return;
-    }
-    let files_iter = WalkDir::new(args.clone().dirpath.clone())
-        .contents_first(true)
-        .into_iter()
-        .filter_map(std::result::Result::ok)
-        .filter(|e| e.file_type().is_file());
-    let rm_fn = |file: DirEntry| async move {
-        let filesize = fs::metadata(file.path()).await.unwrap().len();
-        // remove the file
-        fs::remove_file(file.path()).await.unwrap();
-        filesize
-    };
-
-    let s = stream::iter(files_iter);
-
-    s.for_each_concurrent(10, |file| async {
-        let _filesize = rm_fn(file).await;
-    })
-    .await;
-    // remove the dirpath
-
-    fs::remove_dir_all(&args.dirpath).await.unwrap();
-}
-// iter files...
 
 #[derive(Debug)]
 pub struct RimrafStats {
@@ -89,9 +55,12 @@ impl Rimrafer {
 
     pub async fn rm_file_stats(&self, file: DirEntry) {
         let path = file.path();
-        let nbytes = fs::metadata(path).await.unwrap().len();
-        self.stats.inc_nfiles();
-        self.stats.inc_nbytes(nbytes);
+        let metadata = fs::metadata(path).await;
+        if let Ok(metadata) = metadata {
+            let nbytes = metadata.len();
+            self.stats.inc_nfiles();
+            self.stats.inc_nbytes(nbytes);
+        }
     }
 
     pub async fn rm_file(&self, file: DirEntry) {
@@ -101,16 +70,16 @@ impl Rimrafer {
             return;
         }
         let path = file.path();
-        fs::remove_file(path).await.unwrap();
-        self.stats.inc_nfiles();
-        self.print_stats_1000();
+        match fs::remove_file(path).await {
+            Ok(()) => {
+                self.stats.inc_nfiles();
+                self.print_stats_1000();
+            }
+            Err(e) => {
+                error!("rm_file: {:?}", e);
+            }
+        }
     }
-
-    // pub async fn rm_dir(&self, dir: DirEntry) {
-    //     let path = dir.path();
-    //     fs::remove_dir_all(path).await.unwrap();
-    //     self.stats.inc_ndirs();
-    // }
 
     pub fn stats_str(&self) -> String {
         format!(
@@ -133,7 +102,7 @@ impl Rimrafer {
 }
 
 pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
-    println!("rimraf_main: args: {args:?}");
+    trace!("rimraf_main: args: {args:?}");
     // check that dirpath exists
     let dirpath = Path::new(&args.dirpath);
     if !dirpath.exists() {
@@ -156,7 +125,7 @@ pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
         rmrfer.rm_file(file).await;
     })
     .await;
-    fs::remove_dir_all(&rmrfer.cfg.dirpath).await.unwrap();
+    fs::remove_dir_all(&rmrfer.cfg.dirpath).await?;
     rmrfer.print_stats();
     Ok(())
 }

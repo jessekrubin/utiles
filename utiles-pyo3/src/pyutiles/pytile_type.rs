@@ -1,10 +1,52 @@
-use pyo3::pyfunction;
+use pyo3::types::PyType;
+use pyo3::{pyclass, pyfunction, pymethods, Bound};
 use utiles::tile_type;
+use utiles::tile_type::TileType;
+
+#[pyclass(name = "TileType")]
+pub struct PyTileType(TileType);
+
+#[pymethods]
+impl PyTileType {
+    // #[new]
+    // fn new(format: usize, encoding: usize, compression: usize) -> Self {
+    //     PyTileType(TileTypeV2 {
+    //         format: format as u8,
+    //         encoding: encoding as u8,
+    //         compression: compression as u8,
+    //     })
+    // }
+
+    #[getter]
+    fn format(&self) -> usize {
+        self.0.format as usize
+    }
+
+    #[getter]
+    fn encoding(&self) -> usize {
+        self.0.encoding as usize
+    }
+
+    #[getter]
+    fn compression(&self) -> usize {
+        self.0.encoding as usize
+    }
+
+    #[getter]
+    fn headers(&self) -> Vec<(&'static str, &'static str)> {
+        self.0.headers_vec()
+    }
+
+    #[classmethod]
+    fn from_bytes(_cls: &Bound<'_, PyType>, buffer: &[u8]) -> Self {
+        PyTileType(tile_type::tiletype(buffer))
+    }
+}
 
 #[pyfunction]
-pub fn tiletype(buffer: &[u8]) -> usize {
+pub fn tiletype(buffer: &[u8]) -> PyTileType {
     let ttype = tile_type::tiletype(buffer);
-    tile_type::enum2const(&ttype)
+    PyTileType(ttype)
 }
 
 #[pyfunction]
