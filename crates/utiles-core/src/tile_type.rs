@@ -227,7 +227,13 @@ impl TileType {
                 v if v.starts_with(b"{") || v.starts_with(b"[") => {
                     Self::new(TileFormat::Json, TileEncoding::Uncompressed)
                 }
-                _ => Self::new(TileFormat::Unknown, TileEncoding::Uncompressed),
+                _ => {
+                    if is_mvt_like(buffer) {
+                        Self::new(TileFormat::Pbf, TileEncoding::Uncompressed)
+                    } else {
+                        Self::new(TileFormat::Unknown, TileEncoding::Uncompressed)
+                    }
+                }
             }
         } else {
             Self::new(TileFormat::Unknown, TileEncoding::Uncompressed)
@@ -386,6 +392,58 @@ pub fn zstd_magic_headers(buffer: &[u8]) -> bool {
 #[inline]
 pub fn is_webp_buf(data: &[u8]) -> bool {
     data.starts_with(b"RIFF") && data.len() > 8 && data[8..].starts_with(b"WEBP")
+}
+
+/// Return true if buffer is **maybe** a mapbox-vector-tile (without parsing)
+fn is_mvt_like(buffer: &[u8]) -> bool {
+    if buffer.len() < 2 {
+        return false; // Too small to be a valid MVT
+    }
+
+    // Check the first few bytes for common MVT protobuf key-value indicators
+    let mut i = 0;
+    while i < buffer.len() {
+        let key = buffer[i] >> 3; // Protobuf field number is in the higher bits
+        let wire_type = buffer[i] & 0x07; // Lower bits for wire type
+        i += 1;
+
+        if key == 0 || key > 15 {
+            return false; // Not a valid field number for MVT
+        }
+
+        match wire_type {
+            0 => {
+                // Varint
+                while i < buffer.len() && buffer[i] & 0x80 != 0 {
+                    i += 1;
+                }
+                i += 1;
+            }
+            1 => i += 8, // 64-bit
+            2 => {
+                let mut length = 0;
+                let mut shift = 0;
+                while i < buffer.len() && buffer[i] & 0x80 != 0 {
+                    length |= ((buffer[i] & 0x7F) as usize) << shift;
+                    shift += 7;
+                    i += 1;
+                }
+                if i < buffer.len() {
+                    length |= (buffer[i] as usize) << shift;
+                }
+                i += 1;
+                i += length;
+            }
+            5 => i += 4,
+            _ => return false,
+        }
+
+        if i > buffer.len() {
+            return false;
+        }
+    }
+
+    true
 }
 
 /// Return type of the tile data from a buffer
