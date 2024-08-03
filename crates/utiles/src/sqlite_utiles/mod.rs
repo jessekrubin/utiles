@@ -80,13 +80,7 @@ mod tests {
             let entry = entry?;
             let path = entry.path();
             let filename = path.file_name().unwrap().to_str().unwrap();
-            // TODO: fix when handling uncompressed pbf is implemented
-            // if std::path::Path::new(filename)
-            //     .extension()
-            //     .map_or(false, |ext| ext.eq_ignore_ascii_case("pbf"))
-            // {
-            //     continue;
-            // }
+
             let bytes = std::fs::read(&path)?;
             // insert into table
             db.execute(
