@@ -8,6 +8,7 @@
 
 ## Unreleased/Future
 
+
 - New command(s):
   - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
   - `db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
@@ -23,6 +24,8 @@
 - Using `json-patch` for metadata updates
 - Allow setting metadata value(s) from file if no value is provided (`-`/`--`) for stdin
 - Figured out how to put the caller-site (eg `pyo3` in the cli help so you (likely me) can tell which utiles you are calling)
+- python:
+  - Added `TileFmts` string formatter object
 
 ---
 
