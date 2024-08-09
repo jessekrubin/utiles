@@ -21,7 +21,7 @@ def _run_cli_old(
         input=input,
         capture_output=True,
         text=True,
-        shell=False,  # noqa: S603
+        shell=False,
         check=True,
     )
     return res
@@ -43,7 +43,6 @@ class TestTiles:
         assert result.returncode == 0
         assert result.stdout == "[3413, 6202, 14]\n[3413, 6203, 14]\n"
 
-    #
     def test_cli_tiles_multi_bounds(self) -> None:
         """A LF-delimited sequence can be used as input."""
         result = _run_cli(

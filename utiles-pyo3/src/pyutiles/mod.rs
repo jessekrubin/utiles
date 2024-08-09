@@ -3,6 +3,7 @@ pub use pyfns::*;
 pub use pylnglat::PyLngLat;
 pub use pylnglatbbox::PyLngLatBbox;
 pub use pytile::PyTile;
+pub use pytile_fmts::PyTileFmts;
 pub use pytile_type::{tiletype, tiletype2headers, tiletype_str, PyTileType};
 pub use simplipy::simplify;
 
@@ -14,6 +15,7 @@ mod pylnglat;
 mod pylnglatbbox;
 pub mod pyparsing;
 mod pytile;
+mod pytile_fmts;
 mod pytile_tuple;
 mod pytile_type;
 mod pytilelike;

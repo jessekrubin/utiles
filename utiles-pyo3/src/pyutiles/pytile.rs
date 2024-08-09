@@ -470,6 +470,20 @@ impl From<TileTuple> for PyTile {
     }
 }
 
+impl TileLike for PyTile {
+    fn x(&self) -> u32 {
+        self.xyz.x
+    }
+
+    fn y(&self) -> u32 {
+        self.xyz.y
+    }
+
+    fn z(&self) -> u8 {
+        self.xyz.z
+    }
+}
+
 impl From<PyTile> for Tile {
     fn from(val: PyTile) -> Self {
         val.xyz

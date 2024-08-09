@@ -14,6 +14,8 @@ console = Console()
 
 OUT_DIR = "osm-tiles"
 
+tile_formatter = ut.TileFmts("https://tile.openstreetmap.org/{z}/{x}/{y}.png")
+
 
 @lru_cache(maxsize=128)
 def mkdirp_lru(path: str) -> None:
@@ -21,6 +23,10 @@ def mkdirp_lru(path: str) -> None:
 
 
 def osm_tile_url(t: ut.Tile) -> str:
+    return tile_formatter.format(t)
+
+
+def osm_tile_url_fstring(t: ut.Tile) -> str:
     return f"https://tile.openstreetmap.org/{t.z}/{t.x}/{t.y}.png"
 
 

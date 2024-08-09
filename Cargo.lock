@@ -2020,6 +2020,8 @@ dependencies = [
  "serde",
  "serde_json",
  "size",
+ "tracing",
+ "tracing-subscriber",
  "utiles",
 ]
 

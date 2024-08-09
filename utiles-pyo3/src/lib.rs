@@ -25,9 +25,9 @@ use pyutiles::PyLngLat;
 use pyutiles::PyLngLatBbox;
 use pyutiles::PyTile;
 use utiles::tile_type;
-
 mod cli;
 mod fmt_nbytes;
+// mod lager;
 mod pyutiles;
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -102,6 +102,9 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyLngLatBbox>()?;
     m.add_class::<PyBbox>()?;
 
+    // tile str formatter
+    m.add_class::<pyutiles::PyTileFmts>()?;
+
     // mbutiles...
     // m.add_class::<PyMbtiles>()?;
     // m.add_function(wrap_pyfunction!(query_db, m)?)?;
@@ -111,6 +114,9 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // misc
     m.add_function(wrap_pyfunction!(fmt_nbytes::fmt_nbytes, m)?)?;
+
+    // lager
+    // lager::pymod_add(m)?;
 
     Ok(())
 }

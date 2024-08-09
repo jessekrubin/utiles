@@ -103,7 +103,7 @@ def run_cli(
         input=input,
         capture_output=True,
         text=True,
-        shell=False,  # noqa: S603
+        shell=False,
         check=False,
     )
     tf = time_ns()
