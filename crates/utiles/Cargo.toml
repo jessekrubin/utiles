@@ -21,7 +21,7 @@ path = "src/bin.rs"
 required-features = [
 
 
-  #    "cli"
+    #    "cli"
 ]
 
 [dependencies]
@@ -31,7 +31,6 @@ async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 chrono = "0.4.38"
 clap = { workspace = true, features = ["derive", "color", "wrap_help"] }
-colored = "2.1.0"
 fnv = "1.0.7"
 futures = "0.3.29"
 geo-types.workspace = true
@@ -46,6 +45,7 @@ json-patch = "2.0.0"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
 num_cpus = "1.16.0"
+owo-colors = { version = "4.0.0", features = ["supports-color"] }
 pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
 serde.workspace = true

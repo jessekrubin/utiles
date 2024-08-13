@@ -1,9 +1,9 @@
+use owo_colors::OwoColorize;
 use std::io;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use std::time::Duration;
 
-use colored::Colorize;
 use futures::{stream, Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -57,7 +57,8 @@ impl MbtLint {
     #[must_use]
     pub fn format_error(&self, filepath: &str) -> String {
         let errcode = "MBT".red();
-        let lint_id = self.as_ref().yellow();
+        let lint_id_ref = self.as_ref();
+        let lint_id = lint_id_ref.yellow();
         let filepath_bold = filepath.bold();
         let errstr = format!("{errcode}::{lint_id} {self}");
         let e_str = format!("{filepath_bold}: {errstr}");
