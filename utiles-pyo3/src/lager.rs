@@ -1,6 +1,7 @@
 use crate::pyutiles::PyTile;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyErr, PyResult};
 use utiles::lager::{init_tracing, LagerConfig};
 
@@ -10,7 +11,72 @@ pub fn debug(msg: &str) {
 }
 #[pyfunction]
 pub fn info(msg: &str) {
-    tracing::info!("{}", msg);
+    // call site
+    //     Python::with_gil(|py| {
+    //         let locals = PyDict::new_bound(py);
+    //         py.run_bound(
+    //             r#"
+    // import base64
+    // s = 'Hello Rust!'
+    // ret = base64.b64encode(s. encode('utf-8'))
+    // "#,
+    //             None,
+    //             Some(&locals),
+    //         )
+    //             .unwrap();
+    //         let ret = locals.get_item("ret").unwrap().unwrap();
+    //         let b64 = ret.downcast::<PyBytes>().unwrap();
+    //         assert_eq!(b64.as_bytes(), b"SGVsbG8gUnVzdCE=");
+    //     });
+    // let gil = Python::acquire_gil();
+    //     Python::with_gil(|py| {
+    //         // get the calling python line number/file
+    //         // import inspect
+    //         let inspect = py
+    //             .import_bound("inspect")
+    //             .expect("failed to import inspect");
+    //
+    //         let locals = PyDict::new_bound(py);
+    //         py.run_bound(
+    //             r#"import inspect
+    // frame = inspect.currentframe()
+    // print(frame)
+    //             "#,
+    //             None,
+    //             Some(&locals),
+    //         );
+    //         let frame = locals.get_item("frame").unwrap().unwrap();
+    //         let lineno = frame
+    //             .getattr("f_lineno")
+    //             .expect("failed to get lineno")
+    //             .extract::<u32>()
+    //             .expect("failed to extract lineno");
+    //         let filename = frame
+    //             .getattr("f_code")
+    //             .expect("failed to get code")
+    //             .getattr("co_filename")
+    //             .expect("failed to get filename")
+    //             .extract::<String>()
+    //             .expect("failed to extract filename");
+    //
+    //         // let lineno = frame
+    //         //     .getattr("f_lineno")
+    //         //     .expect("failed to get lineno")
+    //         //     .extract::<u32>()
+    //         //     .expect("failed to extract lineno");
+    //         // let filename = frame
+    //         //     .getattr("f_code")
+    //         //     .expect("failed to get code")
+    //         //     .getattr("co_filename")
+    //         //     .expect("failed to get filename")
+    //         //     .extract::<String>()
+    //         //     .expect("failed to extract filename");
+    //
+    //         println!("{}:{}", filename, lineno);
+    //         tracing::info!(target: "lager", "{}", msg);
+    //     });
+
+    tracing::info!(target: "lager", "{}", msg);
 }
 
 #[pyfunction]
