@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 use std::cell::Cell;
 use std::path::Path;
 
@@ -117,9 +116,7 @@ pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
         .into_iter()
         .filter_map(std::result::Result::ok)
         .filter(|e| e.file_type().is_file());
-
     let rmrfer = Rimrafer::new(args);
-
     let s = stream::iter(files_iter);
     s.for_each_concurrent(10, |file| async {
         rmrfer.rm_file(file).await;

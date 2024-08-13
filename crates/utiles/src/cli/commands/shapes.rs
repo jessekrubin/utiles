@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
 use tracing::{debug, error};
@@ -7,7 +6,9 @@ use utiles_core::projection::Projection;
 use utiles_core::tile::FeatureOptions;
 use utiles_core::{Tile, UtilesCoreError};
 
-use crate::{cli::stdinterator::StdInterator, errors::UtilesResult};
+use crate::cli::args::TileInputStreamArgs;
+use crate::cli::stdinterator_filter;
+use crate::errors::UtilesResult;
 
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]
@@ -63,8 +64,8 @@ impl Default for ShapesOutputMode {
 #[derive(Debug, Parser)] // requires `derive` feature
 #[command(name = "shapes", about = "echo shapes of tile(s) as GeoJSON", long_about = None)]
 pub struct ShapesArgs {
-    #[arg(required = false)]
-    input: Option<String>,
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     seq: bool,
@@ -95,7 +96,7 @@ pub struct ShapesArgs {
 impl Default for ShapesArgs {
     fn default() -> Self {
         ShapesArgs {
-            input: None,
+            inargs: TileInputStreamArgs { input: None },
             seq: false,
             precision: None,
             project: Some(ShapesProject::default()),
@@ -115,23 +116,27 @@ struct TileWithProperties {
 
 pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
     debug!("{:?}", args);
-    let input_lines = StdInterator::new(args.input);
-    let lines = input_lines
-        .filter(|l| !l.is_err())
-        .filter(|l| !l.as_ref().unwrap().is_empty())
-        .filter(|l| l.as_ref().unwrap() != "\x1e");
-    let parsed_lines = lines.map(|l| {
-        let ln = l.unwrap();
+    let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
+    let parsed_lines = lines.map(|line_res| {
+        let ln = line_res.map_err(|e| UtilesCoreError::ParseError(e.to_string()))?;
         let val: Value = serde_json::from_str::<Value>(&ln)?;
         let properties: Option<Map<String, Value>> = if val["properties"].is_object() {
-            let properties = val["properties"].as_object().unwrap().clone();
-            Option::from(properties)
+            let properties = val["properties"].as_object();
+            if let Some(properties) = properties {
+                Option::from(properties.clone())
+            } else {
+                None
+            }
         } else {
             None
         };
         let id = if val["id"].is_string() {
-            let id = val["id"].as_str().unwrap().to_string();
-            Option::from(id)
+            let id = val["id"].as_str();
+            if let Some(id) = id {
+                Option::from(id.to_string())
+            } else {
+                None
+            }
         } else {
             None
         };
@@ -210,7 +215,7 @@ pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
             if !first {
                 println!(",");
             }
-            println!("  {}", f.to_json());
+            print!("  {}", f.to_json());
             first = false;
         } else {
             if args.seq {

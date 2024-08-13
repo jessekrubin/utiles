@@ -1,8 +1,10 @@
-use anyhow::Result;
 use std::path::PathBuf;
+
+use anyhow::Result;
+
 use utiles::mbt::Mbtiles;
-use utiles_core::utile;
-use utiles_core::Tile;
+use utiles::{utile, Tile};
+
 fn get_utiles_test_osm_mbtiles_path() -> PathBuf {
     let pwd = std::env::current_dir().unwrap();
     let repo_root = pwd.parent().unwrap().parent().unwrap();

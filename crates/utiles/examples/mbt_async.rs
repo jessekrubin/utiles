@@ -2,8 +2,7 @@ use anyhow::Result;
 use futures::StreamExt;
 use std::path::PathBuf;
 use utiles::mbt::{MbtilesAsync, MbtilesClientAsync};
-use utiles_core::Tile;
-use utiles_core::{utile, TileLike};
+use utiles::{utile, Tile, TileLike};
 fn get_utiles_test_osm_mbtiles_path() -> PathBuf {
     let pwd = std::env::current_dir().unwrap();
     let repo_root = pwd.parent().unwrap().parent().unwrap();

@@ -8,6 +8,10 @@ pub enum UtilesCoreError {
     #[error("tile parse error: {0}")]
     TileParseError(String),
 
+    /// Error for general parsing
+    #[error("parse error: {0}")]
+    ParseError(String),
+
     /// Error on invalid tile-quadkey
     #[error("invalid tile: {0}")]
     InvalidTile(String),
