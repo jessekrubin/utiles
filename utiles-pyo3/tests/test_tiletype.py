@@ -26,6 +26,47 @@ REPO_ROOT = _repo_root()
 # go up and find dir with sub dir ".github"
 
 
+def is_mvt_like(buffer: bytes) -> bool:
+    if len(buffer) < 2:
+        return False
+
+    i = 0
+
+    while i < len(buffer):
+        key, wire_type = buffer[i] >> 3, buffer[i] & 0x07
+        i += 1
+
+        if key == 0 or key > 15:
+            return False
+
+        if wire_type == 0:
+            while i < len(buffer) and buffer[i] & 0x80 != 0:
+                i += 1
+            i += 1
+        elif wire_type == 1:
+            i += 8  # 64-bit
+        elif wire_type == 2:
+            length = 0
+            shift = 0
+            while i < len(buffer) and buffer[i] & 0x80 != 0:
+                length |= (buffer[i] & 0x7F) << shift
+                shift += 7
+                i += 1
+            if i < len(buffer):
+                length |= buffer[i] << shift
+            i += 1
+            i += length
+        elif wire_type == 5:
+            i += 4  # 32-bit
+        else:
+            return False
+
+        if i > len(buffer):
+            return False
+
+    return True
+
+
 def tiletype(buffer: bytes) -> Extensions:
     if buffer.startswith(b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"):
         return "png"
@@ -79,13 +120,17 @@ def tiletype(buffer: bytes) -> Extensions:
     # if buffer starts with '{' or '[' assume JSON
     elif buffer[0] == 0x7B or buffer[0] == 0x5B:
         return "json"
+    if is_mvt_like(buffer):
+        return "pbf"
     return False
 
 
 TEST_TILES = (REPO_ROOT / "test-data" / "tile-types").glob("**/*")
 
 TEST_TILES_BYTES = [
-    (str(f.name), f.read_bytes()) for f in TEST_TILES if f.name != "0.vector.pbf"
+    (str(f.name), f.read_bytes())
+    for f in TEST_TILES
+    # if f.name != "0.vector.pbf"
 ]
 
 TEST_TILE_NAME2TYPE = {
@@ -93,7 +138,7 @@ TEST_TILE_NAME2TYPE = {
     "0.jpeg": "jpg",
     "0.png": "png",
     # TODO figure out how to handle uncompressed PBF
-    # "0.vector.pbf": "pbf",
+    "0.vector.pbf": "pbf",
     "0.vector.pbf.zst": "pbf.zst",
     "0.vector.pbf.zlib": "pbf.zlib",
     "0.vector.pbf.gz": "pbf.gz",

@@ -1,9 +1,10 @@
 //! Tile string formatting
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
+use std::hash::Hash;
 use utiles_core::bbox::WebBBox;
 use utiles_core::{BBox, TileLike};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub enum FormatTokens {
     X,
     Y,
@@ -40,7 +41,7 @@ impl Display for FormatTokens {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub enum FormatParts {
     Str(String),
     Token(FormatTokens),
@@ -117,7 +118,7 @@ impl From<&FormatParts> for String {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub struct TileStringFormat {
     fmtstr: String,
     tokens: Vec<FormatParts>,
@@ -185,6 +186,37 @@ impl TileStringFormat {
 pub struct TileStringFormatter {
     tile_fmt: TileStringFormat,
     parts: Vec<Part>,
+}
+
+impl Hash for TileStringFormatter {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.tile_fmt.hash(state);
+    }
+}
+
+#[allow(clippy::missing_fields_in_debug)]
+impl Debug for TileStringFormatter {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TileStringFormatter")
+            .field("fmt", &self.tile_fmt.fmtstr)
+            .field("tokens", &self.tile_fmt.tokens)
+            .field("n_tokens", &self.tile_fmt.n_tokens)
+            .finish()
+    }
+}
+
+impl Clone for TileStringFormatter {
+    fn clone(&self) -> Self {
+        let tile_fmt = self.tile_fmt.clone();
+        let parts = TileStringFormatter::parse_parts(&tile_fmt);
+        Self { tile_fmt, parts }
+    }
+}
+
+impl PartialEq<Self> for TileStringFormatter {
+    fn eq(&self, other: &Self) -> bool {
+        self.tile_fmt == other.tile_fmt
+    }
 }
 
 enum Part {
@@ -296,6 +328,9 @@ impl TileStringFormatter {
             _ => self.fmt_tile_custom(tile),
         }
     }
+    pub fn fmt<T: TileLike>(&self, tile: &T) -> String {
+        self.fmt_tile(tile)
+    }
 
     #[must_use]
     pub fn has_token(&self) -> bool {
@@ -303,7 +338,7 @@ impl TileStringFormatter {
     }
 
     #[must_use]
-    pub fn fmt(&self) -> &str {
+    pub fn fmtstr(&self) -> &str {
         &self.tile_fmt.fmtstr
     }
 }
