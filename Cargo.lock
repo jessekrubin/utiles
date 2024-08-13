@@ -2977,6 +2977,7 @@ dependencies = [
  "md-5",
  "noncrypto-digests",
  "num_cpus",
+ "once_cell",
  "owo-colors",
  "pmtiles",
  "rusqlite",

@@ -27,7 +27,7 @@ use pyutiles::PyTile;
 use utiles::tile_type;
 mod cli;
 mod fmt_nbytes;
-// mod lager;
+mod lager;
 mod pyutiles;
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -116,7 +116,7 @@ fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fmt_nbytes::fmt_nbytes, m)?)?;
 
     // lager
-    // lager::pymod_add(m)?;
+    lager::pymod_add(m)?;
 
     Ok(())
 }

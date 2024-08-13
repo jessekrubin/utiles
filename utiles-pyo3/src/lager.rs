@@ -35,6 +35,16 @@ pub fn set_lager_level(level: &str) -> PyResult<()> {
     })
 }
 
+#[pyfunction]
+pub fn set_lager_format(json: bool) -> PyResult<()> {
+    utiles::lager::set_log_format(json).map_err(|e| {
+        PyErr::new::<PyValueError, _>(format!("failed to set log format: {}", e))
+    })
+    // utiles::lager::set_log_level(level).map_err(|e| {
+    //     PyErr::new::<PyValueError, _>(format!("failed to set log level: {}", e))
+    // })
+}
+
 pub fn pymod_add(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let cfg = LagerConfig::default();
     let init_res = init_tracing(&cfg);
@@ -64,6 +74,7 @@ pub fn pymod_add(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // }
 
     m.add_function(wrap_pyfunction!(set_lager_level, m)?)?;
+    m.add_function(wrap_pyfunction!(set_lager_format, m)?)?;
     m.add_function(wrap_pyfunction!(debug, m)?)?;
     m.add_function(wrap_pyfunction!(info, m)?)?;
     m.add_function(wrap_pyfunction!(warn, m)?)?;
