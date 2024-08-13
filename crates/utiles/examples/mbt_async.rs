@@ -1,8 +1,9 @@
 use anyhow::Result;
+use futures::StreamExt;
 use std::path::PathBuf;
 use utiles::mbt::{MbtilesAsync, MbtilesClientAsync};
-use utiles_core::utile;
 use utiles_core::Tile;
+use utiles_core::{utile, TileLike};
 fn get_utiles_test_osm_mbtiles_path() -> PathBuf {
     let pwd = std::env::current_dir().unwrap();
     let repo_root = pwd.parent().unwrap().parent().unwrap();
@@ -40,5 +41,13 @@ async fn main() -> Result<()> {
         println!("tile not found: {:?}", tile);
     }
 
+    // stream over tiles
+    let mut stream = mbt.tiles_stream(None)?;
+    let mut count = 0;
+    while let Some((tile, tile_data)) = stream.next().await {
+        println!("tile: {} ~ size: {}", tile.json_arr(), tile_data.len());
+        count += 1;
+    }
+    println!("tiles count: {:?}", count);
     Ok(())
 }
