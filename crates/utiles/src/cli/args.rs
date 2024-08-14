@@ -1,4 +1,3 @@
-// #![allow(clippy::doc_lazy_continuation)]
 use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
 use strum_macros::AsRefStr;
@@ -876,7 +875,7 @@ impl CopyArgs {
     }
 
     #[must_use]
-    pub fn zoom_set(&self) -> Option<zoom::ZoomSet> {
+    pub fn zoom_set(&self) -> Option<ZoomSet> {
         self.zooms().map(|zooms| ZoomSet::from_zooms(&zooms))
     }
 
