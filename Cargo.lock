@@ -2029,7 +2029,7 @@ dependencies = [
 
 [[package]]
 name = "pyutiles"
-version = "0.7.0-alpha.7"
+version = "0.7.0-alpha.8"
 dependencies = [
  "pyo3",
  "pyo3-build-config",
@@ -2954,7 +2954,7 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "utiles"
-version = "0.7.0-alpha.7"
+version = "0.7.0-alpha.8"
 dependencies = [
  "anyhow",
  "async-sqlite",
@@ -3002,7 +3002,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-core"
-version = "0.7.0-alpha.7"
+version = "0.7.0-alpha.8"
 dependencies = [
  "fast_hilbert",
  "serde",
@@ -3012,7 +3012,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-dev"
-version = "0.7.0-alpha.7"
+version = "0.7.0-alpha.8"
 dependencies = [
  "anyhow",
  "tokio",
@@ -3020,7 +3020,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-oxipng"
-version = "0.7.0-alpha.7"
+version = "0.7.0-alpha.8"
 dependencies = [
  "anyhow",
  "clap",
