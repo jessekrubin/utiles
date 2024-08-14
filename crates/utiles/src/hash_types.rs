@@ -1,11 +1,11 @@
 use std::str::FromStr;
 
-use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 
 use crate::UtilesError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ValueEnum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "cli", derive(clap::ValueEnum))]
 #[serde(rename_all = "kebab-case")]
 #[derive(Default)]
 pub enum HashType {

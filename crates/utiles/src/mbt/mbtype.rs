@@ -4,7 +4,7 @@ use std::str::FromStr;
 #[derive(Debug, Default, Copy, Serialize, PartialEq, Clone, strum_macros::Display)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
-#[derive(clap::ValueEnum)]
+#[cfg_attr(feature = "cli", derive(clap::ValueEnum))]
 pub enum MbtType {
     #[default]
     Flat,

@@ -21,7 +21,7 @@ mod info;
 mod mbt_stats;
 mod mbtiles_async;
 mod mbtype;
-mod metadata;
+pub mod metadata;
 mod metadata_row;
 mod minzoom_maxzoom;
 

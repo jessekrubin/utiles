@@ -616,6 +616,10 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
 }
 
 /// Return Tile struct from longitude, latitude, and zoom.
+///
+/// # Errors
+///
+/// Returns error if the lnglat can not be converted to web mercator.
 pub fn tile(
     lng: f64,
     lat: f64,
@@ -626,6 +630,10 @@ pub fn tile(
 }
 
 /// Return the bounding tile for a bounding box.
+///
+/// # Errors
+///
+/// Returns error if the bounding tile can not be calculated for points on the bbox
 pub fn bounding_tile(
     bbox: BBox,
     truncate: Option<bool>,
@@ -678,6 +686,10 @@ fn tiles_range_zoom(
 }
 
 /// Return `TileRanges` from a bounding box and zoom(s).
+///
+/// # Errors
+///
+/// Returns error tiles cannot be calculated due to invalid bbox/zbox
 pub fn tile_ranges(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,
@@ -733,6 +745,10 @@ pub fn tile_ranges(
 }
 
 /// Return the number of tiles for a bounding box and zoom(s).
+///
+/// # Errors
+///
+/// Returns error if the number of tiles cannot be calculated due to invalid bbox/zbox
 pub fn tiles_count(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,

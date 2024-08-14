@@ -11,8 +11,8 @@ members = [
 [workspace.package]
 version = "0.7.0-alpha.7"
 authors = [
-    "Jesse Rubin <jessekrubin@gmail.com>",
-    "Dan Costello <dan.costello2@gmail.com>",
+  "Jesse Rubin <jessekrubin@gmail.com>",
+  "Dan Costello <dan.costello2@gmail.com>",
 ]
 documentation = "https://github.com/jessekrubin/utiles"
 edition = "2021"

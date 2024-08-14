@@ -19,9 +19,7 @@ path = "src/lib.rs"
 name = "utiles"
 path = "src/bin.rs"
 required-features = [
-
-
-    #    "cli"
+  "cli",
 ]
 
 [dependencies]
@@ -30,7 +28,7 @@ async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", 
 async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 chrono = "0.4.38"
-clap = { workspace = true, features = ["derive", "color", "wrap_help"] }
+clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
 fnv = "1.0.7"
 futures = "0.3.29"
 geo-types.workspace = true
@@ -75,6 +73,12 @@ name = "bench"
 harness = false
 
 [features]
-default = []
-# cli = ["dep:clap"]
+all = [
+  "cli",
+  "pmtiles",
+]
+default = [
+  "pmtiles",
+]
+cli = ["dep:clap", "dep:pmtiles"]
 pmtiles = ["dep:pmtiles"]

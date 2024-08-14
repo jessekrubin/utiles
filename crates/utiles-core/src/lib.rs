@@ -10,7 +10,6 @@
 #![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::module_name_repetitions)]
-#![allow(clippy::missing_errors_doc)]
 #![allow(clippy::similar_names)]
 
 #[doc(inline)]
@@ -43,6 +42,8 @@ pub mod gdal;
 pub mod geostats;
 pub mod lnglat;
 pub mod parsing;
+
+#[cfg(feature = "pmtiles")]
 pub mod pmtiles;
 pub mod point;
 pub mod projection;

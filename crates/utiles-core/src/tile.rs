@@ -237,11 +237,19 @@ impl Tile {
     }
 
     /// Convert quadkey string to Tile
+    ///
+    /// # Errors
+    ///
+    /// Returns error on invalid quadkey (e.g. "1234" -- oh no '4' is invalid)
     pub fn from_quadkey(quadkey: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(quadkey)
     }
 
     /// Convert quadkey string to Tile (alias for `from_quadkey`)
+    ///
+    /// # Errors
+    ///
+    /// Returns error on invalid quadkey (e.g. "1234" -- oh no '4' is invalid)
     pub fn from_qk(qk: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(qk)
     }
@@ -483,6 +491,10 @@ impl Tile {
     }
 
     /// Return a `TileFeature` for the tile
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the feature creation fails (which may be impossible [2024-08-14])
     pub fn feature(&self, opts: &FeatureOptions) -> UtilesCoreResult<TileFeature> {
         let buffer = opts.buffer.unwrap_or(0.0);
         let precision = opts.precision.unwrap_or(-1);

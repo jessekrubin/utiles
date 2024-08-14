@@ -2,7 +2,7 @@ use std::path::Path;
 
 use tokio::sync::mpsc;
 use tokio::{fs, task};
-use tracing::{debug, warn};
+use tracing::{debug, error, warn};
 use walkdir::WalkDir;
 
 use utiles_core::tile_data_row::TileData;
@@ -38,6 +38,11 @@ fn fspath2xyz(path: &Path) -> UtilesResult<(u32, u32, u8)> {
     Ok((x, y, z))
 }
 
+/// Copy a directory of tiles in an xyz (Y-DOWN) layout to a flat mbtiles file
+///
+/// # Panics
+///
+/// Panics if tile insertion into the db fails
 pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
     let dirpath = &cfg.src;
     let mbtiles_path = &cfg.dst;
@@ -45,9 +50,7 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
     let metadata_path = Path::new(&dirpath).join("metadata.json");
     let walker = WalkDir::new(dirpath).min_depth(3).max_depth(3);
     let mut dst_mbt = Mbtiles::open(mbtiles_path)?;
-    dst_mbt
-        .init_flat_mbtiles()
-        .expect("init_flat_mbtiles failed");
+    dst_mbt.init_flat_mbtiles()?;
 
     if let Ok(metadata_str) = fs::read_to_string(metadata_path).await {
         // found metadata.json
@@ -75,7 +78,10 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
                 debug!("inserting tiles: {:?}", tiles.len());
                 let n_affected = dst_mbt
                     .insert_tiles_flat(&tiles)
-                    .expect("insert tiles flat failed");
+                    .map_err(|e| {
+                        UtilesError::Str(format!("insert tiles flat error: {e:?}"))
+                    })
+                    .expect("insert tiles flat error");
                 nwritten += n_affected;
                 tiles.clear();
             }
@@ -84,7 +90,12 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
         if !tiles.is_empty() {
             let n_affected = dst_mbt
                 .insert_tiles_flat(&tiles)
-                .expect("insert tiles flat failed");
+                .map_err(|e| {
+                    error!("insert tiles flat error: {e:?}");
+                    UtilesError::Str(format!("insert tiles flat error: {e:?}"))
+                })
+                .expect("insert tiles flat error");
+
             nwritten += n_affected;
         }
         debug!("nwritten: {:?}", nwritten);
@@ -94,8 +105,7 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
         while let Some(path_str) = tile2load_rx.recv().await {
             let tx_clone = tile_load_tx.clone();
             let path = Path::new(&path_str);
-            let tile_xyz = fspath2xyz(path);
-            match tile_xyz {
+            match fspath2xyz(path) {
                 Ok(tile_xyz) => {
                     task::spawn(async move {
                         let data = fs::read(path_str).await;
@@ -127,48 +137,12 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
         }
     });
 
-    // File processing tasks
-    // for entry in walker.into_iter().filter_map(Result::ok) {
-    //     let path = entry.path().to_owned();
-    //     let tx_clone = tile_load_tx.clone();
-    //     let tile_xyz = fspath2xyz(&path);
-    //     match tile_xyz {
-    //         Ok(tile_xyz) => {
-    //             task::spawn(async move {
-    //                 let data = fs::read(&path).await;
-    //                 match data {
-    //                     Ok(data) => {
-    //                         let tile_data = TileData::new(
-    //                             Tile::new(tile_xyz.0, tile_xyz.1, tile_xyz.2),
-    //                             data,
-    //                         );
-    //                         match tx_clone.send(tile_data).await {
-    //                             Ok(()) => {
-    //                                 debug!("sent tile: {:?}", tile_xyz);
-    //                             }
-    //                             Err(e) => {
-    //                                 warn!("e: {e:?}");
-    //                             }
-    //                         }
-    //                     }
-    //                     Err(e) => {
-    //                         warn!("e: {e:?}");
-    //                     }
-    //                 }
-    //             });
-    //         }
-    //         Err(e) => {
-    //             warn!("e: {e:?}");
-    //         }
-    //     }
-    // }
     for entry in walker.into_iter().filter_map(Result::ok) {
         let fspath_string: String = entry.path().to_string_lossy().into_owned();
         tile2load_tx.send(fspath_string).await.map_err(|e| {
             UtilesError::Unknown(format!("tile2load_tx.send error: {e:?}"))
         })?;
     }
-    debug!("dropping tx");
     // drop tx to close the channel
     drop(tile2load_tx);
     tile_loader_task

@@ -4,6 +4,10 @@
 /// of self or an error
 pub trait IsOk: Sized {
     /// Returns `Ok` if the value is `Ok` or an error
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the value is not `Ok`
     fn ok(&self) -> Result<Self, crate::UtilesCoreError>;
 }
 
