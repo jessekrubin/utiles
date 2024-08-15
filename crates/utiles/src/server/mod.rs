@@ -36,50 +36,18 @@ use crate::errors::UtilesResult;
 use crate::globster::find_filepaths;
 use crate::mbt::MbtilesAsync;
 use crate::mbt::MbtilesClientAsync;
+pub use crate::server::cfg::UtilesServerConfig;
+use crate::server::health::Health;
+use crate::server::state::{Datasets, MbtilesDataset, ServerState};
+use crate::server::ui::uitiles;
 use crate::signal::shutdown_signal;
 
+mod cfg;
+mod health;
 pub mod radix36;
 mod request_id;
-
-//=============================================================================
-
-pub struct MbtilesDataset {
-    pub mbtiles: MbtilesClientAsync,
-    pub tilejson: TileJSON,
-}
-
-pub struct Datasets {
-    pub mbtiles: BTreeMap<String, MbtilesDataset>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct UtilesServerConfig {
-    pub host: String,
-    pub port: u16,
-    pub fspaths: Vec<String>,
-}
-
-pub struct ServerState {
-    pub config: UtilesServerConfig,
-    pub datasets: Datasets,
-    pub start_ts: std::time::Instant,
-}
-
-impl UtilesServerConfig {
-    #[must_use]
-    pub fn new(host: String, port: u16, fspaths: Vec<String>) -> Self {
-        Self {
-            host,
-            port,
-            fspaths,
-        }
-    }
-
-    #[must_use]
-    pub fn addr(&self) -> String {
-        format!("{}:{}", self.host, self.port)
-    }
-}
+mod state;
+mod ui;
 
 async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     warn!("__PREFLIGHT__");
@@ -358,12 +326,6 @@ async fn root() -> &'static str {
     "utiles"
 }
 
-#[derive(Serialize, Deserialize)]
-struct Health {
-    status: String,
-    uptime: u64,
-}
-
 async fn four_o_four() -> impl IntoResponse {
     (StatusCode::NOT_FOUND, "four oh four...")
 }
@@ -372,14 +334,5 @@ async fn health(State(state): State<Arc<ServerState>>) -> Json<Health> {
     let uptime = std::time::Instant::now()
         .duration_since(state.start_ts)
         .as_secs();
-    let health = Health {
-        status: "OK".to_string(),
-        uptime,
-    };
-    Json(health)
-}
-
-/// UI-tiles (ui) wip
-async fn uitiles() -> Json<serde_json::Value> {
-    Json(json!({"status": "TODO/WIP/NOT_IMPLEMENTED_YET"}))
+    Json(Health::new("OK".to_string(), uptime))
 }

@@ -73,11 +73,12 @@ name = "bench"
 harness = false
 
 [features]
-all = [
+default = [
   "cli",
   "pmtiles",
 ]
-default = [
+all = [
+  "cli",
   "pmtiles",
 ]
 cli = ["dep:clap", "dep:pmtiles"]

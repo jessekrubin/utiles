@@ -46,6 +46,7 @@ indent_style = space
 
 [*.{toml}]
 indent_size = 2
+indent_style = space
 
 [*.{yml,yaml}]
 indent_style = space
