@@ -44,7 +44,7 @@ use crate::signal::shutdown_signal;
 
 mod cfg;
 mod health;
-mod radix36;
+pub mod radix36;
 mod request_id;
 mod state;
 mod ui;
