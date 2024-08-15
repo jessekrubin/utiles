@@ -1,7 +1,7 @@
 //! Utiles server configuration
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct UtilesServerConfig {
     pub host: String,
     pub port: u16,

@@ -15,7 +15,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::json;
 use tilejson::TileJSON;
 use tower::ServiceBuilder;
@@ -44,7 +44,7 @@ use crate::signal::shutdown_signal;
 
 mod cfg;
 mod health;
-pub mod radix36;
+mod radix36;
 mod request_id;
 mod state;
 mod ui;
@@ -133,6 +133,7 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     let app = Router::new()
         .route("/", get(root))
         .route("/health", get(health))
+        .route("/cfg", get(get_cfg))
         .route("/uitiles", get(uitiles))
         .route("/datasets", get(get_datasets))
         .route("/tiles/:dataset/tile.json", get(get_dataset_tilejson))
@@ -335,4 +336,10 @@ async fn health(State(state): State<Arc<ServerState>>) -> Json<Health> {
         .duration_since(state.start_ts)
         .as_secs();
     Json(Health::new("OK".to_string(), uptime))
+}
+
+async fn get_cfg(State(state): State<Arc<ServerState>>) -> impl IntoResponse {
+    let cfg_val =
+        serde_json::to_value(&state.config).expect("Error serializing config");
+    Json(cfg_val)
 }
