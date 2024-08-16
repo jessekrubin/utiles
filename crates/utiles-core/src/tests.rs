@@ -92,7 +92,6 @@ fn test_simplify() {
     for t in &targets {
         children.extend(t.children(Some(12)));
     }
-    // children.push(children[0]);
     let tset = children.into_iter().collect::<HashSet<Tile>>();
     let simplified = simplify(&tset);
     for target in targets {
