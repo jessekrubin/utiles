@@ -1,5 +1,8 @@
 //! Utiles traits
 
+use crate::TileLike;
+use std::hash::Hash;
+
 /// `IsOk` trait for checking if a value is Ok and returns a result
 /// of self or an error
 pub trait IsOk: Sized {
@@ -42,4 +45,9 @@ pub trait LngLatLike: Coord2dLike {
     fn latitude(&self) -> f64 {
         self.lat()
     }
+}
+
+pub trait TileParent: Eq + Hash + Copy + TileLike {
+    #[must_use]
+    fn parent(&self, zoom: Option<u8>) -> Self;
 }

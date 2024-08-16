@@ -14,7 +14,7 @@ use serde::Serialize;
 use utiles::bbox::BBox;
 use utiles::projection::Projection;
 use utiles::tile::{FeatureOptions, Tile};
-use utiles::TileLike;
+use utiles::{TileLike, TileParent};
 
 use crate::pyutiles::pyiters::IntIterator;
 use crate::pyutiles::pylnglat::PyLngLat;
@@ -481,6 +481,26 @@ impl TileLike for PyTile {
 
     fn z(&self) -> u8 {
         self.xyz.z
+    }
+}
+
+impl TileLike for &PyTile {
+    fn x(&self) -> u32 {
+        self.xyz.x
+    }
+
+    fn y(&self) -> u32 {
+        self.xyz.y
+    }
+
+    fn z(&self) -> u8 {
+        self.xyz.z
+    }
+}
+
+impl TileParent for PyTile {
+    fn parent(&self, zoom: Option<u8>) -> Self {
+        self.parent(zoom)
     }
 }
 

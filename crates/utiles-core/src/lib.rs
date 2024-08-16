@@ -15,6 +15,8 @@
 #[doc(inline)]
 pub use crate::fns::*;
 #[doc(inline)]
+pub use crate::merge::*;
+#[doc(inline)]
 pub use crate::quadkey::*;
 pub use bbox::{geobbox_merge, BBox};
 #[doc(inline)]
@@ -29,7 +31,7 @@ pub use tile::Tile;
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
 #[doc(inline)]
-pub use traits::{Coord2dLike, IsOk, LngLatLike};
+pub use traits::{Coord2dLike, IsOk, LngLatLike, TileParent};
 pub use zoom::*;
 
 pub mod bbox;
@@ -43,6 +45,7 @@ pub mod geostats;
 pub mod lnglat;
 pub mod parsing;
 
+mod merge;
 #[cfg(feature = "pmtiles")]
 pub mod pmtiles;
 pub mod point;

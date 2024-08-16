@@ -15,6 +15,7 @@ use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
+use crate::traits::TileParent;
 use crate::{pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey, IsOk};
 
 /// Tile X-Y-Z struct
@@ -150,6 +151,12 @@ impl TileLike for Tile {
 
     fn z(&self) -> u8 {
         self.z
+    }
+}
+
+impl TileParent for Tile {
+    fn parent(&self, zoom: Option<u8>) -> Self {
+        self.parent(zoom)
     }
 }
 
