@@ -7,7 +7,7 @@ include = ["src/**/*", "Cargo.toml", "LICENSE", "README.md"]
 license.workspace = true
 
 [lib]
-name = "libutiles"
+name = "_utiles"
 crate-type = ["cdylib"]
 
 [dependencies]

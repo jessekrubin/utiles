@@ -34,7 +34,7 @@ macro_rules! pytile {
     };
 }
 
-#[pyclass(name = "Tile", sequence)]
+#[pyclass(name = "Tile", module = "utiles._utiles", sequence)]
 #[derive(Clone, Debug, PartialEq, Serialize, Eq, Hash, Copy)]
 pub struct PyTile {
     pub xyz: Tile,

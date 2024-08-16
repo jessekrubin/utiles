@@ -10,7 +10,7 @@ use pyo3::{
 };
 use utiles::bbox::BBox;
 
-#[pyclass(name = "LngLatBbox")]
+#[pyclass(name = "LngLatBbox", module = "utiles._utiles")]
 #[derive(Clone)]
 pub struct PyLngLatBbox {
     pub bbox: BBox,

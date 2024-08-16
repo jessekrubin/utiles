@@ -4,7 +4,7 @@ use pyo3::exceptions::{self};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 
-#[pyclass(name = "LngLat")]
+#[pyclass(name = "LngLat", module = "utiles._utiles")]
 pub struct PyLngLat {
     lnglat: utiles::LngLat,
 }
