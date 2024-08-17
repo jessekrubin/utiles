@@ -43,6 +43,7 @@ use crate::sqlite::{SqliteError, SqliteResult};
 /// | 96     | 4    | SQLITE_VERSION_NUMBER                                     |
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SqliteHeader {
+    #[serde(serialize_with = "serialize_magic_string")]
     magic_string: [u8; 16],
     page_size: u16,
     write_version: u8,
@@ -63,9 +64,20 @@ pub struct SqliteHeader {
     user_version: u32,
     incremental_vacuum_mode: u32,
     application_id: u32,
+    #[serde(skip)]
     reserved: [u8; 20],
     version_valid_for: u32,
     sqlite_version_number: u32,
+}
+
+pub fn serialize_magic_string<S>(
+    magic_string: &[u8; 16],
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_str(&String::from_utf8_lossy(magic_string))
 }
 
 impl SqliteHeader {
