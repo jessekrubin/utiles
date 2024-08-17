@@ -73,7 +73,7 @@ impl SqliteHeader {
         if b == b"SQLite format 3\0" {
             Ok(())
         } else {
-            Err(SqliteError::InvalidSqliteMagic(format!("{:?}", b)))
+            Err(SqliteError::InvalidSqliteMagic(format!("{b:?}")))
         }
     }
 
@@ -201,7 +201,8 @@ impl SqliteHeader {
 
     pub fn reserved_space_ok(&self) -> SqliteResult<()> {
         if self.reserved_space <= 32 {
-            let usable_size = self.page_size as u32 - self.reserved_space as u32;
+            let usable_size =
+                u32::from(self.page_size) - u32::from(self.reserved_space);
             if usable_size >= 480 {
                 Ok(())
             } else {
