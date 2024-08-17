@@ -139,7 +139,7 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
     match res {
         Ok(()) => Ok(0),
         Err(e) => {
-            error!("Error: {}", e);
+            error!("{}", e);
             Err(e)
         }
     }

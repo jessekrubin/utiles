@@ -18,6 +18,26 @@ pub enum SqliteError {
 
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
+
+    /// Error from `std::io`
+    #[error("io error: {0}")]
+    IoError(#[from] std::io::Error),
+
+    /// Invalid sqlite-magic; must be `53 51 4c 69 74 65 20 66 6f 72 6d 61 74 20 33 00`
+    #[error("Invalid sqlite-magic: {0}")]
+    InvalidSqliteMagic(String),
+
+    /// Parse header field
+    #[error("Invalid header field: {0}")]
+    ParseHeaderField(String),
+
+    /// Invalid header field
+    #[error("Invalid header field: {0}")]
+    InvalidHeaderField(String),
+
+    /// Invalid sqlite db
+    #[error("Invalid sqlite db: {0}")]
+    InvalidSqliteDb(String),
 }
 
 pub type SqliteResult<T> = Result<T, SqliteError>;

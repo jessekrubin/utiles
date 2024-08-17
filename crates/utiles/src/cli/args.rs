@@ -9,7 +9,7 @@ use utiles_core::{
 use crate::cli::commands::dev::DevArgs;
 use crate::cli::commands::serve::ServeArgs;
 use crate::cli::commands::shapes::ShapesArgs;
-use crate::cli::commands::{analyze_main, vacuum_main};
+use crate::cli::commands::{analyze_main, header_main, vacuum_main};
 use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
 use crate::hash_types::HashType;
@@ -259,6 +259,7 @@ impl TouchArgs {
 /// sqlite utils/cmds
 pub enum DbCommands {
     Analyze(AnalyzeArgs),
+    Header(SqliteHeaderArgs),
     Vacuum(VacuumArgs),
 }
 
@@ -266,6 +267,7 @@ impl DbCommands {
     pub async fn run(&self) -> UtilesResult<()> {
         match self {
             DbCommands::Analyze(args) => analyze_main(args).await,
+            DbCommands::Header(args) => header_main(args).await,
             DbCommands::Vacuum(args) => vacuum_main(args).await,
         }
     }
@@ -278,12 +280,20 @@ impl DbCommands {
 // }
 
 #[derive(Debug, Parser)]
+/// Analyze sqlite db
 pub struct AnalyzeArgs {
     #[command(flatten)]
     pub common: SqliteDbCommonArgs,
 
     #[arg(required = false, long)]
     pub analysis_limit: Option<usize>,
+}
+
+#[derive(Debug, Parser)]
+/// Dump sqlite db header
+pub struct SqliteHeaderArgs {
+    #[command(flatten)]
+    pub common: SqliteDbCommonArgs,
 }
 
 #[derive(Debug, Parser)]

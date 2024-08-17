@@ -1,9 +1,11 @@
-use tracing::{info, trace};
+use tracing::{debug, info, trace};
 
-use crate::cli::args::AnalyzeArgs;
+use crate::cli::args::{AnalyzeArgs, SqliteHeaderArgs};
 use crate::errors::UtilesResult;
+use crate::fs_async::read_nbytes;
 use crate::sqlite::{
     analysis_limit_set, AsyncSqliteConn, Sqlike3Async, SqliteDbAsyncClient,
+    SqliteHeader,
 };
 
 pub async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {
@@ -25,11 +27,15 @@ pub async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {
     Ok(())
 }
 
-//
-// pub async fn schema_main(args: &SqliteSchemaArgs) -> UtilesResult<()> {
-//     info!("Schema for sqlite file: {}", args.common.filepath);
-//     let db = SqliteDbAsyncClient::open_existing(&args.common.filepath, None).await?;
-//     let schema = db.schema().await?;
-//     println!("{}", schema);
-//     Ok(())
-// }
+pub async fn header_main(args: &SqliteHeaderArgs) -> UtilesResult<()> {
+    info!("Analyzing sqlite file: {}", args.common.filepath);
+    // get the first 100 bytes of the file
+    let header_bytes = read_nbytes::<_, 100>(&args.common.filepath).await?;
+    debug!("header-bytes: {:?}", header_bytes);
+
+    let header = SqliteHeader::parse(&header_bytes)?;
+    header.is_ok()?;
+    let json_str = serde_json::to_string_pretty(&header)?;
+    println!("{}", json_str);
+    Ok(())
+}

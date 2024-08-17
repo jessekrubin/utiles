@@ -82,7 +82,7 @@ pub enum UtilesError {
     IoError(#[from] std::io::Error),
 
     /// Error from `sqlite` module
-    #[error("sqlite error: {0}")]
+    #[error("{0}")]
     SqliteError(#[from] crate::sqlite::SqliteError),
 
     /// Error from rusqlite
