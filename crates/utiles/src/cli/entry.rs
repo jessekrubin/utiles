@@ -103,7 +103,7 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
 
     let res: UtilesResult<()> = match args.command {
         Commands::About => about_main(),
-        Commands::Db(dbcmds) => dbcmds.run().await,
+        Commands::Sqlite(dbcmds) => dbcmds.run().await,
         Commands::Lint(args) => lint_main(&args).await,
         Commands::Touch(args) => touch_main(&args).await,
         Commands::Vacuum(args) => vacuum_main(&args).await,

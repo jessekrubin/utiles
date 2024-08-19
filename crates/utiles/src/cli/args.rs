@@ -257,18 +257,18 @@ impl TouchArgs {
 
 #[derive(Debug, Subcommand)]
 /// sqlite utils/cmds
-pub enum DbCommands {
+pub enum SqliteCommands {
     Analyze(AnalyzeArgs),
     Header(SqliteHeaderArgs),
     Vacuum(VacuumArgs),
 }
 
-impl DbCommands {
+impl SqliteCommands {
     pub async fn run(&self) -> UtilesResult<()> {
         match self {
-            DbCommands::Analyze(args) => analyze_main(args).await,
-            DbCommands::Header(args) => header_main(args).await,
-            DbCommands::Vacuum(args) => vacuum_main(args).await,
+            SqliteCommands::Analyze(args) => analyze_main(args).await,
+            SqliteCommands::Header(args) => header_main(args).await,
+            SqliteCommands::Vacuum(args) => vacuum_main(args).await,
         }
     }
 }
@@ -476,8 +476,8 @@ pub enum Commands {
     #[command(name = "about", visible_alias = "aboot")]
     About,
 
-    #[command(subcommand)]
-    Db(DbCommands),
+    #[command(subcommand, visible_alias = "db")]
+    Sqlite(SqliteCommands),
 
     /// Echo the `tile.json` for mbtiles file
     #[command(name = "tilejson", visible_alias = "tj", alias = "trader-joes")]
