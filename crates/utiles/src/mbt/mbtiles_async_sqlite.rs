@@ -366,22 +366,13 @@ where
         if !is_mbtiles_like {
             return Ok(false);
         }
-        // assert tiles is not empty
-        let tiles_is_empty = self
-            .conn(tiles_is_empty)
-            .await
-            .map_err(UtilesError::AsyncSqliteError)?;
-        if tiles_is_empty {
-            Ok(false)
-        } else {
-            let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
-            debug!(
-                target: "is-mbtiles",
-                "has_zoom_row_col_index: {}",
-                has_zoom_row_col_index,
-            );
-            Ok(has_zoom_row_col_index)
-        }
+        let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
+        debug!(
+            target: "is-mbtiles",
+            "has_zoom_row_col_index: {}",
+            has_zoom_row_col_index,
+        );
+        Ok(has_zoom_row_col_index)
     }
 
     async fn assert_mbtiles(&self) -> UtilesResult<()> {
