@@ -7,7 +7,7 @@ use std::convert::Infallible;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::sqlite::{AsyncSqliteConn, AsyncSqliteConnMut, AsyncSqliteError, Sqlike3Async, SqliteError};
+use crate::sqlite::{AsyncSqliteConn, SqliteError};
 pub use deadpool::managed::reexports::*;
 pub use deadpool_sync::reexports::*;
 pub use rusqlite;
@@ -72,7 +72,6 @@ deadpool::managed_reexports!(
     ConfigError
 );
 
-
 /// Type alias for [`Object`]
 pub type Connection = Object;
 
@@ -120,7 +119,9 @@ impl managed::Manager for Manager {
         }
         let recycle_count = self.recycle_count.fetch_add(1, Ordering::Relaxed);
         let n: usize = conn
-            .interact(move |conn| conn.query_row("SELECT $1", [recycle_count], |row| row.get(0)))
+            .interact(move |conn| {
+                conn.query_row("SELECT $1", [recycle_count], |row| row.get(0))
+            })
             .await
             .map_err(|e| RecycleError::message(format!("{}", e)))??;
         if n == recycle_count {
@@ -130,7 +131,6 @@ impl managed::Manager for Manager {
         }
     }
 }
-
 
 pub struct SqliteDeadpool {
     pool: Pool,
@@ -144,19 +144,13 @@ impl AsyncSqliteConn for SqliteDeadpool {
         T: Send + 'static,
     {
         let conn = self.pool.get().await.unwrap();
-        let result = conn.interact(
-            |conn| {
-                func(conn)
-            }
-        ).await.map_err(
-            |e| SqliteError::from(e)
-        );
-        result
+        let result = conn
+            .interact(|conn| func(conn))
+            .await
+            .map_err(|e| SqliteError::from(e))?;
+        result.map_err(SqliteError::from)
     }
 }
-
-
-
 
 //
 // impl Sqlike3Async for SqliteDeadpool {

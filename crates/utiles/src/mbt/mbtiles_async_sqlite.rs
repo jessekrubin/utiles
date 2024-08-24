@@ -29,7 +29,7 @@ use crate::mbt::{
 };
 use crate::sqlite::{
     journal_mode, magic_number, pragma_encoding, AsyncSqliteConn, AsyncSqliteConnMut,
-    RowsAffected,
+    RowsAffected, SqliteError,
 };
 use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilejson::metadata2tilejson;
@@ -70,45 +70,45 @@ impl Debug for MbtilesClientAsync {
 
 #[async_trait]
 impl AsyncSqliteConn for MbtilesClientAsync {
-    async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.client.conn(func).await
+        self.client.conn(func).await.map_err(SqliteError::from)
     }
 }
 
 #[async_trait]
 impl AsyncSqliteConn for MbtilesPoolAsync {
-    async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.pool.conn(func).await
+        self.pool.conn(func).await.map_err(SqliteError::from)
     }
 }
 
 #[async_trait]
 impl AsyncSqliteConnMut for MbtilesClientAsync {
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.client.conn_mut(func).await
+        self.client.conn_mut(func).await.map_err(SqliteError::from)
     }
 }
 
 #[async_trait]
 impl AsyncSqliteConnMut for MbtilesPoolAsync {
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.pool.conn_mut(func).await
+        self.pool.conn_mut(func).await.map_err(SqliteError::from)
     }
 }
 
@@ -426,7 +426,7 @@ where
         let metadata = self
             .conn(mbtiles_metadata)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(metadata)
     }
 
@@ -461,7 +461,7 @@ where
         let row = self
             .conn(move |conn| mbtiles_metadata_row(conn, &name_str))
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(row)
     }
 
@@ -476,7 +476,7 @@ where
                 )
             })
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(rows)
     }
 
@@ -484,7 +484,7 @@ where
         let tiles_is_empty = self
             .conn(tiles_is_empty)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(tiles_is_empty)
     }
 
@@ -525,7 +525,7 @@ where
         let res = self
             .conn(move |conn| has_zxy(conn, z, x, y))
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(res)
     }
 
@@ -533,7 +533,7 @@ where
         let tile = self
             .conn(move |conn| query_zxy(conn, z, x, y))
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(tile)
     }
 
@@ -541,7 +541,7 @@ where
         let t = self
             .conn(minzoom_maxzoom)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(t)
     }
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
