@@ -16,6 +16,10 @@ pub enum SqliteError {
     #[error("sqlite err: {0}")]
     AsyncSqliteError(async_sqlite::Error),
 
+    /// Deadpool interact error
+    #[error("Deadpool interact error: {0}")]
+    DeadpoolInteractError(deadpool_sync::InteractError),
+
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 

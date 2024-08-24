@@ -29,6 +29,8 @@ async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 chrono = "0.4.38"
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
+deadpool = { version = "0.12.1", features = ["managed"], default-features = false }
+deadpool-sync = { version = "0.1.4", features = ["tracing"] }
 fnv = "1.0.7"
 futures = "0.3.29"
 geo-types.workspace = true
