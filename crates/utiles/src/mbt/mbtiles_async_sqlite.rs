@@ -2,9 +2,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
 
-use async_sqlite::{
-    Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
-};
+use async_sqlite::{Client, ClientBuilder, Pool, PoolBuilder};
 use async_trait::async_trait;
 use futures::TryFutureExt;
 use rusqlite::{Connection, OpenFlags};

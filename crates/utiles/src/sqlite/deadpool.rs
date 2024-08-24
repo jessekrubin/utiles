@@ -9,13 +9,12 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::sqlite::{AsyncSqliteConn, SqliteError};
 pub use deadpool::managed::reexports::*;
-pub use deadpool_sync::reexports::*;
 pub use rusqlite;
 
 #[derive(Clone, Debug, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct Config {
-    /// Path to SQLite database file.
+    /// Path to `SQLite` database file.
     pub path: PathBuf,
 
     /// [`Pool`] configuration.
@@ -23,7 +22,7 @@ pub struct Config {
 }
 
 impl Config {
-    /// Create a new [`Config`] with the given `path` of SQLite database file.
+    /// Create a new [`Config`] with the given `path` of `SQLite` database file.
     #[must_use]
     pub fn new(path: impl Into<PathBuf>) -> Self {
         Self {
@@ -59,7 +58,7 @@ impl Config {
     }
 }
 
-/// This error is returned if there is something wrong with the SQLite configuration.
+/// This error is returned if there is something wrong with the `SQLite` configuration.
 ///
 /// This is just a type alias to [`Infallible`] at the moment as there
 /// is no validation happening at the configuration phase.
@@ -75,7 +74,7 @@ deadpool::managed_reexports!(
 /// Type alias for [`Object`]
 pub type Connection = Object;
 
-/// [`Manager`] for creating and recycling SQLite [`Connection`]s.
+/// [`Manager`] for creating and recycling `SQLite` [`Connection`]s.
 ///
 /// [`Manager`]: managed::Manager
 #[derive(Debug)]
@@ -123,7 +122,7 @@ impl managed::Manager for Manager {
                 conn.query_row("SELECT $1", [recycle_count], |row| row.get(0))
             })
             .await
-            .map_err(|e| RecycleError::message(format!("{}", e)))??;
+            .map_err(|e| RecycleError::message(format!("{e}")))??;
         if n == recycle_count {
             Ok(())
         } else {
@@ -143,11 +142,11 @@ impl AsyncSqliteConn for SqliteDeadpool {
         F: FnOnce(&rusqlite::Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        let conn = self.pool.get().await.unwrap();
+        let conn = self.pool.get().await?;
         let result = conn
             .interact(|conn| func(conn))
             .await
-            .map_err(|e| SqliteError::from(e))?;
+            .map_err(SqliteError::from)?;
         result.map_err(SqliteError::from)
     }
 }

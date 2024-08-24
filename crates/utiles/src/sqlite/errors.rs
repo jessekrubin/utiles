@@ -20,6 +20,10 @@ pub enum SqliteError {
     #[error("Deadpool interact error: {0}")]
     DeadpoolInteractErrorPanic(String),
 
+    /// Deadpool PoolError
+    #[error("Deadpool pool error: {0}")]
+    DeadpoolPoolError(#[from] deadpool::managed::PoolError<rusqlite::Error>),
+
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
 
@@ -59,7 +63,7 @@ impl From<deadpool_sync::InteractError> for SqliteError {
     fn from(value: deadpool_sync::InteractError) -> Self {
         match value {
             deadpool_sync::InteractError::Panic(value) => {
-                SqliteError::DeadpoolInteractErrorPanic(format!("{:?}", value))
+                SqliteError::DeadpoolInteractErrorPanic(format!("{value:?}"))
             }
             _ => SqliteError::DeadpoolInteractErrorPanic("Aborted".to_string()),
         }

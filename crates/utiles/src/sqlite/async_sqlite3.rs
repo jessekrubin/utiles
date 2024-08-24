@@ -6,7 +6,7 @@ use crate::sqlite::{
     pragma_table_list, vacuum, vacuum_into, DbPath, PragmaIndexListRow,
     PragmaTableListRow, SqliteError, SqliteResult,
 };
-use async_sqlite::{Client, ClientBuilder, Error as AsyncSqliteError};
+use async_sqlite::{Client, ClientBuilder};
 use async_trait::async_trait;
 use rusqlite::{Connection, OpenFlags};
 use std::fmt;
