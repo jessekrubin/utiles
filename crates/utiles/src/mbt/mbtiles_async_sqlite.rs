@@ -6,6 +6,7 @@ use async_sqlite::{
     Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
 };
 use async_trait::async_trait;
+use futures::TryFutureExt;
 use rusqlite::{Connection, OpenFlags};
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
@@ -159,7 +160,14 @@ impl MbtilesClientAsync {
     pub async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(path)?;
         debug!("Opening mbtiles file with client: {}", dbpath);
-        let client = ClientBuilder::new().path(&dbpath.fspath).open().await?;
+        let client = ClientBuilder::new()
+            .path(&dbpath.fspath)
+            .open()
+            .await
+            .map_err(|e| {
+                debug!("Error opening mbtiles file: {}", e);
+                e
+            })?;
         MbtilesClientAsync::new(dbpath, client).await
     }
 
@@ -174,7 +182,11 @@ impl MbtilesClientAsync {
                     | OpenFlags::SQLITE_OPEN_URI,
             )
             .open()
-            .await?;
+            .await
+            .map_err(|e| {
+                debug!("Error opening existing mbtiles file: {}", e);
+                e
+            })?;
         MbtilesClientAsync::new(dbpath, client).await
     }
 
@@ -193,6 +205,10 @@ impl MbtilesClientAsync {
             .path(&dbpath.fspath)
             .flags(flags)
             .open()
+            .map_err(|e| {
+                debug!("Error opening readonly mbtiles file: {}", e);
+                e
+            })
             .await?;
         MbtilesClientAsync::new(dbpath, client).await
     }

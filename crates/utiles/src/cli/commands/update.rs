@@ -2,8 +2,6 @@ use std::path::Path;
 
 use tracing::{debug, info, warn};
 
-use utiles_core::constants::MBTILES_MAGIC_NUMBER;
-
 use crate::cli::args::UpdateArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::mbtiles::{query_distinct_tilesize_fast, query_distinct_tiletype_fast};
@@ -13,6 +11,8 @@ use crate::mbt::{
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
 use crate::UtilesError;
+use utiles_core::constants::MBTILES_MAGIC_NUMBER;
+use utiles_core::tile_type::{TileKind, TileType};
 
 async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataChange> {
     let filepath = mbt.filepath();
@@ -78,84 +78,107 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
     // register the fn
     mbt.register_utiles_sqlite_functions().await?;
     let format = mbt.metadata_row("format").await?;
+    let current_kind = mbt.metadata_row("kind").await?;
     let query_fmt = mbt
         .conn(
             // whatever clone it!
             move |c| query_distinct_tiletype_fast(c, minmax),
         )
         .await?;
-    match query_fmt.len() {
+    let maybe_ttype = match query_fmt.len() {
         0 => {
             warn!("no format found: {}", filepath);
+            None
         }
         1 => {
-            let mut fmt = query_fmt[0].clone();
-            fmt = if fmt == "pbf.gz" || fmt == "pbf.zst" || fmt == "pbf.zlib" {
-                "pbf".to_string()
-            } else {
-                fmt
-            };
+            let ttile = TileType::parse(query_fmt[0].as_str());
 
-            if let Some(format) = format {
-                if format.value != fmt {
+            if let Some(ttile) = ttile {
+                let queried_format = ttile.format.to_string();
+                let queried_kind = ttile.kind.to_string();
+                if let Some(format) = format {
+                    if format.value != queried_format {
+                        metadata_changes.push(MetadataChangeFromTo {
+                            name: "format".to_string(),
+                            from: Some(format.value.clone()),
+                            to: Some(queried_format.clone()),
+                        });
+                    }
+                } else {
                     metadata_changes.push(MetadataChangeFromTo {
                         name: "format".to_string(),
-                        from: Some(format.value.clone()),
-                        to: Some(fmt.clone()),
+                        from: None,
+                        to: Some(queried_format.clone()),
                     });
                 }
-            } else {
-                metadata_changes.push(MetadataChangeFromTo {
-                    name: "format".to_string(),
-                    from: None,
-                    to: Some(fmt.clone()),
-                });
+
+                if let Some(kind) = current_kind {
+                    if kind.value != queried_kind {
+                        metadata_changes.push(MetadataChangeFromTo {
+                            name: "kind".to_string(),
+                            from: Some(kind.value.clone()),
+                            to: Some(queried_kind.clone()),
+                        });
+                    }
+                } else {
+                    metadata_changes.push(MetadataChangeFromTo {
+                        name: "kind".to_string(),
+                        from: None,
+                        to: Some(queried_kind.clone()),
+                    });
+                }
             }
+            ttile
         }
         _ => {
             warn!("NOT IMPLEMENTED multiple formats found: {:?}", query_fmt);
+            None
         }
-    }
+    };
 
-    let tilesize = mbt.metadata_row("tilesize").await?;
-    let query_tilesize = mbt
-        .conn(
-            // whatever clone it!
-            move |c| query_distinct_tilesize_fast(c, minmax),
-        )
-        .await?;
+    // if it is an image format check tilesize...
+    if let Some(ttile) = maybe_ttype {
+        if ttile.kind == TileKind::Raster {
+            let tilesize = mbt.metadata_row("tilesize").await?;
+            let query_tilesize = mbt
+                .conn(
+                    // whatever clone it!
+                    move |c| query_distinct_tilesize_fast(c, minmax),
+                )
+                .await?;
 
-    match query_tilesize.len() {
-        0 => {
-            debug!("no tilesize found: {}", filepath);
-        }
-        1 => {
-            let ts = query_tilesize[0];
-            let ts_str: String = ts.to_string();
-            if let Some(tilesize) = tilesize {
-                if tilesize.value != ts_str {
-                    metadata_changes.push(MetadataChangeFromTo {
-                        name: "tilesize".to_string(),
-                        from: Some(tilesize.value.clone()),
-                        to: Some(ts_str),
-                    });
+            match query_tilesize.len() {
+                0 => {
+                    debug!("no tilesize found: {}", filepath);
                 }
-            } else {
-                metadata_changes.push(MetadataChangeFromTo {
-                    name: "tilesize".to_string(),
-                    from: None,
-                    to: Some(ts_str),
-                });
+                1 => {
+                    let ts = query_tilesize[0];
+                    let ts_str: String = ts.to_string();
+                    if let Some(tilesize) = tilesize {
+                        if tilesize.value != ts_str {
+                            metadata_changes.push(MetadataChangeFromTo {
+                                name: "tilesize".to_string(),
+                                from: Some(tilesize.value.clone()),
+                                to: Some(ts_str),
+                            });
+                        }
+                    } else {
+                        metadata_changes.push(MetadataChangeFromTo {
+                            name: "tilesize".to_string(),
+                            from: None,
+                            to: Some(ts_str),
+                        });
+                    }
+                }
+                _ => {
+                    warn!(
+                        "NOT IMPLEMENTED multiple tilesize found: {:?}",
+                        query_tilesize
+                    );
+                }
             }
         }
-        _ => {
-            warn!(
-                "NOT IMPLEMENTED multiple tilesize found: {:?}",
-                query_tilesize
-            );
-        }
     }
-
     let metadata_change = if metadata_changes.is_empty() {
         MetadataChange::new_empty()
     } else {
@@ -202,19 +225,20 @@ pub async fn update_mbtiles(mbt: &MbtilesClientAsync) -> UtilesResult<Vec<DbChan
 }
 
 pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
-    // check that filepath exists and is file
-    let filepath = Path::new(&args.common.filepath);
-    assert!(
-        filepath.exists(),
-        "File does not exist: {}",
-        filepath.display()
-    );
-    assert!(
-        filepath.is_file(),
-        "Not a file: {filepath}",
-        filepath = filepath.display()
-    );
+    // let filepath = Path::new(&args.common.filepath);
+    //
+    // assert!(
+    //     filepath.exists(),
+    //     "File does not exist: {}",
+    //     filepath.display()
+    // );
+    // assert!(
+    //     filepath.is_file(),
+    //     "Not a file: {filepath}",
+    //     filepath = filepath.display()
+    // );
 
+    let filepath = Path::new(&args.common.filepath);
     // check that filepath exists and is file
     let mbt = if args.dryrun {
         MbtilesClientAsync::open_readonly(filepath).await?
@@ -222,34 +246,6 @@ pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
         MbtilesClientAsync::open_existing(filepath).await?
     };
     let changes = update_mbtiles(&mbt).await?;
-
-    // if args.dryrun {
-    //     warn!("Dryrun: no changes made");
-    // } else {
-    //     for change in changes {
-    //         match change {
-    //             DbChangeType::PragmaChange(pragma_change) => {
-    //                 mbt.conn(move |conn| conn.execute_batch(&pragma_change.forward))
-    //                     .await?;
-    //             }
-    //             DbChangeType::Metadata(metadata_change) => {
-    //                 mbt.conn(move |conn| {
-    //                     MetadataChange::apply_changes_to_connection(
-    //                         conn,
-    //                         // TODO: fix clone
-    //                         &vec![metadata_change.clone()],
-    //                     )
-    //                 })
-    //                     .await?;
-    //             }
-    //
-    //             _ => {
-    //                 warn!("unimplemented change: {:?}", change);
-    //             }
-    //         }
-    //     }
-    // }
-
     debug!("changes: {:?}", changes);
     let db_changes = DbChangeset::from_vec(changes);
     let jsonstring =
@@ -258,12 +254,6 @@ pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
         warn!("Dryrun: no changes made");
     } else {
         mbt.conn(move |conn| db_changes.apply_to_conn(conn)).await?;
-
-        // let (sql_forward, sql_reverse) = db_changes.sql_forward_reverse();
-        // info!("sql_forward:\n{}", sql_forward);
-        // info!("sql_reverse:\n{}", sql_reverse);
-        // mbt.conn(move |conn| conn.execute_batch(&sql_forward))
-        //     .await?;
     }
     println!("{jsonstring}");
     Ok(())

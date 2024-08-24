@@ -6,6 +6,51 @@
 
 use std::fmt::Display;
 
+/// `TileKind` over arching type of tile data
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub enum TileKind {
+    /// Unknown tile kind
+    Unknown,
+
+    /// Vector tile
+    Vector,
+
+    /// Raster (image) tile
+    Raster,
+
+    /// `JSON` tile
+    Json,
+
+    /// `GeoJSON` tile
+    GeoJson,
+}
+
+impl Display for TileKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Vector => "vector",
+            Self::Raster => "raster",
+            Self::Json => "json",
+            Self::GeoJson => "geojson",
+            Self::Unknown => "unknown",
+        };
+        write!(f, "{s}")
+    }
+}
+
+impl TileKind {
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        Some(match value.to_ascii_lowercase().as_str() {
+            "vector" | "vec" => Self::Vector,
+            "raster" | "image" | "img" => Self::Raster,
+            "json" => Self::Json,
+            "geojson" => Self::GeoJson,
+            _ => None?,
+        })
+    }
+}
+
 /// Tile format
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum TileFormat {
@@ -91,6 +136,19 @@ impl TileFormat {
     }
 
     #[must_use]
+    pub fn kind(&self) -> TileKind {
+        match self {
+            Self::Pbf | Self::Mlt => TileKind::Vector,
+            Self::Gif | Self::Jpg | Self::Png | Self::Webp | Self::Tiff => {
+                TileKind::Raster
+            }
+            Self::Json => TileKind::Json,
+            Self::GeoJson => TileKind::GeoJson,
+            Self::Unknown => TileKind::Unknown,
+        }
+    }
+
+    #[must_use]
     pub fn content_type(&self) -> &'static str {
         match self {
             Self::Png => "image/png",
@@ -172,12 +230,17 @@ impl Display for TileEncoding {
 pub struct TileType {
     pub encoding: TileEncoding,
     pub format: TileFormat,
+    pub kind: TileKind,
 }
 
 impl TileType {
     #[must_use]
     pub fn new(format: TileFormat, encoding: TileEncoding) -> Self {
-        Self { encoding, format }
+        Self {
+            encoding,
+            format,
+            kind: format.kind(),
+        }
     }
 
     #[must_use]
@@ -449,21 +512,6 @@ fn is_mvt_like(buffer: &[u8]) -> bool {
 /// Return type of the tile data from a buffer
 #[must_use]
 pub fn tiletype(buffer: &[u8]) -> TileType {
-    // if buffer.len() >= 8 {
-    //     match buffer {
-    //         v if v.starts_with(b"\x1f\x8b") => return TileType::Pbfgz,
-    //         v if zlib_magic_headers(v) => return TileType::Pbf,
-    //         v if v.starts_with(b"\x89PNG\r\n\x1a\n") => return TileType::Png,
-    //         v if v.starts_with(b"\xff\xd8") => return TileType::Jpg,
-    //         v if is_webp_buf(v) => return TileType::Webp,
-    //         v if v.starts_with(b"GIF87a") || v.starts_with(b"GIF89a") => {
-    //             return TileType::Gif;
-    //         }
-    //         v if v.starts_with(b"{") || v.starts_with(b"[") => return TileType::Json,
-    //         _ => {}
-    //     }
-    // }
-    // TileType::Unknown
     TileType::from_bytes(buffer)
 }
 
