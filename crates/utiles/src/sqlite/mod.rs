@@ -21,7 +21,6 @@ mod db;
 mod dbpath;
 mod errors;
 
-mod deadpool;
 pub mod header;
 mod insert_strategy;
 mod page_size;
