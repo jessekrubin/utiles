@@ -2,10 +2,9 @@ use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
 
-use async_sqlite::{
-    Client, ClientBuilder, Error as AsyncSqliteError, Pool, PoolBuilder,
-};
+use async_sqlite::{Client, ClientBuilder, Pool, PoolBuilder};
 use async_trait::async_trait;
+use futures::TryFutureExt;
 use rusqlite::{Connection, OpenFlags};
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
@@ -28,7 +27,7 @@ use crate::mbt::{
 };
 use crate::sqlite::{
     journal_mode, magic_number, pragma_encoding, AsyncSqliteConn, AsyncSqliteConnMut,
-    RowsAffected,
+    RowsAffected, SqliteError,
 };
 use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
 use crate::utilejson::metadata2tilejson;
@@ -69,45 +68,45 @@ impl Debug for MbtilesClientAsync {
 
 #[async_trait]
 impl AsyncSqliteConn for MbtilesClientAsync {
-    async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.client.conn(func).await
+        self.client.conn(func).await.map_err(SqliteError::from)
     }
 }
 
 #[async_trait]
 impl AsyncSqliteConn for MbtilesPoolAsync {
-    async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.pool.conn(func).await
+        self.pool.conn(func).await.map_err(SqliteError::from)
     }
 }
 
 #[async_trait]
 impl AsyncSqliteConnMut for MbtilesClientAsync {
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.client.conn_mut(func).await
+        self.client.conn_mut(func).await.map_err(SqliteError::from)
     }
 }
 
 #[async_trait]
 impl AsyncSqliteConnMut for MbtilesPoolAsync {
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.pool.conn_mut(func).await
+        self.pool.conn_mut(func).await.map_err(SqliteError::from)
     }
 }
 
@@ -159,7 +158,14 @@ impl MbtilesClientAsync {
     pub async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(path)?;
         debug!("Opening mbtiles file with client: {}", dbpath);
-        let client = ClientBuilder::new().path(&dbpath.fspath).open().await?;
+        let client = ClientBuilder::new()
+            .path(&dbpath.fspath)
+            .open()
+            .await
+            .map_err(|e| {
+                debug!("Error opening mbtiles file: {}", e);
+                e
+            })?;
         MbtilesClientAsync::new(dbpath, client).await
     }
 
@@ -174,7 +180,11 @@ impl MbtilesClientAsync {
                     | OpenFlags::SQLITE_OPEN_URI,
             )
             .open()
-            .await?;
+            .await
+            .map_err(|e| {
+                debug!("Error opening existing mbtiles file: {}", e);
+                e
+            })?;
         MbtilesClientAsync::new(dbpath, client).await
     }
 
@@ -193,6 +203,10 @@ impl MbtilesClientAsync {
             .path(&dbpath.fspath)
             .flags(flags)
             .open()
+            .map_err(|e| {
+                debug!("Error opening readonly mbtiles file: {}", e);
+                e
+            })
             .await?;
         MbtilesClientAsync::new(dbpath, client).await
     }
@@ -366,22 +380,13 @@ where
         if !is_mbtiles_like {
             return Ok(false);
         }
-        // assert tiles is not empty
-        let tiles_is_empty = self
-            .conn(tiles_is_empty)
-            .await
-            .map_err(UtilesError::AsyncSqliteError)?;
-        if tiles_is_empty {
-            Ok(false)
-        } else {
-            let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
-            debug!(
-                target: "is-mbtiles",
-                "has_zoom_row_col_index: {}",
-                has_zoom_row_col_index,
-            );
-            Ok(has_zoom_row_col_index)
-        }
+        let has_zoom_row_col_index = self.conn(has_zoom_row_col_index).await?;
+        debug!(
+            target: "is-mbtiles",
+            "has_zoom_row_col_index: {}",
+            has_zoom_row_col_index,
+        );
+        Ok(has_zoom_row_col_index)
     }
 
     async fn assert_mbtiles(&self) -> UtilesResult<()> {
@@ -419,7 +424,7 @@ where
         let metadata = self
             .conn(mbtiles_metadata)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(metadata)
     }
 
@@ -454,7 +459,7 @@ where
         let row = self
             .conn(move |conn| mbtiles_metadata_row(conn, &name_str))
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(row)
     }
 
@@ -469,7 +474,7 @@ where
                 )
             })
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(rows)
     }
 
@@ -477,7 +482,7 @@ where
         let tiles_is_empty = self
             .conn(tiles_is_empty)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(tiles_is_empty)
     }
 
@@ -518,7 +523,7 @@ where
         let res = self
             .conn(move |conn| has_zxy(conn, z, x, y))
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(res)
     }
 
@@ -526,7 +531,7 @@ where
         let tile = self
             .conn(move |conn| query_zxy(conn, z, x, y))
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(tile)
     }
 
@@ -534,7 +539,7 @@ where
         let t = self
             .conn(minzoom_maxzoom)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(t)
     }
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {

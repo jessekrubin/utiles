@@ -8,10 +8,12 @@
 
 ## Unreleased/Future
 
-
 - New command(s):
   - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
-  - `db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
+  - `sqlite`/`db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
+    - `header`/`head` command that prints the json of a sqlite db header (which has come in handy for weird dbs that use old code to write out sqlite dbs (yes I have seen this))
+    - `vac`/`vacuum` command that vacuums a sqlite db (optionally into a new db)
+    - `analyze` command that analyzes a sqlite db (basically the same as doing `sqlite3 database.sqlite "PRAGMA analyze;"`)
 - `copy` and `touch`
   - Now supports `flat`/`norm` (normalized)/`hash` (flat-with-hash) formats as standardized by the martin/maplibre people. Should also work with non-martin-conforming mbtiles schemas (appears to for me)
 - Dev/hidden commands:

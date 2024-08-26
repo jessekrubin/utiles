@@ -25,18 +25,19 @@ pub use errors::UtilesError;
 pub use errors::UtilesResult;
 pub use tile_strfmt::TileStringFormatter;
 
+#[cfg(feature = "cli")]
 pub mod cli;
 mod config;
-mod copy;
+pub mod copy;
 pub mod core;
 pub mod dev;
 pub(crate) mod errors;
-mod fs_async;
+pub mod fs_async;
 pub mod gj;
 mod globster;
-mod img;
+pub mod img;
 pub mod lager;
-mod lint;
+pub mod lint;
 pub mod mbt;
 mod pmt;
 pub mod server;

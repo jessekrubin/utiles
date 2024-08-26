@@ -88,7 +88,7 @@ pub enum DbChange {
 }
 
 impl DbChangeset {
-    pub(crate) fn apply_to_conn(
+    pub fn apply_to_conn(
         &self,
         conn: &rusqlite::Connection,
     ) -> Result<(), rusqlite::Error> {

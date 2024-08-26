@@ -1,5 +1,4 @@
 //! Core util(e)ity functions for working with web mercator tiles, bounding boxes, et al
-use std::collections::{HashMap, HashSet};
 use std::f64::consts::PI;
 use std::num::FpCategory;
 
@@ -616,6 +615,10 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
 }
 
 /// Return Tile struct from longitude, latitude, and zoom.
+///
+/// # Errors
+///
+/// Returns error if the lnglat can not be converted to web mercator.
 pub fn tile(
     lng: f64,
     lat: f64,
@@ -626,6 +629,10 @@ pub fn tile(
 }
 
 /// Return the bounding tile for a bounding box.
+///
+/// # Errors
+///
+/// Returns error if the bounding tile can not be calculated for points on the bbox
 pub fn bounding_tile(
     bbox: BBox,
     truncate: Option<bool>,
@@ -678,6 +685,10 @@ fn tiles_range_zoom(
 }
 
 /// Return `TileRanges` from a bounding box and zoom(s).
+///
+/// # Errors
+///
+/// Returns error tiles cannot be calculated due to invalid bbox/zbox
 pub fn tile_ranges(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,
@@ -733,6 +744,10 @@ pub fn tile_ranges(
 }
 
 /// Return the number of tiles for a bounding box and zoom(s).
+///
+/// # Errors
+///
+/// Returns error if the number of tiles cannot be calculated due to invalid bbox/zbox
 pub fn tiles_count(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,
@@ -803,65 +818,4 @@ pub fn tiles(
             }
         })
     })
-}
-
-#[allow(dead_code)]
-fn merge(merge_set: &HashSet<Tile>) -> (HashSet<Tile>, bool) {
-    let mut upwards_merge: HashMap<Tile, HashSet<Tile>> = HashMap::new();
-    for tile in merge_set {
-        let tile_parent = tile.parent(None);
-        let children_set = upwards_merge.entry(tile_parent).or_default();
-        children_set.insert(*tile);
-    }
-    let mut current_tileset: Vec<Tile> = Vec::new();
-    let mut changed = false;
-    for (supertile, children) in upwards_merge {
-        if children.len() == 4 {
-            current_tileset.push(supertile);
-            changed = true;
-        } else {
-            current_tileset.extend(children);
-        }
-    }
-    (current_tileset.into_iter().collect(), changed)
-}
-
-/// Simplify a set of tiles replacing children with parents where possible.
-#[allow(dead_code)]
-#[must_use]
-pub fn simplify<S: ::std::hash::BuildHasher + Default>(
-    tiles: HashSet<Tile, S>,
-) -> HashSet<Tile> {
-    // pub fn simplify(tiles: HashSet<Tile>) -> HashSet<Tile> {
-    // Parse tiles from the input sequence
-    let mut tilesv = tiles.into_iter().collect::<Vec<Tile>>();
-
-    tilesv.sort_by_key(|t| t.z);
-    // Check to see if a tile and its parent both already exist.
-    // Ensure that tiles are sorted by zoom so parents are encountered first.
-    // If so, discard the child (it's covered in the parent)
-    // let mut root_set: HashSet<Tile> = HashSet::new();
-    let mut root_set: HashSet<Tile> = HashSet::default();
-    for tile in &tilesv {
-        let mut is_new_tile = true;
-        for i in 0..tile.z {
-            let supertile = tile.parent(Some(i));
-            if root_set.contains(&supertile) {
-                is_new_tile = false;
-                break;
-            }
-        }
-        if is_new_tile {
-            root_set.insert(*tile);
-        }
-    }
-
-    // Repeatedly run merge until no further simplification is possible.
-    let mut is_merging = true;
-    while is_merging {
-        let (new_set, changed) = merge(&root_set);
-        root_set = new_set;
-        is_merging = changed;
-    }
-    root_set
 }

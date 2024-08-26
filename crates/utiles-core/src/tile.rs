@@ -15,6 +15,7 @@ use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
+use crate::traits::TileParent;
 use crate::{pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey, IsOk};
 
 /// Tile X-Y-Z struct
@@ -153,6 +154,12 @@ impl TileLike for Tile {
     }
 }
 
+impl TileParent for Tile {
+    fn parent(&self, zoom: Option<u8>) -> Self {
+        self.parent(zoom)
+    }
+}
+
 impl Tile {
     /// Create a new Tile
     #[must_use]
@@ -237,11 +244,19 @@ impl Tile {
     }
 
     /// Convert quadkey string to Tile
+    ///
+    /// # Errors
+    ///
+    /// Returns error on invalid quadkey (e.g. "1234" -- oh no '4' is invalid)
     pub fn from_quadkey(quadkey: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(quadkey)
     }
 
     /// Convert quadkey string to Tile (alias for `from_quadkey`)
+    ///
+    /// # Errors
+    ///
+    /// Returns error on invalid quadkey (e.g. "1234" -- oh no '4' is invalid)
     pub fn from_qk(qk: &str) -> UtilesCoreResult<Self> {
         quadkey2tile(qk)
     }
@@ -483,6 +498,10 @@ impl Tile {
     }
 
     /// Return a `TileFeature` for the tile
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the feature creation fails (which may be impossible [2024-08-14])
     pub fn feature(&self, opts: &FeatureOptions) -> UtilesCoreResult<TileFeature> {
         let buffer = opts.buffer.unwrap_or(0.0);
         let precision = opts.precision.unwrap_or(-1);

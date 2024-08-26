@@ -92,8 +92,8 @@ fn test_simplify() {
     for t in &targets {
         children.extend(t.children(Some(12)));
     }
-    // children.push(children[0]);
-    let simplified = simplify(children.into_iter().collect::<HashSet<Tile>>());
+    let tset = children.into_iter().collect::<HashSet<Tile>>();
+    let simplified = simplify(&tset);
     for target in targets {
         assert!(simplified.contains(&target));
     }
@@ -106,7 +106,8 @@ fn test_simplify_removal() {
         utile!(649, 1564, 12),
         utile!(650, 1564, 12),
     ];
-    let simplified = simplify(tiles.into_iter().collect::<HashSet<Tile>>());
+    let tset = tiles.into_iter().collect::<HashSet<Tile>>();
+    let simplified = simplify(&tset);
     assert!(!simplified.contains(&utile!(1298, 3129, 13)));
     assert!(simplified.contains(&utile!(650, 1564, 12)));
     assert!(simplified.contains(&utile!(649, 1564, 12)));

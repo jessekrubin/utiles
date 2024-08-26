@@ -31,6 +31,7 @@ pub struct CopyConfig {
 }
 
 impl CopyConfig {
+    #[must_use]
     pub fn src_dbpath_str(&self) -> String {
         self.src.to_string_lossy().to_string()
     }
@@ -71,6 +72,7 @@ impl CopyConfig {
         Ok(())
     }
 
+    #[must_use]
     pub fn njobs(&self) -> u8 {
         if let Some(j) = self.jobs {
             j

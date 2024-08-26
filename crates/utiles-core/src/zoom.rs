@@ -264,6 +264,19 @@ impl From<ZoomRange> for ZoomSet {
     }
 }
 
+/// Parse zoom levels from a string
+///
+/// # Examples
+/// ```
+/// use utiles_core::zoom::parse_zooms;
+/// let zstr = "0,1,2,3,4,5,6,7";
+/// let zvec = parse_zooms(zstr).unwrap();
+/// assert_eq!(zvec, vec![0, 1, 2, 3, 4, 5, 6, 7]);
+/// ```
+///
+/// # Errors
+///
+/// Returns an error if the zoom levels are not between 0 and 30
 pub fn parse_zooms(zstr: &str) -> UtilesCoreResult<Vec<u8>> {
     let mut zvec: Vec<u8> = vec![];
     for z in zstr.split(',') {

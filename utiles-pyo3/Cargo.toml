@@ -7,7 +7,7 @@ include = ["src/**/*", "Cargo.toml", "LICENSE", "README.md"]
 license.workspace = true
 
 [lib]
-name = "libutiles"
+name = "_utiles"
 crate-type = ["cdylib"]
 
 [dependencies]
@@ -17,7 +17,7 @@ serde_json.workspace = true
 size.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
-utiles = { path = "../crates/utiles" }
+utiles = { path = "../crates/utiles", features = ["all"] }
 
 [dev-dependencies]
 pyo3 = { workspace = true, features = ["auto-initialize"] }

@@ -102,7 +102,7 @@ pub trait TileLike {
         pmtiles::xyz2pmid(self.x(), self.y(), self.z())
     }
 
-    /// Return the parent tile
+    /// Return the pmtile id
     #[must_use]
     fn pmid(&self) -> u64 {
         self.pmtileid()

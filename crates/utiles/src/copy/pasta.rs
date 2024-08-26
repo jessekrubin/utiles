@@ -332,7 +332,7 @@ LIMIT 1;
                 })
             })
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         Ok(has_conflict > 0)
     }
 

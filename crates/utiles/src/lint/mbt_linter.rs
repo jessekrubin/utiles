@@ -90,13 +90,13 @@ impl MbtilesLinter {
         let has_unique_index_on_metadata_name = mbt
             .conn(has_unique_index_on_metadata)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
 
         let mut errs = vec![];
         let name_is_pk = mbt
             .conn(metadata_table_name_is_primary_key)
             .await
-            .map_err(UtilesError::AsyncSqliteError)?;
+            .map_err(UtilesError::SqliteError)?;
         if has_unique_index_on_metadata_name || name_is_pk {
             let rows = mbt.metadata_rows().await?;
             let duplicate_rows = metadata2duplicates(rows.clone());

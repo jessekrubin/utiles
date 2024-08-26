@@ -8,7 +8,7 @@ use pyo3::{
 };
 use utiles::BBox;
 
-#[pyclass(name = "Bbox")]
+#[pyclass(name = "Bbox", module = "utiles._utiles")]
 #[derive(Clone)]
 pub struct PyBbox {
     pub bbox: BBox,

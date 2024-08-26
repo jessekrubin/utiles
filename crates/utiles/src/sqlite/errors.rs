@@ -16,8 +16,36 @@ pub enum SqliteError {
     #[error("sqlite err: {0}")]
     AsyncSqliteError(async_sqlite::Error),
 
+    // /// Deadpool interact error
+    // #[error("Deadpool interact error: {0}")]
+    // DeadpoolInteractErrorPanic(String),
+    //
+    // /// Deadpool PoolError
+    // #[error("Deadpool pool error: {0}")]
+    // DeadpoolPoolError(#[from] deadpool::managed::PoolError<rusqlite::Error>),
+    /// File does not exist
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
+
+    /// Error from `std::io`
+    #[error("io error: {0}")]
+    IoError(#[from] std::io::Error),
+
+    /// Invalid sqlite-magic; must be `53 51 4c 69 74 65 20 66 6f 72 6d 61 74 20 33 00`
+    #[error("Invalid sqlite-magic: {0}")]
+    InvalidSqliteMagic(String),
+
+    /// Parse header field
+    #[error("Invalid header field: {0}")]
+    ParseHeaderField(String),
+
+    /// Invalid header field
+    #[error("Invalid header field: {0}")]
+    InvalidHeaderField(String),
+
+    /// Invalid sqlite db
+    #[error("Invalid sqlite db: {0}")]
+    InvalidSqliteDb(String),
 }
 
 pub type SqliteResult<T> = Result<T, SqliteError>;
@@ -30,3 +58,14 @@ impl From<async_sqlite::Error> for SqliteError {
         }
     }
 }
+
+// impl From<deadpool_sync::InteractError> for SqliteError {
+//     fn from(value: deadpool_sync::InteractError) -> Self {
+//         match value {
+//             deadpool_sync::InteractError::Panic(value) => {
+//                 SqliteError::DeadpoolInteractErrorPanic(format!("{value:?}"))
+//             }
+//             _ => SqliteError::DeadpoolInteractErrorPanic("Aborted".to_string()),
+//         }
+//     }
+// }

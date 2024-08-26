@@ -13,7 +13,12 @@ description = "Map tile utilities aka utiles"
 
 [dependencies]
 # Not going to get rid of fast_hilbert
-fast_hilbert.workspace = true
+fast_hilbert = { workspace = true, optional = true }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+
+[features]
+default = ["pmtiles"]
+all = ["pmtiles"]
+pmtiles = ["dep:fast_hilbert"]

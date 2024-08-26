@@ -10,11 +10,12 @@
 #![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::module_name_repetitions)]
-#![allow(clippy::missing_errors_doc)]
 #![allow(clippy::similar_names)]
 
 #[doc(inline)]
 pub use crate::fns::*;
+#[doc(inline)]
+pub use crate::merge::*;
 #[doc(inline)]
 pub use crate::quadkey::*;
 pub use bbox::{geobbox_merge, BBox};
@@ -30,7 +31,7 @@ pub use tile::Tile;
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
 #[doc(inline)]
-pub use traits::{Coord2dLike, IsOk, LngLatLike};
+pub use traits::{Coord2dLike, IsOk, LngLatLike, TileParent};
 pub use zoom::*;
 
 pub mod bbox;
@@ -43,6 +44,9 @@ pub mod gdal;
 pub mod geostats;
 pub mod lnglat;
 pub mod parsing;
+
+mod merge;
+#[cfg(feature = "pmtiles")]
 pub mod pmtiles;
 pub mod point;
 pub mod projection;

@@ -38,8 +38,7 @@ fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
 /// Utiles python module
 #[pymodule]
-#[pyo3(name = "_utiles")]
-fn libutiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _utiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // lib constants
     lib_constants(m)?;
     // mercantile functions

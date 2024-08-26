@@ -3,7 +3,7 @@ use pyo3::{pyclass, pyfunction, pymethods, Bound};
 use utiles::tile_type;
 use utiles::tile_type::TileType;
 
-#[pyclass(name = "TileType")]
+#[pyclass(name = "TileType", module = "utiles._utiles")]
 pub struct PyTileType(TileType);
 
 #[pymethods]

@@ -1,13 +1,12 @@
 use std::io::{self};
 
-use clap::Parser;
 use tracing::debug;
 use tracing_subscriber::fmt::{self};
 use tracing_subscriber::EnvFilter;
 
 use crate::errors::UtilesResult;
 
-#[derive(Parser, Debug, Default)]
+#[derive(Debug, Default)]
 pub struct LagerConfig {
     pub debug: bool,
     pub trace: bool,

@@ -6,7 +6,7 @@ use crate::sqlite::{
     pragma_table_list, vacuum, vacuum_into, DbPath, PragmaIndexListRow,
     PragmaTableListRow, SqliteError, SqliteResult,
 };
-use async_sqlite::{Client, ClientBuilder, Error as AsyncSqliteError};
+use async_sqlite::{Client, ClientBuilder};
 use async_trait::async_trait;
 use rusqlite::{Connection, OpenFlags};
 use std::fmt;
@@ -95,7 +95,7 @@ impl SqliteDbAsyncClient {
 }
 #[async_trait]
 pub trait AsyncSqliteConn: Send + Sync {
-    async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static;
@@ -103,7 +103,7 @@ pub trait AsyncSqliteConn: Send + Sync {
 
 #[async_trait]
 pub trait AsyncSqliteConnMut: Send + Sync {
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static;
@@ -111,23 +111,23 @@ pub trait AsyncSqliteConnMut: Send + Sync {
 
 #[async_trait]
 impl AsyncSqliteConn for SqliteDbAsyncClient {
-    async fn conn<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.client.conn(func).await
+        self.client.conn(func).await.map_err(Into::into)
     }
 }
 
 #[async_trait]
 impl AsyncSqliteConnMut for SqliteDbAsyncClient {
-    async fn conn_mut<F, T>(&self, func: F) -> Result<T, AsyncSqliteError>
+    async fn conn_mut<F, T>(&self, func: F) -> Result<T, SqliteError>
     where
         F: FnOnce(&mut Connection) -> Result<T, rusqlite::Error> + Send + 'static,
         T: Send + 'static,
     {
-        self.client.conn_mut(func).await
+        self.client.conn_mut(func).await.map_err(Into::into)
     }
 }
 
