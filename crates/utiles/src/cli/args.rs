@@ -380,6 +380,9 @@ pub struct InfoArgs {
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub(crate) full: bool,
+
+    #[arg(required = false, long, short, visible_aliases = ["stats"], action = clap::ArgAction::SetTrue)]
+    pub(crate) statistics: bool,
 }
 
 #[derive(Debug, Parser)]

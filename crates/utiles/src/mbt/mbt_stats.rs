@@ -1,5 +1,5 @@
 use rusqlite::Connection;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 use crate::errors::UtilesResult;
@@ -8,7 +8,7 @@ use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::MbtType;
 use crate::sqlite::{pragma_freelist_count, pragma_page_count, pragma_page_size};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MbtilesZoomStats {
     pub zoom: u32,
     pub ntiles: u64,
@@ -22,7 +22,7 @@ pub struct MbtilesZoomStats {
     pub nbytes_avg: Option<f64>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MbtilesStats {
     pub filesize: u64,
     pub mbtype: MbtType,
