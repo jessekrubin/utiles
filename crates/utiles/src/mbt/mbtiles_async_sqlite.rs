@@ -374,7 +374,6 @@ where
         }
         Ok(true)
     }
-
     async fn is_mbtiles(&self) -> UtilesResult<bool> {
         let is_mbtiles_like = self.is_mbtiles_like().await?;
         if !is_mbtiles_like {

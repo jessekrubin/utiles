@@ -59,20 +59,27 @@ async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
     let mut datasets = BTreeMap::new();
     // let mut tilejsons = HashMap::new();
     for fspath in &filepaths {
-        let pool = MbtilesClientAsync::open_readonly(fspath).await?;
-        debug!("sanity check: {:?}", pool.filepath());
-        let is_valid = pool.is_mbtiles().await;
-        if is_valid.is_ok() {
-            let tilejson = pool.tilejson_ext().await?;
-            let filename = pool.filename().to_string().replace(".mbtiles", "");
-            let mbt_ds = MbtilesDataset {
-                mbtiles: pool,
-                tilejson,
-            };
-            datasets.insert(filename, mbt_ds);
-        } else {
-            warn!("Skipping non-mbtiles file: {:?}", fspath);
-            continue;
+        let mbt = MbtilesClientAsync::open_readonly(fspath).await?;
+        debug!("sanity check: {:?}", mbt.filepath());
+        let is_valid = mbt.is_mbtiles().await;
+        match &is_valid {
+            Ok(is_mbt) => {
+                if !is_mbt {
+                    warn!("{}: is not valid mbtiles", mbt.filepath());
+                    continue;
+                }
+                info!("{}: is valid mbtiles", mbt.filepath());
+                let tilejson = mbt.tilejson_ext().await?;
+                let filename = mbt.filename().to_string().replace(".mbtiles", "");
+                let mbt_ds = MbtilesDataset {
+                    mbtiles: mbt,
+                    tilejson,
+                };
+                datasets.insert(filename, mbt_ds);
+            }
+            Err(e) => {
+                warn!("{}: is not valid mbtiles: {:?}", mbt.filepath(), e);
+            }
         }
     }
 
