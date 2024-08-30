@@ -13,7 +13,7 @@ pub enum InfoType {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "kebab-case")]
 pub enum Info {
     Mbtiles(MbtilesStats),
     Sqlite(SqliteHeader),
