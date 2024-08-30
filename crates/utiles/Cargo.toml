@@ -29,8 +29,6 @@ async-trait = "0.1.80"
 axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
 chrono = "0.4.38"
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
-deadpool = { version = "0.12.1", features = ["managed"], default-features = false }
-deadpool-sync = { version = "0.1.4", features = ["tracing"] }
 fnv = "1.0.7"
 futures = "0.3.29"
 geo-types.workspace = true
@@ -66,6 +64,9 @@ tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"
 utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
 walkdir = "2.4.0"
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
+
+# deadpool = { version = "0.12.1", features = ["managed"], default-features = false }
+# deadpool-sync = { version = "0.1.4", features = ["tracing"] }
 
 [dev-dependencies]
 criterion = "0.5.1"
