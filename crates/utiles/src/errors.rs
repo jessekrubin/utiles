@@ -21,6 +21,9 @@ pub enum UtilesError {
     #[error("Unsupported: {0}")]
     Unsupported(String),
 
+    #[error("Unknown filetype: {0}")]
+    UnknownFiletype(String),
+
     #[error("invalid fspath: {0}")]
     InvalidFspath(String),
 

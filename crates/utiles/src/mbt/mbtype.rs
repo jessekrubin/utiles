@@ -1,7 +1,16 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Debug, Default, Copy, Serialize, PartialEq, Clone, strum_macros::Display)]
+#[derive(
+    Debug,
+    Default,
+    Copy,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Clone,
+    strum_macros::Display,
+)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 #[cfg_attr(feature = "cli", derive(clap::ValueEnum))]

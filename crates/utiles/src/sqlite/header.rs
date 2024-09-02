@@ -41,7 +41,7 @@ use crate::sqlite::{SqliteError, SqliteResult};
 /// | 72     | 20   | Reserved for expansion. Must be zero.                     |
 /// | 92     | 4    | The version-valid-for number.                             |
 /// | 96     | 4    | SQLITE_VERSION_NUMBER                                     |
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct SqliteHeader {
     #[serde(serialize_with = "serialize_magic_string")]
     magic_string: [u8; 16],

@@ -27,6 +27,7 @@ def test_touch(tmp_path: Path, test_data_root: Path) -> None:
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
+        "type": "mbtiles",
         "filesize": 20480,
         "mbtype": "flat",
         "ntiles": 0,
@@ -73,6 +74,7 @@ def test_touch_page_size_512(tmp_path: Path) -> None:
     parsed_data = json.loads(result.stdout)
     assert parsed_data["ntiles"] == 0
     expected_info_json = {
+        "type": "mbtiles",
         "filesize": 3072,
         "mbtype": "flat",
         "ntiles": 0,
@@ -102,6 +104,7 @@ def test_mbtiles_info(test_data_root: Path) -> None:
     assert parsed_data["ntiles"] == 341
 
     expected_info_json = {
+        "type": "mbtiles",
         "filesize": 1572864,
         "mbtype": "flat",
         "ntiles": 341,
