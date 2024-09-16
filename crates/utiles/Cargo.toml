@@ -43,7 +43,7 @@ json-patch = "2.0.0"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
 num_cpus = "1.16.0"
-owo-colors = { version = "4.0.0", features = ["supports-color"] }
+owo-colors = { version = "4.1.0", features = ["supports-color"] }
 pmtiles = { version = "0.10.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
 serde.workspace = true
