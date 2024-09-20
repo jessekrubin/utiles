@@ -27,7 +27,7 @@ pub fn children_main(args: ParentChildrenArgs) -> UtilesResult<()> {
         let tile = Tile::from_json(&lstr)?;
         let tile_zbox = tile.children_zbox(Option::from(args.depth));
 
-        let children = tile_zbox.into_iter().map(|t| Tile::from(t));
+        let children = tile_zbox.into_iter().map(Tile::from);
         for child in children {
             println!("{}{}", rs, child.json_arr());
         }
