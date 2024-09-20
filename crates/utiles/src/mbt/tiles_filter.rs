@@ -2,7 +2,7 @@ use utiles_core::{tile_ranges, BBox, ZoomOrZooms, ZoomSet};
 
 use crate::errors::UtilesResult;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TilesFilter {
     pub bboxes: Option<Vec<BBox>>,
     pub zooms: Option<Vec<u8>>,

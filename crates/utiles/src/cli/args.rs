@@ -418,6 +418,22 @@ pub struct ZxyifyArgs {
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
     pub(crate) rm: bool,
 }
+#[derive(Debug, Parser)]
+#[command(
+    name = "enumerate",
+    about = "enumerate db tiles like `tippecanoe-enumerate`"
+)]
+pub struct EnumerateArgs {
+    #[arg(required = true)]
+    pub(crate) fspaths: Vec<String>,
+
+    #[command(flatten)]
+    pub filter_args: TilesFilterArgs,
+
+    /// tippecanoe-enumerate like output '{relpath} {x} {y} {z}'
+    #[arg(required = false, long, short = 't', action = clap::ArgAction::SetTrue)]
+    pub(crate) tippecanoe: bool,
+}
 
 #[derive(Debug, Parser)]
 /// Optimize tiles-db
@@ -470,6 +486,18 @@ pub struct WebpifyArgs {
     pub(crate) quiet: bool,
 }
 
+#[derive(Debug, Parser)]
+pub struct CommandsArgs {
+    #[arg(required = false, short, long, action = clap::ArgAction::SetTrue)]
+    pub full: bool,
+
+    #[arg(required = false, short, long, action = clap::ArgAction::SetTrue)]
+    pub(crate) table: bool,
+    // /// compact/minified json (default: false)
+    // #[arg(required = false, short, long, action = clap::ArgAction::SetTrue)]
+    // pub min: bool,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     // Alias `aboot` for possible Canadian users as they will not understand
@@ -478,6 +506,10 @@ pub enum Commands {
     /// Echo info about utiles
     #[command(name = "about", visible_alias = "aboot")]
     About,
+
+    /// list all commands
+    #[command(name = "commands", visible_alias = "cmds")]
+    Commands(CommandsArgs),
 
     #[command(subcommand, visible_alias = "db")]
     Sqlite(SqliteCommands),
@@ -513,6 +545,10 @@ pub enum Commands {
     /// Update mbtiles db
     #[command(name = "update", visible_aliases = ["up"])]
     Update(UpdateArgs),
+
+    /// Enumerate tiles db
+    #[command(name = "enumerate", visible_aliases = ["enum", "en"])]
+    Enumerate(EnumerateArgs),
 
     /// rm-rf dirpath
     #[command(name = "rimraf", visible_alias = "rmrf")]
@@ -743,6 +779,17 @@ pub enum Commands {
     /// Development/Playground command (hidden)
     #[command(name = "dev", hide = true)]
     Dev(DevArgs),
+
+    // ========================================================================
+    // UNIMPLEMENTED
+    // ========================================================================
+    /// UNIMPLEMENTED
+    #[command(name = "addo", hide = true)]
+    Addo,
+
+    /// UNIMPLEMENTED
+    #[command(name = "translate", hide = true)]
+    Translate,
 }
 
 #[derive(Debug, Parser, Clone)]
