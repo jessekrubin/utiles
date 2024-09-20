@@ -1,10 +1,11 @@
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
-    about_main, agg_hash_main, bounding_tile_main, children_main, contains_main,
-    copy_main, dev_main, fmtstr_main, info_main, lint_main, metadata_main,
-    metadata_set_main, neighbors_main, optimize_main, parent_main, pmtileid_main,
-    quadkey_main, rimraf_main, serve_main, shapes_main, tilejson_main, tiles_main,
-    touch_main, update_main, vacuum_main, webpify_main, zxyify_main,
+    about_main, addo_main, agg_hash_main, bounding_tile_main, children_main,
+    commands_main, contains_main, copy_main, dev_main, enumerate_main, fmtstr_main,
+    info_main, lint_main, metadata_main, metadata_set_main, neighbors_main,
+    optimize_main, parent_main, pmtileid_main, quadkey_main, rimraf_main, serve_main,
+    shapes_main, tilejson_main, tiles_main, touch_main, translate_main, update_main,
+    vacuum_main, webpify_main, zxyify_main,
 };
 use crate::errors::UtilesResult;
 use crate::lager::{init_tracing, LagerConfig};
@@ -103,6 +104,10 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
 
     let res: UtilesResult<()> = match args.command {
         Commands::About => about_main(),
+        Commands::Commands(args) => {
+            let c = Cli::command();
+            commands_main(&c, &args)
+        }
         Commands::Sqlite(dbcmds) => dbcmds.run().await,
         Commands::Lint(args) => lint_main(&args).await,
         Commands::Touch(args) => touch_main(&args).await,
@@ -119,6 +124,8 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
         Commands::Contains { filepath, lnglat } => {
             contains_main(&filepath, lnglat).await
         }
+        Commands::Enumerate(args) => enumerate_main(&args).await,
+
         Commands::Zxyify(args) => zxyify_main(args).await,
         // mercantile cli like
         Commands::Fmt(args) => fmtstr_main(args),
@@ -134,6 +141,9 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
         Commands::Webpify(args) => webpify_main(args).await,
         // server WIP
         Commands::Serve(args) => serve_main(args).await,
+        // unimplemented
+        Commands::Addo => addo_main(None).await,
+        Commands::Translate => translate_main(None).await,
     };
 
     match res {

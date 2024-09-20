@@ -10,6 +10,8 @@
 
 - New command(s):
   - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
+  - `commands` list all available commands (including hidden/dev/unimplemented commands)
+  - `enumerate` list xyz tiles in db(s) similar to `tippecanoe-enumerate`; for tippecanoe compatibility use `--tippecanoe`/`-t`
   - `sqlite`/`db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
     - `header`/`head` command that prints the json of a sqlite db header (which has come in handy for weird dbs that use old code to write out sqlite dbs (yes I have seen this))
     - `vac`/`vacuum` command that vacuums a sqlite db (optionally into a new db)
