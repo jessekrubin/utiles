@@ -7,7 +7,6 @@ use tokio::task::JoinHandle;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt;
 use tracing::{debug, error};
-use utiles_core::TileLike;
 
 async fn enumerate_db(
     fspath: &str,
@@ -71,7 +70,7 @@ pub async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
         });
     let tfilter = args.filter_args.tiles_filter_maybe();
     let fspaths = args.fspaths.clone();
-    let tippecanoe = args.tippecanoe.clone();
+    let tippecanoe = args.tippecanoe;
     let enum_task: JoinHandle<UtilesResult<()>> = tokio::task::spawn(async move {
         let tf = tfilter.clone();
         let nfiles = fspaths.len();
@@ -80,13 +79,13 @@ pub async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
             let formatter = if tippecanoe {
                 // tippecanoe style is `{fspath} {x} {y} {z}`
                 let xyz_fmt_str = "{x} {y} {z}";
-                let fmt_str = format!("{} {}", fspath, xyz_fmt_str);
+                let fmt_str = format!("{fspath} {xyz_fmt_str}");
                 TileStringFormatter::new(&fmt_str)
             } else if nfiles == 1 {
                 TileStringFormatter::default()
             } else {
                 let xyz_fmt_str = "{json_arr}";
-                let fmt_str = format!("{} {}", fspath, xyz_fmt_str);
+                let fmt_str = format!("{fspath} {xyz_fmt_str}");
                 TileStringFormatter::new(&fmt_str)
             };
             enumerate_db(&fspath, formatter, &tf, tx.clone()).await?;

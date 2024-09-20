@@ -6,10 +6,34 @@ struct CommandInfo {
     name: String,
     #[serde(skip)]
     parent: Option<String>,
+    path: String,
     about: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     aliases: Option<Vec<String>>,
     hidden: bool,
+}
+
+impl CommandInfo {
+    fn new(
+        name: String,
+        parent: Option<String>,
+        about: Option<String>,
+        aliases: Option<Vec<String>>,
+        hidden: bool,
+    ) -> Self {
+        let path = match &parent {
+            Some(path) => format!("{}::{}", path, name), // name is a String
+            None => name.clone(),
+        };
+        Self {
+            name,
+            parent,
+            path,
+            about,
+            aliases,
+            hidden,
+        }
+    }
 }
 
 impl CommandInfo {
@@ -33,34 +57,28 @@ fn cmd_info_recursive<'a>(
     let desc = cmd.get_about();
     let aliases: Vec<String> =
         cmd.get_visible_aliases().map(|s| s.to_string()).collect();
-    let name = cmd.get_name().to_string();
-    // match parrent {
-    // Some(path) => format!("{}::{}", path, cmd.get_name()), // name is a String
-    // None => cmd.get_name().to_string(),
-    // };
-    let cur_cmd_info = CommandInfo {
-        name: name.clone(),
-        parent: parrent.map(|s| s.to_string()),
-        about: desc.map(|s| s.to_string()),
-        aliases: if aliases.is_empty() {
+    let cur_cmd_info = CommandInfo::new(
+        cmd.get_name().to_string(),
+        parrent.map(|s| s.to_string()),
+        desc.map(|s| s.to_string()),
+        if aliases.is_empty() {
             None
         } else {
             Some(aliases)
         },
-        hidden: cmd.is_hide_set(),
-    };
-    cmd_info.push(cur_cmd_info);
+        cmd.is_hide_set(),
+    );
     for sub in cmd.get_subcommands() {
-        cmd_info_recursive(sub, Some(&name), cmd_info);
+        cmd_info_recursive(sub, Some(&cur_cmd_info.name), cmd_info);
     }
+    cmd_info.push(cur_cmd_info);
 }
 fn list_commands(cmd: &clap::Command) -> Vec<CommandInfo> {
     let mut cmd_infos = Vec::new();
     for sub in cmd.get_subcommands() {
-        // cmd_info.extend(
         cmd_info_recursive(sub, None, &mut cmd_infos);
     }
-    cmd_infos.sort_by(|a, b| a.name.cmp(&b.name));
+    cmd_infos.sort_by(|a, b| a.path.to_lowercase().cmp(&b.path.to_lowercase()));
     cmd_infos
 }
 
