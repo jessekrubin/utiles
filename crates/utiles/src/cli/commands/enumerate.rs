@@ -20,9 +20,9 @@ async fn enumerate_db(
     let mbt = crate::mbt::MbtilesClientAsync::open_existing(fspath).await?;
     let query: String = match tfilter {
         Some(tfilter) => {
-            let where_clause = tfilter.where_clause(Some("tiles"))?;
+            let where_clause = tfilter.where_clause(Some("tiles."))?;
             format!(
-                "SELECT zoom_level, tile_column, tile_row FROM tiles WHERE {}",
+                "SELECT zoom_level, tile_column, tile_row FROM tiles {}",
                 where_clause
             )
         }
