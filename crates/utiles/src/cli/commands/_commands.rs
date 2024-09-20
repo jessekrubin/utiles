@@ -22,7 +22,7 @@ impl CommandInfo {
         hidden: bool,
     ) -> Self {
         let path = match &parent {
-            Some(path) => format!("{}::{}", path, name), // name is a String
+            Some(path) => format!("{path}::{name}"), // name is a String
             None => name.clone(),
         };
         Self {
