@@ -21,12 +21,14 @@ pub fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
 
 pub fn children_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
+    let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
     for line in lines {
         let lstr = line?.trim_matches(|c| c == '"' || c == '\'').to_string();
         let tile = Tile::from_json(&lstr)?;
-        let children = tile.children(Option::from(tile.z + args.depth));
+        let tile_zbox = tile.children_zbox(Option::from(args.depth));
+
+        let children = tile_zbox.into_iter().map(|t| Tile::from(t));
         for child in children {
-            let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
             println!("{}{}", rs, child.json_arr());
         }
     }

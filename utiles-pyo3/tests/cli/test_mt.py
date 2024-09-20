@@ -7,6 +7,7 @@ from subprocess import CompletedProcess, run
 
 import pytest
 
+import utiles as ut
 from utiles.dev.testing import run_cli as _run_cli
 
 
@@ -280,11 +281,16 @@ class TestParent:
 class TestChildren:
     def test_cli_children(self) -> None:
         result = _run_cli(["children"], "[243, 166, 9]")
+
         assert result.returncode == 0
-        assert (
-            result.stdout
-            == "[486, 332, 10]\n[487, 332, 10]\n[487, 333, 10]\n[486, 333, 10]\n"
-        )
+        json_tiles = result.parse_tiles
+        expected_tiles = [
+            (486, 332, 10),
+            (486, 333, 10),
+            (487, 332, 10),
+            (487, 333, 10),
+        ]
+        assert set(json_tiles) == set((ut.xyz(*el) for el in expected_tiles))
 
 
 # ===================

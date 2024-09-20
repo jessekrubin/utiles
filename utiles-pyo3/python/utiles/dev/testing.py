@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import utiles
+
 try:
     from orjson import loads as json_loads
 except ImportError:
@@ -68,6 +70,21 @@ class CliResult:
     def parse_json(self) -> Any:
         """Parse json"""
         return json_loads(self.stdout)
+
+    @property
+    def parse_jsonl(self) -> list[Any]:
+        """Parse json"""
+        return [json_loads(line) for line in self.stdout.splitlines()]
+
+    @property
+    def parse_tiles(self) -> list[utiles.Tile]:
+        """Parse tile lines"""
+        return [
+            utiles.xyz(arr[0], arr[1], arr[2])
+            for arr in (
+                json_loads(line) for line in self.stdout.splitlines(keepends=False)
+            )
+        ]
 
     def fmt(self) -> str:
         return "\n".join(

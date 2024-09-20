@@ -60,6 +60,12 @@ impl TileZBox {
 
     /// Return the zoom level
     #[must_use]
+    pub fn z(&self) -> u8 {
+        self.zoom
+    }
+
+    /// Return the zoom level
+    #[must_use]
     pub fn zoom(&self) -> u8 {
         self.zoom
     }
@@ -122,6 +128,37 @@ impl TileZBox {
     #[must_use]
     pub fn mbtiles_sql_where(&self) -> String {
         self.mbtiles_sql_where_prefix(None)
+    }
+
+    /// Create zbox from tile
+    #[must_use]
+    pub fn from_tile<T: TileLike + ?Sized>(tile: &T) -> Self {
+        Self {
+            zoom: tile.z(),
+            min: Point2d::new(tile.x(), tile.y()),
+            max: Point2d::new(tile.x(), tile.y()),
+        }
+    }
+
+    /// Return new zbox one zoom level higher/down z2 -> z3
+    #[must_use]
+    pub fn zoom_in(&self) -> Self {
+        Self {
+            zoom: self.zoom + 1,
+            min: Point2d::new(self.min.x * 2, self.min.y * 2),
+            max: Point2d::new(self.max.x * 2 + 1, self.max.y * 2 + 1),
+        }
+    }
+
+    /// Return new zbox one zoom level lower/up z3 -> z2
+    #[must_use]
+    pub fn zoom_depth(&self, depth: u8) -> Self {
+        let target_zoom = self.zoom + depth;
+        let mut zbox = *self;
+        while zbox.zoom < target_zoom {
+            zbox = zbox.zoom_in();
+        }
+        zbox
     }
 }
 

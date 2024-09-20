@@ -366,6 +366,29 @@ pub fn children(x: u32, y: u32, z: u8, zoom: Option<u8>) -> Vec<Tile> {
     tiles
 }
 
+#[must_use]
+pub fn children_iter(
+    x: u32,
+    y: u32,
+    z: u8,
+    zoom: Option<u8>,
+) -> impl Iterator<Item = Tile> {
+    let zoom = zoom.unwrap_or(z + 1);
+    let tile = utile!(x, y, z);
+    let mut tiles = vec![tile];
+    while tiles[0].z < zoom {
+        let (xtile, ytile, ztile) = (tiles[0].x, tiles[0].y, tiles[0].z);
+        tiles.append(&mut vec![
+            utile!(xtile * 2, ytile * 2, ztile + 1), // top-left
+            utile!(xtile * 2 + 1, ytile * 2, ztile + 1), // top-right
+            utile!(xtile * 2 + 1, ytile * 2 + 1, ztile + 1), // bottom-right
+            utile!(xtile * 2, ytile * 2 + 1, ztile + 1), // bottom-left
+        ]);
+        tiles.remove(0);
+    }
+    tiles.into_iter()
+}
+
 /// Return the siblings of a tile given x, y, z
 ///
 /// Siblings are tiles that share the same parent, NOT neighbors.
