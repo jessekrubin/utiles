@@ -1,9 +1,6 @@
-use crate::cli::args::{Cli, CommandsArgs};
-use crate::cli::commands::unimplemented_cmd_main;
+use crate::cli::args::CommandsArgs;
 use crate::UtilesResult;
-use clap::Parser;
 use serde::Serialize;
-use tracing::debug;
 #[derive(Debug, Serialize)]
 struct CommandInfo {
     name: String,
@@ -17,28 +14,33 @@ struct CommandInfo {
 
 impl CommandInfo {
     pub fn fmt_name_and_aliases(&self) -> String {
+        let parent_and_name = match &self.parent {
+            Some(path) => format!("{}::{}", path, self.name), // name is a String
+            None => self.name.clone(),
+        };
         if let Some(aliases) = &self.aliases {
-            format!("{} [{}]", self.name, aliases.join(", "))
+            format!("{} [{}]", parent_and_name, aliases.join(", "))
         } else {
-            self.name.clone()
+            parent_and_name
         }
     }
 }
 fn cmd_info_recursive<'a>(
     cmd: &'a clap::Command,
-    path: Option<&'a str>,
+    parrent: Option<&'a str>,
     cmd_info: &mut Vec<CommandInfo>,
 ) {
     let desc = cmd.get_about();
     let aliases: Vec<String> =
         cmd.get_visible_aliases().map(|s| s.to_string()).collect();
-    let name = match path {
-        Some(path) => format!("{}::{}", path, cmd.get_name()), // name is a String
-        None => cmd.get_name().to_string(),
-    };
+    let name = cmd.get_name().to_string();
+    // match parrent {
+    // Some(path) => format!("{}::{}", path, cmd.get_name()), // name is a String
+    // None => cmd.get_name().to_string(),
+    // };
     let cur_cmd_info = CommandInfo {
         name: name.clone(),
-        parent: path.map(|s| s.to_string()),
+        parent: parrent.map(|s| s.to_string()),
         about: desc.map(|s| s.to_string()),
         aliases: if aliases.is_empty() {
             None
@@ -63,19 +65,19 @@ fn list_commands(cmd: &clap::Command) -> Vec<CommandInfo> {
 }
 
 pub fn commands_main(cli: &clap::Command, args: &CommandsArgs) -> UtilesResult<()> {
-    let cmds_arr = list_commands(&cli);
+    let cmds_arr = list_commands(cli);
     let out_str = if args.table {
         cmds_arr
             .iter()
             .map(|cmd| {
                 let name_aliases = cmd.fmt_name_and_aliases();
-                format!("{}", name_aliases)
+                name_aliases.to_string()
             })
             .collect::<Vec<String>>()
             .join("\n")
     } else {
         serde_json::to_string_pretty(&cmds_arr).expect("json serialization error")
     };
-    println!("{}", out_str);
+    println!("{out_str}");
     Ok(())
 }

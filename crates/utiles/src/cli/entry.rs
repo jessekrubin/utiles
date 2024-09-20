@@ -11,9 +11,8 @@ use crate::errors::UtilesResult;
 use crate::lager::{init_tracing, LagerConfig};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
-use clap::{Command, CommandFactory, FromArgMatches};
-use serde::Serialize;
-use tracing::{debug, error, info};
+use clap::{CommandFactory, FromArgMatches};
+use tracing::{debug, error};
 use utiles_core::VERSION;
 
 pub struct CliOpts {
@@ -63,78 +62,6 @@ pub async fn cli_main(cliops: Option<CliOpts>) -> UtilesResult<u8> {
         }
     }
 }
-
-#[derive(Debug, Serialize)]
-struct CommandInfo {
-    name: String,
-    about: Option<String>,
-    aliases: Option<Vec<String>>,
-    hidden: bool,
-}
-fn cmd_info_recursive<'a>(
-    cmd: &'a clap::Command,
-    path: Option<&'a str>,
-    cmd_info: &mut Vec<CommandInfo>,
-) {
-    let desc = cmd.get_about();
-    let aliases: Vec<String> =
-        cmd.get_visible_aliases().map(|s| s.to_string()).collect();
-
-    // Construct the full name using a reference, no need to convert to String here
-    let name = match path {
-        Some(path) => format!("{}.{}", path, cmd.get_name()), // name is a String
-        None => cmd.get_name().to_string(),
-    };
-
-    let cur_cmd_info = CommandInfo {
-        name: name.clone(), // Since this will be moved later, we clone it here
-        about: desc.map(|s| s.to_string()),
-        aliases: if aliases.is_empty() {
-            None
-        } else {
-            Some(aliases)
-        },
-        hidden: cmd.is_hide_set(),
-    };
-    cmd_info.push(cur_cmd_info);
-
-    // let mut cmd_info = vec![
-    // ];
-
-    // Pass a reference to `name` for subcommands
-    for sub in cmd.get_subcommands() {
-        // cmd_info.extend(
-        cmd_info_recursive(sub, Some(&name), cmd_info);
-    }
-    //
-    // cmd_info
-}
-// fn cmd_info_recursive(
-//     cmd: &clap::Command, path: Option<&str>,
-// ) -> Vec<CommandInfo> {
-//     let desc = cmd.get_about();
-//     let aliases: Vec<String> = cmd.get_visible_aliases().map(|s| s.to_string()).collect();
-//     let name = if let Some(path) = path {
-//         format!("{}.{}", path, cmd.get_name())
-//     } else {
-//         cmd.get_name().to_string()
-//     };
-//     let mut cmd_info = vec![CommandInfo {
-//         name,
-//         about: desc.map(|s| s.to_string()),
-//         aliases: if aliases.is_empty() { None } else { Some(aliases) },
-//         hidden: cmd.is_hide_set(),
-//
-//     }];
-//
-//
-//     for sub in cmd.get_subcommands() {
-//         cmd_info.extend(cmd_info_recursive(sub,
-//             Some(&name)
-//         ));
-//     }
-//     cmd_info
-// }
 
 #[allow(clippy::unused_async)]
 pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {

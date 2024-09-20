@@ -547,7 +547,7 @@ pub enum Commands {
     Update(UpdateArgs),
 
     /// Enumerate tiles db
-    #[command(name = "enumerate", visible_aliases = ["enum", "en"])]
+    #[command(name = "enumerate", visible_aliases = ["enum"])]
     Enumerate(EnumerateArgs),
 
     /// rm-rf dirpath
