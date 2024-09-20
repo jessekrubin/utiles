@@ -259,7 +259,8 @@ impl TileStringFormatter {
                         parts.push(FmtPart::Dynamic(|tile| tile.quadkey()));
                     }
                     FormatTokens::PmtileId => {
-                        parts.push(FmtPart::Dynamic(|tile| tile.pmtileid().to_string()));
+                        parts
+                            .push(FmtPart::Dynamic(|tile| tile.pmtileid().to_string()));
                     }
                     FormatTokens::JsonArr => {
                         parts.push(FmtPart::Dynamic(|tile| tile.json_arr()));

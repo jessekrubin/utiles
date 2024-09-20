@@ -66,6 +66,9 @@ pub async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
                     }
                 }
             }
+
+            // flush remaining
+            buf.flush()?;
             Ok(())
         });
     let tfilter = args.filter_args.tiles_filter_maybe();
