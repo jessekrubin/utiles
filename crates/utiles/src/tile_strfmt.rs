@@ -185,7 +185,7 @@ impl TileStringFormat {
 
 pub struct TileStringFormatter {
     tile_fmt: TileStringFormat,
-    parts: Vec<Part>,
+    parts: Vec<FmtPart>,
 }
 
 impl Hash for TileStringFormatter {
@@ -219,7 +219,7 @@ impl PartialEq<Self> for TileStringFormatter {
     }
 }
 
-enum Part {
+enum FmtPart {
     Static(&'static str),
     Dynamic(fn(&dyn TileLike) -> String),
 }
@@ -232,62 +232,62 @@ impl TileStringFormatter {
         Self { tile_fmt, parts }
     }
 
-    fn parse_parts(tile_fmt: &TileStringFormat) -> Vec<Part> {
+    fn parse_parts(tile_fmt: &TileStringFormat) -> Vec<FmtPart> {
         let mut parts = Vec::new();
         for token in &tile_fmt.tokens {
             match token {
                 FormatParts::Str(s) => {
-                    parts.push(Part::Static(Box::leak(s.clone().into_boxed_str())));
+                    parts.push(FmtPart::Static(Box::leak(s.clone().into_boxed_str())));
                 }
                 FormatParts::Token(t) => match t {
                     FormatTokens::X => {
-                        parts.push(Part::Dynamic(|tile| tile.x().to_string()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.x().to_string()));
                     }
                     FormatTokens::Y => {
-                        parts.push(Part::Dynamic(|tile| tile.y().to_string()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.y().to_string()));
                     }
                     FormatTokens::Yup => {
-                        parts.push(Part::Dynamic(|tile| (tile.yup()).to_string()));
+                        parts.push(FmtPart::Dynamic(|tile| (tile.yup()).to_string()));
                     }
                     FormatTokens::Z => {
-                        parts.push(Part::Dynamic(|tile| tile.z().to_string()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.z().to_string()));
                     }
                     FormatTokens::ZxyFslash => {
-                        parts.push(Part::Dynamic(|tile| tile.zxy_str_fslash()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.zxy_str_fslash()));
                     }
                     FormatTokens::Quadkey => {
-                        parts.push(Part::Dynamic(|tile| tile.quadkey()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.quadkey()));
                     }
                     FormatTokens::PmtileId => {
-                        parts.push(Part::Dynamic(|tile| tile.pmtileid().to_string()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.pmtileid().to_string()));
                     }
                     FormatTokens::JsonArr => {
-                        parts.push(Part::Dynamic(|tile| tile.json_arr()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.json_arr()));
                     }
                     FormatTokens::JsonObj => {
-                        parts.push(Part::Dynamic(|tile| tile.json_obj()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.json_obj()));
                     }
                     FormatTokens::GeoBBox => {
-                        parts.push(Part::Dynamic(|tile| {
+                        parts.push(FmtPart::Dynamic(|tile| {
                             let b: BBox = tile.bbox().into();
                             b.json_arr()
                         }));
                     }
                     FormatTokens::Projwin => {
-                        parts.push(Part::Dynamic(|tile| {
+                        parts.push(FmtPart::Dynamic(|tile| {
                             let b: BBox = tile.bbox().into();
                             b.projwin_str()
                         }));
                     }
 
                     FormatTokens::ProjwinWeb => {
-                        parts.push(Part::Dynamic(|tile| {
+                        parts.push(FmtPart::Dynamic(|tile| {
                             let b: WebBBox = tile.webbbox();
                             b.projwin_str()
                         }));
                     }
                     FormatTokens::BBoxWeb => {
-                        parts.push(Part::Dynamic(|tile| {
+                        parts.push(FmtPart::Dynamic(|tile| {
                             let b: WebBBox = tile.webbbox();
                             b.json_arr()
                         }));
@@ -312,8 +312,8 @@ impl TileStringFormatter {
         let mut out = String::with_capacity(self.tile_fmt.fmtstr.len() * 2); // Assuming average length doubling due to replacements
         for part in &self.parts {
             match part {
-                Part::Static(s) => out.push_str(s),
-                Part::Dynamic(f) => out.push_str(&f(tile)),
+                FmtPart::Static(s) => out.push_str(s),
+                FmtPart::Dynamic(f) => out.push_str(&f(tile)),
             }
         }
         out
