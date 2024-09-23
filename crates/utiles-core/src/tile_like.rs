@@ -1,5 +1,5 @@
 use crate::bbox::WebBBox;
-use crate::{flipy, pmtiles, xyz2rmid, BBox, LngLat, Tile};
+use crate::{flipy, pmtiles, xyz2rmid, BBox, LngLat, Tile, TileZBox};
 
 /// Trait def for tile-like objects/structs/things/whatevers
 pub trait TileLike {
@@ -202,5 +202,23 @@ pub trait TileLike {
             self.x(),
             flipy(self.y(), self.z())
         )
+    }
+
+    /// return zbox for tile-like
+    #[must_use]
+    fn zbox(&self) -> TileZBox {
+        TileZBox::from_tile(self)
+    }
+
+    /// Return children-zbox for tile-like at optional depth (default 1)
+    #[must_use]
+    fn children_zbox(&self, depth: Option<u8>) -> TileZBox {
+        let d = depth.unwrap_or(1);
+        let target_zoom = self.z() + d;
+        let mut zbox = TileZBox::from_tile(self);
+        while zbox.z() < target_zoom {
+            zbox = zbox.zoom_in();
+        }
+        zbox
     }
 }
