@@ -1,6 +1,6 @@
 use rusqlite::Connection;
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{error, warn};
+use tracing::{debug, error, warn};
 
 use utiles_core::prelude::*;
 
@@ -85,20 +85,32 @@ pub fn make_enumerate_rx(
                     let z_column = s.column_index("zoom_level")?;
                     let x_column = s.column_index("tile_column")?;
                     let y_column = s.column_index("tile_row")?;
+                    let tx = tx.clone();
                     let tiles_iters = s.query_map(rusqlite::params![], |row| {
                         let z: u8 = row.get(z_column)?;
                         let x: u32 = row.get(x_column)?;
                         let yup: u32 = row.get(y_column)?;
                         let tile = utile_yup!(x, yup, z);
-                        let tx = tx.clone();
                         if let Err(e) = tx.blocking_send(tile) {
-                            warn!("Blocking send error: {:?}", e);
+                            debug!("Blocking send error: {:?}", e);
+                            Ok(false)
+                        } else {
+                            Ok(true)
                         }
-                        Ok(())
                     })?;
                     // Consume the iterator
                     for row in tiles_iters {
                         let _ = row;
+                        match row {
+                            Ok(true) => {}
+                            Ok(false) => {
+                                break;
+                            }
+                            Err(e) => {
+                                error!("enum tiles iter error: {:?}", e);
+                                break;
+                            }
+                        }
                     }
                     Ok(())
                 })

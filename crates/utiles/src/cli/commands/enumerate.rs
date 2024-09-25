@@ -6,7 +6,7 @@ use std::io::{BufWriter, Write};
 use tokio::task::JoinHandle;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt;
-use tracing::{debug, error};
+use tracing::debug;
 
 async fn enumerate_db(
     fspath: &str,
@@ -27,10 +27,10 @@ async fn enumerate_db(
     let s = mbt.enumerate_rx(Some(&query))?;
     let mut tiles = ReceiverStream::new(s);
     while let Some(tile) = tiles.next().await {
-        // let tile_str = format!("{} {}", fspath, tile.json_arr());
         let tile_str = tformatter.fmt_tile(&tile);
         if let Err(e) = tx.send(tile_str).await {
-            return Err(crate::UtilesError::Error(format!("enumerate_db: {e:?}")));
+            debug!("recv dropped: {:?}", e);
+            break;
         }
     }
     Ok(())
@@ -55,20 +55,25 @@ pub async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
             let mut buf = BufWriter::with_capacity(32 * 1024, lock);
             let mut count: usize = 0;
             while let Some(tile_str) = rx.blocking_recv() {
-                buf.write_all(tile_str.as_bytes())?;
-                buf.write_all(b"\n")?;
+                let tile_str_newline = format!("{tile_str}\n");
+
+                if let Err(e) = buf.write_all(tile_str_newline.as_bytes()) {
+                    debug!("write_all err: {:?}", e);
+                    break;
+                }
                 count += 1;
                 if count % 1024 == 0 {
-                    buf.flush()?;
                     if let Err(e) = buf.flush() {
-                        error!("write_task: {:?}", e);
+                        debug!("flushing err: {:?}", e);
                         break;
                     }
                 }
             }
 
             // flush remaining
-            buf.flush()?;
+            if let Err(e) = buf.flush() {
+                debug!("final flush err: {:?}", e);
+            }
             Ok(())
         });
     let tfilter = args.filter_args.tiles_filter_maybe();
