@@ -25,17 +25,17 @@ required-features = [
 [dependencies]
 anyhow.workspace = true
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
-async-trait = "0.1.80"
-axum = { version = "0.7.5", features = ["tokio", "json", "macros"] }
+async-trait = "0.1.83"
+axum = { version = "0.7.6", features = ["tokio", "json", "macros"] }
 chrono = "0.4.38"
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
 fnv = "1.0.7"
-futures = "0.3.29"
+futures = "0.3.30"
 geo-types.workspace = true
 geojson.workspace = true
 globset = "0.4.15"
 hex = "0.4.3"
-image = "0.25.1"
+image = "0.25.2"
 imagesize = "0.13.0"
 indicatif.workspace = true
 indoc = { workspace = true }
@@ -49,7 +49,7 @@ rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functio
 serde.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 size.workspace = true
-sqlite-hashes = { version = "0.7.3", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.7.5", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
@@ -58,11 +58,11 @@ time = "0.3.36"
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true
 tower = { version = "0.5.1", features = ["timeout"] }
-tower-http = { version = "0.5.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
+tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
-utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.1" }
-walkdir = "2.4.0"
+utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.9" }
+walkdir = "2.5.0"
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
 
 # deadpool = { version = "0.12.1", features = ["managed"], default-features = false }
