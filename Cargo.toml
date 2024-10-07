@@ -25,7 +25,7 @@ anyhow = "1.0.89"
 async-sqlite = { version = "0.3.1", features = ["bundled", "functions", "trace"] }
 clap = { version = "4.5.17", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
-futures = "0.3.29"
+futures = "0.3.31"
 geo-types = "0.7.9"
 geojson = "0.24.1"
 indicatif = "0.17.8"
