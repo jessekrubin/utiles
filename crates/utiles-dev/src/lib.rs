@@ -1,3 +1,6 @@
+pub mod cover;
+pub mod edges;
+
 use anyhow::Result;
 pub fn quick_maths() -> Result<()> {
     let mut n = 2; // 2
