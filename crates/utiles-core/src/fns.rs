@@ -276,13 +276,12 @@ pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Option<Tile> {
 /// Return the 4 direct children of a tile
 #[must_use]
 pub fn children1_zorder(x: u32, y: u32, z: u8) -> [Tile; 4] {
-    let t = [
+    [
         utile!(x * 2, y * 2, z + 1),         // top-left
         utile!(x * 2 + 1, y * 2, z + 1),     // top-right
         utile!(x * 2, y * 2 + 1, z + 1),     // bottom-left
         utile!(x * 2 + 1, y * 2 + 1, z + 1), // bottom-right
-    ];
-    t
+    ]
 }
 /// Return the children of a tile given x, y, z, and zoom in z-order.
 ///
@@ -690,7 +689,7 @@ fn tiles_range_zoom(
     miny: u32,
     maxy: u32,
     zoom: u8,
-) -> impl Iterator<Item = (u32, u32, u8)> {
+) -> impl Iterator<Item=(u32, u32, u8)> {
     (minx..=maxx).flat_map(move |i| (miny..=maxy).map(move |j| (i, j, zoom)))
 }
 
@@ -770,7 +769,7 @@ pub fn tiles_count(
 pub fn tiles(
     bounds: (f64, f64, f64, f64),
     zooms: ZoomOrZooms,
-) -> impl Iterator<Item = Tile> {
+) -> impl Iterator<Item=Tile> {
     let zooms = as_zooms(zooms);
     let bboxthing = BBox {
         north: bounds.3,
@@ -821,9 +820,9 @@ pub fn tiles(
                     bottom_right.y,
                     zoom,
                 )
-                .map(move |(x, y, z)| Tile { x, y, z })
-                .collect::<Vec<_>>()
-                .into_iter(),
+                    .map(move |(x, y, z)| Tile { x, y, z })
+                    .collect::<Vec<_>>()
+                    .into_iter(),
                 _ => Vec::new().into_iter(),
             }
         })
