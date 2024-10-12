@@ -12,9 +12,10 @@ pub fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
         let nup = i32::from(tile.z) - i32::from(args.depth);
         // error
         assert!(nup >= 0, "depth must be less than or equal to tile zoom");
-        let parent = tile.parent(Option::from(args.depth - 1));
-        let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
-        println!("{}{}", rs, parent.json_arr());
+        if let Some(parent) = tile.parent(Option::from(args.depth - 1)) {
+            let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
+            println!("{}{}", rs, parent.json_arr());
+        }
     }
     Ok(())
 }

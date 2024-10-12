@@ -1,18 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/utiles",
-  "crates/utiles-core",
-  "crates/utiles-dev",
-  "crates/utiles-oxipng",
-  "utiles-pyo3",
+    "crates/utiles",
+    "crates/utiles-core",
+    "crates/utiles-dev",
+    "crates/utiles-oxipng",
+    "utiles-pyo3",
 ]
 
 [workspace.package]
 version = "0.7.0-alpha.9"
 authors = [
-  "Jesse Rubin <jessekrubin@gmail.com>",
-  "Dan Costello <dan.costello2@gmail.com>",
+    "Jesse Rubin <jessekrubin@gmail.com>",
+    "Dan Costello <dan.costello2@gmail.com>",
 ]
 documentation = "https://github.com/jessekrubin/utiles"
 edition = "2021"
@@ -73,8 +73,8 @@ proc-macro2.opt-level = 3
 [profile.release]
 opt-level = 3
 strip = true
-lto = "thin"
-# lto = "fat"
+#lto = "thin"
+lto = "fat"
 
 # The profile that 'cargo dist' will build with
 [profile.dist]

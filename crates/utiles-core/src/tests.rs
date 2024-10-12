@@ -94,6 +94,8 @@ fn test_simplify() {
     }
     let tset = children.into_iter().collect::<HashSet<Tile>>();
     let simplified = simplify(&tset);
+    println!("set {:?}", simplified);
+
     for target in targets {
         assert!(simplified.contains(&target));
     }

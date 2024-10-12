@@ -16,7 +16,9 @@ use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 use crate::traits::TileParent;
-use crate::{pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey, IsOk};
+use crate::{
+    children1_zorder, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey, IsOk, TileChildren1,
+};
 
 /// Tile X-Y-Z struct
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -155,8 +157,14 @@ impl TileLike for Tile {
 }
 
 impl TileParent for Tile {
-    fn parent(&self, zoom: Option<u8>) -> Self {
+    fn parent(&self, zoom: Option<u8>) -> Option<Tile> {
         self.parent(zoom)
+    }
+}
+
+impl TileChildren1 for Tile {
+    fn children1(&self) -> [Self; 4] {
+        self.children1()
     }
 }
 
@@ -239,8 +247,8 @@ impl Tile {
 
     /// Return the parent tile's pmtile-id
     #[must_use]
-    pub fn parent_pmtileid(&self) -> u64 {
-        self.parent(None).pmtileid()
+    pub fn parent_pmtileid(&self) -> Option<u64> {
+        self.parent(None).map(|t| Self::pmtileid(&t))
     }
 
     /// Convert quadkey string to Tile
@@ -479,6 +487,12 @@ impl Tile {
         neighbors(self.x, self.y, self.z)
     }
 
+    /// Return direct children
+    #[must_use]
+    pub fn children1(&self) -> [Tile; 4] {
+        children1_zorder(self.x, self.y, self.z)
+    }
+
     /// Return the children tiles of the tile
     #[must_use]
     pub fn children(&self, zoom: Option<u8>) -> Vec<Tile> {
@@ -487,7 +501,7 @@ impl Tile {
 
     /// Return the parent tile
     #[must_use]
-    pub fn parent(&self, zoom: Option<u8>) -> Self {
+    pub fn parent(&self, zoom: Option<u8>) -> Option<Self> {
         parent(self.x, self.y, self.z, zoom)
     }
 

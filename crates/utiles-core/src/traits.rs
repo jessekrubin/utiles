@@ -1,5 +1,6 @@
 //! Utiles traits
 
+use crate::parent::Parents;
 use crate::TileLike;
 use std::hash::Hash;
 
@@ -49,5 +50,21 @@ pub trait LngLatLike: Coord2dLike {
 
 pub trait TileParent: Eq + Hash + Copy + TileLike {
     #[must_use]
-    fn parent(&self, zoom: Option<u8>) -> Self;
+    fn parent(&self, zoom: Option<u8>) -> Option<Self>;
+
+    fn iter_parents(&self) -> Parents<Self> {
+        Parents {
+            current: self.parent(None),
+        }
+    }
+}
+
+pub trait TileChildren1: Eq + Hash + Copy + TileLike {
+    /// Returns direct children in Z order:
+    ///     1) top-left
+    ///     2) top-right
+    ///     3) bottom-left
+    ///     4) bottom-right
+    #[must_use]
+    fn children1(&self) -> [Self; 4];
 }

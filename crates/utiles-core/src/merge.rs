@@ -1,18 +1,19 @@
-use std::collections::{HashMap, HashSet};
-
+use crate::traits::TileChildren1;
 use crate::TileParent;
+use std::collections::{HashMap, HashSet};
+use std::hash::Hash;
 
 /// Merge a set of tiles into a simplified set of tiles
 ///
 #[must_use]
-pub fn merge<T: TileParent, S: ::std::hash::BuildHasher + Default>(
-    merge_set: &HashSet<T, S>,
-) -> (HashSet<T>, bool) {
+pub fn merge<T: TileParent>(merge_set: &HashSet<T>) -> (HashSet<T>, bool) {
     let mut upwards_merge: HashMap<T, HashSet<T>> = HashMap::new();
 
     for tile in merge_set {
-        let tile_parent = tile.parent(None);
-        upwards_merge.entry(tile_parent).or_default().insert(*tile);
+        // let tile_parent = tile.parent(None);
+        if let Some(tile_parent) = tile.parent(None) {
+            upwards_merge.entry(tile_parent).or_default().insert(*tile);
+        }
     }
     let mut current_tileset: HashSet<T> = HashSet::default();
     let mut changed = false;
@@ -33,9 +34,7 @@ pub fn merge<T: TileParent, S: ::std::hash::BuildHasher + Default>(
 ///
 /// TODO: Add `minzoom` and `maxzoom` parameters
 #[must_use]
-pub fn simplify<T: TileParent, S: ::std::hash::BuildHasher + Default>(
-    tiles: &HashSet<T, S>,
-) -> HashSet<T> {
+pub fn simplify_v1<T: TileParent>(tiles: &HashSet<T>) -> HashSet<T> {
     let mut tilesv: Vec<&T> = tiles.iter().collect();
     tilesv.sort_by_key(|t| t.z());
 
@@ -43,8 +42,10 @@ pub fn simplify<T: TileParent, S: ::std::hash::BuildHasher + Default>(
 
     'outer: for tile in tilesv {
         for i in 0..tile.z() {
-            if root_set.contains(&tile.parent(Some(i))) {
-                continue 'outer;
+            if let Some(par) = tile.parent(Some(i)) {
+                if root_set.contains(&par) {
+                    continue 'outer;
+                }
             }
         }
         root_set.insert(*tile);
@@ -58,4 +59,78 @@ pub fn simplify<T: TileParent, S: ::std::hash::BuildHasher + Default>(
     }
 
     root_set
+}
+
+struct TileMerger<T: TileParent + TileChildren1> {
+    coverage_map: HashSet<T>,
+}
+
+impl<T: TileParent + TileChildren1 + Eq + Hash + Copy + Sized> TileMerger<T> {
+    fn new() -> Self {
+        Self {
+            coverage_map: HashSet::new(),
+        }
+    }
+
+    fn has_tile_or_parent(&self, tile: &T) -> bool {
+        self.coverage_map.contains(tile)
+            || tile
+                .iter_parents()
+                .any(|el| self.coverage_map.contains(&el))
+    }
+
+    fn put(&mut self, tile: &T) -> bool {
+        if self.has_tile_or_parent(tile) {
+            true
+        } else {
+            self.coverage_map.insert(*tile);
+            self.attempt_merge(*tile);
+            false
+        }
+    }
+    // fn attempt_merge(&mut self, tile: T) {
+    //     tile.iter_parents().find_map(|parent_tile| {
+    //         let siblings = parent_tile.children1();
+    //
+    //         if siblings.iter().all(|sibling| self.coverage_map.contains(sibling)) {
+    //             siblings.iter().for_each(|sibling| {
+    //                 self.coverage_map.remove(sibling);
+    //             });
+    //             self.coverage_map.insert(parent_tile);
+    //             None // Continue merging, return None so the iteration continues
+    //         } else {
+    //             Some(()) // Stop merging, return Some to break the iteration
+    //         }
+    //     });
+    // }
+
+    fn attempt_merge(&mut self, tile: T) {
+        for parent_tile in tile.iter_parents() {
+            let siblings = parent_tile.children1();
+
+            if siblings
+                .iter()
+                .all(|sibling| self.coverage_map.contains(sibling))
+            {
+                for sibling in siblings.iter() {
+                    self.coverage_map.remove(sibling);
+                }
+                self.coverage_map.insert(parent_tile);
+                // current_tile = parent_tile;
+            } else {
+                // stop merging BC WE CANNOT!
+                break;
+            }
+        }
+    }
+}
+#[must_use]
+pub fn simplify<T: TileParent + TileChildren1>(tiles: &HashSet<T>) -> HashSet<T> {
+    let mut tiles_vec: Vec<_> = tiles.into_iter().collect();
+    tiles_vec.sort_by(|a, b| a.z().cmp(&b.z()));
+    let mut merger = TileMerger::new();
+    for tile in tiles_vec.into_iter() {
+        merger.put(tile);
+    }
+    merger.coverage_map
 }
