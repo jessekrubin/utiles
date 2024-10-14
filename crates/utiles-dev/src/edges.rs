@@ -103,6 +103,7 @@ fn find_edges(tiles: Vec<Tile>) -> Vec<Tile> {
     // let mut edge_indices = Vec::new();
     let uxmin = xmin - 1;
     let uymin = ymin - 1;
+
     // v1 of weird itering
     // ==========================================
     // let tiles = xys_edge.indexed_iter().map(
@@ -135,7 +136,7 @@ fn find_edges(tiles: Vec<Tile>) -> Vec<Tile> {
     tiles
 }
 
-fn test_data() -> Vec<Tile> {
+fn _test_data_input() -> Vec<Tile> {
     vec![
         utile!(4188, 3104, 13),
         utile!(4192, 2977, 13),
@@ -240,7 +241,7 @@ fn test_data() -> Vec<Tile> {
     ]
 }
 
-fn test_expected() -> Vec<Tile> {
+fn _test_expected() -> Vec<Tile> {
     vec![
         utile!(4188, 3104, 13),
         utile!(4192, 2737, 13),
@@ -330,21 +331,32 @@ fn test_expected() -> Vec<Tile> {
     ]
 }
 pub fn edges_main() {
-    // let tiles = vec![
-    //     Tile { x: 1, y: 1, z: 3 },
-    //     Tile { x: 2, y: 1, z: 3 },
-    //     Tile { x: 1, y: 2, z: 3 },
-    //     Tile { x: 2, y: 2, z: 3 },
-    // ];
-
-    let tdata = test_data();
+    let tdata = _test_data_input();
     let edges = find_edges(tdata);
 
     println!("Edges:\n{:?}", edges);
-    let expected = test_expected();
+    let expected = _test_expected();
 
     let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
     let edges_set = edges.into_iter().collect::<HashSet<Tile>>();
 
     println!("EQUAH: {}", expected_set.eq(&edges_set));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_edges() {
+        let tdata = _test_data_input();
+        let edges = find_edges(tdata);
+
+        let expected = _test_expected();
+
+        let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
+        let edges_set = edges.into_iter().collect::<HashSet<Tile>>();
+
+        assert_eq!(expected_set, edges_set);
+    }
 }
