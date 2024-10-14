@@ -51,7 +51,7 @@ fn roll_2d(arr: &Array2<bool>, x_shift: isize, y_shift: isize) -> Array2<bool> {
     }
     rolled
 }
-static idxs: &'static [(isize, isize)] = &[
+static IDXS: &[(isize, isize)] = &[
     (-1, -1),
     (-1, 0),
     (-1, 1),
@@ -81,8 +81,8 @@ fn find_edges(tiles: Vec<Tile>) -> Vec<Tile> {
     // ];
 
     // Create the rolled arrays without adding an extra axis
-    let stacks: Vec<Array2<bool>> = idxs
-        .into_iter()
+    let stacks: Vec<Array2<bool>> = IDXS
+        .iter()
         .map(|(dx, dy)| roll_2d(&burn, *dx, *dy))
         .collect();
     // Stack along Axis(2), resulting in a 3D array
@@ -132,98 +132,7 @@ fn find_edges(tiles: Vec<Tile>) -> Vec<Tile> {
         .map(|((i, j), _)| Tile::new((i + uxmin) as u32, (j + uymin) as u32, zoom))
         .collect::<Vec<Tile>>();
 
-    // for ((i, j), &is_edge) in xys_edge.indexed_iter() {
-    //     if is_edge {
-    //         let tile = Tile::new(
-    //             (i + uxmin) as u32,
-    //             (j + uymin) as u32,
-    //             zoom,
-    //         );
-    //         edge_indices.push(tile);
-    //     }
-    // }
-
     tiles
-}
-// Main function to find edges in the tiles
-fn find_edges_cloning(tiles: Vec<Tile>) -> Vec<Tile> {
-    let (xmin, xmax, ymin, ymax) = get_range(&tiles);
-    let zoom = get_zoom(&tiles);
-
-    // Create the 2D burn array
-    let burn = burn_tiles(&tiles, xmin, xmax, ymin, ymax);
-
-    // Define the rolling indices
-    // let idxs = vec![
-    //     (-1, -1),
-    //     (-1, 0),
-    //     (-1, 1),
-    //     (0, -1),
-    //     (0, 1),
-    //     (1, -1),
-    //     (1, 0),
-    //     (1, 1),
-    // ];
-
-    // Create the rolled arrays without adding an extra axis
-    let mut stacks: Vec<Array2<bool>> = vec![];
-    for (dx, dy) in idxs {
-        // let rolled =
-        // roll_2d(&burn, *dx, *dy);
-        stacks.push(roll_2d(&burn, *dx, *dy));
-    }
-
-    // Verify shapes of rolled arrays
-    for (i, array) in stacks.iter().enumerate() {
-        println!("Shape of rolled array {}: {:?}", i, array.shape());
-    }
-
-    // Stack along Axis(2), resulting in a shape of [7, 370, 8]
-    let stacked = stack(
-        Axis(2),
-        &stacks.iter().map(|a| a.view()).collect::<Vec<_>>(),
-    )
-    .expect("Failed to stack arrays");
-
-    println!("Stacked shape: {:?}", stacked.shape());
-    println!("Burn shape: {:?}", burn.shape());
-
-    // Calculate the edges
-    let min_array =
-        stacked.map_axis(Axis(2), |view| view.iter().copied().min().unwrap());
-    println!("Shape of min_array: {:?}", min_array.shape());
-
-    let xys_edge = &min_array ^ &burn;
-
-    // set missed to false...
-    // previously used:
-    // ```
-    // let mut xys_edge_bool = xys_edge.clone();
-    // for ((i, j), &burn_val) in burn.indexed_iter() {
-    //     if !burn_val {
-    //         xys_edge_bool[(i, j)] = false;
-    //     }
-    // }
-    // ```
-    // but the below is MUCH more sexy
-    let mut xys_edge_bool = xys_edge.clone();
-    xys_edge_bool &= &burn;
-
-    let mut edge_indices = vec![];
-    let uxmin: usize = xmin - 1;
-    let uymin: usize = ymin - 1;
-    for ((i, j), &is_edge) in xys_edge_bool.indexed_iter() {
-        if is_edge {
-            let tile = utile!((i + uxmin) as u32, (j + uymin) as u32, zoom);
-            // let xyz: (u32, u32, u8) = (
-            //     (i + uxmin - 1) as u32,
-            //     (j + uymin - 1) as u32,
-            //     zoom,
-            // );
-            edge_indices.push(tile);
-        }
-    }
-    edge_indices
 }
 
 fn test_data() -> Vec<Tile> {
