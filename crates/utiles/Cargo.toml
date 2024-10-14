@@ -39,7 +39,7 @@ image = "0.25.2"
 imagesize = "0.13.0"
 indicatif.workspace = true
 indoc = { workspace = true }
-json-patch = "2.0.0"
+json-patch = "3.0.1"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
 num_cpus = "1.16.0"
