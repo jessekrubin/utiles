@@ -647,15 +647,15 @@ pub fn tile(
 /// assert!((yf - 191.471_191_406_25).abs() < 0.0001, "yf: {}", yf);
 /// assert!(z == 9);
 /// ```
-pub fn lnglat2tile_frac(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
+#[must_use] pub fn lnglat2tile_frac(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
     let sin = (lat * DEG2RAD).sin();
-    let z2 = 2f64.powi(z as i32);
+    let z2 = 2f64.powi(i32::from(z));
 
     let mut x = z2 * (lng / 360.0 + 0.5);
     let y = z2 * (0.5 - (0.25 * ((1.0 + sin) / (1.0 - sin)).ln()) / PI);
 
     // Wrap Tile X
-    x = x % z2;
+    x %= z2;
     if x < 0.0 {
         x += z2;
     }
