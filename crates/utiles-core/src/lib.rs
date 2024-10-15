@@ -31,7 +31,7 @@ pub use tile::Tile;
 pub use tile_like::TileLike;
 pub use tile_zbox::TileZBox;
 #[doc(inline)]
-pub use traits::{Coord2dLike, IsOk, LngLatLike, TileParent};
+pub use traits::{Coord2dLike, IsOk, LngLatLike, TileChildren1, TileParent};
 pub use zoom::*;
 
 pub mod bbox;
@@ -46,6 +46,7 @@ pub mod lnglat;
 pub mod parsing;
 
 mod merge;
+mod parent;
 #[cfg(feature = "pmtiles")]
 pub mod pmtiles;
 pub mod point;

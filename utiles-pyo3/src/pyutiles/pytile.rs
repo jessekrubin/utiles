@@ -14,7 +14,7 @@ use serde::Serialize;
 use utiles::bbox::BBox;
 use utiles::projection::Projection;
 use utiles::tile::{FeatureOptions, Tile};
-use utiles::{TileLike, TileParent};
+use utiles::{TileChildren1, TileLike, TileParent};
 
 use crate::pyutiles::pyiters::IntIterator;
 use crate::pyutiles::pylnglat::PyLngLat;
@@ -153,7 +153,7 @@ impl PyTile {
         self.xyz.pmtileid()
     }
 
-    pub fn parent_pmtileid(&self) -> u64 {
+    pub fn parent_pmtileid(&self) -> Option<u64> {
         self.xyz.parent_pmtileid()
     }
 
@@ -359,14 +359,19 @@ impl PyTile {
     }
 
     #[pyo3(signature = (n = None))]
-    pub fn parent(&self, n: Option<u8>) -> Self {
-        self.xyz.parent(n).into()
+    pub fn parent(&self, n: Option<u8>) -> Option<Self> {
+        self.xyz.parent(n).map(PyTile::from)
     }
 
     #[pyo3(signature = (zoom = None))]
     pub fn children(&self, zoom: Option<u8>) -> Vec<Self> {
         let xyzs = self.xyz.children(zoom);
         xyzs.into_iter().map(Self::from).collect()
+    }
+
+    pub fn children1(&self) -> [Self; 4] {
+        let direct_child_tiles = self.xyz.children1();
+        direct_child_tiles.map(Self::from)
     }
 
     pub fn siblings(&self) -> Vec<Self> {
@@ -499,8 +504,14 @@ impl TileLike for &PyTile {
 }
 
 impl TileParent for PyTile {
-    fn parent(&self, zoom: Option<u8>) -> Self {
+    fn parent(&self, zoom: Option<u8>) -> Option<Self> {
         self.parent(zoom)
+    }
+}
+
+impl TileChildren1 for PyTile {
+    fn children1(&self) -> [PyTile; 4] {
+        self.children1()
     }
 }
 

@@ -5,9 +5,12 @@
 - Docs/readme update
 - Write/copy from planetiler/tippecanoe fails bc distinction between supported write schema and what is a recognized schema(s)
 - Move `utiles-oxipng` to own crate/bin
+- `edges` api to find "edge" tiles of collection of tiles
 
 ## Unreleased/Future
 
+- `simplify`/`merge` function(s) optimized for faster merging and WAY less memory usage
+- Parent methods now returns `None` if `z<=0`
 - New command(s):
   - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
   - `commands` list all available commands (including hidden/dev/unimplemented commands)

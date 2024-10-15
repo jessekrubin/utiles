@@ -261,19 +261,28 @@ pub fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
 
 /// Return the parent tile of a tile given x, y, z, and n (number of ancestors).
 #[must_use]
-pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Tile {
+pub fn parent(x: u32, y: u32, z: u8, n: Option<u8>) -> Option<Tile> {
     let n = n.unwrap_or(0);
     if n == 0 {
-        Tile {
-            x: x >> 1,
-            y: y >> 1,
-            z: z - 1,
+        if z == 0 {
+            None
+        } else {
+            Some(utile!(x >> 1, y >> 1, z - 1))
         }
     } else {
         parent(x >> 1, y >> 1, z - 1, Some(n - 1))
     }
 }
-
+/// Return the 4 direct children of a tile
+#[must_use]
+pub fn children1_zorder(x: u32, y: u32, z: u8) -> [Tile; 4] {
+    [
+        utile!(x * 2, y * 2, z + 1),         // top-left
+        utile!(x * 2 + 1, y * 2, z + 1),     // top-right
+        utile!(x * 2, y * 2 + 1, z + 1),     // bottom-left
+        utile!(x * 2 + 1, y * 2 + 1, z + 1), // bottom-right
+    ]
+}
 /// Return the children of a tile given x, y, z, and zoom in z-order.
 ///
 /// # Examples

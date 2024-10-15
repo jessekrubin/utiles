@@ -103,7 +103,8 @@ pub fn from_tuple(tile: TileTuple) -> PyTile {
     PyTile::new(tile.0, tile.1, tile.2)
 }
 #[pyfunction]
-#[pyo3(signature = (tile, fid = None, props = None, projected = None, buffer = None, precision = None))]
+#[pyo3(signature = (tile, fid = None, props = None, projected = None, buffer = None, precision = None)
+)]
 pub fn feature(
     py: Python,
     tile: PyTileLike,
@@ -230,8 +231,14 @@ pub fn parent(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Option<Py
         tile.xyz.y,
         tile.xyz.z,
         Some(tile.xyz.z - zoom - 1),
-    );
-    Ok(Some(PyTile::from(p)))
+    )
+    .map(PyTile::from);
+    Ok(p)
+    // if let Some(pt) = p {
+    //     Ok(Some(PyTile::from(pt)))
+    // } else {
+    //     Ok(None)
+    // }
 }
 
 #[pyfunction]
