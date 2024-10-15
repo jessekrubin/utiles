@@ -3076,6 +3076,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "utiles",
  "utiles-core",
 ]
 

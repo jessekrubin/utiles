@@ -647,7 +647,8 @@ pub fn tile(
 /// assert!((yf - 191.471_191_406_25).abs() < 0.0001, "yf: {}", yf);
 /// assert!(z == 9);
 /// ```
-#[must_use] pub fn lnglat2tile_frac(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
+#[must_use]
+pub fn lnglat2tile_frac(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
     let sin = (lat * DEG2RAD).sin();
     let z2 = 2f64.powi(i32::from(z));
 

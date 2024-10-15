@@ -52,7 +52,7 @@ pub mod hash_types;
 mod tests;
 mod tile_stream;
 
-mod cover;
+pub mod cover;
 mod edges;
 pub mod hash;
 

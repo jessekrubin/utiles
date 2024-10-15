@@ -752,7 +752,7 @@ pub enum Commands {
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
-    /// Burn tiles from GeoJSON stream at zoom level
+    /// Burn tiles from `GeoJSON` stream at zoom level
     #[command(name = "burn", hide = true)]
     Burn(TileFmtArgs),
 

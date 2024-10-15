@@ -100,14 +100,19 @@ fn get_range_info(tiles: &[Tile]) -> UtilesResult<RangeInfo> {
         ymax: ymax as usize,
     })
 }
-pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
+pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
     let range_info = get_range_info(tiles)?;
     // let (xmin, xmax, ymin, ymax) =(&tiles);
     // let zoom = check_all_same_zoom(tiles)?;
 
-
     // Create the 2D burn array
-    let burn = burn_tiles(&tiles, range_info.xmin, range_info.xmax, range_info.ymin, range_info.ymax);
+    let burn = burn_tiles(
+        tiles,
+        range_info.xmin,
+        range_info.xmax,
+        range_info.ymin,
+        range_info.ymax,
+    );
 
     // Create the rolled arrays without adding an extra axis
     let stacks: Vec<Array2<bool>> = IDXS
@@ -119,7 +124,7 @@ pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
         Axis(2),
         &stacks.iter().map(|a| a.view()).collect::<Vec<_>>(),
     )
-        .map_err(|e| UtilesError::NdarrayShapeError(e))?;
+    .map_err(UtilesError::NdarrayShapeError)?;
 
     // Calculate the edges
     let min_array =
@@ -157,7 +162,9 @@ pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
     let tiles = xys_edge
         .indexed_iter()
         .filter(|(_, &is_edge)| is_edge)
-        .map(|((i, j), _)| Tile::new((i + uxmin) as u32, (j + uymin) as u32, range_info.zoom))
+        .map(|((i, j), _)| {
+            Tile::new((i + uxmin) as u32, (j + uymin) as u32, range_info.zoom)
+        })
         .collect::<Vec<Tile>>();
 
     Ok(tiles)
@@ -166,8 +173,8 @@ pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use utiles_core::{utile, Tile};
     use std::collections::HashSet;
+    use utiles_core::{utile, Tile};
 
     fn _test_data_input() -> Vec<Tile> {
         vec![
