@@ -1,11 +1,11 @@
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
-    about_main, addo_main, agg_hash_main, bounding_tile_main, children_main,
-    commands_main, contains_main, copy_main, dev_main, enumerate_main, fmtstr_main,
-    info_main, lint_main, metadata_main, metadata_set_main, neighbors_main,
-    optimize_main, parent_main, pmtileid_main, quadkey_main, rimraf_main, serve_main,
-    shapes_main, tilejson_main, tiles_main, touch_main, translate_main, update_main,
-    vacuum_main, webpify_main, zxyify_main,
+    about_main, addo_main, agg_hash_main, bounding_tile_main, burn_main, children_main,
+    commands_main, contains_main, copy_main, dev_main, edges_main, enumerate_main,
+    fmtstr_main, info_main, lint_main, metadata_main, metadata_set_main,
+    neighbors_main, optimize_main, parent_main, pmtileid_main, quadkey_main,
+    rimraf_main, serve_main, shapes_main, tilejson_main, tiles_main, touch_main,
+    translate_main, update_main, vacuum_main, webpify_main, zxyify_main,
 };
 use crate::errors::UtilesResult;
 use crate::lager::{init_tracing, LagerConfig};
@@ -126,6 +126,8 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
         }
         Commands::Enumerate(args) => enumerate_main(&args).await,
 
+        Commands::Burn(args) => burn_main(args).await,
+        Commands::Edges(args) => edges_main(args).await,
         Commands::Zxyify(args) => zxyify_main(args).await,
         // mercantile cli like
         Commands::Fmt(args) => fmtstr_main(args),

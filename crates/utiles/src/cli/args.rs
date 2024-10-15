@@ -752,6 +752,14 @@ pub enum Commands {
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
+    /// Burn tiles from GeoJSON stream at zoom level
+    #[command(name = "burn", hide = true)]
+    Burn(TileFmtArgs),
+
+    /// Echo edge tiles from stream of xyz tiles
+    #[command(name = "edges")]
+    Edges(TileFmtArgs),
+
     /// Convert raster mbtiles to webp format
     #[command(
         name = "webpify",

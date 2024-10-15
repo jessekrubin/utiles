@@ -3030,6 +3030,7 @@ dependencies = [
  "indoc",
  "json-patch",
  "md-5",
+ "ndarray",
  "noncrypto-digests",
  "num_cpus",
  "owo-colors",
@@ -3070,6 +3071,7 @@ name = "utiles-dev"
 version = "0.7.0-alpha.9"
 dependencies = [
  "anyhow",
+ "geojson",
  "ndarray",
  "serde",
  "serde_json",

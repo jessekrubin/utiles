@@ -1,9 +1,12 @@
+use utiles_dev::cover::burn_main;
 use utiles_dev::edges::edges_main;
 
 fn main() {
     println!("utiles ~ dev");
 
     edges_main();
+
+    burn_main();
 }
 
 // #[tokio::main]

@@ -3,7 +3,7 @@ use std::f64::consts::PI;
 use std::num::FpCategory;
 
 use crate::bbox::{BBox, WebBBox};
-use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
+use crate::constants::{DEG2RAD, EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesCoreResult;
 use crate::point2d;
 use crate::sibling_relationship::SiblingRelationship;
@@ -635,6 +635,32 @@ pub fn tile(
     truncate: Option<bool>,
 ) -> Result<Tile, UtilesCoreError> {
     Tile::from_lnglat_zoom(lng, lat, zoom, truncate)
+}
+
+/// Converts longitude, latitude, and zoom level to fractional tile coordinates.
+///
+/// # Examples
+/// ```
+/// use utiles_core::lnglat2tile_frac;
+/// let (xf, yf, z) =lnglat2tile_frac(-95.939_655_303_955_08, 41.260_001_085_686_97, 9);
+/// assert!((xf - 119.552_490_234_375).abs() < 0.0001, "xf: {}", xf);
+/// assert!((yf - 191.471_191_406_25).abs() < 0.0001, "yf: {}", yf);
+/// assert!(z == 9);
+/// ```
+pub fn lnglat2tile_frac(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
+    let sin = (lat * DEG2RAD).sin();
+    let z2 = 2f64.powi(z as i32);
+
+    let mut x = z2 * (lng / 360.0 + 0.5);
+    let y = z2 * (0.5 - (0.25 * ((1.0 + sin) / (1.0 - sin)).ln()) / PI);
+
+    // Wrap Tile X
+    x = x % z2;
+    if x < 0.0 {
+        x += z2;
+    }
+
+    (x, y, z)
 }
 
 /// Return the bounding tile for a bounding box.

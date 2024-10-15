@@ -19,6 +19,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
+geojson.workspace = true
 ndarray = "0.16.1"
 serde.workspace = true
 serde_json.workspace = true

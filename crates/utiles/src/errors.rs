@@ -123,6 +123,10 @@ pub enum UtilesError {
     #[cfg(feature = "pmtiles")]
     #[error("pmtiles error: {0}")]
     PmtilesError(#[from] pmtiles::PmtError),
+
+    /// ndarray shape error
+    #[error("ndarray shape error: {0}")]
+    NdarrayShapeError(#[from] ndarray::ShapeError),
 }
 
 pub type UtilesResult<T, E = UtilesError> = Result<T, E>;
