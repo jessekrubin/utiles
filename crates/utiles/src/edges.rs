@@ -1,7 +1,6 @@
 use crate::{UtilesError, UtilesResult};
 use ndarray::{stack, Array2, Axis};
-use std::collections::HashSet;
-use utiles_core::{utile, Tile, TileLike};
+use utiles_core::{Tile, TileLike};
 
 static IDXS: &[(isize, isize)] = &[
     (-1, -1),
@@ -13,24 +12,6 @@ static IDXS: &[(isize, isize)] = &[
     (1, 0),
     (1, 1),
 ];
-fn get_range(tiles: &[Tile]) -> (usize, usize, usize, usize) {
-    let (xmin, xmax) = tiles.iter().fold((usize::MAX, 0), |(min_x, max_x), tile| {
-        (min_x.min(tile.x() as usize), max_x.max(tile.x()))
-    });
-
-    let (ymin, ymax) = tiles.iter().fold((usize::MAX, 0), |(min_y, max_y), tile| {
-        (min_y.min(tile.y() as usize), max_y.max(tile.y()))
-    });
-
-    (xmin, xmax as usize, ymin, ymax as usize)
-}
-
-// Function to get zoom level (assumes all tiles have the same zoom).
-fn get_zoom(tiles: &[Tile]) -> u8 {
-    tiles[0].z
-}
-
-// Burn the tiles into a 2D array
 
 fn burn_tiles(
     tiles: &[Tile],
@@ -63,28 +44,70 @@ fn roll_2d(arr: &Array2<bool>, x_shift: isize, y_shift: isize) -> Array2<bool> {
     rolled
 }
 
-fn check_all_same_zoom(tiles: &Vec<Tile>) -> UtilesResult<()> {
-    if tiles.len() == 0 {
-        Ok(())
-    } else {
-        let expected_zoom = tiles.first().map(|tile| tile.z).unwrap_or_default();
-        let all_same = tiles.iter().all(|tile| tile.z == expected_zoom);
-        if all_same {
-            Ok(())
-        } else {
-            Err(UtilesError::Str(
-                "Not all tiles have same zoom level".to_string(),
-            ))
+#[derive(Debug)]
+struct RangeInfo {
+    pub zoom: u8,
+    pub xmin: usize,
+    pub xmax: usize,
+    pub ymin: usize,
+    pub ymax: usize,
+}
+
+fn get_range_info(tiles: &[Tile]) -> UtilesResult<RangeInfo> {
+    if tiles.is_empty() {
+        return Err(UtilesError::Str("No tiles provided".to_string()));
+    }
+
+    let expected_zoom = tiles[0].z;
+    let mut xmin = u32::MAX;
+    let mut xmax = u32::MIN;
+    let mut ymin = u32::MAX;
+    let mut ymax = u32::MIN;
+
+    for tile in tiles {
+        // Check if all tiles have the same zoom level
+        if tile.z != expected_zoom {
+            return Err(UtilesError::Str(
+                "Not all tiles have the same zoom level".to_string(),
+            ));
+        }
+
+        let x = tile.x();
+        let y = tile.y();
+
+        // Update min and max values for x
+        if x < xmin {
+            xmin = x;
+        }
+        if x > xmax {
+            xmax = x;
+        }
+
+        // Update min and max values for y
+        if y < ymin {
+            ymin = y;
+        }
+        if y > ymax {
+            ymax = y;
         }
     }
+
+    Ok(RangeInfo {
+        zoom: expected_zoom,
+        xmin: xmin as usize,
+        xmax: xmax as usize,
+        ymin: ymin as usize,
+        ymax: ymax as usize,
+    })
 }
 pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
-    let (xmin, xmax, ymin, ymax) = get_range(&tiles);
-    check_all_same_zoom(tiles)?;
-    let zoom = get_zoom(&tiles);
+    let range_info = get_range_info(tiles)?;
+    // let (xmin, xmax, ymin, ymax) =(&tiles);
+    // let zoom = check_all_same_zoom(tiles)?;
+
 
     // Create the 2D burn array
-    let burn = burn_tiles(&tiles, xmin, xmax, ymin, ymax);
+    let burn = burn_tiles(&tiles, range_info.xmin, range_info.xmax, range_info.ymin, range_info.ymax);
 
     // Create the rolled arrays without adding an extra axis
     let stacks: Vec<Array2<bool>> = IDXS
@@ -96,7 +119,7 @@ pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
         Axis(2),
         &stacks.iter().map(|a| a.view()).collect::<Vec<_>>(),
     )
-    .map_err(|e| UtilesError::NdarrayShapeError(e))?;
+        .map_err(|e| UtilesError::NdarrayShapeError(e))?;
 
     // Calculate the edges
     let min_array =
@@ -105,8 +128,8 @@ pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
     let xys_edge = &burn & !&min_array;
 
     // collect the edge tiles
-    let uxmin = xmin - 1;
-    let uymin = ymin - 1;
+    let uxmin = range_info.xmin - 1;
+    let uymin = range_info.ymin - 1;
 
     // v1 of weird itering
     // ==========================================
@@ -134,7 +157,7 @@ pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
     let tiles = xys_edge
         .indexed_iter()
         .filter(|(_, &is_edge)| is_edge)
-        .map(|((i, j), _)| Tile::new((i + uxmin) as u32, (j + uymin) as u32, zoom))
+        .map(|((i, j), _)| Tile::new((i + uxmin) as u32, (j + uymin) as u32, range_info.zoom))
         .collect::<Vec<Tile>>();
 
     Ok(tiles)
@@ -144,6 +167,8 @@ pub fn find_edges(tiles: &Vec<Tile>) -> UtilesResult<Vec<Tile>> {
 mod tests {
     use super::*;
     use utiles_core::{utile, Tile};
+    use std::collections::HashSet;
+
     fn _test_data_input() -> Vec<Tile> {
         vec![
             utile!(4188, 3104, 13),
