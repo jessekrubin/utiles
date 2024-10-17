@@ -1,3 +1,4 @@
+pub use cover::geojson2tiles;
 pub use pybbox::PyBbox;
 pub use pyfns::*;
 pub use pylnglat::PyLngLat;
@@ -7,6 +8,7 @@ pub use pytile_fmts::PyTileFmts;
 pub use pytile_type::{tiletype, tiletype2headers, tiletype_str, PyTileType};
 pub use simplipy::simplify;
 
+mod cover;
 mod pybbox;
 pub mod pycoords;
 mod pyfns;

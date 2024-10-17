@@ -2076,6 +2076,7 @@ dependencies = [
 name = "pyutiles"
 version = "0.7.0-alpha.10"
 dependencies = [
+ "geojson",
  "pyo3",
  "pyo3-build-config",
  "serde",

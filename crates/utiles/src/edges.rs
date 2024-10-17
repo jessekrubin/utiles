@@ -51,7 +51,7 @@ pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
         });
 
         if is_edge {
-            edge_tiles.push(tile.clone());
+            edge_tiles.push(*tile);
         }
     }
 

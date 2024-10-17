@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use utiles_core::{parse_textiles, Tile};
 
 fn expected_burn_test_tiles() -> Vec<Tile> {
-    let tiles_str = r#"[78, 178, 9]
+    let tiles_str = r"[78, 178, 9]
 [79, 178, 9]
 [80, 178, 9]
 [81, 178, 9]
@@ -545,7 +545,7 @@ fn expected_burn_test_tiles() -> Vec<Tile> {
 [100, 200, 9]
 [101, 200, 9]
 [102, 200, 9]
-[103, 200, 9]"#;
+[103, 200, 9]";
     parse_textiles(tiles_str)
 }
 
@@ -564,7 +564,7 @@ fn burn_test() {
 
     let geojson: GeoJson = geojson_string.parse::<GeoJson>().unwrap();
 
-    let tilescoverage = geojson2tiles(&geojson, 9).unwrap();
+    let tilescoverage = geojson2tiles(&geojson, 9, None).unwrap();
 
     let tiles_set: HashSet<Tile> = tilescoverage.into_iter().collect();
     let expected_set: HashSet<Tile> = expected.into_iter().collect();
@@ -576,7 +576,7 @@ fn burn_test() {
     );
 
     // Find common elements (intersection)
-    let common: HashSet<_> = tiles_set.intersection(&expected_set).cloned().collect();
+    let common: HashSet<_> = tiles_set.intersection(&expected_set).copied().collect();
     assert!(
         !common.is_empty(),
         "No common elements between tiles and expected tiles."
@@ -584,18 +584,16 @@ fn burn_test() {
 
     // Find elements only in expected_set
     let expected_only: HashSet<_> =
-        expected_set.difference(&tiles_set).cloned().collect();
+        expected_set.difference(&tiles_set).copied().collect();
     assert!(
         expected_only.is_empty(),
-        "Expected set contains additional tiles: {:?}",
-        expected_only
+        "Expected set contains additional tiles: {expected_only:?}"
     );
 
     // Find elements only in tiles_set
-    let tiles_only: HashSet<_> = tiles_set.difference(&expected_set).cloned().collect();
+    let tiles_only: HashSet<_> = tiles_set.difference(&expected_set).copied().collect();
     assert!(
         tiles_only.is_empty(),
-        "Tiles set contains additional tiles: {:?}",
-        tiles_only
+        "Tiles set contains additional tiles: {tiles_only:?}"
     );
 }

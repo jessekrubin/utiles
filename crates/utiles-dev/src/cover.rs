@@ -811,7 +811,7 @@ pub fn burn_main() {
     println!("geojson {:?}", geojson);
 
     // let mut tilescoverage: Vec<Tile> = vec![];
-    let tilescoverage = geojson2tiles(&geojson, 9).unwrap();
+    let tilescoverage = geojson2tiles(&geojson, 9, Some(9)).unwrap();
     println!("SHIT: {:?}", tilescoverage);
 
     // let tiles_set: HashSet<Tile> = tilescoverage.into_iter().collect();

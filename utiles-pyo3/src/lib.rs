@@ -68,9 +68,11 @@ fn _utiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(pyutiles::feature, m)?)?;
 
     // utiles functions
+    m.add_function(wrap_pyfunction!(pyutiles::geojson2tiles, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::tiles_count, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::tiles_list, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::xyz, m)?)?;
+    m.add_function(wrap_pyfunction!(pyutiles::pyparsing::parse_textiles, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::pyparsing::parse_tiles, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::xyz2quadkey, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::quadkey2xyz, m)?)?;

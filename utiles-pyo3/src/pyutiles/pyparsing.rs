@@ -88,3 +88,10 @@ pub fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
         "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument"
     ))
 }
+
+#[pyfunction]
+pub fn parse_textiles(string: &str) -> PyResult<Vec<PyTile>> {
+    let t = utiles::parse_textiles(string);
+    let pytiles = t.into_iter().map(PyTile::from).collect();
+    Ok(pytiles)
+}
