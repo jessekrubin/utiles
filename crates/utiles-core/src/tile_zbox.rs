@@ -1,5 +1,5 @@
 //! `TileZBox` - zoom-x-y bounding box
-use crate::{Point2d, TileLike};
+use crate::{Point2d, Tile, TileLike, UtilesCoreError, UtilesCoreResult};
 
 /// A struct representing a bbox of tiles at a specific zoom level
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -56,6 +56,31 @@ impl TileZBox {
     #[must_use]
     pub fn maxy(&self) -> u32 {
         self.max.y
+    }
+
+    #[must_use]
+    pub fn dx(&self) -> u32 {
+        self.max.x - self.min.x
+    }
+
+    #[must_use]
+    pub fn width(&self) -> u32 {
+        self.dx()
+    }
+
+    #[must_use]
+    pub fn dy(&self) -> u32 {
+        self.max.y - self.min.y
+    }
+
+    #[must_use]
+    pub fn height(&self) -> u32 {
+        self.dy()
+    }
+
+    #[must_use]
+    pub fn dxdy(&self) -> (u32, u32) {
+        (self.max.x - self.min.x, self.max.y - self.min.y)
     }
 
     /// Return the zoom level
@@ -138,6 +163,57 @@ impl TileZBox {
             min: Point2d::new(tile.x(), tile.y()),
             max: Point2d::new(tile.x(), tile.y()),
         }
+    }
+
+    /// Returns zbox struct from ref to array of tiles
+    ///
+    /// # Errors
+    ///
+    /// Error when there are no tiles in the array or zoom level(s) of tiles
+    /// do not match
+    pub fn from_tiles(tiles: &[Tile]) -> UtilesCoreResult<Self> {
+        if tiles.is_empty() {
+            return Err(UtilesCoreError::Str("No tiles provided".to_string()));
+        }
+
+        let expected_zoom = tiles[0].z;
+        let mut xmin = u32::MAX;
+        let mut xmax = u32::MIN;
+        let mut ymin = u32::MAX;
+        let mut ymax = u32::MIN;
+
+        for tile in tiles {
+            // Check if all tiles have the same zoom level
+            if tile.z != expected_zoom {
+                return Err(UtilesCoreError::Str(
+                    "Not all tiles have the same zoom level".to_string(),
+                ));
+            }
+
+            let x = tile.x();
+            let y = tile.y();
+
+            // Update min and max values for x
+            if x < xmin {
+                xmin = x;
+            }
+            if x > xmax {
+                xmax = x;
+            }
+
+            // Update min and max values for y
+            if y < ymin {
+                ymin = y;
+            }
+            if y > ymax {
+                ymax = y;
+            }
+        }
+        Ok(Self {
+            zoom: expected_zoom,
+            min: Point2d::new(xmin, ymin),
+            max: Point2d::new(xmax, ymax),
+        })
     }
 
     /// Return new zbox one zoom level higher/down z2 -> z3

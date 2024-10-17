@@ -14,6 +14,9 @@ fn from_id(id: u64) -> Tile {
     let y = ((xy - u64::from(x)) / dim) as u32;
     utile!(x, y, z)
 }
+
+#[allow(clippy::cast_precision_loss)]
+#[allow(clippy::similar_names)]
 fn line_string_cover(
     tile_hash: &mut HashSet<u64>,
     coords: &[(f64, f64)],
