@@ -28,8 +28,13 @@ def test_edge_cli():
     result = _run_cli(["edges"], input=contents)
     assert result.exit_code == 0
     with open(expected_filename) as ofile:
-        expected = ofile.read()
-    assert result.output == expected
+        textiles_expected = ofile.read()
+    edge_tiles = set(result.parse_tiles)
+
+    expected_edge_tiles = {
+        ut.xyz(*json.loads(e)) for e in textiles_expected.split("\n") if e.strip()
+    }
+    assert edge_tiles == expected_edge_tiles
 
 
 def test_burn_cli():

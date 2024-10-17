@@ -41,7 +41,6 @@ indicatif.workspace = true
 indoc = { workspace = true }
 json-patch = "2.0.0"
 md-5 = "0.10.6"
-ndarray = "0.16.1"
 noncrypto-digests = "0.3.2"
 num_cpus = "1.16.0"
 owo-colors = { version = "4.1.0", features = ["supports-color"] }
@@ -65,6 +64,10 @@ tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"
 utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.9" }
 walkdir = "2.5.0"
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
+
+# was using for edge finding
+#ndarray = { version = "0.16.1", features = ["rayon"] }
+#rayon = "1.10.0"
 
 # deadpool = { version = "0.12.1", features = ["managed"], default-features = false }
 # deadpool-sync = { version = "0.1.4", features = ["tracing"] }
