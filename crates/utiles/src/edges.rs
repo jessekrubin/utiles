@@ -2,17 +2,6 @@ use crate::UtilesResult;
 use std::collections::HashSet;
 use utiles_core::{Tile, TileLike, TileZBox};
 
-static IDXS: &[(isize, isize)] = &[
-    (-1, -1),
-    (-1, 0),
-    (-1, 1),
-    (0, -1),
-    (0, 1),
-    (1, -1),
-    (1, 0),
-    (1, 1),
-];
-
 static NEIGHBOR_IDXS: &[(i32, i32)] = &[
     (-1, -1),
     (-1, 0),

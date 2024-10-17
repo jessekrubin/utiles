@@ -881,20 +881,22 @@ pub fn tiles(
 /// Convert tile xyz to u64 tile id (based on mapbox coverage implementation)
 #[must_use]
 pub fn to_id(x: u32, y: u32, z: u8) -> u64 {
-    ((2u64 * (1u64 << z)) * u64::from(y) + u64::from(x)) * 32u64 + u64::from(z)
+    let dim = 2u64 * (1u64 << z);
+    ((dim * u64::from(y) + u64::from(x)) * 32u64) + u64::from(z)
 }
 
 /// Convert tile u64 id to tile xyz
 ///
-/// # Errors
+/// # Panics
 ///
-/// Errors on integer conversion error (should not happen)
-pub fn from_id(id: u64) -> UtilesCoreResult<Tile> {
+/// Errors on integer conversion error (should not happen) should not happen
+#[allow(clippy::cast_possible_truncation)]
+#[must_use]
+pub fn from_id(id: u64) -> Tile {
     let z = (id % 32) as u8;
     let dim = 2u64 * (1u64 << z);
     let xy = (id - u64::from(z)) / 32u64;
-    let x = u32::try_from(xy % dim)?;
-    let y = u32::try_from((xy - u64::from(x)) / dim)?;
-    let tile = utile!(x, y, z);
-    Ok(tile)
+    let x = u32::try_from(xy % dim).expect("should never happen");
+    let y = ((xy - u64::from(x)) / dim) as u32;
+    utile!(x, y, z)
 }

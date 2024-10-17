@@ -3,21 +3,6 @@ use geojson::GeoJson;
 use std::collections::HashSet;
 use tracing::debug;
 use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
-const EPSILON: f64 = 1e-14; // Small value to account for floating-point precision
-
-fn to_id(x: u32, y: u32, z: u8) -> u64 {
-    let dim = 2u64 * (1u64 << z);
-    ((dim * y as u64 + x as u64) * 32u64) + z as u64
-}
-
-fn from_id(id: u64) -> Tile {
-    let z = (id % 32) as u8;
-    let dim = 2u64 * (1u64 << z);
-    let xy = (id - z as u64) / 32u64;
-    let x = (xy % dim) as u32;
-    let y = ((xy - x as u64) / dim) as u32;
-    utile!(x, y, z)
-}
 
 // fn line_string_cover(tile_hash: &mut HashSet<Tile>, coords: &[(f64, f64)], zoom: u8) {
 //     for i in 0..coords.len() - 1 {
@@ -72,7 +57,7 @@ fn from_id(id: u64) -> Tile {
 // }
 //
 
-// #[allow(clippy::cast_precision_loss)]
+#[allow(clippy::cast_precision_loss)]
 #[allow(clippy::similar_names)]
 fn line_string_cover(
     tile_hash: &mut HashSet<Tile>,
@@ -83,10 +68,7 @@ fn line_string_cover(
     let mut prev_x: Option<i64> = None;
     let mut prev_y: Option<i64> = None;
     let mut y_value: Option<i64> = None;
-
-    let n = 1u32 << maxzoom; // Number of tiles at this zoom level
     let minxy = (1u32 << maxzoom) - 1; // Maximum valid tile index at this zoom level
-
     for i in 0..coords.len() - 1 {
         let start_coord = coords[i];
         let stop_coord = coords[i + 1];
@@ -224,7 +206,7 @@ fn polygon_cover(
         }
         let max_x = intersections[i + 1].0;
         for x in min_x..max_x {
-            let tile = utile!(x.try_into().unwrap(), y.try_into().unwrap(), zoom);
+            let tile = utile!(x, y, zoom);
             tile_array.push(tile);
         }
         i += 2;
