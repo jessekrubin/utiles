@@ -115,29 +115,23 @@ impl FromStr for Tile {
         if s.starts_with('{') {
             // if '{' assume its an obj
             let r = Tile::from_json_obj(s);
-            return match r {
+            match r {
                 Ok(tile) => Ok(tile),
                 Err(_e) => {
                     Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
                 }
-            };
+            }
         } else if s.starts_with('[') {
             // if '[' assume its an arr
             let r = Tile::from_json_arr(s);
-            return match r {
+            match r {
                 Ok(tile) => Ok(tile),
                 Err(_e) => {
                     Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
                 }
-            };
-        }
-
-        // assume its a quadkey
-        let res = quadkey2tile(s);
-        // if ok return tile but not tile parse error
-        match res {
-            Ok(tile) => Ok(tile),
-            Err(_e) => Err(Box::from(UtilesCoreError::TileParseError(s.to_string()))),
+            }
+        } else {
+            Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
         }
     }
 }

@@ -98,6 +98,62 @@ fn test_simplify() {
         assert!(simplified.contains(&target));
     }
 }
+#[test]
+fn test_simplify_minzoom() {
+    let targets = vec![
+        utile!(487, 332, 10),
+        utile!(486, 332, 10),
+        utile!(487, 333, 10),
+        utile!(973, 667, 11),
+        utile!(973, 666, 11),
+        utile!(972, 666, 11),
+        utile!(1944, 1334, 12),
+    ];
+
+    let mut children = vec![];
+    for t in &targets {
+        children.extend(t.children(Some(12)));
+    }
+    let tset = children.into_iter().collect::<HashSet<Tile>>();
+    let simplified = simplify(&tset, Some(11));
+    for target in targets {
+        if target.z == 10 {
+            for child in target.children1() {
+                assert!(simplified.contains(&child));
+            }
+        } else {
+            assert!(simplified.contains(&target));
+        }
+    }
+}
+#[test]
+fn test_simplify_v1_minzoom() {
+    let targets = vec![
+        utile!(487, 332, 10),
+        utile!(486, 332, 10),
+        utile!(487, 333, 10),
+        utile!(973, 667, 11),
+        utile!(973, 666, 11),
+        utile!(972, 666, 11),
+        utile!(1944, 1334, 12),
+    ];
+
+    let mut children = vec![];
+    for t in &targets {
+        children.extend(t.children(Some(12)));
+    }
+    let tset = children.into_iter().collect::<HashSet<Tile>>();
+    let simplified = simplify_v1(&tset, Some(11));
+    for target in targets {
+        if target.z == 10 {
+            for child in target.children1() {
+                assert!(simplified.contains(&child));
+            }
+        } else {
+            assert!(simplified.contains(&target));
+        }
+    }
+}
 
 #[test]
 fn test_simplify_removal() {

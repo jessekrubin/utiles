@@ -1,10 +1,9 @@
 use crate::Tile;
-use std::str::FromStr;
 
+#[must_use]
 pub fn parse_textiles(s: &str) -> Vec<Tile> {
-    let parsed: Vec<Tile> = s
-        .split('\n')
-        .flat_map(Tile::from_str)
-        .collect::<Vec<Tile>>();
-    parsed
+    s.split('\n')
+        .filter(|line| !line.trim().is_empty())
+        .filter_map(|line| Tile::from_json(line).ok())
+        .collect()
 }

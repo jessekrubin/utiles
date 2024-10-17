@@ -1,6 +1,7 @@
 use crate::traits::TileChildren1;
 use crate::TileParent;
 use std::collections::{HashMap, HashSet};
+use std::fmt::Debug;
 use std::hash::Hash;
 
 /// Merge a set of tiles into a simplified set of tiles
@@ -46,7 +47,7 @@ pub fn merge<
 ///
 /// TODO: Add `minzoom` and `maxzoom` parameters
 #[must_use]
-pub fn simplify<
+pub fn simplify_v1<
     T: TileParent + Copy + Eq + std::hash::Hash,
     S: ::std::hash::BuildHasher + Default,
 >(
@@ -93,7 +94,7 @@ struct TileMerger<T: TileParent + TileChildren1> {
     minzoom: u8,
 }
 
-impl<T: TileParent + TileChildren1 + Eq + Hash + Copy + Sized> TileMerger<T> {
+impl<T: TileParent + TileChildren1 + Eq + Hash + Copy + Sized + Debug> TileMerger<T> {
     fn new(minzoom: u8) -> Self {
         Self {
             coverage_map: HashSet::new(),
@@ -159,7 +160,7 @@ impl<T: TileParent + TileChildren1 + Eq + Hash + Copy + Sized> TileMerger<T> {
 }
 
 #[must_use]
-pub fn simplify_v2<T: TileParent + TileChildren1, S: ::std::hash::BuildHasher>(
+pub fn simplify<T: TileParent + TileChildren1 + Debug, S: ::std::hash::BuildHasher>(
     tiles: &HashSet<T, S>,
     minzoom: Option<u8>,
 ) -> HashSet<T> {
