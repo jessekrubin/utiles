@@ -6,7 +6,7 @@ import pytest
 import utiles as ut
 from utiles.dev.testing import run_cli as _run_cli
 
-## TODO
+## TODO union is not implemented as of right now...
 # def test_union_cli():
 #     filename = os.path.join(os.path.dirname(__file__), 'fixtures/union.txt')
 #     expectedFilename = os.path.join(os.path.dirname(__file__), 'expected/union.txt')
@@ -81,7 +81,6 @@ def test_burn_tile_center_lines_roundtrip():
         "geometry": {"type": "LineString", "coordinates": list(coords)},
     }
 
-    # runner = CliRunner()
     result = _run_cli(["burn", "1"], input=json.dumps(features))
 
     output_tiles = [json.loads(t) for t in result.output.split("\n") if t]
