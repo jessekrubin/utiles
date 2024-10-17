@@ -802,8 +802,8 @@ mod tests {
     #[test]
     fn parse_quadkey() {
         let quadkey = "023010203";
-        let tile = quadkey.parse::<Tile>();
-        assert_eq!(tile.unwrap(), Tile::new(81, 197, 9));
+        let tile = Tile::from_quadkey(quadkey).unwrap();
+        assert_eq!(tile, Tile::new(81, 197, 9));
     }
 
     #[test]
