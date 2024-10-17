@@ -160,7 +160,21 @@ pub struct BurnArgs {
     #[command(flatten)]
     pub fmtopts: TileFmtOptions,
 }
+#[derive(Debug, Parser)]
+pub struct MergeArgs {
+    /// min zoom level (0-30) to merge to
+    #[arg(long, short = 'Z', default_value = "0")]
+    pub minzoom: u8,
 
+    #[arg(required = false, short, long, action = clap::ArgAction::SetTrue)]
+    pub sort: bool,
+
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
 #[derive(Debug, Parser)]
 pub struct FmtStrArgs {
     #[command(flatten)]
@@ -768,6 +782,10 @@ pub enum Commands {
     /// Burn tiles from `GeoJSON` stream at zoom level
     #[command(name = "burn", hide = true)]
     Burn(BurnArgs),
+
+    /// Merge tiles from stream removing parent tiles if children are present
+    #[command(name = "merge")]
+    Merge(MergeArgs),
 
     /// Echo edge tiles from stream of xyz tiles
     #[command(name = "edges")]
