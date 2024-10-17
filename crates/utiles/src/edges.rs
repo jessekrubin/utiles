@@ -45,10 +45,7 @@ fn roll_2d(arr: &Array2<bool>, x_shift: isize, y_shift: isize) -> Array2<bool> {
 pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
     let zbox = TileZBox::from_tiles(tiles)?;
     // make 2D burn array
-    let burn = burn_tiles(
-        tiles,
-        zbox,
-    );
+    let burn = burn_tiles(tiles, zbox);
 
     // rolled arrays w/o adding an extra axis
     let stacks: Vec<Array2<bool>> = IDXS

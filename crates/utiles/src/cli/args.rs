@@ -149,6 +149,19 @@ pub struct TileFmtArgs {
 }
 
 #[derive(Debug, Parser)]
+pub struct BurnArgs {
+    /// Zoom level (0-30)
+    #[arg(required = true, value_parser = clap::value_parser ! (u8).range(0..=30))]
+    pub zoom: u8,
+
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
+
+#[derive(Debug, Parser)]
 pub struct FmtStrArgs {
     #[command(flatten)]
     pub inargs: TileInputStreamArgs,
@@ -754,7 +767,7 @@ pub enum Commands {
 
     /// Burn tiles from `GeoJSON` stream at zoom level
     #[command(name = "burn", hide = true)]
-    Burn(TileFmtArgs),
+    Burn(BurnArgs),
 
     /// Echo edge tiles from stream of xyz tiles
     #[command(name = "edges")]

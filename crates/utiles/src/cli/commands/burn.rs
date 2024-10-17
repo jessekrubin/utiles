@@ -1,23 +1,23 @@
-use crate::cli::args::TileFmtArgs;
+use crate::cli::args::BurnArgs;
+use crate::cli::stdinterator_filter;
+use crate::cover::geojson2tiles;
 use crate::errors::UtilesResult;
-use tracing::debug;
+use geojson::GeoJson;
+use utiles_core::TileLike;
 
-pub async fn burn_main(args: TileFmtArgs) -> UtilesResult<()> {
-    debug!("BURN TBD");
-    debug!("ARGS: {:?}", args);
-    // let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
-    // let mut tiles: Vec<Tile> =  vec![];
-    //
-    // for line_res in lines {
-    //     let line = line_res?;
-    //     let tile = Tile::from_json(&line)?;
-    //     tiles.insert(tile);
-    //
-    //     // let neighbors = tile.neighbors();
-    //     // for neighbor in neighbors {
-    //     //     let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
-    //     //     println!("{}{}", rs, neighbor.json_arr());
-    //     // }
-    // }
+pub async fn burn_main(args: BurnArgs) -> UtilesResult<()> {
+    let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
+    let mut string = String::new();
+    for line_res in lines {
+        let line = line_res?;
+        string.push_str(&line);
+    }
+    let geojson_parse_res = string.parse::<GeoJson>();
+    let geojson = geojson_parse_res?;
+    let tiles = geojson2tiles(&geojson, args.zoom)?;
+    for tile in tiles {
+        let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
+        println!("{}{}", rs, tile.json_arr());
+    }
     Ok(())
 }

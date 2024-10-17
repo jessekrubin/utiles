@@ -96,6 +96,10 @@ pub enum UtilesError {
     #[error("sqlite err: {0}")]
     AsyncSqliteError(#[from] async_sqlite::Error),
 
+    /// Geojson error(s)
+    #[error("geojson error: {0}")]
+    GeojsonError(#[from] geojson::Error),
+
     /// Error from globset
     #[error("globset error: {0}")]
     GlobsetError(#[from] globset::Error),

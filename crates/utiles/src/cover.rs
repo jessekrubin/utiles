@@ -1,19 +1,7 @@
 use crate::{UtilesError, UtilesResult};
 use geojson::GeoJson;
 use std::collections::HashSet;
-use utiles_core::{lnglat2tile_frac, tile, utile, Tile};
-
-fn to_id(x: u32, y: u32, z: u8) -> u64 {
-    ((2u64 * (1u64 << z)) * u64::from(y) + u64::from(x)) * 32u64 + u64::from(z)
-}
-fn from_id(id: u64) -> Tile {
-    let z = (id % 32) as u8;
-    let dim = 2u64 * (1u64 << z);
-    let xy = (id - u64::from(z)) / 32u64;
-    let x = (xy % dim) as u32;
-    let y = ((xy - u64::from(x)) / dim) as u32;
-    utile!(x, y, z)
-}
+use utiles_core::{from_id, lnglat2tile_frac, tile, to_id, utile, Tile};
 
 #[allow(clippy::cast_precision_loss)]
 #[allow(clippy::similar_names)]
@@ -173,10 +161,15 @@ fn polygon_cover(
         i += 2;
     }
 }
-fn append_hash_tiles(tile_hash: &HashSet<u64>, tiles: &mut Vec<Tile>) {
+fn append_hash_tiles(
+    tile_hash: &HashSet<u64>,
+    tiles: &mut Vec<Tile>,
+) -> UtilesResult<()> {
     for id in tile_hash {
-        tiles.push(from_id(*id));
+        let tile = from_id(*id)?;
+        tiles.push(tile);
     }
+    Ok(())
 }
 
 fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> UtilesResult<Vec<Tile>> {
@@ -232,7 +225,7 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> UtilesResult<Vec<Tile>> {
         )),
     };
     res?;
-    append_hash_tiles(&tile_hash, &mut tiles);
+    append_hash_tiles(&tile_hash, &mut tiles)?;
     Ok(tiles)
 }
 pub fn geojson2tiles(gj: &GeoJson, zoom: u8) -> UtilesResult<HashSet<Tile>> {

@@ -290,7 +290,7 @@ class TestChildren:
             (487, 332, 10),
             (487, 333, 10),
         ]
-        assert set(json_tiles) == set((ut.xyz(*el) for el in expected_tiles))
+        assert set(json_tiles) == set(ut.xyz(*el) for el in expected_tiles)
 
 
 # ===================
