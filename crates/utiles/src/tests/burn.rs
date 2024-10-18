@@ -25,8 +25,7 @@ fn burn_test() {
     for tile in expected_set {
         assert!(
             tiles_set.contains(&tile),
-            "Expected tile {:?} is not in the tiles set.",
-            tile
+            "Expected tile {tile:?} is not in the tiles set."
         );
     }
 
