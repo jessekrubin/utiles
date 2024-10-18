@@ -91,23 +91,16 @@ def _test_geojson_cover(geojson_filepath: str) -> None:
     assert set(expected_tiles) == set(coverage)
 
 
-PROBLEM_CHILDREN = {
-    "degenring.geojson",
-    "donut.geojson",
-    "highzoom.geojson",
-    "multipoint.geojson",
-    "spiked.geojson",
-    "uk.geojson",
-}
+PROBLEM_CHILDREN = {}
 
 
 @pytest.mark.parametrize(
     "filepath",
-    [
-        pytest.param(str(e), id=str(e))
-        for e in TEST_GEOJSON_FILEPATHS
-        if not any(str(e).endswith(p) for p in PROBLEM_CHILDREN)
-    ],
+    [pytest.param(str(e), id=str(e)) for e in TEST_GEOJSON_FILEPATHS],
 )
 def test_geojson_cover(filepath: Path) -> None:
-    _test_geojson_cover(str(filepath))
+    if any(str(filepath).endswith(p) for p in PROBLEM_CHILDREN):
+        with pytest.raises(AssertionError):
+            _test_geojson_cover(str(filepath))
+    else:
+        _test_geojson_cover(str(filepath))

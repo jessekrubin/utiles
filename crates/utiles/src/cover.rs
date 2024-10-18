@@ -1,61 +1,10 @@
+//! Tile cover for geojson object(s) based on mapbox's tile-cover alg
+use crate::server::UtilesServerConfig;
 use crate::{UtilesError, UtilesResult};
 use geojson::GeoJson;
 use std::collections::HashSet;
 use tracing::debug;
 use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
-
-// fn line_string_cover(tile_hash: &mut HashSet<Tile>, coords: &[(f64, f64)], zoom: u8) {
-//     for i in 0..coords.len() - 1 {
-//         let (x0f, y0f, _) = lnglat2tile_frac(coords[i].0, coords[i].1, zoom);
-//         let (x1f, y1f, _) = lnglat2tile_frac(coords[i + 1].0, coords[i + 1].1, zoom);
-//
-//         let x0 = x0f.floor() as i32;
-//         let y0 = y0f.floor() as i32;
-//         let x1 = x1f.floor() as i32;
-//         let y1 = y1f.floor() as i32;
-//
-//         bresenham_line(x0, y0, x1, y1, zoom, tile_hash);
-//     }
-// }
-//
-// fn bresenham_line(
-//     x0: i32,
-//     y0: i32,
-//     x1: i32,
-//     y1: i32,
-//     zoom: u8,
-//     tile_hash: &mut HashSet<Tile>,
-// ) {
-//     let mut x = x0;
-//     let mut y = y0;
-//     let dx = (x1 - x0).abs();
-//     let dy = -(y1 - y0).abs();
-//     let sx = if x0 < x1 { 1 } else { -1 };
-//     let sy = if y0 < y1 { 1 } else { -1 };
-//     let mut err = dx + dy;
-//
-//     loop {
-//         if x >= 0 && y >= 0 {
-//             let tile = utile!(x as u32, y as u32, zoom);
-//             tile_hash.insert(tile);
-//         }
-//
-//         if x == x1 && y == y1 {
-//             break;
-//         }
-//
-//         let e2 = 2 * err;
-//         if e2 >= dy {
-//             err += dy;
-//             x += sx;
-//         }
-//         if e2 <= dx {
-//             err += dx;
-//             y += sy;
-//         }
-//     }
-// }
-//
 
 #[allow(clippy::cast_precision_loss)]
 #[allow(clippy::similar_names)]
@@ -167,96 +116,92 @@ fn line_string_cover(
     }
 }
 
+#[allow(clippy::cast_precision_loss)]
 fn polygon_cover(
     tile_hash: &mut HashSet<Tile>,
     tile_array: &mut Vec<Tile>,
     geom: &[Vec<(f64, f64)>],
     zoom: u8,
 ) {
-    let mut intersections = Vec::new();
+    use std::collections::BTreeMap;
+
+    let mut scanline_intersections: BTreeMap<u32, Vec<u32>> = BTreeMap::new();
+
     for element in geom {
         let mut ring = Vec::new();
         line_string_cover(tile_hash, element, zoom, Some(&mut ring));
         let len = ring.len();
-        for j in 0..len {
-            let k = if j == 0 { len - 1 } else { j - 1 };
-            let m = (j + 1) % len;
 
+        if len == 0 {
+            continue;
+        }
+
+        let mut j = 0usize;
+        let mut k = len - 1;
+
+        while j < len {
             let ring_j = ring[j];
             let ring_k = ring[k];
-            let ring_m = ring[m];
 
-            let y = ring_j.1;
+            let x0 = ring_k.0 as i32;
+            let y0 = ring_k.1 as i32;
+            let x1 = ring_j.0 as i32;
+            let y1 = ring_j.1 as i32;
 
-            if (y > ring_k.1 || y > ring_m.1) // Not local minimum
-                && (y < ring_k.1 || y < ring_m.1) // Not local maximum
-                && y != ring_m.1
-            {
-                intersections.push(ring_j);
+            // Skip horizontal edges
+            if y0 == y1 {
+                k = j;
+                j += 1;
+                continue;
             }
+
+            // Calculate the range of y values to process
+            let ymin = y0.min(y1);
+            let ymax = y0.max(y1);
+
+            let dx = x1 - x0;
+            let dy = y1 - y0;
+
+            for y in ymin..ymax {
+                // Calculate the intersection x coordinate
+                let t = (y - y0) as f64 / dy as f64;
+                let x = x0 as f64 + t * dx as f64;
+                let x = x.floor() as u32;
+
+                // Add the intersection to the scanline
+                scanline_intersections
+                    .entry(y as u32)
+                    .or_insert_with(Vec::new)
+                    .push(x);
+            }
+
+            k = j;
+            j += 1;
         }
     }
-    intersections.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
-    let mut i = 0;
-    while i < intersections.len() {
-        let y = intersections[i].1;
-        let min_x = intersections[i].0 + 1;
-        if i + 1 >= intersections.len() {
-            break;
+
+    // Now process each scanline
+    for (&y, xs) in &scanline_intersections {
+        let mut xs = xs.clone();
+        xs.sort_unstable();
+
+        let mut i = 0;
+        while i + 1 < xs.len() {
+            let x_start = xs[i];
+            let x_end = xs[i + 1];
+
+            for x in x_start..x_end {
+                let tile = Tile::new(x, y, zoom);
+                if !tile_hash.contains(&tile) {
+                    tile_array.push(tile);
+                }
+            }
+
+            i += 2;
         }
-        let max_x = intersections[i + 1].0;
-        for x in min_x..max_x {
-            let tile = utile!(x, y, zoom);
-            tile_array.push(tile);
-        }
-        i += 2;
     }
 }
 
-// fn polygon_coverv1(
-//     tile_hash: &mut HashSet<u64>,
-//     tile_array: &mut Vec<Tile>,
-//     geom: &[Vec<(f64, f64)>],
-//     zoom: u8,
-// ) {
-//     let mut intersections = Vec::new();
-//     for element in geom {
-//         let mut ring = Vec::new();
-//         line_string_cover(tile_hash, element, zoom, Some(&mut ring));
-//         let len = ring.len();
-//         for j in 0..len {
-//             let k = if j == 0 { len - 1 } else { j - 1 };
-//             let m = (j + 1) % len;
-//
-//             let ring_j = ring[j];
-//             let ring_k = ring[k];
-//             let ring_m = ring[m];
-//
-//             let y = ring_j.1;
-//
-//             if (y > ring_k.1 || y > ring_m.1) // Not local minimum
-//                 && (y < ring_k.1 || y < ring_m.1) // Not local maximum
-//                 && y != ring_m.1
-//             {
-//                 intersections.push(ring_j);
-//             }
-//         }
-//     }
-//     intersections.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
-//     let mut i = 0;
-//     while i < intersections.len() {
-//         let y = intersections[i].1;
-//         let min_x = intersections[i].0 + 1;
-//         if i + 1 >= intersections.len() {
-//             break;
-//         }
-//         let max_x = intersections[i + 1].0;
-//         for x in min_x..max_x {
-//             tile_array.push(utile!(x, y, zoom));
-//         }
-//         i += 2;
-//     }
-// }
 fn append_hash_tiles(
     tile_hash: &HashSet<Tile>,
     tiles: &mut Vec<Tile>,
@@ -275,7 +220,7 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> UtilesResult<Vec<Tile>> {
         geojson::Value::Point(coords) => {
             let tile = tile(coords[0], coords[1], zoom, None)?;
             tiles.push(tile);
-            Ok(())
+            Ok::<(), UtilesError>(())
         }
         geojson::Value::MultiPoint(coords_list) => {
             for coords in coords_list {
@@ -317,9 +262,13 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> UtilesResult<Vec<Tile>> {
             }
             Ok(())
         }
-        geojson::Value::GeometryCollection(_) => Err(UtilesError::Unsupported(
-            "Unsupported geometry type".to_string(),
-        )),
+        geojson::Value::GeometryCollection(gjcoll) => {
+            for geom in gjcoll {
+                let recurse_res = geom2tiles(geom, zoom)?;
+                tile_hash.extend(recurse_res);
+            }
+            Ok(())
+        }
     };
     res?;
     append_hash_tiles(&tile_hash, &mut tiles)?;
