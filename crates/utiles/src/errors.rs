@@ -102,7 +102,7 @@ pub enum UtilesError {
 
     /// Geojson error(s)
     #[error("geojson error: {0}")]
-    GeojsonError(#[from] geojson::Error),
+    GeojsonError(String),
 
     /// Error from globset
     #[error("globset error: {0}")]
