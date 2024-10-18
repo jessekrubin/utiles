@@ -155,7 +155,7 @@ fn polygon_cover(
                 continue;
             }
 
-            // Calculate the range of y values to process
+            // range of y values
             let ymin = y0.min(y1);
             let ymax = y0.max(y1);
 
@@ -163,18 +163,17 @@ fn polygon_cover(
             let dy = y1 - y0;
 
             for y in ymin..ymax {
-                // Calculate the intersection x coordinate
+                // add intersection x coordinate
                 let t = (y - y0) as f64 / dy as f64;
                 let x = x0 as f64 + t * dx as f64;
                 let x = x.floor() as u32;
 
-                // Add the intersection to the scanline
+                // Add intersection point
                 scanline_intersections
                     .entry(y as u32)
                     .or_insert_with(Vec::new)
                     .push(x);
             }
-
             k = j;
             j += 1;
         }
@@ -207,7 +206,6 @@ fn append_hash_tiles(
     tiles: &mut Vec<Tile>,
 ) -> UtilesResult<()> {
     for id in tile_hash {
-        // let tile = from_id(*id);
         tiles.push(*id);
     }
     Ok(())
