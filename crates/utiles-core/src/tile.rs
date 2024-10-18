@@ -552,9 +552,9 @@ impl Tile {
         let xyz = self.tuple_string();
         let geometry_coordinates = vec![vec![
             vec![west, south],
-            vec![west, north],
-            vec![east, north],
             vec![east, south],
+            vec![east, north],
+            vec![west, north],
             vec![west, south],
         ]];
         let mut properties: Map<String, Value> = Map::new();
