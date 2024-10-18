@@ -52,8 +52,8 @@ def test_burn_cli() -> None:
 
     expected_tiles = set(ut.parse_textiles(textiles_expected))
     # make sure all expected are in parsed_edges...
-    for edge in parsed_edges:
-        assert edge in expected_tiles
+    for edge in expected_tiles:
+        assert edge in parsed_edges
 
 
 def test_burn_tile_center_point_roundtrip() -> None:
