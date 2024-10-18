@@ -24,6 +24,7 @@ pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
     let debug_or_trace = log_config.debug || log_config.trace;
 
     #[allow(clippy::match_bool)]
+    #[allow(clippy::single_match_else)]
     match log_config.json {
         true => {
             let subscriber = fmt::Subscriber::builder()

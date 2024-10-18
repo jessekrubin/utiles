@@ -1,140 +1,8 @@
-use ndarray::{stack, Array2, Axis};
+#![allow(clippy::too_many_lines)]
+
+use crate::edges::find_edges;
 use std::collections::HashSet;
-use utiles_core::{utile, Tile, TileLike};
-
-fn get_range(tiles: &[Tile]) -> (usize, usize, usize, usize) {
-    let (xmin, xmax) = tiles.iter().fold((usize::MAX, 0), |(min_x, max_x), tile| {
-        (min_x.min(tile.x() as usize), max_x.max(tile.x()))
-    });
-
-    let (ymin, ymax) = tiles.iter().fold((usize::MAX, 0), |(min_y, max_y), tile| {
-        (min_y.min(tile.y() as usize), max_y.max(tile.y()))
-    });
-
-    (xmin, xmax as usize, ymin, ymax as usize)
-}
-
-// Function to get zoom level (assumes all tiles have the same zoom).
-fn get_zoom(tiles: &[Tile]) -> u8 {
-    tiles[0].z
-}
-
-// Burn the tiles into a 2D array
-
-fn burn_tiles(
-    tiles: &[Tile],
-    xmin: usize,
-    xmax: usize,
-    ymin: usize,
-    ymax: usize,
-) -> Array2<bool> {
-    let mut burn = Array2::<bool>::default((xmax - xmin + 3, ymax - ymin + 3));
-    for tile in tiles {
-        let x_us = tile.x() as usize;
-        let y_us = tile.y() as usize;
-        burn[(x_us - xmin + 1, y_us - ymin + 1)] = true;
-    }
-    burn
-}
-
-// Roll function for 2D arrays
-fn roll_2d(arr: &Array2<bool>, x_shift: isize, y_shift: isize) -> Array2<bool> {
-    let (rows, cols) = arr.dim();
-    let mut rolled = Array2::default((rows, cols));
-
-    for i in 0..rows {
-        for j in 0..cols {
-            let new_i = ((i as isize + x_shift).rem_euclid(rows as isize)) as usize;
-            let new_j = ((j as isize + y_shift).rem_euclid(cols as isize)) as usize;
-            rolled[(new_i, new_j)] = arr[(i, j)];
-        }
-    }
-    rolled
-}
-static IDXS: &[(isize, isize)] = &[
-    (-1, -1),
-    (-1, 0),
-    (-1, 1),
-    (0, -1),
-    (0, 1),
-    (1, -1),
-    (1, 0),
-    (1, 1),
-];
-fn find_edges(tiles: Vec<Tile>) -> Vec<Tile> {
-    let (xmin, xmax, ymin, ymax) = get_range(&tiles);
-    let zoom = get_zoom(&tiles);
-
-    // Create the 2D burn array
-    let burn = burn_tiles(&tiles, xmin, xmax, ymin, ymax);
-
-    // Define the rolling indices
-    // let idxs = vec![
-    //     (-1, -1),
-    //     (-1, 0),
-    //     (-1, 1),
-    //     (0, -1),
-    //     (0, 1),
-    //     (1, -1),
-    //     (1, 0),
-    //     (1, 1),
-    // ];
-
-    // Create the rolled arrays without adding an extra axis
-    let stacks: Vec<Array2<bool>> = IDXS
-        .iter()
-        .map(|(dx, dy)| roll_2d(&burn, *dx, *dy))
-        .collect();
-    // Stack along Axis(2), resulting in a 3D array
-    let stacked = stack(
-        Axis(2),
-        &stacks.iter().map(|a| a.view()).collect::<Vec<_>>(),
-    )
-    .expect("Failed to stack arrays");
-
-    // Calculate the edges
-    // let min_array = stacked.map_axis(Axis(2), |view| view.iter().copied().min().unwrap());
-    let min_array = stacked.map_axis(Axis(2), |view| *view.iter().min().unwrap());
-
-    // get edges sans clone (xors the 2 arrs)
-    let xys_edge = &burn & !&min_array;
-
-    // Collect the edge tiles
-    // let mut edge_indices = Vec::new();
-    let uxmin = xmin - 1;
-    let uymin = ymin - 1;
-
-    // v1 of weird itering
-    // ==========================================
-    // let tiles = xys_edge.indexed_iter().map(
-    //     |((i, j), is_edge)| {
-    //         if *is_edge{
-    //             let tile = Tile::new(
-    //                 (i + uxmin) as u32,
-    //                 (j + uymin) as u32,
-    //                 zoom,
-    //             );
-    //             Some(
-    //              tile
-    //             )
-    //         }else{
-    //             None
-    //         }
-    //
-    //     }
-    //
-    // ).flatten().collect::<Vec<Tile>>();
-    // ==========================================
-    // more sane version:
-
-    let tiles = xys_edge
-        .indexed_iter()
-        .filter(|(_, &is_edge)| is_edge)
-        .map(|((i, j), _)| Tile::new((i + uxmin) as u32, (j + uymin) as u32, zoom))
-        .collect::<Vec<Tile>>();
-
-    tiles
-}
+use utiles_core::{utile, Tile};
 
 fn _test_data_input() -> Vec<Tile> {
     vec![
@@ -330,33 +198,13 @@ fn _test_expected() -> Vec<Tile> {
         utile!(4192, 3101, 13),
     ]
 }
-pub fn edges_main() {
+#[test]
+fn test_edges() {
     let tdata = _test_data_input();
-    let edges = find_edges(tdata);
-
-    println!("Edges:\n{:?}", edges);
+    let edges = find_edges(&tdata).unwrap();
     let expected = _test_expected();
-
     let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
     let edges_set = edges.into_iter().collect::<HashSet<Tile>>();
 
-    println!("EQUAH: {}", expected_set.eq(&edges_set));
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_edges() {
-        let tdata = _test_data_input();
-        let edges = find_edges(tdata);
-
-        let expected = _test_expected();
-
-        let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
-        let edges_set = edges.into_iter().collect::<HashSet<Tile>>();
-
-        assert_eq!(expected_set, edges_set);
-    }
+    assert_eq!(expected_set, edges_set);
 }

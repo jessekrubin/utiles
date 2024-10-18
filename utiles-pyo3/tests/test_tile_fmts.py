@@ -1,7 +1,7 @@
 import utiles as ut
 
 
-def test_tile_fmts_simple():
+def test_tile_fmts_simple() -> None:
     t = (1, 2, 3)
     tfmt = ut.TileFmts("{z}/{x}/{y}")
     assert tfmt.format(t) == "3/1/2"
@@ -23,7 +23,7 @@ def _osm_tile_url_fstring(t: ut.Tile) -> str:
     return f"https://tile.openstreetmap.org/{t.z}/{t.x}/{t.y}.png"
 
 
-def test_equiv():
+def test_equiv() -> None:
     assert _osm_tile_url_fmtstr(ut.Tile(1, 2, 3)) == _osm_tile_url_fstring(
         ut.Tile(1, 2, 3)
     )

@@ -3,7 +3,7 @@ use std::f64::consts::PI;
 use std::num::FpCategory;
 
 use crate::bbox::{BBox, WebBBox};
-use crate::constants::{EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
+use crate::constants::{DEG2RAD, EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesCoreResult;
 use crate::point2d;
 use crate::sibling_relationship::SiblingRelationship;
@@ -637,6 +637,55 @@ pub fn tile(
     Tile::from_lnglat_zoom(lng, lat, zoom, truncate)
 }
 
+/// Converts longitude, latitude, and zoom level to fractional tile coordinates.
+///
+/// # Examples
+/// ```
+/// use utiles_core::lnglat2tile_frac;
+/// let (xf, yf, z) =lnglat2tile_frac(-95.939_655_303_955_08, 41.260_001_085_686_97, 9);
+/// assert!((xf - 119.552_490_234_375).abs() < 0.0001, "xf: {}", xf);
+/// assert!((yf - 191.471_191_406_25).abs() < 0.0001, "yf: {}", yf);
+/// assert!(z == 9);
+/// ```
+#[must_use]
+pub fn lnglat2tile_frac(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
+    let sin = (lat * DEG2RAD).sin();
+    let z2 = 2f64.powi(i32::from(z));
+    let mut x = z2 * (lng / 360.0 + 0.5);
+    let y = z2 * (0.5 - (0.25 * ((1.0 + sin) / (1.0 - sin)).ln()) / PI);
+
+    // Wrap Tile X using rem_euclid
+    x = x.rem_euclid(z2);
+
+    (x, y, z)
+}
+
+// fn lnglat2tile_frac_old(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
+//     // let n = 2.0_f64.powi(z as i32);
+//     // let x = n * ((lng + 180.0) / 360.0);
+//     // let lat_rad = lat.to_radians();
+//     // let y = n * (1.0 - (lat_rad.sinh().atanh() / std::f64::consts::PI)) / 2.0;
+//     // (x, y, z)
+//     let sin = (lat * DEG2RAD).sin();
+//     let z2 = 2f64.powi(i32::from(z));
+//     let mut x = z2 * (lng / 360.0 + 0.5);
+//     let y = z2 * (0.5 - (0.25 * ((1.0 + sin) / (1.0 - sin)).ln()) / PI);
+//     // Wrap Tile X
+//     x %= z2;
+//     if x < 0.0 {
+//         x += z2;
+//     }
+//
+//     (x, y, z)
+// }
+// fn lnglat2tile_frac(lon: f64, lat: f64, zoom: u8) -> (f64, f64, u8) {
+//     let n = 2.0_f64.powi(zoom as i32);
+//     let x = n * ((lon + 180.0) / 360.0);
+//     let lat_rad = lat.to_radians();
+//     let y = n * (1.0 - (lat_rad.sinh().atanh() / std::f64::consts::PI)) / 2.0;
+//     (x, y, zoom)
+// }
+
 /// Return the bounding tile for a bounding box.
 ///
 /// # Errors
@@ -827,4 +876,27 @@ pub fn tiles(
             }
         })
     })
+}
+
+/// Convert tile xyz to u64 tile id (based on mapbox coverage implementation)
+#[must_use]
+pub fn to_id(x: u32, y: u32, z: u8) -> u64 {
+    let dim = 2u64 * (1u64 << z);
+    ((dim * u64::from(y) + u64::from(x)) * 32u64) + u64::from(z)
+}
+
+/// Convert tile u64 id to tile xyz
+///
+/// # Panics
+///
+/// Errors on integer conversion error (should not happen) should not happen
+#[allow(clippy::cast_possible_truncation)]
+#[must_use]
+pub fn from_id(id: u64) -> Tile {
+    let z = (id % 32) as u8;
+    let dim = 2u64 * (1u64 << z);
+    let xy = (id - u64::from(z)) / 32u64;
+    let x = u32::try_from(xy % dim).expect("should never happen");
+    let y = ((xy - u64::from(x)) / dim) as u32;
+    utile!(x, y, z)
 }

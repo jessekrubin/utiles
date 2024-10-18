@@ -178,7 +178,7 @@ def test_copy_mbtiles_bbox(tmp_path: Path, test_data_root: Path, db_type: str) -
         "--bbox",
         "-180,-90,0,90",
     ]
-    print(" ".join(west_half_o_world_args))
+    # print(" ".join(west_half_o_world_args))
     copy_result_a = _run_cli(west_half_o_world_args)
 
     assert copy_result_a.returncode == 0
@@ -207,5 +207,5 @@ def test_copy_mbtiles_bbox(tmp_path: Path, test_data_root: Path, db_type: str) -
 
     info_result_final = _run_cli(["info", str(out_path)])
     info_dict_final = info_result_final.parse_json
-    print(info_dict_final)
+    # print(info_dict_final)
     assert info_dict_final["ntiles"] == expected_ntiles_total

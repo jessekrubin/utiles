@@ -115,29 +115,23 @@ impl FromStr for Tile {
         if s.starts_with('{') {
             // if '{' assume its an obj
             let r = Tile::from_json_obj(s);
-            return match r {
+            match r {
                 Ok(tile) => Ok(tile),
                 Err(_e) => {
                     Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
                 }
-            };
+            }
         } else if s.starts_with('[') {
             // if '[' assume its an arr
             let r = Tile::from_json_arr(s);
-            return match r {
+            match r {
                 Ok(tile) => Ok(tile),
                 Err(_e) => {
                     Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
                 }
-            };
-        }
-
-        // assume its a quadkey
-        let res = quadkey2tile(s);
-        // if ok return tile but not tile parse error
-        match res {
-            Ok(tile) => Ok(tile),
-            Err(_e) => Err(Box::from(UtilesCoreError::TileParseError(s.to_string()))),
+            }
+        } else {
+            Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
         }
     }
 }
@@ -558,9 +552,9 @@ impl Tile {
         let xyz = self.tuple_string();
         let geometry_coordinates = vec![vec![
             vec![west, south],
-            vec![west, north],
-            vec![east, north],
             vec![east, south],
+            vec![east, north],
+            vec![west, north],
             vec![west, south],
         ]];
         let mut properties: Map<String, Value> = Map::new();
@@ -808,8 +802,8 @@ mod tests {
     #[test]
     fn parse_quadkey() {
         let quadkey = "023010203";
-        let tile = quadkey.parse::<Tile>();
-        assert_eq!(tile.unwrap(), Tile::new(81, 197, 9));
+        let tile = Tile::from_quadkey(quadkey).unwrap();
+        assert_eq!(tile, Tile::new(81, 197, 9));
     }
 
     #[test]

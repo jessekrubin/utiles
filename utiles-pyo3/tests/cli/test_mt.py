@@ -1,31 +1,12 @@
 """Utiles rust cli tests"""
 
 import json
-import sys
 from json import dumps as stringify
-from subprocess import CompletedProcess, run
 
 import pytest
 
 import utiles as ut
 from utiles.dev.testing import run_cli as _run_cli
-
-
-def _run_cli_old(
-    args: list[str] | None,
-    input: str | None = None,
-) -> CompletedProcess[str]:
-    _python = sys.executable
-    _args = args or []
-    res = run(
-        [_python, "-m", "utiles.cli", *_args],
-        input=input,
-        capture_output=True,
-        text=True,
-        shell=False,
-        check=True,
-    )
-    return res
 
 
 def test_rust_cli_help() -> None:
@@ -63,19 +44,11 @@ class TestTiles:
 
     def test_rust_cli_tiles_seq(self) -> None:
         result = _run_cli(["tiles", "14", "--seq", "[14.0859, 5.798]"])
-        # runner = CliRunner()
-        # result = runner.invoke(cli, ["tiles", "14", "--seq",
-        #                              "[14.0859, 5.798]"
-        #                              ],)
-        # print(result)
         assert result.returncode == 0
         assert result.stdout == "\x1e\n[8833, 7927, 14]\n"
 
     def test_cli_tiles_points(self) -> None:
         result = _run_cli(["tiles", "14"], "[14.0859, 5.798]")
-        # j
-        # runner = CliRunner()
-        # result = runner.invoke(cli, ["tiles", "14"], "[14.0859, 5.798]")
         assert result.returncode == 0
         assert result.stdout == "[8833, 7927, 14]\n"
 
@@ -87,10 +60,6 @@ class TestTiles:
         assert result.stdout == "[8833, 7927, 14]\n"
 
     def test_cli_tiles_implicit_stdin(self) -> None:
-        # result = _run_cli(["tiles", "14"], "[14.0859, 5.798]")
-        # assert result.returncode == 0
-        # assert result.stdout == "[8833, 7927, 14]\n"
-        # runner = CliRunner()
         result = _run_cli(["tiles", "14"], "[-105, 39.99, -104.99, 40]")
         assert result.returncode == 0
         assert result.stdout == "[3413, 6202, 14]\n[3413, 6203, 14]\n"
@@ -283,14 +252,14 @@ class TestChildren:
         result = _run_cli(["children"], "[243, 166, 9]")
 
         assert result.returncode == 0
-        json_tiles = result.parse_tiles
+        json_tiles = result.parse_tiles()
         expected_tiles = [
             (486, 332, 10),
             (486, 333, 10),
             (487, 332, 10),
             (487, 333, 10),
         ]
-        assert set(json_tiles) == set((ut.xyz(*el) for el in expected_tiles))
+        assert set(json_tiles) == {ut.xyz(*el) for el in expected_tiles}
 
 
 # ===================
@@ -312,9 +281,9 @@ class TestShapes:
                 "coordinates": [
                     [
                         [-105.46875, 39.909736],
-                        [-105.46875, 40.446947],
-                        [-104.765625, 40.446947],
                         [-104.765625, 39.909736],
+                        [-104.765625, 40.446947],
+                        [-105.46875, 40.446947],
                         [-105.46875, 39.909736],
                     ]
                 ],
@@ -339,9 +308,9 @@ class TestShapes:
                 "coordinates": [
                     [
                         [-105.46875, 39.909736],
-                        [-105.46875, 40.446947],
-                        [-104.765625, 40.446947],
                         [-104.765625, 39.909736],
+                        [-104.765625, 40.446947],
+                        [-105.46875, 40.446947],
                         [-105.46875, 39.909736],
                     ]
                 ],
@@ -365,9 +334,9 @@ class TestShapes:
                 "coordinates": [
                     [
                         [-106.46875, 38.909736],
-                        [-106.46875, 41.446947],
-                        [-103.765625, 41.446947],
                         [-103.765625, 38.909736],
+                        [-103.765625, 41.446947],
+                        [-106.46875, 41.446947],
                         [-106.46875, 38.909736],
                     ]
                 ],

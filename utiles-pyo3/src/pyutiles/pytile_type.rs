@@ -8,28 +8,19 @@ pub struct PyTileType(TileType);
 
 #[pymethods]
 impl PyTileType {
-    // #[new]
-    // fn new(format: usize, encoding: usize, compression: usize) -> Self {
-    //     PyTileType(TileTypeV2 {
-    //         format: format as u8,
-    //         encoding: encoding as u8,
-    //         compression: compression as u8,
-    //     })
-    // }
-
     #[getter]
-    fn format(&self) -> usize {
-        self.0.format as usize
+    fn format(&self) -> String {
+        format!("{}", self.0.format)
     }
 
     #[getter]
-    fn encoding(&self) -> usize {
-        self.0.encoding as usize
+    fn encoding(&self) -> String {
+        format!("{}", self.0.encoding)
     }
 
     #[getter]
-    fn compression(&self) -> usize {
-        self.0.encoding as usize
+    fn compression(&self) -> String {
+        format!("{}", self.0.encoding)
     }
 
     #[getter]

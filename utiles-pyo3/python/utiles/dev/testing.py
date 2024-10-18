@@ -71,12 +71,10 @@ class CliResult:
         """Parse json"""
         return json_loads(self.stdout)
 
-    @property
     def parse_jsonl(self) -> list[Any]:
         """Parse json"""
         return [json_loads(line) for line in self.stdout.splitlines()]
 
-    @property
     def parse_tiles(self) -> list[utiles.Tile]:
         """Parse tile lines"""
         return [
@@ -115,7 +113,7 @@ def run_cli(
     _python = sys.executable
     _args = args or []
     ti = time_ns()
-    completed_process = run(
+    completed_process = run(  # noqa: S603
         [_python, "-m", "utiles.cli", *_args],
         input=input,
         capture_output=True,
@@ -133,7 +131,7 @@ def run_cli(
         dt=(tf - ti) / 1e9,
         completed_process=completed_process,
     )
-    if res.completed_process.returncode != 0:
+    if res.returncode != 0:
         res.echo()
     return res
 

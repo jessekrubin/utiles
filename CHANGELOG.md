@@ -9,6 +9,7 @@
 
 ## Unreleased/Future
 
+- `shapes` and `feature` functions for tile produce polygons that now DO follow the right-hand-rule; exterior rings are clockwise
 - `simplify`/`merge` function(s) optimized for faster merging and WAY less memory usage
 - Parent methods now returns `None` if `z<=0`
 - New command(s):

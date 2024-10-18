@@ -1,4 +1,6 @@
 //! utiles-core errors mod
+
+use std::num::TryFromIntError;
 use thiserror::Error;
 
 /// Error type for utiles-core
@@ -59,6 +61,10 @@ pub enum UtilesCoreError {
     /// Error on serde io error
     #[error("io error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
+
+    /// Try from int
+    #[error("try-from-int: {0}")]
+    TryFromIntError(#[from] TryFromIntError),
 }
 
 /// Result type for utiles-core; really a type alias for `Result<T, UtilesCoreError>`

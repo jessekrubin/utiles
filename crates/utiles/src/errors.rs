@@ -80,6 +80,10 @@ pub enum UtilesError {
     #[error("utiles-copy error: {0}")]
     CopyError(#[from] UtilesCopyError),
 
+    /// Error from `serde_json`
+    #[error("serde error: {0}")]
+    SerdeJsonError(#[from] serde_json::Error),
+
     /// Error from `std::io`
     #[error("io error: {0}")]
     IoError(#[from] std::io::Error),
@@ -96,13 +100,13 @@ pub enum UtilesError {
     #[error("sqlite err: {0}")]
     AsyncSqliteError(#[from] async_sqlite::Error),
 
+    /// Geojson error(s)
+    #[error("geojson error: {0}")]
+    GeojsonError(String),
+
     /// Error from globset
     #[error("globset error: {0}")]
     GlobsetError(#[from] globset::Error),
-
-    /// Error from `serde_json`
-    #[error("serde error: {0}")]
-    SerdeJsonError(#[from] serde_json::Error),
 
     /// Image error
     #[error("image error: {0}")]
@@ -116,13 +120,17 @@ pub enum UtilesError {
     #[error("tokio::task::JoinError - {0}")]
     TokioJoinError(#[from] tokio::task::JoinError),
 
-    // /// Error from `oxipng`
-    // #[error("oxipng::PngError: {0}")]
-    // OxipngError(#[from] oxipng::PngError),
     /// Error from `pmtiles`
     #[cfg(feature = "pmtiles")]
     #[error("pmtiles error: {0}")]
     PmtilesError(#[from] pmtiles::PmtError),
+    // /// Error from `oxipng`
+    // #[error("oxipng::PngError: {0}")]
+    // OxipngError(#[from] oxipng::PngError),
+
+    // /// ndarray shape error
+    // #[error("ndarray shape error: {0}")]
+    // NdarrayShapeError(#[from] ndarray::ShapeError),
 }
 
 pub type UtilesResult<T, E = UtilesError> = Result<T, E>;

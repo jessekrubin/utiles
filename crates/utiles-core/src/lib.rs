@@ -25,6 +25,7 @@ pub use errors::{UtilesCoreError, UtilesCoreResult};
 pub use gdal::geotransform2optzoom;
 pub use lnglat::LngLat;
 pub use point::{Point2d, Point3d};
+pub use textiles::*;
 #[doc(inline)]
 pub use tile::Tile;
 #[doc(inline)]
@@ -33,7 +34,6 @@ pub use tile_zbox::TileZBox;
 #[doc(inline)]
 pub use traits::{Coord2dLike, IsOk, LngLatLike, TileChildren1, TileParent};
 pub use zoom::*;
-
 pub mod bbox;
 pub mod constants;
 
@@ -54,6 +54,7 @@ pub mod projection;
 pub mod quadkey;
 pub mod sibling_relationship;
 mod tests;
+mod textiles;
 pub mod tile;
 pub mod tile_data_row;
 mod tile_feature;

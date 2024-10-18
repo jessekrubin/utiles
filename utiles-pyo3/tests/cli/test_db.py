@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from pytest import fixture
-
 from utiles.dev.testing import run_cli as _run_cli
 
 
@@ -12,7 +10,7 @@ def _osm_standard_z0z4_mbtiles(test_data: Path) -> Path:
     return test_data / "mbtiles" / "osm-standard.z0z4.mbtiles"
 
 
-def test_touch(tmp_path: Path, test_data_root: Path) -> None:
+def test_touch(tmp_path: Path) -> None:
     # make a new file
     new_mbtiles = tmp_path / "new.mbtiles"
     result = _run_cli(["touch", str(new_mbtiles)])
@@ -165,5 +163,4 @@ def test_mbtiles_info(test_data_root: Path) -> None:
     parsed_data["zooms"] = [
         {k: v for k, v in e.items() if k != "nbytes_avg"} for e in parsed_data["zooms"]
     ]
-    print(parsed_data)
     assert parsed_data == expected_info_json
