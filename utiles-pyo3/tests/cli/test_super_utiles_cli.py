@@ -19,7 +19,7 @@ from utiles.dev.testing import run_cli as _run_cli
 #     assert len(result.output.strip().split("\n")) == len(expected)
 
 
-def test_edge_cli():
+def test_edge_cli() -> None:
     filename = os.path.join(os.path.dirname(__file__), "fixtures", "edges.txt")
     expected_filename = os.path.join(os.path.dirname(__file__), "expected", "edges.txt")
     with open(filename) as f:
@@ -37,7 +37,7 @@ def test_edge_cli():
     assert edge_tiles == expected_edge_tiles
 
 
-def test_burn_cli():
+def test_burn_cli() -> None:
     filename = os.path.join(os.path.dirname(__file__), "fixtures", "shape.geojson")
     expected_filename = os.path.join(
         os.path.dirname(__file__), "expected", "burned.txt"
@@ -59,7 +59,7 @@ def test_burn_cli():
     }
 
 
-def test_burn_tile_center_point_roundtrip():
+def test_burn_tile_center_point_roundtrip() -> None:
     tile = [83885, 202615, 19]
     w, s, e, n = ut.bounds(*tile)
 
@@ -75,7 +75,7 @@ def test_burn_tile_center_point_roundtrip():
     assert json.loads(result.output) == tile, result.output
 
 
-def test_burn_tile_center_lines_roundtrip():
+def test_burn_tile_center_lines_roundtrip() -> None:
     tiles = list(ut.children([0, 0, 0]))
     bounds = (ut.bounds(*t) for t in tiles)
     coords = (((e - w) / 2 + w, (n - s) / 2 + s) for w, s, e, n in bounds)
@@ -93,7 +93,7 @@ def test_burn_tile_center_lines_roundtrip():
 
 
 @pytest.mark.skip()
-def test_burn_cli_tile_shape():
+def test_burn_cli_tile_shape() -> None:
     # tile_geom = {
     #     "bbox": [-122.4755859375, 37.75334401310657, -122.431640625, 37.78808138412046],
     #     "geometry": {
