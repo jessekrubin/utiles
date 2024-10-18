@@ -1,5 +1,4 @@
 //! Tile cover for geojson object(s) based on mapbox's tile-cover alg
-use crate::server::UtilesServerConfig;
 use crate::{UtilesError, UtilesResult};
 use geojson::GeoJson;
 use std::collections::HashSet;
@@ -32,7 +31,6 @@ fn line_string_cover(
         if dx == 0.0 && dy == 0.0 {
             continue;
         }
-
         let sx = dx.signum() as i64;
         let sy = dy.signum() as i64;
 
@@ -164,15 +162,12 @@ fn polygon_cover(
 
             for y in ymin..ymax {
                 // add intersection x coordinate
-                let t = (y - y0) as f64 / dy as f64;
-                let x = x0 as f64 + t * dx as f64;
+                let t = f64::from(y - y0) / f64::from(dy);
+                let x = f64::from(x0) + t * f64::from(dx);
                 let x = x.floor() as u32;
 
                 // Add intersection point
-                scanline_intersections
-                    .entry(y as u32)
-                    .or_insert_with(Vec::new)
-                    .push(x);
+                scanline_intersections.entry(y as u32).or_default().push(x);
             }
             k = j;
             j += 1;
