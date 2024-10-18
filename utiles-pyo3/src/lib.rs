@@ -29,6 +29,7 @@ mod cli;
 mod fmt_nbytes;
 // mod lager;
 mod pyutiles;
+mod py_lager;
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
