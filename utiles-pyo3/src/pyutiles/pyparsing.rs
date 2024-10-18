@@ -90,8 +90,9 @@ pub fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
 }
 
 #[pyfunction]
-pub fn parse_textiles(string: &str) -> PyResult<Vec<PyTile>> {
-    let t = utiles::parse_textiles(string);
-    let pytiles = t.into_iter().map(PyTile::from).collect();
-    Ok(pytiles)
+pub fn parse_textiles(string: &str) -> Vec<PyTile> {
+    utiles::parse_textiles(string)
+        .into_iter()
+        .map(PyTile::from)
+        .collect()
 }
