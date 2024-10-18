@@ -4,7 +4,6 @@ import sqlite3
 from pathlib import Path
 from shutil import copyfile
 
-from utiles.dev.testing import query_metadata_rows
 from utiles.dev.testing import run_cli as _run_cli
 
 
@@ -44,7 +43,6 @@ def test_update_metadata(tmp_path: Path, test_data_root: Path) -> None:
 
     metadata_proc_updated = _run_cli(["metadata", "--obj", str(dbpath)])
     metadata_updated = metadata_proc_updated.parse_json
-    print(metadata_updated)
     assert metadata_updated["format"] == "png"
     assert metadata_updated["minzoom"] == 0
     assert metadata_updated["maxzoom"] == 4

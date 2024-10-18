@@ -1,14 +1,14 @@
 //! Tile cover for geojson object(s) based on mapbox's tile-cover alg
 use crate::{UtilesError, UtilesResult};
 use geojson::GeoJson;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use tracing::debug;
 use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
 
 #[allow(clippy::cast_precision_loss)]
 #[allow(clippy::similar_names)]
 fn line_string_cover(
-    tile_hash: &mut HashSet<Tile>,
+    tiles_set: &mut HashSet<Tile>,
     coords: &[(f64, f64)],
     maxzoom: u8,
     mut ring: Option<&mut Vec<(u32, u32)>>,
@@ -17,9 +17,9 @@ fn line_string_cover(
     let mut prev_y: Option<i64> = None;
     let mut y_value: Option<i64> = None;
     let minxy = (1u32 << maxzoom) - 1; // Maximum valid tile index at this zoom level
-    for i in 0..coords.len() - 1 {
-        let start_coord = coords[i];
-        let stop_coord = coords[i + 1];
+    for segment in coords.windows(2) {
+        let start_coord = segment[0];
+        let stop_coord = segment[1];
 
         let (x0f, y0f, _) = lnglat2tile_frac(start_coord.0, start_coord.1, maxzoom);
         let (x1f, y1f, _) = lnglat2tile_frac(stop_coord.0, stop_coord.1, maxzoom);
@@ -60,12 +60,10 @@ fn line_string_cover(
             ((if dy > 0.0 { 1.0 } else { 0.0 } + y as f64 - y0f) / dy).abs()
         };
 
-        // Remove the initial boundary check
-
         // Add initial tile
         if prev_x != Some(x) || prev_y != Some(y) {
             let tile = utile!(x as u32, y as u32, maxzoom);
-            tile_hash.insert(tile);
+            tiles_set.insert(tile);
             if let Some(ring) = &mut ring {
                 if prev_y != Some(y) {
                     ring.push((x as u32, y as u32));
@@ -75,7 +73,9 @@ fn line_string_cover(
             prev_y = Some(y);
         }
 
-        while t_max_x < 1.0 || t_max_y < 1.0 {
+        // the MAX number of tiles to check to dx.abs() + dy.abs()
+        let mut max_it = (dx.abs() + dy.abs()) as i64;
+        while (t_max_x < 1.0 || t_max_y < 1.0) && max_it >= 0 {
             if t_max_x < t_max_y {
                 t_max_x += tdx;
                 x += sx;
@@ -84,15 +84,14 @@ fn line_string_cover(
                 y += sy;
             }
 
-            // Check if x or y is outside valid tile ranges
-            if x < -1 || y < -5 || x > i64::from(minxy) + 1 || y > i64::from(minxy) + 1
-            {
+            // Sanity check if x or y is outside valid tile ranges
+            if x > i64::from(minxy) + 1 || y > i64::from(minxy) + 1 {
                 break;
             }
 
             if prev_x != Some(x) || prev_y != Some(y) {
                 let tile = utile!(x as u32, y as u32, maxzoom);
-                tile_hash.insert(tile);
+                tiles_set.insert(tile);
                 if let Some(ring) = &mut ring {
                     if prev_y != Some(y) {
                         ring.push((x as u32, y as u32));
@@ -101,10 +100,12 @@ fn line_string_cover(
                 prev_x = Some(x);
                 prev_y = Some(y);
             }
+
+            max_it -= 1; // Decrement the number of steps remaining
         }
     }
 
-    // Adjust the ring if needed
+    // adjust the ring if needed
     if let Some(ring) = &mut ring {
         if let (Some(first_ring), Some(y_value)) = (ring.first(), y_value) {
             if y_value == i64::from(first_ring.1) {
@@ -115,19 +116,12 @@ fn line_string_cover(
 }
 
 #[allow(clippy::cast_precision_loss)]
-fn polygon_cover(
-    tile_hash: &mut HashSet<Tile>,
-    tile_array: &mut Vec<Tile>,
-    geom: &[Vec<(f64, f64)>],
-    zoom: u8,
-) {
-    use std::collections::BTreeMap;
-
+fn polygon_cover(tiles_set: &mut HashSet<Tile>, geom: &[Vec<(f64, f64)>], zoom: u8) {
     let mut scanline_intersections: BTreeMap<u32, Vec<u32>> = BTreeMap::new();
 
     for element in geom {
         let mut ring = Vec::new();
-        line_string_cover(tile_hash, element, zoom, Some(&mut ring));
+        line_string_cover(tiles_set, element, zoom, Some(&mut ring));
         let len = ring.len();
 
         if len == 0 {
@@ -186,9 +180,10 @@ fn polygon_cover(
 
             for x in x_start..x_end {
                 let tile = Tile::new(x, y, zoom);
-                if !tile_hash.contains(&tile) {
-                    tile_array.push(tile);
-                }
+                tiles_set.insert(tile);
+                // if !tiles_set.contains(&tile) {
+                //     tiles_vec.push(tile);
+                // }
             }
 
             i += 2;
@@ -196,44 +191,35 @@ fn polygon_cover(
     }
 }
 
-fn append_hash_tiles(
-    tile_hash: &HashSet<Tile>,
-    tiles: &mut Vec<Tile>,
-) -> UtilesResult<()> {
-    for id in tile_hash {
-        tiles.push(*id);
-    }
-    Ok(())
-}
-
 fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> UtilesResult<Vec<Tile>> {
-    let mut tile_hash = HashSet::new();
-    let mut tiles = Vec::new();
+    let mut tiles_set = HashSet::new();
     let res = match &geom.value {
         geojson::Value::Point(coords) => {
             let tile = tile(coords[0], coords[1], zoom, None)?;
-            tiles.push(tile);
+            tiles_set.insert(tile);
             Ok::<(), UtilesError>(())
         }
         geojson::Value::MultiPoint(coords_list) => {
-            for coords in coords_list {
-                let tile = tile(coords[0], coords[1], zoom, None)?;
-                tile_hash.insert(tile);
-                // tile_hash.insert(to_id(tile.x, tile.y, tile.z));
-            }
+            coords_list
+                .iter()
+                .map(|coords| tile(coords[0], coords[1], zoom, None))
+                .collect::<Result<HashSet<_>, _>>()
+                .map(|set| {
+                    tiles_set.extend(set);
+                })?;
             Ok(())
         }
         geojson::Value::LineString(coords_list) => {
             let coords: Vec<(f64, f64)> =
                 coords_list.iter().map(|c| (c[0], c[1])).collect();
-            line_string_cover(&mut tile_hash, &coords, zoom, None);
+            line_string_cover(&mut tiles_set, &coords, zoom, None);
             Ok(())
         }
         geojson::Value::MultiLineString(coords_lists) => {
             for coords_list in coords_lists {
                 let coords: Vec<(f64, f64)> =
                     coords_list.iter().map(|c| (c[0], c[1])).collect();
-                line_string_cover(&mut tile_hash, &coords, zoom, None);
+                line_string_cover(&mut tiles_set, &coords, zoom, None);
             }
             Ok(())
         }
@@ -242,7 +228,7 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> UtilesResult<Vec<Tile>> {
                 .iter()
                 .map(|ring| ring.iter().map(|c| (c[0], c[1])).collect())
                 .collect();
-            polygon_cover(&mut tile_hash, &mut tiles, &coords, zoom);
+            polygon_cover(&mut tiles_set, &coords, zoom);
             Ok(())
         }
         geojson::Value::MultiPolygon(coords_list_of_lists) => {
@@ -251,21 +237,21 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> UtilesResult<Vec<Tile>> {
                     .iter()
                     .map(|ring| ring.iter().map(|c| (c[0], c[1])).collect())
                     .collect();
-                polygon_cover(&mut tile_hash, &mut tiles, &coords, zoom);
+                polygon_cover(&mut tiles_set, &coords, zoom);
             }
             Ok(())
         }
         geojson::Value::GeometryCollection(gjcoll) => {
             for geom in gjcoll {
                 let recurse_res = geom2tiles(geom, zoom)?;
-                tile_hash.extend(recurse_res);
+                tiles_set.extend(recurse_res);
             }
             Ok(())
         }
     };
     res?;
-    append_hash_tiles(&tile_hash, &mut tiles)?;
-    Ok(tiles)
+    let tiles_vec = tiles_set.into_iter().collect();
+    Ok(tiles_vec)
 }
 pub fn geojson2tiles(
     gj: &GeoJson,

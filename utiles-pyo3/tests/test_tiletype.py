@@ -148,7 +148,7 @@ TEST_TILE_NAME2TYPE = {
     "png-640x400.png": "png",
     "tux.webp": "webp",
     "tux_alpha.webp": "webp",
-    "unknown.txt": False,
+    "unknown.txt": "unknown",
     "webp-550x368.webp": "webp",
     "tile-arr.json": "json",
     "tile-obj.json": "json",
@@ -186,7 +186,8 @@ def test_tiletype_rs(
     expected = TEST_TILE_NAME2TYPE[filename]
 
     ttype = utiles.TileType.from_bytes(buffer)
-    print(ttype)
+    expected_format = expected.split(".")[0]
+    assert ttype.format == expected_format
     ttype_str = utiles.tiletype_str(buffer)
     if filename == "unknown.txt":
         assert ttype_str is False or ttype_str == "unknown"  # type: ignore

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
-from pprint import pprint
 
 import pytest
 
@@ -64,34 +63,35 @@ def zoom_limits(filepath: Path | str) -> tuple[int, int]:
 
 
 def _test_geojson_cover(geojson_filepath: str) -> None:
-    with open(geojson_filepath, "r") as f:
+    with open(geojson_filepath) as f:
         data = f.read()
     expected_textiles_filepath = str(geojson_filepath).replace(
         ".geojson", ".tiles.jsonl"
     )
-    with open(expected_textiles_filepath, "r") as f:
+    with open(expected_textiles_filepath) as f:
         textiles = f.read()
 
     minzoom, maxzoom = zoom_limits(geojson_filepath)
     expected_tiles = set(ut.parse_textiles(textiles))
     coverage = set(ut.geojson2tiles(data, maxzoom, minzoom))
 
-    if set(expected_tiles) != set(coverage):
-        not_in_expected_tiles = expected_tiles.difference(coverage)
-        not_in_coverage = coverage.difference(expected_tiles)
-        print("============")
-        print(geojson_filepath)
-        pprint(
-            {
-                "not_in_expected_tiles": not_in_expected_tiles,
-                "not_in_coverage": not_in_coverage,
-                # 'common_tiles': common_tiles,
-            }
-        )
+    # if set(expected_tiles) != set(coverage):
+    #     not_in_expected_tiles = expected_tiles.difference(coverage)
+    #     not_in_coverage = coverage.difference(expected_tiles)
+    #     print("============")
+    #     print(geojson_filepath)
+    #     pprint(
+    #         {
+    #             "not_in_expected_tiles": not_in_expected_tiles,
+    #             "not_in_coverage": not_in_coverage,
+    #             # 'common_tiles': common_tiles,
+    #         }
+    #     )
     assert set(expected_tiles) == set(coverage)
 
 
-PROBLEM_CHILDREN = {}
+# problematic tile cover files (possibly a thing to remove)
+PROBLEM_CHILDREN: set[str] = set()
 
 
 @pytest.mark.parametrize(

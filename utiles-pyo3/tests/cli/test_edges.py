@@ -202,7 +202,7 @@ def test_cli_edges() -> None:
         ],
         input=TEXTILES_INPUT,
     )
-    parsed_edges = edges_result.parse_tiles
+    parsed_edges = edges_result.parse_tiles()
 
     assert set(parsed_edges) == {
         ut.xyz(*json.loads(e)) for e in TEXTILES_EXPECTED.split("\n") if e.strip()

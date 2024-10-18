@@ -29,7 +29,7 @@ def test_edge_cli() -> None:
     assert result.exit_code == 0
     with open(expected_filename) as ofile:
         textiles_expected = ofile.read()
-    edge_tiles = set(result.parse_tiles)
+    edge_tiles = set(result.parse_tiles())
 
     expected_edge_tiles = {
         ut.xyz(*json.loads(e)) for e in textiles_expected.split("\n") if e.strip()
@@ -46,12 +46,7 @@ def test_burn_cli() -> None:
         geojson = f.read()
     result = _run_cli(["burn", "9"], input=geojson)
     assert result.exit_code == 0
-
-    with open(expected_filename) as f:
-        expected = f.read()
-    print(result.output)
-    parsed_edges = result.parse_tiles
-
+    parsed_edges = result.parse_tiles()
     with open(expected_filename) as f:
         textiles_expected = f.read()
     assert set(parsed_edges) == {
