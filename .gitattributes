@@ -27,6 +27,8 @@
 *.yml text eol=lf
 *.prisma text eol=lf
 *.sql text eol=lf
+LICENSE-MIT text eol=lf
+LICENSE-APACHE text eol=lf
 
 # Declare files that will always have CRLF line endings on checkout.
 *.cmd text eol=crlf
