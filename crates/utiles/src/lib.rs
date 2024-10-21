@@ -55,5 +55,6 @@ mod tile_stream;
 pub mod cover;
 mod edges;
 pub mod hash;
+mod sleep;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

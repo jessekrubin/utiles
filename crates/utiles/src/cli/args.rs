@@ -779,8 +779,8 @@ pub enum Commands {
     #[command(name = "shapes")]
     Shapes(ShapesArgs),
 
-    /// Burn tiles from `GeoJSON` stream at zoom level
-    #[command(name = "burn", hide = true)]
+    /// Burn tiles from `GeoJSON` stream at zoom level (tile coverage)
+    #[command(name = "burn")]
     Burn(BurnArgs),
 
     /// Merge tiles from stream removing parent tiles if children are present
