@@ -23,7 +23,7 @@ pub async fn burn_main(args: BurnArgs) -> UtilesResult<()> {
         let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
         println!("{}{}", rs, tile.json_arr());
         if i % 2048 == 0 {
-            sleep0().await
+            sleep0().await;
         }
     }
     Ok(())
