@@ -19,7 +19,7 @@ path = "src/lib.rs"
 name = "utiles"
 path = "src/bin.rs"
 required-features = [
-  "cli",
+    "cli",
 ]
 
 [dependencies]
@@ -82,16 +82,16 @@ harness = false
 
 [features]
 default = [
-  "cli",
-  "pmtiles",
+    "cli",
+    "pmtiles",
 ]
 all = [
-  "cli",
-  "pmtiles",
+    "cli",
+    "pmtiles",
 ]
-lagereload = []
+lager-reload = []
 python = [
-  "lagereload"
+    "lager-reload"
 ]
 cli = ["dep:clap", "dep:pmtiles"]
 pmtiles = ["dep:pmtiles"]

@@ -8,7 +8,7 @@ use tracing_subscriber::reload::{self, Handle};
 use tracing_subscriber::{EnvFilter, Layer, Registry};
 
 use crate::errors::UtilesResult;
-use crate::lager::LagerConfig;
+use crate::lager::{LagerConfig, LagerFormat, LagerLevel};
 use crate::UtilesError;
 
 type LagerLayer = Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
@@ -149,6 +149,35 @@ pub fn set_log_level(level: &str) -> UtilesResult<()> {
     } else {
         Err(UtilesError::Str("global reload handle not set".to_string()))
     }
+}
+
+// pub fn get_lager_level() -> UtilesResult<LagerLevel> {
+//     let lager_config = GLOBAL_LAGER_CONFIG
+//         .lock()
+//         .map_err(|e| Err(UtilesError::LockError("lager-level-lock".to_string())))?;
+//     Ok(lager_config.level)
+//
+//     // .map_err(|e| Err(UtilesError::Str(String::from("lager-lock-error"))))?;
+//     // let level = a.level;
+//     // Ok(level)
+// }
+pub fn get_lager_level() -> UtilesResult<LagerLevel> {
+    let lager_config = GLOBAL_LAGER_CONFIG
+        .lock()
+        .map_err(|_| UtilesError::LockError("lager-config-lock".to_string()))?;
+    Ok(lager_config.level)
+}
+
+pub fn get_lager_format() -> UtilesResult<LagerFormat> {
+    let lager_config = GLOBAL_LAGER_CONFIG
+        .lock()
+        .map_err(|_| UtilesError::LockError("lager-config-lock".to_string()))?;
+    let format = if lager_config.json {
+        LagerFormat::Json
+    } else {
+        LagerFormat::Full
+    };
+    Ok(format)
 }
 
 pub fn set_log_format(json: bool) -> UtilesResult<()> {

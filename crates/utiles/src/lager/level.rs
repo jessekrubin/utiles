@@ -2,7 +2,7 @@ use crate::UtilesError;
 use std::fmt::Formatter;
 use std::str::FromStr;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum LagerLevel {
     Trace = 0,
     Debug = 1,
