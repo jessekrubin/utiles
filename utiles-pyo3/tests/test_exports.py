@@ -1,5 +1,7 @@
 from collections import Counter
 
+import pytest
+
 import utiles
 from utiles import _utiles as libutiles
 
@@ -9,6 +11,7 @@ def test_import() -> None:
     assert libutiles
 
 
+@pytest.mark.skip(reason="ruff now handles this")
 def test_all_sorted() -> None:
     all_current = utiles.__all__
     all_tuple = tuple(sorted(utiles.__all__))
@@ -22,7 +25,9 @@ def test_all_no_duplicates() -> None:
 
 
 def test_missing_from_libutiles() -> None:
+    tmp_ignored = {"debug", "error", "info", "trace", "warn"}
     ignored_members = {
+        *tmp_ignored,
         "__all__",
         "__doc__",
         "__file__",

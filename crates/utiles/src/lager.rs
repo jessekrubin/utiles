@@ -1,4 +1,6 @@
+use std::fmt::Formatter;
 use std::io;
+use std::str::FromStr;
 use std::sync::Mutex;
 
 use axum::handler::Handler;
@@ -6,6 +8,7 @@ use clap::Parser;
 use futures::FutureExt;
 use once_cell::sync::Lazy;
 use tracing::debug;
+use tracing::log::Level;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::{Layered, SubscriberExt};
 use tracing_subscriber::reload::{self, Handle};
@@ -13,6 +16,7 @@ use tracing_subscriber::{EnvFilter, Layer, Registry};
 
 use crate::errors::UtilesResult;
 use crate::UtilesError;
+use std::sync::OnceLock;
 
 type LagerLayer = Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
 // type LagerFormatLayer = Handle<<unknown>, Layered<Box<dyn Layer<Registry>+Send+Sync>, Registry, Registry>>
@@ -32,19 +36,75 @@ static GLOBAL_FORMAT_RELOAD_HANDLE: Lazy<Mutex<Option<LagerFormatLayer>>> =
 static GLOBAL_LAGER_CONFIG: Lazy<Mutex<LagerConfig>> =
     Lazy::new(|| Mutex::new(LagerConfig::default()));
 
+#[derive(Debug, Copy, Clone)]
+pub enum LagerLevel {
+    Trace = 0,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
+    Error = 4,
+}
+
+impl Default for LagerLevel {
+    fn default() -> Self {
+        Self::Info
+    }
+}
+
+impl std::fmt::Display for LagerLevel {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            LagerLevel::Error => write!(f, "error"),
+            LagerLevel::Warn => write!(f, "warn"),
+            LagerLevel::Info => write!(f, "info"),
+            LagerLevel::Debug => write!(f, "debug"),
+            LagerLevel::Trace => write!(f, "trace"),
+        }
+    }
+}
+
+impl FromStr for LagerLevel {
+    type Err = UtilesError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "trace" => Ok(LagerLevel::Trace),
+            "debug" => Ok(LagerLevel::Debug),
+            "info" => Ok(LagerLevel::Info),
+            "warn" => Ok(LagerLevel::Warn),
+            "error" => Ok(LagerLevel::Error),
+            _ => Err(UtilesError::Str("invalid lager level".to_string())),
+        }
+    }
+}
+
 #[derive(Debug, Default, Copy, Clone)]
 pub struct LagerConfig {
-    pub debug: bool,
-    pub trace: bool,
+    // pub debug: bool,
+    // pub trace: bool,
     pub json: bool,
+    pub level: LagerLevel,
+}
+
+impl LagerConfig {
+    pub fn env_filter(&self) -> EnvFilter {
+        match self.level {
+            LagerLevel::Error => EnvFilter::new("ERROR"),
+            LagerLevel::Warn => EnvFilter::new("WARN"),
+            LagerLevel::Info => EnvFilter::new("INFO"),
+            LagerLevel::Debug => EnvFilter::new("DEBUG"),
+            LagerLevel::Trace => EnvFilter::new("TRACE"),
+        }
+    }
 }
 
 pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
-    let filter = match log_config {
-        LagerConfig { trace: true, .. } => EnvFilter::new("TRACE"),
-        LagerConfig { debug: true, .. } => EnvFilter::new("DEBUG"),
-        _ => EnvFilter::new("INFO"),
-    };
+    let filter = log_config.env_filter();
+    // let filter = match log_config {
+    //     LagerConfig { trace: true, .. } => EnvFilter::new("TRACE"),
+    //     LagerConfig { debug: true, .. } => EnvFilter::new("DEBUG"),
+    //     _ => EnvFilter::new("INFO"),
+    // };
     let (filter_layer, filter_reload_handle) = reload::Layer::new(filter.boxed());
     let format_layer_raw = match log_config.json {
         true => fmt::Layer::new().json().with_writer(io::stderr).boxed(),
@@ -66,7 +126,6 @@ pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
 }
 
 pub fn set_log_level(level: &str) -> UtilesResult<()> {
-    println!("set_log_level: {}", level);
     let filter = EnvFilter::try_new(level).map_err(|e| {
         println!("failed to set log level: {}", e);
         UtilesError::Str(format!("failed to set log level: {}", e))
@@ -85,6 +144,16 @@ pub fn set_log_level(level: &str) -> UtilesResult<()> {
         Err(UtilesError::Str("global reload handle not set".to_string()))
     }
 }
+
+// pub fn lager_level() -> UtilesResult<String> {
+//     let logcfg =
+//         GLOBAL_LAGER_CONFIG
+//             .lock()
+//             .map_err(Err(UtilesError::Str(String::from(
+//                 "failed to get lager level",
+//             ))))?;
+//     Ok(logcfg.level.to_string())
+// }
 
 // pub fn set_log_format(json: bool) -> UtilesResult<()> {
 //     let format_layer = match json {

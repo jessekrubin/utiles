@@ -266,3 +266,12 @@ def parse_textiles(string: str) -> list[Tile]: ...
 # CLI
 def ut_cli(args: list[str]) -> int: ...
 def fmt_nbytes(nbytes: int) -> str: ...
+
+# Lager
+LagerLevel = Literal["trace", "debug", "info", "warn", "error"]
+
+def set_lager_level(level: LagerLevel) -> None:
+    """set utiles lager level"""
+
+def set_lager_format(json: bool) -> None:
+    """set utiles lager format (json true/false)"""
