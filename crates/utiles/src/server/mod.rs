@@ -299,7 +299,7 @@ async fn get_datasets(State(state): State<Arc<ServerState>>) -> impl IntoRespons
 }
 
 async fn get_dataset_tilejson(
-    Host(hostname): axum::extract::Host,
+    Host(hostname): Host,
     State(state): State<Arc<ServerState>>,
     Path(path): Path<String>,
 ) -> impl IntoResponse {

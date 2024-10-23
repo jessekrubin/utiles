@@ -7,10 +7,7 @@ use std::hash::Hash;
 /// Merge a set of tiles into a simplified set of tiles
 ///
 #[must_use]
-pub fn merge<
-    T: TileParent + Copy + Eq + std::hash::Hash,
-    S: ::std::hash::BuildHasher,
->(
+pub fn merge<T: TileParent + Copy + Eq + Hash, S: std::hash::BuildHasher>(
     merge_set: &HashSet<T, S>,
     minzoom: Option<u8>,
 ) -> (HashSet<T>, bool) {
@@ -48,8 +45,8 @@ pub fn merge<
 /// TODO: Add `minzoom` and `maxzoom` parameters
 #[must_use]
 pub fn simplify_v1<
-    T: TileParent + Copy + Eq + std::hash::Hash,
-    S: ::std::hash::BuildHasher + Default,
+    T: TileParent + Copy + Eq + Hash,
+    S: std::hash::BuildHasher + Default,
 >(
     tiles: &HashSet<T, S>,
     minzoom: Option<u8>,
@@ -160,7 +157,7 @@ impl<T: TileParent + TileChildren1 + Eq + Hash + Copy + Sized + Debug> TileMerge
 }
 
 #[must_use]
-pub fn simplify<T: TileParent + TileChildren1 + Debug, S: ::std::hash::BuildHasher>(
+pub fn simplify<T: TileParent + TileChildren1 + Debug, S: std::hash::BuildHasher>(
     tiles: &HashSet<T, S>,
     minzoom: Option<u8>,
 ) -> HashSet<T> {

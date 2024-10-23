@@ -12,7 +12,6 @@ use crate::lager::{init_tracing, LagerConfig, LagerLevel};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
 use clap::{CommandFactory, FromArgMatches};
-use tracing::log::Level;
 use tracing::{debug, error};
 use utiles_core::VERSION;
 

@@ -37,16 +37,16 @@ impl MbtilesLinter {
 
     pub async fn check_magic_number(
         mbt: &MbtilesClientAsync,
-    ) -> UtilesResult<Option<crate::lint::MbtLint>> {
+    ) -> UtilesResult<Option<MbtLint>> {
         let magic_number_res = mbt.magic_number().await;
         match magic_number_res {
             Ok(magic_number) => {
                 if magic_number == 0x4d50_4258 {
                     Ok(None)
                 } else if magic_number == 0 {
-                    Ok(Some(crate::lint::MbtLint::MissingMagicNumber))
+                    Ok(Some(MbtLint::MissingMagicNumber))
                 } else {
-                    Ok(Some(crate::lint::MbtLint::UnknownMagicNumber(magic_number)))
+                    Ok(Some(MbtLint::UnknownMagicNumber(magic_number)))
                 }
             }
             Err(e) => Err(e),
@@ -78,8 +78,8 @@ impl MbtilesLinter {
             .collect::<Vec<String>>();
         let errs = missing_metadata_keys
             .iter()
-            .map(|k| crate::lint::MbtLint::MissingMetadataKv(k.clone()))
-            .collect::<Vec<crate::lint::MbtLint>>();
+            .map(|k| MbtLint::MissingMetadataKv(k.clone()))
+            .collect::<Vec<MbtLint>>();
         Ok(errs)
     }
 
@@ -117,7 +117,7 @@ impl MbtilesLinter {
         Ok(errs)
     }
 
-    pub async fn lint(&self) -> UtilesResult<Vec<crate::lint::MbtLint>> {
+    pub async fn lint(&self) -> UtilesResult<Vec<MbtLint>> {
         if self.fix {
             warn!("Fix not implemented (yet)");
         }
@@ -137,9 +137,7 @@ impl MbtilesLinter {
 
         let metadata_res = MbtilesLinter::check_metadata(&mbt).await?;
         lint_results.extend(metadata_res);
-        let lint_errors = lint_results
-            .into_iter()
-            .collect::<Vec<crate::lint::MbtLint>>();
+        let lint_errors = lint_results.into_iter().collect::<Vec<MbtLint>>();
         Ok(lint_errors)
     }
 }

@@ -114,7 +114,7 @@ pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
     let files_iter = WalkDir::new(args.clone().dirpath.clone())
         .contents_first(true)
         .into_iter()
-        .filter_map(std::result::Result::ok)
+        .filter_map(Result::ok)
         .filter(|e| e.file_type().is_file());
     let rmrfer = Rimrafer::new(args);
     let s = stream::iter(files_iter);
