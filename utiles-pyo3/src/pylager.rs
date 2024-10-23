@@ -4,28 +4,30 @@ use pyo3::{pyfunction, PyErr, PyResult};
 use utiles::lager::{init_tracing, LagerConfig};
 
 const VERSION_STRING: &'static str = "pylager";
+
 #[pyfunction]
 pub fn trace(msg: &str) {
-    tracing::trace!(target: VERSION_STRING,"{}", msg);
+    tracing::trace!(target: VERSION_STRING, "{}", msg);
 }
 
+#[pyfunction]
 pub fn debug(msg: &str) {
     tracing::debug!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
 pub fn info(msg: &str) {
-    tracing::info!(target: VERSION_STRING,"{}", msg);
+    tracing::info!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
 pub fn warn(msg: &str) {
-    tracing::warn!(target: VERSION_STRING,"{}", msg);
+    tracing::warn!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
 pub fn error(msg: &str) {
-    tracing::error!(target: VERSION_STRING,"{}", msg);
+    tracing::error!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
@@ -57,25 +59,13 @@ pub fn pymod_add(m: &Bound<'_, PyModule>) -> PyResult<()> {
         }
         Err(e) => tracing::debug!("failed to init tracing: {}", e),
     }
-    // let mut reload_handle: Option<
-    //     tracing_subscriber::reload::Handle<
-    //         tracing_subscriber::EnvFilter,
-    //         tracing_subscriber::Registry,
-    //     >,
-    // > = None;
 
-    // add the re-load function
-    // .map_err(
-    //     |e| PyErr::new::<PyValueError, _>(format!("failed to init tracing: {}", e))
-    // ) {
-    //     return Err(res);
-    // }
     m.add_function(wrap_pyfunction!(set_lager_level, m)?)?;
     m.add_function(wrap_pyfunction!(set_lager_format, m)?)?;
+    m.add_function(wrap_pyfunction!(trace, m)?)?;
     m.add_function(wrap_pyfunction!(debug, m)?)?;
     m.add_function(wrap_pyfunction!(info, m)?)?;
     m.add_function(wrap_pyfunction!(warn, m)?)?;
     m.add_function(wrap_pyfunction!(error, m)?)?;
-    m.add_function(wrap_pyfunction!(trace, m)?)?;
     Ok(())
 }

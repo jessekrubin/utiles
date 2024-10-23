@@ -34,6 +34,7 @@ pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
             }
         }
     }
+    debug!("tracing initialized (fixed-lager)");
     debug!("lager-config: {:?}", log_config);
     Ok(())
 }

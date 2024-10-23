@@ -18,7 +18,7 @@ serde_json.workspace = true
 size.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
-utiles = { path = "../crates/utiles", features = ["all"] }
+utiles = { path = "../crates/utiles", features = ["all", "python"] }
 
 [dev-dependencies]
 pyo3 = { workspace = true, features = ["auto-initialize"] }

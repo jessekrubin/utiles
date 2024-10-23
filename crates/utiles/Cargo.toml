@@ -89,5 +89,9 @@ all = [
   "cli",
   "pmtiles",
 ]
+lagereload = []
+python = [
+  "lagereload"
+]
 cli = ["dep:clap", "dep:pmtiles"]
 pmtiles = ["dep:pmtiles"]
