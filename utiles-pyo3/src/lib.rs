@@ -28,7 +28,7 @@ use utiles::tile_type;
 mod cli;
 mod fmt_nbytes;
 // mod lager;
-mod py_lager;
+mod pylager;
 mod pyutiles;
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -42,7 +42,7 @@ fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
 fn _utiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // lib constants
     lib_constants(m)?;
-    py_lager::pymod_add(m)?;
+    pylager::pymod_add(m)?;
     // mercantile functions
     m.add_function(wrap_pyfunction!(pyutiles::pyparsing::parse_tile_arg, m)?)?;
     m.add_function(wrap_pyfunction!(pyutiles::pyparsing::_parse_tile_arg, m)?)?;

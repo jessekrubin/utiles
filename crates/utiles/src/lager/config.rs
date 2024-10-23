@@ -18,4 +18,9 @@ impl LagerConfig {
             LagerLevel::Trace => EnvFilter::new("TRACE"),
         }
     }
+
+    #[must_use]
+    pub fn is_debug_or_trace(&self) -> bool {
+        matches!(self.level, LagerLevel::Debug | LagerLevel::Trace)
+    }
 }

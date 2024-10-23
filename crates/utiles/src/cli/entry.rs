@@ -101,7 +101,7 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
             json: args.log_json,
         }
     };
-    init_tracing(&logcfg)?;
+    init_tracing(logcfg)?;
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);

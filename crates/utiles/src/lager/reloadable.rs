@@ -73,7 +73,7 @@ pub static GLOBAL_LAGER_CONFIG: Lazy<Mutex<LagerConfig>> =
 // }
 
 /// Initializes the tracing subscriber with the given logging configuration.
-pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
+pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
     let filter = log_config.env_filter();
     let (filter_layer, filter_reload_handle) = reload::Layer::new(filter.boxed());
 
@@ -123,7 +123,7 @@ pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
             let mut config = GLOBAL_LAGER_CONFIG.lock().map_err(|e| {
                 UtilesError::Str(format!("Failed to lock logging configuration: {e}"))
             })?;
-            *config = *log_config;
+            *config = log_config;
         }
 
         debug!("Logging configuration initialized: {:?}", log_config);

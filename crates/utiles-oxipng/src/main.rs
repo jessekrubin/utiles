@@ -193,7 +193,7 @@ async fn main() -> Result<()> {
         LagerLevel::Info
     };
     let logcfg = LagerConfig { json: false, level };
-    init_tracing(&logcfg)?;
+    init_tracing(logcfg)?;
     let res = oxipng_main(args).await;
 
     // if let Err(e) = res {
