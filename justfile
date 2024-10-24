@@ -85,3 +85,7 @@ ci:
 
 pipsync:
     uv pip sync ./utiles-pyo3/requirements/dev.txt
+
+reinstall:
+    cargo install --path ./crates/utiles
+    cargo install --path ./crates/utiles-oxipng

@@ -17,7 +17,8 @@ use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 use crate::traits::TileParent;
 use crate::{
-    children1_zorder, pmtiles, quadkey2tile, rmid2xyz, xyz2quadkey, IsOk, TileChildren1,
+    children1_zorder, pmtiles, quadkey2tile, rmid2xyz, utile, xyz2quadkey, IsOk,
+    TileChildren1,
 };
 
 /// Tile X-Y-Z struct
@@ -153,6 +154,10 @@ impl TileLike for Tile {
 impl TileParent for Tile {
     fn parent(&self, zoom: Option<u8>) -> Option<Tile> {
         self.parent(zoom)
+    }
+
+    fn root() -> Tile {
+        utile!(0, 0, 0)
     }
 }
 

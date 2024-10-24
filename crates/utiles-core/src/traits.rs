@@ -49,14 +49,20 @@ pub trait LngLatLike: Coord2dLike {
 }
 
 pub trait TileParent: Eq + Hash + Copy + TileLike {
-    #[must_use]
-    fn parent(&self, zoom: Option<u8>) -> Option<Self>;
+    fn parent(&self, zoom: Option<u8>) -> Option<Self>
+    where
+        Self: Sized;
 
     fn iter_parents(&self) -> Parents<Self> {
         Parents {
             current: self.parent(None),
         }
     }
+
+    #[must_use]
+    fn root() -> Self
+    where
+        Self: Sized;
 }
 
 pub trait TileChildren1: Eq + Hash + Copy + TileLike {
