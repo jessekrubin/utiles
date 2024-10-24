@@ -3,37 +3,55 @@
 ## TODO
 
 - Docs/readme update
-- Write/copy from planetiler/tippecanoe fails bc distinction between supported write schema and what is a recognized schema(s)
-- Move `utiles-oxipng` to own crate/bin
-- `edges` api to find "edge" tiles of collection of tiles
 
 ## Unreleased/Future
 
-- `shapes` and `feature` functions for tile produce polygons that now DO follow the right-hand-rule; exterior rings are clockwise
-- `simplify`/`merge` function(s) optimized for faster merging and WAY less memory usage
+- **NO UNWRAPPING!**
+- supermercado compatible `edges` and `burn` cli commands added as well a s rust
+  lib functions (obviously)
+- `shapes` and `feature` functions for tile produce polygons that now DO follow
+  the right-hand-rule; exterior rings are clockwise
+- `simplify`/`merge` function(s) optimized for faster merging and WAY less
+  memory usage
 - Parent methods now returns `None` if `z<=0`
 - New command(s):
-  - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as standardized by the martin/maplibre team (this supports more hash-types; `xxh3` appears to be the fastest and what utiles will likely default to if not `xxh64`)
-  - `commands` list all available commands (including hidden/dev/unimplemented commands)
-  - `enumerate` list xyz tiles in db(s) similar to `tippecanoe-enumerate`; for tippecanoe compatibility use `--tippecanoe`/`-t`
-  - `sqlite`/`db` sub-command group with `vac`/`analyze` commands and will likely contain future pure sqlite util(e)s... these could totally be shell scripts, but they're nice to have on das-windows
-    - `header`/`head` command that prints the json of a sqlite db header (which has come in handy for weird dbs that use old code to write out sqlite dbs (yes I have seen this))
+  - `agg-hash` command that computes the `agg-tiles-hash` of a tiles-db as
+    standardized by the martin/maplibre team (this supports more hash-types;
+    `xxh3` appears to be the fastest and what utiles will likely default to if
+    not `xxh64`)
+  - `commands` list all available commands (including hidden/dev/unimplemented
+    commands)
+  - `enumerate` list xyz tiles in db(s) similar to `tippecanoe-enumerate`; for
+    tippecanoe compatibility use `--tippecanoe`/`-t`
+  - `sqlite`/`db` sub-command group with `vac`/`analyze` commands and will
+    likely contain future pure sqlite util(e)s... these could totally be shell
+    scripts, but they're nice to have on das-windows
+    - `header`/`head` command that prints the json of a sqlite db header (which
+      has come in handy for weird dbs that use old code to write out sqlite dbs
+      (yes I have seen this))
     - `vac`/`vacuum` command that vacuums a sqlite db (optionally into a new db)
-    - `analyze` command that analyzes a sqlite db (basically the same as doing `sqlite3 database.sqlite "PRAGMA analyze;"`)
+    - `analyze` command that analyzes a sqlite db (basically the same as doing
+      `sqlite3 database.sqlite "PRAGMA analyze;"`)
 - `copy` and `touch`
-  - Now supports `flat`/`norm` (normalized)/`hash` (flat-with-hash) formats as standardized by the martin/maplibre people. Should also work with non-martin-conforming mbtiles schemas (appears to for me)
+  - Now supports `flat`/`norm` (normalized)/`hash` (flat-with-hash) formats as
+    standardized by the martin/maplibre people. Should also work with
+    non-martin-conforming mbtiles schemas (appears to for me)
 - Dev/hidden commands:
-  - `webpify` command that converts all non-webp raster-tiles to webp (lossless only due to image-crate not supporting lossy encoding...)
+  - `webpify` command that converts all non-webp raster-tiles to webp (lossless
+    only due to image-crate not supporting lossy encoding...)
   - `oxipng` command that optimizes png(s) in mbtiles db(s) using `oxipng` crate
 - figured out how to make async tile-stream(s)
 - Removed even more `unwrap` usages
 - lint/copy overhaul
 - Added `--page-size` to vacuum command
 - Using `json-patch` for metadata updates
-- Allow setting metadata value(s) from file if no value is provided (`-`/`--`) for stdin
-- Figured out how to put the caller-site (eg `pyo3` in the cli help so you (likely me) can tell which utiles you are calling)
+- Allow setting metadata value(s) from file if no value is provided (`-`/`--`)
+  for stdin
+- Figured out how to put the caller-site (eg `pyo3` in the cli help so you
+  (likely me) can tell which utiles you are calling)
 - python:
   - Added `TileFmts` string formatter object
+  - `Lager` singleton that can toggle tracing format and level (WIP)
 
 ---
 
@@ -45,17 +63,24 @@
 
 ## 0.6.0 (2024-06-28)
 
-- Upgrade pyo3 to `v0.22.0` -- had to add signatures to all fns with optional args/kwargs
+- Upgrade pyo3 to `v0.22.0` -- had to add signatures to all fns with optional
+  args/kwargs
 - Update python dev deps
-- Added `{bbox}`, `{projwin}`, `{bbox_web}` and `{projwin_web}` format tokens to tile-formatter (those projwins are handy for gdaling)
+- Added `{bbox}`, `{projwin}`, `{bbox_web}` and `{projwin_web}` format tokens to
+  tile-formatter (those projwins are handy for gdaling)
 
 ---
 
 ## 0.5.1 (2024-06-19)
 
-- Fixed backpressure issue when `unpyramiding` direcotry to mbtiles; the loading of tiles was happening too fast and could cause memory issues on large tile-pyramids... (this was previously not an issue b/c I would run those jobs on my work machine which had 512gb or ram, but that machine died... RIP titus)
-- Write out `metadata.json` when `pyramid-ing` mbtiles to directory if the metadata of the mbtiles does not conatin duplicate keys (which it should not)
-- Limit jobs/concurrency when `pyramid-ing` mbtiles to directory to 4 (if not specified by `--jobs`/`-j` option) to prevent nuking machines
+- Fixed backpressure issue when `unpyramiding` direcotry to mbtiles; the loading
+  of tiles was happening too fast and could cause memory issues on large
+  tile-pyramids... (this was previously not an issue b/c I would run those jobs
+  on my work machine which had 512gb or ram, but that machine died... RIP titus)
+- Write out `metadata.json` when `pyramid-ing` mbtiles to directory if the
+  metadata of the mbtiles does not conatin duplicate keys (which it should not)
+- Limit jobs/concurrency when `pyramid-ing` mbtiles to directory to 4 (if not
+  specified by `--jobs`/`-j` option) to prevent nuking machines
 
 ---
 
@@ -74,7 +99,8 @@
 - Testing:
   - More tests added (mostly testing w/ python)
   - Added test mbtiles file `osm-standard.0z4.mbtiles`
-- fmt-str command and option `--fmt` added `tiles` command; allows string formatting of json-tiles:
+- fmt-str command and option `--fmt` added `tiles` command; allows string
+  formatting of json-tiles:
 
 ```
 Format json-tiles format-string
@@ -103,7 +129,8 @@ Example:
 
 ## 0.4.1 (2024-04-04)
 
-- Fixed problem with python tile `__richcmp__` not handling invalid tiles and non-tile-like objs
+- Fixed problem with python tile `__richcmp__` not handling invalid tiles and
+  non-tile-like objs
 
 ## 0.4.0 (2024-03-28)
 
@@ -137,7 +164,8 @@ Example:
 
 - Drop python 3.7 (was good knowing you)
 - Update pyo3 to 0.20.0
-- Added rasterio/rio entry points ('utiles' and 'ut' alias bc why type `rio utiles` over `rio ut`)
+- Added rasterio/rio entry points ('utiles' and 'ut' alias bc why type
+  `rio utiles` over `rio ut`)
 
 ---
 
