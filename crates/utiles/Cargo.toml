@@ -19,7 +19,7 @@ path = "src/lib.rs"
 name = "utiles"
 path = "src/bin.rs"
 required-features = [
-  "cli",
+    "cli",
 ]
 
 [dependencies]
@@ -43,6 +43,7 @@ json-patch = "3.0.1"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
 num_cpus = "1.16.0"
+once_cell = "1.20.2"
 owo-colors = { version = "4.1.0", features = ["supports-color"] }
 pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
@@ -81,12 +82,16 @@ harness = false
 
 [features]
 default = [
-  "cli",
-  "pmtiles",
+    "cli",
+    "pmtiles",
 ]
 all = [
-  "cli",
-  "pmtiles",
+    "cli",
+    "pmtiles",
+]
+lager-reload = []
+python = [
+    "lager-reload"
 ]
 cli = ["dep:clap", "dep:pmtiles"]
 pmtiles = ["dep:pmtiles"]

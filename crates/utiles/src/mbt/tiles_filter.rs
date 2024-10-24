@@ -56,7 +56,7 @@ impl TilesFilter {
                     "zoom_level IN ({zooms})",
                     zooms = zooms
                         .iter()
-                        .map(std::string::ToString::to_string)
+                        .map(ToString::to_string)
                         .collect::<Vec<String>>()
                         .join(",")
                 )

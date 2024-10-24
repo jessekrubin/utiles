@@ -1,27 +1,12 @@
 use std::io::{self};
 
+use crate::errors::UtilesResult;
+use crate::lager::LagerConfig;
 use tracing::debug;
 use tracing_subscriber::fmt::{self};
-use tracing_subscriber::EnvFilter;
 
-use crate::errors::UtilesResult;
-
-#[derive(Debug, Default)]
-pub struct LagerConfig {
-    pub debug: bool,
-    pub trace: bool,
-    pub json: bool,
-}
-
-pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
-    let filter = if log_config.trace {
-        EnvFilter::new("TRACE")
-    } else if log_config.debug {
-        EnvFilter::new("DEBUG")
-    } else {
-        EnvFilter::new("INFO")
-    };
-    let debug_or_trace = log_config.debug || log_config.trace;
+pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
+    let filter = log_config.env_filter();
 
     #[allow(clippy::match_bool)]
     #[allow(clippy::single_match_else)]
@@ -41,7 +26,7 @@ pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
             let subscriber = fmt::Subscriber::builder()
                 .with_env_filter(filter)
                 .with_writer(io::stderr)
-                .with_target(debug_or_trace)
+                .with_target(log_config.is_debug_or_trace())
                 .finish();
             let set_global_res = tracing::subscriber::set_global_default(subscriber);
             if let Err(e) = set_global_res {
@@ -49,6 +34,7 @@ pub fn init_tracing(log_config: &LagerConfig) -> UtilesResult<()> {
             }
         }
     }
+    debug!("tracing initialized (fixed-lager)");
     debug!("lager-config: {:?}", log_config);
     Ok(())
 }

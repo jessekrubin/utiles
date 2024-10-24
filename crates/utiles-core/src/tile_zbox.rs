@@ -1,5 +1,7 @@
 //! `TileZBox` - zoom-x-y bounding box
-use crate::{Point2d, Tile, TileLike, UtilesCoreError, UtilesCoreResult};
+
+use crate::{fns, Point2d, Tile, TileLike, UtilesCoreError, UtilesCoreResult};
+use fns::flipy;
 
 /// A struct representing a bbox of tiles at a specific zoom level
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -117,8 +119,8 @@ impl TileZBox {
     #[must_use]
     pub fn flipy(&self) -> Self {
         Self {
-            min: Point2d::new(self.min.x, crate::fns::flipy(self.max.y, self.zoom)),
-            max: Point2d::new(self.max.x, crate::fns::flipy(self.min.y, self.zoom)),
+            min: Point2d::new(self.min.x, flipy(self.max.y, self.zoom)),
+            max: Point2d::new(self.max.x, flipy(self.min.y, self.zoom)),
             zoom: self.zoom,
         }
     }
@@ -139,8 +141,8 @@ impl TileZBox {
         let col_prefix = prefix.unwrap_or_default();
         // classic mbtiles sqlite query:
         // 'SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?',
-        let miny = crate::fns::flipy(self.min.y, self.zoom);
-        let maxy = crate::fns::flipy(self.max.y, self.zoom);
+        let miny = flipy(self.min.y, self.zoom);
+        let maxy = flipy(self.max.y, self.zoom);
         format!(
             "(zoom_level = {} AND {}tile_column >= {} AND {}tile_column <= {} AND {}tile_row >= {} AND {}tile_row <= {})",
             self.zoom,

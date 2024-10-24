@@ -69,6 +69,10 @@ pub enum UtilesError {
     #[error("path conversion error: {0}")]
     PathConversionError(String),
 
+    /// simple string lock error type that might be good to fix up
+    #[error("Lock error: {0}")]
+    LockError(String),
+
     // ===============================================================
     // EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL ~ EXTERNAL
     // ===============================================================

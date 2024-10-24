@@ -8,7 +8,7 @@ use crate::cli::commands::{
     translate_main, update_main, vacuum_main, webpify_main, zxyify_main,
 };
 use crate::errors::UtilesResult;
-use crate::lager::{init_tracing, LagerConfig};
+use crate::lager::{init_tracing, LagerConfig, LagerLevel};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
 use clap::{CommandFactory, FromArgMatches};
@@ -85,18 +85,23 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
     // if the command is "dev" init tracing w/ debug
     let logcfg = if let Commands::Dev(_) = args.command {
         LagerConfig {
-            trace: false,
-            debug: true,
+            level: LagerLevel::Debug,
             json: args.log_json,
         }
     } else {
+        let level = if args.trace {
+            LagerLevel::Trace
+        } else if args.debug {
+            LagerLevel::Debug
+        } else {
+            LagerLevel::Info
+        };
         LagerConfig {
-            trace: args.trace,
-            debug: args.debug,
+            level,
             json: args.log_json,
         }
     };
-    init_tracing(&logcfg)?;
+    init_tracing(logcfg)?;
 
     debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
     debug!("argv: {:?}", argv);

@@ -9,7 +9,7 @@ use tracing::{debug, error, info, warn};
 
 use utiles::tile_type::TileFormat;
 use utiles::{
-    lager::{init_tracing, LagerConfig},
+    lager::{init_tracing, LagerConfig, LagerLevel},
     mbt::{
         MbtStreamWriterSync, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync,
     },
@@ -187,10 +187,13 @@ async fn main() -> Result<()> {
     let args = Cli::parse();
     debug!("args: {:?}", args);
 
-    init_tracing(&LagerConfig {
-        debug: args.debug,
-        ..Default::default()
-    })?;
+    let level = if args.debug {
+        LagerLevel::Debug
+    } else {
+        LagerLevel::Info
+    };
+    let logcfg = LagerConfig { json: false, level };
+    init_tracing(logcfg)?;
     let res = oxipng_main(args).await;
 
     // if let Err(e) = res {

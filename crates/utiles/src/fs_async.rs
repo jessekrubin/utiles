@@ -7,7 +7,7 @@ use crate::errors::UtilesResult;
 use crate::sqlite::SqliteError;
 use crate::UtilesError;
 
-pub async fn file_exists<P: AsRef<std::path::Path>>(p: P) -> bool {
+pub async fn file_exists<P: AsRef<Path>>(p: P) -> bool {
     let metadata = fs::metadata(p).await;
     match metadata {
         Ok(metadata) => metadata.is_file(),
@@ -23,7 +23,7 @@ pub async fn file_exists<P: AsRef<std::path::Path>>(p: P) -> bool {
 //     }
 // }
 
-pub async fn file_exists_err<P: AsRef<std::path::Path>>(p: P) -> UtilesResult<bool> {
+pub async fn file_exists_err<P: AsRef<Path>>(p: P) -> UtilesResult<bool> {
     if file_exists(&p).await {
         Ok(true)
     } else {
@@ -32,7 +32,7 @@ pub async fn file_exists_err<P: AsRef<std::path::Path>>(p: P) -> UtilesResult<bo
     }
 }
 
-pub async fn filesize_async<P: AsRef<std::path::Path>>(p: P) -> Option<u64> {
+pub async fn filesize_async<P: AsRef<Path>>(p: P) -> Option<u64> {
     let metadata = fs::metadata(p).await.ok()?;
     Some(metadata.len())
 }

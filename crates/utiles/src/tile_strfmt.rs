@@ -247,7 +247,7 @@ impl TileStringFormatter {
                         parts.push(FmtPart::Dynamic(|tile| tile.y().to_string()));
                     }
                     FormatTokens::Yup => {
-                        parts.push(FmtPart::Dynamic(|tile| (tile.yup()).to_string()));
+                        parts.push(FmtPart::Dynamic(|tile| tile.yup().to_string()));
                     }
                     FormatTokens::Z => {
                         parts.push(FmtPart::Dynamic(|tile| tile.z().to_string()));

@@ -96,10 +96,10 @@ pub fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
                 // recurse around again
                 let geom_ref = geom;
                 let res = _coords(&geom_ref.as_borrowed());
-                match res {
-                    Ok(res) => return Ok(res),
-                    Err(e) => return Err(e),
-                }
+                return match res {
+                    Ok(res) => Ok(res),
+                    Err(e) => Err(e),
+                };
             }
             if let Some(features) = d.get("features") {
                 if let Ok(features) = features.extract::<Vec<Bound<PyDict>>>() {
