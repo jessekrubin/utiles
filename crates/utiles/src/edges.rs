@@ -29,9 +29,9 @@ fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u
         }
     })
 }
-pub fn find_edges_wrap_x<'a>(
-    tiles: &'a [Tile],
-) -> UtilesResult<impl Iterator<Item = Tile> + 'a> {
+pub fn find_edges_wrap_x(
+    tiles: &[Tile],
+) -> UtilesResult<impl Iterator<Item = Tile> + '_> {
     let zbox = TileZBox::from_tiles(tiles)?;
     let max_xy = zoom_max_xy(zbox.zoom);
     let tile_positions: HashSet<(u32, u32)> =
@@ -56,9 +56,7 @@ pub fn find_edges_wrap_x<'a>(
     Ok(edge_it)
 }
 
-pub fn find_edges<'a>(
-    tiles: &'a [Tile],
-) -> UtilesResult<impl Iterator<Item = Tile> + 'a> {
+pub fn find_edges(tiles: &[Tile]) -> UtilesResult<impl Iterator<Item = Tile> + '_> {
     TileZBox::from_tiles(tiles)?;
     let tile_positions: HashSet<(u32, u32)> =
         tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
