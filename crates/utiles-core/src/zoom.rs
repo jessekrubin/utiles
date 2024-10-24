@@ -8,6 +8,12 @@ use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 use crate::UtilesCoreError::InvalidZoom;
 
+/// Return max-xy for a zoom level
+#[must_use]
+pub fn zoom_max_xy(zoom: u8) -> u32 {
+    2_u32.pow(u32::from(zoom)) - 1
+}
+
 /// `ZoomSet` is a set of zoom levels represented as a 32-bit unsigned integer
 /// where each bit represents a zoom level (0 <= z <= 30). BY DEFAULT: The
 /// least significant bit represents zoom level 0 and the SECOND most significant

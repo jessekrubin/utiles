@@ -147,7 +147,17 @@ pub struct TileFmtArgs {
     #[command(flatten)]
     pub fmtopts: TileFmtOptions,
 }
+#[derive(Debug, Parser)]
+pub struct EdgesArgs {
+    #[arg(required = false, long, action = clap::ArgAction::SetTrue,)]
+    pub wrapx: bool,
 
+    #[command(flatten)]
+    pub inargs: TileInputStreamArgs,
+
+    #[command(flatten)]
+    pub fmtopts: TileFmtOptions,
+}
 #[derive(Debug, Parser)]
 pub struct BurnArgs {
     /// Zoom level (0-30)
@@ -789,7 +799,7 @@ pub enum Commands {
 
     /// Echo edge tiles from stream of xyz tiles
     #[command(name = "edges")]
-    Edges(TileFmtArgs),
+    Edges(EdgesArgs),
 
     /// Convert raster mbtiles to webp format
     #[command(
