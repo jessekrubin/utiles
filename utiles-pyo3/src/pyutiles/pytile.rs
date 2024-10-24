@@ -507,6 +507,10 @@ impl TileParent for PyTile {
     fn parent(&self, zoom: Option<u8>) -> Option<Self> {
         self.parent(zoom)
     }
+
+    fn root() -> Self {
+        pytile!(0, 0, 0)
+    }
 }
 
 impl TileChildren1 for PyTile {
