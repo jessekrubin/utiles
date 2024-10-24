@@ -25,7 +25,7 @@ def test_all_no_duplicates() -> None:
 
 
 def test_missing_from_libutiles() -> None:
-    tmp_ignored = {"debug", "error", "info", "trace", "warn"}
+    tmp_ignored = {"debug", "error", "info", "trace", "warn", "lager", "Lager"}
     ignored_members = {
         *tmp_ignored,
         "__all__",

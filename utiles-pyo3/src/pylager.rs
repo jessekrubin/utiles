@@ -1,14 +1,12 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::{pyfunction, PyErr, PyResult};
 use std::str::FromStr;
 use utiles::lager::{
     get_lager_format, get_lager_level, init_tracing, LagerConfig, LagerFormat,
     LagerLevel,
 };
-use utiles::TileStringFormatter;
 
-const VERSION_STRING: &'static str = "pylager";
+const VERSION_STRING: &str = "pylager";
 
 #[pyfunction]
 pub fn trace(msg: &str) {
@@ -37,7 +35,13 @@ pub fn error(msg: &str) {
 
 #[derive(Clone, Debug, PartialEq, Hash)]
 #[pyclass(name = "Lager", module = "utiles._utiles")]
-pub struct PyLager {}
+pub struct PyLager;
+
+impl Default for PyLager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 #[pymethods]
 impl PyLager {
@@ -49,16 +53,16 @@ impl PyLager {
     #[getter]
     fn get_level(&self) -> PyResult<String> {
         let r = get_lager_level()
-            .map(|e| format!("{}", e))
-            .map_err(|e| PyErr::new::<PyValueError, _>("Failed to get lager level"))?;
+            .map(|e| format!("{e}"))
+            .map_err(|_e| PyErr::new::<PyValueError, _>("Failed to get lager level"))?;
         Ok(r)
     }
 
     #[getter]
     fn get_format(&self) -> PyResult<String> {
-        let r = get_lager_format()
-            .map(|e| format!("{}", e))
-            .map_err(|e| PyErr::new::<PyValueError, _>("Failed to get lager format"))?;
+        let r = get_lager_format().map(|e| format!("{e}")).map_err(|_e| {
+            PyErr::new::<PyValueError, _>("Failed to get lager format")
+        })?;
         Ok(r)
     }
 
@@ -70,29 +74,30 @@ impl PyLager {
             )
         })?;
         let cur_level = get_lager_level()
-            .map_err(|e| PyErr::new::<PyValueError, _>("Failed to get lager level"))?;
+            .map_err(|_e| PyErr::new::<PyValueError, _>("Failed to get lager level"))?;
 
         if cur_level != parse_lev {
             utiles::lager::set_log_level(level).map_err(|e| {
-                PyErr::new::<PyValueError, _>(format!("failed to set log level: {}", e))
-            })?
+                PyErr::new::<PyValueError, _>(format!("failed to set log level: {e}"))
+            })?;
         };
         Ok(())
     }
     #[setter]
     fn set_format(&self, fmt: &str) -> PyResult<()> {
-        let parse_lev = LagerFormat::from_str(fmt).map_err(|e| {
+        let parse_fmt = LagerFormat::from_str(fmt).map_err(|_e| {
             PyErr::new::<PyValueError, _>("Invalid lager level ('full', 'json')")
         })?;
-        let cur_level = get_lager_format()
-            .map_err(|e| PyErr::new::<PyValueError, _>("Failed to get lager format"))?;
+        let cur_fmt = get_lager_format().map_err(|_e| {
+            PyErr::new::<PyValueError, _>("Failed to get lager format")
+        })?;
 
-        if cur_level != parse_lev {
+        if cur_fmt != parse_fmt {
             // TODO: FIX THIS NOT BE BOOL
-            let is_json = cur_level == LagerFormat::Json;
+            let is_json = cur_fmt == LagerFormat::Json;
             utiles::lager::set_log_format(is_json).map_err(|e| {
-                PyErr::new::<PyValueError, _>(format!("failed to set log level: {}", e))
-            })?
+                PyErr::new::<PyValueError, _>(format!("failed to set log level: {e}"))
+            })?;
         };
         Ok(())
     }
@@ -100,7 +105,7 @@ impl PyLager {
     pub fn __str__(&self) -> PyResult<String> {
         let fmt = self.get_format()?;
         let lev = self.get_level()?;
-        Ok(format!("Lager(level={}, format={})", lev, fmt))
+        Ok(format!("Lager(level={lev}, format={fmt})"))
     }
 
     pub fn trace(&self, msg: &str) {
@@ -127,21 +132,21 @@ impl PyLager {
 #[pyfunction]
 pub fn set_lager_level(level: &str) -> PyResult<()> {
     utiles::lager::set_log_level(level).map_err(|e| {
-        PyErr::new::<PyValueError, _>(format!("failed to set log level: {}", e))
+        PyErr::new::<PyValueError, _>(format!("failed to set log level: {e}"))
     })
 }
 
 #[pyfunction]
 pub fn set_lager_format(json: bool) -> PyResult<()> {
     utiles::lager::set_log_format(json).map_err(|e| {
-        PyErr::new::<PyValueError, _>(format!("failed to set log format: {}", e))
+        PyErr::new::<PyValueError, _>(format!("failed to set log format: {e}"))
     })
 }
 
 pub fn pymod_add(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let cfg = LagerConfig::default();
     match init_tracing(cfg) {
-        Ok(_) => {
+        Ok(()) => {
             tracing::debug!("lager-config: {:?}", cfg);
         }
         Err(e) => tracing::debug!("failed to init tracing: {}", e),
