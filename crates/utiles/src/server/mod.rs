@@ -43,6 +43,7 @@ use crate::server::ui::uitiles;
 use crate::signal::shutdown_signal;
 
 mod cfg;
+mod favicon;
 mod health;
 pub mod radix36;
 mod request_id;
@@ -139,6 +140,7 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     // Build the app/router!
     let app = Router::new()
         .route("/", get(root))
+        .route("/favicon.ico", get(favicon::favicon))
         .route("/health", get(health))
         .route("/cfg", get(get_cfg))
         .route("/uitiles", get(uitiles))
