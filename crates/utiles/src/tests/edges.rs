@@ -201,7 +201,12 @@ fn _test_expected() -> Vec<Tile> {
 #[test]
 fn test_edges() {
     let tdata = _test_data_input();
-    let edges = find_edges(&tdata).unwrap();
+
+    let mut edges = vec![];
+    for t in find_edges(&tdata).unwrap() {
+        edges.push(t);
+    }
+    // let edges = find_edges_vec(&tdata).unwrap();
     let expected = _test_expected();
     let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
     let edges_set = edges.into_iter().collect::<HashSet<Tile>>();

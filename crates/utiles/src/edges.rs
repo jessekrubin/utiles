@@ -1,6 +1,6 @@
 use crate::UtilesResult;
 use std::collections::HashSet;
-use utiles_core::{Tile, TileLike, TileZBox};
+use utiles_core::{zoom_max_xy, Tile, TileLike, TileZBox};
 
 static NEIGHBOR_IDXS: &[(i32, i32)] = &[
     (-1, -1),
@@ -12,24 +12,64 @@ static NEIGHBOR_IDXS: &[(i32, i32)] = &[
     (1, 0),
     (1, 1),
 ];
+fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u32)> {
+    NEIGHBOR_IDXS.iter().filter_map(move |&(dx, dy)| {
+        let x = xy.0 as i32;
+        let y = xy.1 as i32;
 
-pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
+        // Wrap the x-coordinate if it goes out of bounds
+        let wrapped_x = (x + dx).rem_euclid(max_xy as i32) as u32;
+
+        // Ensure the y-coordinate does not wrap and is within bounds
+        let neighbor_y = y + dy;
+        if neighbor_y >= 0 && (neighbor_y as u32) < max_xy {
+            Some((wrapped_x, neighbor_y as u32))
+        } else {
+            None
+        }
+    })
+}
+pub fn find_edges_wrap_x(
+    tiles: &[Tile],
+) -> UtilesResult<impl Iterator<Item = Tile> + '_> {
+    let zbox = TileZBox::from_tiles(tiles)?;
+    let max_xy = zoom_max_xy(zbox.zoom);
+    let tile_positions: HashSet<(u32, u32)> =
+        tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
+
+    let edge_it = tiles.iter().filter_map(move |tile| {
+        let x = tile.x();
+        let y = tile.y();
+
+        let is_edge =
+            neighbors_wrap_x((x, y), max_xy).any(|(neighbor_x, neighbor_y)| {
+                // If neighbor is out of bounds or not in tile_positions, it's considered an edge
+                !tile_positions.contains(&(neighbor_x, neighbor_y))
+            });
+
+        if is_edge {
+            Some(*tile)
+        } else {
+            None
+        }
+    });
+    Ok(edge_it)
+}
+
+pub fn find_edges(tiles: &[Tile]) -> UtilesResult<impl Iterator<Item = Tile> + '_> {
     TileZBox::from_tiles(tiles)?;
     let tile_positions: HashSet<(u32, u32)> =
         tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
-    let mut edge_tiles = Vec::new();
 
-    for tile in tiles {
+    let edge_it = tiles.iter().filter_map(move |tile| {
         let x = tile.x() as i32;
         let y = tile.y() as i32;
 
-        // if any neighbor is not in the tile_positions das ist uno edge
         let is_edge = NEIGHBOR_IDXS.iter().any(|&(dx, dy)| {
             let neighbor_x = x + dx;
             let neighbor_y = y + dy;
 
-            // TODO: handle wrapping!?
-            // if neighbor position is invalid (negative coordinates), consider it as an edge
+            // Handle negative coordinates or positions outside the tile_positions
             if neighbor_x < 0 || neighbor_y < 0 {
                 true
             } else {
@@ -39,11 +79,12 @@ pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
         });
 
         if is_edge {
-            edge_tiles.push(*tile);
+            Some(*tile)
+        } else {
+            None
         }
-    }
-
-    Ok(edge_tiles)
+    });
+    Ok(edge_it)
 }
 
 // ============================================================================
