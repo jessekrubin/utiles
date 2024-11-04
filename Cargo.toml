@@ -38,7 +38,7 @@ serde_json = { version = "1.0.132", features = ["preserve_order"] }
 size = { version = "=0.5.0-preview2", features = ["default"] }
 strum = { version = "0.26.3", features = ["derive"] }
 strum_macros = "0.26.3"
-thiserror = "1.0.63"
+thiserror = "1.0.67"
 tilejson = "0.4.1"
 tokio = { version = "1.39.3", features = ["full"] }
 tokio-stream = "0.1.16"
