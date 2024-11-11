@@ -35,7 +35,7 @@ geo-types.workspace = true
 geojson.workspace = true
 globset = "0.4.15"
 hex = "0.4.3"
-image = "0.25.2"
+image = "0.25.5"
 imagesize = "0.13.0"
 indicatif.workspace = true
 indoc = { workspace = true }
