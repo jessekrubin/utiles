@@ -40,7 +40,7 @@ strum = { version = "0.26.3", features = ["derive"] }
 strum_macros = "0.26.3"
 thiserror = "1.0.67"
 tilejson = "0.4.1"
-tokio = { version = "1.39.3", features = ["full"] }
+tokio = { version = "1.41.1", features = ["full"] }
 tokio-stream = "0.1.16"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
