@@ -54,42 +54,48 @@ impl PyLngLat {
         &self,
         other: &Bound<'_, PyAny>,
         op: CompareOp,
-        py: Python<'_>,
-    ) -> PyObject {
+    ) -> PyResult<bool> {
         let is_lnglat = other.is_instance_of::<PyLngLat>();
         if is_lnglat {
             let maybe_lnglat = other.extract::<PyRef<PyLngLat>>();
             if let Ok(lnglat) = maybe_lnglat {
                 match op {
-                    CompareOp::Eq => (self._lng() == lnglat._lng()
-                        && self._lat() == lnglat._lat())
-                    .into_py(py),
-                    CompareOp::Ne => (self._lng() != lnglat._lng()
-                        || self._lat() != lnglat._lat())
-                    .into_py(py),
-                    CompareOp::Lt => (self._lng() < lnglat._lng()
-                        || self._lat() < lnglat._lat())
-                    .into_py(py),
-                    _ => py.NotImplemented(),
+                    CompareOp::Eq => {
+                        Ok(self._lng() == lnglat._lng() && self._lat() == lnglat._lat())
+                    }
+                    CompareOp::Ne => {
+                        Ok(self._lng() != lnglat._lng() || self._lat() != lnglat._lat())
+                    }
+                    CompareOp::Lt => {
+                        Ok(self._lng() < lnglat._lng() || self._lat() < lnglat._lat())
+                    }
+                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                        "Not implemented",
+                    )),
                 }
             } else {
-                py.NotImplemented()
+                Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                    "Not implemented",
+                ))
             }
         } else if let Ok(tuple) = other.extract::<(f64, f64)>() {
             match op {
-                CompareOp::Eq => {
-                    (self._lng() == tuple.0 && self._lat() == tuple.1).into_py(py)
-                }
-                CompareOp::Ne => {
-                    (self._lng() != tuple.0 || self._lat() != tuple.1).into_py(py)
-                }
-                CompareOp::Lt => {
-                    (self._lng() < tuple.0 || self._lat() < tuple.1).into_py(py)
-                }
-                _ => py.NotImplemented(),
+                CompareOp::Eq => Ok(self._lng() == tuple.0 && self._lat() == tuple.1),
+                CompareOp::Ne => Ok(self._lng() != tuple.0 || self._lat() != tuple.1),
+                CompareOp::Lt => Ok(self._lng() < tuple.0 || self._lat() < tuple.1),
+                _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                    "Not implemented",
+                )),
             }
         } else {
-            py.NotImplemented()
+            match op {
+                CompareOp::Eq => Ok(false),
+                CompareOp::Ne => Ok(true),
+                CompareOp::Lt => Ok(false),
+                _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                    "Not implemented",
+                )),
+            }
         }
     }
     pub fn __len__(&self) -> usize {

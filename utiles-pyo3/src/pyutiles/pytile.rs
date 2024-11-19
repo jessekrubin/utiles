@@ -1,5 +1,5 @@
 use std::collections::hash_map::DefaultHasher;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 
 use pyo3::basic::CompareOp;
@@ -7,8 +7,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyNotImplemented, PyTuple, PyType};
 use pyo3::{
-    exceptions, intern, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
-    PyResult, Python,
+    exceptions, intern, pyclass, pymethods, Py, PyAny, PyErr, PyRef, PyResult, Python,
 };
 use serde::Serialize;
 use utiles::bbox::BBox;
@@ -224,7 +223,7 @@ impl PyTile {
     pub fn __getitem__<'py>(
         &self,
         idx: tuple_slice::SliceOrInt,
-        _py: Python<'py>,
+        py: Python<'py>,
     ) -> PyResult<
         // tuple_slice::TupleSliceResult<u32>
         Bound<'py, PyAny>,
@@ -239,24 +238,26 @@ impl PyTile {
                     .copied()
                     .collect();
                 let tuple =
-                    PyTuple::new(_py, m).map(|x| x.into_any()).map_err(|e| {
-                        PyErr::new::<PyValueError, _>(format!("Error: {e}"))
-                    })?;
+                    PyTuple::new(py, m)
+                        .map(pyo3::Bound::into_any)
+                        .map_err(|e| {
+                            PyErr::new::<PyValueError, _>(format!("Error: {e}"))
+                        })?;
                 Ok(tuple)
             }
             tuple_slice::SliceOrInt::Int(idx) => match idx {
                 0 | -3 => {
-                    let r = self.xyz.x.into_pyobject(_py).map(|x| x.into_any())?;
+                    let r = self.xyz.x.into_pyobject(py).map(pyo3::Bound::into_any)?;
                     Ok(r)
                 }
                 1 | -2 => {
-                    let r = self.xyz.y.into_pyobject(_py).map(|x| x.into_any())?;
+                    let r = self.xyz.y.into_pyobject(py).map(pyo3::Bound::into_any)?;
                     Ok(r)
                 }
                 2 | -1 => {
                     let r = u32::from(self.xyz.z)
-                        .into_pyobject(_py)
-                        .map(|x| x.into_any())?;
+                        .into_pyobject(py)
+                        .map(pyo3::Bound::into_any)?;
                     Ok(r)
                 }
                 3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
@@ -289,7 +290,6 @@ impl PyTile {
         &self,
         other: &Bound<'_, PyAny>,
         op: CompareOp,
-        py: Python<'_>,
     ) -> PyResult<bool> {
         let is_pytile = other.is_instance_of::<PyTile>();
         if is_pytile {
@@ -298,29 +298,29 @@ impl PyTile {
                 Ok(other) => {
                     let b = match op {
                         CompareOp::Eq => {
-                            ((self.xyz.x == other.xyz.x)
+                            (self.xyz.x == other.xyz.x)
                                 && (self.xyz.y == other.xyz.y)
-                                && (self.xyz.z == other.xyz.z))
+                                && (self.xyz.z == other.xyz.z)
                         }
                         CompareOp::Ne => {
-                            ((self.xyz.x != other.xyz.x)
+                            (self.xyz.x != other.xyz.x)
                                 || (self.xyz.y != other.xyz.y)
-                                || (self.xyz.z != other.xyz.z))
+                                || (self.xyz.z != other.xyz.z)
                         }
                         CompareOp::Lt => {
-                            ((self.xyz.x < other.xyz.x)
+                            (self.xyz.x < other.xyz.x)
                                 && (self.xyz.y < other.xyz.y)
-                                && (self.xyz.z < other.xyz.z))
+                                && (self.xyz.z < other.xyz.z)
                         }
                         CompareOp::Gt => {
-                            ((self.xyz.x > other.xyz.x)
+                            (self.xyz.x > other.xyz.x)
                                 && (self.xyz.y > other.xyz.y)
-                                && (self.xyz.z > other.xyz.z))
+                                && (self.xyz.z > other.xyz.z)
                         }
                         CompareOp::Ge => {
-                            ((self.xyz.x >= other.xyz.x)
+                            (self.xyz.x >= other.xyz.x)
                                 && (self.xyz.y >= other.xyz.y)
-                                && (self.xyz.z >= other.xyz.z))
+                                && (self.xyz.z >= other.xyz.z)
                         }
                         CompareOp::Le => {
                             (self.xyz.x <= other.xyz.x)
@@ -335,34 +335,34 @@ impl PyTile {
         } else if let Ok(tuple) = other.extract::<(u32, u32, u8)>() {
             let r = match op {
                 CompareOp::Eq => {
-                    ((self.xyz.x == tuple.0)
+                    (self.xyz.x == tuple.0)
                         && (self.xyz.y == tuple.1)
-                        && (self.xyz.z == tuple.2))
+                        && (self.xyz.z == tuple.2)
                 }
                 CompareOp::Ne => {
-                    ((self.xyz.x != tuple.0)
+                    (self.xyz.x != tuple.0)
                         || (self.xyz.y != tuple.1)
-                        || (self.xyz.z != tuple.2))
+                        || (self.xyz.z != tuple.2)
                 }
                 CompareOp::Lt => {
-                    ((self.xyz.x < tuple.0)
+                    (self.xyz.x < tuple.0)
                         && (self.xyz.y < tuple.1)
-                        && (self.xyz.z < tuple.2))
+                        && (self.xyz.z < tuple.2)
                 }
                 CompareOp::Gt => {
-                    ((self.xyz.x > tuple.0)
+                    (self.xyz.x > tuple.0)
                         && (self.xyz.y > tuple.1)
-                        && (self.xyz.z > tuple.2))
+                        && (self.xyz.z > tuple.2)
                 }
                 CompareOp::Ge => {
-                    ((self.xyz.x >= tuple.0)
+                    (self.xyz.x >= tuple.0)
                         && (self.xyz.y >= tuple.1)
-                        && (self.xyz.z >= tuple.2))
+                        && (self.xyz.z >= tuple.2)
                 }
                 CompareOp::Le => {
-                    ((self.xyz.x <= tuple.0)
+                    (self.xyz.x <= tuple.0)
                         && (self.xyz.y <= tuple.1)
-                        && (self.xyz.z <= tuple.2))
+                        && (self.xyz.z <= tuple.2)
                 }
             };
             Ok(r)

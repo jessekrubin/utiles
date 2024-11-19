@@ -1,10 +1,10 @@
 use crate::pyutiles::pytile::PyTile;
+use crate::pyutiles::PyLngLatBbox;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{
-    exceptions, pyclass, pymethods, IntoPy, PyAny, PyErr, PyObject, PyRef, PyResult,
-    Python,
+    exceptions, pyclass, pymethods, IntoPy, PyAny, PyErr, PyRef, PyResult, Python,
 };
 use utiles::BBox;
 
@@ -113,57 +113,58 @@ impl PyBbox {
             )),
         }
     }
-
     pub fn __richcmp__(
         &self,
         other: &Bound<'_, PyAny>,
         op: CompareOp,
-        py: Python<'_>,
-    ) -> PyObject {
-        // fn __richcmp__(&self, other: PyAny, op: CompareOp, py: Python<'_>) -> PyObject {
+    ) -> PyResult<bool> {
         let maybetuple = other.extract::<(f64, f64, f64, f64)>();
 
         if let Ok(tuple) = maybetuple {
             match op {
-                CompareOp::Eq => (self.bbox.left() == tuple.0
-                    && self.bbox.bottom() == tuple.1
-                    && self.bbox.right() == tuple.2
-                    && self.bbox.top() == tuple.3)
-                    .into_py(py),
-                CompareOp::Ne => (self.bbox.left() != tuple.0
-                    || self.bbox.bottom() != tuple.1
-                    || self.bbox.right() != tuple.2
-                    || self.bbox.top() != tuple.3)
-                    .into_py(py),
-                CompareOp::Lt => (self.bbox.left() < tuple.0
-                    || self.bbox.bottom() < tuple.1
-                    || self.bbox.right() < tuple.2
-                    || self.bbox.top() < tuple.3)
-                    .into_py(py),
-                _ => py.NotImplemented(),
+                CompareOp::Eq => Ok(self.bbox.west() == tuple.0
+                    && self.bbox.south() == tuple.1
+                    && self.bbox.east() == tuple.2
+                    && self.bbox.north() == tuple.3),
+                CompareOp::Ne => Ok(self.bbox.west() != tuple.0
+                    || self.bbox.south() != tuple.1
+                    || self.bbox.east() != tuple.2
+                    || self.bbox.north() != tuple.3),
+                CompareOp::Lt => Ok(self.bbox.west() < tuple.0
+                    || self.bbox.south() < tuple.1
+                    || self.bbox.east() < tuple.2
+                    || self.bbox.north() < tuple.3),
+                _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                    "Not implemented",
+                )),
             }
         } else {
-            let other = other.extract::<PyRef<PyBbox>>();
+            let other = other.extract::<PyRef<PyLngLatBbox>>();
             match other {
                 Ok(other) => match op {
-                    CompareOp::Eq => (self.bbox.left() == other.bbox.left()
-                        && self.bbox.bottom() == other.bbox.bottom()
-                        && self.bbox.right() == other.bbox.right()
-                        && self.bbox.top() == other.bbox.top())
-                    .into_py(py),
-                    CompareOp::Ne => (self.bbox.left() != other.bbox.left()
-                        || self.bbox.bottom() != other.bbox.bottom()
-                        || self.bbox.right() != other.bbox.right()
-                        || self.bbox.top() != other.bbox.top())
-                    .into_py(py),
-                    CompareOp::Lt => (self.bbox.left() < other.bbox.left()
-                        || self.bbox.bottom() < other.bbox.bottom()
-                        || self.bbox.right() < other.bbox.right()
-                        || self.bbox.top() < other.bbox.top())
-                    .into_py(py),
-                    _ => py.NotImplemented(),
+                    CompareOp::Eq => Ok(self.bbox.west() == other.bbox.west()
+                        && self.bbox.south() == other.bbox.south()
+                        && self.bbox.east() == other.bbox.east()
+                        && self.bbox.north() == other.bbox.north()),
+                    CompareOp::Ne => Ok(self.bbox.west != other.bbox.west()
+                        || self.bbox.south() != other.bbox.south()
+                        || self.bbox.east() != other.bbox.east()
+                        || self.bbox.north() != other.bbox.north()),
+                    CompareOp::Lt => Ok(self.bbox.west() < other.bbox.west()
+                        || self.bbox.south() < other.bbox.south()
+                        || self.bbox.east() < other.bbox.east()
+                        || self.bbox.north() < other.bbox.north()),
+                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                        "Not implemented",
+                    )),
                 },
-                Err(_) => py.NotImplemented(),
+                Err(_) => match op {
+                    CompareOp::Eq => Ok(false),
+                    CompareOp::Ne => Ok(true),
+                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                        "Not implemented",
+                    )),
+                },
             }
         }
     }

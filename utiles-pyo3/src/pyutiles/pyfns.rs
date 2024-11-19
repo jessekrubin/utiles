@@ -4,7 +4,6 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use pyo3::types::PyTuple;
 use pyo3::{pyfunction, PyErr, PyResult};
-use std::collections::HashMap;
 use utiles::zoom::ZoomOrZooms;
 
 use crate::pyutiles::pybbox::PyBbox;
