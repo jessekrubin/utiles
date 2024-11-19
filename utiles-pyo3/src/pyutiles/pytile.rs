@@ -1,13 +1,13 @@
 use std::collections::hash_map::DefaultHasher;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyTuple, PyType};
+use pyo3::types::{PyDict, PyTuple, PyType};
 use pyo3::{
-    exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
+    exceptions, intern, pyclass, pymethods, Py, PyAny, PyErr, PyObject, PyRef,
     PyResult, Python,
 };
 use serde::Serialize;
@@ -406,15 +406,15 @@ impl PyTile {
     #[pyo3(
         signature = (fid = None, props = None, projected = None, buffer = None, precision = None)
     )]
-    pub fn feature(
+    pub fn feature<'py>(
         &self,
-        py: Python,
+        py: Python<'py>,
         fid: Option<String>,
-        props: Option<HashMap<String, Bound<PyAny>>>,
+        props: Option<Bound<'py, PyDict>>,
         projected: Option<String>,
         buffer: Option<f64>,
         precision: Option<i32>,
-    ) -> PyResult<HashMap<String, PyObject>> {
+    ) -> PyResult<Bound<'py, PyDict>> {
         let projection = if let Some(projected) = projected {
             Projection::try_from(projected)
                 .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?
@@ -434,38 +434,48 @@ impl PyTile {
             .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
 
         // feature that will become python object
-        let mut feature_dict = HashMap::new();
+        let feature_dict = PyDict::new(py);
+        // let mut feature_dict = HashMap::new();
         let bbox_vec = vec![tfeat.bbox.0, tfeat.bbox.1, tfeat.bbox.2, tfeat.bbox.3];
-        let geometry_items = vec![
-            ("type".to_string(), tfeat.geometry.type_.to_object(py)),
-            (
-                "coordinates".to_string(),
-                tfeat.geometry.coordinates.to_object(py),
-            ),
-        ]
-        .into_iter()
-        .collect::<HashMap<String, PyObject>>();
+        let feat_geom_type_string = tfeat.geometry.type_;
+        let geometry_dict = PyDict::new(py);
+        geometry_dict.set_item("type", feat_geom_type_string)?;
+        geometry_dict.set_item("coordinates", tfeat.geometry.coordinates)?;
+        // let geometry_items = vec![
+        //     ("type".to_string(),
+        //
+        //         PyString::new(py, feat_geom_type_string)
+        //     ),
+        //     (
+        //         "coordinates".to_string(),
+        //         tfeat.geometry.coordinates.to_object(py),
+        //     ),
+        // ]
+        // .into_iter()
+        // .collect::<HashMap<String, PyObject>>();
         // Create the properties dictionary
-        let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
+        // let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
+        let properties_dict = PyDict::new(py);
         let (x, y, z) = self.tuple();
-        let xyz_tuple_string = format!("({x}, {y}, {z})").into_py(py);
+        let xyz_tuple_string = format!("({x}, {y}, {z})");
+        let title_string = format!("XYZ tile {xyz_tuple_string}");
 
-        properties_dict.insert(
-            "title".to_string(),
-            format!("XYZ tile {xyz_tuple_string}").into_py(py),
-        );
+        properties_dict.set_item("title", title_string)?;
+        // properties_dict.insert(
+        //     "title".to_string(),
+        //     format!("XYZ tile {xyz_tuple_string}").into_py(py),
+        // );
         if let Some(props) = props {
-            let props: PyResult<Vec<(String, Py<PyAny>)>> = props
-                .into_iter()
-                .map(|(k, v)| Ok((k, v.into_py(py))))
-                .collect();
-            properties_dict.extend(props?);
+            for (k, v) in props.iter() {
+                properties_dict.set_item(k, v)?;
+            }
         }
-        feature_dict.insert("type".to_string(), "Feature".to_object(py));
-        feature_dict.insert("bbox".to_string(), bbox_vec.to_object(py));
-        feature_dict.insert("id".to_string(), tfeat.id.to_object(py));
-        feature_dict.insert("geometry".to_string(), geometry_items.to_object(py));
-        feature_dict.insert("properties".to_string(), properties_dict.to_object(py));
+        feature_dict.set_item(intern!(py, "type"), "Feature")?;
+
+        feature_dict.set_item(intern!(py, "bbox"), bbox_vec)?;
+        feature_dict.set_item(intern!(py, "id"), tfeat.id)?;
+        feature_dict.set_item(intern!(py, "geometry"), geometry_dict)?;
+        feature_dict.set_item("properties".to_string(), properties_dict)?;
         Ok(feature_dict)
     }
 }
