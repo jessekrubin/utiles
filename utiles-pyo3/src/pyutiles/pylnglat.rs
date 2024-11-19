@@ -89,9 +89,8 @@ impl PyLngLat {
             }
         } else {
             match op {
-                CompareOp::Eq => Ok(false),
+                CompareOp::Eq | CompareOp::Lt => Ok(false),
                 CompareOp::Ne => Ok(true),
-                CompareOp::Lt => Ok(false),
                 _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
                     "Not implemented",
                 )),
