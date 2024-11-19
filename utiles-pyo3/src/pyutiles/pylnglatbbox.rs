@@ -104,7 +104,9 @@ impl PyLngLatBbox {
             2 | -2 => Ok(self.bbox.east),
             3 | -1 => Ok(self.bbox.north),
             4 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-            _ => panic!("Index {idx} out of range for tile"),
+            _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
+                "Index out of range for BBox",
+            )),
         }
     }
 

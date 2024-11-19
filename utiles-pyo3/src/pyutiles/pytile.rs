@@ -261,7 +261,9 @@ impl PyTile {
                     Ok(r)
                 }
                 3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-                _ => panic!("Index {idx} out of range for tile"),
+                _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
+                    "Index out of range",
+                )),
             },
         }
     }

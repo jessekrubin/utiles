@@ -111,7 +111,9 @@ impl PyLngLat {
             1 | -1 => Ok(self._lat()),
             2 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
 
-            _ => panic!("Index {idx} out of range for tile"),
+            _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
+                "Index out of range",
+            )),
         }
     }
 
