@@ -5,7 +5,7 @@ use std::hash::{Hash, Hasher};
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::PyType;
+use pyo3::types::{PyTuple, PyType};
 use pyo3::{
     exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
     PyResult, Python,
@@ -221,11 +221,14 @@ impl PyTile {
         vec![self.xyz.x, self.xyz.y, u32::from(self.xyz.z)]
     }
 
-    pub fn __getitem__(
+    pub fn __getitem__<'py>(
         &self,
         idx: tuple_slice::SliceOrInt,
-        _py: Python<'_>,
-    ) -> PyResult<tuple_slice::TupleSliceResult<u32>> {
+        _py: Python<'py>,
+    ) -> PyResult<
+        // tuple_slice::TupleSliceResult<u32>
+        Bound<'py, PyAny>,
+    > {
         match idx {
             tuple_slice::SliceOrInt::Slice(slice) => {
                 let psi = slice.indices(3)?;
@@ -235,13 +238,27 @@ impl PyTile {
                     .step_by(step as usize)
                     .copied()
                     .collect();
-                let m = tuple_slice::TupleSliceResult::Slice(m);
-                Ok(m)
+                let tuple =
+                    PyTuple::new(_py, m).map(|x| x.into_any()).map_err(|e| {
+                        PyErr::new::<PyValueError, _>(format!("Error: {e}"))
+                    })?;
+                Ok(tuple)
             }
             tuple_slice::SliceOrInt::Int(idx) => match idx {
-                0 | -3 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.x)),
-                1 | -2 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.y)),
-                2 | -1 => Ok(tuple_slice::TupleSliceResult::It(u32::from(self.xyz.z))),
+                0 | -3 => {
+                    let r = self.xyz.x.into_pyobject(_py).map(|x| x.into_any())?;
+                    Ok(r)
+                }
+                1 | -2 => {
+                    let r = self.xyz.y.into_pyobject(_py).map(|x| x.into_any())?;
+                    Ok(r)
+                }
+                2 | -1 => {
+                    let r = u32::from(self.xyz.z)
+                        .into_pyobject(_py)
+                        .map(|x| x.into_any())?;
+                    Ok(r)
+                }
                 3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
                 _ => panic!("Index {idx} out of range for tile"),
             },

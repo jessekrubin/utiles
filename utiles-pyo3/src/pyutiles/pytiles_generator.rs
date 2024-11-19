@@ -4,7 +4,7 @@ use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(name = "TilesGenerator", module = "utiles._utiles")]
 pub struct TilesGenerator {
-    pub iter: Box<dyn Iterator<Item = PyTile> + Send>,
+    pub iter: Box<dyn Iterator<Item = PyTile> + Send + Sync>,
     pub length: u64,
 }
 
