@@ -1,13 +1,13 @@
 use std::collections::hash_map::DefaultHasher;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::hash::{Hash, Hasher};
 
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyTuple, PyType};
+use pyo3::types::{PyDict, PyNotImplemented, PyTuple, PyType};
 use pyo3::{
-    exceptions, intern, pyclass, pymethods, Py, PyAny, PyErr, PyObject, PyRef,
+    exceptions, intern, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
     PyResult, Python,
 };
 use serde::Serialize;
@@ -290,68 +290,90 @@ impl PyTile {
         other: &Bound<'_, PyAny>,
         op: CompareOp,
         py: Python<'_>,
-    ) -> PyObject {
+    ) -> PyResult<bool> {
         let is_pytile = other.is_instance_of::<PyTile>();
         if is_pytile {
             let maybe_pytile = other.extract::<PyTile>();
             match maybe_pytile {
-                Ok(other) => match op {
-                    CompareOp::Eq => ((self.xyz.x == other.xyz.x)
-                        && (self.xyz.y == other.xyz.y)
-                        && (self.xyz.z == other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Ne => ((self.xyz.x != other.xyz.x)
-                        || (self.xyz.y != other.xyz.y)
-                        || (self.xyz.z != other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Lt => ((self.xyz.x < other.xyz.x)
-                        && (self.xyz.y < other.xyz.y)
-                        && (self.xyz.z < other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Gt => ((self.xyz.x > other.xyz.x)
-                        && (self.xyz.y > other.xyz.y)
-                        && (self.xyz.z > other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Ge => ((self.xyz.x >= other.xyz.x)
-                        && (self.xyz.y >= other.xyz.y)
-                        && (self.xyz.z >= other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Le => ((self.xyz.x <= other.xyz.x)
-                        && (self.xyz.y <= other.xyz.y)
-                        && (self.xyz.z <= other.xyz.z))
-                        .into_py(py),
-                },
-                Err(_) => py.NotImplemented(),
+                Ok(other) => {
+                    let b = match op {
+                        CompareOp::Eq => {
+                            ((self.xyz.x == other.xyz.x)
+                                && (self.xyz.y == other.xyz.y)
+                                && (self.xyz.z == other.xyz.z))
+                        }
+                        CompareOp::Ne => {
+                            ((self.xyz.x != other.xyz.x)
+                                || (self.xyz.y != other.xyz.y)
+                                || (self.xyz.z != other.xyz.z))
+                        }
+                        CompareOp::Lt => {
+                            ((self.xyz.x < other.xyz.x)
+                                && (self.xyz.y < other.xyz.y)
+                                && (self.xyz.z < other.xyz.z))
+                        }
+                        CompareOp::Gt => {
+                            ((self.xyz.x > other.xyz.x)
+                                && (self.xyz.y > other.xyz.y)
+                                && (self.xyz.z > other.xyz.z))
+                        }
+                        CompareOp::Ge => {
+                            ((self.xyz.x >= other.xyz.x)
+                                && (self.xyz.y >= other.xyz.y)
+                                && (self.xyz.z >= other.xyz.z))
+                        }
+                        CompareOp::Le => {
+                            (self.xyz.x <= other.xyz.x)
+                                && (self.xyz.y <= other.xyz.y)
+                                && (self.xyz.z <= other.xyz.z)
+                        }
+                    };
+                    Ok(b)
+                }
+                Err(_) => Err(PyErr::new::<PyNotImplemented, _>("Should not happen")),
             }
         } else if let Ok(tuple) = other.extract::<(u32, u32, u8)>() {
-            match op {
-                CompareOp::Eq => ((self.xyz.x == tuple.0)
-                    && (self.xyz.y == tuple.1)
-                    && (self.xyz.z == tuple.2))
-                    .into_py(py),
-                CompareOp::Ne => ((self.xyz.x != tuple.0)
-                    || (self.xyz.y != tuple.1)
-                    || (self.xyz.z != tuple.2))
-                    .into_py(py),
-                CompareOp::Lt => ((self.xyz.x < tuple.0)
-                    && (self.xyz.y < tuple.1)
-                    && (self.xyz.z < tuple.2))
-                    .into_py(py),
-                CompareOp::Gt => ((self.xyz.x > tuple.0)
-                    && (self.xyz.y > tuple.1)
-                    && (self.xyz.z > tuple.2))
-                    .into_py(py),
-                CompareOp::Ge => ((self.xyz.x >= tuple.0)
-                    && (self.xyz.y >= tuple.1)
-                    && (self.xyz.z >= tuple.2))
-                    .into_py(py),
-                CompareOp::Le => ((self.xyz.x <= tuple.0)
-                    && (self.xyz.y <= tuple.1)
-                    && (self.xyz.z <= tuple.2))
-                    .into_py(py),
-            }
+            let r = match op {
+                CompareOp::Eq => {
+                    ((self.xyz.x == tuple.0)
+                        && (self.xyz.y == tuple.1)
+                        && (self.xyz.z == tuple.2))
+                }
+                CompareOp::Ne => {
+                    ((self.xyz.x != tuple.0)
+                        || (self.xyz.y != tuple.1)
+                        || (self.xyz.z != tuple.2))
+                }
+                CompareOp::Lt => {
+                    ((self.xyz.x < tuple.0)
+                        && (self.xyz.y < tuple.1)
+                        && (self.xyz.z < tuple.2))
+                }
+                CompareOp::Gt => {
+                    ((self.xyz.x > tuple.0)
+                        && (self.xyz.y > tuple.1)
+                        && (self.xyz.z > tuple.2))
+                }
+                CompareOp::Ge => {
+                    ((self.xyz.x >= tuple.0)
+                        && (self.xyz.y >= tuple.1)
+                        && (self.xyz.z >= tuple.2))
+                }
+                CompareOp::Le => {
+                    ((self.xyz.x <= tuple.0)
+                        && (self.xyz.y <= tuple.1)
+                        && (self.xyz.z <= tuple.2))
+                }
+            };
+            Ok(r)
         } else {
-            py.NotImplemented()
+            match op {
+                CompareOp::Eq => Ok(false),
+                CompareOp::Ne => Ok(true),
+                _ => Err(PyErr::new::<PyNotImplemented, _>(
+                    "Comparison not implemented for PyTile",
+                )),
+            }
         }
     }
 

@@ -8,4 +8,9 @@ def test_equality() -> None:
 
 
 def test_equality_invalid_zoom() -> None:
-    assert ut.Tile(1, 2, 3) != (1, 2, 2234234)
+    utile = ut.Tile(1, 2, 3)
+    tuple_ = (1, 2, 2234234)
+    assert tuple_ != utile
+    assert utile != tuple_
+
+    assert (1, 2, 2234234) != ut.Tile(1, 2, 3)
