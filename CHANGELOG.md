@@ -6,7 +6,9 @@
 
 ## Unreleased/Future
 
-- **NO UNWRAPPING!**
+- **NO UNWRAPPING!** there is no unwrapping in utiles!
+- updated `thiserror` to v2
+- remove `gil-refs` pyo3 feature from python lib
 - supermercado compatible `edges` and `burn` cli commands added as well a s rust
   lib functions (obviously)
 - `shapes` and `feature` functions for tile produce polygons that now DO follow
