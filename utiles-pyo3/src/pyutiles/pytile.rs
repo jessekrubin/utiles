@@ -1,14 +1,13 @@
 use std::collections::hash_map::DefaultHasher;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::PyType;
+use pyo3::types::{PyDict, PyNotImplemented, PyTuple, PyType};
 use pyo3::{
-    exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
-    PyResult, Python,
+    exceptions, intern, pyclass, pymethods, Py, PyAny, PyErr, PyRef, PyResult, Python,
 };
 use serde::Serialize;
 use utiles::bbox::BBox;
@@ -221,11 +220,14 @@ impl PyTile {
         vec![self.xyz.x, self.xyz.y, u32::from(self.xyz.z)]
     }
 
-    pub fn __getitem__(
+    pub fn __getitem__<'py>(
         &self,
         idx: tuple_slice::SliceOrInt,
-        _py: Python<'_>,
-    ) -> PyResult<tuple_slice::TupleSliceResult<u32>> {
+        py: Python<'py>,
+    ) -> PyResult<
+        // tuple_slice::TupleSliceResult<u32>
+        Bound<'py, PyAny>,
+    > {
         match idx {
             tuple_slice::SliceOrInt::Slice(slice) => {
                 let psi = slice.indices(3)?;
@@ -235,15 +237,33 @@ impl PyTile {
                     .step_by(step as usize)
                     .copied()
                     .collect();
-                let m = tuple_slice::TupleSliceResult::Slice(m);
-                Ok(m)
+                let tuple =
+                    PyTuple::new(py, m)
+                        .map(pyo3::Bound::into_any)
+                        .map_err(|e| {
+                            PyErr::new::<PyValueError, _>(format!("Error: {e}"))
+                        })?;
+                Ok(tuple)
             }
             tuple_slice::SliceOrInt::Int(idx) => match idx {
-                0 | -3 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.x)),
-                1 | -2 => Ok(tuple_slice::TupleSliceResult::It(self.xyz.y)),
-                2 | -1 => Ok(tuple_slice::TupleSliceResult::It(u32::from(self.xyz.z))),
+                0 | -3 => {
+                    let r = self.xyz.x.into_pyobject(py).map(pyo3::Bound::into_any)?;
+                    Ok(r)
+                }
+                1 | -2 => {
+                    let r = self.xyz.y.into_pyobject(py).map(pyo3::Bound::into_any)?;
+                    Ok(r)
+                }
+                2 | -1 => {
+                    let r = u32::from(self.xyz.z)
+                        .into_pyobject(py)
+                        .map(pyo3::Bound::into_any)?;
+                    Ok(r)
+                }
                 3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-                _ => panic!("Index {idx} out of range for tile"),
+                _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
+                    "Index out of range",
+                )),
             },
         }
     }
@@ -272,69 +292,90 @@ impl PyTile {
         &self,
         other: &Bound<'_, PyAny>,
         op: CompareOp,
-        py: Python<'_>,
-    ) -> PyObject {
+    ) -> PyResult<bool> {
         let is_pytile = other.is_instance_of::<PyTile>();
         if is_pytile {
             let maybe_pytile = other.extract::<PyTile>();
             match maybe_pytile {
-                Ok(other) => match op {
-                    CompareOp::Eq => ((self.xyz.x == other.xyz.x)
-                        && (self.xyz.y == other.xyz.y)
-                        && (self.xyz.z == other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Ne => ((self.xyz.x != other.xyz.x)
-                        || (self.xyz.y != other.xyz.y)
-                        || (self.xyz.z != other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Lt => ((self.xyz.x < other.xyz.x)
-                        && (self.xyz.y < other.xyz.y)
-                        && (self.xyz.z < other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Gt => ((self.xyz.x > other.xyz.x)
-                        && (self.xyz.y > other.xyz.y)
-                        && (self.xyz.z > other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Ge => ((self.xyz.x >= other.xyz.x)
-                        && (self.xyz.y >= other.xyz.y)
-                        && (self.xyz.z >= other.xyz.z))
-                        .into_py(py),
-                    CompareOp::Le => ((self.xyz.x <= other.xyz.x)
-                        && (self.xyz.y <= other.xyz.y)
-                        && (self.xyz.z <= other.xyz.z))
-                        .into_py(py),
-                },
-                Err(_) => py.NotImplemented(),
+                Ok(other) => {
+                    let b = match op {
+                        CompareOp::Eq => {
+                            (self.xyz.x == other.xyz.x)
+                                && (self.xyz.y == other.xyz.y)
+                                && (self.xyz.z == other.xyz.z)
+                        }
+                        CompareOp::Ne => {
+                            (self.xyz.x != other.xyz.x)
+                                || (self.xyz.y != other.xyz.y)
+                                || (self.xyz.z != other.xyz.z)
+                        }
+                        CompareOp::Lt => {
+                            (self.xyz.x < other.xyz.x)
+                                && (self.xyz.y < other.xyz.y)
+                                && (self.xyz.z < other.xyz.z)
+                        }
+                        CompareOp::Gt => {
+                            (self.xyz.x > other.xyz.x)
+                                && (self.xyz.y > other.xyz.y)
+                                && (self.xyz.z > other.xyz.z)
+                        }
+                        CompareOp::Ge => {
+                            (self.xyz.x >= other.xyz.x)
+                                && (self.xyz.y >= other.xyz.y)
+                                && (self.xyz.z >= other.xyz.z)
+                        }
+                        CompareOp::Le => {
+                            (self.xyz.x <= other.xyz.x)
+                                && (self.xyz.y <= other.xyz.y)
+                                && (self.xyz.z <= other.xyz.z)
+                        }
+                    };
+                    Ok(b)
+                }
+                Err(_) => Err(PyErr::new::<PyNotImplemented, _>("Should not happen")),
             }
         } else if let Ok(tuple) = other.extract::<(u32, u32, u8)>() {
-            match op {
-                CompareOp::Eq => ((self.xyz.x == tuple.0)
-                    && (self.xyz.y == tuple.1)
-                    && (self.xyz.z == tuple.2))
-                    .into_py(py),
-                CompareOp::Ne => ((self.xyz.x != tuple.0)
-                    || (self.xyz.y != tuple.1)
-                    || (self.xyz.z != tuple.2))
-                    .into_py(py),
-                CompareOp::Lt => ((self.xyz.x < tuple.0)
-                    && (self.xyz.y < tuple.1)
-                    && (self.xyz.z < tuple.2))
-                    .into_py(py),
-                CompareOp::Gt => ((self.xyz.x > tuple.0)
-                    && (self.xyz.y > tuple.1)
-                    && (self.xyz.z > tuple.2))
-                    .into_py(py),
-                CompareOp::Ge => ((self.xyz.x >= tuple.0)
-                    && (self.xyz.y >= tuple.1)
-                    && (self.xyz.z >= tuple.2))
-                    .into_py(py),
-                CompareOp::Le => ((self.xyz.x <= tuple.0)
-                    && (self.xyz.y <= tuple.1)
-                    && (self.xyz.z <= tuple.2))
-                    .into_py(py),
-            }
+            let r = match op {
+                CompareOp::Eq => {
+                    (self.xyz.x == tuple.0)
+                        && (self.xyz.y == tuple.1)
+                        && (self.xyz.z == tuple.2)
+                }
+                CompareOp::Ne => {
+                    (self.xyz.x != tuple.0)
+                        || (self.xyz.y != tuple.1)
+                        || (self.xyz.z != tuple.2)
+                }
+                CompareOp::Lt => {
+                    (self.xyz.x < tuple.0)
+                        && (self.xyz.y < tuple.1)
+                        && (self.xyz.z < tuple.2)
+                }
+                CompareOp::Gt => {
+                    (self.xyz.x > tuple.0)
+                        && (self.xyz.y > tuple.1)
+                        && (self.xyz.z > tuple.2)
+                }
+                CompareOp::Ge => {
+                    (self.xyz.x >= tuple.0)
+                        && (self.xyz.y >= tuple.1)
+                        && (self.xyz.z >= tuple.2)
+                }
+                CompareOp::Le => {
+                    (self.xyz.x <= tuple.0)
+                        && (self.xyz.y <= tuple.1)
+                        && (self.xyz.z <= tuple.2)
+                }
+            };
+            Ok(r)
         } else {
-            py.NotImplemented()
+            match op {
+                CompareOp::Eq => Ok(false),
+                CompareOp::Ne => Ok(true),
+                _ => Err(PyErr::new::<PyNotImplemented, _>(
+                    "Comparison not implemented for PyTile",
+                )),
+            }
         }
     }
 
@@ -389,15 +430,15 @@ impl PyTile {
     #[pyo3(
         signature = (fid = None, props = None, projected = None, buffer = None, precision = None)
     )]
-    pub fn feature(
+    pub fn feature<'py>(
         &self,
-        py: Python,
+        py: Python<'py>,
         fid: Option<String>,
-        props: Option<HashMap<String, Bound<PyAny>>>,
+        props: Option<Bound<'py, PyDict>>,
         projected: Option<String>,
         buffer: Option<f64>,
         precision: Option<i32>,
-    ) -> PyResult<HashMap<String, PyObject>> {
+    ) -> PyResult<Bound<'py, PyDict>> {
         let projection = if let Some(projected) = projected {
             Projection::try_from(projected)
                 .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?
@@ -417,38 +458,48 @@ impl PyTile {
             .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
 
         // feature that will become python object
-        let mut feature_dict = HashMap::new();
+        let feature_dict = PyDict::new(py);
+        // let mut feature_dict = HashMap::new();
         let bbox_vec = vec![tfeat.bbox.0, tfeat.bbox.1, tfeat.bbox.2, tfeat.bbox.3];
-        let geometry_items = vec![
-            ("type".to_string(), tfeat.geometry.type_.to_object(py)),
-            (
-                "coordinates".to_string(),
-                tfeat.geometry.coordinates.to_object(py),
-            ),
-        ]
-        .into_iter()
-        .collect::<HashMap<String, PyObject>>();
+        let feat_geom_type_string = tfeat.geometry.type_;
+        let geometry_dict = PyDict::new(py);
+        geometry_dict.set_item("type", feat_geom_type_string)?;
+        geometry_dict.set_item("coordinates", tfeat.geometry.coordinates)?;
+        // let geometry_items = vec![
+        //     ("type".to_string(),
+        //
+        //         PyString::new(py, feat_geom_type_string)
+        //     ),
+        //     (
+        //         "coordinates".to_string(),
+        //         tfeat.geometry.coordinates.to_object(py),
+        //     ),
+        // ]
+        // .into_iter()
+        // .collect::<HashMap<String, PyObject>>();
         // Create the properties dictionary
-        let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
+        // let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
+        let properties_dict = PyDict::new(py);
         let (x, y, z) = self.tuple();
-        let xyz_tuple_string = format!("({x}, {y}, {z})").into_py(py);
+        let xyz_tuple_string = format!("({x}, {y}, {z})");
+        let title_string = format!("XYZ tile {xyz_tuple_string}");
 
-        properties_dict.insert(
-            "title".to_string(),
-            format!("XYZ tile {xyz_tuple_string}").into_py(py),
-        );
+        properties_dict.set_item("title", title_string)?;
+        // properties_dict.insert(
+        //     "title".to_string(),
+        //     format!("XYZ tile {xyz_tuple_string}").into_py(py),
+        // );
         if let Some(props) = props {
-            let props: PyResult<Vec<(String, Py<PyAny>)>> = props
-                .into_iter()
-                .map(|(k, v)| Ok((k, v.into_py(py))))
-                .collect();
-            properties_dict.extend(props?);
+            for (k, v) in props.iter() {
+                properties_dict.set_item(k, v)?;
+            }
         }
-        feature_dict.insert("type".to_string(), "Feature".to_object(py));
-        feature_dict.insert("bbox".to_string(), bbox_vec.to_object(py));
-        feature_dict.insert("id".to_string(), tfeat.id.to_object(py));
-        feature_dict.insert("geometry".to_string(), geometry_items.to_object(py));
-        feature_dict.insert("properties".to_string(), properties_dict.to_object(py));
+        feature_dict.set_item(intern!(py, "type"), "Feature")?;
+
+        feature_dict.set_item(intern!(py, "bbox"), bbox_vec)?;
+        feature_dict.set_item(intern!(py, "id"), tfeat.id)?;
+        feature_dict.set_item(intern!(py, "geometry"), geometry_dict)?;
+        feature_dict.set_item("properties".to_string(), properties_dict)?;
         Ok(feature_dict)
     }
 }

@@ -227,7 +227,6 @@ def test_parse_tile_arg() -> None:
 
 def test_tile_feature() -> None:
     t = utiles.Tile(1, 2, 3)
-    f = utiles.feature(t, props={"x": 1, "y": 2, "z": 3})
     expected = {
         "bbox": [-135.0, 40.97989806962013, -90.0, 66.51326044311186],
         "type": "Feature",
@@ -247,8 +246,9 @@ def test_tile_feature() -> None:
         "properties": {"title": "XYZ tile (1, 2, 3)", "z": 3, "y": 2, "x": 1},
     }
 
-    assert f == expected
     assert t.feature(props={"x": 1, "y": 2, "z": 3}) == expected
+    f = utiles.feature(t, props={"x": 1, "y": 2, "z": 3})
+    assert f == expected
 
 
 def test_tiles_len() -> None:

@@ -1,9 +1,9 @@
 use crate::pyutiles::{pycoords, pyparsing};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use pyo3::types::PyTuple;
 use pyo3::{pyfunction, PyErr, PyResult};
-use std::collections::HashMap;
 use utiles::zoom::ZoomOrZooms;
 
 use crate::pyutiles::pybbox::PyBbox;
@@ -105,20 +105,25 @@ pub fn from_tuple(tile: TileTuple) -> PyTile {
 #[pyfunction]
 #[pyo3(signature = (tile, fid = None, props = None, projected = None, buffer = None, precision = None)
 )]
-pub fn feature(
-    py: Python,
+pub fn feature<'py>(
+    py: Python<'py>,
     tile: PyTileLike,
     // (u32, u32, u8),
     fid: Option<String>,
-    props: Option<HashMap<String, Bound<PyAny>>>,
+    props: Option<
+        Bound<'py, PyDict>, // HashMap<String, Bound<PyAny>>
+    >,
     projected: Option<String>,
     buffer: Option<f64>,
     precision: Option<i32>,
-) -> PyResult<HashMap<String, PyObject>> {
+) -> PyResult<Bound<'py, PyDict>> {
     // Convert the arguments to Rust values
     let pytile: PyTile = tile.into();
     let f = pytile.feature(py, fid, props, projected, buffer, precision)?;
     Ok(f)
+    // dummy hashmap for now
+    // let mut h = HashMap::new();
+    // Ok(h)
 }
 
 /// Extract a tile or tiles to Vec<PyTile>

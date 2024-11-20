@@ -4,10 +4,7 @@ use crate::pyutiles::pytile::PyTile;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use pyo3::{
-    exceptions, pyclass, pymethods, IntoPy, Py, PyAny, PyErr, PyObject, PyRef,
-    PyResult, Python,
-};
+use pyo3::{exceptions, pyclass, pymethods, Py, PyAny, PyErr, PyRef, PyResult, Python};
 use utiles::bbox::BBox;
 
 #[pyclass(name = "LngLatBbox", module = "utiles._utiles")]
@@ -107,7 +104,9 @@ impl PyLngLatBbox {
             2 | -2 => Ok(self.bbox.east),
             3 | -1 => Ok(self.bbox.north),
             4 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-            _ => panic!("Index {idx} out of range for tile"),
+            _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
+                "Index out of range for BBox",
+            )),
         }
     }
 
@@ -119,51 +118,54 @@ impl PyLngLatBbox {
         &self,
         other: &Bound<'_, PyAny>,
         op: CompareOp,
-        py: Python<'_>,
-    ) -> PyObject {
+    ) -> PyResult<bool> {
         let maybetuple = other.extract::<(f64, f64, f64, f64)>();
 
         if let Ok(tuple) = maybetuple {
             match op {
-                CompareOp::Eq => (self.bbox.west() == tuple.0
+                CompareOp::Eq => Ok(self.bbox.west() == tuple.0
                     && self.bbox.south() == tuple.1
                     && self.bbox.east() == tuple.2
-                    && self.bbox.north() == tuple.3)
-                    .into_py(py),
-                CompareOp::Ne => (self.bbox.west() != tuple.0
+                    && self.bbox.north() == tuple.3),
+                CompareOp::Ne => Ok(self.bbox.west() != tuple.0
                     || self.bbox.south() != tuple.1
                     || self.bbox.east() != tuple.2
-                    || self.bbox.north() != tuple.3)
-                    .into_py(py),
-                CompareOp::Lt => (self.bbox.west() < tuple.0
+                    || self.bbox.north() != tuple.3),
+                CompareOp::Lt => Ok(self.bbox.west() < tuple.0
                     || self.bbox.south() < tuple.1
                     || self.bbox.east() < tuple.2
-                    || self.bbox.north() < tuple.3)
-                    .into_py(py),
-                _ => py.NotImplemented(),
+                    || self.bbox.north() < tuple.3),
+                _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                    "Not implemented",
+                )),
             }
         } else {
             let other = other.extract::<PyRef<PyLngLatBbox>>();
             match other {
                 Ok(other) => match op {
-                    CompareOp::Eq => (self.bbox.west() == other.bbox.west()
+                    CompareOp::Eq => Ok(self.bbox.west() == other.bbox.west()
                         && self.bbox.south() == other.bbox.south()
                         && self.bbox.east() == other.bbox.east()
-                        && self.bbox.north() == other.bbox.north())
-                    .into_py(py),
-                    CompareOp::Ne => (self.bbox.west != other.bbox.west()
+                        && self.bbox.north() == other.bbox.north()),
+                    CompareOp::Ne => Ok(self.bbox.west != other.bbox.west()
                         || self.bbox.south() != other.bbox.south()
                         || self.bbox.east() != other.bbox.east()
-                        || self.bbox.north() != other.bbox.north())
-                    .into_py(py),
-                    CompareOp::Lt => (self.bbox.west() < other.bbox.west()
+                        || self.bbox.north() != other.bbox.north()),
+                    CompareOp::Lt => Ok(self.bbox.west() < other.bbox.west()
                         || self.bbox.south() < other.bbox.south()
                         || self.bbox.east() < other.bbox.east()
-                        || self.bbox.north() < other.bbox.north())
-                    .into_py(py),
-                    _ => py.NotImplemented(),
+                        || self.bbox.north() < other.bbox.north()),
+                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                        "Not implemented",
+                    )),
                 },
-                Err(_) => py.NotImplemented(),
+                Err(_) => match op {
+                    CompareOp::Eq => Ok(false),
+                    CompareOp::Ne => Ok(true),
+                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
+                        "Not implemented",
+                    )),
+                },
             }
         }
     }
