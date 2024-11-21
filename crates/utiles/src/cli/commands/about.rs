@@ -8,6 +8,21 @@ pub fn about_main() -> UtilesResult<()> {
     } else {
         "release"
     };
+    // if (json){
+    //     let j = serde_json::json! ({
+    //         "name": env!("CARGO_PKG_NAME"),
+    //         "version": env!("CARGO_PKG_VERSION"),
+    //         "authors": env!("CARGO_PKG_AUTHORS"),
+    //         "desc": env!("CARGO_PKG_DESCRIPTION"),
+    //         "repo": env!("CARGO_PKG_REPOSITORY"),
+    //         "which": current_exe.display().to_string(),
+    //         "profile": prof,
+
+    //     });
+    //     println!("{}", serde_json::to_string_pretty(&j)?);
+    //     return Ok(());
+    // }
+
     let parts = [
         format!("{} ~ {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
         format!("version: {}", env!("CARGO_PKG_VERSION")),

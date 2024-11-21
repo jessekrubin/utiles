@@ -25,7 +25,12 @@ use crate::tile_strfmt::TileStringFormatter;
 ///  ╚═════╝    ╚═╝   ╚═╝╚══════╝╚══════╝╚══════╝
 
 fn about() -> String {
-    format!("utiles cli (rust) ~ v{VERSION}")
+    let is_debug: bool = cfg!(debug_assertions);
+    if is_debug {
+        format!("utiles cli (rust) ~ v{VERSION} ~ DEBUG")
+    } else {
+        format!("utiles cli (rust) ~ v{VERSION}")
+    }
 }
 
 #[derive(Debug, Parser)]
@@ -567,7 +572,7 @@ pub enum Commands {
     #[command(name = "lint")]
     Lint(LintArgs),
 
-    /// Agg hash db
+    /// Aggregate tile hashes for tiles-db
     #[command(name = "agg-hash")]
     AggHash(AggHashArgs),
 
@@ -588,7 +593,7 @@ pub enum Commands {
     Enumerate(EnumerateArgs),
 
     /// rm-rf dirpath
-    #[command(name = "rimraf", visible_alias = "rmrf")]
+    #[command(name = "rimraf", visible_alias = "rmrf", hide = true)]
     Rimraf(RimrafArgs),
 
     /// Echo mbtiles info/stats
@@ -621,7 +626,7 @@ pub enum Commands {
     TILE CLI UTILS - MERCANTILE LIKE CLI
     ========================================================================
     */
-    /// Format json-tiles format-string
+    /// Format json-tiles `[x, y, z]` tiles w/ format-string
     ///
     /// fmt-tokens:
     ///     `{json_arr}`/`{json}`  -> [x, y, z]
@@ -809,9 +814,6 @@ pub enum Commands {
     )]
     Webpify(WebpifyArgs),
 
-    // /// Optimize pngs with `oxipng` for raster tiles-db
-    // #[command(name = "oxipng", hide = true)]
-    // Oxipng(OxipngArgs),
     /// Convert raster mbtiles to webp format
     #[command(
         name = "optimize",
