@@ -128,18 +128,18 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.platform.target }}
           path: utiles-pyo3/dist
-      
       - name: pytest
-        if: ${{ !startsWith(matrix.target, 'aarch64') }}
+        if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
         shell: bash
         run: |
           set -e
           cd utiles-pyo3
-          pip install click
-          pip install utiles --no-index --no-deps --find-links dist --force-reinstall
+          ls dist
+          python3 -m venv .venv
+          source .venv/Scripts/activate
+          pip install utiles --find-links dist --force-reinstall
           pip install -r requirements/dev.txt
-          pytest --benchmark-disable
-          
+          pytest
   macos:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
