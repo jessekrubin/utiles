@@ -121,7 +121,8 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
 #          just do python 3.10
-          args: --release --out dist --find-interpreter -i python3.10
+#          args: --release --out dist --find-interpreter -i python3.10
+          args: --release --out dist -i python3.10
           sccache: 'true'
           working-directory: ./utiles-pyo3
       - name: Upload wheels
