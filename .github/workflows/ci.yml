@@ -106,8 +106,8 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
-          - runner: windows-latest
-            target: x86
+#          - runner: windows-latest
+#            target: x86
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -120,7 +120,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+#          just do python 3.10
+          args: --release --out dist --find-interpreter -i python3.10
           sccache: 'true'
           working-directory: ./utiles-pyo3
       - name: Upload wheels
@@ -136,8 +137,9 @@ jobs:
           cd utiles-pyo3
           ls dist
           python3 -m venv .venv
-          source .venv/Scripts/activate
-          pip install utiles --find-links dist --force-reinstall
+          source .venv/Scripts/activates
+          pip install click
+          pip install utiles --find-links dist --force-reinstall --no-index --no-deps
           pip install -r requirements/dev.txt
           pytest
 #  macos:
