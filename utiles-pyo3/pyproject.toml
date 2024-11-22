@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "utiles"
 description = "utiles = (utils + tiles) * rust"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
