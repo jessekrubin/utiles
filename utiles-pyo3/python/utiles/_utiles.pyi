@@ -16,8 +16,12 @@ from typing import (
     overload,
 )
 
-__version_lib__: str
+__version__: str
 __build_profile__: Literal["debug", "release"]
+__build_timestamp__: str
+__authors__: str
+__description__: str
+__pkg_name__: str
 TupleIntInt = Tuple[int, int]
 TupleIntIntInt = Tuple[int, int, int]
 

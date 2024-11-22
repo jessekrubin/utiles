@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 TILES_ZOOM_0_4 = [
     (0, 0, 0),
     (0, 0, 1),

@@ -15,7 +15,8 @@ def _utiles_ext_info() -> Dict[str, Union[str, int]]:
         "abspath": os.path.abspath(_utiles.__file__),
         "fsize": size,
         "fsize_str": _utiles.fmt_nbytes(size),
-        "build_profile": str(_utiles.__build_profile__),
+        "build_profile": _utiles.__build_profile__,
+        "build_timestamp": _utiles.__build_timestamp__,
     }
 
 

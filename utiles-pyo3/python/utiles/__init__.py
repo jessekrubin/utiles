@@ -74,8 +74,12 @@ from utiles._utiles import (
     Tile,
     TileFmts,
     TileType,
+    __authors__,
     __build_profile__,
-    __version_lib__,
+    __build_timestamp__,
+    __description__,
+    __pkg_name__,
+    __version__,
     _coords,
     _parse_tile_arg,
     _xy,
@@ -125,7 +129,6 @@ from utiles._utiles import (
 TileLike = Union[Tile, Tuple[int, int, int]]
 TileArg = Union[TileLike, Sequence[TileLike]]
 
-__version__ = __version_lib__
 __all__ = (
     "Bbox",
     "LngLat",
@@ -143,9 +146,12 @@ __all__ = (
     "Tile",
     "TileFmts",
     "TileType",
+    "__authors__",
     "__build_profile__",
+    "__build_timestamp__",
+    "__description__",
+    "__pkg_name__",
     "__version__",
-    "__version_lib__",
     "_coords",
     "_parse_tile_arg",
     "_xy",
