@@ -138,7 +138,7 @@ jobs:
           cd utiles-pyo3
           ls dist
           python3 -m venv .venv
-          source .venv/Scripts/activates
+          source .venv/Scripts/activate
           pip install click
           pip install utiles --find-links dist --force-reinstall --no-index --no-deps
           pip install -r requirements/dev.txt
