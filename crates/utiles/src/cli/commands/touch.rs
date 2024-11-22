@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use chrono;
 use tracing::{debug, info};
 
 use crate::cli::args::TouchArgs;
@@ -9,6 +8,7 @@ use crate::mbt::MbtType;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::is_valid_page_size;
 use crate::sqlite::{Sqlike3Async, SqliteError};
+use crate::timestamp::timestamp_string;
 use crate::UtilesError;
 
 fn check_page_size(page_size: i64) -> UtilesResult<i64> {
@@ -55,8 +55,7 @@ pub async fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
                     mbtiles.metadata_set("name", &filename_no_ext).await?;
                     mbtiles.metadata_set("mbtype", dbtype_str.as_str()).await?;
                     // current iso datetimestamp
-                    let now = chrono::Utc::now();
-                    let now_str = now.to_rfc3339();
+                    let now_str = timestamp_string();
                     mbtiles.metadata_set("ctime", now_str.as_str()).await?;
                     mbtiles.metadata_set("mtime", now_str.as_str()).await?;
                     mbtiles.pragma_page_size_set(page_size).await?;

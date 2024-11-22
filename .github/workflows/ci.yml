@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        target: [x86_64, x86] #aarch64, armv7, s390x, ppc64le] # maybe add these back later can't bc of oxi-png + libdeflate?
+        target: [x86_64, x86, aarch64, armv7] #s390x, ppc64le] # maybe add these back later can't bc of oxi-png + libdeflate?
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

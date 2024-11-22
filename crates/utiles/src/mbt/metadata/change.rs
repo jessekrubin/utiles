@@ -4,6 +4,7 @@ use serde_json::Value;
 use tracing::warn;
 
 use crate::mbt::mbtiles::{metadata_delete, metadata_set};
+use crate::timestamp::timestamp_string;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MetadataChangeFromTo {
@@ -132,7 +133,7 @@ impl DbChangeset {
     #[must_use]
     pub fn from_vec(changes: Vec<DbChange>) -> Self {
         Self {
-            timestamp: chrono::Utc::now().to_rfc3339(),
+            timestamp: timestamp_string(),
             changes,
         }
     }
@@ -190,7 +191,7 @@ impl From<MetadataChange> for DbChange {
 impl From<DbChange> for DbChangeset {
     fn from(change: DbChange) -> Self {
         Self {
-            timestamp: chrono::Utc::now().to_rfc3339(),
+            timestamp: timestamp_string(),
             changes: vec![change],
         }
     }

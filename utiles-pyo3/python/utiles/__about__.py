@@ -1,5 +1,7 @@
 """Package metadata/info"""
 
+from __future__ import annotations
+
 from utiles._utiles import (
     __authors__,
     __build_profile__,
