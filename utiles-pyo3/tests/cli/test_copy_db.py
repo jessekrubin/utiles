@@ -1,5 +1,7 @@
 """Utiles rust cli tests"""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from utiles.dev.testing import run_cli as _run_cli

@@ -1,5 +1,7 @@
 """Download OpenStreetMap tiles for testing"""
 
+from __future__ import annotations
+
 import asyncio
 from functools import lru_cache
 from os import path

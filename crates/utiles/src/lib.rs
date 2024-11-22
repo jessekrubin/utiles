@@ -56,5 +56,6 @@ pub mod cover;
 mod edges;
 pub mod hash;
 mod sleep;
+mod timestamp;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

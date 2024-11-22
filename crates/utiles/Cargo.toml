@@ -27,7 +27,6 @@ anyhow.workspace = true
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 async-trait = "0.1.83"
 axum = { version = "0.7.9", features = ["tokio", "json", "macros"] }
-chrono = "0.4.38"
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
 fnv = "1.0.7"
 futures = "0.3.31"
@@ -39,6 +38,7 @@ image = "0.25.5"
 imagesize = "0.13.0"
 indicatif.workspace = true
 indoc = { workspace = true }
+jiff.workspace = true
 json-patch = "3.0.1"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
@@ -61,7 +61,7 @@ tokio-stream.workspace = true
 tower = { version = "0.5.1", features = ["timeout"] }
 tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing.workspace = true
-tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter", "chrono"] }
+tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.9" }
 walkdir = "2.5.0"
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }

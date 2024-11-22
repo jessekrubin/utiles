@@ -7,8 +7,6 @@ import sys
 
 from utiles import ut_cli
 
-logger = logging.getLogger(__name__)
-
 
 def cli(
     args: list[str | int | float | bool | None] | None = None,
@@ -22,6 +20,7 @@ def cli(
     try:
         ut_cli(["ut", *map(str, _args)])
     except Exception as e:
+        logger = logging.getLogger(__name__)
         logger.error(e)
         raise e from e
 

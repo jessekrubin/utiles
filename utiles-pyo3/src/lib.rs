@@ -30,10 +30,27 @@ mod fmt_nbytes;
 // mod lager;
 mod pylager;
 mod pyutiles;
+const PACKAGE: &str = "utiles";
+const DESCRIPTION: &str = "Python bindings for the utiles library";
+
+const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+const BUILD_PROFILE: &str = env!("PROFILE");
+const BUILD_TIMESTAMP: &str = env!("BUILD_TIMESTAMP");
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
-    m.add("__build_profile__", env!("PROFILE"))?;
+    m.add("__pkg_name__", PACKAGE)?;
+    m.add("__description__", DESCRIPTION)?;
+    m.add("__version__", VERSION)?;
+    m.add("__build_profile__", BUILD_PROFILE)?;
+    m.add("__build_timestamp__", BUILD_TIMESTAMP)?;
+    m.add("__authors__", AUTHORS)?;
+    //
+    // m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
+    // m.add("__build_profile__", env!("PROFILE"))?;
+    // m.add("__build_timestamp__", env!("BUILD_TIMESTAMP"))?;
+    // m.add("__authors__", env!("CARGO_PKG_AUTHORS"))?;
+
     Ok(())
 }
 

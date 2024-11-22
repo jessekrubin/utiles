@@ -1,5 +1,7 @@
 """Utiles rust cli tests"""
 
+from __future__ import annotations
+
 import json
 from json import dumps as stringify
 

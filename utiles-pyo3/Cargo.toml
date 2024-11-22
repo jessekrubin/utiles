@@ -25,3 +25,4 @@ pyo3 = { workspace = true, features = ["auto-initialize"] }
 
 [build-dependencies]
 pyo3-build-config.workspace = true
+jiff.workspace = true

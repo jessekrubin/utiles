@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from utiles._click import ut_click as rio_ut
 from utiles._click import utiles_click as rio_utiles
 
