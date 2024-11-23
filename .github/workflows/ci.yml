@@ -137,7 +137,8 @@ jobs:
           set -e
           cd utiles-pyo3
           ls dist
-          python3 -m venv .venv
+          python -m venv .venv
+          python -m pip install --upgrade pip
           source .venv/Scripts/activate
           pip install click
           pip install utiles --find-links dist --force-reinstall --no-index --no-deps
