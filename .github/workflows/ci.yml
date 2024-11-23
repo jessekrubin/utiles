@@ -120,7 +120,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter -i python3.10
+          args: --release --out dist --find-interpreter
           sccache: 'true'
           working-directory: ./utiles-pyo3
       - name: Upload wheels
