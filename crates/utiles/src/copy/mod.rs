@@ -50,7 +50,7 @@ fn get_tile_src(src: &str) -> UtilesResult<Source> {
 fn get_tile_dst(dst: &str) -> UtilesResult<Destination> {
     // if it contains '.mbtiles' then it's a mbtiles file
     // else it's a directory
-    if dst.contains(".mbtiles") {
+    if dst.to_ascii_lowercase().ends_with(".mbtiles") {
         Ok(Destination::Mbtiles(dst.to_string()))
     } else {
         Ok(Destination::Fs(dst.to_string()))

@@ -79,7 +79,7 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
                 let n_affected = dst_mbt
                     .insert_tiles_flat(&tiles)
                     .map_err(|e| {
-                        UtilesError::Str(format!("insert tiles flat error: {e:?}"))
+                        UtilesError::AdHoc(format!("insert tiles flat error: {e:?}"))
                     })
                     .expect("insert tiles flat error");
                 nwritten += n_affected;
@@ -92,7 +92,7 @@ pub async fn copy_fs2mbtiles(cfg: &CopyConfig) -> UtilesResult<()> {
                 .insert_tiles_flat(&tiles)
                 .map_err(|e| {
                     error!("insert tiles flat error: {e:?}");
-                    UtilesError::Str(format!("insert tiles flat error: {e:?}"))
+                    UtilesError::AdHoc(format!("insert tiles flat error: {e:?}"))
                 })
                 .expect("insert tiles flat error");
 

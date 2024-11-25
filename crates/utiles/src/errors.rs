@@ -14,6 +14,10 @@ pub enum UtilesCopyError {
 
 #[derive(Error, Debug)]
 pub enum UtilesError {
+    #[error("utiles error: {0}")]
+    AdHoc(String),
+
+    /// Error for unimplemented feature(s) with a string message for context
     #[error("Unimplemented: {0}")]
     Unimplemented(String),
 
@@ -59,9 +63,6 @@ pub enum UtilesError {
 
     #[error("utiles error: {0}")]
     Error(String),
-
-    #[error("utiles error: {0}")]
-    Str(String),
 
     #[error("unknown utiles error: {0}")]
     Unknown(String),

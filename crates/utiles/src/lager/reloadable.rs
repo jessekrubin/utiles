@@ -105,7 +105,7 @@ pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
         // *GLOBAL_FORMAT_RELOAD_HANDLE.lock().unwrap() = Some(format_reload_handle);
         {
             let mut handle = GLOBAL_FILTER_RELOAD_HANDLE.lock().map_err(|e| {
-                UtilesError::Str(format!("Failed to lock filter reload handle: {e}"))
+                UtilesError::AdHoc(format!("Failed to lock filter reload handle: {e}"))
             })?;
             *handle = Some(filter_reload_handle);
         }
@@ -113,7 +113,7 @@ pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
         // Update global format reload handle
         {
             let mut handle = GLOBAL_FORMAT_RELOAD_HANDLE.lock().map_err(|e| {
-                UtilesError::Str(format!("Failed to lock format reload handle: {e}"))
+                UtilesError::AdHoc(format!("Failed to lock format reload handle: {e}"))
             })?;
             *handle = Some(format_reload_handle);
         }
@@ -121,7 +121,7 @@ pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
         // Update global logging configuration
         {
             let mut config = GLOBAL_LAGER_CONFIG.lock().map_err(|e| {
-                UtilesError::Str(format!("Failed to lock logging configuration: {e}"))
+                UtilesError::AdHoc(format!("Failed to lock logging configuration: {e}"))
             })?;
             *config = log_config;
         }
@@ -134,20 +134,22 @@ pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
 pub fn set_log_level(level: &str) -> UtilesResult<()> {
     let filter = EnvFilter::try_new(level).map_err(|e| {
         println!("failed to set log level: {e}");
-        UtilesError::Str(format!("failed to set log level: {e}"))
+        UtilesError::AdHoc(format!("failed to set log level: {e}"))
     })?;
 
-    let global_handle = GLOBAL_FILTER_RELOAD_HANDLE
-        .lock()
-        .map_err(|e| UtilesError::Str(format!("failed to lock global handle: {e}")))?;
+    let global_handle = GLOBAL_FILTER_RELOAD_HANDLE.lock().map_err(|e| {
+        UtilesError::AdHoc(format!("failed to lock global handle: {e}"))
+    })?;
 
     if let Some(handle) = global_handle.as_ref() {
         handle.reload(filter.boxed()).map_err(|e| {
-            UtilesError::Str(format!("failed to reload filter layer: {e}"))
+            UtilesError::AdHoc(format!("failed to reload filter layer: {e}"))
         })?;
         Ok(())
     } else {
-        Err(UtilesError::Str("global reload handle not set".to_string()))
+        Err(UtilesError::AdHoc(
+            "global reload handle not set".to_string(),
+        ))
     }
 }
 
@@ -187,15 +189,17 @@ pub fn set_log_format(json: bool) -> UtilesResult<()> {
         fmt::Layer::new().with_writer(io::stderr).boxed()
     };
     // get teh format layer reload handle
-    let global_handle = GLOBAL_FORMAT_RELOAD_HANDLE
-        .lock()
-        .map_err(|e| UtilesError::Str(format!("failed to lock global handle: {e}")))?;
+    let global_handle = GLOBAL_FORMAT_RELOAD_HANDLE.lock().map_err(|e| {
+        UtilesError::AdHoc(format!("failed to lock global handle: {e}"))
+    })?;
     if let Some(handle) = global_handle.as_ref() {
         handle.reload(format_layer_raw).map_err(|e| {
-            UtilesError::Str(format!("failed to reload format layer: {e}"))
+            UtilesError::AdHoc(format!("failed to reload format layer: {e}"))
         })?;
         Ok(())
     } else {
-        Err(UtilesError::Str("global reload handle not set".to_string()))
+        Err(UtilesError::AdHoc(
+            "global reload handle not set".to_string(),
+        ))
     }
 }

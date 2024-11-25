@@ -20,7 +20,7 @@ impl TryFrom<String> for Projection {
         match value.to_lowercase().as_str() {
             "geographic" => Ok(Projection::Geographic),
             "mercator" => Ok(Projection::Mercator),
-            _ => Err(UtilesCoreError::Str(value)),
+            _ => Err(UtilesCoreError::InvalidProjection(value)),
         }
     }
 }
