@@ -31,8 +31,8 @@ geojson = "0.24.1"
 indicatif = "0.17.9"
 indoc = "2.0.5"
 jiff = "0.1.14"
-pyo3 = "0.23.1"
-pyo3-build-config = "0.23.1"
+pyo3 = "0.23.2"
+pyo3-build-config = "0.23.2"
 rusqlite = { version = "0.32.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.133", features = ["preserve_order"] }

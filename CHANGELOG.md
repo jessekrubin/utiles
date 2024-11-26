@@ -45,6 +45,7 @@
   - `oxipng` command that optimizes png(s) in mbtiles db(s) using `oxipng` crate
 - figured out how to make async tile-stream(s)
 - Removed even more `unwrap` usages
+- lager/logging/tracing is reloadable from python; using the new fancy `std::sync::LazyLock` (yay)
 - lint/copy overhaul
 - Added `--page-size` to vacuum command
 - Using `json-patch` for metadata updates
