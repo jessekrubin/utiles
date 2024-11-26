@@ -51,9 +51,10 @@ pub fn find_filepaths(fspaths: &[String]) -> UtilesResult<Vec<PathBuf>> {
         debug!("fspath: {}", fspath);
         if fspath == "." {
             // get the current working directory and resolve it to an absolute path
-            let cwd =
-                std::env::current_dir().map_err(|e| UtilesError::Str(e.to_string()))?;
-            let cwd_to_str = cwd.to_str().ok_or(UtilesError::Str("cwd".to_string()))?;
+            let cwd = std::env::current_dir()
+                .map_err(|e| UtilesError::AdHoc(e.to_string()))?;
+            let cwd_to_str =
+                cwd.to_str().ok_or(UtilesError::AdHoc("cwd".to_string()))?;
             dirs.push(cwd_to_str.to_string());
         } else if is_file(fspath) {
             files.push(fspath.clone());

@@ -30,7 +30,7 @@ impl FromStr for LagerFormat {
         match s.to_lowercase().as_str() {
             "json" => Ok(LagerFormat::Json),
             "full" => Ok(LagerFormat::Full),
-            _ => Err(UtilesError::Str("invalid lager level".to_string())),
+            _ => Err(UtilesError::AdHoc("invalid lager level".to_string())),
         }
     }
 }

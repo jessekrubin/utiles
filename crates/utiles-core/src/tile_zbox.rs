@@ -175,7 +175,7 @@ impl TileZBox {
     /// do not match
     pub fn from_tiles(tiles: &[Tile]) -> UtilesCoreResult<Self> {
         if tiles.is_empty() {
-            return Err(UtilesCoreError::Str("No tiles provided".to_string()));
+            return Err(UtilesCoreError::AdHoc("No tiles provided".to_string()));
         }
 
         let expected_zoom = tiles[0].z;
@@ -187,7 +187,7 @@ impl TileZBox {
         for tile in tiles {
             // Check if all tiles have the same zoom level
             if tile.z != expected_zoom {
-                return Err(UtilesCoreError::Str(
+                return Err(UtilesCoreError::AdHoc(
                     "Not all tiles have the same zoom level".to_string(),
                 ));
             }

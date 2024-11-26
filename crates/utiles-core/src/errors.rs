@@ -6,6 +6,10 @@ use thiserror::Error;
 /// Error type for utiles-core
 #[derive(Error, Debug)]
 pub enum UtilesCoreError {
+    /// Error with some string
+    #[error("{0}")]
+    AdHoc(String),
+
     /// Error for parsing a tile
     #[error("tile parse error: {0}")]
     TileParseError(String),
@@ -38,6 +42,10 @@ pub enum UtilesCoreError {
     #[error("invalid zoom(s): {0}")]
     InvalidZoom(String),
 
+    /// Error for invalid projection
+    #[error("invalid projection: {0}")]
+    InvalidProjection(String),
+
     /// Error for invalid json
     #[error("invalid json: {0}")]
     InvalidJson(String),
@@ -49,14 +57,6 @@ pub enum UtilesCoreError {
     /// Error on unimplemented feature
     #[error("Unimplemented: {0}")]
     Unimplemented(String),
-
-    /// Error on unknown error catch all
-    #[error("unknown utiles error: {0}")]
-    Unknown(String),
-
-    /// Error with some string
-    #[error("{0}")]
-    Str(String),
 
     /// Error on serde io error
     #[error("io error: {0}")]
