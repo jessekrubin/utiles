@@ -364,6 +364,7 @@ impl Tile {
     /// # Errors
     ///
     /// Returns an error if the conversion fails resulting in invalid tile
+    #[allow(clippy::used_underscore_items)]
     #[allow(clippy::cast_possible_truncation)]
     pub fn from_lnglat_zoom(
         lng: f64,

@@ -11,7 +11,7 @@ use tracing::debug;
 async fn enumerate_db(
     fspath: &str,
     tformatter: TileStringFormatter,
-    tfilter: &Option<TilesFilter>,
+    tfilter: Option<&TilesFilter>,
     tx: tokio::sync::mpsc::Sender<String>,
 ) -> UtilesResult<()> {
     let mbt = crate::mbt::MbtilesClientAsync::open_existing(fspath).await?;
@@ -96,7 +96,7 @@ pub async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
                 let fmt_str = format!("{fspath} {xyz_fmt_str}");
                 TileStringFormatter::new(&fmt_str)
             };
-            enumerate_db(&fspath, formatter, &tf, tx.clone()).await?;
+            enumerate_db(&fspath, formatter, tf.as_ref(), tx.clone()).await?;
         }
         Ok(())
     });
