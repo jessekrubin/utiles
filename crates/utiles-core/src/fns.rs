@@ -531,7 +531,7 @@ enum TileEdgeInfo {
     Middle,
 }
 
-fn _tile_edge_info(x: u32, y: u32, z: u8) -> TileEdgeInfo {
+fn tile_edge_info(x: u32, y: u32, z: u8) -> TileEdgeInfo {
     if x == 0 && y == 0 {
         return TileEdgeInfo::TopLeft;
     }
@@ -550,7 +550,7 @@ fn _tile_edge_info(x: u32, y: u32, z: u8) -> TileEdgeInfo {
     }
 }
 
-fn _neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
+fn neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
     vec![
         utile!(x + 1, y, z),
         utile!(x, y + 1, z),
@@ -569,9 +569,9 @@ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
     if z == 0 {
         return Vec::new();
     }
-    let edge_info = _tile_edge_info(x, y, z);
+    let edge_info = tile_edge_info(x, y, z);
     match edge_info {
-        TileEdgeInfo::Middle => _neighbors_middle_tile(x, y, z),
+        TileEdgeInfo::Middle => neighbors_middle_tile(x, y, z),
         TileEdgeInfo::TopLeft => vec![
             utile!(x + 1, y, z),
             utile!(x, y + 1, z),

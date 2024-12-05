@@ -11,6 +11,7 @@
 #![allow(clippy::too_many_lines)]
 // road to clippy pedantic
 #![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::used_underscore_items)]
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::float_cmp)]
 #![allow(clippy::needless_pass_by_value)]
