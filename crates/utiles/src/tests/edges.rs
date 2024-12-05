@@ -4,7 +4,7 @@ use crate::edges::find_edges;
 use std::collections::HashSet;
 use utiles_core::{utile, Tile};
 
-fn _test_data_input() -> Vec<Tile> {
+fn test_data_input() -> Vec<Tile> {
     vec![
         utile!(4188, 3104, 13),
         utile!(4192, 2977, 13),
@@ -109,7 +109,7 @@ fn _test_data_input() -> Vec<Tile> {
     ]
 }
 
-fn _test_expected() -> Vec<Tile> {
+fn test_expected() -> Vec<Tile> {
     vec![
         utile!(4188, 3104, 13),
         utile!(4192, 2737, 13),
@@ -200,14 +200,14 @@ fn _test_expected() -> Vec<Tile> {
 }
 #[test]
 fn test_edges() {
-    let tdata = _test_data_input();
+    let tdata = test_data_input();
 
     let mut edges = vec![];
     for t in find_edges(&tdata).unwrap() {
         edges.push(t);
     }
     // let edges = find_edges_vec(&tdata).unwrap();
-    let expected = _test_expected();
+    let expected = test_expected();
     let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
     let edges_set = edges.into_iter().collect::<HashSet<Tile>>();
 
