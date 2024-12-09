@@ -54,7 +54,7 @@ strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
 tilejson.workspace = true
-time = "0.3.36"
+time = "0.3.37"
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true
 tower = { version = "0.5.1", features = ["timeout"] }
