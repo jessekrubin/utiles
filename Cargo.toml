@@ -42,7 +42,7 @@ strum_macros = "0.26.3"
 thiserror = "2.0.3"
 tilejson = "0.4.1"
 tokio = { version = "1.41.1", features = ["full"] }
-tokio-stream = "0.1.16"
+tokio-stream = "0.1.17"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.17", features = ["serde", "serde_json", "env-filter"] }
 xxhash-rust = { version = "0.8.10", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
