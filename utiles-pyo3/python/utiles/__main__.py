@@ -3,13 +3,12 @@ from __future__ import annotations
 import json
 import os
 import sys
-from typing import Dict, Union
 
 from utiles import _utiles
 from utiles.__about__ import __pkgroot__, __title__, __version__
 
 
-def _utiles_ext_info() -> Dict[str, Union[str, int]]:
+def _utiles_ext_info() -> dict[str, str | int]:
     size = os.path.getsize(_utiles.__file__)
     return {
         "abspath": os.path.abspath(_utiles.__file__),

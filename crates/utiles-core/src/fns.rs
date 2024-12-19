@@ -1,4 +1,5 @@
 //! Core util(e)ity functions for working with web mercator tiles, bounding boxes, et al
+#![deny(clippy::missing_const_for_fn)]
 use std::f64::consts::PI;
 use std::num::FpCategory;
 
@@ -81,7 +82,7 @@ pub fn yflip(y: u32, z: u8) -> u32 {
 /// of the tile.
 #[must_use]
 #[inline]
-pub fn int_2_offset_zoom(i: u64) -> (u64, u8) {
+pub const fn int_2_offset_zoom(i: u64) -> (u64, u8) {
     if i == 0 {
         return (0, 0);
     }

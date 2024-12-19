@@ -25,12 +25,12 @@ class CliResult:
 
     __slots__ = (
         "args",
-        "stdout",
-        "stderr",
-        "returncode",
+        "completed_process",
         "dt",
         "input",
-        "completed_process",
+        "returncode",
+        "stderr",
+        "stdout",
     )
 
     args: list[str]
