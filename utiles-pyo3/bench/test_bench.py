@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable
 
 import mercantile
 import pytest
@@ -44,8 +44,8 @@ tile_pytest_params = pytest.mark.parametrize(
     group="quadkey",
 )
 def test_quadkey_bench(
-    tile: Tuple[int, int, int],
-    func: Callable[[Tuple[int, int, int]], str],
+    tile: tuple[int, int, int],
+    func: Callable[[tuple[int, int, int]], str],
     benchmark: BenchmarkFixture,
 ) -> None:
     benchmark(func, *tile)
@@ -66,30 +66,11 @@ def test_quadkey_bench(
     group="ul",
 )
 def test_ul_bench(
-    tile: Tuple[int, int, int],
-    func: Callable[[Tuple[int, int, int]], Tuple[float, float]],
+    tile: tuple[int, int, int],
+    func: Callable[[tuple[int, int, int]], tuple[float, float]],
     benchmark: BenchmarkFixture,
 ) -> None:
     benchmark(func, *tile)
-
-
-# @pytest.mark.parametrize(
-#     "tile",
-#     [pytest.param(t, id=str(t)) for t in TEST_TILES],
-# )
-# @pytest.mark.parametrize(
-#     "func",
-#     [
-#         pytest.param(mercantile.ul, id="mercantile"),
-#         pytest.param(utiles.ul, id="utiles"),
-#     ],
-# )
-# def test_ul_bench(
-#     tile: Tuple[int, int, int],
-#     func: Callable[[Tuple[int, int, int]], Tuple[float, float]],
-#     benchmark: BenchmarkFixture,
-# ) -> None:
-#     benchmark(func, *tile)
 
 
 def mercantile_tiles_gen() -> None:
@@ -149,7 +130,7 @@ def utiles_coords(obj: Any) -> None:
     ],
 )
 def test_coords(
-    func: Callable[[Any], Union[Tuple[float, float], List[Tuple[float, float]]]],
+    func: Callable[[Any], tuple[float, float] | list[tuple[float, float]]],
     obj: Any,
     benchmark: BenchmarkFixture,
 ) -> None:
@@ -185,11 +166,11 @@ def _pm_xyz2pmtileid(x: int, y: int, z: int) -> int:
     return zxy_to_tileid(z, x, y)
 
 
-def _ut_pmtileid2xyz(tileid: int) -> Tuple[int, int, int]:
+def _ut_pmtileid2xyz(tileid: int) -> tuple[int, int, int]:
     return utiles.from_pmtileid(tileid)
 
 
-def _pm_pmtileid2xyz(tileid: int) -> Tuple[int, int, int]:
+def _pm_pmtileid2xyz(tileid: int) -> tuple[int, int, int]:
     return tileid_to_zxy(tileid)
 
 
@@ -225,8 +206,8 @@ def test_xyz2pmtileid_eq():
     ],
 )
 def test_xyz2pmtileid(
-    tile: Tuple[int, int, int],
-    func: Callable[[int, int, int], List[str]],
+    tile: tuple[int, int, int],
+    func: Callable[[int, int, int], list[str]],
     benchmark: BenchmarkFixture,
 ) -> None:
     """Get feature of tile"""
@@ -248,8 +229,8 @@ def test_xyz2pmtileid(
     ],
 )
 def test_pmtileid2xyz(
-    tile: Tuple[int, int, int],
-    func: Callable[[int, int, int], List[str]],
+    tile: tuple[int, int, int],
+    func: Callable[[int, int, int], list[str]],
     benchmark: BenchmarkFixture,
 ) -> None:
     """Get feature of tile"""

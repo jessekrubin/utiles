@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List, Tuple, Union
+from typing import Any
 
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
@@ -22,7 +22,7 @@ PYPROJECT_TOML = PWD.parent / "pyproject.toml"
         ((486, 332, 10), "0313102310"),
     ],
 )
-def test_quadkey(tile: Tuple[int, int, int], quadkey: str) -> None:
+def test_quadkey(tile: tuple[int, int, int], quadkey: str) -> None:
     # mtile = tile_dict_to_mercantile_tile(tile_dict)
     # expected = mercantile.quadkey(mtile)
 
@@ -88,7 +88,7 @@ def test_tile_parse_if_already_utiles_tile() -> None:
 
 def test_parse_tiles() -> None:
     tile_obj = utiles.Tile(7, 8, 9)
-    t: List[Union[Tuple[int, int, int], utiles.Tile]] = [(1, 2, 3), (4, 5, 6), tile_obj]
+    t: list[tuple[int, int, int] | utiles.Tile] = [(1, 2, 3), (4, 5, 6), tile_obj]
     tiles_list = utiles.parse_tiles(t)
     assert tiles_list == [
         utiles.Tile(1, 2, 3),

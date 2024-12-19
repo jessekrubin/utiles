@@ -5,7 +5,8 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from collections.abc import Iterable
+from typing import Any
 
 import click
 
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 RS = "\x1e"
 
 
-def normalize_input(input: str) -> List[str]:
+def normalize_input(input: str) -> list[str]:
     """Normalize file or string input."""
     try:
         src = click.open_file(input).readlines()
@@ -42,7 +43,7 @@ def normalize_input(input: str) -> List[str]:
     return src
 
 
-def iter_lines(lines: List[str]) -> Iterable[str]:
+def iter_lines(lines: list[str]) -> Iterable[str]:
     """Iterate over lines of input, stripping and skipping."""
     for line in lines:
         line_stripped = line.strip()
@@ -143,11 +144,11 @@ def cli(ctx: click.Context, verbose: int, quiet: int) -> None:
 def shapes(
     _ctx: click.Context,
     input: str,
-    precision: Optional[int] = None,
-    indent: Optional[int] = None,
+    precision: int | None = None,
+    indent: int | None = None,
     projected: str = "geographic",
     output_mode: str = "feature",
-    buffer: Optional[float] = None,
+    buffer: float | None = None,
     compact: bool = False,
     seq: bool = False,
     collect: bool = False,
@@ -175,7 +176,8 @@ def shapes(
         [-9.1406, 53.1204, -8.7891, 53.3309]
 
     """
-    dump_kwds: Dict[str, Union[bool, int, Tuple[str, ...]]] = {"sort_keys": True}
+
+    dump_kwds: dict[str, bool | int | tuple[str, ...]] = {"sort_keys": True}
     if indent:
         dump_kwds["indent"] = indent
     if compact:
@@ -283,7 +285,7 @@ def tiles(
     # If input is RS-delimited JSON sequence.
     if first_line.startswith(RS):
 
-        def feature_gen() -> Iterable[Dict[str, Any]]:
+        def feature_gen() -> Iterable[dict[str, Any]]:
             buffer = first_line.strip(RS)
             for line in src:
                 if line.startswith(RS):
@@ -297,7 +299,7 @@ def tiles(
 
     else:
 
-        def feature_gen() -> Iterable[Dict[str, Any]]:
+        def feature_gen() -> Iterable[dict[str, Any]]:
             yield json.loads(first_line)
             for line in src:
                 yield json.loads(line)
@@ -373,7 +375,7 @@ def bounding_tile(_ctx: click.Context, input: str, seq: bool = False) -> None:
     # If input is RS-delimited JSON sequence.
     if first_line.startswith(RS):
 
-        def feature_gen() -> Iterable[Dict[str, Any]]:
+        def feature_gen() -> Iterable[dict[str, Any]]:
             buffer = first_line.strip(RS)
             for line in src:
                 if line.startswith(RS):
@@ -387,7 +389,7 @@ def bounding_tile(_ctx: click.Context, input: str, seq: bool = False) -> None:
 
     else:
 
-        def feature_gen() -> Iterable[Dict[str, Any]]:
+        def feature_gen() -> Iterable[dict[str, Any]]:
             yield json.loads(first_line)
             for line in src:
                 yield json.loads(line)

@@ -5,44 +5,44 @@ pyut_pyproject_toml := pyut / "pyproject.toml"
 dev: fmt develop pytest cargo-test
 
 develop:
-    cd {{pyut}}
-    maturin develop -m {{pyut_manifest}}
+    cd {{ pyut }}
+    maturin develop -m {{ pyut_manifest }}
 
 cargo-test:
     cargo test
 
 build: cargo-test
-    cd {{pyut}}
-    maturin build -m {{pyut_manifest}}
+    cd {{ pyut }}
+    maturin build -m {{ pyut_manifest }}
 
 build-release:
-    cd {{pyut}}
-    maturin build --release  -m {{pyut_manifest}}
+    cd {{ pyut }}
+    maturin build --release  -m {{ pyut_manifest }}
 
 dev-rel:
-    cd {{pyut}}
-    maturin develop --release -m {{pyut_manifest}}
+    cd {{ pyut }}
+    maturin develop --release -m {{ pyut_manifest }}
 
 pytest:
-    cd {{pyut}}
-    pytest --benchmark-disable -n 4 --config-file={{pyut_pyproject_toml}} {{pyut}}
+    cd {{ pyut }}
+    pytest --benchmark-disable -n 4 --config-file={{ pyut_pyproject_toml }} {{ pyut }}
 
 test-release: build-release
-    cd {{pyut}}
-    pytest --benchmark-disable --config-file={{pyut_pyproject_toml}} {{pyut}}
+    cd {{ pyut }}
+    pytest --benchmark-disable --config-file={{ pyut_pyproject_toml }} {{ pyut }}
 
 bench: dev-rel
-    cd {{pyut}}
-    pytest -vv --benchmark-only --config-file={{pyut_pyproject_toml}} {{pyut}}
+    cd {{ pyut }}
+    pytest -vv --benchmark-only --config-file={{ pyut_pyproject_toml }} {{ pyut }}
 
 cargo-fmt:
     cargo fmt
 
 sort-all:
-    sort-all {{pyut}}/python/utiles/__init__.py
+    sort-all {{ pyut }}/python/utiles/__init__.py
 
 black:
-    black {{pyut}}/python {{pyut}}/tests
+    black {{ pyut }}/python {{ pyut }}/tests
 
 # format python
 fmtpy:
@@ -57,7 +57,7 @@ fmtcpy:
 fmt: cargo-fmt fmtpy
 
 mypy:
-    mypy --config-file {{pyut}}/pyproject.toml {{pyut}}/python {{pyut}}/tests
+    mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests
 
 ruff:
     ruff check .
@@ -67,7 +67,6 @@ ruffix:
 
 clippy:
     cargo clippy
-
 
 clippy-fix:
     cargo clippy --all-targets --all-features --fix --allow-dirty -- -D warnings

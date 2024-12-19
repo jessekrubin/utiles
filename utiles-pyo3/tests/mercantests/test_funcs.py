@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Tuple, Union
+from typing import Any
 
 import pytest
 from hypothesis import example, given
@@ -9,9 +9,7 @@ from hypothesis.strategies import SearchStrategy, composite, integers
 import utiles
 import utiles as mercantile
 
-TileArgs = Union[
-    Tuple[int, int, int], List[Tuple[int, int, int]], List[mercantile.Tile]
-]
+TileArgs = tuple[int, int, int] | list[tuple[int, int, int]] | list[mercantile.Tile]
 
 
 @pytest.mark.parametrize(
@@ -229,7 +227,7 @@ def test_root_parent() -> None:
 
 @pytest.mark.parametrize("args", [(486, 332, 10, 9), ((486, 332, 10), 9)])
 def test_parent_invalid_args(
-    args: Union[Tuple[int, int, int, int], Tuple[Tuple[int, int, int], int]],
+    args: tuple[int, int, int, int] | tuple[tuple[int, int, int], int],
 ) -> None:
     """tile arg must have length 1 or 3"""
     with pytest.raises(ValueError):
@@ -423,8 +421,8 @@ def test_simplify_removal() -> None:
     ],
 )
 def test_bounding_tile(
-    bounds: Union[Tuple[int, int, int, int], Tuple[float, float, float, float]],
-    tile: Tuple[int, int, int],
+    bounds: tuple[int, int, int, int] | tuple[float, float, float, float],
+    tile: tuple[int, int, int],
 ) -> None:
     assert mercantile.bounding_tile(*bounds) == mercantile.Tile(*tile)
 
@@ -472,8 +470,8 @@ def test_truncate_lat_over() -> None:
     ],
 )
 def test_arg_parse(
-    args: Union[Tuple[int, int, int], Tuple[Tuple[int, int, int]], mercantile.Tile],
-    tile: Tuple[int, int, int],
+    args: tuple[int, int, int] | tuple[tuple[int, int, int]] | mercantile.Tile,
+    tile: tuple[int, int, int],
 ) -> None:
     """Helper function parse tile args properly"""
     assert mercantile._parse_tile_arg(*args) == mercantile.Tile(*tile)
@@ -481,7 +479,7 @@ def test_arg_parse(
 
 @pytest.mark.parametrize("args", [(0, 0), (0, 0, 0, 0)])
 def test_arg_parse_error(
-    args: Union[Tuple[int, int], Tuple[int, int, int, int]],
+    args: tuple[int, int] | tuple[int, int, int, int],
 ) -> None:
     """Helper function raises exception as expected"""
     with pytest.raises(ValueError):
@@ -583,7 +581,7 @@ def test_minmax() -> None:
 
 
 @pytest.mark.parametrize("z", [1.2, "lol", -1])
-def test_minmax_error(z: Union[int, float, str]) -> None:
+def test_minmax_error(z: int | float | str) -> None:
     """Get an exception when zoom is invalid"""
     with pytest.raises((ValueError, TypeError)):
         mercantile.minmax(z)  # type: ignore

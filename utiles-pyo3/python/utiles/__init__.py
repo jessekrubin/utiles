@@ -57,7 +57,7 @@ Example:
 
 from __future__ import annotations
 
-from typing import Sequence, Tuple, Union
+from collections.abc import Sequence
 
 from utiles._utiles import (
     TILETYPE_GIF,
@@ -126,16 +126,11 @@ from utiles._utiles import (
     xyz2quadkey,
 )
 
-TileLike = Union[Tile, Tuple[int, int, int]]
-TileArg = Union[TileLike, Sequence[TileLike]]
+TileLike = Tile | tuple[int, int, int]
+TileArg = TileLike | Sequence[TileLike]
 
 __all__ = (
-    "Bbox",
-    "LngLat",
-    "LngLatBbox",
     "TILETYPE_GIF",
-    "set_lager_level",
-    "set_lager_format",
     "TILETYPE_JPG",
     "TILETYPE_JSON",
     "TILETYPE_PBF",
@@ -143,6 +138,9 @@ __all__ = (
     "TILETYPE_PNG",
     "TILETYPE_UNKNOWN",
     "TILETYPE_WEBP",
+    "Bbox",
+    "LngLat",
+    "LngLatBbox",
     "Tile",
     "TileFmts",
     "TileType",
@@ -179,6 +177,8 @@ __all__ = (
     "quadkey",
     "quadkey2xyz",
     "quadkey_to_tile",
+    "set_lager_format",
+    "set_lager_level",
     "simplify",
     "tile",
     "tiles",
