@@ -5,7 +5,7 @@ import os
 import sys
 
 from utiles import _utiles
-from utiles.__about__ import __pkgroot__, __title__, __version__
+from utiles.__about__ import __authors__, __pkgroot__, __title__, __version__
 
 
 def _utiles_ext_info() -> dict[str, str | int]:
@@ -28,6 +28,8 @@ def main() -> None:
                 "package": __title__,
                 "version": __version__,
                 "pkgroot": __pkgroot__,
+                "authors": __authors__,
+                "website": "https://github.com/jessekrubin/utiles",
                 "_utiles": _utiles_ext_info(),
             },
             indent=2,
