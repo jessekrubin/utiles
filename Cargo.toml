@@ -21,7 +21,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/jessekrubin/utiles"
 
 [workspace.dependencies]
-anyhow = "1.0.94"
+anyhow = "1.0.95"
 async-sqlite = { version = "0.3.1", features = ["bundled", "functions", "trace"] }
 clap = { version = "4.5.23", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
