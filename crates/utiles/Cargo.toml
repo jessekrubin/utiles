@@ -49,7 +49,7 @@ rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functio
 serde.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 size.workspace = true
-sqlite-hashes = { version = "0.7.6", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.7.8", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
