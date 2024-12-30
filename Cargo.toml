@@ -30,7 +30,7 @@ geo-types = "0.7.14"
 geojson = "0.24.1"
 indicatif = "0.17.9"
 indoc = "2.0.5"
-jiff = "0.1.15"
+jiff = "0.1.16"
 pyo3 = "0.23.3"
 pyo3-build-config = "0.23.2"
 rusqlite = { version = "0.32.0", features = ["bundled", "vtab", "blob"] }
