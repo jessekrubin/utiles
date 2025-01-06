@@ -25,7 +25,7 @@ required-features = [
 [dependencies]
 anyhow.workspace = true
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
-async-trait = "0.1.83"
+async-trait = "0.1.84"
 axum = { version = "0.7.9", features = ["tokio", "json", "macros"] }
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
 fnv = "1.0.7"
