@@ -5,7 +5,7 @@ authors.workspace = true
 categories = ["science::geo"]
 edition.workspace = true
 homepage = "https://github.com/jessekrubin/utiles"
-keywords = ["map", "geo", "mercator", "tile"]
+keywords = ["map", "geo", "mercator", "tile", "webmap"]
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/jessekrubin/utiles"
@@ -23,10 +23,12 @@ required-features = [
 ]
 
 [dependencies]
+ahash.workspace = true
 anyhow.workspace = true
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
-async-trait = "0.1.84"
-axum = { version = "0.7.9", features = ["tokio", "json", "macros"] }
+async-trait = "0.1.85"
+axum = { version = "0.8.1", features = ["tokio", "json", "macros"] }
+axum-extra = "0.10.0"
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
 fnv = "1.0.7"
 futures = "0.3.31"
@@ -54,14 +56,13 @@ strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
 tilejson.workspace = true
-time = "0.3.37"
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true
 tower = { version = "0.5.2", features = ["timeout"] }
 tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
-utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.9" }
+utiles-core = { path = "../utiles-core", version = "0.7.0-beta.4" }
 walkdir = "2.5.0"
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
 

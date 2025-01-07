@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-use axum::extract::{Host, Path};
+use axum::extract::Path;
 use axum::http::HeaderName;
 use axum::{
     body::Body,
@@ -15,6 +15,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use axum_extra::extract::Host;
 use serde::Deserialize;
 use serde_json::json;
 use tilejson::TileJSON;
@@ -306,6 +307,7 @@ async fn get_dataset_tilejson(
     Path(path): Path<String>,
 ) -> impl IntoResponse {
     let dataset = path;
+
     let ds = state.datasets.mbtiles.get(&dataset);
     if let Some(ds) = ds {
         let tilejson = ds.tilejson.clone();

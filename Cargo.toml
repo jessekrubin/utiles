@@ -9,7 +9,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.0-beta.3"
+version = "0.7.0-beta.4"
 authors = [
   "Jesse Rubin <jessekrubin@gmail.com>",
   "Dan Costello <dan.costello2@gmail.com>",
@@ -21,9 +21,10 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/jessekrubin/utiles"
 
 [workspace.dependencies]
+ahash = "0.8.11"
 anyhow = "1.0.95"
 async-sqlite = { version = "0.3.1", features = ["bundled", "functions", "trace"] }
-clap = { version = "4.5.23", features = ["derive", "color", "wrap_help"] }
+clap = { version = "4.5.24", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
 futures = "0.3.31"
 geo-types = "0.7.14"
@@ -35,7 +36,7 @@ pyo3 = "0.23.3"
 pyo3-build-config = "0.23.2"
 rusqlite = { version = "0.32.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0.134", features = ["preserve_order"] }
+serde_json = { version = "1.0.135", features = ["preserve_order"] }
 size = { version = "=0.5.0-preview2", features = ["default"] }
 strum = { version = "0.26.3", features = ["derive"] }
 strum_macros = "0.26.3"
