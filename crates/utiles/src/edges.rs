@@ -1,5 +1,6 @@
 use crate::UtilesResult;
-use std::collections::HashSet;
+use ahash::HashSet;
+
 use utiles_core::{zoom_max_xy, Tile, TileLike, TileZBox};
 
 static NEIGHBOR_IDXS: &[(i32, i32)] = &[
@@ -12,6 +13,7 @@ static NEIGHBOR_IDXS: &[(i32, i32)] = &[
     (1, 0),
     (1, 1),
 ];
+
 fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u32)> {
     NEIGHBOR_IDXS.iter().filter_map(move |&(dx, dy)| {
         let x = xy.0 as i32;
@@ -29,6 +31,7 @@ fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u
         }
     })
 }
+
 pub fn find_edges_wrap_x(
     tiles: &[Tile],
 ) -> UtilesResult<impl Iterator<Item = Tile> + '_> {

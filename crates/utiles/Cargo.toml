@@ -5,7 +5,7 @@ authors.workspace = true
 categories = ["science::geo"]
 edition.workspace = true
 homepage = "https://github.com/jessekrubin/utiles"
-keywords = ["map", "geo", "mercator", "tile"]
+keywords = ["map", "geo", "mercator", "tile", "webmap"]
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/jessekrubin/utiles"
@@ -23,26 +23,29 @@ required-features = [
 ]
 
 [dependencies]
+ahash.workspace = true
 anyhow.workspace = true
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
-async-trait = "0.1.84"
-axum = { version = "0.7.9", features = ["tokio", "json", "macros"] }
+axum = { version = "0.8.1", features = ["tokio", "json", "macros"] }
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
-fnv = "1.0.7"
-futures = "0.3.31"
 geo-types.workspace = true
 geojson.workspace = true
-globset = "0.4.15"
-hex = "0.4.3"
-image = "0.25.5"
-imagesize = "0.13.0"
+
+async-trait.workspace = true
+axum-extra.workspace = true
+fnv.workspace = true
+futures.workspace = true
+globset.workspace = true
+hex.workspace = true
+image.workspace = true
+imagesize.workspace = true
 indicatif.workspace = true
 indoc = { workspace = true }
 jiff.workspace = true
-json-patch = "3.0.1"
-md-5 = "0.10.6"
-noncrypto-digests = "0.3.2"
-num_cpus = "1.16.0"
+json-patch.workspace = true
+md-5.workspace = true
+noncrypto-digests.workspace = true
+num_cpus.workspace = true
 owo-colors = { version = "4.1.0", features = ["supports-color"] }
 pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
@@ -54,15 +57,14 @@ strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
 tilejson.workspace = true
-time = "0.3.37"
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true
 tower = { version = "0.5.2", features = ["timeout"] }
 tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
-utiles-core = { path = "../utiles-core", version = "0.7.0-alpha.9" }
-walkdir = "2.5.0"
+utiles-core = { path = "../utiles-core", version = "0.7.0-beta.4" }
+walkdir.workspace = true
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
 
 # was using for edge finding
