@@ -24,14 +24,25 @@ repository = "https://github.com/jessekrubin/utiles"
 ahash = "0.8.11"
 anyhow = "1.0.95"
 async-sqlite = { version = "0.3.1", features = ["bundled", "functions", "trace"] }
+async-trait = "0.1.85"
+axum-extra = "0.10.0"
 clap = { version = "4.5.24", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
+fnv = "1.0.7"
 futures = "0.3.31"
 geo-types = "0.7.14"
 geojson = "0.24.1"
+globset = "0.4.15"
+hex = "0.4.3"
+image = "0.25.5"
+imagesize = "0.13.0"
 indicatif = "0.17.9"
 indoc = "2.0.5"
 jiff = "0.1.21"
+json-patch = "3.0.1"
+md-5 = "0.10.6"
+noncrypto-digests = "0.3.2"
+num_cpus = "1.16.0"
 pyo3 = "0.23.3"
 pyo3-build-config = "0.23.2"
 rusqlite = { version = "0.32.0", features = ["bundled", "vtab", "blob"] }
@@ -46,6 +57,7 @@ tokio = { version = "1.42.0", features = ["full"] }
 tokio-stream = "0.1.17"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["serde", "serde_json", "env-filter"] }
+walkdir = "2.5.0"
 xxhash-rust = { version = "0.8.15", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
 
 # Config for 'cargo dist'
