@@ -1955,7 +1955,7 @@ dependencies = [
 
 [[package]]
 name = "pyutiles"
-version = "0.7.0-beta.4"
+version = "0.7.0"
 dependencies = [
  "geojson",
  "jiff",
@@ -2851,7 +2851,7 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "utiles"
-version = "0.7.0-beta.4"
+version = "0.7.0"
 dependencies = [
  "ahash",
  "anyhow",
@@ -2900,7 +2900,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-core"
-version = "0.7.0-beta.4"
+version = "0.7.0"
 dependencies = [
  "fast_hilbert",
  "serde",
@@ -2910,7 +2910,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-dev"
-version = "0.7.0-beta.4"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "geojson",
@@ -2923,7 +2923,7 @@ dependencies = [
 
 [[package]]
 name = "utiles-oxipng"
-version = "0.7.0-beta.4"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "clap",

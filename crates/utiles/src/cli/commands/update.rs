@@ -31,9 +31,9 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
     let minzoom_maxzoom = mbt.query_minzoom_maxzoom().await?;
     // updated_metadata
     // Updating metadata...
-    let metdata_minzoom = mbt.metadata_minzoom().await?;
+    let metadata_minzoom = mbt.metadata_minzoom().await?;
     if let Some(minzoom_maxzoom) = minzoom_maxzoom {
-        if let Some(metadata_minzoom) = metdata_minzoom {
+        if let Some(metadata_minzoom) = metadata_minzoom {
             if metadata_minzoom != minzoom_maxzoom.minzoom {
                 metadata_changes.push(MetadataChangeFromTo {
                     name: "minzoom".to_string(),
@@ -50,9 +50,9 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
         }
     }
 
-    let metdata_maxzoom = mbt.metadata_maxzoom().await?;
+    let metadata_maxzoom = mbt.metadata_maxzoom().await?;
     if let Some(minzoom_maxzoom) = minzoom_maxzoom {
-        if let Some(metadata_maxzoom) = metdata_maxzoom {
+        if let Some(metadata_maxzoom) = metadata_maxzoom {
             if metadata_maxzoom != minzoom_maxzoom.maxzoom {
                 metadata_changes.push(MetadataChangeFromTo {
                     name: "maxzoom".to_string(),

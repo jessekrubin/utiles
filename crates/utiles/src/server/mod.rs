@@ -112,7 +112,7 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     // ...seems to be the idiomatic way to do this...
     let shared_state = Arc::new(state);
     let x_request_id = HeaderName::from_static("x-request-id");
-    let comression_layer: CompressionLayer = CompressionLayer::new()
+    let compression_layer: CompressionLayer = CompressionLayer::new()
         // .br(true)
         // .deflate(true)
         .gzip(true)
@@ -136,7 +136,7 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
         // propagate `x-request-id` headers from request to response
         .layer(PropagateRequestIdLayer::new(x_request_id))
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
-        .layer(comression_layer);
+        .layer(compression_layer);
 
     // Build the app/router!
     let app = Router::new()

@@ -189,7 +189,7 @@ pub fn set_log_format(json: bool) -> UtilesResult<()> {
     } else {
         fmt::Layer::new().with_writer(io::stderr).boxed()
     };
-    // get teh format layer reload handle
+    // get the format layer reload handle
     let global_handle = GLOBAL_FORMAT_RELOAD_HANDLE.lock().map_err(|e| {
         UtilesError::AdHoc(format!("failed to lock global handle: {e}"))
     })?;
