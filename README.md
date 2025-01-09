@@ -2,6 +2,8 @@
 
 utiles = utils + tiles
 
+_web map tile utilities, batching, serving, python and bears (oh-my)_
+
 ## Installation
 
 ```bash
@@ -9,7 +11,9 @@ utiles = utils + tiles
 # from crates
 cargo install utiles 
 # from source
-cargo install --git https://github.com/jessekrubin/utiles.git utiles # and/or utiles-oxipng
+cargo install --git https://github.com/jessekrubin/utiles.git utiles 
+# install the oxipng mbtiles/tiles-db wrapper cli
+cargo install --git https://github.com/jessekrubin/utiles.git utiles-oxipng
 # via the python package (which wrappers the rust-cli)
 pip install -U utiles
 
