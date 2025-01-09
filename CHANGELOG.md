@@ -6,6 +6,12 @@
 
 ___
 
+## 0.7.1 (2025-01-09)
+
+- fix axum 8 new routing paths
+
+___
+
 ## 0.7.0 (2025-01-09)
 
 - **NO UNWRAPPING!** there is no unwrapping in utiles!

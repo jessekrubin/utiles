@@ -146,9 +146,12 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
         .route("/cfg", get(get_cfg))
         .route("/uitiles", get(uitiles))
         .route("/datasets", get(get_datasets))
-        .route("/tiles/:dataset/tile.json", get(get_dataset_tilejson))
-        .route("/tiles/:dataset/:quadkey", get(get_dataset_tile_quadkey))
-        .route("/tiles/:dataset/:z/:x/:y", get(get_dataset_tile_zxy))
+        .route("/tiles/{dataset}/tile.json", get(get_dataset_tilejson))
+        .route(
+            "/tiles/{dataset}/qk/{quadkey}",
+            get(get_dataset_tile_quadkey),
+        )
+        .route("/tiles/{dataset}/{z}/{x}/{y}", get(get_dataset_tile_zxy))
         .layer(middleware)
         .with_state(shared_state) // shared app/server state
         .fallback(four_o_four); // 404
@@ -161,10 +164,6 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
         .await?;
     Ok(())
 }
-// =============
-// REQUEST ID
-// =============
-
 // =====================================================================
 // ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES ~ ROUTES
 // =====================================================================
