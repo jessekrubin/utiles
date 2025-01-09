@@ -4,7 +4,9 @@
 
 - Docs/readme update
 
-## Unreleased/Future
+___
+
+## 0.7.0 (2025-01-09)
 
 - **NO UNWRAPPING!** there is no unwrapping in utiles!
 - updated `thiserror` to v2
@@ -77,12 +79,12 @@
 
 ## 0.5.1 (2024-06-19)
 
-- Fixed backpressure issue when `unpyramiding` direcotry to mbtiles; the loading
+- Fixed backpressure issue when `unpyramiding` directory to mbtiles; the loading
   of tiles was happening too fast and could cause memory issues on large
   tile-pyramids... (this was previously not an issue b/c I would run those jobs
   on my work machine which had 512gb or ram, but that machine died... RIP titus)
 - Write out `metadata.json` when `pyramid-ing` mbtiles to directory if the
-  metadata of the mbtiles does not conatin duplicate keys (which it should not)
+  metadata of the mbtiles does not contain duplicate keys (which it should not)
 - Limit jobs/concurrency when `pyramid-ing` mbtiles to directory to 4 (if not
   specified by `--jobs`/`-j` option) to prevent nuking machines
 
@@ -157,7 +159,7 @@ Example:
 
 ## 0.2.0 (2023-11-10)
 
-- Converted cli to rust as an excerise in learning clap
+- Converted cli to rust as an exercise in learning clap
 - Moved old click cli to `utiles._legacy.cli`
 - Added tilejson/tj command to rust cli to write out tilejson files for mbtiles
 - Added meta command to rust cli to write out json of metadata table for mbtiles

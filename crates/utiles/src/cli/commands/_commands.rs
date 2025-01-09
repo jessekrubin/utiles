@@ -51,7 +51,7 @@ impl CommandInfo {
 }
 fn cmd_info_recursive<'a>(
     cmd: &'a clap::Command,
-    parrent: Option<&'a str>,
+    parent: Option<&'a str>,
     cmd_info: &mut Vec<CommandInfo>,
 ) {
     let desc = cmd.get_about();
@@ -59,7 +59,7 @@ fn cmd_info_recursive<'a>(
         cmd.get_visible_aliases().map(|s| s.to_string()).collect();
     let cur_cmd_info = CommandInfo::new(
         cmd.get_name().to_string(),
-        parrent.map(|s| s.to_string()),
+        parent.map(|s| s.to_string()),
         desc.map(|s| s.to_string()),
         if aliases.is_empty() {
             None
