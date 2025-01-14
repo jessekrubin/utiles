@@ -46,26 +46,30 @@ json-patch.workspace = true
 md-5.workspace = true
 noncrypto-digests.workspace = true
 num_cpus.workspace = true
-owo-colors = { version = "4.1.0", features = ["supports-color"] }
+#owo-colors = { version = "4.1.0", features = ["supports-color"] }
 pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"], optional = true }
 rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
 serde.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 size.workspace = true
-sqlite-hashes = { version = "0.7.8", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+#sqlite-hashes = { version = "0.7.8", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
 tilejson.workspace = true
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true
-tower = { version = "0.5.2", features = ["timeout"] }
-tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
+#tower = { version = "0.5.2", features = ["timeout"] }
+#tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
+tower.workspace = true
+tower-http.workspace = true
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 utiles-core = { path = "../utiles-core", version = "0.7.1" }
 walkdir.workspace = true
 xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
+owo-colors.workspace = true
+sqlite-hashes.workspace = true
 
 # was using for edge finding
 #ndarray = { version = "0.16.1", features = ["rayon"] }
