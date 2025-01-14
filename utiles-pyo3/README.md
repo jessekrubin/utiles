@@ -15,12 +15,14 @@ util(e)ities.
 
 ```bash
 pip install utiles
+uv add utiles
 ```
 
 ## Usage
 
-```
+```python
 >>> import utiles as ut
+>>> from utiles import Tile, LngLat, LngLatBbox
 >>> ut.bounds(1, 1, 1)
 LngLatBbox(west=0, south=-85.0511287798066, east=180, north=0)
 >>> t = ut.Tile(1, 2, 3)

@@ -11,7 +11,7 @@
 - `utiles webpify` and `utiles-oxipng` commands now show correct size difference
   if/when the size of a tiles-db is larger than it was previously
 - fix axum 8 new routing paths
-- `utiles-pyo3` children now accepts kwarg bool `zorder`:
+- `utiles-pyo3` children now accept kwarg bool `zorder`:
   - `zorder` returns quadkey ordering: `top-left`, `top-right`, `bottom-left`,
     `bottom-right`
   - For some reason (I do not know why) `mercantile` and `@mapbox/tilebelt` both
