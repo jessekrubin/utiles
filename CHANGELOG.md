@@ -4,20 +4,27 @@
 
 - Docs/readme update
 
-___
+---
 
 ## 0.7.2
 
-- `utiles webpify` and `utiles-oxipng` commands now show correct size difference if/when the size of a tiles-db is larger than it was previously
+- `utiles webpify` and `utiles-oxipng` commands now show correct size difference
+  if/when the size of a tiles-db is larger than it was previously
 - fix axum 8 new routing paths
+- `utiles-pyo3` children now accepts kwarg bool `zorder`:
+  - `zorder` returns quadkey ordering: `top-left`, `top-right`, `bottom-left`,
+    `bottom-right`
+  - For some reason (I do not know why) `mercantile` and `@mapbox/tilebelt` both
+    return children in the order of `top-left`, `top-right`, `bottom-right`,
+    `bottom-left` which I call 'd-ordering'
 
-___
+---
 
 ## 0.7.1 (2025-01-09)
 
 - fix axum 8 new routing paths
 
-___
+---
 
 ## 0.7.0 (2025-01-09)
 
@@ -60,7 +67,8 @@ ___
   - `oxipng` command that optimizes png(s) in mbtiles db(s) using `oxipng` crate
 - figured out how to make async tile-stream(s)
 - Removed even more `unwrap` usages
-- lager/logging/tracing is reloadable from python; using the new fancy `std::sync::LazyLock` (yay)
+- lager/logging/tracing is reloadable from python; using the new fancy
+  `std::sync::LazyLock` (yay)
 - lint/copy overhaul
 - Added `--page-size` to vacuum command
 - Using `json-patch` for metadata updates
