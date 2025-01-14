@@ -1,7 +1,4 @@
-use base64::{
-    engine::{ general_purpose},
-    Engine as _,
-};
+use base64::{engine::general_purpose, Engine as _};
 
 use rusqlite::functions::FunctionFlags;
 use rusqlite::types::ValueRef;
@@ -12,10 +9,10 @@ use tracing::{error, trace};
 /// Return xxh3-64 hash of string/blob as an integer (i64) value.
 ///
 /// Sqlite stores integers as 8-byte signed integers.
-pub fn add_function_ut_base64(db: &Connection) -> rusqlite::Result<()> {
-    trace!("Adding ut_base64 function");
+pub fn add_function_base64_encode(db: &Connection) -> rusqlite::Result<()> {
+    trace!("Adding base64_encode function");
     db.create_scalar_function(
-        "ut_base64",
+        "base64_encode",
         1,
         FunctionFlags::SQLITE_UTF8 | FunctionFlags::SQLITE_DETERMINISTIC,
         move |ctx| {
