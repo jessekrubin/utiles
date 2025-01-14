@@ -17,8 +17,8 @@ use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 use crate::traits::TileParent;
 use crate::{
-    children1_zorder, pmtiles, quadkey2tile, rmid2xyz, utile, xyz2quadkey, IsOk,
-    TileChildren1,
+    children1_zorder, children_zorder, pmtiles, quadkey2tile, rmid2xyz, utile,
+    xyz2quadkey, IsOk, TileChildren1,
 };
 
 /// Tile X-Y-Z struct
@@ -497,6 +497,12 @@ impl Tile {
     #[must_use]
     pub fn children(&self, zoom: Option<u8>) -> Vec<Tile> {
         children(self.x, self.y, self.z, zoom)
+    }
+
+    /// Return the children tiles of the tile
+    #[must_use]
+    pub fn children_zorder(&self, zoom: Option<u8>) -> Vec<Tile> {
+        children_zorder(self.x, self.y, self.z, zoom)
     }
 
     /// Return the parent tile

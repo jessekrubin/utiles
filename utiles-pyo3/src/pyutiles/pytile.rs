@@ -404,9 +404,16 @@ impl PyTile {
         self.xyz.parent(n).map(PyTile::from)
     }
 
-    #[pyo3(signature = (zoom = None))]
-    pub fn children(&self, zoom: Option<u8>) -> Vec<Self> {
-        let xyzs = self.xyz.children(zoom);
+    #[pyo3(signature = (zoom = None, *, zorder = None))]
+    pub fn children(&self, zoom: Option<u8>, zorder: Option<bool>) -> Vec<Self> {
+        let zorder = zorder.unwrap_or(false);
+        let xyzs = {
+            if zorder {
+                self.xyz.children_zorder(zoom)
+            } else {
+                self.xyz.children(zoom)
+            }
+        };
         xyzs.into_iter().map(Self::from).collect()
     }
 

@@ -6,6 +6,13 @@
 
 ___
 
+## 0.7.2
+
+- `utiles webpify` and `utiles-oxipng` commands now show correct size difference if/when the size of a tiles-db is larger than it was previously
+- fix axum 8 new routing paths
+
+___
+
 ## 0.7.1 (2025-01-09)
 
 - fix axum 8 new routing paths
