@@ -5,6 +5,7 @@
 //!   - `ut_tilesize(blob)`   - returns the size of raster tile or None
 //!   - `xxh3_int(blob|str)`  - returns xxh3 hash as `i64` big-endian view
 //!   - `xxh64_int(blob|str)` - returns xxh64 hash as `i64` big-endian view
+use crate::sqlite_utiles::base64::add_function_ut_base64;
 use crate::sqlite_utiles::hash_int::{
     add_function_fnv_i64, add_function_xxh3_i64, add_function_xxh64_i64,
 };
@@ -13,6 +14,7 @@ use crate::sqlite_utiles::tiletype::add_function_ut_tiletype;
 use rusqlite::{Connection, Result};
 use tracing::debug;
 
+mod base64;
 mod hash_int;
 mod tilesize;
 mod tiletype;
@@ -21,6 +23,7 @@ pub fn add_ut_functions(db: &Connection) -> Result<()> {
     debug!("registering sqlite-utiles functions...");
     add_function_ut_tiletype(db)?;
     add_function_ut_tilesize(db)?;
+    add_function_ut_base64(db)?;
 
     add_function_xxh3_i64(db)?;
     add_function_xxh64_i64(db)?;
@@ -138,6 +141,33 @@ mod tests {
         ];
         expected.sort_unstable();
         assert_eq!(distinct_rows, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ut_base64() -> Result<(), BoxError> {
+        let db = rusqlite::Connection::open_in_memory()?;
+        super::add_ut_functions(&db)?;
+        // maketablwe and insert data
+        db.execute(
+            "CREATE TABLE data (
+                id INTEGER PRIMARY KEY,
+                data BLOB
+            )",
+            [],
+        )?;
+        let data = b"hello world~";
+        db.execute("INSERT INTO data (data) VALUES (?)", params![data])?;
+        let mut stmt = db.prepare("SELECT ut_base64(data) FROM data")?;
+        let rows = stmt
+            .query_map(params![], |row| {
+                let b64: String = row.get(0)?;
+                Ok(b64)
+            })?
+            .collect::<Result<Vec<String>, rusqlite::Error>>()?;
+        assert_eq!(rows.len(), 1);
+        let expected = "aGVsbG8gd29ybGR+";
+        assert_eq!(rows[0], expected);
         Ok(())
     }
 }

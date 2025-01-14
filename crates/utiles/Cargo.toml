@@ -66,6 +66,7 @@ xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "cons
 # optional
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
 pmtiles = { workspace = true, optional= true}
+base64 = "0.22.1"
 
 [dev-dependencies]
 criterion = "0.5.1"
