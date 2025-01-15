@@ -9,7 +9,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.1"
+version = "0.7.2"
 authors = [
   "Jesse Rubin <jessekrubin@gmail.com>",
   "Dan Costello <dan.costello2@gmail.com>",
@@ -23,9 +23,11 @@ repository = "https://github.com/jessekrubin/utiles"
 [workspace.dependencies]
 ahash = "0.8.11"
 anyhow = "1.0.95"
-async-sqlite = { version = "0.3.1", features = ["bundled", "functions", "trace"] }
+async-sqlite = { version = "0.4.0", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.85"
+axum = { version = "0.8.1", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.0"
+base64 = "0.22.1"
 clap = { version = "4.5.26", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
 fnv = "1.0.7"
@@ -43,18 +45,23 @@ json-patch = "3.0.1"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
 num_cpus = "1.16.0"
+owo-colors = { version = "4.1.0", features = ["supports-color"] }
+pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"] }
 pyo3 = "0.23.4"
 pyo3-build-config = "0.23.2"
 rusqlite = { version = "0.32.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.135", features = ["preserve_order"] }
 size = { version = "=0.5.0-preview2", features = ["default"] }
+sqlite-hashes = { version = "0.7.8", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
 strum = { version = "0.26.3", features = ["derive"] }
 strum_macros = "0.26.3"
 thiserror = "2.0.11"
 tilejson = "0.4.1"
 tokio = { version = "1.42.0", features = ["full"] }
 tokio-stream = "0.1.17"
+tower = { version = "0.5.2", features = ["timeout"] }
+tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"

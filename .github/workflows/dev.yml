@@ -52,7 +52,7 @@ jobs:
           cd utiles-pyo3
           pip install click
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
-          pip install -r requirements/dev.txt
+          pip install -r requirements.dev.txt
           pytest --benchmark-disable
 
 #      - name: Build wheels

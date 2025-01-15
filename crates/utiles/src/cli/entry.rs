@@ -74,8 +74,19 @@ pub async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
         VERSION
     );
 
+    // check for `UTILES_MAX_TERM_WIDTH` env var and use it if it's set
+    // otherwise use the default value of 120
+    let max_term_width = {
+        if let Ok(val) = std::env::var("UTILES_MAX_TERM_WIDTH") {
+            val.parse::<usize>().unwrap_or(120)
+        } else {
+            120
+        }
+    };
     // set caller if provided
-    let cli = Cli::command().about(about_str);
+    let cli = Cli::command()
+        .about(about_str)
+        .max_term_width(max_term_width);
     let matches = cli.get_matches_from(
         // argv.clone()
         &argv,

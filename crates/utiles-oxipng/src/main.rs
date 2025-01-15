@@ -161,13 +161,32 @@ async fn oxipng_main(args: Cli) -> UtilesResult<()> {
             total_size_diff += size_diff;
             processed += 1;
             pb.inc(1);
-
-            let size_saved = size::Size::from_bytes(total_size_diff as u64).to_string();
-            pb.set_message(format!("size-diff: {size_saved}"));
+            let size_saved_msg = if total_size_diff > 0 {
+                format!(
+                    "-{}",
+                    size::Size::from_bytes(total_size_diff.unsigned_abs())
+                )
+            } else {
+                format!(
+                    "+{}",
+                    size::Size::from_bytes(total_size_diff.unsigned_abs())
+                )
+            };
+            pb.set_message(format!("size-diff: {size_saved_msg}"));
         }
-        let total_size_str = size::Size::from_bytes(total_size_diff as u64).to_string();
+        let total_size_saved_str = if total_size_diff > 0 {
+            format!(
+                "-{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        } else {
+            format!(
+                "+{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        };
         pb.finish_with_message(format!(
-            "Processed {processed} tiles, saved {total_size_str} ({total_size_diff}b)"
+            "Processed {processed} tiles, saved {total_size_saved_str} ({total_size_diff}b)"
         ));
     });
 
@@ -195,13 +214,8 @@ async fn main() -> Result<()> {
     let logcfg = LagerConfig { json: false, level };
     init_tracing(logcfg)?;
     let res = oxipng_main(args).await;
-
-    // if let Err(e) = res {
-    //     error!("{}", e);
-    // }
     res.map_err(|e| {
         error!("{}", e);
         e.into()
     })
-    // Ok(())
 }

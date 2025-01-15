@@ -97,10 +97,31 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
             processed += 1;
             pb.inc(1);
 
-            let size_saved = size::Size::from_bytes(total_size_diff as u64).to_string();
-            pb.set_message(format!("webpify ~ size-diff: {size_saved}"));
+            let size_saved_msg = if total_size_diff > 0 {
+                format!(
+                    "-{}",
+                    size::Size::from_bytes(total_size_diff.unsigned_abs())
+                )
+            } else {
+                format!(
+                    "+{}",
+                    size::Size::from_bytes(total_size_diff.unsigned_abs())
+                )
+            };
+            pb.set_message(format!("webpify ~ size-diff: {size_saved_msg}"));
         }
-        let total_size_str = size::Size::from_bytes(total_size_diff as u64).to_string();
+        let total_size_str = if total_size_diff > 0 {
+            format!(
+                "-{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        } else {
+            format!(
+                "+{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        };
+
         pb.finish_with_message(format!(
             "Processed {processed} tiles, saved {total_size_str} ({total_size_diff}b)"
         ));

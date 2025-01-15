@@ -247,8 +247,12 @@ pub fn parent(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Option<Py
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args, zoom = None))]
-pub fn children(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
+#[pyo3(signature = (* args, zoom = None, zorder = None))]
+pub fn children(
+    args: &Bound<'_, PyTuple>,
+    zoom: Option<u8>,
+    zorder: Option<bool>,
+) -> PyResult<Vec<PyTile>> {
     let tile = pyparsing::parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z + 1);
     if zoom < tile.xyz.z {
@@ -257,7 +261,7 @@ pub fn children(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyT
             tile.xyz.z
         )))?;
     }
-    let children = tile.children(Some(zoom));
+    let children = tile.children(Some(zoom), zorder);
     Ok(children)
 }
 
