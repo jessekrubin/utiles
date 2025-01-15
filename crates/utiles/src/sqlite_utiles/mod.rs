@@ -5,7 +5,7 @@
 //!   - `ut_tilesize(blob)`   - returns the size of raster tile or None
 //!   - `xxh3_int(blob|str)`  - returns xxh3 hash as `i64` big-endian view
 //!   - `xxh64_int(blob|str)` - returns xxh64 hash as `i64` big-endian view
-use crate::sqlite_utiles::base64::{add_function_base64_encode};
+use crate::sqlite_utiles::base64::add_function_base64_encode;
 use crate::sqlite_utiles::hash_int::{
     add_function_fnv_i64, add_function_xxh3_i64, add_function_xxh64_i64,
 };

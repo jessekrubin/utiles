@@ -29,6 +29,7 @@ async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", 
 async-trait.workspace = true
 axum-extra.workspace = true
 axum.workspace = true
+base64.workspace = true
 fnv.workspace = true
 futures.workspace = true
 geo-types.workspace = true
@@ -60,13 +61,12 @@ tower-http.workspace = true
 tower.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 tracing.workspace = true
-utiles-core = { path = "../utiles-core", version = "0.7.1" }
+utiles-core = { path = "../utiles-core", version = "0.7.2" }
 walkdir.workspace = true
-xxhash-rust = { workspace = true, features = ["const_xxh3", "const_xxh64", "const_xxh32", "xxh3", "xxh64", "xxh32"] }
+xxhash-rust.workspace = true
 # optional
 clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
 pmtiles = { workspace = true, optional= true}
-base64 = "0.22.1"
 
 [dev-dependencies]
 criterion = "0.5.1"

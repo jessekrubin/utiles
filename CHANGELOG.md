@@ -6,7 +6,7 @@
 
 ---
 
-## 0.7.2
+## 0.7.2 (2025-01-14)
 
 - `utiles webpify` and `utiles-oxipng` commands now show correct size difference
   if/when the size of a tiles-db is larger than it was previously
@@ -17,6 +17,8 @@
   - For some reason (I do not know why) `mercantile` and `@mapbox/tilebelt` both
     return children in the order of `top-left`, `top-right`, `bottom-right`,
     `bottom-left` which I call 'd-ordering'
+- `cli`
+  - format string `{projwin}` and `{projwin_web}` changed to return ` ` space separated coords
 
 ---
 

@@ -9,7 +9,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.1"
+version = "0.7.2"
 authors = [
   "Jesse Rubin <jessekrubin@gmail.com>",
   "Dan Costello <dan.costello2@gmail.com>",
@@ -27,6 +27,7 @@ async-sqlite = { version = "0.4.0", features = ["bundled", "functions", "trace"]
 async-trait = "0.1.85"
 axum = { version = "0.8.1", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.0"
+base64 = "0.22.1"
 clap = { version = "4.5.26", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
 fnv = "1.0.7"

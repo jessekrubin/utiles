@@ -217,7 +217,7 @@ impl BBox {
     #[inline]
     pub fn projwin_str(&self) -> String {
         format!(
-            "{},{},{},{}",
+            "{} {} {} {}",
             self.west(),
             self.north(),
             self.east(),
@@ -541,7 +541,7 @@ impl WebBBox {
     #[inline]
     pub fn projwin_str(&self) -> String {
         format!(
-            "{},{},{},{}",
+            "{} {} {} {}",
             self.west(),
             self.north(),
             self.east(),
