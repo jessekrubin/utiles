@@ -25,6 +25,7 @@ def _repo_root() -> Path:
 
 REPO_ROOT = _repo_root()
 
+
 # go up and find dir with sub dir ".github"
 
 
@@ -156,6 +157,26 @@ TEST_TILE_NAME2TYPE = {
     "tile-obj.json": "json",
 }
 
+TEST_TILE_NAME2ENCODING = {
+    "0.gif": "internal",
+    "0.jpeg": "internal",
+    "0.png": "internal",
+    "0.vector.pbf": "uncompressed",
+    "0.vector.pbf.zst": "zstd",
+    "0.vector.pbf.zlib": "zlib",
+    "0.vector.pbf.gz": "gzip",
+    "0.webp": "internal",
+    "gif-990x1050.gif": "internal",
+    "jpg-640x400.jpg": "internal",
+    "png-640x400.png": "internal",
+    "tux.webp": "internal",
+    "tux_alpha.webp": "internal",
+    "unknown.txt": "uncompressed",
+    "webp-550x368.webp": "internal",
+    "tile-arr.json": "uncompressed",
+    "tile-obj.json": "uncompressed",
+}
+
 
 def test_found_test_files() -> None:
     assert len(TEST_TILES_BYTES) == len(TEST_TILE_NAME2TYPE)
@@ -195,6 +216,20 @@ def test_tiletype_rs(
         assert ttype_str is False or ttype_str == "unknown"  # type: ignore
     else:
         assert ttype_str == expected
+
+
+@pytest.mark.parametrize(
+    "tile",
+    TEST_TILES_BYTES,
+)
+def test_tiletype_obj(
+    tile: tuple[str, bytes],
+) -> None:
+    filename, buffer = tile
+    ttype = utiles.TileType.from_bytes(buffer)
+    expected = TEST_TILE_NAME2TYPE[filename]
+    assert ttype.format == expected.split(".")[0]
+    assert ttype.encoding == TEST_TILE_NAME2ENCODING[filename]
 
 
 @pytest.mark.parametrize(
