@@ -860,7 +860,7 @@ pub struct RimrafArgs {
     pub(crate) dryrun: bool,
 
     #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
-    verbose: bool,
+    pub(crate) verbose: bool,
 }
 
 #[derive(Args, Debug)]
