@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use crate::mbt::{metadata2map_val, metadata_vec_has_duplicates};
 use futures::stream::{self, StreamExt};
 use tokio::fs;
-use tracing::{debug, info, warn};
+use tracing::{debug, warn};
 
 use utiles_core::TileLike;
 
@@ -76,7 +76,9 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
     let output_dir = Path::new(&cfg.dst);
     let mbt = Mbtiles::open_existing(mbt_path)?;
     let where_clause = cfg.mbtiles_sql_where()?;
-    info!("where_clause: {where_clause:?}");
+    if !where_clause.is_empty() {
+        debug!("where_clause: {where_clause:?}");
+    }
     let start_time = std::time::Instant::now();
 
     // let count_query = &"SELECT count(*) FROM tiles".to_string();

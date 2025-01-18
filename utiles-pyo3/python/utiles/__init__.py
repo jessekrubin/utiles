@@ -126,9 +126,6 @@ from utiles._utiles import (
     xyz2quadkey,
 )
 
-TileLike = Tile | tuple[int, int, int]
-TileArg = TileLike | Sequence[TileLike]
-
 __all__ = (
     "TILETYPE_GIF",
     "TILETYPE_JPG",

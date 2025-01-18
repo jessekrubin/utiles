@@ -21,7 +21,7 @@ execnet==2.1.1
     # via pytest-xdist
 filelock==3.16.1
     # via virtualenv
-hypothesis==6.123.17
+hypothesis==6.124.0
     # via -r utiles-pyo3/requirements.dev.in
 iniconfig==2.0.0
     # via pytest
@@ -59,7 +59,7 @@ pytest-cov==6.0.0
     # via -r utiles-pyo3/requirements.dev.in
 pytest-xdist==3.6.1
     # via -r utiles-pyo3/requirements.dev.in
-ruff==0.9.1
+ruff==0.9.2
     # via -r utiles-pyo3/requirements.dev.in
 sortedcontainers==2.4.0
     # via hypothesis
@@ -69,5 +69,5 @@ typing-extensions==4.12.2
     # via
     #   -r utiles-pyo3/requirements.dev.in
     #   mypy
-virtualenv==20.28.1
+virtualenv==20.29.1
     # via nox

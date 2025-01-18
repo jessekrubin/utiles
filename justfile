@@ -121,4 +121,5 @@ reinstall:
 
 # pip compile requirements
 pip-compile:
+    uv export > utiles-pyo3/requirements.dev.txt
     uv pip compile utiles-pyo3/requirements.dev.in -n > utiles-pyo3/requirements.dev.txt
