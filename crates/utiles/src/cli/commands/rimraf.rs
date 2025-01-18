@@ -2,10 +2,6 @@ use futures::stream::{self, StreamExt};
 use jiff::SignedDuration;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
-use std::sync::{
-    atomic::{AtomicU64, Ordering},
-    Arc,
-};
 use std::time::Duration;
 use tokio::{
     fs,
@@ -13,18 +9,18 @@ use tokio::{
     task::JoinHandle,
 };
 use tracing::{error, info, trace};
-use walkdir::{DirEntry, WalkDir};
+use walkdir::WalkDir;
 
 use crate::cli::args::RimrafArgs;
 use crate::errors::UtilesResult;
 use crate::UtilesError;
 
-/// Represents different ways we might update stats.
+/// stat update thing
 #[derive(Debug)]
 enum StatsEvent {
-    /// A file was removed. The `u64` is the file size in bytes.
+    /// A file was removed (contains size)
     FileRemoved(u64),
-    /// A directory was removed.
+    /// dir removed
     DirRemoved,
 }
 
@@ -54,15 +50,17 @@ impl FinalRimrafStats {
         let ndirs = self.stats.ndirs;
         let nbytes = self.stats.nbytes;
         let signed_duration = SignedDuration::try_from(self.elapsed);
-        let elapsed_str = signed_duration
-            .map(|sd| {
-                let s = format!("{:#}", sd);
-                s
-            })
-            .unwrap_or_else(|_| "unknown".to_string());
-        info!(
-            "NUKED: nfiles={nfiles}, ndirs={ndirs}, nbytes={nbytes} in {elapsed_str}"
-        );
+        match signed_duration {
+            Ok(sd) => {
+                info!(
+                    "NUKED: nfiles={nfiles}, ndirs={ndirs}, nbytes={nbytes} in {sd:#}"
+                );
+            }
+            Err(e) => {
+                trace!("Failed to convert Duration to SignedDuration: {:?}", e);
+                info!("NUKED: nfiles={nfiles}, ndirs={ndirs}, nbytes={nbytes}");
+            }
+        }
     }
 
     pub fn json_str(&self) -> String {
@@ -70,25 +68,23 @@ impl FinalRimrafStats {
         let ndirs = self.stats.ndirs;
         let nbytes = self.stats.nbytes;
         let signed_duration = SignedDuration::try_from(self.elapsed);
-        let elapsed_str = signed_duration
-            .map(|sd| {
-                let s = format!("{:#}", sd);
-                s
-            })
-            .unwrap_or_else(|_| "unknown".to_string());
-        let json_str = format!(
-            r#"{{"nfiles":{nfiles},"ndirs":{ndirs},"nbytes":{nbytes},"elapsed":"{elapsed_str}"}}"#,
-            nfiles = nfiles,
-            ndirs = ndirs,
-            nbytes = nbytes,
-            elapsed_str = elapsed_str,
-        );
-        json_str
+        match signed_duration {
+            Ok(sd) => {
+                format!(
+                    r#"{{"nfiles": {nfiles}, "ndirs": {ndirs}, "nbytes": {nbytes}, "elapsed": "{sd:#}"}}"#
+                )
+            }
+            Err(_e) => {
+                format!(
+                    r#"{{"nfiles": {nfiles}, "ndirs": {ndirs}, "nbytes": {nbytes}, "elapsed": null}}"#
+                )
+            }
+        }
     }
 }
 
 /// A separate task that collects stats events and updates `RimrafStats`.
-async fn stats_collector(mut rx: UnboundedReceiver<StatsEvent>) -> (FinalRimrafStats) {
+async fn stats_collector(mut rx: UnboundedReceiver<StatsEvent>) -> FinalRimrafStats {
     let mut stats = RimrafStats::default();
     let start = std::time::Instant::now();
     while let Some(event) = rx.recv().await {
@@ -141,10 +137,12 @@ async fn remove_all_files(
                     }
                 };
 
-                if !cfg.dryrun {
+                if cfg.dryrun {
+                    let _ = tx.send(StatsEvent::FileRemoved(fsize));
+                } else {
                     // Remove file
                     match fs::remove_file(&path).await {
-                        Ok(_) => {
+                        Ok(()) => {
                             // Attempt to re-check size
                             match path.metadata() {
                                 Ok(meta) => {
@@ -160,9 +158,6 @@ async fn remove_all_files(
                             error!("Removing file {:?} failed: {:?}", path, e);
                         }
                     }
-                } else {
-                    // Just gather size
-                    let _ = tx.send(StatsEvent::FileRemoved(fsize));
                 }
             }
         })
@@ -184,14 +179,12 @@ async fn remove_all_directories_in_stages(
     let mut depth_map: BTreeMap<usize, Vec<PathBuf>> = BTreeMap::new();
 
     // build the depth map
-    for entry_result in WalkDir::new(dirpath) {
-        if let Ok(entry) = entry_result {
-            if entry.file_type().is_dir() {
-                // dirs.push(entry);
-                let path = entry.path().to_owned();
-                let depth = path.components().count(); // number of components
-                depth_map.entry(depth).or_default().push(path);
-            }
+    for entry in WalkDir::new(dirpath).into_iter().flatten() {
+        if entry.file_type().is_dir() {
+            // dirs.push(entry);
+            let path = entry.path().to_owned();
+            let depth = path.components().count(); // number of components
+            depth_map.entry(depth).or_default().push(path);
         }
     }
 
@@ -206,7 +199,7 @@ async fn remove_all_directories_in_stages(
                 let tx = tx.clone();
                 async move {
                     match fs::remove_dir(&path).await {
-                        Ok(_) => {
+                        Ok(()) => {
                             // Send DirRemoved event
                             let _ = tx.send(StatsEvent::DirRemoved);
                         }
@@ -266,6 +259,7 @@ pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
     // let (nfiles, ndirs, nbytes) = final_stats.snapshot();
     if args.verbose {
         final_stats.log();
+        println!("{}", final_stats.json_str());
     }
     Ok(())
 }

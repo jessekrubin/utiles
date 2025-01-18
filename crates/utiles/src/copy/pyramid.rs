@@ -76,7 +76,9 @@ pub async fn copy_mbtiles2fs(cfg: &CopyConfig) -> UtilesResult<()> {
     let output_dir = Path::new(&cfg.dst);
     let mbt = Mbtiles::open_existing(mbt_path)?;
     let where_clause = cfg.mbtiles_sql_where()?;
-    info!("where_clause: {where_clause:?}");
+    if !where_clause.is_empty() {
+        debug!("where_clause: {where_clause:?}");
+    }
     let start_time = std::time::Instant::now();
 
     // let count_query = &"SELECT count(*) FROM tiles".to_string();
