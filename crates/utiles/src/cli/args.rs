@@ -859,7 +859,7 @@ pub struct RimrafArgs {
     #[arg(required = false, short = 'n', long, action = clap::ArgAction::SetTrue)]
     pub(crate) dryrun: bool,
 
-    #[arg(required = false, long, action = clap::ArgAction::SetTrue)]
+    #[arg(required = false, short, long, action = clap::ArgAction::SetTrue)]
     pub(crate) verbose: bool,
 }
 

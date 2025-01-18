@@ -8,7 +8,7 @@ use tokio::{
     sync::mpsc::{self, UnboundedReceiver, UnboundedSender},
     task::JoinHandle,
 };
-use tracing::{error, info, trace};
+use tracing::{debug, error, info, trace};
 use walkdir::WalkDir;
 
 use crate::cli::args::RimrafArgs;
@@ -24,13 +24,13 @@ enum StatsEvent {
     DirRemoved,
 }
 
+/// Super-small copy-able config obj that is passed around bit-wise copied
 #[derive(Debug, Clone, Copy)]
 struct RimrafCfg {
     pub dryrun: bool,
     pub size: bool,
 }
 
-/// A thread-safe stats struct using atomics (optional but handy).
 #[derive(Debug, Default)]
 pub struct RimrafStats {
     pub nfiles: u64,
@@ -233,6 +233,12 @@ pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
         )));
     }
 
+    if args.dryrun {
+        info!("NUKING (dryrun): {:?}", dirpath);
+    } else {
+        debug!("NUKING: {:?}", dirpath);
+    }
+
     // channel 4 collector
     let (tx, rx) = mpsc::unbounded_channel();
     let stats_handle: JoinHandle<_> =
@@ -256,8 +262,7 @@ pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
         .await
         .map_err(|e| UtilesError::Error(format!("Stats collector task failed: {e}")))?;
 
-    // let (nfiles, ndirs, nbytes) = final_stats.snapshot();
-    if args.verbose {
+    if args.verbose || args.dryrun {
         final_stats.log();
         println!("{}", final_stats.json_str());
     }

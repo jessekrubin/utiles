@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use crate::mbt::{metadata2map_val, metadata_vec_has_duplicates};
 use futures::stream::{self, StreamExt};
 use tokio::fs;
-use tracing::{debug, info, warn};
+use tracing::{debug, warn};
 
 use utiles_core::TileLike;
 
