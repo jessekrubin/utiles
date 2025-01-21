@@ -32,7 +32,7 @@ clap = { version = "4.5.26", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
 fnv = "1.0.7"
 futures = "0.3.31"
-geo-types = "0.7.14"
+geo-types = "0.7.15"
 geojson = "0.24.1"
 globset = "0.4.15"
 hex = "0.4.3"
