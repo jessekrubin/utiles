@@ -66,7 +66,7 @@ fn warn_debug_build(py: Python) -> PyResult<()> {
     use pyo3::types::PyTuple;
 
     let warnings_mod = py.import(intern!(py, "warnings"))?;
-    let warning = PyRuntimeWarning::new_err("ry not compiled in release mode");
+    let warning = PyRuntimeWarning::new_err("utiles not compiled in release mode");
     let args = PyTuple::new(py, vec![warning])?;
     warnings_mod.call_method1(intern!(py, "warn"), args)?;
     Ok(())
