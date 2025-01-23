@@ -2920,10 +2920,15 @@ name = "utiles-dev"
 version = "0.7.3"
 dependencies = [
  "anyhow",
+ "futures",
+ "futures-util",
  "geojson",
+ "rusqlite",
  "serde",
  "serde_json",
  "tokio",
+ "tokio-stream",
+ "tracing",
  "utiles",
  "utiles-core",
 ]

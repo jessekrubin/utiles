@@ -47,13 +47,13 @@ fn get_tile_src(src: &str) -> UtilesResult<Source> {
     }
 }
 
-fn get_tile_dst(dst: &str) -> UtilesResult<Destination> {
+fn get_tile_dst(dst: &str) -> Destination {
     // if it contains '.mbtiles' then it's a mbtiles file
     // else it's a directory
     if dst.to_ascii_lowercase().ends_with(".mbtiles") {
-        Ok(Destination::Mbtiles(dst.to_string()))
+        Destination::Mbtiles(dst.to_string())
     } else {
-        Ok(Destination::Fs(dst.to_string()))
+        Destination::Fs(dst.to_string())
     }
 }
 
@@ -75,7 +75,7 @@ pub async fn copy(cfg: &CopyConfig) -> UtilesResult<()> {
     })?)?;
     let dst = get_tile_dst(pasta.cfg.dst.to_str().ok_or_else(|| {
         UtilesError::PathConversionError(pasta.cfg.dst.to_string_lossy().to_string())
-    })?)?;
+    })?);
 
     let srcdst = match (src, dst) {
         (Source::Mbtiles(_src), Destination::Fs(_dst)) => Ok(CopySrcDest::Mbtiles2Fs),

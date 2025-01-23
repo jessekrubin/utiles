@@ -25,3 +25,8 @@ serde_json.workspace = true
 tokio.workspace = true
 utiles-core = { path = "../utiles-core" }
 utiles = { path = "../utiles" }
+tokio-stream.workspace = true
+tracing = "0.1.41"
+rusqlite.workspace = true
+futures.workspace = true
+futures-util = "0.3.31"
