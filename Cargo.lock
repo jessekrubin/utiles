@@ -2923,6 +2923,7 @@ dependencies = [
  "futures",
  "futures-util",
  "geojson",
+ "image",
  "rusqlite",
  "serde",
  "serde_json",

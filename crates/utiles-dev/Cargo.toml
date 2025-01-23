@@ -30,3 +30,4 @@ tracing = "0.1.41"
 rusqlite.workspace = true
 futures.workspace = true
 futures-util = "0.3.31"
+image.workspace = true

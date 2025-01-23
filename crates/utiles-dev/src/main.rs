@@ -74,6 +74,70 @@ where
 
     Ok(rx)
 }
+fn imgjoin_dev() -> anyhow::Result<()> {
+    let tl = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\0\\0.png";
+    let tr = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\0\\1.png";
+    let bl = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\1\\0.png";
+    let br = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\1\\1.png";
+
+    let images = [tl, tr, bl, br];
+
+    let img_bufs = images
+        .iter()
+        .map(|img| {
+            let img_bytes = std::fs::read(img)?;
+            //
+            let img_buf = image::load_from_memory(&img_bytes)
+                .map_err(|e| anyhow::anyhow!("image::load_from_memory - {e}"))?;
+
+            Ok(img_buf)
+        })
+        .collect::<Result<Vec<image::DynamicImage>, anyhow::Error>>()?;
+
+    let joiner = ImgJoiner {
+        tl: img_bufs[0].clone(),
+        tr: img_bufs[1].clone(),
+        bl: img_bufs[2].clone(),
+        br: img_bufs[3].clone(),
+    };
+
+    let img_buf = joiner.join()?;
+
+    // to buffer in memory
+
+    let mut bytes: Vec<u8> = Vec::new();
+    img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::Png)?;
+
+    // write to file
+    std::fs::write(
+        "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\0-1-1-1.png",
+        &bytes,
+    )?;
+
+    // resize the thing in half
+
+    let img_buf_half = img_buf.resize(
+        img_buf.width() / 2,
+        img_buf.height() / 2,
+        // image::imageops::FilterType::Nearest,
+        // image::imageops::FilterType::CatmullRom,
+        // image::imageops::FilterType::Lanczos3,
+        // image::imageops::FilterType::Triangle,
+        image::imageops::FilterType::Gaussian,
+    );
+    let mut bytes_half: Vec<u8> = Vec::new();
+    img_buf_half
+        .write_to(&mut Cursor::new(&mut bytes_half), image::ImageFormat::Png)?;
+
+    // write to file
+    std::fs::write(
+        "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\0-1-1-1-half.png",
+        &bytes_half,
+    )?;
+
+    Ok(())
+}
+
 
 // static function qery
 const QUERY: &str = r#"
