@@ -1,28 +1,20 @@
-use image::GenericImage;
+use image::{DynamicImage, GenericImage, GenericImageView};
 use std::io::Cursor;
 
 fn load_image_from_memory(data: &[u8]) -> anyhow::Result<image::DynamicImage> {
     image::load_from_memory(data)
         .map_err(|e| anyhow::anyhow!("Failed to load image: {}", e))
 }
-// pub trait ChildTiles {
-//     type TileData;
-//
-//     fn child_0(&self) -> Self::TileData;
-//     fn child_1(&self) -> Self::TileData;
-//     fn child_2(&self) -> Self::TileData;
-//     fn child_3(&self) -> Self::TileData;
-// }
 
-pub fn image_is_transparent(img: &image::DynamicImage) -> bool {
-    match img {
-        image::DynamicImage::ImageRgba8(img) => img.pixels().any(|p| p[3] < 255),
-        image::DynamicImage::ImageRgba16(img) => img.pixels().any(|p| p[3] < 255),
-        image::DynamicImage::ImageLumaA8(img) => img.pixels().any(|p| p[1] < 255),
-        image::DynamicImage::ImageLumaA16(img) => img.pixels().any(|p| p[1] < 255),
-        _ => false,
-    }
-}
+// pub fn image_is_transparent(img: &image::DynamicImage) -> bool {
+//     match img {
+//         image::DynamicImage::ImageRgba8(img) => img.pixels().any(|p| p[3] < 255),
+//         image::DynamicImage::ImageRgba16(img) => img.pixels().any(|p| p[3] < 255),
+//         image::DynamicImage::ImageLumaA8(img) => img.pixels().any(|p| p[1] < 255),
+//         image::DynamicImage::ImageLumaA16(img) => img.pixels().any(|p| p[1] < 255),
+//         _ => false,
+//     }
+// }
 
 // pub fn image_unique_pixel_count(img: &image::DynamicImage) -> usize {
 //     match img {
@@ -43,21 +35,19 @@ pub fn image_is_transparent(img: &image::DynamicImage) -> bool {
 //         _ => false,
 //     }
 // }
-struct ImgJoiner {
+struct RasterTileJoiner {
     pub tl: Option<image::DynamicImage>,
     pub tr: Option<image::DynamicImage>,
     pub bl: Option<image::DynamicImage>,
     pub br: Option<image::DynamicImage>,
 }
-impl ImgJoiner {
+impl RasterTileJoiner {
     pub fn preflight(
         &self,
     ) -> anyhow::Result<
         //     dims
         (u32, u32),
     > {
-        //     all images are the same size
-        // all are not none
         if self.tl.is_none()
             && self.tr.is_none()
             && self.bl.is_none()
@@ -66,8 +56,31 @@ impl ImgJoiner {
             return Err(anyhow::anyhow!("one or more images are missing"));
         }
 
-        Ok((256, 256))
+        // if all images are the same size, return the size... otherwise no go err
+        let sizes: Vec<(u32, u32)> = self
+            .non_null_tiles()
+            .iter()
+            .map(|img| img.dimensions())
+            .collect();
+
+        if sizes.iter().all(|&x| x == sizes[0]) {
+            Ok(sizes[0])
+        } else {
+            Err(anyhow::anyhow!("images are not all the same size"))
+        }
     }
+
+    fn tiles_vec(&self) -> Vec<&Option<image::DynamicImage>> {
+        vec![&self.tl, &self.tr, &self.bl, &self.br]
+    }
+
+    fn non_null_tiles(&self) -> Vec<&image::DynamicImage> {
+        self.tiles_vec()
+            .into_iter() // into iter
+            .filter_map(|x| x.as_ref()) // filter out the Nones
+            .collect() // collect into a vec
+    }
+
     pub fn join(&self) -> anyhow::Result<image::DynamicImage> {
         let (w, h) = self.preflight()?;
 
@@ -103,15 +116,20 @@ pub struct RasterChildren<'a> {
     pub child_2: Option<&'a [u8]>,
     pub child_3: Option<&'a [u8]>,
 }
-pub fn join_raster_children(children: &RasterChildren) -> anyhow::Result<Vec<u8>> {
-    // pub fn join_raster_children<T>(children: &T) -> anyhow::Result<Vec<u8>>
-    // where
-    //     T: for<'a> ChildTiles<TileData = Option<&'a [u8]>>,
-    // {
-    // pub fn join_images(
-    //     children: &TileChildrenRow<ChildTilesData>,
-    // ) -> anyhow::Result<(Tile, Vec<u8>)> {
-    // Helper function to load an image from memory with error handling
+
+pub fn dynamic_img_2_webp(img: &DynamicImage) -> anyhow::Result<Vec<u8>> {
+    let mut bytes: Vec<u8> = Vec::new();
+    img.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::WebP)?;
+    Ok(bytes)
+}
+
+// pub fn dynamic_img_2_png(img: &DynamicImage) -> anyhow::Result<Vec<u8>> {
+//     let mut bytes: Vec<u8> = Vec::new();
+//     img.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::Png)?;
+//     Ok(bytes)
+// }
+
+pub fn join_raster_children(children: &RasterChildren) -> anyhow::Result<DynamicImage> {
     // TIL about `Option::transpose()` which is doppppe
     let top_left = children
         .child_0
@@ -135,34 +153,35 @@ pub fn join_raster_children(children: &RasterChildren) -> anyhow::Result<Vec<u8>
         .transpose()?;
 
     // Join the images
-    let joiner = ImgJoiner {
+    let joiner = RasterTileJoiner {
         tl: top_left,
         tr: top_right,
         bl: bottom_left,
         br: bottom_right,
     };
     let img_buf = joiner.join()?;
+    Ok(img_buf)
     // Buffer the result in memory
-    let mut bytes: Vec<u8> = Vec::new();
+    // let mut bytes: Vec<u8> = Vec::new();
     // img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::WebP)?;
-    img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::Png)?;
-    Ok(bytes)
-}
-fn generate_known_image(
-    height: u32,
-    width: u32,
-) -> image_merger::BufferedImage<image::Rgba<u8>> {
-    // Create an image buffer with the given dimensions
-    image_merger::BufferedImage::new_from_pixel(
-        width,
-        height,
-        image::Rgba([255, 0, 0, 255]),
-    )
+    // img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::Png)?;
+    // Ok(bytes)
 }
 //////////////////////////////////////////////////////////////////////////////
 // experiment with `image-merger` crate
 // NOTE: does not actually seem to be faster at all
 //////////////////////////////////////////////////////////////////////////////
+// fn generate_known_image(
+//     height: u32,
+//     width: u32,
+// ) -> image_merger::BufferedImage<image::Rgba<u8>> {
+//     // Create an image buffer with the given dimensions
+//     image_merger::BufferedImage::new_from_pixel(
+//         width,
+//         height,
+//         image::Rgba([255, 0, 0, 255]),
+//     )
+// }
 // pub fn join_raster_children_external_dep(
 //     children: &RasterChildren,
 // ) -> anyhow::Result<Vec<u8>> {

@@ -47,14 +47,14 @@ mod tile_strfmt;
 pub mod utilejson;
 
 pub mod hash_types;
-#[cfg(test)]
-mod tests;
 mod tile_stream;
 
 pub mod cover;
-mod edges;
+pub mod edges;
 pub mod hash;
-mod sleep;
+mod macros;
+#[cfg(test)]
+mod tests;
 mod timestamp;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

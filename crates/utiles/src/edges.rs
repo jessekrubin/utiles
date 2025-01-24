@@ -18,10 +18,7 @@ static NEIGHBOR_IDXS: &[(i32, i32)] = &[
     (1, 1),
 ];
 
-pub fn neighbors_wrap_x(
-    xy: (u32, u32),
-    max_xy: u32,
-) -> impl Iterator<Item = (u32, u32)> {
+fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u32)> {
     NEIGHBOR_IDXS.iter().filter_map(move |&(dx, dy)| {
         let x = xy.0 as i32;
         let y = xy.1 as i32;

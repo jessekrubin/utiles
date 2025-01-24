@@ -22,12 +22,13 @@
 
 mod raster_tile_join;
 
-use crate::raster_tile_join::join_raster_children;
+use crate::raster_tile_join::dynamic_img_2_webp;
+use crate::ProgressEvent::{Msg, SizeDiff};
 use clap::Parser;
 use futures::StreamExt;
-use image::GenericImage;
 use indoc::indoc;
 use rusqlite::{Connection, Result as RusqliteResult};
+use std::time::Duration;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
@@ -38,7 +39,6 @@ use utiles::mbt::{
 use utiles::sqlite::AsyncSqliteConn;
 use utiles::Tile;
 use utiles::UtilesResult;
-
 
 #[derive(Debug, Parser)]
 #[command(name = "utiles-doubledown")]
@@ -59,17 +59,6 @@ struct Cli {
     #[arg(required = true)]
     pub dst: String,
 
-    /// optimize level
-    #[arg(required = false, long, short, default_value = "2")]
-    pub(crate) opt: u8,
-
-    // optimize alpha channel (default: false)
-    // #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
-    // pub(crate) alpha: bool,
-
-    // /// palette-reduction optimization (default: false)
-    // #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
-    // pub(crate) palette: bool,
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
     pub jobs: Option<u8>,
@@ -83,88 +72,10 @@ struct Cli {
     pub(crate) force: bool,
 }
 
-/// Creates and returns an async `Receiver` of items derived from rows in the DB.
-/// `T` is the custom output type.
-/// `F` is a closure that maps a `rusqlite::Row` to `T`.
-pub fn sqlite_query_tokio_receiver<T, F, C>(
-    mbt: &C,
-    // &MbtilesClientAsync,
-    query_override: &str,
-    row_mapper: F,
-) -> UtilesResult<tokio::sync::mpsc::Receiver<T>>
-where
-    // The row_mapper must be callable from inside a `spawn_blocking`.
-    F: Fn(&rusqlite::Row) -> RusqliteResult<T> + Send + Sync + 'static,
-    T: Send + 'static,
-    C: AsyncSqliteConn + Clone + 'static,
-{
-    // Create a channel for streaming out `T` items.
-    let (tx, rx) = tokio::sync::mpsc::channel::<T>(100);
-    let query = query_override.to_string();
-    // clone handle for spawned task.
-    let mbt_clone = mbt.clone();
-
-    tokio::spawn(async move {
-        // Perform the DB connection + row iteration on the blocking thread (via `.conn()`).
-        let result = mbt_clone
-            .conn(move |conn: &Connection| -> RusqliteResult<()> {
-                let mut stmt = conn.prepare(&query)?;
-                // Map each DB row into T via `row_mapper`.
-                let rows_iter = stmt.query_map([], |row| {
-                    // Convert row -> T
-                    let item = row_mapper(row)?;
-
-                    // Send to the channel (blocking_send is fine in this context).
-                    if let Err(e) = tx.blocking_send(item) {
-                        warn!("channel send error: {:?}", e);
-                    }
-
-                    Ok(())
-                })?;
-
-                // consume all rows
-                for row_result in rows_iter {
-                    // You can optionally handle row-level errors here
-                    if let Err(e) = row_result {
-                        error!("row error: {:?}", e);
-                    }
-                }
-                Ok(())
-            })
-            .await;
-
-        if let Err(e) = result {
-            error!("make_stream_rx: DB error: {:?}", e);
-        }
-    });
-    Ok(rx)
+enum ProgressEvent {
+    SizeDiff(i64),
+    Msg(String),
 }
-pub fn sqlite_query_tokio_receiver_stream<T, F, C>(
-    mbt: &C,
-    query_override: &str,
-    row_mapper: F,
-) -> UtilesResult<ReceiverStream<T>>
-where
-    // The row_mapper must be callable from inside a `spawn_blocking`.
-    F: Fn(&rusqlite::Row) -> RusqliteResult<T> + Send + Sync + 'static,
-    T: Send + 'static,
-    C: AsyncSqliteConn + Clone + 'static,
-{
-    let tokio_rx = sqlite_query_tokio_receiver(mbt, query_override, row_mapper)?;
-    Ok(ReceiverStream::new(tokio_rx))
-}
-// pub fn sqlite_query_tokio_receiver_stream<T, F>(
-//     mbt: &MbtilesClientAsync,
-//     query_override:&str,
-//     row_mapper: F,
-// ) -> UtilesResult<ReceiverStream<T>>
-// where
-//     F: Fn(&rusqlite::Row) -> RusqliteResult<T> + Send + Sync + 'static,
-//     T: Send + 'static,
-// {
-//     let tokio_rx = sqlite_query_tokio_receiver(&mbt, query_override, row_mapper)?;
-//     Ok(ReceiverStream::new(tokio_rx))
-// }
 
 const QUERY: &str = indoc! {r"
 WITH parent AS (SELECT DISTINCT (zoom_level - 1)  AS p_z,
@@ -206,6 +117,20 @@ struct TileChildrenRow {
     child_3: Option<Vec<u8>>,
 }
 
+impl TileChildrenRow {
+    fn data_vec(&self) -> Vec<&Option<Vec<u8>>> {
+        vec![&self.child_0, &self.child_1, &self.child_2, &self.child_3]
+    }
+    fn total_size(&self) -> usize {
+        self.data_vec().iter().fold(0, |acc, x| {
+            acc + match x {
+                Some(v) => v.len(),
+                None => 0,
+            }
+        })
+    }
+}
+
 fn map_four_tile_row(row: &rusqlite::Row) -> rusqlite::Result<TileChildrenRow> {
     Ok(TileChildrenRow {
         parent_z: row.get("parent_z")?,
@@ -218,7 +143,9 @@ fn map_four_tile_row(row: &rusqlite::Row) -> rusqlite::Result<TileChildrenRow> {
     })
 }
 
-fn join_tmp(children: &TileChildrenRow) -> anyhow::Result<Vec<u8>> {
+fn raster_join_tile_children_row(
+    children: &TileChildrenRow,
+) -> anyhow::Result<Vec<u8>> {
     let raster_children_struct = raster_tile_join::RasterChildren {
         child_0: children.child_0.as_deref(),
         child_1: children.child_1.as_deref(),
@@ -226,13 +153,13 @@ fn join_tmp(children: &TileChildrenRow) -> anyhow::Result<Vec<u8>> {
         child_3: children.child_3.as_deref(),
     };
     let start = std::time::Instant::now();
-    let b = raster_tile_join::join_raster_children(&raster_children_struct);
+    let b = raster_tile_join::join_raster_children(&raster_children_struct)?;
     let elapsed = start.elapsed();
-    info!("join_raster_children elapsed: {:?}", elapsed);
-    b
+    debug!("join_raster_children elapsed: {:?}", elapsed);
+    dynamic_img_2_webp(&b)
 }
 
-async fn utiles_doubledown_main(args: &Cli) -> anyhow::Result<()> {
+async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
     info!("utiles-doubledown");
     debug!("args: {:?}", args);
     let mbt = MbtilesClientAsync::open_existing(&args.src).await?;
@@ -278,45 +205,122 @@ async fn utiles_doubledown_main(args: &Cli) -> anyhow::Result<()> {
     }
 
     dst.metadata_set_from_vec(&src_rows)?;
-    // let thingystream =
-    //     sqlite_query_tokio_receiver(mbt, QUERY, map_four_tile_row)?;
-    // let stream = ReceiverStream::new(thingystream);
-    let stream = sqlite_query_tokio_receiver_stream(&mbt, QUERY, map_four_tile_row)?;
-    let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(1000);
+    let stream = utiles::sqlite::streams::sqlite_query_tokio_receiver_stream(
+        &mbt,
+        QUERY,
+        map_four_tile_row,
+    )?;
+    let (tx_progress, mut rx_progress) =
+        tokio::sync::mpsc::channel::<ProgressEvent>(100);
+    let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     // mbt-writer stream....
     let mut writer = MbtStreamWriterSync {
         stream: ReceiverStream::new(rx_writer),
         mbt: dst,
         stats: MbtWriterStats::default(),
     };
+    let progress_future = tokio::spawn(async move {
+        let mut total_size_diff: i64 = 0;
+        let mut processed = 0;
+        let pb = indicatif::ProgressBar::new_spinner();
+        // let pb_style = indicatif::ProgressStyle::with_template(
+        // "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        // "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        // );
+        if args.quiet {
+            pb.set_draw_target(indicatif::ProgressDrawTarget::hidden());
+        }
+        pb.set_message("double-down");
+        // match pb_style {
+        //     Err(e) => {
+        //         warn!("pb_style error: {:?}", e);
+        //     }
+        //     Ok(s) => {
+        //         pb.set_style(s);
+        //     }
+        // }
+        pb.enable_steady_tick(Duration::from_millis(100));
+        while let Some(size_diff) = rx_progress.recv().await {
+            match size_diff {
+                SizeDiff(size_diff) => {
+                    total_size_diff += size_diff;
+                    processed += 1;
+                    pb.inc(1);
+                    let size_saved_msg = if total_size_diff > 0 {
+                        format!(
+                            "-{}",
+                            size::Size::from_bytes(total_size_diff.unsigned_abs())
+                        )
+                    } else {
+                        format!(
+                            "+{}",
+                            size::Size::from_bytes(total_size_diff.unsigned_abs())
+                        )
+                    };
+                    pb.set_message(format!(
+                        "double-down ~ processed: {processed} ~ total-size-diff: {size_saved_msg}"
+                    ));
+                }
+                Msg(msg) => {
+                    pb.println(msg);
+                }
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////
+        // AND LAST BUT NOT LEAST, THE FINAL MESSAGE
+        ///////////////////////////////////////////////////////////////////////
+        let total_size_str = if total_size_diff > 0 {
+            format!(
+                "-{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        } else {
+            format!(
+                "+{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        };
 
+        pb.finish_with_message(format!(
+            "Processed {processed} tiles, saved {total_size_str} ({total_size_diff}b)"
+        ));
+    });
     let jobs = usize::from(args.jobs.unwrap_or(4));
     let proc_future = tokio::spawn(async move {
         // TODO: cli flag for concurrency
         stream
             .for_each_concurrent(jobs, |d| {
                 let tx_writer = tx_writer.clone();
-                // let tx_progress = tx_progress.clone();
-                // let initial_size = tile_data.len() as i64;
+                let tx_progress = tx_progress.clone();
+                let initial_size = d.total_size() as i64;
 
                 async move {
                     let new_tile = Tile::new(d.parent_x, d.parent_y, d.parent_z);
-                    let blocking_res =
-                        tokio::task::spawn_blocking(move || join_tmp(&d)).await;
+                    let blocking_res = tokio::task::spawn_blocking(move || {
+                        raster_join_tile_children_row(&d)
+                    })
+                    .await;
                     match blocking_res {
                         Err(je) => {
                             warn!("join-error: {:?}", je);
                         }
                         Ok(imgjoin_result) => match imgjoin_result {
                             Ok(image_bytes) => {
+                                let size_diff =
+                                    initial_size - (image_bytes.len() as i64);
                                 let send_res =
                                     tx_writer.send((new_tile, image_bytes, None)).await;
                                 if let Err(e) = send_res {
                                     warn!("send_res: {:?}", e);
                                 }
+                                let send_res =
+                                    tx_progress.send(SizeDiff(size_diff)).await;
+                                if let Err(e) = send_res {
+                                    warn!("progress send_res: {:?}", e);
+                                }
                             }
                             Err(e) => {
-                                warn!("webpify_image: {:?}", e);
+                                warn!("raster-join-error: {:?}", e);
                             }
                         },
                     }
@@ -326,12 +330,16 @@ async fn utiles_doubledown_main(args: &Cli) -> anyhow::Result<()> {
     });
 
     // wait for the writer and the processor to finish
-    let (proc_res, write_res) = tokio::join!(proc_future, writer.write());
+    let (proc_res, write_res, progress_res) =
+        tokio::join!(proc_future, writer.write(), progress_future);
     if let Err(e) = proc_res {
         warn!("proc_res: {:?}", e);
     }
     if let Err(e) = write_res {
         warn!("write_res: {:?}", e);
+    }
+    if let Err(e) = progress_res {
+        warn!("progress_res: {:?}", e);
     }
     Ok(())
 }
@@ -346,7 +354,7 @@ async fn tokio_double_down() -> anyhow::Result<()> {
     };
     let logcfg = LagerConfig { json: false, level };
     init_tracing(logcfg)?;
-    let res = utiles_doubledown_main(&args).await;
+    let res = utiles_doubledown_main(args).await;
     res.map_err(|e| {
         error!("{}", e);
         e

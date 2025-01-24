@@ -1,5 +1,3 @@
-// pub mod double_down_rayon;
-
 use anyhow::Result;
 pub fn quick_maths() -> Result<()> {
     let mut n = 2; // 2
