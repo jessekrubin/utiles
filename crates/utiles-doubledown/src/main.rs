@@ -39,12 +39,7 @@ use utiles::sqlite::AsyncSqliteConn;
 use utiles::Tile;
 use utiles::UtilesResult;
 
-struct ImgJoiner {
-    pub tl: Option<image::DynamicImage>,
-    pub tr: Option<image::DynamicImage>,
-    pub bl: Option<image::DynamicImage>,
-    pub br: Option<image::DynamicImage>,
-}
+
 #[derive(Debug, Parser)]
 #[command(name = "utiles-doubledown")]
 #[command(version = utiles::VERSION)]
@@ -86,53 +81,6 @@ struct Cli {
     /// force overwrite dst if exists
     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
     pub(crate) force: bool,
-}
-impl ImgJoiner {
-    pub fn preflight(
-        &self,
-    ) -> anyhow::Result<
-        //     dims
-        (u32, u32),
-    > {
-        //     all images are the same size
-        // all are not none
-        if self.tl.is_none()
-            && self.tr.is_none()
-            && self.bl.is_none()
-            && self.br.is_none()
-        {
-            return Err(anyhow::anyhow!("one or more images are missing"));
-        }
-
-        Ok((256, 256))
-    }
-    pub fn join(&self) -> anyhow::Result<image::DynamicImage> {
-        let (w, h) = self.preflight()?;
-
-        let out_w = w * 2;
-        let out_h = h * 2;
-
-        let mut img_buf_b = image::DynamicImage::new_rgba8(out_w, out_h);
-
-        // if tl is not none, copy it to the top left
-        if let Some(tl) = &self.tl {
-            img_buf_b.copy_from(tl, 0, 0)?;
-        }
-
-        // if tr is not none, copy it to the top right
-        if let Some(tr) = &self.tr {
-            img_buf_b.copy_from(tr, w, 0)?;
-        }
-        // if bl is not none, copy it to the bottom left
-        if let Some(bl) = &self.bl {
-            img_buf_b.copy_from(bl, 0, h)?;
-        }
-        // if br is not none, copy it to the bottom right
-        if let Some(br) = &self.br {
-            img_buf_b.copy_from(br, h, w)?;
-        }
-        Ok(img_buf_b)
-    }
 }
 
 /// Creates and returns an async `Receiver` of items derived from rows in the DB.
@@ -278,9 +226,9 @@ fn join_tmp(children: &TileChildrenRow) -> anyhow::Result<Vec<u8>> {
         child_3: children.child_3.as_deref(),
     };
     let start = std::time::Instant::now();
-    let b = join_raster_children(&raster_children_struct);
+    let b = raster_tile_join::join_raster_children(&raster_children_struct);
     let elapsed = start.elapsed();
-    debug!("join_raster_children elapsed: {:?}", elapsed);
+    info!("join_raster_children elapsed: {:?}", elapsed);
     b
 }
 
