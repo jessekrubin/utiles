@@ -74,6 +74,7 @@ struct Cli {
 
 enum ProgressEvent {
     SizeDiff(i64),
+    #[allow(dead_code)]
     Msg(String),
 }
 
@@ -159,6 +160,62 @@ fn raster_join_tile_children_row(
     dynamic_img_2_webp(&b)
 }
 
+async fn make_progress_future(
+    mut rx_progress: tokio::sync::mpsc::Receiver<ProgressEvent>,
+) -> tokio::task::JoinHandle<()> {
+    tokio::spawn(async move {
+        let mut total_size_diff: i64 = 0;
+        let mut processed = 0;
+        let pb = indicatif::ProgressBar::new_spinner();
+        pb.set_message("double-down");
+        pb.enable_steady_tick(Duration::from_millis(100));
+        while let Some(size_diff) = rx_progress.recv().await {
+            match size_diff {
+                SizeDiff(size_diff) => {
+                    total_size_diff += size_diff;
+                    processed += 1;
+                    pb.inc(1);
+                    let size_saved_msg = if total_size_diff > 0 {
+                        format!(
+                            "-{}",
+                            size::Size::from_bytes(total_size_diff.unsigned_abs())
+                        )
+                    } else {
+                        format!(
+                            "+{}",
+                            size::Size::from_bytes(total_size_diff.unsigned_abs())
+                        )
+                    };
+                    pb.set_message(format!(
+                        "double-down ~ processed: {processed} ~ total-size-diff: {size_saved_msg}"
+                    ));
+                }
+                Msg(msg) => {
+                    pb.println(msg);
+                }
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////
+        // AND LAST BUT NOT LEAST, THE FINAL MESSAGE
+        ///////////////////////////////////////////////////////////////////////
+        let total_size_str = if total_size_diff > 0 {
+            format!(
+                "-{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        } else {
+            format!(
+                "+{}",
+                size::Size::from_bytes(total_size_diff.unsigned_abs())
+            )
+        };
+
+        pb.finish_with_message(format!(
+            "Processed {processed} tiles, saved {total_size_str} ({total_size_diff}b)"
+        ));
+    })
+}
+
 async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
     info!("utiles-doubledown");
     debug!("args: {:?}", args);
@@ -219,72 +276,7 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
         mbt: dst,
         stats: MbtWriterStats::default(),
     };
-    let progress_future = tokio::spawn(async move {
-        let mut total_size_diff: i64 = 0;
-        let mut processed = 0;
-        let pb = indicatif::ProgressBar::new_spinner();
-        // let pb_style = indicatif::ProgressStyle::with_template(
-        // "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
-        // "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
-        // );
-        if args.quiet {
-            pb.set_draw_target(indicatif::ProgressDrawTarget::hidden());
-        }
-        pb.set_message("double-down");
-        // match pb_style {
-        //     Err(e) => {
-        //         warn!("pb_style error: {:?}", e);
-        //     }
-        //     Ok(s) => {
-        //         pb.set_style(s);
-        //     }
-        // }
-        pb.enable_steady_tick(Duration::from_millis(100));
-        while let Some(size_diff) = rx_progress.recv().await {
-            match size_diff {
-                SizeDiff(size_diff) => {
-                    total_size_diff += size_diff;
-                    processed += 1;
-                    pb.inc(1);
-                    let size_saved_msg = if total_size_diff > 0 {
-                        format!(
-                            "-{}",
-                            size::Size::from_bytes(total_size_diff.unsigned_abs())
-                        )
-                    } else {
-                        format!(
-                            "+{}",
-                            size::Size::from_bytes(total_size_diff.unsigned_abs())
-                        )
-                    };
-                    pb.set_message(format!(
-                        "double-down ~ processed: {processed} ~ total-size-diff: {size_saved_msg}"
-                    ));
-                }
-                Msg(msg) => {
-                    pb.println(msg);
-                }
-            }
-        }
-        ///////////////////////////////////////////////////////////////////////
-        // AND LAST BUT NOT LEAST, THE FINAL MESSAGE
-        ///////////////////////////////////////////////////////////////////////
-        let total_size_str = if total_size_diff > 0 {
-            format!(
-                "-{}",
-                size::Size::from_bytes(total_size_diff.unsigned_abs())
-            )
-        } else {
-            format!(
-                "+{}",
-                size::Size::from_bytes(total_size_diff.unsigned_abs())
-            )
-        };
-
-        pb.finish_with_message(format!(
-            "Processed {processed} tiles, saved {total_size_str} ({total_size_diff}b)"
-        ));
-    });
+    let progress_future = make_progress_future(rx_progress).await;
     let jobs = usize::from(args.jobs.unwrap_or(4));
     let proc_future = tokio::spawn(async move {
         // TODO: cli flag for concurrency
@@ -363,6 +355,5 @@ async fn tokio_double_down() -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() {
-    println!("utiles ~ dev");
     tokio_double_down().await.expect("utiles-doubledown failed");
 }
