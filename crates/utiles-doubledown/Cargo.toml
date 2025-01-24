@@ -21,4 +21,3 @@ tokio.workspace = true
 tokio-stream.workspace = true
 tracing.workspace = true
 utiles = { version = "0.7.3", path = "../utiles" }
-utiles-core = "0.7.2"

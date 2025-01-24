@@ -2922,21 +2922,9 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
- "utiles-core 0.7.3",
+ "utiles-core",
  "walkdir",
  "xxhash-rust",
-]
-
-[[package]]
-name = "utiles-core"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6884fcb379464093a68dfd5a3a9026889744f0247fd75c381f751b9cb754c84f"
-dependencies = [
- "fast_hilbert",
- "serde",
- "serde_json",
- "thiserror 2.0.11",
 ]
 
 [[package]]
@@ -2970,7 +2958,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "utiles",
- "utiles-core 0.7.3",
+ "utiles-core",
 ]
 
 [[package]]
@@ -2987,7 +2975,6 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "utiles",
- "utiles-core 0.7.2",
 ]
 
 [[package]]

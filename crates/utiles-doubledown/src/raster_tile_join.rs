@@ -12,6 +12,8 @@ fn load_image_from_memory(data: &[u8]) -> anyhow::Result<image::DynamicImage> {
 //     fn child_2(&self) -> Self::TileData;
 //     fn child_3(&self) -> Self::TileData;
 // }
+
+#[allow(clippy::struct_field_names)]
 pub struct RasterChildren<'a> {
     pub child_0: Option<&'a [u8]>,
     pub child_1: Option<&'a [u8]>,

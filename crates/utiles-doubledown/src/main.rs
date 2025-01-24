@@ -28,7 +28,6 @@ use futures::StreamExt;
 use image::GenericImage;
 use indoc::indoc;
 use rusqlite::{Connection, Result as RusqliteResult};
-use std::io::Cursor;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
@@ -140,7 +139,7 @@ impl ImgJoiner {
 /// `T` is the custom output type.
 /// `F` is a closure that maps a `rusqlite::Row` to `T`.
 pub fn sqlite_query_tokio_receiver<T, F, C>(
-    mbt: C,
+    mbt: &C,
     // &MbtilesClientAsync,
     query_override: &str,
     row_mapper: F,
@@ -193,7 +192,7 @@ where
     Ok(rx)
 }
 pub fn sqlite_query_tokio_receiver_stream<T, F, C>(
-    mbt: C,
+    mbt: &C,
     query_override: &str,
     row_mapper: F,
 ) -> UtilesResult<ReceiverStream<T>>
@@ -219,7 +218,7 @@ where
 //     Ok(ReceiverStream::new(tokio_rx))
 // }
 
-const QUERY: &str = indoc! {r#"
+const QUERY: &str = indoc! {r"
 WITH parent AS (SELECT DISTINCT (zoom_level - 1)  AS p_z,
                                 (tile_column / 2) AS p_x,
                                 (tile_row / 2)    AS p_y
@@ -245,8 +244,9 @@ FROM parent
          LEFT JOIN tiles child_3 ON child_3.zoom_level = parent.p_z + 1
     AND child_3.tile_column = parent.p_x * 2 + 1
     AND child_3.tile_row = parent.p_y * 2
-"#
+"
 };
+
 #[derive(Debug)]
 struct TileChildrenRow {
     parent_z: u8,
@@ -270,67 +270,21 @@ fn map_four_tile_row(row: &rusqlite::Row) -> rusqlite::Result<TileChildrenRow> {
     })
 }
 
-fn load_image_from_memory(data: &[u8]) -> anyhow::Result<image::DynamicImage> {
-    image::load_from_memory(data)
-        .map_err(|e| anyhow::anyhow!("Failed to load image: {}", e))
-}
-
-fn join_tmp(children: TileChildrenRow) -> anyhow::Result<Vec<u8>> {
+fn join_tmp(children: &TileChildrenRow) -> anyhow::Result<Vec<u8>> {
     let raster_children_struct = raster_tile_join::RasterChildren {
         child_0: children.child_0.as_deref(),
         child_1: children.child_1.as_deref(),
         child_2: children.child_2.as_deref(),
         child_3: children.child_3.as_deref(),
     };
-    join_raster_children(&raster_children_struct)
+    let start = std::time::Instant::now();
+    let b = join_raster_children(&raster_children_struct);
+    let elapsed = start.elapsed();
+    debug!("join_raster_children elapsed: {:?}", elapsed);
+    b
 }
 
-fn join_images2(children: TileChildrenRow) -> anyhow::Result<(Tile, Vec<u8>)> {
-    // Helper function to load an image from memory with error handling
-    // TIL about `Option::transpose()` which is doppppe
-    let top_left = children
-        .child_0
-        .as_ref()
-        .map(|data| load_image_from_memory(data))
-        .transpose()?;
-    let top_right = children
-        .child_1
-        .as_ref()
-        .map(|data| load_image_from_memory(data))
-        .transpose()?;
-    let bottom_left = children
-        .child_2
-        .as_ref()
-        .map(|data| load_image_from_memory(data))
-        .transpose()?;
-    let bottom_right = children
-        .child_3
-        .as_ref()
-        .map(|data| load_image_from_memory(data))
-        .transpose()?;
-
-    // Join the images
-    let joiner = ImgJoiner {
-        tl: top_left,
-        tr: top_right,
-        bl: bottom_left,
-        br: bottom_right,
-    };
-
-    let img_buf = joiner.join()?;
-
-    // Buffer the result in memory
-    let mut bytes: Vec<u8> = Vec::new();
-    // img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::WebP)?;
-    img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::Png)?;
-
-    Ok((
-        Tile::new(children.parent_x, children.parent_y, children.parent_z),
-        bytes,
-    ))
-}
-
-pub async fn utiles_doubledown_main(args: &Cli) -> anyhow::Result<()> {
+async fn utiles_doubledown_main(args: &Cli) -> anyhow::Result<()> {
     info!("utiles-doubledown");
     debug!("args: {:?}", args);
     let mbt = MbtilesClientAsync::open_existing(&args.src).await?;
@@ -379,7 +333,7 @@ pub async fn utiles_doubledown_main(args: &Cli) -> anyhow::Result<()> {
     // let thingystream =
     //     sqlite_query_tokio_receiver(mbt, QUERY, map_four_tile_row)?;
     // let stream = ReceiverStream::new(thingystream);
-    let stream = sqlite_query_tokio_receiver_stream(mbt, QUERY, map_four_tile_row)?;
+    let stream = sqlite_query_tokio_receiver_stream(&mbt, QUERY, map_four_tile_row)?;
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(1000);
     // mbt-writer stream....
     let mut writer = MbtStreamWriterSync {
@@ -400,7 +354,7 @@ pub async fn utiles_doubledown_main(args: &Cli) -> anyhow::Result<()> {
                 async move {
                     let new_tile = Tile::new(d.parent_x, d.parent_y, d.parent_z);
                     let blocking_res =
-                        tokio::task::spawn_blocking(move || join_tmp(d)).await;
+                        tokio::task::spawn_blocking(move || join_tmp(&d)).await;
                     match blocking_res {
                         Err(je) => {
                             warn!("join-error: {:?}", je);
@@ -447,7 +401,7 @@ async fn tokio_double_down() -> anyhow::Result<()> {
     let res = utiles_doubledown_main(&args).await;
     res.map_err(|e| {
         error!("{}", e);
-        e.into()
+        e
     })
 }
 
