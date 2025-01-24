@@ -1,5 +1,8 @@
 use crate::bbox::WebBBox;
-use crate::{flipy, pmtiles, xyz2rmid, BBox, LngLat, Tile, TileZBox};
+use crate::{flipy, xyz2rmid, BBox, LngLat, Tile, TileZBox};
+
+#[cfg(feature = "pmtiles")]
+use crate::pmtiles;
 
 /// Trait def for tile-like objects/structs/things/whatevers
 pub trait TileLike {
@@ -97,12 +100,14 @@ pub trait TileLike {
     }
 
     /// Return the pmtile-id for the tile
+    #[cfg(feature = "pmtiles")]
     #[must_use]
     fn pmtileid(&self) -> u64 {
         pmtiles::xyz2pmid(self.x(), self.y(), self.z())
     }
 
     /// Return the pmtile id
+    #[cfg(feature = "pmtiles")]
     #[must_use]
     fn pmid(&self) -> u64 {
         self.pmtileid()

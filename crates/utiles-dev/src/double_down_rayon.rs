@@ -1,8 +1,8 @@
 use clap::Parser;
-use crossbeam::channel::{bounded, Receiver};
 use futures::StreamExt; // You may remove this if no longer needed
 use image::{GenericImage, GenericImageView};
 use indoc::indoc;
+use crossbeam::channel::{bounded, Receiver};
 
 use rayon::prelude::*;
 use rusqlite::{Connection, Result as RusqliteResult, Row};
@@ -11,9 +11,7 @@ use std::time::Instant;
 use tracing::{debug, error, info, warn};
 use utiles::img::webpify_image; // or if not needed, remove
 use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
-use utiles::mbt::{
-    MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesAsync,
-};
+use utiles::mbt::{MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesAsync};
 use utiles::sqlite::AsyncSqliteConn; // remove if not needed
 use utiles::UtilesResult;
 use utiles_core::{utile_yup, Tile};
@@ -63,11 +61,7 @@ struct Cli {
 
 impl ImgJoiner {
     pub fn preflight(&self) -> anyhow::Result<(u32, u32)> {
-        if self.tl.is_none()
-            && self.tr.is_none()
-            && self.bl.is_none()
-            && self.br.is_none()
-        {
+        if self.tl.is_none() && self.tr.is_none() && self.bl.is_none() && self.br.is_none() {
             return Err(anyhow::anyhow!("one or more images are missing"));
         }
         Ok((256, 256))
@@ -159,26 +153,10 @@ fn load_image_from_memory(data: &[u8]) -> anyhow::Result<image::DynamicImage> {
 
 /// Join the four child tiles into a new `(Tile, Vec<u8>)`.
 fn join_images(children: TileChildrenRow) -> anyhow::Result<(Tile, Vec<u8>)> {
-    let top_left = children
-        .child_0
-        .as_ref()
-        .map(|d| load_image_from_memory(d))
-        .transpose()?;
-    let top_right = children
-        .child_1
-        .as_ref()
-        .map(|d| load_image_from_memory(d))
-        .transpose()?;
-    let bottom_left = children
-        .child_2
-        .as_ref()
-        .map(|d| load_image_from_memory(d))
-        .transpose()?;
-    let bottom_right = children
-        .child_3
-        .as_ref()
-        .map(|d| load_image_from_memory(d))
-        .transpose()?;
+    let top_left = children.child_0.as_ref().map(|d| load_image_from_memory(d)).transpose()?;
+    let top_right = children.child_1.as_ref().map(|d| load_image_from_memory(d)).transpose()?;
+    let bottom_left = children.child_2.as_ref().map(|d| load_image_from_memory(d)).transpose()?;
+    let bottom_right = children.child_3.as_ref().map(|d| load_image_from_memory(d)).transpose()?;
 
     let joiner = ImgJoiner {
         tl: top_left,
@@ -191,19 +169,14 @@ fn join_images(children: TileChildrenRow) -> anyhow::Result<(Tile, Vec<u8>)> {
     let mut bytes: Vec<u8> = Vec::new();
     // Use WebP or whatever format you need:
     img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::WebP)?;
-    Ok((
-        Tile::new(children.parent_x, children.parent_y, children.parent_z),
-        bytes,
-    ))
+    Ok((Tile::new(children.parent_x, children.parent_y, children.parent_z), bytes))
 }
 
 /// Spawns a thread that queries the rows and sends them down a Crossbeam channel.
 ///
 /// - Returns a `Receiver<TileChildrenRow>` for consuming them.
 /// - You can then `.into_iter().par_bridge()` that receiver to process in parallel.
-fn gather_children_rows_stream(
-    src: Mbtiles,
-) -> anyhow::Result<Receiver<TileChildrenRow>> {
+fn gather_children_rows_stream(src: Mbtiles) -> anyhow::Result<Receiver<TileChildrenRow>> {
     // You can choose bounded or unbounded; choose an appropriate buffer size.
     let (tx, rx) = bounded::<TileChildrenRow>(1024);
 
@@ -214,7 +187,7 @@ fn gather_children_rows_stream(
             Ok(c) => c,
             Err(err) => {
                 error!("DB conn error: {:?}", err);
-                return;
+                return ;
             }
         };
 
@@ -327,6 +300,7 @@ fn utiles_512ify(args: &Cli) -> anyhow::Result<()> {
     // let rows = gather_children_rows(&src)?;
     let row_rx = gather_children_rows_stream(src)?;
 
+    // Ok(())
     // 5) Use rayon to process each row in parallel
     let jobs = args.jobs.unwrap_or_else(|| {
         // As a fallback, pick something like # of CPUs or 4
@@ -334,35 +308,36 @@ fn utiles_512ify(args: &Cli) -> anyhow::Result<()> {
     });
     // Configure the Rayon global thread pool if you want:
     // rayon::ThreadPoolBuilder::new().num_threads(jobs).build_global()?;
-    let joined_tiles = row_rx.into_iter().par_bridge().filter_map(|row| {
-        // Attempt to join images
-        match join_images(row) {
-            Ok(res) => Some(res),
-            Err(e) => {
-                warn!("Failed to join images: {:?}", e);
-                None
-            }
-        }
-    });
-    for (tile, data) in joined_tiles {
-        dst.insert_tile_flat(&tile, &data)?;
-    }
+
+    // let joined_tiles: Vec<(Tile, Vec<u8>)> = rows
+    //     .into_par_iter()
+    //     .map(|row| {
+    //         match join_images(row) {
+    //             Ok(result) => Some(result),
+    //             Err(e) => {
+    //                 warn!("join_images failed: {:?}", e);
+    //                 None
+    //             }
+    //         }
+    //     })
+    //     .filter_map(|x| x)
+    //     .collect();
 
     // info!("Processed {} tiles in parallel", joined_tiles.len());
 
     // 6) Write them all out with MbtStreamWriterSync
     // let mut writer = MbtStreamWriterSync {
     //     We won't use a Receiver now; just do direct writes in a loop
-    // stream: Default::default(),
-    // mbt: dst,
-    // stats: MbtWriterStats::default(),
+        // stream: Default::default(),
+        // mbt: dst,
+        // stats: MbtWriterStats::default(),
     // };
 
     // Synchronously insert each tile
     // for (tile, data) in joined_tiles {
-    // The third field is an optional `tile_compression` if your `MbtStreamWriterSync`
-    // signature is `(Tile, Vec<u8>, Option<String>)`. Adjust if needed.
-    // dst.insert_tile_flat( &tile, &data)?;
+        // The third field is an optional `tile_compression` if your `MbtStreamWriterSync`
+        // signature is `(Tile, Vec<u8>, Option<String>)`. Adjust if needed.
+        // dst.insert_tile_flat( &tile, &data)?;
     // }
 
     // info!("Done writing tiles. Stats = {:?}", writer.stats);
@@ -380,7 +355,10 @@ pub fn main_rayon() -> anyhow::Result<()> {
     };
 
     // Initialize logging/tracing
-    let logcfg = LagerConfig { json: false, level };
+    let logcfg = LagerConfig {
+        json: false,
+        level,
+    };
     init_tracing(logcfg)?;
 
     println!("utiles ~ dev (rayon concurrency)");

@@ -1,4 +1,4 @@
-pub mod double_down_rayon;
+// pub mod double_down_rayon;
 
 use anyhow::Result;
 pub fn quick_maths() -> Result<()> {

@@ -541,10 +541,10 @@ where
             .map_err(UtilesError::SqliteError)?;
         Ok(t)
     }
+
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
         let mut metadata = self.metadata_rows().await?;
         // if no 'minzoom' or 'maxzoom' are found we gotta query them...
-
         // check if minzoom or maxzoom are missing
         let minzoom_value = metadata.iter().find(|m| m.name == "minzoom");
         let maxzoom_value = metadata.iter().find(|m| m.name == "maxzoom");

@@ -111,6 +111,10 @@ ci:
     cargo clippy --all-targets --all-features -- -D warnings
     cargo test
 
+check-features:
+    cargo hack check --feature-powerset
+
+
 pipsync:
     uv pip sync ./utiles-pyo3/requirements.dev.txt
 
