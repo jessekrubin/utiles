@@ -27,7 +27,6 @@ use crate::ProgressEvent::{Msg, SizeDiff};
 use clap::Parser;
 use futures::StreamExt;
 use indoc::indoc;
-use rusqlite::{Connection, Result as RusqliteResult};
 use std::time::Duration;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
@@ -36,9 +35,7 @@ use utiles::mbt::{
     MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesAsync,
     MbtilesClientAsync,
 };
-use utiles::sqlite::AsyncSqliteConn;
 use utiles::Tile;
-use utiles::UtilesResult;
 
 #[derive(Debug, Parser)]
 #[command(name = "utiles-doubledown")]
@@ -160,7 +157,7 @@ fn raster_join_tile_children_row(
     dynamic_img_2_webp(&b)
 }
 
-async fn make_progress_future(
+fn make_progress_future(
     mut rx_progress: tokio::sync::mpsc::Receiver<ProgressEvent>,
 ) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
@@ -233,32 +230,20 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
     }
     let dst = Mbtiles::open_new(&args.dst, Option::from(MbtType::Norm))?;
 
-    let src_rows = mbt.metadata_rows().await?;
-    for row in src_rows {
-        info!("row: {:?}", row);
-    }
-
     let mut src_rows = mbt.metadata_rows().await?;
-
     for row in &mut src_rows {
         if row.name == "minzoom" && row.value != "0" {
-            let minzoom = row.value.parse::<u8>()?;
-            let new_minzoom = minzoom - 1;
+            let new_minzoom = row.value.parse::<u8>().map(|mz| mz - 1)?;
             row.value = new_minzoom.to_string();
         }
         if row.name == "maxzoom" {
-            let maxzoom = row.value.parse::<u8>()?;
-            // adjust the maxzoom because we're double downing so -1
-            let new_maxzoom = maxzoom - 1;
-            // info!("maxzoom: {:?}", maxzoom);
+            let new_maxzoom = row.value.parse::<u8>().map(|mz| mz + 1)?;
             row.value = new_maxzoom.to_string();
         }
         if row.name == "tilesize" {
-            let tilesize = row.value.parse::<u32>()?;
-            let new_tilesize = tilesize * 2;
+            let new_tilesize = row.value.parse::<u32>().map(|ts| ts * 2)?;
             row.value = new_tilesize.to_string();
         }
-        info!("row: {:?}", row);
     }
 
     dst.metadata_set_from_vec(&src_rows)?;
@@ -267,8 +252,7 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
         QUERY,
         map_four_tile_row,
     )?;
-    let (tx_progress, mut rx_progress) =
-        tokio::sync::mpsc::channel::<ProgressEvent>(100);
+    let (tx_progress, rx_progress) = tokio::sync::mpsc::channel::<ProgressEvent>(100);
     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
     // mbt-writer stream....
     let mut writer = MbtStreamWriterSync {
@@ -276,7 +260,7 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
         mbt: dst,
         stats: MbtWriterStats::default(),
     };
-    let progress_future = make_progress_future(rx_progress).await;
+    let progress_future = make_progress_future(rx_progress);
     let jobs = usize::from(args.jobs.unwrap_or(4));
     let proc_future = tokio::spawn(async move {
         // TODO: cli flag for concurrency
