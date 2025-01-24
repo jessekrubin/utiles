@@ -1,23 +1,124 @@
-use std::time::Instant;
-// fn main() {
-//     println!("utiles ~ dev");
-// }
+use clap::Parser;
 use futures::StreamExt;
+use image::{GenericImage, GenericImageView};
+use indoc::indoc;
 use rusqlite::{Connection, Result as RusqliteResult, Row};
+use std::io::Cursor;
+use std::time::Instant;
 use tokio::sync::mpsc::{channel, Receiver};
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
+use utiles::img::webpify_image;
+use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
 use utiles::mbt::{
-    MbtStreamWriterSync, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync,
+    MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesAsync,
+    MbtilesClientAsync,
 };
 use utiles::sqlite::AsyncSqliteConn;
 use utiles::UtilesResult;
-use utiles_core::utile_yup;
+use utiles_core::{utile_yup, Tile};
+use utiles_dev::double_down_rayon::main_rayon;
+
+struct ImgJoiner {
+    pub tl: Option<image::DynamicImage>,
+    pub tr: Option<image::DynamicImage>,
+    pub bl: Option<image::DynamicImage>,
+    pub br: Option<image::DynamicImage>,
+}
+#[derive(Debug, Parser)]
+#[command(name = "utiles-doubledown")]
+#[command(version = utiles::VERSION)]
+#[command(max_term_width = 120)]
+#[command(author)]
+#[command(about = "join-raster-tiles doubling each tile in a tiles-db", long_about = None)]
+struct Cli {
+    /// debug
+    #[arg(long, default_value = "false", action = clap::ArgAction::SetTrue)]
+    pub debug: bool,
+
+    /// mbtiles-like fspath
+    #[arg(required = true)]
+    pub src: String,
+
+    /// destination mbtiles fspath
+    #[arg(required = true)]
+    pub dst: String,
+
+    /// optimize level
+    #[arg(required = false, long, short, default_value = "2")]
+    pub(crate) opt: u8,
+
+    // optimize alpha channel (default: false)
+    // #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    // pub(crate) alpha: bool,
+
+    // /// palette-reduction optimization (default: false)
+    // #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    // pub(crate) palette: bool,
+    /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
+    #[arg(required = false, long, short)]
+    pub jobs: Option<u8>,
+
+    /// quiet
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub(crate) quiet: bool,
+
+    /// force overwrite dst if exists
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub(crate) force: bool,
+}
+impl ImgJoiner {
+    pub fn preflight(
+        &self,
+    ) -> anyhow::Result<
+        //     dims
+        (u32, u32),
+    > {
+        //     all images are the same size
+        // all are not none
+        if self.tl.is_none()
+            && self.tr.is_none()
+            && self.bl.is_none()
+            && self.br.is_none()
+        {
+            return Err(anyhow::anyhow!("one or more images are missing"));
+        }
+
+        Ok((256, 256))
+    }
+    pub fn join(&self) -> anyhow::Result<image::DynamicImage> {
+        let (w, h) = self.preflight()?;
+
+        let out_w = w * 2;
+        let out_h = h * 2;
+
+        let mut img_buf_b = image::DynamicImage::new_rgba8(out_w, out_h);
+
+        // if tl is not none, copy it to the top left
+        if let Some(tl) = &self.tl {
+            img_buf_b.copy_from(tl, 0, 0)?;
+        }
+
+        // if tr is not none, copy it to the top right
+        if let Some(tr) = &self.tr {
+            img_buf_b.copy_from(tr, w, 0)?;
+        }
+        // if bl is not none, copy it to the bottom left
+        if let Some(bl) = &self.bl {
+            img_buf_b.copy_from(bl, 0, h)?;
+        }
+        // if br is not none, copy it to the bottom right
+        if let Some(br) = &self.br {
+            img_buf_b.copy_from(br, h, w)?;
+        }
+        Ok(img_buf_b)
+    }
+}
 
 /// Creates and returns an async `Receiver` of items derived from rows in the DB.
 /// `T` is the custom output type.
 /// `F` is a closure that maps a `Row` to `T`.
-pub fn make_stream_rx<T, F>(
+pub fn make_tokio_stream_rx<T, F>(
     mbt: &MbtilesClientAsync,
     query_override: Option<&str>,
     row_mapper: F,
@@ -74,244 +175,105 @@ where
 
     Ok(rx)
 }
-fn imgjoin_dev() -> anyhow::Result<()> {
-    let tl = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\0\\0.png";
-    let tr = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\0\\1.png";
-    let bl = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\1\\0.png";
-    let br = "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\1\\1\\1.png";
 
-    let images = [tl, tr, bl, br];
+const QUERY: &str = indoc! {r#"
+WITH parent AS (SELECT DISTINCT (zoom_level - 1)  AS p_z,
+                                (tile_column / 2) AS p_x,
+                                (tile_row / 2)    AS p_y
+                FROM tiles
+                WHERE zoom_level > 0)
+SELECT parent.p_z        AS parent_z,
+       parent.p_x        AS parent_x,
+       parent.p_y        AS parent_y,
+       child_0.tile_data AS child_0, -- top/upper left ~ qk=0
+       child_1.tile_data AS child_1, -- top/upper right ~ qk=1
+       child_2.tile_data AS child_2, -- bottom/lower left ~ qk=2
+       child_3.tile_data AS child_3  -- bottom/lower right ~ qk=3
+FROM parent
+         LEFT JOIN tiles child_0 ON child_0.zoom_level = parent.p_z + 1
+    AND child_0.tile_column = parent.p_x * 2
+    AND child_0.tile_row = parent.p_y * 2 + 1
+         LEFT JOIN tiles child_1 ON child_1.zoom_level = parent.p_z + 1
+    AND child_1.tile_column = parent.p_x * 2 + 1
+    AND child_1.tile_row = parent.p_y * 2 + 1
+         LEFT JOIN tiles child_2 ON child_2.zoom_level = parent.p_z + 1
+    AND child_2.tile_column = parent.p_x * 2
+    AND child_2.tile_row = parent.p_y * 2
+         LEFT JOIN tiles child_3 ON child_3.zoom_level = parent.p_z + 1
+    AND child_3.tile_column = parent.p_x * 2 + 1
+    AND child_3.tile_row = parent.p_y * 2
+"#
+};
+#[derive(Debug)]
+struct TileChildrenRow {
+    parent_z: u8,
+    parent_x: u32,
+    parent_y: u32,
+    child_0: Option<Vec<u8>>,
+    child_1: Option<Vec<u8>>,
+    child_2: Option<Vec<u8>>,
+    child_3: Option<Vec<u8>>,
+}
+fn map_four_tile_row(row: &rusqlite::Row) -> rusqlite::Result<TileChildrenRow> {
+    Ok(TileChildrenRow {
+        parent_z: row.get("parent_z")?,
+        parent_x: row.get("parent_x")?,
+        parent_y: row.get("parent_y")?,
+        child_0: row.get("child_0")?,
+        child_1: row.get("child_1")?,
+        child_2: row.get("child_2")?,
+        child_3: row.get("child_3")?,
+    })
+}
 
-    let img_bufs = images
-        .iter()
-        .map(|img| {
-            let img_bytes = std::fs::read(img)?;
-            //
-            let img_buf = image::load_from_memory(&img_bytes)
-                .map_err(|e| anyhow::anyhow!("image::load_from_memory - {e}"))?;
+fn load_image_from_memory(data: &[u8], ix: u8) -> anyhow::Result<image::DynamicImage> {
+    image::load_from_memory(data)
+        .map_err(|e| anyhow::anyhow!("Failed to load image: {}", e))
+}
+fn join_images(children: TileChildrenRow) -> anyhow::Result<(Tile, Vec<u8>)> {
+    // Helper function to load an image from memory with error handling
+    // TIL about `Option::transpose()` which is doppppe
+    let top_left = children
+        .child_0
+        .as_ref()
+        .map(|data| load_image_from_memory(data, 0))
+        .transpose()?;
+    let top_right = children
+        .child_1
+        .as_ref()
+        .map(|data| load_image_from_memory(data, 1))
+        .transpose()?;
+    let bottom_left = children
+        .child_2
+        .as_ref()
+        .map(|data| load_image_from_memory(data, 2))
+        .transpose()?;
+    let bottom_right = children
+        .child_3
+        .as_ref()
+        .map(|data| load_image_from_memory(data, 3))
+        .transpose()?;
 
-            Ok(img_buf)
-        })
-        .collect::<Result<Vec<image::DynamicImage>, anyhow::Error>>()?;
-
+    // Join the images
     let joiner = ImgJoiner {
-        tl: img_bufs[0].clone(),
-        tr: img_bufs[1].clone(),
-        bl: img_bufs[2].clone(),
-        br: img_bufs[3].clone(),
+        tl: top_left,
+        tr: top_right,
+        bl: bottom_left,
+        br: bottom_right,
     };
 
     let img_buf = joiner.join()?;
 
-    // to buffer in memory
-
+    // Buffer the result in memory
     let mut bytes: Vec<u8> = Vec::new();
-    img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::Png)?;
+    img_buf.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::WebP)?;
 
-    // write to file
-    std::fs::write(
-        "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\0-1-1-1.png",
-        &bytes,
-    )?;
-
-    // resize the thing in half
-
-    let img_buf_half = img_buf.resize(
-        img_buf.width() / 2,
-        img_buf.height() / 2,
-        // image::imageops::FilterType::Nearest,
-        // image::imageops::FilterType::CatmullRom,
-        // image::imageops::FilterType::Lanczos3,
-        // image::imageops::FilterType::Triangle,
-        image::imageops::FilterType::Gaussian,
-    );
-    let mut bytes_half: Vec<u8> = Vec::new();
-    img_buf_half
-        .write_to(&mut Cursor::new(&mut bytes_half), image::ImageFormat::Png)?;
-
-    // write to file
-    std::fs::write(
-        "D:\\utiles\\test-data\\mbtiles\\osm-standard.z0z4.tiles\\0-1-1-1-half.png",
-        &bytes_half,
-    )?;
-
-    Ok(())
+    Ok((
+        Tile::new(children.parent_x, children.parent_y, children.parent_z),
+        bytes,
+    ))
 }
 
-
-// static function qery
-const QUERY: &str = r#"
-WITH parent AS (
-  SELECT DISTINCT
-    (zoom_level - 1) AS p_z,
-    (tile_column / 2) AS p_x,
-    (tile_row / 2)    AS p_y
-  FROM tiles
-  WHERE zoom_level > 0
-)
-SELECT
-  parent.p_z          AS parent_z,
-  parent.p_x          AS parent_x,
-  parent.p_y          AS parent_y,
-
-  child_tl.tile_data  AS top_left_data,
-  child_tr.tile_data  AS top_right_data,
-  child_bl.tile_data  AS bottom_left_data,
-  child_br.tile_data  AS bottom_right_data
-
-FROM parent
--- top-left child
-LEFT JOIN tiles child_tl
-  ON child_tl.zoom_level  = parent.p_z + 1
- AND child_tl.tile_column = parent.p_x * 2
- AND child_tl.tile_row    = parent.p_y * 2
-
--- top-right child
-LEFT JOIN tiles child_tr
-  ON child_tr.zoom_level  = parent.p_z + 1
- AND child_tr.tile_column = parent.p_x * 2 + 1
- AND child_tr.tile_row    = parent.p_y * 2
-
--- bottom-left child
-LEFT JOIN tiles child_bl
-  ON child_bl.zoom_level  = parent.p_z + 1
- AND child_bl.tile_column = parent.p_x * 2
- AND child_bl.tile_row    = parent.p_y * 2 + 1
-
--- bottom-right child
-LEFT JOIN tiles child_br
-  ON child_br.zoom_level  = parent.p_z + 1
- AND child_br.tile_column = parent.p_x * 2 + 1
- AND child_br.tile_row    = parent.p_y * 2 + 1
-
-"#;
-#[derive(Debug)]
-struct FourTileRow {
-    parent_z: u8,
-    parent_x: u32,
-    parent_y: u32,
-    top_left: Option<Vec<u8>>,
-    top_right: Option<Vec<u8>>,
-    bottom_left: Option<Vec<u8>>,
-    bottom_right: Option<Vec<u8>>,
-}
-/// This is just a placeholder for your custom "merge 4 child tiles" into one 512x512 tile.
-fn merge_256_tiles_into_512(
-    tl: Option<&[u8]>,
-    tr: Option<&[u8]>,
-    bl: Option<&[u8]>,
-    br: Option<&[u8]>,
-) -> Result<Vec<u8>, String> {
-    // 1) decode each child tile if it exists
-    // 2) create a new 512x512 buffer
-    // 3) place each 256 tile in the correct quadrant
-    // 4) encode the final as PNG/WebP/whatever
-    // For example, you could use image crate, etc.
-    // We'll just return a stub here:
-    Ok(vec![]) // Return empty
-}
-fn map_four_tile_row(row: &rusqlite::Row) -> rusqlite::Result<FourTileRow> {
-    Ok(FourTileRow {
-        parent_z: row.get("parent_z")?,
-        parent_x: row.get("parent_x")?,
-        parent_y: row.get("parent_y")?,
-        top_left: row.get("top_left_data")?,
-        top_right: row.get("top_right_data")?,
-        bottom_left: row.get("bottom_left_data")?,
-        bottom_right: row.get("bottom_right_data")?,
-    })
-}
-
-// async fn stream_four_tiles(
-//     mbt: &MbtilesClientAsync,
-//     query: &str,
-// ) -> UtilesResult<Receiver<FourTileRow>> {
-//     let (tx, rx) = channel(100);
-//     let query_string = query.to_string();
-//
-//     tokio::spawn({
-//         let mbt_clone = mbt.clone();
-//         async move {
-//             let result = mbt_clone
-//                 .conn(move |c: &Connection| -> RusqliteResult<()> {
-//                     let mut s = c.prepare(QUERY)?;
-//                     // let z_column = s.column_index("zoom_level")?;
-//                     // let x_column = s.column_index("tile_column")?;
-//                     // let y_column = s.column_index("tile_row")?;
-//                     let tx = tx.clone();
-//                     let rows_iter = s.query_map(rusqlite::params![], |row| {
-//                         let item = map_four_tile_row(row)?;
-//                         if let Err(e) = tx.blocking_send(item) {
-//                             warn!("send error: {:?}", e);
-//                         }
-//                         Ok(())
-//                         // let z: u8 = row.get(z_column)?;
-//                         // let x: u32 = row.get(x_column)?;
-//                         // let yup: u32 = row.get(y_column)?;
-//                         // let tile = utile_yup!(x, yup, z);
-//                         // if let Err(e) = tx.blocking_send(tile) {
-//                         //     debug!("Blocking send error: {:?}", e);
-//                         //     Ok(false)
-//                         // } else {
-//                         //     Ok(true)
-//                         // }
-//                     })?;
-//                     // Consume the iterator
-//                     for row_result in rows_iter {
-//                         if let Err(e) = row_result {
-//                             error!("row error: {:?}", e);
-//                         }
-//                     }
-//                     Ok(())
-//                     //
-//                     // for row in tiles_iters {
-//                     //     let _ = row;
-//                     //     match row {
-//                     //         Ok(true) => {}
-//                     //         Ok(false) => {
-//                     //             break;
-//                     //         }
-//                     //         Err(e) => {
-//                     //             error!("enum tiles iter error: {:?}", e);
-//                     //             break;
-//                     //         }
-//                     //     }
-//                     // }
-//                     // Ok(())
-//                 })
-//                 .await;
-//             if let Err(e) = result {
-//                 error!("make_enumerate_rx: {:?}", e);
-//             }
-//         }
-//         // let result = mbt_clone
-//         //     .conn(move |conn: &Connection| -> rusqlite::Result<()> {
-//         //         let mut stmt = conn.prepare(&query_string)?;
-//         //         let rows_iter = stmt.query_map([], |row| {
-//         //             let item = map_four_tile_row(row)?;
-//         //             if let Err(e) = tx.blocking_send(item) {
-//         //                 warn!("send error: {:?}", e);
-//         //             }
-//         //             Ok(())
-//         //         })?;
-//         //
-//         //         for row_result in rows_iter {
-//         //             if let Err(e) = row_result {
-//         //                 error!("row error: {:?}", e);
-//         //             }
-//         //         }
-//         //         Ok(())
-//         //     })
-//         //     .await;
-//         //
-//         // if let Err(e) = result {
-//         //     error!("stream_four_tiles: DB error: {:?}", e);
-//         // }
-//     });
-//
-//     Ok(rx)
-// }
-//
 pub fn make_stream_rx_mapper<T, F>(
     mbt: &MbtilesClientAsync,
     query: &str,
@@ -321,7 +283,7 @@ where
     F: Fn(&Row) -> RusqliteResult<T> + Send + Sync + 'static,
     T: Send + 'static,
 {
-    let (tx, rx) = tokio::sync::mpsc::channel(100);
+    let (tx, rx) = tokio::sync::mpsc::channel(1000);
     let mbt_clone = mbt.clone();
     let query_string = query.to_string();
 
@@ -355,217 +317,152 @@ where
     Ok(rx)
 }
 
-pub async fn utiles_512ify() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn utiles_512ify(args: &Cli) -> anyhow::Result<()> {
     info!("utiles ~ 512ify");
 
-    let src_mbtiles = "osm-test-z1.mbtiles";
-    let dst_mbtiles = "osm-test-z1-512.mbtiles";
+    // let src_mbtiles = "osm-test-z1.mbtiles";
+    // let dst_mbtiles = "test-out.mbtiles";
 
-    // 1) Open source
-    let mbt = MbtilesClientAsync::open_existing(src_mbtiles).await?;
+    debug!("args: {:?}", args);
+
+    let mbt = MbtilesClientAsync::open_existing(&args.src).await?;
     mbt.assert_mbtiles().await?;
 
     // 2) Open or create the destination MBTiles
     // let dst = Mbtiles::from(dst_mbtiles);
-    // Possibly set metadata, e.g. format=png or something
-    // dst.metadata_set("name", "512ified")?;
-    // dst.metadata_set("format", "png")?;
+    let dst_exists = std::fs::metadata(&args.dst).is_ok();
+    if dst_exists {
+        if args.force {
+            std::fs::remove_file(&args.dst)?;
+        } else {
+            return Err(anyhow::anyhow!("dst exists, use --force to overwrite"));
+        }
+    }
+    let dst = Mbtiles::open_new(&args.dst, Option::from(MbtType::Norm))?;
 
-    // 3) Build the multi-join query
-    let join_query = r#"
-        WITH parent AS (
-          SELECT DISTINCT
-            (zoom_level - 1) AS p_z,
-            (tile_column / 2) AS p_x,
-            (tile_row / 2)    AS p_y
-          FROM tiles
-          WHERE zoom_level > 0
-        )
-        SELECT
-          parent.p_z          AS parent_z,
-          parent.p_x          AS parent_x,
-          parent.p_y          AS parent_y,
-          child_tl.tile_data  AS top_left_data,
-          child_tr.tile_data  AS top_right_data,
-          child_bl.tile_data  AS bottom_left_data,
-          child_br.tile_data  AS bottom_right_data
-        FROM parent
-        LEFT JOIN tiles child_tl
-          ON child_tl.zoom_level  = parent.p_z + 1
-         AND child_tl.tile_column = parent.p_x * 2
-         AND child_tl.tile_row    = parent.p_y * 2
-        LEFT JOIN tiles child_tr
-          ON child_tr.zoom_level  = parent.p_z + 1
-         AND child_tr.tile_column = parent.p_x * 2 + 1
-         AND child_tr.tile_row    = parent.p_y * 2
-        LEFT JOIN tiles child_bl
-          ON child_bl.zoom_level  = parent.p_z + 1
-         AND child_bl.tile_column = parent.p_x * 2
-         AND child_bl.tile_row    = parent.p_y * 2 + 1
-        LEFT JOIN tiles child_br
-          ON child_br.zoom_level  = parent.p_z + 1
-         AND child_br.tile_column = parent.p_x * 2 + 1
-         AND child_br.tile_row    = parent.p_y * 2 + 1
-    "#;
-
-    // 4) Stream the rows
-
-    let thingystream = make_stream_rx(&mbt, Some(join_query), map_four_tile_row)?;
-
-
-    //  for now just print each thingy....
-    let mut stream = ReceiverStream::new(thingystream);
-    while let Some(thingy) = stream.next().await {
-        println!("thingy: {:?}", thingy);
+    let src_rows = mbt.metadata_rows().await?;
+    for row in src_rows {
+        info!("row: {:?}", row);
     }
 
+    let mut src_rows = mbt.metadata_rows().await?;
 
-    // let four_tile_rx = stream_four_tiles(&mbt, join_query).await?;
-    //
-    // // 5) Prepare the writer
-    // let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
-    // let mut writer = MbtStreamWriterSync {
-    //     stream: tokio_stream::wrappers::ReceiverStream::new(rx_writer),
-    //     mbt: dst,
-    //     stats: MbtWriterStats::default(),
-    // };
-    //
-    // let start_time = Instant::now();
-    //
-    // // 6) Spawn a task to consume that stream, combine the child tiles -> a 512 tile,
-    // //    and send to the writer channel
-    // let proc_handle = tokio::spawn(async move {
-    //     let stream = tokio_stream::wrappers::ReceiverStream::new(four_tile_rx);
-    //     // Run concurrently if you want to:
-    //     stream
-    //         .for_each_concurrent(4, |row_item| {
-    //             async move {
-    //
-    //                 println!("row_item: {:?}", row_item);
-    //             }
-    //
-    //             // let tx_writer = tx_writer.clone();
-    //             // async move {
-    //             //     let parent_tile =
-    //             //         (row_item.parent_x, row_item.parent_y, row_item.parent_z);
-    //             //     // Combine child tiles into one 512 tile
-    //             //     let merged_res = tokio::task::spawn_blocking(move || {
-    //             //         merge_256_tiles_into_512(
-    //             //             row_item.top_left.as_deref(),
-    //             //             row_item.top_right.as_deref(),
-    //             //             row_item.bottom_left.as_deref(),
-    //             //             row_item.bottom_right.as_deref(),
-    //             //         )
-    //             //     })
-    //             //     .await;
-    //             //
-    //             //     match merged_res {
-    //             //         Err(join_err) => {
-    //             //             warn!("spawn_blocking error: {:?}", join_err);
-    //             //         }
-    //             //         Ok(Ok(merged_bytes)) => {
-    //             //             // // Send to the MBT wr/**/iter
-    //             //             // // We typically store a tile as (Tile, tile_data, Some(content_type)?)
-    //             //             // let _ = tx_writer.send((
-    //             //             //     parent_tile.into(), // If you have a Tile struct or something
-    //             //             //     merged_bytes,
-    //             //             //     None
-    //             //             // )).await;
-    //             //             info!("would send");
-    //             //         }
-    //             //         Ok(Err(e)) => {
-    //             //             warn!("merge_256_tiles error: {:?}", e);
-    //             //         }
-    //             //     }
-    //             // }
-    //         })
-    //         .await;
-    // });
-    //
-    // // 7) Spawn the writer
-    // let writer_handle = tokio::spawn(
-    //     writer.write()
-    // );
-    //
-    // // Wait for everything
-    // let (proc_res, writer_res) = tokio::join!(proc_handle, writer_handle);
-    // proc_res?;
-    // writer_res??; // double-? to handle the JoinResult and the actual method Result
-    //
-    // info!("512ify done in {:?}", start_time.elapsed());
+    {
+        for mut row in &mut src_rows {
+            if row.name == "minzoom" && row.value != "0" {
+                let minzoom = row.value.parse::<u8>()?;
+                let new_minzoom = minzoom - 1;
+                row.value = new_minzoom.to_string();
+            }
+            if row.name == "maxzoom" {
+                let maxzoom = row.value.parse::<u8>()?;
+                // adjust the maxzoom because we're double downing so -1
+                let new_maxzoom = maxzoom - 1;
+                // info!("maxzoom: {:?}", maxzoom);
+                row.value = new_maxzoom.to_string();
+            }
+            if row.name == "tilesize" {
+                let tilesize = row.value.parse::<u32>()?;
+                let new_tilesize = tilesize * 2;
+                row.value = new_tilesize.to_string();
+            }
+            info!("row: {:?}", row);
+        }
+    }
 
+    dst.metadata_set_from_vec(&src_rows)?;
+    let thingystream = make_tokio_stream_rx(&mbt, Some(QUERY), map_four_tile_row)?;
+
+    let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(1000);
+
+    // mbt-writer stream....
+    let mut writer = MbtStreamWriterSync {
+        stream: ReceiverStream::new(rx_writer),
+        mbt: dst,
+        stats: MbtWriterStats::default(),
+    };
+
+    let mut stream = ReceiverStream::new(thingystream);
+
+    let jobs = usize::from(args.jobs.unwrap_or(4));
+    let proc_future = tokio::spawn(async move {
+        // TODO: cli flag for concurrency
+        stream
+            .for_each_concurrent(jobs, |d| {
+                let tx_writer = tx_writer.clone();
+                // let tx_progress = tx_progress.clone();
+                // let initial_size = tile_data.len() as i64;
+
+                async move {
+                    let blocking_res =
+                        tokio::task::spawn_blocking(move || join_images(d)).await;
+                    match blocking_res {
+                        Err(je) => {
+                            warn!("join-error: {:?}", je);
+                        }
+                        Ok(webpify_result) => match webpify_result {
+                            Ok(webp_bytes) => {
+                                // let size_diff =
+                                //     initial_size - (webp_bytes.len() as i64);
+                                let send_res = tx_writer
+                                    .send((webp_bytes.0, webp_bytes.1, None))
+                                    .await;
+                                if let Err(e) = send_res {
+                                    warn!("send_res: {:?}", e);
+                                }
+                                // let send_res = tx_progress.send(size_diff).await;
+                                // if let Err(e) = send_res {
+                                //     warn!("progress send_res: {:?}", e);
+                                // }
+                            }
+                            Err(e) => {
+                                warn!("webpify_image: {:?}", e);
+                            }
+                        },
+                    }
+                }
+            })
+            .await;
+    });
+
+    // wait for the writer and the processor to finish
+    let (proc_res, write_res) = tokio::join!(proc_future, writer.write());
+    if let Err(e) = proc_res {
+        warn!("proc_res: {:?}", e);
+    }
+    if let Err(e) = write_res {
+        warn!("write_res: {:?}", e);
+    }
     Ok(())
 }
-// async fn utiles_512ify2() -> Result<(), Box<dyn std::error::Error>> {
-//     println!("utiles ~ 512ify");
-//
-//     let src_mbtiles = "osm-test-z1.mbtiles";
-//     let dst_mbtiles = "osm-test-z1-512.mbtiles";
-//
-//     let mbt = MbtilesClientAsync::open_existing(src_mbtiles).await?;
-//     mbt.assert_mbtiles().await?;
-//
-//     let (tx, rx) = channel(100);
-//
-//     mbt.conn(
-//         |c| {
-//             let mut stmt = c.prepare(QUERY)?;
-//             let rows = stmt.query_map([], |row| {
-//                 let parent_z: i64 = row.get(0)?;
-//                 let parent_x: i64 = row.get(1)?;
-//                 let parent_y: i64 = row.get(2)?;
-//                 let top_left_data: Vec<u8> = row.get(3)?;
-//                 let top_right_data: Vec<u8> = row.get(4)?;
-//                 let bottom_left_data: Vec<u8> = row.get(5)?;
-//                 let bottom_right_data: Vec<u8> = row.get(6)?;
-//
-//                 // Send to the channel (blocking_send is fine in this context).
-//                 if let Err(e) = tx.blocking_send((
-//                     parent_z,
-//                     parent_x,
-//                     parent_y,
-//                     top_left_data,
-//                     top_right_data,
-//                     bottom_left_data,
-//                     bottom_right_data,
-//                 )) {
-//                     warn!("channel send error: {:?}", e);
-//                 }
-//
-//                 Ok(())
-//             })?;
-//
-//             // consume all rows
-//             for row_result in rows {
-//                 // You can optionally handle row-level errors here
-//                 if let Err(e) = row_result {
-//                     error!("row error: {:?}", e);
-//                 }
-//             }
-//                 Ok(())
-//         }
-//     )
-//
-//     let (tx_writer, rx_writer) = tokio::sync::mpsc::channel(100);
-//     let start_time = std::time::Instant::now();
-//     let mut writer = MbtStreamWriterSync {
-//         stream: ReceiverStream::new(rx_writer),
-//         mbt: Mbtiles::from(dst_mbtiles),
-//         stats: MbtWriterStats::default(),
-//     };
-//
-//     Ok(())
-// }
+
+async fn tokio_double_down() -> anyhow::Result<()> {
+    let logcfg = LagerConfig {
+        json: false,
+        level: LagerLevel::Debug,
+    };
+
+    let args = Cli::parse();
+    debug!("args: {:?}", args);
+
+    let level = if args.debug {
+        LagerLevel::Debug
+    } else {
+        LagerLevel::Info
+    };
+    let logcfg = LagerConfig { json: false, level };
+    init_tracing(logcfg)?;
+    let res = utiles_512ify(&args).await;
+    res.map_err(|e| {
+        error!("{}", e);
+        e.into()
+    })
+}
 
 #[tokio::main]
 async fn main() {
     println!("utiles ~ dev");
-    utiles_512ify().await.expect("512ify failed");
-
-    // let r = utiles_dev::quick_maths();
-    // if let Err(e) = r {
-    //     println!("e: {:?}", e);
-    // } else {
-    //     println!("2 + 2, that's 4, minus 1 that's 3, quick-maths.");
-    // }
+    // tokio_double_down().await.expect("512ify failed");
+    let r = main_rayon();
+    println!("r: {:?}", r);
 }

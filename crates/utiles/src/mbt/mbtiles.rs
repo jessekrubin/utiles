@@ -207,6 +207,10 @@ impl Mbtiles {
         }
     }
 
+    pub fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>> {
+        mbtiles_metadata(&self.conn()).map_err(|e| e.into())
+    }
+
     pub fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
         metadata_json(&self.conn).map_err(|e| e.into())
     }
