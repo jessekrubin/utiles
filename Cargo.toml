@@ -28,7 +28,7 @@ async-trait = "0.1.85"
 axum = { version = "0.8.1", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.0"
 base64 = "0.22.1"
-clap = { version = "4.5.26", features = ["derive", "color", "wrap_help"] }
+clap = { version = "4.5.27", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.0"
 fnv = "1.0.7"
 futures = "0.3.31"
@@ -40,7 +40,7 @@ image = "0.25.5"
 imagesize = "0.13.0"
 indicatif = "0.17.9"
 indoc = "2.0.5"
-jiff = "0.1.24"
+jiff = "0.1.27"
 json-patch = "3.0.1"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
