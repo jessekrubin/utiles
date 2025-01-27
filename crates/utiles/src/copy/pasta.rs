@@ -378,7 +378,7 @@ LIMIT 1;
                             }
                             Ok((tile_data, hash_hex)) => {
                                 if let Err(e) = tx_writer
-                                    .send((tile, tile_data, Some(hash_hex)))
+                                    .send((tile, tile_data, Some(hash_hex)).into())
                                     .await
                                 {
                                     warn!("send_res: {:?}", e);

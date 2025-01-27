@@ -1,6 +1,6 @@
 """utiles
 
-Rust + python spherical mercator coordinate and tile util(e)ities
+rust + python spherical mercator coordinate and tile util(e)ities
 
 Example:
     >>> import utiles as ut
@@ -56,8 +56,6 @@ Example:
 """
 
 from __future__ import annotations
-
-from collections.abc import Sequence
 
 from utiles._utiles import (
     TILETYPE_GIF,

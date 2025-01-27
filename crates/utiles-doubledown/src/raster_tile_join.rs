@@ -1,4 +1,4 @@
-use image::{DynamicImage, GenericImage, GenericImageView};
+use image::{GenericImage, GenericImageView};
 use std::io::Cursor;
 
 fn load_image_from_memory(data: &[u8]) -> anyhow::Result<image::DynamicImage> {
@@ -6,15 +6,15 @@ fn load_image_from_memory(data: &[u8]) -> anyhow::Result<image::DynamicImage> {
         .map_err(|e| anyhow::anyhow!("Failed to load image: {}", e))
 }
 
-// pub fn image_is_transparent(img: &image::DynamicImage) -> bool {
-//     match img {
-//         image::DynamicImage::ImageRgba8(img) => img.pixels().any(|p| p[3] < 255),
-//         image::DynamicImage::ImageRgba16(img) => img.pixels().any(|p| p[3] < 255),
-//         image::DynamicImage::ImageLumaA8(img) => img.pixels().any(|p| p[1] < 255),
-//         image::DynamicImage::ImageLumaA16(img) => img.pixels().any(|p| p[1] < 255),
-//         _ => false,
-//     }
-// }
+pub fn image_is_transparent(img: &image::DynamicImage) -> bool {
+    match img {
+        image::DynamicImage::ImageRgba8(img) => img.pixels().any(|p| p[3] < 255),
+        image::DynamicImage::ImageRgba16(img) => img.pixels().any(|p| p[3] < 255),
+        image::DynamicImage::ImageLumaA8(img) => img.pixels().any(|p| p[1] < 255),
+        image::DynamicImage::ImageLumaA16(img) => img.pixels().any(|p| p[1] < 255),
+        _ => false,
+    }
+}
 
 // pub fn image_unique_pixel_count(img: &image::DynamicImage) -> usize {
 //     match img {
@@ -81,14 +81,12 @@ impl RasterTileJoiner {
             .collect() // collect into a vec
     }
 
-    pub fn join(&self) -> anyhow::Result<image::DynamicImage> {
+    pub fn join_rgb(&self) -> anyhow::Result<image::DynamicImage> {
         let (w, h) = self.preflight()?;
 
         let out_w = w * 2;
         let out_h = h * 2;
-
-        let mut img_buf_b = image::DynamicImage::new_rgba8(out_w, out_h);
-
+        let mut img_buf_b = image::DynamicImage::new_rgb8(out_w, out_h);
         // if tl is not none, copy it to the top left
         if let Some(tl) = &self.tl {
             img_buf_b.copy_from(tl, 0, 0)?;
@@ -108,7 +106,51 @@ impl RasterTileJoiner {
         }
         Ok(img_buf_b)
     }
+
+    pub fn join_rgba(&self) -> anyhow::Result<image::DynamicImage> {
+        let (w, h) = self.preflight()?;
+
+        let out_w = w * 2;
+        let out_h = h * 2;
+        let mut img_buf_b = image::DynamicImage::new_rgba8(out_w, out_h);
+        // if tl is not none, copy it to the top left
+        if let Some(tl) = &self.tl {
+            img_buf_b.copy_from(tl, 0, 0)?;
+        }
+
+        // if tr is not none, copy it to the top right
+        if let Some(tr) = &self.tr {
+            img_buf_b.copy_from(tr, w, 0)?;
+        }
+        // if bl is not none, copy it to the bottom left
+        if let Some(bl) = &self.bl {
+            img_buf_b.copy_from(bl, 0, h)?;
+        }
+        // if br is not none, copy it to the bottom right
+        if let Some(br) = &self.br {
+            img_buf_b.copy_from(br, h, w)?;
+        }
+        Ok(img_buf_b)
+    }
+
+    pub fn is_transparent(&self) -> bool {
+        let non_null_tiles = self.non_null_tiles();
+        non_null_tiles.len() == 4
+            && self
+                .non_null_tiles()
+                .iter()
+                .any(|img| image_is_transparent(img))
+    }
+
+    pub fn join(&self) -> anyhow::Result<image::DynamicImage> {
+        if self.is_transparent() {
+            self.join_rgba()
+        } else {
+            self.join_rgb()
+        }
+    }
 }
+
 #[allow(clippy::struct_field_names)]
 pub struct RasterChildren<'a> {
     pub child_0: Option<&'a [u8]>,
@@ -117,7 +159,7 @@ pub struct RasterChildren<'a> {
     pub child_3: Option<&'a [u8]>,
 }
 
-pub fn dynamic_img_2_webp(img: &DynamicImage) -> anyhow::Result<Vec<u8>> {
+pub fn dynamic_img_2_webp(img: &image::DynamicImage) -> anyhow::Result<Vec<u8>> {
     let mut bytes: Vec<u8> = Vec::new();
     img.write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::WebP)?;
     Ok(bytes)
@@ -129,7 +171,9 @@ pub fn dynamic_img_2_webp(img: &DynamicImage) -> anyhow::Result<Vec<u8>> {
 //     Ok(bytes)
 // }
 
-pub fn join_raster_children(children: &RasterChildren) -> anyhow::Result<DynamicImage> {
+pub fn join_raster_children(
+    children: &RasterChildren,
+) -> anyhow::Result<image::DynamicImage> {
     // TIL about `Option::transpose()` which is doppppe
     let top_left = children
         .child_0

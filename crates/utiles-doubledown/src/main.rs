@@ -130,10 +130,14 @@ impl TileChildrenRow {
 }
 
 fn map_four_tile_row(row: &rusqlite::Row) -> rusqlite::Result<TileChildrenRow> {
+    let parent_z: u8 = row.get("parent_z")?;
+    let parent_yup: u32 = row.get("parent_y")?;
+    // that is upside-down ^ so must flip...
+    let parent_y = (1 << parent_z) - 1 - parent_yup;
     Ok(TileChildrenRow {
-        parent_z: row.get("parent_z")?,
+        parent_z,
         parent_x: row.get("parent_x")?,
-        parent_y: row.get("parent_y")?,
+        parent_y,
         child_0: row.get("child_0")?,
         child_1: row.get("child_1")?,
         child_2: row.get("child_2")?,
@@ -284,8 +288,9 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
                             Ok(image_bytes) => {
                                 let size_diff =
                                     initial_size - (image_bytes.len() as i64);
-                                let send_res =
-                                    tx_writer.send((new_tile, image_bytes, None)).await;
+                                let send_res = tx_writer
+                                    .send((new_tile, image_bytes, None).into())
+                                    .await;
                                 if let Err(e) = send_res {
                                     warn!("send_res: {:?}", e);
                                 }

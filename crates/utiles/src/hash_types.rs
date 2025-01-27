@@ -40,8 +40,8 @@ impl FromStr for HashType {
             "fnv" | "fnv1a" | "fnv1a64" => Ok(HashType::Fnv1a),
             "xxh32" => Ok(HashType::Xxh32),
             "xxh64" => Ok(HashType::Xxh64),
-            "xxh3_64" => Ok(HashType::Xxh3_64),
-            "xxh3_128" => Ok(HashType::Xxh3_128),
+            "xxh3" | "xxh3_64" | "xxh3-64" => Ok(HashType::Xxh3_64),
+            "xxh3_128" | "xxh3-128" => Ok(HashType::Xxh3_128),
             _ => Err(UtilesError::Error(format!(
                 "HashType::from_str: unknown hash type: {s}"
             ))),

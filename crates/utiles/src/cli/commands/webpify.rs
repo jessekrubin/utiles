@@ -52,8 +52,9 @@ pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
                             Ok(webp_bytes) => {
                                 let size_diff =
                                     initial_size - (webp_bytes.len() as i64);
-                                let send_res =
-                                    tx_writer.send((tile, webp_bytes, None)).await;
+                                let send_res = tx_writer
+                                    .send((tile, webp_bytes, None).into())
+                                    .await;
                                 if let Err(e) = send_res {
                                     warn!("send_res: {:?}", e);
                                 }

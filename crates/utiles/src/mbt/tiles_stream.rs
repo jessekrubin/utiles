@@ -63,6 +63,7 @@ pub fn make_tiles_rx(
     });
     Ok(rx)
 }
+
 pub fn make_enumerate_rx(
     mbt: &MbtilesClientAsync,
     query_override: Option<&str>,

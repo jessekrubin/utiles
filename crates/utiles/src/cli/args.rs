@@ -796,7 +796,7 @@ pub enum Commands {
     Shapes(ShapesArgs),
 
     /// Burn tiles from `GeoJSON` stream at zoom level (tile coverage)
-    #[command(name = "burn")]
+    #[command(name = "burn", visible_alias = "cover")]
     Burn(BurnArgs),
 
     /// Merge tiles from stream removing parent tiles if children are present
@@ -960,8 +960,12 @@ pub struct CopyArgs {
     #[arg(required = false, long, short, default_value = "undefined")]
     pub conflict: ConflictStrategy,
 
-    /// db-type (default: src type)
-    #[arg(required = false, long = "dst-type", aliases = ["dbtype", "dsttype", "mbtype", "mbt-type", "mbtiles-type"])]
+    /// db-type to copy to (flat, hash, norm) defaults to dbtype of src
+    #[arg(
+          required = false,
+          long = "dst-type",
+          aliases = ["dbtype", "dsttype", "mbtype", "mbt-type", "mbtiles-type"]
+    )]
     pub dst_type: Option<DbtypeOption>,
 
     /// hash to use for blob-id if copying to normal/hash db type
