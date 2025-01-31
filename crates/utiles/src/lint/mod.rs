@@ -46,8 +46,11 @@ pub enum MbtLint {
     #[error("missing unique index: {0}")]
     MissingUniqueIndex(String),
 
-    #[error("duplicate metadata key: {0}")]
-    DuplicateMetadataKey(String),
+    #[error("duplicate metadata key: {0} (values: {1})")]
+    DuplicateMetadataKey(String, String),
+
+    #[error("duplicate metadata key-value: {0}, {1} (#{2})")]
+    DuplicateMetadataKeyValue(String, String, usize),
 
     #[error("metadata k/v missing: {0}")]
     MissingMetadataKv(String),

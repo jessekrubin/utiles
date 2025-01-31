@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
 use serde_json::{Map, Value};
 
@@ -14,6 +14,24 @@ pub fn metadata2duplicates(
             BTreeMap::new(),
             |mut acc: BTreeMap<String, Vec<MbtMetadataRow>>, row| {
                 acc.entry(row.name.clone()).or_default().push(row);
+                acc
+            },
+        )
+        .into_iter()
+        .filter(|(_k, v)| v.len() > 1)
+        .collect()
+}
+
+/// Return a `BTreeMap<String, HashSet<String>>` of duplicate metadata keys
+#[must_use]
+pub fn metadata2duplicate_keys(
+    rows: Vec<MbtMetadataRow>,
+) -> BTreeMap<String, HashSet<MbtMetadataRow>> {
+    rows.into_iter()
+        .fold(
+            BTreeMap::new(),
+            |mut acc: BTreeMap<String, HashSet<MbtMetadataRow>>, row| {
+                acc.entry(row.name.clone()).or_default().insert(row);
                 acc
             },
         )

@@ -68,4 +68,7 @@ pub trait MbtilesAsync: Sized {
     async fn update_minzoom_maxzoom(
         &self,
     ) -> UtilesResult<Option<Vec<MetadataChangeFromTo>>>;
+    async fn metadata_duplicate_key_values(
+        &self,
+    ) -> UtilesResult<Vec<(String, String, usize)>>;
 }

@@ -424,6 +424,32 @@ pub fn mbtiles_metadata_row(
     Ok(mdata)
 }
 
+/// Returns list of metadata rows where the name, value pairs are identical
+pub fn metadata_duplicate_key_values(
+    conn: &Connection,
+) -> RusqliteResult<Vec<(String, String, usize)>> {
+    let mut stmt = conn.prepare(include_str!("sql/mbt-metadata-duplicate-rows.sql"))?;
+    let mdata = stmt
+        .query_map([], |row| {
+            let name: String = row.get(0)?;
+            let value: String = row.get(1)?;
+            let count: usize = row.get(2)?;
+            Ok((name, value, count))
+        })?
+        .collect::<RusqliteResult<Vec<_>, rusqlite::Error>>()?;
+    Ok(mdata)
+}
+
+/// Delete rows in metadata table with duplicate key-value pairs except for the first row
+pub fn delete_metadata_duplicate_key_values(
+    conn: &Connection,
+) -> RusqliteResult<usize> {
+    let mut stmt =
+        conn.prepare(include_str!("sql/mbt-metadata-delete-duplicate-rows.sql"))?;
+    let res = stmt.execute([])?;
+    Ok(res)
+}
+
 /// Return true/false if metadata table has a unique index on 'name'
 pub fn has_unique_index_on_metadata(conn: &Connection) -> RusqliteResult<bool> {
     let mut stmt = conn.prepare("SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND tbl_name='metadata' AND sql LIKE '%UNIQUE%'")?;

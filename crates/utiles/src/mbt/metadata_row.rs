@@ -9,7 +9,7 @@ use crate::mbt::{MetadataChange, MetadataChangeFromTo};
 use crate::UtilesError;
 
 /// Metadata row struct for `mbtiles` metadata table
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MbtMetadataRow {
     /// name TEXT NOT NULL
     pub name: String,
