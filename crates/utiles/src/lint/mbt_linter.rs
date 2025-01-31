@@ -31,7 +31,7 @@ pub trait MbtLintRule {
     }
 }
 
-/// A rule that checks the MBTiles magic number.
+/// A rule that checks the `MBTiles` magic number.
 pub struct MagicNumberRule;
 
 #[async_trait::async_trait]
@@ -224,7 +224,7 @@ impl MbtLintRule for MetadataRequiredKeysRule {
             .collect::<Vec<String>>();
         let missing_metadata_keys = crate::lint::REQUIRED_METADATA_FIELDS
             .iter()
-            .filter(|k| !metadata_keys.contains(&(*k).to_string()))
+            .filter(|k| !metadata_keys.contains(&(*(*k)).to_string()))
             .map(|k| (*k).to_string())
             .collect::<Vec<String>>();
 
@@ -292,7 +292,7 @@ impl MbtilesLinter {
         let mut all_errors = vec![];
 
         if self.fix {
-            for rule in rules.iter() {
+            for rule in &rules {
                 debug!("Checking rule: {}", rule.name());
                 // first we check!
                 let errs = rule.check(&mbt).await?;
@@ -305,7 +305,7 @@ impl MbtilesLinter {
                 all_errors.append(&mut errs);
             }
         } else {
-            for rule in rules.iter() {
+            for rule in &rules {
                 // 1) Check
                 let mut errs = rule.check(&mbt).await?;
                 all_errors.append(&mut errs);
