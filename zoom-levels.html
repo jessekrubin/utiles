@@ -1,0 +1,516 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>ZOOM-LEVELS - utiles.dev</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">utiles.dev</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/jessekrubin/utiles" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/jessekrubin/utiles/edit/main/docs/src/zoom-levels.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ref"><a class="header" href="#ref">REF</a></h1>
+<h1 id="zoom-levels"><a class="header" href="#zoom-levels">ZOOM LEVELS</a></h1>
+<details>
+<summary>zoom info</summary>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: right">zoom</th><th style="text-align: right">ntiles</th><th style="text-align: right">total</th><th style="text-align: right">rowcol_range</th><th style="text-align: right">max_rowcol</th></tr></thead><tbody>
+<tr><td style="text-align: right">0</td><td style="text-align: right">1</td><td style="text-align: right">1</td><td style="text-align: right">0</td><td style="text-align: right">1</td></tr>
+<tr><td style="text-align: right">1</td><td style="text-align: right">4</td><td style="text-align: right">5</td><td style="text-align: right">1</td><td style="text-align: right">2</td></tr>
+<tr><td style="text-align: right">2</td><td style="text-align: right">16</td><td style="text-align: right">21</td><td style="text-align: right">3</td><td style="text-align: right">4</td></tr>
+<tr><td style="text-align: right">3</td><td style="text-align: right">64</td><td style="text-align: right">85</td><td style="text-align: right">7</td><td style="text-align: right">8</td></tr>
+<tr><td style="text-align: right">4</td><td style="text-align: right">256</td><td style="text-align: right">341</td><td style="text-align: right">15</td><td style="text-align: right">16</td></tr>
+<tr><td style="text-align: right">5</td><td style="text-align: right">1_024</td><td style="text-align: right">1_365</td><td style="text-align: right">31</td><td style="text-align: right">32</td></tr>
+<tr><td style="text-align: right">6</td><td style="text-align: right">4_096</td><td style="text-align: right">5_461</td><td style="text-align: right">63</td><td style="text-align: right">64</td></tr>
+<tr><td style="text-align: right">7</td><td style="text-align: right">16_384</td><td style="text-align: right">21_845</td><td style="text-align: right">127</td><td style="text-align: right">128</td></tr>
+<tr><td style="text-align: right">8</td><td style="text-align: right">65_536</td><td style="text-align: right">87_381</td><td style="text-align: right">255</td><td style="text-align: right">256</td></tr>
+<tr><td style="text-align: right">9</td><td style="text-align: right">262_144</td><td style="text-align: right">349_525</td><td style="text-align: right">511</td><td style="text-align: right">512</td></tr>
+<tr><td style="text-align: right">10</td><td style="text-align: right">1_048_576</td><td style="text-align: right">1_398_101</td><td style="text-align: right">1_023</td><td style="text-align: right">1_024</td></tr>
+<tr><td style="text-align: right">11</td><td style="text-align: right">4_194_304</td><td style="text-align: right">5_592_405</td><td style="text-align: right">2_047</td><td style="text-align: right">2_048</td></tr>
+<tr><td style="text-align: right">12</td><td style="text-align: right">16_777_216</td><td style="text-align: right">22_369_621</td><td style="text-align: right">4_095</td><td style="text-align: right">4_096</td></tr>
+<tr><td style="text-align: right">13</td><td style="text-align: right">67_108_864</td><td style="text-align: right">89_478_485</td><td style="text-align: right">8_191</td><td style="text-align: right">8_192</td></tr>
+<tr><td style="text-align: right">14</td><td style="text-align: right">268_435_456</td><td style="text-align: right">357_913_941</td><td style="text-align: right">16_383</td><td style="text-align: right">16_384</td></tr>
+<tr><td style="text-align: right">15</td><td style="text-align: right">1_073_741_824</td><td style="text-align: right">1_431_655_765</td><td style="text-align: right">32_767</td><td style="text-align: right">32_768</td></tr>
+<tr><td style="text-align: right">16</td><td style="text-align: right">4_294_967_296</td><td style="text-align: right">5_726_623_061</td><td style="text-align: right">65_535</td><td style="text-align: right">65_536</td></tr>
+<tr><td style="text-align: right">17</td><td style="text-align: right">17_179_869_184</td><td style="text-align: right">22_906_492_245</td><td style="text-align: right">131_071</td><td style="text-align: right">131_072</td></tr>
+<tr><td style="text-align: right">18</td><td style="text-align: right">68_719_476_736</td><td style="text-align: right">91_625_968_981</td><td style="text-align: right">262_143</td><td style="text-align: right">262_144</td></tr>
+<tr><td style="text-align: right">19</td><td style="text-align: right">274_877_906_944</td><td style="text-align: right">366_503_875_925</td><td style="text-align: right">524_287</td><td style="text-align: right">524_288</td></tr>
+<tr><td style="text-align: right">20</td><td style="text-align: right">1_099_511_627_776</td><td style="text-align: right">1_466_015_503_701</td><td style="text-align: right">1_048_575</td><td style="text-align: right">1_048_576</td></tr>
+<tr><td style="text-align: right">21</td><td style="text-align: right">4_398_046_511_104</td><td style="text-align: right">5_864_062_014_805</td><td style="text-align: right">2_097_151</td><td style="text-align: right">2_097_152</td></tr>
+<tr><td style="text-align: right">22</td><td style="text-align: right">17_592_186_044_416</td><td style="text-align: right">23_456_248_059_221</td><td style="text-align: right">4_194_303</td><td style="text-align: right">4_194_304</td></tr>
+<tr><td style="text-align: right">23</td><td style="text-align: right">70_368_744_177_664</td><td style="text-align: right">93_824_992_236_885</td><td style="text-align: right">8_388_607</td><td style="text-align: right">8_388_608</td></tr>
+<tr><td style="text-align: right">24</td><td style="text-align: right">281_474_976_710_656</td><td style="text-align: right">375_299_968_947_541</td><td style="text-align: right">16_777_215</td><td style="text-align: right">16_777_216</td></tr>
+<tr><td style="text-align: right">25</td><td style="text-align: right">1_125_899_906_842_624</td><td style="text-align: right">1_501_199_875_790_165</td><td style="text-align: right">33_554_431</td><td style="text-align: right">33_554_432</td></tr>
+<tr><td style="text-align: right">26</td><td style="text-align: right">4_503_599_627_370_496</td><td style="text-align: right">6_004_799_503_160_661</td><td style="text-align: right">67_108_863</td><td style="text-align: right">67_108_864</td></tr>
+<tr><td style="text-align: right">27</td><td style="text-align: right">18_014_398_509_481_984</td><td style="text-align: right">24_019_198_012_642_645</td><td style="text-align: right">134_217_727</td><td style="text-align: right">134_217_728</td></tr>
+<tr><td style="text-align: right">28</td><td style="text-align: right">72_057_594_037_927_936</td><td style="text-align: right">96_076_792_050_570_581</td><td style="text-align: right">268_435_455</td><td style="text-align: right">268_435_456</td></tr>
+<tr><td style="text-align: right">29</td><td style="text-align: right">288_230_376_151_711_744</td><td style="text-align: right">384_307_168_202_282_325</td><td style="text-align: right">536_870_911</td><td style="text-align: right">536_870_912</td></tr>
+<tr><td style="text-align: right">30</td><td style="text-align: right">1_152_921_504_606_846_976</td><td style="text-align: right">1_537_228_672_809_129_301</td><td style="text-align: right">1_073_741_823</td><td style="text-align: right">1_073_741_824</td></tr>
+<tr><td style="text-align: right">31</td><td style="text-align: right">4_611_686_018_427_387_904</td><td style="text-align: right">6_148_914_691_236_517_205</td><td style="text-align: right">2_147_483_647</td><td style="text-align: right">2_147_483_648</td></tr>
+</tbody></table>
+</div></details>
+<p>Zoom levels</p>
+<pre><code>    zoom               ntiles                total  rowcol_range  max_rowcol
+0      0                    1                    1             0           1
+1      1                    4                    5             1           2
+2      2                   16                   21             3           4
+3      3                   64                   85             7           8
+4      4                  256                  341            15          16
+5      5                 1024                 1365            31          32
+6      6                 4096                 5461            63          64
+7      7                16384                21845           127         128
+8      8                65536                87381           255         256
+9      9               262144               349525           511         512
+10    10              1048576              1398101          1023        1024
+11    11              4194304              5592405          2047        2048
+12    12             16777216             22369621          4095        4096
+13    13             67108864             89478485          8191        8192
+14    14            268435456            357913941         16383       16384
+15    15           1073741824           1431655765         32767       32768
+16    16           4294967296           5726623061         65535       65536
+17    17          17179869184          22906492245        131071      131072
+18    18          68719476736          91625968981        262143      262144
+19    19         274877906944         366503875925        524287      524288
+20    20        1099511627776        1466015503701       1048575     1048576
+21    21        4398046511104        5864062014805       2097151     2097152
+22    22       17592186044416       23456248059221       4194303     4194304
+23    23       70368744177664       93824992236885       8388607     8388608
+24    24      281474976710656      375299968947541      16777215    16777216
+25    25     1125899906842624     1501199875790165      33554431    33554432
+26    26     4503599627370496     6004799503160661      67108863    67108864
+27    27    18014398509481984    24019198012642645     134217727   134217728
+28    28    72057594037927936    96076792050570581     268435455   268435456
+29    29   288230376151711744   384307168202282325     536870911   536870912
+30    30  1152921504606846976  1537228672809129301    1073741823  1073741824
+31    31  4611686018427387904  6148914691236517205    2147483647  2147483648
+</code></pre>
+<details>
+<summary>json</summary>
+<pre><code class="language-json">[
+  {
+    "max_rowcol": 1,
+    "ntiles": 1,
+    "rowcol_range": 0,
+    "total": 1,
+    "zoom": 0
+  },
+  {
+    "max_rowcol": 2,
+    "ntiles": 4,
+    "rowcol_range": 1,
+    "total": 5,
+    "zoom": 1
+  },
+  {
+    "max_rowcol": 4,
+    "ntiles": 16,
+    "rowcol_range": 3,
+    "total": 21,
+    "zoom": 2
+  },
+  {
+    "max_rowcol": 8,
+    "ntiles": 64,
+    "rowcol_range": 7,
+    "total": 85,
+    "zoom": 3
+  },
+  {
+    "max_rowcol": 16,
+    "ntiles": 256,
+    "rowcol_range": 15,
+    "total": 341,
+    "zoom": 4
+  },
+  {
+    "max_rowcol": 32,
+    "ntiles": 1024,
+    "rowcol_range": 31,
+    "total": 1365,
+    "zoom": 5
+  },
+  {
+    "max_rowcol": 64,
+    "ntiles": 4096,
+    "rowcol_range": 63,
+    "total": 5461,
+    "zoom": 6
+  },
+  {
+    "max_rowcol": 128,
+    "ntiles": 16384,
+    "rowcol_range": 127,
+    "total": 21845,
+    "zoom": 7
+  },
+  {
+    "max_rowcol": 256,
+    "ntiles": 65536,
+    "rowcol_range": 255,
+    "total": 87381,
+    "zoom": 8
+  },
+  {
+    "max_rowcol": 512,
+    "ntiles": 262144,
+    "rowcol_range": 511,
+    "total": 349525,
+    "zoom": 9
+  },
+  {
+    "max_rowcol": 1024,
+    "ntiles": 1048576,
+    "rowcol_range": 1023,
+    "total": 1398101,
+    "zoom": 10
+  },
+  {
+    "max_rowcol": 2048,
+    "ntiles": 4194304,
+    "rowcol_range": 2047,
+    "total": 5592405,
+    "zoom": 11
+  },
+  {
+    "max_rowcol": 4096,
+    "ntiles": 16777216,
+    "rowcol_range": 4095,
+    "total": 22369621,
+    "zoom": 12
+  },
+  {
+    "max_rowcol": 8192,
+    "ntiles": 67108864,
+    "rowcol_range": 8191,
+    "total": 89478485,
+    "zoom": 13
+  },
+  {
+    "max_rowcol": 16384,
+    "ntiles": 268435456,
+    "rowcol_range": 16383,
+    "total": 357913941,
+    "zoom": 14
+  },
+  {
+    "max_rowcol": 32768,
+    "ntiles": 1073741824,
+    "rowcol_range": 32767,
+    "total": 1431655765,
+    "zoom": 15
+  },
+  {
+    "max_rowcol": 65536,
+    "ntiles": 4294967296,
+    "rowcol_range": 65535,
+    "total": 5726623061,
+    "zoom": 16
+  },
+  {
+    "max_rowcol": 131072,
+    "ntiles": 17179869184,
+    "rowcol_range": 131071,
+    "total": 22906492245,
+    "zoom": 17
+  },
+  {
+    "max_rowcol": 262144,
+    "ntiles": 68719476736,
+    "rowcol_range": 262143,
+    "total": 91625968981,
+    "zoom": 18
+  },
+  {
+    "max_rowcol": 524288,
+    "ntiles": 274877906944,
+    "rowcol_range": 524287,
+    "total": 366503875925,
+    "zoom": 19
+  },
+  {
+    "max_rowcol": 1048576,
+    "ntiles": 1099511627776,
+    "rowcol_range": 1048575,
+    "total": 1466015503701,
+    "zoom": 20
+  },
+  {
+    "max_rowcol": 2097152,
+    "ntiles": 4398046511104,
+    "rowcol_range": 2097151,
+    "total": 5864062014805,
+    "zoom": 21
+  },
+  {
+    "max_rowcol": 4194304,
+    "ntiles": 17592186044416,
+    "rowcol_range": 4194303,
+    "total": 23456248059221,
+    "zoom": 22
+  },
+  {
+    "max_rowcol": 8388608,
+    "ntiles": 70368744177664,
+    "rowcol_range": 8388607,
+    "total": 93824992236885,
+    "zoom": 23
+  },
+  {
+    "max_rowcol": 16777216,
+    "ntiles": 281474976710656,
+    "rowcol_range": 16777215,
+    "total": 375299968947541,
+    "zoom": 24
+  },
+  {
+    "max_rowcol": 33554432,
+    "ntiles": 1125899906842624,
+    "rowcol_range": 33554431,
+    "total": 1501199875790165,
+    "zoom": 25
+  },
+  {
+    "max_rowcol": 67108864,
+    "ntiles": 4503599627370496,
+    "rowcol_range": 67108863,
+    "total": 6004799503160661,
+    "zoom": 26
+  },
+  {
+    "max_rowcol": 134217728,
+    "ntiles": 18014398509481984,
+    "rowcol_range": 134217727,
+    "total": 24019198012642645,
+    "zoom": 27
+  },
+  {
+    "max_rowcol": 268435456,
+    "ntiles": 72057594037927936,
+    "rowcol_range": 268435455,
+    "total": 96076792050570581,
+    "zoom": 28
+  },
+  {
+    "max_rowcol": 536870912,
+    "ntiles": 288230376151711744,
+    "rowcol_range": 536870911,
+    "total": 384307168202282325,
+    "zoom": 29
+  },
+  {
+    "max_rowcol": 1073741824,
+    "ntiles": 1152921504606846976,
+    "rowcol_range": 1073741823,
+    "total": 1537228672809129301,
+    "zoom": 30
+  },
+  {
+    "max_rowcol": 2147483648,
+    "ntiles": 4611686018427387904,
+    "rowcol_range": 2147483647,
+    "total": 6148914691236517205,
+    "zoom": 31
+  }
+]
+</code></pre>
+</details>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="python.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="CHANGELOG.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="python.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="CHANGELOG.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

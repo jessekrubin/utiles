@@ -1,0 +1,1522 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>COMMANDS - utiles.dev</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">utiles.dev</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/jessekrubin/utiles" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/jessekrubin/utiles/edit/main/docs/src/commands.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="utiles-cli-commands"><a class="header" href="#utiles-cli-commands">utiles CLI commands</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of contents</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="#about">about</a></td><td>Echo info about utiles</td></tr>
+<tr><td><a href="#agg-hash">agg-hash</a></td><td>Aggregate tile hashes for tiles-db</td></tr>
+<tr><td><a href="#bounding-tile">bounding-tile</a></td><td>Echo bounding tile at zoom for bbox / geojson</td></tr>
+<tr><td><a href="#burn">burn</a></td><td>Burn tiles from <code>GeoJSON</code> stream at zoom level (tile coverage)</td></tr>
+<tr><td><a href="#children">children</a></td><td>Echo children tiles of input tiles</td></tr>
+<tr><td><a href="#commands">commands</a></td><td>list all commands</td></tr>
+<tr><td><a href="#copy">copy</a></td><td>Copy tiles from src -&gt; dst</td></tr>
+<tr><td><a href="#dbcontains">dbcontains</a></td><td>Determine if mbtiles contains a latlong</td></tr>
+<tr><td><a href="#dev">dev</a></td><td>Development/Playground command (hidden)</td></tr>
+<tr><td><a href="#edges">edges</a></td><td>Echo edge tiles from stream of xyz tiles</td></tr>
+<tr><td><a href="#enumerate">enumerate</a></td><td>Enumerate tiles db</td></tr>
+<tr><td><a href="#fmtstr">fmtstr</a></td><td>Format json-tiles <code>[x, y, z]</code> tiles w/ format-string</td></tr>
+<tr><td><a href="#info">info</a></td><td>Echo mbtiles info/stats</td></tr>
+<tr><td><a href="#lint">lint</a></td><td>Lint mbtiles file(s) (wip)</td></tr>
+<tr><td><a href="#merge">merge</a></td><td>Merge tiles from stream removing parent tiles if children are present</td></tr>
+<tr><td><a href="#metadata">metadata</a></td><td>Echo metadata (table) as json arr/obj</td></tr>
+<tr><td><a href="#metadata-set">metadata-set</a></td><td>Set metadata key/value or from <code>json</code> file if key is fspath</td></tr>
+<tr><td><a href="#neighbors">neighbors</a></td><td>Echo the neighbor tiles for input tiles</td></tr>
+<tr><td><a href="#optimize">optimize</a></td><td>Optimize tiles-db</td></tr>
+<tr><td><a href="#parent">parent</a></td><td>Echo parent tile of input tiles</td></tr>
+<tr><td><a href="#pmtileid">pmtileid</a></td><td>Converts tile(s) to/from pmtile-id/[x, y, z]</td></tr>
+<tr><td><a href="#quadkey">quadkey</a></td><td>Converts tiles to/from quadkey/[x, y, z]</td></tr>
+<tr><td><a href="#rimraf">rimraf</a></td><td>rm-rf dirpath</td></tr>
+<tr><td><a href="#serve">serve</a></td><td>utiles server (wip)</td></tr>
+<tr><td><a href="#shapes">shapes</a></td><td>Echo tiles as <code>GeoJSON</code> feature collections/sequences</td></tr>
+<tr><td><a href="#sqlite">sqlite</a></td><td>sqlite utils/cmds</td></tr>
+<tr><td><a href="#tilejson">tilejson</a></td><td>Echo the <code>tile.json</code> for mbtiles file</td></tr>
+<tr><td><a href="#tiles">tiles</a></td><td>Echo tiles at zoom intersecting geojson bbox / feature / collection</td></tr>
+<tr><td><a href="#touch">touch</a></td><td>Create new mbtiles db w/ schema</td></tr>
+<tr><td><a href="#update">update</a></td><td>Update mbtiles db</td></tr>
+<tr><td><a href="#vacuum">vacuum</a></td><td>vacuum sqlite db inplace/into</td></tr>
+<tr><td><a href="#webpify">webpify</a></td><td>Convert raster mbtiles to webp format</td></tr>
+<tr><td><a href="#zxyify">zxyify</a></td><td>zxyify/unzxyify tiles-db</td></tr>
+</tbody></table>
+</div>
+<hr />
+<h2 id="about"><a class="header" href="#about">about</a></h2>
+<pre><code class="language-bash">Echo info about utiles
+
+Usage: utiles about [OPTIONS]
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="agg-hash"><a class="header" href="#agg-hash">agg-hash</a></h2>
+<pre><code class="language-bash">Aggregate tile hashes for tiles-db
+
+Usage: utiles agg-hash [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug              debug mode (print/log more)
+  -m, --min                compact/minified json (default: false)
+      --bbox &lt;BBOX&gt;        bbox(es) (west, south, east, north)
+      --trace              trace mode (print/log EVEN more)
+      --log-json           format log as NDJSON
+  -z, --zoom &lt;ZOOM&gt;        Zoom level (0-30)
+      --minzoom &lt;MINZOOM&gt;  min zoom level (0-30)
+      --maxzoom &lt;MAXZOOM&gt;  max zoom level (0-30)
+      --hash &lt;HASH&gt;        hash to use for blob-id if copying to normal/hash db type [possible
+                           values: md5, fnv1a, xxh32, xxh64, xxh3-64, xxh3-128]
+  -h, --help               Print help
+
+</code></pre>
+<hr />
+<h2 id="bounding-tile"><a class="header" href="#bounding-tile">bounding-tile</a></h2>
+<pre><code class="language-bash">Echo the Web Mercator tile at ZOOM level bounding `GeoJSON` [west, south,
+east, north] bounding boxes, features, or collections read from stdin.
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Examples:
+
+  \&gt; echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
+  [426, 775, 11]
+
+Usage: utiles bounding-tile [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="burn"><a class="header" href="#burn">burn</a></h2>
+<pre><code class="language-bash">Burn tiles from `GeoJSON` stream at zoom level (tile coverage)
+
+Usage: utiles burn [OPTIONS] &lt;ZOOM&gt; [INPUT]
+
+Arguments:
+  &lt;ZOOM&gt;
+          Zoom level (0-30)
+
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="children"><a class="header" href="#children">children</a></h2>
+<pre><code class="language-bash">Echo children tiles of input tiles
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Example:
+
+  \&gt; echo "[486, 332, 10]" | utiles children
+  [972, 664, 11]
+
+Usage: utiles children [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+      --depth &lt;DEPTH&gt;
+          [default: 1]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="commands"><a class="header" href="#commands">commands</a></h2>
+<pre><code class="language-bash">list all commands
+
+Usage: utiles commands [OPTIONS]
+
+Options:
+      --debug     debug mode (print/log more)
+  -f, --full      
+  -t, --table     
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="copy"><a class="header" href="#copy">copy</a></h2>
+<pre><code class="language-bash">Copy tiles from src -&gt; dst
+
+Usage: utiles copy [OPTIONS] &lt;SRC&gt; &lt;DST&gt;
+
+Arguments:
+  &lt;SRC&gt;  source dataset fspath (mbtiles, dirpath)
+  &lt;DST&gt;  destination dataset fspath (mbtiles, dirpath)
+
+Options:
+      --debug                debug mode (print/log more)
+  -n, --dryrun               dryrun (don't actually copy)
+  -f, --force                force overwrite dst
+      --trace                trace mode (print/log EVEN more)
+      --log-json             format log as NDJSON
+  -z, --zoom &lt;ZOOM&gt;          Zoom level (0-30)
+      --minzoom &lt;MINZOOM&gt;    min zoom level (0-30)
+      --maxzoom &lt;MAXZOOM&gt;    max zoom level (0-30)
+      --bbox &lt;BBOX&gt;          bbox (west, south, east, north)
+  -c, --conflict &lt;CONFLICT&gt;  conflict strategy when copying tiles [default: undefined] [possible
+                             values: undefined, ignore, replace, abort, fail]
+      --dst-type &lt;DST_TYPE&gt;  db-type (default: src type) [possible values: flat, hash, norm]
+      --hash &lt;HASH&gt;          hash to use for blob-id if copying to normal/hash db type [possible
+                             values: md5, fnv1a, xxh32, xxh64, xxh3-64, xxh3-128]
+  -j, --jobs &lt;JOBS&gt;          n-jobs ~ 0=ncpus (default: max(4, ncpus))
+  -h, --help                 Print help
+
+</code></pre>
+<hr />
+<h2 id="dbcontains"><a class="header" href="#dbcontains">dbcontains</a></h2>
+<pre><code class="language-bash">Determine if mbtiles contains a latlong
+
+Usage: utiles dbcontains [OPTIONS] &lt;FILEPATH&gt; &lt;LNGLAT&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  mbtiles filepath
+  &lt;LNGLAT&gt;    lat/long
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="dev"><a class="header" href="#dev">dev</a></h2>
+<pre><code class="language-bash">Development/Playground command (hidden)
+
+Usage: utiles dev [OPTIONS] [FSPATH]
+
+Arguments:
+  [FSPATH]  
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="edges"><a class="header" href="#edges">edges</a></h2>
+<pre><code class="language-bash">Echo edge tiles from stream of xyz tiles
+
+Usage: utiles edges [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --wrapx
+          
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --log-json
+          format log as NDJSON
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="enumerate"><a class="header" href="#enumerate">enumerate</a></h2>
+<pre><code class="language-bash">Enumerate tiles db
+
+Usage: utiles enumerate [OPTIONS] &lt;FSPATHS&gt;...
+
+Arguments:
+  &lt;FSPATHS&gt;...  
+
+Options:
+      --bbox &lt;BBOX&gt;        bbox(es) (west, south, east, north)
+      --debug              debug mode (print/log more)
+      --trace              trace mode (print/log EVEN more)
+  -z, --zoom &lt;ZOOM&gt;        Zoom level (0-30)
+      --log-json           format log as NDJSON
+      --minzoom &lt;MINZOOM&gt;  min zoom level (0-30)
+      --maxzoom &lt;MAXZOOM&gt;  max zoom level (0-30)
+  -t, --tippecanoe         tippecanoe-enumerate like output '{relpath} {x} {y} {z}'
+  -h, --help               Print help
+
+</code></pre>
+<hr />
+<h2 id="fmtstr"><a class="header" href="#fmtstr">fmtstr</a></h2>
+<pre><code class="language-bash">Format json-tiles `[x, y, z]` tiles w/ format-string
+
+fmt-tokens:
+    `{json_arr}`/`{json}`  -&gt; [x, y, z]
+    `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+    `{quadkey}`/`{qk}`     -&gt; quadkey string
+    `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+    `{x}`                  -&gt; x tile coord
+    `{y}`                  -&gt; y tile coord
+    `{z}`                  -&gt; z/zoom level
+    `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+    `{zxy}`                -&gt; z/x/y
+
+
+Example:
+    ```
+    \&gt; echo "[486, 332, 10]" | utiles fmtstr
+    [486, 332, 10]
+    \&gt; echo "[486, 332, 10]" | utiles fmtstr --fmt "{x},{y},{z}"
+    486,332,10
+    \&gt; echo "[486, 332, 10]" | utiles fmt --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND
+    tile_column = {x} AND tile_row = {y};"
+    SELECT * FROM tiles WHERE zoom_level = 10 AND tile_column = 486 AND tile_row = 332;
+    ```
+
+Usage: utiles fmtstr [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="info"><a class="header" href="#info">info</a></h2>
+<pre><code class="language-bash">Echo mbtiles info/stats
+
+Usage: utiles info [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug       debug mode (print/log more)
+  -m, --min         compact/minified json (default: false)
+      --full        
+      --trace       trace mode (print/log EVEN more)
+      --log-json    format log as NDJSON
+  -s, --statistics  [aliases: stats]
+  -h, --help        Print help
+
+</code></pre>
+<hr />
+<h2 id="lint"><a class="header" href="#lint">lint</a></h2>
+<pre><code class="language-bash">Lint mbtiles file(s) (wip)
+
+Usage: utiles lint [OPTIONS] &lt;FSPATHS&gt;...
+
+Arguments:
+  &lt;FSPATHS&gt;...  filepath(s) or dirpath(s)
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="merge"><a class="header" href="#merge">merge</a></h2>
+<pre><code class="language-bash">Merge tiles from stream removing parent tiles if children are present
+
+Usage: utiles merge [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+  -Z, --minzoom &lt;MINZOOM&gt;
+          min zoom level (0-30) to merge to
+          
+          [default: 0]
+
+  -s, --sort
+          
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --log-json
+          format log as NDJSON
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="metadata"><a class="header" href="#metadata">metadata</a></h2>
+<pre><code class="language-bash">Echo metadata (table) as json arr/obj
+
+Usage: utiles metadata [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+      --obj       Output as json object not array
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+      --raw       Output as json string for values (default: false)
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="metadata-set"><a class="header" href="#metadata-set">metadata-set</a></h2>
+<pre><code class="language-bash">Set metadata key/value or from `json` file if key is fspath
+
+Usage: utiles metadata-set [OPTIONS] &lt;FILEPATH&gt; &lt;KEY/FSPATH&gt; [VALUE]
+
+Arguments:
+  &lt;FILEPATH&gt;    sqlite filepath
+  &lt;KEY/FSPATH&gt;  key or json-fspath
+  [VALUE]       value
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+  -n, --dryrun    dryrun (don't actually set)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="neighbors"><a class="header" href="#neighbors">neighbors</a></h2>
+<pre><code class="language-bash">Echo the neighbor tiles for input tiles
+
+Input may be a compact newline-delimited sequences of JSON or a pretty-printed ASCII RS-delimited
+sequence of JSON (like &lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Usage: utiles neighbors [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="optimize"><a class="header" href="#optimize">optimize</a></h2>
+<pre><code class="language-bash">Optimize tiles-db
+
+Usage: utiles optimize [OPTIONS] &lt;FILEPATH&gt; &lt;DST&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+  &lt;DST&gt;       destination dataset fspath (mbtiles, dirpath)
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="parent"><a class="header" href="#parent">parent</a></h2>
+<pre><code class="language-bash">Echo parent tile of input tiles
+
+Usage: utiles parent [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+      --depth &lt;DEPTH&gt;
+          [default: 1]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="pmtileid"><a class="header" href="#pmtileid">pmtileid</a></h2>
+<pre><code class="language-bash">Converts tile(s) to/from pmtile-id/[x, y, z]
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Examples:
+
+  \&gt; echo "[486, 332, 10]" | utiles pmtileid
+  506307
+  \&gt; echo "506307" | utiles pmtileid
+  [486, 332, 10]
+  \&gt; utiles pmtileid 506307
+  [486, 332, 10]
+
+Usage: utiles pmtileid [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="quadkey"><a class="header" href="#quadkey">quadkey</a></h2>
+<pre><code class="language-bash">Converts tiles to/from quadkey/[x, y, z]
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Examples:
+
+  \&gt; echo "[486, 332, 10]" | utiles quadkey
+  0313102310
+  \&gt; echo "0313102310" | utiles quadkey
+  [486, 332, 10]
+  \&gt; utiles quadkey 0313102310
+  [486, 332, 10]
+
+Usage: utiles quadkey [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="rimraf"><a class="header" href="#rimraf">rimraf</a></h2>
+<pre><code class="language-bash">rm-rf dirpath
+
+Usage: utiles rimraf [OPTIONS] &lt;DIRPATH&gt;
+
+Arguments:
+  &lt;DIRPATH&gt;  dirpath to nuke
+
+Options:
+      --debug     debug mode (print/log more)
+      --size      collect and print file sizes
+  -n, --dryrun    dryrun (don't actually rm)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+      --verbose   
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="serve"><a class="header" href="#serve">serve</a></h2>
+<pre><code class="language-bash">utiles server (wip)
+
+Usage: utiles serve [OPTIONS] [FSPATHS]...
+
+Arguments:
+  [FSPATHS]...  Filesystem paths to serve from
+
+Options:
+      --debug        debug mode (print/log more)
+  -p, --port &lt;PORT&gt;  Port to server on [default: 3333]
+  -H, --host &lt;HOST&gt;  Host bind address [default: 0.0.0.0]
+      --trace        trace mode (print/log EVEN more)
+      --log-json     format log as NDJSON
+  -s, --strict       strict mode (default: false)
+  -h, --help         Print help
+
+</code></pre>
+<hr />
+<h2 id="shapes"><a class="header" href="#shapes">shapes</a></h2>
+<pre><code class="language-bash">Echo tiles as `GeoJSON` feature collections/sequences
+
+Input may be a compact newline-delimited sequences of JSON or a pretty-printed ASCII RS-delimited
+sequence of JSON (like &lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Example:
+
+\&gt; echo "[486, 332, 10]" | utiles shapes --precision 4 --bbox [-9.1406, 53.1204, -8.7891, 53.3309]
+
+Usage: utiles shapes [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          
+
+      --precision &lt;PRECISION&gt;
+          Decimal precision of coordinates
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --geographic
+          Output in geographic coordinates (the default)
+
+      --log-json
+          format log as NDJSON
+
+      --mercator
+          Output in Web Mercator coordinates
+
+      --feature
+          Output as a `GeoJSON` feature collections
+
+      --bbox
+          Output in Web Mercator coordinates
+
+      --collect
+          Output as a `GeoJSON` feature collections
+
+      --extents
+          Write shape extents as ws-separated strings (default is False)
+
+      --buffer &lt;BUFFER&gt;
+          Shift shape x and y values by a constant number
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="sqlite"><a class="header" href="#sqlite">sqlite</a></h2>
+<pre><code class="language-bash">sqlite utils/cmds
+
+Usage: utiles sqlite [OPTIONS] &lt;COMMAND&gt;
+
+Commands:
+  analyze  Analyze sqlite db
+  header   Dump sqlite db header
+  vacuum   vacuum sqlite db inplace/into
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="tilejson"><a class="header" href="#tilejson">tilejson</a></h2>
+<pre><code class="language-bash">Echo the `tile.json` for mbtiles file
+
+Usage: utiles tilejson [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug      debug mode (print/log more)
+  -m, --min        compact/minified json (default: false)
+  -t, --tilestats  include tilestats
+      --trace      trace mode (print/log EVEN more)
+      --log-json   format log as NDJSON
+  -h, --help       Print help
+
+</code></pre>
+<hr />
+<h2 id="tiles"><a class="header" href="#tiles">tiles</a></h2>
+<pre><code class="language-bash">Echos web-mercator tiles at zoom level intersecting given geojson-bbox [west, south,
+east, north], geojson-features, or geojson-collections read from stdin.
+
+Output format is a JSON `[x, y, z]` array by default; use --obj to output a
+JSON object `{x: x, y: y, z: z}`.
+
+bbox shorthands (case-insensitive):
+    "*"  | "world"     =&gt; [-180, -85.0511, 180, 85.0511]
+    "n"  | "north"     =&gt; [-180, 0, 180, 85.0511]
+    "s"  | "south"     =&gt; [-180, -85.0511, 180, 0]
+    "e"  | "east"      =&gt; [0, -85.0511, 180, 85.0511]
+    "w"  | "west"      =&gt; [-180, -85.0511, 0, 85.0511]
+    "ne" | "northeast" =&gt; [0, 0, 180, 85.0511]
+    "se" | "southeast" =&gt; [0, -85.0511, 180, 0]
+    "nw" | "northwest" =&gt; [-180, 0, 0, 85.0511]
+    "sw" | "southwest" =&gt; [-180, -85.0511, 0, 0]
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Example:
+
+  \\&gt; echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
+  [852, 1550, 12]
+  [852, 1551, 12]
+  [853, 1550, 12]
+  [853, 1551, 12]
+  \&gt; utiles tiles 12 "[-105.05, 39.95, -105, 40]"
+  [852, 1550, 12]
+  [852, 1551, 12]
+  [853, 1550, 12]
+  [853, 1551, 12]
+
+Usage: utiles tiles [OPTIONS] &lt;ZOOM&gt; [INPUT]
+
+Arguments:
+  &lt;ZOOM&gt;
+          Zoom level (0-30)
+
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="touch"><a class="header" href="#touch">touch</a></h2>
+<pre><code class="language-bash">Create new mbtiles db w/ schema
+
+Usage: utiles touch [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  mbtiles filepath
+
+Options:
+      --debug                  debug mode (print/log more)
+      --page-size &lt;PAGE_SIZE&gt;  page size
+      --dbtype &lt;DBTYPE&gt;        db-type (default: flat) [default: flat] [possible values: flat, hash,
+                               norm]
+      --trace                  trace mode (print/log EVEN more)
+      --log-json               format log as NDJSON
+  -h, --help                   Print help
+
+</code></pre>
+<hr />
+<h2 id="update"><a class="header" href="#update">update</a></h2>
+<pre><code class="language-bash">Update mbtiles db
+
+Usage: utiles update [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+  -n, --dryrun    dryrun (don't actually update)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="vacuum"><a class="header" href="#vacuum">vacuum</a></h2>
+<pre><code class="language-bash">vacuum sqlite db inplace/into
+
+Usage: utiles vacuum [OPTIONS] &lt;FILEPATH&gt; [INTO]
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+  [INTO]      fspath to vacuum db into
+
+Options:
+      --debug                  debug mode (print/log more)
+  -m, --min                    compact/minified json (default: false)
+  -a, --analyze                Analyze db after vacuum
+      --trace                  trace mode (print/log EVEN more)
+      --log-json               format log as NDJSON
+      --page-size &lt;PAGE_SIZE&gt;  page size to set
+  -h, --help                   Print help
+
+</code></pre>
+<hr />
+<h2 id="webpify"><a class="header" href="#webpify">webpify</a></h2>
+<pre><code class="language-bash">Convert raster mbtiles to webp format
+
+Usage: utiles webpify [OPTIONS] &lt;FILEPATH&gt; &lt;DST&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+  &lt;DST&gt;       destination dataset fspath (mbtiles, dirpath)
+
+Options:
+      --debug        debug mode (print/log more)
+  -m, --min          compact/minified json (default: false)
+  -j, --jobs &lt;JOBS&gt;  n-jobs ~ 0=ncpus (default: max(4, ncpus))
+      --trace        trace mode (print/log EVEN more)
+      --log-json     format log as NDJSON
+  -q, --quiet        quiet
+  -h, --help         Print help
+
+</code></pre>
+<hr />
+<h2 id="zxyify"><a class="header" href="#zxyify">zxyify</a></h2>
+<pre><code class="language-bash">zxyify/unzxyify tiles-db
+
+Adds/removes `z/x/y` table/view for querying tiles not inverted
+
+Usage: utiles zxyify [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;
+          sqlite filepath
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+  -m, --min
+          compact/minified json (default: false)
+
+      --rm
+          un-zxyify a db
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="cli.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="python.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="cli.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="python.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

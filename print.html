@@ -1,0 +1,2419 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>utiles.dev</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">utiles.dev</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/jessekrubin/utiles" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p><strong>updated:</strong> <code>2025-02-01T00:40:11.753556192+00:00[Etc/UTC]</code></p>
+<h1 id="utiles"><a class="header" href="#utiles">utiles</a></h1>
+<p>utiles = utils + tiles</p>
+<p><em>web map tile utilities, batching, serving, python and bears (oh-my)</em></p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<pre><code class="language-bash"># __CLI__
+# from crates
+cargo install utiles 
+# from source
+cargo install --git https://github.com/jessekrubin/utiles.git utiles 
+# install the oxipng mbtiles/tiles-db wrapper cli
+cargo install --git https://github.com/jessekrubin/utiles.git utiles-oxipng
+# via the python package (which wrappers the rust-cli)
+pip install -U utiles
+
+# __LIBS__
+# python (python lib + rust-cli)
+pip install -U utiles
+# rust-cli
+cargo install utiles
+# rust-libs
+cargo add utiles-core utiles
+</code></pre>
+<h2 id="about"><a class="header" href="#about">About</a></h2>
+<p><code>utiles</code> started off as a python port of mapbox’s web-mercator utils
+python-library <a href="https://github.com/mapbox/mercantile">mercantile</a> written
+in rust. It has since been expanded into a slim rust crate (<code>utiles-core</code>)
+a less slim crate with a lib/cli (<code>utiles</code>), that has a python package wrapper.</p>
+<p>For more details on the python package see: <a href="https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3">./utiles-pyo3</a></p>
+<h2 id="python"><a class="header" href="#python">python</a></h2>
+<p>A mostly drop-in replacement for <a href="https://github.com/mapbox/mercantile">mercantile</a> written w/ rust, plus several other util(e)ities</p>
+<p><a href="https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3">py-utiles</a></p>
+<hr />
+<h1 id="dev"><a class="header" href="#dev">dev</a></h1>
+<h2 id="contributing"><a class="header" href="#contributing">Contributing</a></h2>
+<ul>
+<li>Please do! Would love some feedback!</li>
+<li>Be kind!</li>
+<li>DO NOT USE the phrases <code>blazing fast</code>/<code>blazingly fast</code> in any PRs, issues or docs.</li>
+<li>I will happily accept PRs, and add you to the currently (5/26/2023) non-existent contributors list.</li>
+</ul>
+<hr />
+<h2 id="misc"><a class="header" href="#misc">MISC</a></h2>
+<details>
+<summary>zoom info</summary>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: right">zoom</th><th style="text-align: right">ntiles</th><th style="text-align: right">total</th><th style="text-align: right">rowcol_range</th><th style="text-align: right">max_rowcol</th></tr></thead><tbody>
+<tr><td style="text-align: right">0</td><td style="text-align: right">1</td><td style="text-align: right">1</td><td style="text-align: right">0</td><td style="text-align: right">1</td></tr>
+<tr><td style="text-align: right">1</td><td style="text-align: right">4</td><td style="text-align: right">5</td><td style="text-align: right">1</td><td style="text-align: right">2</td></tr>
+<tr><td style="text-align: right">2</td><td style="text-align: right">16</td><td style="text-align: right">21</td><td style="text-align: right">3</td><td style="text-align: right">4</td></tr>
+<tr><td style="text-align: right">3</td><td style="text-align: right">64</td><td style="text-align: right">85</td><td style="text-align: right">7</td><td style="text-align: right">8</td></tr>
+<tr><td style="text-align: right">4</td><td style="text-align: right">256</td><td style="text-align: right">341</td><td style="text-align: right">15</td><td style="text-align: right">16</td></tr>
+<tr><td style="text-align: right">5</td><td style="text-align: right">1_024</td><td style="text-align: right">1_365</td><td style="text-align: right">31</td><td style="text-align: right">32</td></tr>
+<tr><td style="text-align: right">6</td><td style="text-align: right">4_096</td><td style="text-align: right">5_461</td><td style="text-align: right">63</td><td style="text-align: right">64</td></tr>
+<tr><td style="text-align: right">7</td><td style="text-align: right">16_384</td><td style="text-align: right">21_845</td><td style="text-align: right">127</td><td style="text-align: right">128</td></tr>
+<tr><td style="text-align: right">8</td><td style="text-align: right">65_536</td><td style="text-align: right">87_381</td><td style="text-align: right">255</td><td style="text-align: right">256</td></tr>
+<tr><td style="text-align: right">9</td><td style="text-align: right">262_144</td><td style="text-align: right">349_525</td><td style="text-align: right">511</td><td style="text-align: right">512</td></tr>
+<tr><td style="text-align: right">10</td><td style="text-align: right">1_048_576</td><td style="text-align: right">1_398_101</td><td style="text-align: right">1_023</td><td style="text-align: right">1_024</td></tr>
+<tr><td style="text-align: right">11</td><td style="text-align: right">4_194_304</td><td style="text-align: right">5_592_405</td><td style="text-align: right">2_047</td><td style="text-align: right">2_048</td></tr>
+<tr><td style="text-align: right">12</td><td style="text-align: right">16_777_216</td><td style="text-align: right">22_369_621</td><td style="text-align: right">4_095</td><td style="text-align: right">4_096</td></tr>
+<tr><td style="text-align: right">13</td><td style="text-align: right">67_108_864</td><td style="text-align: right">89_478_485</td><td style="text-align: right">8_191</td><td style="text-align: right">8_192</td></tr>
+<tr><td style="text-align: right">14</td><td style="text-align: right">268_435_456</td><td style="text-align: right">357_913_941</td><td style="text-align: right">16_383</td><td style="text-align: right">16_384</td></tr>
+<tr><td style="text-align: right">15</td><td style="text-align: right">1_073_741_824</td><td style="text-align: right">1_431_655_765</td><td style="text-align: right">32_767</td><td style="text-align: right">32_768</td></tr>
+<tr><td style="text-align: right">16</td><td style="text-align: right">4_294_967_296</td><td style="text-align: right">5_726_623_061</td><td style="text-align: right">65_535</td><td style="text-align: right">65_536</td></tr>
+<tr><td style="text-align: right">17</td><td style="text-align: right">17_179_869_184</td><td style="text-align: right">22_906_492_245</td><td style="text-align: right">131_071</td><td style="text-align: right">131_072</td></tr>
+<tr><td style="text-align: right">18</td><td style="text-align: right">68_719_476_736</td><td style="text-align: right">91_625_968_981</td><td style="text-align: right">262_143</td><td style="text-align: right">262_144</td></tr>
+<tr><td style="text-align: right">19</td><td style="text-align: right">274_877_906_944</td><td style="text-align: right">366_503_875_925</td><td style="text-align: right">524_287</td><td style="text-align: right">524_288</td></tr>
+<tr><td style="text-align: right">20</td><td style="text-align: right">1_099_511_627_776</td><td style="text-align: right">1_466_015_503_701</td><td style="text-align: right">1_048_575</td><td style="text-align: right">1_048_576</td></tr>
+<tr><td style="text-align: right">21</td><td style="text-align: right">4_398_046_511_104</td><td style="text-align: right">5_864_062_014_805</td><td style="text-align: right">2_097_151</td><td style="text-align: right">2_097_152</td></tr>
+<tr><td style="text-align: right">22</td><td style="text-align: right">17_592_186_044_416</td><td style="text-align: right">23_456_248_059_221</td><td style="text-align: right">4_194_303</td><td style="text-align: right">4_194_304</td></tr>
+<tr><td style="text-align: right">23</td><td style="text-align: right">70_368_744_177_664</td><td style="text-align: right">93_824_992_236_885</td><td style="text-align: right">8_388_607</td><td style="text-align: right">8_388_608</td></tr>
+<tr><td style="text-align: right">24</td><td style="text-align: right">281_474_976_710_656</td><td style="text-align: right">375_299_968_947_541</td><td style="text-align: right">16_777_215</td><td style="text-align: right">16_777_216</td></tr>
+<tr><td style="text-align: right">25</td><td style="text-align: right">1_125_899_906_842_624</td><td style="text-align: right">1_501_199_875_790_165</td><td style="text-align: right">33_554_431</td><td style="text-align: right">33_554_432</td></tr>
+<tr><td style="text-align: right">26</td><td style="text-align: right">4_503_599_627_370_496</td><td style="text-align: right">6_004_799_503_160_661</td><td style="text-align: right">67_108_863</td><td style="text-align: right">67_108_864</td></tr>
+<tr><td style="text-align: right">27</td><td style="text-align: right">18_014_398_509_481_984</td><td style="text-align: right">24_019_198_012_642_645</td><td style="text-align: right">134_217_727</td><td style="text-align: right">134_217_728</td></tr>
+<tr><td style="text-align: right">28</td><td style="text-align: right">72_057_594_037_927_936</td><td style="text-align: right">96_076_792_050_570_581</td><td style="text-align: right">268_435_455</td><td style="text-align: right">268_435_456</td></tr>
+<tr><td style="text-align: right">29</td><td style="text-align: right">288_230_376_151_711_744</td><td style="text-align: right">384_307_168_202_282_325</td><td style="text-align: right">536_870_911</td><td style="text-align: right">536_870_912</td></tr>
+<tr><td style="text-align: right">30</td><td style="text-align: right">1_152_921_504_606_846_976</td><td style="text-align: right">1_537_228_672_809_129_301</td><td style="text-align: right">1_073_741_823</td><td style="text-align: right">1_073_741_824</td></tr>
+<tr><td style="text-align: right">31</td><td style="text-align: right">4_611_686_018_427_387_904</td><td style="text-align: right">6_148_914_691_236_517_205</td><td style="text-align: right">2_147_483_647</td><td style="text-align: right">2_147_483_648</td></tr>
+</tbody></table>
+</div></details>
+<p>Zoom levels</p>
+<pre><code>    zoom               ntiles                total  rowcol_range  max_rowcol
+0      0                    1                    1             0           1
+1      1                    4                    5             1           2
+2      2                   16                   21             3           4
+3      3                   64                   85             7           8
+4      4                  256                  341            15          16
+5      5                 1024                 1365            31          32
+6      6                 4096                 5461            63          64
+7      7                16384                21845           127         128
+8      8                65536                87381           255         256
+9      9               262144               349525           511         512
+10    10              1048576              1398101          1023        1024
+11    11              4194304              5592405          2047        2048
+12    12             16777216             22369621          4095        4096
+13    13             67108864             89478485          8191        8192
+14    14            268435456            357913941         16383       16384
+15    15           1073741824           1431655765         32767       32768
+16    16           4294967296           5726623061         65535       65536
+17    17          17179869184          22906492245        131071      131072
+18    18          68719476736          91625968981        262143      262144
+19    19         274877906944         366503875925        524287      524288
+20    20        1099511627776        1466015503701       1048575     1048576
+21    21        4398046511104        5864062014805       2097151     2097152
+22    22       17592186044416       23456248059221       4194303     4194304
+23    23       70368744177664       93824992236885       8388607     8388608
+24    24      281474976710656      375299968947541      16777215    16777216
+25    25     1125899906842624     1501199875790165      33554431    33554432
+26    26     4503599627370496     6004799503160661      67108863    67108864
+27    27    18014398509481984    24019198012642645     134217727   134217728
+28    28    72057594037927936    96076792050570581     268435455   268435456
+29    29   288230376151711744   384307168202282325     536870911   536870912
+30    30  1152921504606846976  1537228672809129301    1073741823  1073741824
+31    31  4611686018427387904  6148914691236517205    2147483647  2147483648
+</code></pre>
+<details>
+<summary>json</summary>
+<pre><code class="language-json">[
+  {
+    "max_rowcol": 1,
+    "ntiles": 1,
+    "rowcol_range": 0,
+    "total": 1,
+    "zoom": 0
+  },
+  {
+    "max_rowcol": 2,
+    "ntiles": 4,
+    "rowcol_range": 1,
+    "total": 5,
+    "zoom": 1
+  },
+  {
+    "max_rowcol": 4,
+    "ntiles": 16,
+    "rowcol_range": 3,
+    "total": 21,
+    "zoom": 2
+  },
+  {
+    "max_rowcol": 8,
+    "ntiles": 64,
+    "rowcol_range": 7,
+    "total": 85,
+    "zoom": 3
+  },
+  {
+    "max_rowcol": 16,
+    "ntiles": 256,
+    "rowcol_range": 15,
+    "total": 341,
+    "zoom": 4
+  },
+  {
+    "max_rowcol": 32,
+    "ntiles": 1024,
+    "rowcol_range": 31,
+    "total": 1365,
+    "zoom": 5
+  },
+  {
+    "max_rowcol": 64,
+    "ntiles": 4096,
+    "rowcol_range": 63,
+    "total": 5461,
+    "zoom": 6
+  },
+  {
+    "max_rowcol": 128,
+    "ntiles": 16384,
+    "rowcol_range": 127,
+    "total": 21845,
+    "zoom": 7
+  },
+  {
+    "max_rowcol": 256,
+    "ntiles": 65536,
+    "rowcol_range": 255,
+    "total": 87381,
+    "zoom": 8
+  },
+  {
+    "max_rowcol": 512,
+    "ntiles": 262144,
+    "rowcol_range": 511,
+    "total": 349525,
+    "zoom": 9
+  },
+  {
+    "max_rowcol": 1024,
+    "ntiles": 1048576,
+    "rowcol_range": 1023,
+    "total": 1398101,
+    "zoom": 10
+  },
+  {
+    "max_rowcol": 2048,
+    "ntiles": 4194304,
+    "rowcol_range": 2047,
+    "total": 5592405,
+    "zoom": 11
+  },
+  {
+    "max_rowcol": 4096,
+    "ntiles": 16777216,
+    "rowcol_range": 4095,
+    "total": 22369621,
+    "zoom": 12
+  },
+  {
+    "max_rowcol": 8192,
+    "ntiles": 67108864,
+    "rowcol_range": 8191,
+    "total": 89478485,
+    "zoom": 13
+  },
+  {
+    "max_rowcol": 16384,
+    "ntiles": 268435456,
+    "rowcol_range": 16383,
+    "total": 357913941,
+    "zoom": 14
+  },
+  {
+    "max_rowcol": 32768,
+    "ntiles": 1073741824,
+    "rowcol_range": 32767,
+    "total": 1431655765,
+    "zoom": 15
+  },
+  {
+    "max_rowcol": 65536,
+    "ntiles": 4294967296,
+    "rowcol_range": 65535,
+    "total": 5726623061,
+    "zoom": 16
+  },
+  {
+    "max_rowcol": 131072,
+    "ntiles": 17179869184,
+    "rowcol_range": 131071,
+    "total": 22906492245,
+    "zoom": 17
+  },
+  {
+    "max_rowcol": 262144,
+    "ntiles": 68719476736,
+    "rowcol_range": 262143,
+    "total": 91625968981,
+    "zoom": 18
+  },
+  {
+    "max_rowcol": 524288,
+    "ntiles": 274877906944,
+    "rowcol_range": 524287,
+    "total": 366503875925,
+    "zoom": 19
+  },
+  {
+    "max_rowcol": 1048576,
+    "ntiles": 1099511627776,
+    "rowcol_range": 1048575,
+    "total": 1466015503701,
+    "zoom": 20
+  },
+  {
+    "max_rowcol": 2097152,
+    "ntiles": 4398046511104,
+    "rowcol_range": 2097151,
+    "total": 5864062014805,
+    "zoom": 21
+  },
+  {
+    "max_rowcol": 4194304,
+    "ntiles": 17592186044416,
+    "rowcol_range": 4194303,
+    "total": 23456248059221,
+    "zoom": 22
+  },
+  {
+    "max_rowcol": 8388608,
+    "ntiles": 70368744177664,
+    "rowcol_range": 8388607,
+    "total": 93824992236885,
+    "zoom": 23
+  },
+  {
+    "max_rowcol": 16777216,
+    "ntiles": 281474976710656,
+    "rowcol_range": 16777215,
+    "total": 375299968947541,
+    "zoom": 24
+  },
+  {
+    "max_rowcol": 33554432,
+    "ntiles": 1125899906842624,
+    "rowcol_range": 33554431,
+    "total": 1501199875790165,
+    "zoom": 25
+  },
+  {
+    "max_rowcol": 67108864,
+    "ntiles": 4503599627370496,
+    "rowcol_range": 67108863,
+    "total": 6004799503160661,
+    "zoom": 26
+  },
+  {
+    "max_rowcol": 134217728,
+    "ntiles": 18014398509481984,
+    "rowcol_range": 134217727,
+    "total": 24019198012642645,
+    "zoom": 27
+  },
+  {
+    "max_rowcol": 268435456,
+    "ntiles": 72057594037927936,
+    "rowcol_range": 268435455,
+    "total": 96076792050570581,
+    "zoom": 28
+  },
+  {
+    "max_rowcol": 536870912,
+    "ntiles": 288230376151711744,
+    "rowcol_range": 536870911,
+    "total": 384307168202282325,
+    "zoom": 29
+  },
+  {
+    "max_rowcol": 1073741824,
+    "ntiles": 1152921504606846976,
+    "rowcol_range": 1073741823,
+    "total": 1537228672809129301,
+    "zoom": 30
+  },
+  {
+    "max_rowcol": 2147483648,
+    "ntiles": 4611686018427387904,
+    "rowcol_range": 2147483647,
+    "total": 6148914691236517205,
+    "zoom": 31
+  }
+]
+</code></pre>
+</details>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cli"><a class="header" href="#cli">cli</a></h1>
+<p>The utiles cli can be installed via cargo or pip; the python library bundles
+a version of the cli that can be run just as <code>utiles</code> and/or <code>python -m utiles</code>.</p>
+<p>The cli is a collection of commands for streaming tiles in text format (excellent for piping) and working with mbtiles/tile-db files.</p>
+<p>All of the <code>mercantile</code> cli commands are available, and <code>burn</code> and <code>edges</code> from <code>supermercado</code> are also available.</p>
+<hr />
+<h2 id="what-about-the-mbtiles-cli-in-the-martin-repo-2025-01-14"><a class="header" href="#what-about-the-mbtiles-cli-in-the-martin-repo-2025-01-14">What about the <code>mbtiles</code> cli in the martin repo? [2025-01-14]</a></h2>
+<p>The <code>mbtiles</code> cli is very good and has significant overlap with the <code>utiles</code> cli.</p>
+<p>(imo) The most intriguing feature of the <code>mbtiles</code> cli is the <code>diff</code>/<code>patch</code> commands
+that allow for comparing and updating mbtiles files; <code>utiles</code> does not have this feature.</p>
+<p><code>utiles</code> does have a streaming mode copy command that allows copying tiles from one mbtiles db to another without using the <code>sqlite-ATTACH</code> command; this is in my testing and experience less crash-prone and much faster on super large tile-dbs.</p>
+<p>The cli commands in <code>utiles</code> that interact with mbtiles are more focused <code>raster</code> format <code>mbtiles</code> files.</p>
+<h3 id="agg-hash"><a class="header" href="#agg-hash"><code>agg-hash</code></a></h3>
+<p><code>utiles</code> adopted the standardized way of calculating an <code>aggregate-tiles-hash</code> for an mbtiles file, and builds on it to allow for hash-algorithms aside from <code>md5</code>. The cli command also allows for selecting zoom-levels, and bounding-boxes to calculate the hash over.</p>
+<p>The default hashing alg is <code>md5</code> to match the martin <code>mbtiles</code> cli; but may change if I get around to updating some of our (dgi’s) very large datasets;
+<code>xxh64</code> is generally very fast.</p>
+<pre><code class="language-bash">&gt; utiles agg-hash -z 2 osm-standard.z0z4.mbtiles
+{
+  "hash_type": "md5",
+  "hash": "F211FF7D9FF917B58808302E0AAE82FF",
+  "ntiles": 16,
+  "dt": {
+    "secs": 0,
+    "nanos": 709600
+  }
+}
+
+&gt; utiles agg-hash osm-standard.z0z4.mbtiles --hash md5
+{
+  "hash_type": "md5",
+  "hash": "3A9279283D4D6B5B12362E3A76AF7201",
+  "ntiles": 341,
+  "dt": {
+    "secs": 0,
+    "nanos": 10092400
+  }
+}
+
+&gt; utiles agg-hash osm-standard.z0z4.mbtiles
+{
+  "hash_type": "md5",
+  "hash": "3A9279283D4D6B5B12362E3A76AF7201",
+  "ntiles": 341,
+  "dt": {
+    "secs": 0,
+    "nanos": 10108300
+  }
+}
+</code></pre>
+<h2 id="copy"><a class="header" href="#copy"><code>copy</code></a></h2>
+<pre><code class="language-bash">&gt; utiles tj osm-standard.z0z4.mbtiles
+{
+  "tilejson": "3.0.0",
+  "tiles": [],
+  "bounds": [
+    -180.0,
+    -85.05113,
+    180.0,
+    85.05113
+  ],
+  "center": [
+    0.0,
+    0.0,
+    2
+  ],
+  "description": "osm standard png tiles 256",
+  "maxzoom": 4,
+  "minzoom": 0,
+  "name": "osm-standard",
+  "format": "png",
+  "type": "overlay"
+}
+
+&gt; utiles copy osm-standard.z0z4.mbtiles osm-standard.z4.mbtiles -z 4
+2025-01-14T22:17:07.113799Z  INFO utiles::copy: copy-config-json: {
+  "src": "osm-standard.z0z4.mbtiles",
+  "dst": "osm-standard.z4.mbtiles",
+  "zset": 16,
+  "zooms": [
+    4
+  ],
+  "bboxes": null,
+  "bounds_string": null,
+  "verbose": true,
+  "dryrun": false,
+  "force": false,
+  "jobs": null,
+  "istrat": "None",
+  "dst_type": null,
+  "hash": null,
+  "stream": false
+}
+2025-01-14T22:17:07.114507Z  WARN utiles::copy::pasta: mbtiles-2-mbtiles copy is a WIP
+2025-01-14T22:17:07.116782Z  INFO utiles::copy::pasta: dst_db_type_if_new: Some(Flat)
+2025-01-14T22:17:07.154346Z  INFO utiles::copy::pasta: Copying from "osm-standard.z0z4.mbtiles" (flat) -&gt; "osm-standard.z4.mbtiles" flat
+2025-01-14T22:17:07.154803Z  INFO utiles::copy::pasta: Copying tiles: "osm-standard.z0z4.mbtiles" -&gt; "osm-standard.z4.mbtiles"
+2025-01-14T22:17:07.165062Z  INFO utiles::copy::pasta: Copied 256 tiles from "osm-standard.z0z4.mbtiles" -&gt; "osm-standard.z4.mbtiles" in 10.0263ms
+
+&gt; utiles tj osm-standard.z4.mbtiles
+{
+  "tilejson": "3.0.0",
+  "tiles": [],
+  "bounds": [
+    -180.0,
+    -85.05113,
+    180.0,
+    85.05113
+  ],
+  "center": [
+    0.0,
+    0.0,
+    2
+  ],
+  "description": "osm standard png tiles 256",
+  "maxzoom": 4,
+  "minzoom": 4,
+  "name": "osm-standard",
+  "dbtype": "flat",
+  "format": "png",
+  "type": "overlay"
+}
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="utiles-cli-commands"><a class="header" href="#utiles-cli-commands">utiles CLI commands</a></h1>
+<h2 id="table-of-contents"><a class="header" href="#table-of-contents">Table of contents</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="commands.html#about">about</a></td><td>Echo info about utiles</td></tr>
+<tr><td><a href="commands.html#agg-hash">agg-hash</a></td><td>Aggregate tile hashes for tiles-db</td></tr>
+<tr><td><a href="commands.html#bounding-tile">bounding-tile</a></td><td>Echo bounding tile at zoom for bbox / geojson</td></tr>
+<tr><td><a href="commands.html#burn">burn</a></td><td>Burn tiles from <code>GeoJSON</code> stream at zoom level (tile coverage)</td></tr>
+<tr><td><a href="commands.html#children">children</a></td><td>Echo children tiles of input tiles</td></tr>
+<tr><td><a href="commands.html#commands">commands</a></td><td>list all commands</td></tr>
+<tr><td><a href="commands.html#copy">copy</a></td><td>Copy tiles from src -&gt; dst</td></tr>
+<tr><td><a href="commands.html#dbcontains">dbcontains</a></td><td>Determine if mbtiles contains a latlong</td></tr>
+<tr><td><a href="commands.html#dev">dev</a></td><td>Development/Playground command (hidden)</td></tr>
+<tr><td><a href="commands.html#edges">edges</a></td><td>Echo edge tiles from stream of xyz tiles</td></tr>
+<tr><td><a href="commands.html#enumerate">enumerate</a></td><td>Enumerate tiles db</td></tr>
+<tr><td><a href="commands.html#fmtstr">fmtstr</a></td><td>Format json-tiles <code>[x, y, z]</code> tiles w/ format-string</td></tr>
+<tr><td><a href="commands.html#info">info</a></td><td>Echo mbtiles info/stats</td></tr>
+<tr><td><a href="commands.html#lint">lint</a></td><td>Lint mbtiles file(s) (wip)</td></tr>
+<tr><td><a href="commands.html#merge">merge</a></td><td>Merge tiles from stream removing parent tiles if children are present</td></tr>
+<tr><td><a href="commands.html#metadata">metadata</a></td><td>Echo metadata (table) as json arr/obj</td></tr>
+<tr><td><a href="commands.html#metadata-set">metadata-set</a></td><td>Set metadata key/value or from <code>json</code> file if key is fspath</td></tr>
+<tr><td><a href="commands.html#neighbors">neighbors</a></td><td>Echo the neighbor tiles for input tiles</td></tr>
+<tr><td><a href="commands.html#optimize">optimize</a></td><td>Optimize tiles-db</td></tr>
+<tr><td><a href="commands.html#parent">parent</a></td><td>Echo parent tile of input tiles</td></tr>
+<tr><td><a href="commands.html#pmtileid">pmtileid</a></td><td>Converts tile(s) to/from pmtile-id/[x, y, z]</td></tr>
+<tr><td><a href="commands.html#quadkey">quadkey</a></td><td>Converts tiles to/from quadkey/[x, y, z]</td></tr>
+<tr><td><a href="commands.html#rimraf">rimraf</a></td><td>rm-rf dirpath</td></tr>
+<tr><td><a href="commands.html#serve">serve</a></td><td>utiles server (wip)</td></tr>
+<tr><td><a href="commands.html#shapes">shapes</a></td><td>Echo tiles as <code>GeoJSON</code> feature collections/sequences</td></tr>
+<tr><td><a href="commands.html#sqlite">sqlite</a></td><td>sqlite utils/cmds</td></tr>
+<tr><td><a href="commands.html#tilejson">tilejson</a></td><td>Echo the <code>tile.json</code> for mbtiles file</td></tr>
+<tr><td><a href="commands.html#tiles">tiles</a></td><td>Echo tiles at zoom intersecting geojson bbox / feature / collection</td></tr>
+<tr><td><a href="commands.html#touch">touch</a></td><td>Create new mbtiles db w/ schema</td></tr>
+<tr><td><a href="commands.html#update">update</a></td><td>Update mbtiles db</td></tr>
+<tr><td><a href="commands.html#vacuum">vacuum</a></td><td>vacuum sqlite db inplace/into</td></tr>
+<tr><td><a href="commands.html#webpify">webpify</a></td><td>Convert raster mbtiles to webp format</td></tr>
+<tr><td><a href="commands.html#zxyify">zxyify</a></td><td>zxyify/unzxyify tiles-db</td></tr>
+</tbody></table>
+</div>
+<hr />
+<h2 id="about-1"><a class="header" href="#about-1">about</a></h2>
+<pre><code class="language-bash">Echo info about utiles
+
+Usage: utiles about [OPTIONS]
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="agg-hash-1"><a class="header" href="#agg-hash-1">agg-hash</a></h2>
+<pre><code class="language-bash">Aggregate tile hashes for tiles-db
+
+Usage: utiles agg-hash [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug              debug mode (print/log more)
+  -m, --min                compact/minified json (default: false)
+      --bbox &lt;BBOX&gt;        bbox(es) (west, south, east, north)
+      --trace              trace mode (print/log EVEN more)
+      --log-json           format log as NDJSON
+  -z, --zoom &lt;ZOOM&gt;        Zoom level (0-30)
+      --minzoom &lt;MINZOOM&gt;  min zoom level (0-30)
+      --maxzoom &lt;MAXZOOM&gt;  max zoom level (0-30)
+      --hash &lt;HASH&gt;        hash to use for blob-id if copying to normal/hash db type [possible
+                           values: md5, fnv1a, xxh32, xxh64, xxh3-64, xxh3-128]
+  -h, --help               Print help
+
+</code></pre>
+<hr />
+<h2 id="bounding-tile"><a class="header" href="#bounding-tile">bounding-tile</a></h2>
+<pre><code class="language-bash">Echo the Web Mercator tile at ZOOM level bounding `GeoJSON` [west, south,
+east, north] bounding boxes, features, or collections read from stdin.
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Examples:
+
+  \&gt; echo "[-105.05, 39.95, -105, 40]" | utiles bounding-tile
+  [426, 775, 11]
+
+Usage: utiles bounding-tile [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="burn"><a class="header" href="#burn">burn</a></h2>
+<pre><code class="language-bash">Burn tiles from `GeoJSON` stream at zoom level (tile coverage)
+
+Usage: utiles burn [OPTIONS] &lt;ZOOM&gt; [INPUT]
+
+Arguments:
+  &lt;ZOOM&gt;
+          Zoom level (0-30)
+
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="children"><a class="header" href="#children">children</a></h2>
+<pre><code class="language-bash">Echo children tiles of input tiles
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Example:
+
+  \&gt; echo "[486, 332, 10]" | utiles children
+  [972, 664, 11]
+
+Usage: utiles children [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+      --depth &lt;DEPTH&gt;
+          [default: 1]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="commands"><a class="header" href="#commands">commands</a></h2>
+<pre><code class="language-bash">list all commands
+
+Usage: utiles commands [OPTIONS]
+
+Options:
+      --debug     debug mode (print/log more)
+  -f, --full      
+  -t, --table     
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="copy-1"><a class="header" href="#copy-1">copy</a></h2>
+<pre><code class="language-bash">Copy tiles from src -&gt; dst
+
+Usage: utiles copy [OPTIONS] &lt;SRC&gt; &lt;DST&gt;
+
+Arguments:
+  &lt;SRC&gt;  source dataset fspath (mbtiles, dirpath)
+  &lt;DST&gt;  destination dataset fspath (mbtiles, dirpath)
+
+Options:
+      --debug                debug mode (print/log more)
+  -n, --dryrun               dryrun (don't actually copy)
+  -f, --force                force overwrite dst
+      --trace                trace mode (print/log EVEN more)
+      --log-json             format log as NDJSON
+  -z, --zoom &lt;ZOOM&gt;          Zoom level (0-30)
+      --minzoom &lt;MINZOOM&gt;    min zoom level (0-30)
+      --maxzoom &lt;MAXZOOM&gt;    max zoom level (0-30)
+      --bbox &lt;BBOX&gt;          bbox (west, south, east, north)
+  -c, --conflict &lt;CONFLICT&gt;  conflict strategy when copying tiles [default: undefined] [possible
+                             values: undefined, ignore, replace, abort, fail]
+      --dst-type &lt;DST_TYPE&gt;  db-type (default: src type) [possible values: flat, hash, norm]
+      --hash &lt;HASH&gt;          hash to use for blob-id if copying to normal/hash db type [possible
+                             values: md5, fnv1a, xxh32, xxh64, xxh3-64, xxh3-128]
+  -j, --jobs &lt;JOBS&gt;          n-jobs ~ 0=ncpus (default: max(4, ncpus))
+  -h, --help                 Print help
+
+</code></pre>
+<hr />
+<h2 id="dbcontains"><a class="header" href="#dbcontains">dbcontains</a></h2>
+<pre><code class="language-bash">Determine if mbtiles contains a latlong
+
+Usage: utiles dbcontains [OPTIONS] &lt;FILEPATH&gt; &lt;LNGLAT&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  mbtiles filepath
+  &lt;LNGLAT&gt;    lat/long
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="dev-1"><a class="header" href="#dev-1">dev</a></h2>
+<pre><code class="language-bash">Development/Playground command (hidden)
+
+Usage: utiles dev [OPTIONS] [FSPATH]
+
+Arguments:
+  [FSPATH]  
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="edges"><a class="header" href="#edges">edges</a></h2>
+<pre><code class="language-bash">Echo edge tiles from stream of xyz tiles
+
+Usage: utiles edges [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --wrapx
+          
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --log-json
+          format log as NDJSON
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="enumerate"><a class="header" href="#enumerate">enumerate</a></h2>
+<pre><code class="language-bash">Enumerate tiles db
+
+Usage: utiles enumerate [OPTIONS] &lt;FSPATHS&gt;...
+
+Arguments:
+  &lt;FSPATHS&gt;...  
+
+Options:
+      --bbox &lt;BBOX&gt;        bbox(es) (west, south, east, north)
+      --debug              debug mode (print/log more)
+      --trace              trace mode (print/log EVEN more)
+  -z, --zoom &lt;ZOOM&gt;        Zoom level (0-30)
+      --log-json           format log as NDJSON
+      --minzoom &lt;MINZOOM&gt;  min zoom level (0-30)
+      --maxzoom &lt;MAXZOOM&gt;  max zoom level (0-30)
+  -t, --tippecanoe         tippecanoe-enumerate like output '{relpath} {x} {y} {z}'
+  -h, --help               Print help
+
+</code></pre>
+<hr />
+<h2 id="fmtstr"><a class="header" href="#fmtstr">fmtstr</a></h2>
+<pre><code class="language-bash">Format json-tiles `[x, y, z]` tiles w/ format-string
+
+fmt-tokens:
+    `{json_arr}`/`{json}`  -&gt; [x, y, z]
+    `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+    `{quadkey}`/`{qk}`     -&gt; quadkey string
+    `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+    `{x}`                  -&gt; x tile coord
+    `{y}`                  -&gt; y tile coord
+    `{z}`                  -&gt; z/zoom level
+    `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+    `{zxy}`                -&gt; z/x/y
+
+
+Example:
+    ```
+    \&gt; echo "[486, 332, 10]" | utiles fmtstr
+    [486, 332, 10]
+    \&gt; echo "[486, 332, 10]" | utiles fmtstr --fmt "{x},{y},{z}"
+    486,332,10
+    \&gt; echo "[486, 332, 10]" | utiles fmt --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND
+    tile_column = {x} AND tile_row = {y};"
+    SELECT * FROM tiles WHERE zoom_level = 10 AND tile_column = 486 AND tile_row = 332;
+    ```
+
+Usage: utiles fmtstr [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="info"><a class="header" href="#info">info</a></h2>
+<pre><code class="language-bash">Echo mbtiles info/stats
+
+Usage: utiles info [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug       debug mode (print/log more)
+  -m, --min         compact/minified json (default: false)
+      --full        
+      --trace       trace mode (print/log EVEN more)
+      --log-json    format log as NDJSON
+  -s, --statistics  [aliases: stats]
+  -h, --help        Print help
+
+</code></pre>
+<hr />
+<h2 id="lint"><a class="header" href="#lint">lint</a></h2>
+<pre><code class="language-bash">Lint mbtiles file(s) (wip)
+
+Usage: utiles lint [OPTIONS] &lt;FSPATHS&gt;...
+
+Arguments:
+  &lt;FSPATHS&gt;...  filepath(s) or dirpath(s)
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="merge"><a class="header" href="#merge">merge</a></h2>
+<pre><code class="language-bash">Merge tiles from stream removing parent tiles if children are present
+
+Usage: utiles merge [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+  -Z, --minzoom &lt;MINZOOM&gt;
+          min zoom level (0-30) to merge to
+          
+          [default: 0]
+
+  -s, --sort
+          
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --log-json
+          format log as NDJSON
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="metadata"><a class="header" href="#metadata">metadata</a></h2>
+<pre><code class="language-bash">Echo metadata (table) as json arr/obj
+
+Usage: utiles metadata [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+      --obj       Output as json object not array
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+      --raw       Output as json string for values (default: false)
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="metadata-set"><a class="header" href="#metadata-set">metadata-set</a></h2>
+<pre><code class="language-bash">Set metadata key/value or from `json` file if key is fspath
+
+Usage: utiles metadata-set [OPTIONS] &lt;FILEPATH&gt; &lt;KEY/FSPATH&gt; [VALUE]
+
+Arguments:
+  &lt;FILEPATH&gt;    sqlite filepath
+  &lt;KEY/FSPATH&gt;  key or json-fspath
+  [VALUE]       value
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+  -n, --dryrun    dryrun (don't actually set)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="neighbors"><a class="header" href="#neighbors">neighbors</a></h2>
+<pre><code class="language-bash">Echo the neighbor tiles for input tiles
+
+Input may be a compact newline-delimited sequences of JSON or a pretty-printed ASCII RS-delimited
+sequence of JSON (like &lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Usage: utiles neighbors [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="optimize"><a class="header" href="#optimize">optimize</a></h2>
+<pre><code class="language-bash">Optimize tiles-db
+
+Usage: utiles optimize [OPTIONS] &lt;FILEPATH&gt; &lt;DST&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+  &lt;DST&gt;       destination dataset fspath (mbtiles, dirpath)
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="parent"><a class="header" href="#parent">parent</a></h2>
+<pre><code class="language-bash">Echo parent tile of input tiles
+
+Usage: utiles parent [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+      --depth &lt;DEPTH&gt;
+          [default: 1]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="pmtileid"><a class="header" href="#pmtileid">pmtileid</a></h2>
+<pre><code class="language-bash">Converts tile(s) to/from pmtile-id/[x, y, z]
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Examples:
+
+  \&gt; echo "[486, 332, 10]" | utiles pmtileid
+  506307
+  \&gt; echo "506307" | utiles pmtileid
+  [486, 332, 10]
+  \&gt; utiles pmtileid 506307
+  [486, 332, 10]
+
+Usage: utiles pmtileid [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="quadkey"><a class="header" href="#quadkey">quadkey</a></h2>
+<pre><code class="language-bash">Converts tiles to/from quadkey/[x, y, z]
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Examples:
+
+  \&gt; echo "[486, 332, 10]" | utiles quadkey
+  0313102310
+  \&gt; echo "0313102310" | utiles quadkey
+  [486, 332, 10]
+  \&gt; utiles quadkey 0313102310
+  [486, 332, 10]
+
+Usage: utiles quadkey [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="rimraf"><a class="header" href="#rimraf">rimraf</a></h2>
+<pre><code class="language-bash">rm-rf dirpath
+
+Usage: utiles rimraf [OPTIONS] &lt;DIRPATH&gt;
+
+Arguments:
+  &lt;DIRPATH&gt;  dirpath to nuke
+
+Options:
+      --debug     debug mode (print/log more)
+      --size      collect and print file sizes
+  -n, --dryrun    dryrun (don't actually rm)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+      --verbose   
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="serve"><a class="header" href="#serve">serve</a></h2>
+<pre><code class="language-bash">utiles server (wip)
+
+Usage: utiles serve [OPTIONS] [FSPATHS]...
+
+Arguments:
+  [FSPATHS]...  Filesystem paths to serve from
+
+Options:
+      --debug        debug mode (print/log more)
+  -p, --port &lt;PORT&gt;  Port to server on [default: 3333]
+  -H, --host &lt;HOST&gt;  Host bind address [default: 0.0.0.0]
+      --trace        trace mode (print/log EVEN more)
+      --log-json     format log as NDJSON
+  -s, --strict       strict mode (default: false)
+  -h, --help         Print help
+
+</code></pre>
+<hr />
+<h2 id="shapes"><a class="header" href="#shapes">shapes</a></h2>
+<pre><code class="language-bash">Echo tiles as `GeoJSON` feature collections/sequences
+
+Input may be a compact newline-delimited sequences of JSON or a pretty-printed ASCII RS-delimited
+sequence of JSON (like &lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Example:
+
+\&gt; echo "[486, 332, 10]" | utiles shapes --precision 4 --bbox [-9.1406, 53.1204, -8.7891, 53.3309]
+
+Usage: utiles shapes [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          
+
+      --precision &lt;PRECISION&gt;
+          Decimal precision of coordinates
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --geographic
+          Output in geographic coordinates (the default)
+
+      --log-json
+          format log as NDJSON
+
+      --mercator
+          Output in Web Mercator coordinates
+
+      --feature
+          Output as a `GeoJSON` feature collections
+
+      --bbox
+          Output in Web Mercator coordinates
+
+      --collect
+          Output as a `GeoJSON` feature collections
+
+      --extents
+          Write shape extents as ws-separated strings (default is False)
+
+      --buffer &lt;BUFFER&gt;
+          Shift shape x and y values by a constant number
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="sqlite"><a class="header" href="#sqlite">sqlite</a></h2>
+<pre><code class="language-bash">sqlite utils/cmds
+
+Usage: utiles sqlite [OPTIONS] &lt;COMMAND&gt;
+
+Commands:
+  analyze  Analyze sqlite db
+  header   Dump sqlite db header
+  vacuum   vacuum sqlite db inplace/into
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+      --debug     debug mode (print/log more)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="tilejson"><a class="header" href="#tilejson">tilejson</a></h2>
+<pre><code class="language-bash">Echo the `tile.json` for mbtiles file
+
+Usage: utiles tilejson [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug      debug mode (print/log more)
+  -m, --min        compact/minified json (default: false)
+  -t, --tilestats  include tilestats
+      --trace      trace mode (print/log EVEN more)
+      --log-json   format log as NDJSON
+  -h, --help       Print help
+
+</code></pre>
+<hr />
+<h2 id="tiles"><a class="header" href="#tiles">tiles</a></h2>
+<pre><code class="language-bash">Echos web-mercator tiles at zoom level intersecting given geojson-bbox [west, south,
+east, north], geojson-features, or geojson-collections read from stdin.
+
+Output format is a JSON `[x, y, z]` array by default; use --obj to output a
+JSON object `{x: x, y: y, z: z}`.
+
+bbox shorthands (case-insensitive):
+    "*"  | "world"     =&gt; [-180, -85.0511, 180, 85.0511]
+    "n"  | "north"     =&gt; [-180, 0, 180, 85.0511]
+    "s"  | "south"     =&gt; [-180, -85.0511, 180, 0]
+    "e"  | "east"      =&gt; [0, -85.0511, 180, 85.0511]
+    "w"  | "west"      =&gt; [-180, -85.0511, 0, 85.0511]
+    "ne" | "northeast" =&gt; [0, 0, 180, 85.0511]
+    "se" | "southeast" =&gt; [0, -85.0511, 180, 0]
+    "nw" | "northwest" =&gt; [-180, 0, 0, 85.0511]
+    "sw" | "southwest" =&gt; [-180, -85.0511, 0, 0]
+
+Input may be a compact newline-delimited sequences of JSON or a
+pretty-printed ASCII RS-delimited sequence of JSON (like
+&lt;https://tools.ietf.org/html/rfc8142&gt; and
+&lt;https://tools.ietf.org/html/rfc7159&gt;).
+
+Example:
+
+  \\&gt; echo "[-105.05, 39.95, -105, 40]" | utiles tiles 12
+  [852, 1550, 12]
+  [852, 1551, 12]
+  [853, 1550, 12]
+  [853, 1551, 12]
+  \&gt; utiles tiles 12 "[-105.05, 39.95, -105, 40]"
+  [852, 1550, 12]
+  [852, 1551, 12]
+  [853, 1550, 12]
+  [853, 1551, 12]
+
+Usage: utiles tiles [OPTIONS] &lt;ZOOM&gt; [INPUT]
+
+Arguments:
+  &lt;ZOOM&gt;
+          Zoom level (0-30)
+
+  [INPUT]
+          
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+      --seq
+          Write tiles as RS-delimited JSON sequence
+
+      --obj
+          Format tiles as json objects (equiv to `-F/--fmt "{json_obj}"`)
+
+      --trace
+          trace mode (print/log EVEN more)
+
+  -F, --fmt &lt;FMT&gt;
+          Format string for tiles (default: `{json_arr}`)
+          
+          Example:
+              &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
+              http://thingy.com/1/0/0.png
+              http://thingy.com/1/0/1.png
+              http://thingy.com/1/1/0.png
+              http://thingy.com/1/1/1.png
+              &gt; utiles tiles 1 * --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column =
+              {x} AND tile_row = {-y};"
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
+              SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
+          
+          fmt-tokens:
+              `{json_arr}`/`{json}`  -&gt; [x, y, z]
+              `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+              `{quadkey}`/`{qk}`     -&gt; quadkey string
+              `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+              `{x}`                  -&gt; x tile coord
+              `{y}`                  -&gt; y tile coord
+              `{z}`                  -&gt; z/zoom level
+              `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+              `{zxy}`                -&gt; z/x/y
+              `{bbox}`               -&gt; [w, s, e, n] bbox lnglat (wgs84)
+              `{projwin}`            -&gt; ulx,uly,lrx,lry projwin 4 gdal (wgs84)
+              `{bbox_web}`           -&gt; [w, s, e, n] bbox web-mercator (epsg:3857)
+              `{projwin_web}`        -&gt; ulx,uly,lrx,lry projwin 4 gdal (epsg:3857)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<hr />
+<h2 id="touch"><a class="header" href="#touch">touch</a></h2>
+<pre><code class="language-bash">Create new mbtiles db w/ schema
+
+Usage: utiles touch [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  mbtiles filepath
+
+Options:
+      --debug                  debug mode (print/log more)
+      --page-size &lt;PAGE_SIZE&gt;  page size
+      --dbtype &lt;DBTYPE&gt;        db-type (default: flat) [default: flat] [possible values: flat, hash,
+                               norm]
+      --trace                  trace mode (print/log EVEN more)
+      --log-json               format log as NDJSON
+  -h, --help                   Print help
+
+</code></pre>
+<hr />
+<h2 id="update"><a class="header" href="#update">update</a></h2>
+<pre><code class="language-bash">Update mbtiles db
+
+Usage: utiles update [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+
+Options:
+      --debug     debug mode (print/log more)
+  -m, --min       compact/minified json (default: false)
+  -n, --dryrun    dryrun (don't actually update)
+      --trace     trace mode (print/log EVEN more)
+      --log-json  format log as NDJSON
+  -h, --help      Print help
+
+</code></pre>
+<hr />
+<h2 id="vacuum"><a class="header" href="#vacuum">vacuum</a></h2>
+<pre><code class="language-bash">vacuum sqlite db inplace/into
+
+Usage: utiles vacuum [OPTIONS] &lt;FILEPATH&gt; [INTO]
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+  [INTO]      fspath to vacuum db into
+
+Options:
+      --debug                  debug mode (print/log more)
+  -m, --min                    compact/minified json (default: false)
+  -a, --analyze                Analyze db after vacuum
+      --trace                  trace mode (print/log EVEN more)
+      --log-json               format log as NDJSON
+      --page-size &lt;PAGE_SIZE&gt;  page size to set
+  -h, --help                   Print help
+
+</code></pre>
+<hr />
+<h2 id="webpify"><a class="header" href="#webpify">webpify</a></h2>
+<pre><code class="language-bash">Convert raster mbtiles to webp format
+
+Usage: utiles webpify [OPTIONS] &lt;FILEPATH&gt; &lt;DST&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;  sqlite filepath
+  &lt;DST&gt;       destination dataset fspath (mbtiles, dirpath)
+
+Options:
+      --debug        debug mode (print/log more)
+  -m, --min          compact/minified json (default: false)
+  -j, --jobs &lt;JOBS&gt;  n-jobs ~ 0=ncpus (default: max(4, ncpus))
+      --trace        trace mode (print/log EVEN more)
+      --log-json     format log as NDJSON
+  -q, --quiet        quiet
+  -h, --help         Print help
+
+</code></pre>
+<hr />
+<h2 id="zxyify"><a class="header" href="#zxyify">zxyify</a></h2>
+<pre><code class="language-bash">zxyify/unzxyify tiles-db
+
+Adds/removes `z/x/y` table/view for querying tiles not inverted
+
+Usage: utiles zxyify [OPTIONS] &lt;FILEPATH&gt;
+
+Arguments:
+  &lt;FILEPATH&gt;
+          sqlite filepath
+
+Options:
+      --debug
+          debug mode (print/log more)
+
+  -m, --min
+          compact/minified json (default: false)
+
+      --rm
+          un-zxyify a db
+
+      --trace
+          trace mode (print/log EVEN more)
+
+      --log-json
+          format log as NDJSON
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="utiles-python"><a class="header" href="#utiles-python">utiles (python)</a></h1>
+<p><a href="https://pypi.org/project/utiles"><img src="https://img.shields.io/pypi/v/utiles.svg?logo=python&amp;style=flat-square&amp;logoColor=white&amp;color=blue" alt="PyPI" /></a>
+<img src="https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fjessekrubin%2Futiles%2Fmain%2Futiles-pyo3%2Fpyproject.toml&amp;style=flat-square&amp;logo=python&amp;logoColor=white&amp;color=blue" alt="Python Version from PEP 621 TOML" />
+<a href="https://img.shields.io/pypi/wheel/utiles.svg"><img src="https://img.shields.io/pypi/wheel/utiles.svg?style=flat-square" alt="Wheel" /></a></p>
+<p><code>utiles = utils + tiles</code> OR <code>utiles = ultra-tiles</code> depending on the day.</p>
+<p>Fast spherical mercator geo/tile util(e)ities.</p>
+<p>A mostly drop-in replacement for <a href="https://github.com/mapbox/mercantile">mercantile</a> written w/ rust, plus several other
+util(e)ities.</p>
+<h2 id="installation-1"><a class="header" href="#installation-1">Installation</a></h2>
+<pre><code class="language-bash">pip install utiles
+uv add utiles
+</code></pre>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; import utiles as ut
+&gt;&gt;&gt; from utiles import Tile, LngLat, LngLatBbox
+&gt;&gt;&gt; ut.bounds(1, 1, 1)
+LngLatBbox(west=0, south=-85.0511287798066, east=180, north=0)
+&gt;&gt;&gt; t = ut.Tile(1, 2, 3)
+&gt;&gt;&gt; t
+Tile(x=1, y=2, z=3)
+&gt;&gt;&gt; t.x, t.y, t.z
+(1, 2, 3)
+&gt;&gt;&gt; x, y, z = t
+&gt;&gt;&gt; (x, y, z)
+(1, 2, 3)
+&gt;&gt;&gt; list(ut.tiles(*ut.bounds(1, 1, 1), 3))
+[Tile(x=4, y=4, z=3), Tile(x=4, y=5, z=3), Tile(x=4, y=6, z=3), Tile(x=4, y=7, z=3), Tile(x=5, y=4, z=3), Tile(x=5, y=5, z=3), Tile(x=5, y=6, z=3), Tile(x=5, y=7, z=3), Tile(x=6, y=4, z=3), Tile(x=6, y=5, z=3), Tile(x=6, y=6, z=3), Tile(x=6, y=7, z=3), Tile(x=7, y=4, z=3), Tile(x=7, y=5, z=3), Tile(x=7, y=6, z=3), Tile(x=7, y=7, z=3)]
+&gt;&gt;&gt; t
+Tile(x=1, y=2, z=3)
+&gt;&gt;&gt; t.parent()
+Tile(x=0, y=1, z=2)
+&gt;&gt;&gt; t.children()
+[Tile(x=2, y=4, z=4), Tile(x=3, y=4, z=4), Tile(x=3, y=5, z=4), Tile(x=2, y=5, z=4)]
+&gt;&gt;&gt; t.bounds()
+LngLatBbox(west=-135, south=40.97989806962013, east=-90, north=66.51326044311186)
+&gt;&gt;&gt; t.ul()
+LngLat(lng=-135, lat=66.51326044311186)
+&gt;&gt;&gt; t.asdict()
+{'x': 1, 'y': 2, 'z': 3}
+&gt;&gt;&gt; t.center()
+LngLat(lng=-112.5, lat=53.74657925636599)
+&gt;&gt;&gt; ~t
+Tile(x=1, y=5, z=3)
+&gt;&gt;&gt; t.valid()  # check if tile is valid
+True
+&gt;&gt;&gt; ut.Tile(1000, 1231234124, 2).valid()  # invalid tile
+False
+&gt;&gt;&gt; t.pmtileid()  # return the pmtileid of the tile
+34
+&gt;&gt;&gt; ut.Tile.from_pmtileid(34)  # create a tile from pmtileid
+Tile(x=1, y=2, z=3)
+&gt;&gt;&gt; t.json_arr()  # json-array string
+'[1, 2, 3]'
+&gt;&gt;&gt; t.json_obj()  # json-object string
+'{"x":1,"y":2,"z":3}'
+&gt;&gt;&gt; t.fmt_zxy()  # format tile as z/x/y
+'3/1/2'
+&gt;&gt;&gt; t.fmt_zxy_ext('png')  # format tile as z/x/y.ext
+'3/1/2.png'
+&gt;&gt;&gt; t == (1, 2, 3)  # compare with tuple
+True
+&gt;&gt;&gt; t == (1, 2, 2234234)  # compare with tuple
+False
+</code></pre>
+<h2 id="about-2"><a class="header" href="#about-2">About</a></h2>
+<h3 id="why"><a class="header" href="#why">Why?</a></h3>
+<p>I use mercantile regularly and wished it were a bit more ergonomic, had type annotations, and was faster, but overall
+it’s a great library.</p>
+<p>This was an excuse to learn some more rust as well as pyo3.</p>
+<p><strong>Do I/you REALLY need a rust-port of mercantile?</strong></p>
+<p>I don’t know, decide for yourself. <code>utiles</code> is certainly faster than <code>mercantile</code> for some things (see benchmarks below)</p>
+<p><strong>Is it really a drop in replacement for mercantile?</strong></p>
+<p>Not quite, but it’s close. utiles doesn’t throw the same exceptions as mercantile, instead it throws <code>ValueError</code>’s and
+<code>TypeError</code>’s.</p>
+<p>There might be other differences, but I have been using it instead of mercantile for a bit now and it works pretty
+decent, tho I am open to suggestions!</p>
+<h2 id="benchmarks-wip"><a class="header" href="#benchmarks-wip">Benchmarks (WIP)</a></h2>
+<pre><code>---------------------------------------------------------------------------------------------------- benchmark 'quadkey': 12 tests -----------------------------------------------------------------------------------------------------
+Name (time in ns)                                        Min                     Max                  Mean              StdDev                Median                 IQR            Outliers  OPS (Kops/s)            Rounds  Iterations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_quadkey_bench[utiles-(0, 0, 0)]                199.9942 (1.0)       47,100.0021 (8.78)       284.7909 (1.0)      315.1058 (6.70)       299.9950 (1.06)     100.0008 (&gt;1000.0)  966;1164    3,511.3476 (1.0)       38911           1
+test_quadkey_bench[utiles-(1, 1, 1)]                252.6316 (1.26)       5,363.1581 (1.0)        293.9171 (1.03)      47.0478 (1.0)        284.2108 (1.0)       10.5264 (&gt;1000.0)2884;35689    3,402.3204 (0.97)     196079          19
+test_quadkey_bench[utiles-(1, 0, 1)]                299.9950 (1.50)      86,300.0023 (16.09)      397.2831 (1.39)     383.5726 (8.15)       399.9958 (1.41)       0.0073 (1.0)    1451;22409    2,517.0967 (0.72)      99010           1
+test_quadkey_bench[mercantile-(0, 0, 0)]            599.9973 (3.00)      28,200.0037 (5.26)       821.2744 (2.88)     301.0209 (6.40)       799.9988 (2.81)       0.0073 (1.0)     658;21559    1,217.6198 (0.35)      69445           1
+test_quadkey_bench[utiles-(1, 40, 7)]               599.9973 (3.00)     136,899.9947 (25.53)      758.0325 (2.66)     676.4311 (14.38)      699.9981 (2.46)       0.0073 (1.0)     565;29079    1,319.2047 (0.38)     108696           1
+test_quadkey_bench[utiles-(486, 332, 10)]           749.9999 (3.75)       8,055.0002 (1.50)       838.5705 (2.94)     137.5439 (2.92)       824.9997 (2.90)      23.7496 (&gt;1000.0) 1445;4742    1,192.5056 (0.34)      63695          20
+test_quadkey_bench[mercantile-(1, 0, 1)]            799.9988 (4.00)     104,300.0011 (19.45)    1,015.6996 (3.57)     539.0831 (11.46)    1,000.0003 (3.52)       0.0073 (1.0)    1217;51791      984.5431 (0.28)     119048           1
+test_quadkey_bench[mercantile-(1, 1, 1)]            799.9988 (4.00)      75,999.9966 (14.17)    1,047.5805 (3.68)     419.8019 (8.92)     1,000.0003 (3.52)     100.0008 (&gt;1000.0) 3366;4074      954.5806 (0.27)     166667           1
+test_quadkey_bench[utiles-(486, 332, 20)]         1,299.9953 (6.50)      83,399.9948 (15.55)    1,545.1801 (5.43)     461.2615 (9.80)     1,499.9969 (5.28)     100.0008 (&gt;1000.0)8793;17328      647.1738 (0.18)     163935           1
+test_quadkey_bench[mercantile-(1, 40, 7)]         1,599.9976 (8.00)     110,599.9982 (20.62)    1,789.4247 (6.28)     711.1950 (15.12)    1,799.9992 (6.33)     100.0008 (&gt;1000.0) 1599;2703      558.8388 (0.16)     116280           1
+test_quadkey_bench[mercantile-(486, 332, 10)]     1,999.9934 (10.00)    117,000.0032 (21.82)    2,353.1110 (8.26)     768.5591 (16.34)    2,300.0030 (8.09)     200.0015 (&gt;1000.0) 1917;2168      424.9693 (0.12)     117648           1
+test_quadkey_bench[mercantile-(486, 332, 20)]     3,199.9953 (16.00)     66,100.0013 (12.32)    3,601.3369 (12.65)    567.1348 (12.05)    3,599.9983 (12.67)    100.0080 (&gt;1000.0) 1479;4347      277.6747 (0.08)      97088           1
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------- benchmark 'tiles': 2 tests ---------------------------------------------------------------------------------------------
+Name (time in us)                           Min                   Max                  Mean              StdDev                Median                 IQR            Outliers         OPS            Rounds  Iterations
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_tiles_gen_bench[utiles]           239.3000 (1.0)      1,597.3000 (1.0)        308.5684 (1.0)      130.3316 (1.0)        267.2000 (1.0)       16.5000 (1.0)       312;559  3,240.7721 (1.0)        3232           1
+test_tiles_gen_bench[mercantile]     1,349.9000 (5.64)     7,159.2000 (4.48)     1,798.2186 (5.83)     779.7610 (5.98)     1,526.7000 (5.71)     149.6250 (9.07)       66;111    556.1059 (0.17)        601           1
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------- benchmark 'ul': 12 tests ------------------------------------------------------------------------------------------------------
+Name (time in ns)                                   Min                     Max                  Mean                StdDev                Median                 IQR              Outliers  OPS (Kops/s)            Rounds  Iterations
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_ul_bench[utiles-(1, 1, 1)]                204.3478 (1.0)        7,160.8697 (1.0)        263.7100 (1.0)        125.3400 (1.00)       221.7392 (1.0)       26.0868 (1.30)    17101;28014    3,792.0436 (1.0)      169492          23
+test_ul_bench[utiles-(1, 0, 1)]                229.9999 (1.13)      10,579.9998 (1.48)       273.2589 (1.04)       124.7846 (1.0)        250.0001 (1.13)      20.0002 (1.0)      9266;14360    3,659.5327 (0.97)     188680          20
+test_ul_bench[utiles-(1, 40, 7)]               229.9999 (1.13)      42,870.0001 (5.99)       311.4689 (1.18)       188.2129 (1.51)       255.0001 (1.15)      35.0003 (1.75)    16764;39465    3,210.5932 (0.85)     200000          20
+test_ul_bench[utiles-(486, 332, 20)]           229.9999 (1.13)      65,699.9997 (9.17)       318.4368 (1.21)       243.5307 (1.95)       259.9998 (1.17)      35.0003 (1.75)    11008;36596    3,140.3404 (0.83)     178572          20
+test_ul_bench[utiles-(0, 0, 0)]                299.9950 (1.47)      33,899.9962 (4.73)       349.3773 (1.32)       205.0577 (1.64)       300.0023 (1.35)     100.0008 (5.00)        618;618    2,862.2349 (0.75)      70423           1
+test_ul_bench[utiles-(486, 332, 10)]           299.9950 (1.47)      57,999.9978 (8.10)       403.1283 (1.53)       400.2343 (3.21)       399.9958 (1.80)     100.0008 (5.00)     2013;20449    2,480.5998 (0.65)     192308           1
+test_ul_bench[mercantile-(0, 0, 0)]            999.9931 (4.89)     206,099.9977 (28.78)    1,296.5665 (4.92)     1,201.7776 (9.63)     1,200.0019 (5.41)     100.0008 (5.00)       387;2129      771.2678 (0.20)      45872           1
+test_ul_bench[mercantile-(1, 0, 1)]            999.9931 (4.89)     166,500.0018 (23.25)    1,288.3700 (4.89)       712.6090 (5.71)     1,299.9953 (5.86)     100.0008 (5.00)      2119;3450      776.1746 (0.20)     147059           1
+test_ul_bench[mercantile-(1, 1, 1)]          1,000.0003 (4.89)     102,799.9970 (14.36)    1,253.0401 (4.75)       570.2565 (4.57)     1,200.0019 (5.41)     100.0008 (5.00)      2957;3697      798.0590 (0.21)     144928           1
+test_ul_bench[mercantile-(1, 40, 7)]         1,000.0003 (4.89)      89,599.9983 (12.51)    1,263.1955 (4.79)       586.9464 (4.70)     1,200.0019 (5.41)     100.0008 (5.00)      1775;2965      791.6431 (0.21)     166667           1
+test_ul_bench[mercantile-(486, 332, 10)]     1,099.9938 (5.38)      90,200.0029 (12.60)    1,327.0801 (5.03)       536.7494 (4.30)     1,299.9953 (5.86)     100.0008 (5.00)      6813;7956      753.5340 (0.20)     135136           1
+test_ul_bench[mercantile-(486, 332, 20)]     1,099.9938 (5.38)     107,300.0021 (14.98)    1,264.2361 (4.79)       594.6154 (4.77)     1,200.0019 (5.41)     100.0008 (5.00)      1522;2265      790.9915 (0.21)     123457           1
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+</code></pre>
+<h2 id="todo"><a class="header" href="#todo">TODO:</a></h2>
+<ul>
+<li><input disabled="" type="checkbox" checked=""/>
+benchmark against mercantile</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Split library into <code>utiles</code> (rust lib) and <code>utiles-python</code> (python/pip package)?</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Re-write cli in rust with clap?</li>
+<li><strong>Maybe:</strong>
+<ul>
+<li>[] Mbtiles support for the python lib??</li>
+<li>[] Reading/writing mvt files?</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ref"><a class="header" href="#ref">REF</a></h1>
+<h1 id="zoom-levels"><a class="header" href="#zoom-levels">ZOOM LEVELS</a></h1>
+<details>
+<summary>zoom info</summary>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: right">zoom</th><th style="text-align: right">ntiles</th><th style="text-align: right">total</th><th style="text-align: right">rowcol_range</th><th style="text-align: right">max_rowcol</th></tr></thead><tbody>
+<tr><td style="text-align: right">0</td><td style="text-align: right">1</td><td style="text-align: right">1</td><td style="text-align: right">0</td><td style="text-align: right">1</td></tr>
+<tr><td style="text-align: right">1</td><td style="text-align: right">4</td><td style="text-align: right">5</td><td style="text-align: right">1</td><td style="text-align: right">2</td></tr>
+<tr><td style="text-align: right">2</td><td style="text-align: right">16</td><td style="text-align: right">21</td><td style="text-align: right">3</td><td style="text-align: right">4</td></tr>
+<tr><td style="text-align: right">3</td><td style="text-align: right">64</td><td style="text-align: right">85</td><td style="text-align: right">7</td><td style="text-align: right">8</td></tr>
+<tr><td style="text-align: right">4</td><td style="text-align: right">256</td><td style="text-align: right">341</td><td style="text-align: right">15</td><td style="text-align: right">16</td></tr>
+<tr><td style="text-align: right">5</td><td style="text-align: right">1_024</td><td style="text-align: right">1_365</td><td style="text-align: right">31</td><td style="text-align: right">32</td></tr>
+<tr><td style="text-align: right">6</td><td style="text-align: right">4_096</td><td style="text-align: right">5_461</td><td style="text-align: right">63</td><td style="text-align: right">64</td></tr>
+<tr><td style="text-align: right">7</td><td style="text-align: right">16_384</td><td style="text-align: right">21_845</td><td style="text-align: right">127</td><td style="text-align: right">128</td></tr>
+<tr><td style="text-align: right">8</td><td style="text-align: right">65_536</td><td style="text-align: right">87_381</td><td style="text-align: right">255</td><td style="text-align: right">256</td></tr>
+<tr><td style="text-align: right">9</td><td style="text-align: right">262_144</td><td style="text-align: right">349_525</td><td style="text-align: right">511</td><td style="text-align: right">512</td></tr>
+<tr><td style="text-align: right">10</td><td style="text-align: right">1_048_576</td><td style="text-align: right">1_398_101</td><td style="text-align: right">1_023</td><td style="text-align: right">1_024</td></tr>
+<tr><td style="text-align: right">11</td><td style="text-align: right">4_194_304</td><td style="text-align: right">5_592_405</td><td style="text-align: right">2_047</td><td style="text-align: right">2_048</td></tr>
+<tr><td style="text-align: right">12</td><td style="text-align: right">16_777_216</td><td style="text-align: right">22_369_621</td><td style="text-align: right">4_095</td><td style="text-align: right">4_096</td></tr>
+<tr><td style="text-align: right">13</td><td style="text-align: right">67_108_864</td><td style="text-align: right">89_478_485</td><td style="text-align: right">8_191</td><td style="text-align: right">8_192</td></tr>
+<tr><td style="text-align: right">14</td><td style="text-align: right">268_435_456</td><td style="text-align: right">357_913_941</td><td style="text-align: right">16_383</td><td style="text-align: right">16_384</td></tr>
+<tr><td style="text-align: right">15</td><td style="text-align: right">1_073_741_824</td><td style="text-align: right">1_431_655_765</td><td style="text-align: right">32_767</td><td style="text-align: right">32_768</td></tr>
+<tr><td style="text-align: right">16</td><td style="text-align: right">4_294_967_296</td><td style="text-align: right">5_726_623_061</td><td style="text-align: right">65_535</td><td style="text-align: right">65_536</td></tr>
+<tr><td style="text-align: right">17</td><td style="text-align: right">17_179_869_184</td><td style="text-align: right">22_906_492_245</td><td style="text-align: right">131_071</td><td style="text-align: right">131_072</td></tr>
+<tr><td style="text-align: right">18</td><td style="text-align: right">68_719_476_736</td><td style="text-align: right">91_625_968_981</td><td style="text-align: right">262_143</td><td style="text-align: right">262_144</td></tr>
+<tr><td style="text-align: right">19</td><td style="text-align: right">274_877_906_944</td><td style="text-align: right">366_503_875_925</td><td style="text-align: right">524_287</td><td style="text-align: right">524_288</td></tr>
+<tr><td style="text-align: right">20</td><td style="text-align: right">1_099_511_627_776</td><td style="text-align: right">1_466_015_503_701</td><td style="text-align: right">1_048_575</td><td style="text-align: right">1_048_576</td></tr>
+<tr><td style="text-align: right">21</td><td style="text-align: right">4_398_046_511_104</td><td style="text-align: right">5_864_062_014_805</td><td style="text-align: right">2_097_151</td><td style="text-align: right">2_097_152</td></tr>
+<tr><td style="text-align: right">22</td><td style="text-align: right">17_592_186_044_416</td><td style="text-align: right">23_456_248_059_221</td><td style="text-align: right">4_194_303</td><td style="text-align: right">4_194_304</td></tr>
+<tr><td style="text-align: right">23</td><td style="text-align: right">70_368_744_177_664</td><td style="text-align: right">93_824_992_236_885</td><td style="text-align: right">8_388_607</td><td style="text-align: right">8_388_608</td></tr>
+<tr><td style="text-align: right">24</td><td style="text-align: right">281_474_976_710_656</td><td style="text-align: right">375_299_968_947_541</td><td style="text-align: right">16_777_215</td><td style="text-align: right">16_777_216</td></tr>
+<tr><td style="text-align: right">25</td><td style="text-align: right">1_125_899_906_842_624</td><td style="text-align: right">1_501_199_875_790_165</td><td style="text-align: right">33_554_431</td><td style="text-align: right">33_554_432</td></tr>
+<tr><td style="text-align: right">26</td><td style="text-align: right">4_503_599_627_370_496</td><td style="text-align: right">6_004_799_503_160_661</td><td style="text-align: right">67_108_863</td><td style="text-align: right">67_108_864</td></tr>
+<tr><td style="text-align: right">27</td><td style="text-align: right">18_014_398_509_481_984</td><td style="text-align: right">24_019_198_012_642_645</td><td style="text-align: right">134_217_727</td><td style="text-align: right">134_217_728</td></tr>
+<tr><td style="text-align: right">28</td><td style="text-align: right">72_057_594_037_927_936</td><td style="text-align: right">96_076_792_050_570_581</td><td style="text-align: right">268_435_455</td><td style="text-align: right">268_435_456</td></tr>
+<tr><td style="text-align: right">29</td><td style="text-align: right">288_230_376_151_711_744</td><td style="text-align: right">384_307_168_202_282_325</td><td style="text-align: right">536_870_911</td><td style="text-align: right">536_870_912</td></tr>
+<tr><td style="text-align: right">30</td><td style="text-align: right">1_152_921_504_606_846_976</td><td style="text-align: right">1_537_228_672_809_129_301</td><td style="text-align: right">1_073_741_823</td><td style="text-align: right">1_073_741_824</td></tr>
+<tr><td style="text-align: right">31</td><td style="text-align: right">4_611_686_018_427_387_904</td><td style="text-align: right">6_148_914_691_236_517_205</td><td style="text-align: right">2_147_483_647</td><td style="text-align: right">2_147_483_648</td></tr>
+</tbody></table>
+</div></details>
+<p>Zoom levels</p>
+<pre><code>    zoom               ntiles                total  rowcol_range  max_rowcol
+0      0                    1                    1             0           1
+1      1                    4                    5             1           2
+2      2                   16                   21             3           4
+3      3                   64                   85             7           8
+4      4                  256                  341            15          16
+5      5                 1024                 1365            31          32
+6      6                 4096                 5461            63          64
+7      7                16384                21845           127         128
+8      8                65536                87381           255         256
+9      9               262144               349525           511         512
+10    10              1048576              1398101          1023        1024
+11    11              4194304              5592405          2047        2048
+12    12             16777216             22369621          4095        4096
+13    13             67108864             89478485          8191        8192
+14    14            268435456            357913941         16383       16384
+15    15           1073741824           1431655765         32767       32768
+16    16           4294967296           5726623061         65535       65536
+17    17          17179869184          22906492245        131071      131072
+18    18          68719476736          91625968981        262143      262144
+19    19         274877906944         366503875925        524287      524288
+20    20        1099511627776        1466015503701       1048575     1048576
+21    21        4398046511104        5864062014805       2097151     2097152
+22    22       17592186044416       23456248059221       4194303     4194304
+23    23       70368744177664       93824992236885       8388607     8388608
+24    24      281474976710656      375299968947541      16777215    16777216
+25    25     1125899906842624     1501199875790165      33554431    33554432
+26    26     4503599627370496     6004799503160661      67108863    67108864
+27    27    18014398509481984    24019198012642645     134217727   134217728
+28    28    72057594037927936    96076792050570581     268435455   268435456
+29    29   288230376151711744   384307168202282325     536870911   536870912
+30    30  1152921504606846976  1537228672809129301    1073741823  1073741824
+31    31  4611686018427387904  6148914691236517205    2147483647  2147483648
+</code></pre>
+<details>
+<summary>json</summary>
+<pre><code class="language-json">[
+  {
+    "max_rowcol": 1,
+    "ntiles": 1,
+    "rowcol_range": 0,
+    "total": 1,
+    "zoom": 0
+  },
+  {
+    "max_rowcol": 2,
+    "ntiles": 4,
+    "rowcol_range": 1,
+    "total": 5,
+    "zoom": 1
+  },
+  {
+    "max_rowcol": 4,
+    "ntiles": 16,
+    "rowcol_range": 3,
+    "total": 21,
+    "zoom": 2
+  },
+  {
+    "max_rowcol": 8,
+    "ntiles": 64,
+    "rowcol_range": 7,
+    "total": 85,
+    "zoom": 3
+  },
+  {
+    "max_rowcol": 16,
+    "ntiles": 256,
+    "rowcol_range": 15,
+    "total": 341,
+    "zoom": 4
+  },
+  {
+    "max_rowcol": 32,
+    "ntiles": 1024,
+    "rowcol_range": 31,
+    "total": 1365,
+    "zoom": 5
+  },
+  {
+    "max_rowcol": 64,
+    "ntiles": 4096,
+    "rowcol_range": 63,
+    "total": 5461,
+    "zoom": 6
+  },
+  {
+    "max_rowcol": 128,
+    "ntiles": 16384,
+    "rowcol_range": 127,
+    "total": 21845,
+    "zoom": 7
+  },
+  {
+    "max_rowcol": 256,
+    "ntiles": 65536,
+    "rowcol_range": 255,
+    "total": 87381,
+    "zoom": 8
+  },
+  {
+    "max_rowcol": 512,
+    "ntiles": 262144,
+    "rowcol_range": 511,
+    "total": 349525,
+    "zoom": 9
+  },
+  {
+    "max_rowcol": 1024,
+    "ntiles": 1048576,
+    "rowcol_range": 1023,
+    "total": 1398101,
+    "zoom": 10
+  },
+  {
+    "max_rowcol": 2048,
+    "ntiles": 4194304,
+    "rowcol_range": 2047,
+    "total": 5592405,
+    "zoom": 11
+  },
+  {
+    "max_rowcol": 4096,
+    "ntiles": 16777216,
+    "rowcol_range": 4095,
+    "total": 22369621,
+    "zoom": 12
+  },
+  {
+    "max_rowcol": 8192,
+    "ntiles": 67108864,
+    "rowcol_range": 8191,
+    "total": 89478485,
+    "zoom": 13
+  },
+  {
+    "max_rowcol": 16384,
+    "ntiles": 268435456,
+    "rowcol_range": 16383,
+    "total": 357913941,
+    "zoom": 14
+  },
+  {
+    "max_rowcol": 32768,
+    "ntiles": 1073741824,
+    "rowcol_range": 32767,
+    "total": 1431655765,
+    "zoom": 15
+  },
+  {
+    "max_rowcol": 65536,
+    "ntiles": 4294967296,
+    "rowcol_range": 65535,
+    "total": 5726623061,
+    "zoom": 16
+  },
+  {
+    "max_rowcol": 131072,
+    "ntiles": 17179869184,
+    "rowcol_range": 131071,
+    "total": 22906492245,
+    "zoom": 17
+  },
+  {
+    "max_rowcol": 262144,
+    "ntiles": 68719476736,
+    "rowcol_range": 262143,
+    "total": 91625968981,
+    "zoom": 18
+  },
+  {
+    "max_rowcol": 524288,
+    "ntiles": 274877906944,
+    "rowcol_range": 524287,
+    "total": 366503875925,
+    "zoom": 19
+  },
+  {
+    "max_rowcol": 1048576,
+    "ntiles": 1099511627776,
+    "rowcol_range": 1048575,
+    "total": 1466015503701,
+    "zoom": 20
+  },
+  {
+    "max_rowcol": 2097152,
+    "ntiles": 4398046511104,
+    "rowcol_range": 2097151,
+    "total": 5864062014805,
+    "zoom": 21
+  },
+  {
+    "max_rowcol": 4194304,
+    "ntiles": 17592186044416,
+    "rowcol_range": 4194303,
+    "total": 23456248059221,
+    "zoom": 22
+  },
+  {
+    "max_rowcol": 8388608,
+    "ntiles": 70368744177664,
+    "rowcol_range": 8388607,
+    "total": 93824992236885,
+    "zoom": 23
+  },
+  {
+    "max_rowcol": 16777216,
+    "ntiles": 281474976710656,
+    "rowcol_range": 16777215,
+    "total": 375299968947541,
+    "zoom": 24
+  },
+  {
+    "max_rowcol": 33554432,
+    "ntiles": 1125899906842624,
+    "rowcol_range": 33554431,
+    "total": 1501199875790165,
+    "zoom": 25
+  },
+  {
+    "max_rowcol": 67108864,
+    "ntiles": 4503599627370496,
+    "rowcol_range": 67108863,
+    "total": 6004799503160661,
+    "zoom": 26
+  },
+  {
+    "max_rowcol": 134217728,
+    "ntiles": 18014398509481984,
+    "rowcol_range": 134217727,
+    "total": 24019198012642645,
+    "zoom": 27
+  },
+  {
+    "max_rowcol": 268435456,
+    "ntiles": 72057594037927936,
+    "rowcol_range": 268435455,
+    "total": 96076792050570581,
+    "zoom": 28
+  },
+  {
+    "max_rowcol": 536870912,
+    "ntiles": 288230376151711744,
+    "rowcol_range": 536870911,
+    "total": 384307168202282325,
+    "zoom": 29
+  },
+  {
+    "max_rowcol": 1073741824,
+    "ntiles": 1152921504606846976,
+    "rowcol_range": 1073741823,
+    "total": 1537228672809129301,
+    "zoom": 30
+  },
+  {
+    "max_rowcol": 2147483648,
+    "ntiles": 4611686018427387904,
+    "rowcol_range": 2147483647,
+    "total": 6148914691236517205,
+    "zoom": 31
+  }
+]
+</code></pre>
+</details>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="changelog"><a class="header" href="#changelog">CHANGELOG</a></h1>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
