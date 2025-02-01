@@ -24,20 +24,20 @@ fn benchmark_conversion(
         black_box(1),
     ];
 
-    c.bench_function(&format!("{} u64_to_i64", name), |b| {
+    c.bench_function(&format!("{name} u64_to_i64"), |b| {
         b.iter(|| {
-            for &value in values_u64.iter() {
+            for &value in &values_u64 {
                 let _ = u64_to_i64(value);
             }
-        })
+        });
     });
 
-    c.bench_function(&format!("{} i64_to_u64", name), |b| {
+    c.bench_function(&format!("{name} i64_to_u64"), |b| {
         b.iter(|| {
-            for &value in values_i64.iter() {
+            for &value in &values_i64 {
                 let _ = i64_to_u64(value);
             }
-        })
+        });
     });
 }
 

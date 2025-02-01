@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -18,20 +19,20 @@ fn printsep() {
 
 fn main() -> Result<()> {
     let src = get_utiles_test_osm_mbtiles_path();
-    println!("mbtiles path: {:?}", src);
+    println!("mbtiles path: {src:?}");
 
     printsep();
     let mbt = Mbtiles::open_existing(src) // .await
         .expect("Failed to open mbtiles");
-    println!("mbtiles: {:?}", mbt);
+    println!("mbtiles: {mbt:?}");
     printsep();
 
     let metadata = mbt.metadata();
-    println!("metadata: {:?}", metadata);
+    println!("metadata: {metadata:?}");
 
     printsep();
     let count = mbt.tiles_count();
-    println!("tiles count: {:?}", count);
+    println!("tiles count: {count:?}");
 
     printsep();
     let tile = utile!(0, 0, 0);
@@ -39,7 +40,7 @@ fn main() -> Result<()> {
     if let Some(tile_data) = a_tile {
         println!("tile (size): {:?}", tile_data.len());
     } else {
-        println!("tile not found: {:?}", tile);
+        println!("tile not found: {tile:?}");
     }
     Ok(())
 }

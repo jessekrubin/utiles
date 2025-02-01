@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use anyhow::Result;
 use futures::StreamExt;
 use std::path::PathBuf;
@@ -17,19 +18,19 @@ fn printsep() {
 #[tokio::main]
 async fn main() -> Result<()> {
     let src = get_utiles_test_osm_mbtiles_path();
-    println!("mbtiles path: {:?}", src);
+    println!("mbtiles path: {src:?}");
 
     printsep();
     let mbt = MbtilesClientAsync::open_existing(src).await?; // .await
-    println!("mbtiles: {:?}", mbt);
+    println!("mbtiles: {mbt:?}");
 
     printsep();
     let metadata = mbt.metadata_rows().await?;
-    println!("metadata: {:?}", metadata);
+    println!("metadata: {metadata:?}");
 
     printsep();
     let count = mbt.tiles_count().await?;
-    println!("tiles count: {:?}", count);
+    println!("tiles count: {count:?}");
 
     printsep();
     let tile = utile!(0, 0, 0);
@@ -37,7 +38,7 @@ async fn main() -> Result<()> {
     if let Some(tile_data) = a_tile {
         println!("tile (size): {:?}", tile_data.len());
     } else {
-        println!("tile not found: {:?}", tile);
+        println!("tile not found: {tile:?}");
     }
 
     // stream over tiles
@@ -47,6 +48,6 @@ async fn main() -> Result<()> {
         println!("tile: {} ~ size: {}", tile.json_arr(), tile_data.len());
         count += 1;
     }
-    println!("tiles count: {:?}", count);
+    println!("tiles count: {count:?}");
     Ok(())
 }

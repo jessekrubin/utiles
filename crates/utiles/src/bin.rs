@@ -6,7 +6,7 @@ async fn main() {
     match r {
         Ok(_) => std::process::exit(0),
         Err(e) => {
-            eprintln!("Error -- {}", e);
+            eprintln!("Error -- {e}");
             std::process::exit(1);
         }
     }
