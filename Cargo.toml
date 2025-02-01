@@ -1,18 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/utiles",
-  "crates/utiles-core",
-  "crates/utiles-dev", "crates/utiles-doubledown",
-  "crates/utiles-oxipng",
-  "utiles-pyo3",
+    "crates/utiles",
+    "crates/utiles-core",
+    "crates/utiles-dev", "crates/utiles-doubledown",
+    "crates/utiles-oxipng",
+    "utiles-pyo3",
 ]
 
 [workspace.package]
 version = "0.7.3"
 authors = [
-  "Jesse Rubin <jessekrubin@gmail.com>",
-  "Dan Costello <dan.costello2@gmail.com>",
+    "Jesse Rubin <jessekrubin@gmail.com>",
+    "Dan Costello <dan.costello2@gmail.com>",
 ]
 documentation = "https://github.com/jessekrubin/utiles"
 edition = "2021"
@@ -104,6 +104,7 @@ lto = "thin"
 
 [workspace.lints.rust]
 unsafe_code = "warn"
+# MUST CLEAN UP MAIN LIBRARY....
 #unreachable_pub = "warn"
 
 [workspace.lints.clippy]

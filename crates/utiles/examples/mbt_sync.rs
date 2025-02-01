@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -8,7 +7,11 @@ use utiles::{utile, Tile};
 
 fn get_utiles_test_osm_mbtiles_path() -> Result<PathBuf> {
     let pwd = std::env::current_dir()?;
-    let repo_root = pwd.parent()?.parent()?;
+    let repo_root = pwd
+        .parent()
+        .ok_or(anyhow::anyhow!("repo root not found"))?
+        .parent()
+        .ok_or(anyhow::anyhow!("repo root not found"))?;
     Ok(repo_root.join("test-data/mbtiles/osm-standard.z0z4.mbtiles"))
 }
 

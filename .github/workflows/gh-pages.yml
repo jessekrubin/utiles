@@ -1,0 +1,47 @@
+name: gh-pages
+
+on:
+  push:
+    branches: [ main, jkrdev ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  docs-build-test-deploy:
+    name: Build, test and deploy docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # To push a branch 
+      pull-requests: write  # To create a PR from that branch
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Setup mdBook
+        uses: taiki-e/install-action@v2
+        with:
+          tool: mdbook,lychee
+      - name: build-docs
+        run: cd docs && mdbook build && lychee book
+      - name: upload-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: book
+          path: docs/book
+
+      - name: deploy-docs
+        if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/book
