@@ -22,7 +22,6 @@
 pub use core::*;
 pub use errors::UtilesError;
 pub use errors::UtilesResult;
-pub use tile_strfmt::TileStringFormatter;
 
 #[cfg(feature = "cli")]
 pub mod cli;
@@ -30,7 +29,7 @@ mod config;
 pub mod copy;
 pub mod core;
 pub mod dev;
-pub(crate) mod errors;
+pub mod errors;
 pub mod fs_async;
 pub mod gj;
 mod globster;
@@ -43,7 +42,6 @@ pub mod server;
 mod signal;
 pub mod sqlite;
 pub mod sqlite_utiles;
-mod tile_strfmt;
 pub mod utilejson;
 
 pub mod hash_types;

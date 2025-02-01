@@ -351,28 +351,13 @@ impl Mbtiles {
     }
 }
 
-impl<P: AsRef<Path>> From<P> for Mbtiles {
-    // TODO: fix uses of this
-    #[allow(clippy::unwrap_used)]
-    fn from(p: P) -> Self {
-        Mbtiles::open_existing(p).unwrap()
-    }
-}
-
 // =========================================================================
 // SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS
 // =========================================================================
-pub fn add_sqlite_hashes(conn: &Connection) -> RusqliteResult<()> {
-    sqlite_hashes::register_hash_functions(conn)
-}
 
-pub fn register_utiles_sqlite_functions(conn: &Connection) -> RusqliteResult<()> {
+pub fn register_utiles_sqlite(conn: &Connection) -> RusqliteResult<()> {
+    sqlite_hashes::register_hash_functions(conn)?;
     add_ut_functions(conn)
-}
-
-pub fn add_functions(conn: &Connection) -> RusqliteResult<()> {
-    add_sqlite_hashes(conn)?;
-    register_utiles_sqlite_functions(conn)
 }
 
 // =====================================================================

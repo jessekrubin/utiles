@@ -97,3 +97,6 @@ python = [
 # dep-features
 cli = ["dep:clap", "dep:pmtiles"]
 pmtiles = ["dep:pmtiles"]
+
+[lints]
+workspace = true

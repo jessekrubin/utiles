@@ -101,3 +101,23 @@ lto = "thin"
 [profile.dist]
 inherits = "release"
 lto = "thin"
+
+[workspace.lints.rust]
+unsafe_code = "warn"
+#unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+# groups
+all = { level = "warn", priority = -2 }
+pedantic = { level = "warn", priority = -2 }
+correctness = { level = "warn", priority = 2 }
+panic = { level = "warn", priority = -1 }
+style = { level = "warn", priority = 1 }
+perf = { level = "warn", priority = 3 }
+# DENY lints
+unwrap_used = "deny"
+# allow pedantic
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+similar_names = "allow"

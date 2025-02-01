@@ -22,3 +22,6 @@ thiserror.workspace = true
 default = ["pmtiles"]
 all = ["pmtiles"]
 pmtiles = ["dep:fast_hilbert"]
+
+[lints]
+workspace = true
