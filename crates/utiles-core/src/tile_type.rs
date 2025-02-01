@@ -53,6 +53,25 @@ impl TileKind {
 
 /// Tile format
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub enum RasterTileFormat {
+    /// GIF image
+    Gif,
+
+    /// JPEG image
+    Jpg,
+
+    /// PNG image
+    Png,
+
+    /// TIFF image
+    Tiff,
+
+    /// `WebP` image
+    Webp,
+}
+
+/// Tile format
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum TileFormat {
     /// Unknown format
     Unknown,
@@ -94,6 +113,18 @@ pub enum TileFormat {
     GeoJson,
 }
 
+impl From<RasterTileFormat> for TileFormat {
+    fn from(raster_format: RasterTileFormat) -> Self {
+        match raster_format {
+            RasterTileFormat::Gif => Self::Gif,
+            RasterTileFormat::Jpg => Self::Jpg,
+            RasterTileFormat::Png => Self::Png,
+            RasterTileFormat::Tiff => Self::Tiff,
+            RasterTileFormat::Webp => Self::Webp,
+        }
+    }
+}
+
 impl Display for TileFormat {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
@@ -109,6 +140,29 @@ impl Display for TileFormat {
             Self::Unknown => "unknown",
         };
         write!(f, "{s}")
+    }
+}
+impl RasterTileFormat {
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        Some(match value.to_ascii_lowercase().as_str() {
+            "png" => Self::Png,
+            "webp" => Self::Webp,
+            "gif" => Self::Gif,
+            "jpg" | "jpeg" => Self::Jpg,
+            _ => None?,
+        })
+    }
+
+    #[must_use]
+    pub fn content_type(&self) -> &'static str {
+        match self {
+            Self::Png => "image/png",
+            Self::Jpg => "image/jpeg",
+            Self::Gif => "image/gif",
+            Self::Webp => "image/webp",
+            Self::Tiff => "image/tiff",
+        }
     }
 }
 

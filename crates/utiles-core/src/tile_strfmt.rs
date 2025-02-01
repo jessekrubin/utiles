@@ -1,8 +1,10 @@
 //! Tile string formatting
+use crate::bbox::WebBBox;
+use crate::{BBox, TileLike};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
-use utiles_core::bbox::WebBBox;
-use utiles_core::{BBox, TileLike};
+// use utiles_core::bbox::WebBBox;
+// use utiles_core::{BBox, TileLike};
 
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub enum FormatTokens {
@@ -352,9 +354,8 @@ impl Default for TileStringFormatter {
 
 #[cfg(test)]
 mod tests {
-    use utiles_core::Tile;
-
     use super::*;
+    use crate::Tile;
 
     #[test]
     fn test_formatter_zxy() {

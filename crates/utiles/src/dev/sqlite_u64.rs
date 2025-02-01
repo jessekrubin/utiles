@@ -21,22 +21,26 @@ pub fn i64_to_u64_shift(value: i64) -> u64 {
 }
 
 #[must_use]
+#[allow(unsafe_code)]
 pub fn u64_to_i64_unsafe_transmute(value: u64) -> i64 {
     unsafe { std::mem::transmute(value) }
 }
 
 #[must_use]
+#[allow(unsafe_code)]
 pub fn i64_to_u64_unsafe_transmute(value: i64) -> u64 {
     unsafe { std::mem::transmute(value) }
 }
 
 #[must_use]
+#[allow(unsafe_code)]
 pub fn u64_to_i64_ptr(value: u64) -> i64 {
     let ptr = std::ptr::addr_of!(value).cast::<i64>();
     unsafe { *ptr }
 }
 
 #[must_use]
+#[allow(unsafe_code)]
 pub fn i64_to_u64_ptr(value: i64) -> u64 {
     let ptr = std::ptr::addr_of!(value).cast::<u64>();
     unsafe { *ptr }

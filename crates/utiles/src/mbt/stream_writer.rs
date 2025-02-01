@@ -10,6 +10,17 @@ use crate::hash::xxh64_be_hex_upper;
 use crate::mbt::{MbtType, Mbtiles};
 use crate::{UtilesError, UtilesResult};
 
+pub enum MbtWriterStreamData {
+    Tile(Tile, Vec<u8>, Option<String>),
+    Metadata(String, String),
+}
+
+impl From<(Tile, Vec<u8>, Option<String>)> for MbtWriterStreamData {
+    fn from(data: (Tile, Vec<u8>, Option<String>)) -> Self {
+        MbtWriterStreamData::Tile(data.0, data.1, data.2)
+    }
+}
+
 #[derive(Default)]
 pub struct MbtWriterStats {
     pub count: usize,
@@ -17,7 +28,7 @@ pub struct MbtWriterStats {
 }
 
 pub struct MbtStreamWriterSync {
-    pub stream: ReceiverStream<(Tile, Vec<u8>, Option<String>)>,
+    pub stream: ReceiverStream<MbtWriterStreamData>,
     pub mbt: Mbtiles,
     pub stats: MbtWriterStats,
 }
@@ -59,15 +70,25 @@ impl MbtStreamWriterSync {
         )?;
         let stream = &mut self.stream;
         while let Some(value) = stream.next().await {
-            let (tile, tile_data, _hash) = value;
-            let tile_params = rusqlite::params![tile.z, tile.x, tile.yup(), tile_data];
-            let insert_res = stmt.execute(tile_params);
-            if let Err(e) = insert_res {
-                warn!("insert_res: {:?}", e);
-            } else {
-                self.stats.count += 1;
-                self.stats.nbytes += tile_data.len();
-                debug!("count: {}, nbytes: {}", self.stats.count, self.stats.nbytes);
+            match value {
+                MbtWriterStreamData::Metadata(_key, _value) => {
+                    warn!("Writing metadata not yet supported");
+                }
+                MbtWriterStreamData::Tile(tile, tile_data, _) => {
+                    let tile_params =
+                        rusqlite::params![tile.z, tile.x, tile.yup(), tile_data];
+                    let insert_res = stmt.execute(tile_params);
+                    if let Err(e) = insert_res {
+                        warn!("insert_res: {:?}", e);
+                    } else {
+                        self.stats.count += 1;
+                        self.stats.nbytes += tile_data.len();
+                        debug!(
+                            "count: {}, nbytes: {}",
+                            self.stats.count, self.stats.nbytes
+                        );
+                    }
+                }
             }
         }
         Ok(())
@@ -79,18 +100,22 @@ impl MbtStreamWriterSync {
         )?;
         let stream = &mut self.stream;
         while let Some(value) = stream.next().await {
-            let (tile, tile_data, hash_hex) = value;
-            let hash_hex = hash_hex.unwrap_or_else(|| xxh64_be_hex_upper(&tile_data));
-            // let hash_hex = xxh64_be_hex_upper(&tile_data);
-            let tile_params =
-                rusqlite::params![tile.z, tile.x, tile.yup(), tile_data, hash_hex];
-            let insert_res = stmt.execute(tile_params);
-            if let Err(e) = insert_res {
-                warn!("insert_res: {:?}", e);
-            } else {
-                self.stats.count += 1;
-                self.stats.nbytes += tile_data.len();
-                debug!("count: {}, nbytes: {}", self.stats.count, self.stats.nbytes);
+            if let MbtWriterStreamData::Tile(tile, tile_data, hash_hex) = value {
+                let hash_hex =
+                    hash_hex.unwrap_or_else(|| xxh64_be_hex_upper(&tile_data));
+                let tile_params =
+                    rusqlite::params![tile.z, tile.x, tile.yup(), tile_data, hash_hex];
+                let insert_res = stmt.execute(tile_params);
+                if let Err(e) = insert_res {
+                    warn!("insert_res: {:?}", e);
+                } else {
+                    self.stats.count += 1;
+                    self.stats.nbytes += tile_data.len();
+                    debug!(
+                        "count: {}, nbytes: {}",
+                        self.stats.count, self.stats.nbytes
+                    );
+                }
             }
         }
         Ok(())
@@ -104,26 +129,39 @@ impl MbtStreamWriterSync {
             "INSERT OR IGNORE INTO images (tile_id, tile_data) VALUES (?1, ?2);",
         )?;
         while let Some(value) = self.stream.next().await {
-            let (tile, tile_data, hash_hex) = value;
-            let hash_hex = hash_hex.unwrap_or_else(|| xxh64_be_hex_upper(&tile_data));
-            let map_insert_res =
-                rusqlite::params![tile.z, tile.x, tile.yup(), hash_hex];
-            let map_insert_res = map_stmt.execute(map_insert_res);
-            if let Err(e) = map_insert_res {
-                warn!("insert_res: {:?}", e);
-            } else {
-                self.stats.count += 1;
-                self.stats.nbytes += tile_data.len();
-                debug!("count: {}, nbytes: {}", self.stats.count, self.stats.nbytes);
-            }
-            let blob_params = rusqlite::params![hash_hex, tile_data];
-            let insert_res = blob_stmt.execute(blob_params);
-            if let Err(e) = insert_res {
-                warn!("blob insert res: {:?}", e);
-            } else {
-                self.stats.count += 1;
-                self.stats.nbytes += tile_data.len();
-                debug!("count: {}, nbytes: {}", self.stats.count, self.stats.nbytes);
+            match value {
+                MbtWriterStreamData::Tile(tile, tile_data, hash_hex) => {
+                    let hash_hex =
+                        hash_hex.unwrap_or_else(|| xxh64_be_hex_upper(&tile_data));
+                    let map_insert_res =
+                        rusqlite::params![tile.z, tile.x, tile.yup(), hash_hex];
+                    let map_insert_res = map_stmt.execute(map_insert_res);
+                    if let Err(e) = map_insert_res {
+                        warn!("insert_res: {:?}", e);
+                    } else {
+                        self.stats.count += 1;
+                        self.stats.nbytes += tile_data.len();
+                        debug!(
+                            "count: {}, nbytes: {}",
+                            self.stats.count, self.stats.nbytes
+                        );
+                    }
+                    let blob_params = rusqlite::params![hash_hex, tile_data];
+                    let insert_res = blob_stmt.execute(blob_params);
+                    if let Err(e) = insert_res {
+                        warn!("blob insert res: {:?}", e);
+                    } else {
+                        self.stats.count += 1;
+                        self.stats.nbytes += tile_data.len();
+                        debug!(
+                            "count: {}, nbytes: {}",
+                            self.stats.count, self.stats.nbytes
+                        );
+                    }
+                }
+                MbtWriterStreamData::Metadata(_key, _value) => {
+                    warn!("Writing metadata not yet supported");
+                }
             }
         }
         Ok(())
@@ -149,42 +187,47 @@ impl MbtStreamWriterSync {
         self.preflight()?;
         let mut batch = vec![];
         while let Some(value) = self.stream.next().await {
-            let (tile, tile_data, _hash) = value;
-            self.stats.count += 1;
-            self.stats.nbytes += tile_data.len();
-            batch.push((tile, tile_data));
-            // let insert_res =
-            //     stmt.execute(rusqlite::params![tile.z, tile.x, tile.y, tile_data]);
-            if batch.len() >= 100 {
-                let placeholders = batch
-                    .iter()
-                    .map(|_| "(?, ?, ?, ?)")
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                let mut stmt = self.mbt.conn.prepare_cached(
-                    &format!("INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES {placeholders};"),
-                )?;
-                // let mut param_values: Vec<Value> = vec![];
-                let param_values: Vec<Value> = batch
-                    .iter()
-                    .flat_map(|(tile, tile_data)| {
-                        vec![
-                            Value::Integer(i64::from(tile.z())),
-                            Value::Integer(i64::from(tile.x())),
-                            Value::Integer(i64::from(tile.yup())),
-                            Value::Blob(tile_data.clone()),
-                        ]
-                    })
-                    .collect();
-                let insert_res = stmt.execute(params_from_iter(param_values.iter()));
-                batch.clear();
-                if let Err(e) = insert_res {
-                    warn!("insert_res: {:?}", e);
-                } else {
-                    debug!(
-                        "count: {}, nbytes: {}",
-                        self.stats.count, self.stats.nbytes
-                    );
+            match value {
+                MbtWriterStreamData::Metadata(_key, _value) => {
+                    warn!("Writing metadata not yet supported");
+                }
+                MbtWriterStreamData::Tile(tile, tile_data, hash_hex) => {
+                    let hash_hex =
+                        hash_hex.unwrap_or_else(|| xxh64_be_hex_upper(&tile_data));
+                    batch.push((tile, tile_data, hash_hex));
+                    if batch.len() >= 100 {
+                        let placeholders = batch
+                            .iter()
+                            .map(|_| "(?, ?, ?, ?, ?)")
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        let mut stmt = self.mbt.conn.prepare_cached(
+                            &format!("INSERT INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES {placeholders};"),
+                        )?;
+                        let param_values: Vec<Value> = batch
+                            .iter()
+                            .flat_map(|(tile, tile_data, hash_hex)| {
+                                vec![
+                                    Value::Integer(i64::from(tile.z())),
+                                    Value::Integer(i64::from(tile.x())),
+                                    Value::Integer(i64::from(tile.yup())),
+                                    Value::Blob(tile_data.clone()),
+                                    Value::Text(hash_hex.clone()),
+                                ]
+                            })
+                            .collect();
+                        let insert_res =
+                            stmt.execute(params_from_iter(param_values.iter()));
+                        batch.clear();
+                        if let Err(e) = insert_res {
+                            warn!("insert_res: {:?}", e);
+                        } else {
+                            debug!(
+                                "count: {}, nbytes: {}",
+                                self.stats.count, self.stats.nbytes
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -200,7 +243,7 @@ impl MbtStreamWriterSync {
             )?;
             let param_values: Vec<Value> = batch
                 .iter()
-                .flat_map(|(tile, tile_data)| {
+                .flat_map(|(tile, tile_data, _)| {
                     vec![
                         Value::Integer(i64::from(tile.z())),
                         Value::Integer(i64::from(tile.x())),

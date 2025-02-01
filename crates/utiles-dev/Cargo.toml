@@ -25,3 +25,14 @@ serde_json.workspace = true
 tokio.workspace = true
 utiles-core = { path = "../utiles-core" }
 utiles = { path = "../utiles" }
+tokio-stream.workspace = true
+tracing = "0.1.41"
+rusqlite.workspace = true
+futures.workspace = true
+futures-util = "0.3.31"
+image.workspace = true
+indoc.workspace = true
+clap = { version = "4.5.26", features = ["derive"] }
+rayon = "1.10.0"
+num_cpus = "1.16.0"
+crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }

@@ -89,7 +89,7 @@ impl SqliteHeader {
         }
     }
 
-    pub(crate) fn parse(buffer: &[u8; 100]) -> SqliteResult<Self> {
+    pub fn parse(buffer: &[u8; 100]) -> SqliteResult<Self> {
         // let mut buffer = [0u8; 100];
         // reader.read_exact(&mut buffer)?;
         let magic: &[u8; 16] = &buffer[0..16].try_into().map_err(|_| {

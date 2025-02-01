@@ -55,9 +55,29 @@ fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+/// Raise RuntimeWarning for debug build(s)
+///
+/// Taken from `obstore` pyo3 library (obstore)[https://github.com/developmentseed/obstore.git]
+#[cfg(debug_assertions)]
+#[pyfunction]
+fn warn_debug_build(py: Python) -> PyResult<()> {
+    use pyo3::exceptions::PyRuntimeWarning;
+    use pyo3::intern;
+    use pyo3::types::PyTuple;
+
+    let warnings_mod = py.import(intern!(py, "warnings"))?;
+    let warning = PyRuntimeWarning::new_err("utiles not compiled in release mode");
+    let args = PyTuple::new(py, vec![warning])?;
+    warnings_mod.call_method1(intern!(py, "warn"), args)?;
+    Ok(())
+}
+
 /// Utiles python module
 #[pymodule]
 fn _utiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    // debug build warning
+    #[cfg(debug_assertions)]
+    warn_debug_build(m.py())?;
     // lib constants
     lib_constants(m)?;
     pylager::pymod_add(m)?;

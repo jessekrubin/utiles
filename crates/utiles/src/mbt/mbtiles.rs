@@ -207,6 +207,10 @@ impl Mbtiles {
         }
     }
 
+    pub fn metadata_rows(&self) -> UtilesResult<Vec<MbtMetadataRow>> {
+        mbtiles_metadata(self.conn()).map_err(|e| e.into())
+    }
+
     pub fn metadata_json(&self) -> UtilesResult<MbtilesMetadataJson> {
         metadata_json(&self.conn).map_err(|e| e.into())
     }
@@ -347,28 +351,13 @@ impl Mbtiles {
     }
 }
 
-impl<P: AsRef<Path>> From<P> for Mbtiles {
-    // TODO: fix uses of this
-    #[allow(clippy::unwrap_used)]
-    fn from(p: P) -> Self {
-        Mbtiles::open_existing(p).unwrap()
-    }
-}
-
 // =========================================================================
 // SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS
 // =========================================================================
-pub fn add_sqlite_hashes(conn: &Connection) -> RusqliteResult<()> {
-    sqlite_hashes::register_hash_functions(conn)
-}
 
-pub fn register_utiles_sqlite_functions(conn: &Connection) -> RusqliteResult<()> {
+pub fn register_utiles_sqlite(conn: &Connection) -> RusqliteResult<()> {
+    sqlite_hashes::register_hash_functions(conn)?;
     add_ut_functions(conn)
-}
-
-pub fn add_functions(conn: &Connection) -> RusqliteResult<()> {
-    add_sqlite_hashes(conn)?;
-    register_utiles_sqlite_functions(conn)
 }
 
 // =====================================================================
@@ -418,6 +407,32 @@ pub fn mbtiles_metadata_row(
         })
         .optional()?;
     Ok(mdata)
+}
+
+/// Returns list of metadata rows where the name, value pairs are identical
+pub fn metadata_duplicate_key_values(
+    conn: &Connection,
+) -> RusqliteResult<Vec<(String, String, usize)>> {
+    let mut stmt = conn.prepare(include_str!("sql/mbt-metadata-duplicate-rows.sql"))?;
+    let mdata = stmt
+        .query_map([], |row| {
+            let name: String = row.get(0)?;
+            let value: String = row.get(1)?;
+            let count: usize = row.get(2)?;
+            Ok((name, value, count))
+        })?
+        .collect::<RusqliteResult<Vec<_>, rusqlite::Error>>()?;
+    Ok(mdata)
+}
+
+/// Delete rows in metadata table with duplicate key-value pairs except for the first row
+pub fn delete_metadata_duplicate_key_values(
+    conn: &Connection,
+) -> RusqliteResult<usize> {
+    let mut stmt =
+        conn.prepare(include_str!("sql/mbt-metadata-delete-duplicate-rows.sql"))?;
+    let res = stmt.execute([])?;
+    Ok(res)
 }
 
 /// Return true/false if metadata table has a unique index on 'name'

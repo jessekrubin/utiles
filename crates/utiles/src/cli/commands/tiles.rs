@@ -4,14 +4,13 @@ use std::{io, io::Write};
 use tracing::{debug, error};
 
 use utiles_core::parsing::parse_bbox_ext;
-use utiles_core::tiles;
 use utiles_core::zoom::ZoomOrZooms;
+use utiles_core::{tiles, TileStringFormatter};
 
 use crate::cli::args::TilesArgs;
 use crate::cli::stdinterator_filter::stdin_filtered;
 use crate::errors::UtilesResult;
 use crate::gj::parsing::parse_bbox_geojson;
-use crate::tile_strfmt::TileStringFormatter;
 
 pub async fn tiles_main(
     args: TilesArgs,

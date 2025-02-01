@@ -30,6 +30,7 @@ pub use textiles::*;
 pub use tile::Tile;
 #[doc(inline)]
 pub use tile_like::TileLike;
+pub use tile_strfmt::{TileStringFormat, TileStringFormatter};
 pub use tile_zbox::TileZBox;
 #[doc(inline)]
 pub use traits::{Coord2dLike, IsOk, LngLatLike, TileChildren1, TileParent};
@@ -59,6 +60,7 @@ pub mod tile;
 pub mod tile_data_row;
 mod tile_feature;
 mod tile_like;
+mod tile_strfmt;
 mod tile_tuple;
 pub mod tile_type;
 pub mod tile_zbox;

@@ -23,7 +23,7 @@ required-features = [
 ]
 
 [dependencies]
-ahash.workspace = true
+ahash = { workspace = true, optional = true }
 anyhow.workspace = true
 async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
 async-trait.workspace = true
@@ -77,16 +77,26 @@ harness = false
 
 [features]
 default = [
+    "ahash",
     "cli",
     "pmtiles",
 ]
 all = [
+    "ahash",
     "cli",
     "pmtiles",
 ]
+#server = [
+#    "axum",
+#    "axum-extra",
+#]
 lager-reload = []
 python = [
     "lager-reload"
 ]
+# dep-features
 cli = ["dep:clap", "dep:pmtiles"]
 pmtiles = ["dep:pmtiles"]
+
+[lints]
+workspace = true

@@ -117,8 +117,9 @@ async fn oxipng_main(args: Cli) -> UtilesResult<()> {
                                 let size_diff =
                                     (initial_size as i64) - (final_size as i64);
                                 debug!("size_diff: {}", size_diff);
-                                let send_res =
-                                    tx_writer.send((tile, img_result, None)).await;
+                                let send_res = tx_writer
+                                    .send((tile, img_result, None).into())
+                                    .await;
 
                                 if let Err(e) = send_res {
                                     warn!("send_res: {:?}", e);

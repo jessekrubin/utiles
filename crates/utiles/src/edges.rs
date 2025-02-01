@@ -1,5 +1,9 @@
 use crate::UtilesResult;
+// use ahash::HashSet;
+#[cfg(feature = "ahash")]
 use ahash::HashSet;
+#[cfg(not(feature = "ahash"))]
+use std::collections::HashSet;
 
 use utiles_core::{zoom_max_xy, Tile, TileLike, TileZBox};
 

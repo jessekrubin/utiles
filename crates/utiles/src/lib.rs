@@ -14,7 +14,6 @@
 #![deny(clippy::pedantic)]
 #![allow(clippy::redundant_closure_for_method_calls)]
 #![allow(clippy::missing_errors_doc)]
-// #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::unnecessary_wraps)]
 #![allow(clippy::cast_possible_truncation)]
@@ -23,7 +22,6 @@
 pub use core::*;
 pub use errors::UtilesError;
 pub use errors::UtilesResult;
-pub use tile_strfmt::TileStringFormatter;
 
 #[cfg(feature = "cli")]
 pub mod cli;
@@ -31,7 +29,7 @@ mod config;
 pub mod copy;
 pub mod core;
 pub mod dev;
-pub(crate) mod errors;
+pub mod errors;
 pub mod fs_async;
 pub mod gj;
 mod globster;
@@ -44,18 +42,17 @@ pub mod server;
 mod signal;
 pub mod sqlite;
 pub mod sqlite_utiles;
-mod tile_strfmt;
 pub mod utilejson;
 
 pub mod hash_types;
-#[cfg(test)]
-mod tests;
 mod tile_stream;
 
 pub mod cover;
-mod edges;
+pub mod edges;
 pub mod hash;
-mod sleep;
+mod macros;
+#[cfg(test)]
+mod tests;
 mod timestamp;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

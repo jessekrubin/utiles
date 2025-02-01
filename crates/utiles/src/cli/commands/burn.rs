@@ -2,8 +2,7 @@ use crate::cli::args::BurnArgs;
 use crate::cli::stdinterator_filter;
 use crate::cover::geojson2tiles;
 use crate::errors::UtilesResult;
-use crate::sleep::sleep0;
-use crate::UtilesError;
+use crate::{asleep0, UtilesError};
 use geojson::GeoJson;
 use utiles_core::TileLike;
 
@@ -23,7 +22,7 @@ pub async fn burn_main(args: BurnArgs) -> UtilesResult<()> {
         let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
         println!("{}{}", rs, tile.json_arr());
         if i % 2048 == 0 {
-            sleep0().await;
+            asleep0!();
         }
     }
     Ok(())

@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use strum_macros::AsRefStr;
 
 use utiles_core::{
-    geobbox_merge, parsing::parse_bbox_ext, zoom, BBox, LngLat, ZoomSet, VERSION,
+    geobbox_merge, parsing::parse_bbox_ext, zoom, BBox, LngLat, TileStringFormatter,
+    ZoomSet, VERSION,
 };
 
 use crate::cli::commands::dev::DevArgs;
@@ -15,7 +16,6 @@ use crate::errors::UtilesResult;
 use crate::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;
-use crate::tile_strfmt::TileStringFormatter;
 
 // ██╗   ██╗████████╗██╗██╗     ███████╗███████╗
 // ██║   ██║╚══██╔══╝██║██║     ██╔════╝██╔════╝
@@ -155,6 +155,7 @@ pub struct TileFmtArgs {
 }
 #[derive(Debug, Parser)]
 pub struct EdgesArgs {
+    /// Wrap x/longitude across antimeridian (default: false)
     #[arg(required = false, long, action = clap::ArgAction::SetTrue,)]
     pub wrapx: bool,
 
@@ -164,6 +165,7 @@ pub struct EdgesArgs {
     #[command(flatten)]
     pub fmtopts: TileFmtOptions,
 }
+
 #[derive(Debug, Parser)]
 pub struct BurnArgs {
     /// Zoom level (0-30)
@@ -176,6 +178,7 @@ pub struct BurnArgs {
     #[command(flatten)]
     pub fmtopts: TileFmtOptions,
 }
+
 #[derive(Debug, Parser)]
 pub struct MergeArgs {
     /// min zoom level (0-30) to merge to
@@ -191,6 +194,7 @@ pub struct MergeArgs {
     #[command(flatten)]
     pub fmtopts: TileFmtOptions,
 }
+
 #[derive(Debug, Parser)]
 pub struct FmtStrArgs {
     #[command(flatten)]
@@ -796,7 +800,7 @@ pub enum Commands {
     Shapes(ShapesArgs),
 
     /// Burn tiles from `GeoJSON` stream at zoom level (tile coverage)
-    #[command(name = "burn")]
+    #[command(name = "burn", visible_alias = "cover")]
     Burn(BurnArgs),
 
     /// Merge tiles from stream removing parent tiles if children are present
@@ -960,8 +964,12 @@ pub struct CopyArgs {
     #[arg(required = false, long, short, default_value = "undefined")]
     pub conflict: ConflictStrategy,
 
-    /// db-type (default: src type)
-    #[arg(required = false, long = "dst-type", aliases = ["dbtype", "dsttype", "mbtype", "mbt-type", "mbtiles-type"])]
+    /// db-type to copy to (flat, hash, norm) defaults to dbtype of src
+    #[arg(
+          required = false,
+          long = "dst-type",
+          aliases = ["dbtype", "dsttype", "mbtype", "mbt-type", "mbtiles-type"]
+    )]
     pub dst_type: Option<DbtypeOption>,
 
     /// hash to use for blob-id if copying to normal/hash db type

@@ -17,9 +17,12 @@ use crate::tile_like::TileLike;
 use crate::tile_tuple::TileTuple;
 use crate::traits::TileParent;
 use crate::{
-    children1_zorder, children_zorder, pmtiles, quadkey2tile, rmid2xyz, utile,
-    xyz2quadkey, IsOk, TileChildren1,
+    children1_zorder, children_zorder, quadkey2tile, rmid2xyz, utile, xyz2quadkey,
+    IsOk, TileChildren1,
 };
+
+#[cfg(feature = "pmtiles")]
+use crate::pmtiles;
 
 /// Tile X-Y-Z struct
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -186,24 +189,6 @@ impl Tile {
         bounds(self.x, self.y, self.z)
     }
 
-    /// Return pmtile-id for the tile
-    #[must_use]
-    pub fn pmtileid(&self) -> u64 {
-        pmtiles::xyz2pmid(self.x, self.y, self.z)
-    }
-
-    /// Return tile from pmtile-id
-    #[must_use]
-    pub fn from_pmtileid(id: u64) -> Self {
-        pmtiles::pmid2xyz(id).into()
-    }
-
-    /// Return tile from pmtile-id (alias for `from_pmtileid`)
-    #[must_use]
-    pub fn from_pmid(id: u64) -> Self {
-        pmtiles::pmid2xyz(id).into()
-    }
-
     /// Return tile from row-major tile-id
     #[must_use]
     pub fn from_row_major_id(id: u64) -> Self {
@@ -242,12 +227,6 @@ impl Tile {
         } else {
             format!("{}/{}/{}.{}", self.z, self.x, self.y, ext)
         }
-    }
-
-    /// Return the parent tile's pmtile-id
-    #[must_use]
-    pub fn parent_pmtileid(&self) -> Option<u64> {
-        self.parent(None).map(|t| Self::pmtileid(&t))
     }
 
     /// Convert quadkey string to Tile
@@ -587,6 +566,32 @@ impl Tile {
     }
 }
 
+#[cfg(feature = "pmtiles")]
+impl Tile {
+    /// Return pmtile-id for the tile
+    #[must_use]
+    pub fn pmtileid(&self) -> u64 {
+        pmtiles::xyz2pmid(self.x, self.y, self.z)
+    }
+
+    /// Return tile from pmtile-id
+    #[must_use]
+    pub fn from_pmtileid(id: u64) -> Self {
+        pmtiles::pmid2xyz(id).into()
+    }
+
+    /// Return tile from pmtile-id (alias for `from_pmtileid`)
+    #[must_use]
+    pub fn from_pmid(id: u64) -> Self {
+        pmtiles::pmid2xyz(id).into()
+    }
+
+    /// Return the parent tile's pmtile-id
+    #[must_use]
+    pub fn parent_pmtileid(&self) -> Option<u64> {
+        self.parent(None).map(|t| Self::pmtileid(&t))
+    }
+}
 impl IsOk for Tile {
     fn ok(&self) -> UtilesCoreResult<Self> {
         if self.z > 30 {

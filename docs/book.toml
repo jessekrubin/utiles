@@ -17,7 +17,9 @@ no-section-label = false
 git-repository-url = "https://github.com/jessekrubin/utiles"
 git-repository-icon = "fa-github"
 edit-url-template = "https://github.com/jessekrubin/utiles/edit/main/docs/{path}"
-# site-url = "https://jessekrubin.github.io/ry" # gh-pages
 site-url = "https://utiles.dev" # cf
 cname = "utiles.dev"
 input-404 = "four-o-four.md"
+
+[preprocessor.py_preprocessor]
+command = "uv run utiles_version.py"

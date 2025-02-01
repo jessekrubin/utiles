@@ -13,10 +13,10 @@ use utiles_core::BBox;
 
 use crate::errors::UtilesResult;
 use crate::mbt::mbtiles::{
-    add_functions, has_metadata_table_or_view, has_tiles_table_or_view,
-    has_zoom_row_col_index, has_zxy, init_mbtiles, mbtiles_metadata,
-    mbtiles_metadata_row, metadata_json, minzoom_maxzoom, query_zxy, tiles_count,
-    tiles_is_empty,
+    has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
+    has_zxy, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
+    metadata_duplicate_key_values, metadata_json, minzoom_maxzoom, query_zxy,
+    register_utiles_sqlite, tiles_count, tiles_is_empty,
 };
 use crate::mbt::mbtiles_async::MbtilesAsync;
 use crate::mbt::query::query_mbtiles_type;
@@ -305,7 +305,19 @@ where
     }
 
     async fn register_utiles_sqlite_functions(&self) -> UtilesResult<()> {
-        let r = self.conn(add_functions).await?;
+        let r = self.conn(register_utiles_sqlite).await?;
+        Ok(r)
+    }
+
+    async fn metadata_duplicate_key_values(
+        &self,
+    ) -> UtilesResult<Vec<(String, String, usize)>> {
+        let r = self
+            .conn(|conn| {
+                let a = metadata_duplicate_key_values(conn)?;
+                Ok(a)
+            })
+            .await?;
         Ok(r)
     }
 
@@ -374,6 +386,7 @@ where
         }
         Ok(true)
     }
+
     async fn is_mbtiles(&self) -> UtilesResult<bool> {
         let is_mbtiles_like = self.is_mbtiles_like().await?;
         if !is_mbtiles_like {
@@ -541,10 +554,10 @@ where
             .map_err(UtilesError::SqliteError)?;
         Ok(t)
     }
+
     async fn tilejson_ext(&self) -> UtilesResult<TileJSON> {
         let mut metadata = self.metadata_rows().await?;
         // if no 'minzoom' or 'maxzoom' are found we gotta query them...
-
         // check if minzoom or maxzoom are missing
         let minzoom_value = metadata.iter().find(|m| m.name == "minzoom");
         let maxzoom_value = metadata.iter().find(|m| m.name == "maxzoom");

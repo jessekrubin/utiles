@@ -3,7 +3,7 @@ use crate::tile_like::TileLike;
 use crate::Tile;
 
 #[derive(Debug)]
-struct TileCrz {
+pub struct TileCrz {
     // column -> x
     tile_column: u32,
     // row -> y

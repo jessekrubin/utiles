@@ -26,6 +26,7 @@ mod insert_strategy;
 mod page_size;
 mod pragma;
 mod sqlike3;
+pub mod streams;
 
 pub type AsyncSqliteResult<T> = Result<T, async_sqlite::Error>;
 pub type AsyncSqliteError = async_sqlite::Error;

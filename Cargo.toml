@@ -1,18 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/utiles",
-  "crates/utiles-core",
-  "crates/utiles-dev",
-  "crates/utiles-oxipng",
-  "utiles-pyo3",
+    "crates/utiles",
+    "crates/utiles-core",
+    "crates/utiles-dev", "crates/utiles-doubledown",
+    "crates/utiles-oxipng",
+    "utiles-pyo3",
 ]
 
 [workspace.package]
 version = "0.7.3"
 authors = [
-  "Jesse Rubin <jessekrubin@gmail.com>",
-  "Dan Costello <dan.costello2@gmail.com>",
+    "Jesse Rubin <jessekrubin@gmail.com>",
+    "Dan Costello <dan.costello2@gmail.com>",
 ]
 documentation = "https://github.com/jessekrubin/utiles"
 edition = "2021"
@@ -101,3 +101,24 @@ lto = "thin"
 [profile.dist]
 inherits = "release"
 lto = "thin"
+
+[workspace.lints.rust]
+unsafe_code = "warn"
+# MUST CLEAN UP MAIN LIBRARY....
+#unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+# groups
+all = { level = "warn", priority = -2 }
+pedantic = { level = "warn", priority = -2 }
+correctness = { level = "warn", priority = 2 }
+panic = { level = "warn", priority = -1 }
+style = { level = "warn", priority = 1 }
+perf = { level = "warn", priority = 3 }
+# DENY lints
+unwrap_used = "deny"
+# allow pedantic
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+similar_names = "allow"

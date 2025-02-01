@@ -5,10 +5,14 @@ use anyhow::Result;
 use utiles::mbt::Mbtiles;
 use utiles::{utile, Tile};
 
-fn get_utiles_test_osm_mbtiles_path() -> PathBuf {
-    let pwd = std::env::current_dir().unwrap();
-    let repo_root = pwd.parent().unwrap().parent().unwrap();
-    repo_root.join("test-data/mbtiles/osm-standard.z0z4.mbtiles")
+fn get_utiles_test_osm_mbtiles_path() -> Result<PathBuf> {
+    let pwd = std::env::current_dir()?;
+    let repo_root = pwd
+        .parent()
+        .ok_or(anyhow::anyhow!("repo root not found"))?
+        .parent()
+        .ok_or(anyhow::anyhow!("repo root not found"))?;
+    Ok(repo_root.join("test-data/mbtiles/osm-standard.z0z4.mbtiles"))
 }
 
 fn printsep() {
@@ -17,21 +21,20 @@ fn printsep() {
 }
 
 fn main() -> Result<()> {
-    let src = get_utiles_test_osm_mbtiles_path();
-    println!("mbtiles path: {:?}", src);
+    let src = get_utiles_test_osm_mbtiles_path()?;
+    println!("mbtiles path: {src:?}");
 
     printsep();
-    let mbt = Mbtiles::open_existing(src) // .await
-        .expect("Failed to open mbtiles");
-    println!("mbtiles: {:?}", mbt);
+    let mbt = Mbtiles::open_existing(src)?;
+    println!("mbtiles: {mbt:?}");
     printsep();
 
     let metadata = mbt.metadata();
-    println!("metadata: {:?}", metadata);
+    println!("metadata: {metadata:?}");
 
     printsep();
     let count = mbt.tiles_count();
-    println!("tiles count: {:?}", count);
+    println!("tiles count: {count:?}");
 
     printsep();
     let tile = utile!(0, 0, 0);
@@ -39,7 +42,7 @@ fn main() -> Result<()> {
     if let Some(tile_data) = a_tile {
         println!("tile (size): {:?}", tile_data.len());
     } else {
-        println!("tile not found: {:?}", tile);
+        println!("tile not found: {tile:?}");
     }
     Ok(())
 }
