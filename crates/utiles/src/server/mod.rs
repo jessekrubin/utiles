@@ -1,9 +1,10 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
+use tower_http::cors::{Any, CorsLayer};
 
 use axum::extract::Path;
-use axum::http::HeaderName;
+use axum::http::{HeaderName, Method};
 use axum::{
     body::Body,
     extract::State,
@@ -112,34 +113,53 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     // ...seems to be the idiomatic way to do this...
     let shared_state = Arc::new(state);
     let x_request_id = HeaderName::from_static("x-request-id");
-    let compression_layer: CompressionLayer = CompressionLayer::new()
-        // .br(true)
-        // .deflate(true)
-        .gzip(true)
-        .zstd(true);
-    // .compress_when(|_, _, _, _| true);
+    let compression_layer: CompressionLayer =
+        CompressionLayer::new().gzip(true).zstd(true);
+
+    let trace_layer = TraceLayer::new_for_http()
+        .make_span_with(DefaultMakeSpan::new().include_headers(true))
+        .on_body_chunk(DefaultOnBodyChunk::new())
+        .on_failure(DefaultOnFailure::new())
+        // .on_request(|request: &axum::http::Request<_>, _span: &tracing::Span| {
+        //     tracing::info!(
+        //         method = ?request.method(),
+        //         uri = ?request.uri(),
+        //         // headers = ?request.headers(),
+        //         "Incoming request"
+        //     );
+        // })
+        .on_response(
+            |response: &axum::http::Response<_>,
+             latency: Duration,
+             _span: &tracing::Span| {
+                tracing::info!(
+                    status = ?response.status(),
+                    latency = ?latency.as_millis(),
+                    "Response sent"
+                );
+            },
+        );
+    // .on_request(DefaultOnRequest::new().level(tracing::Level::DEBUG))
+    // .on_response(DefaultOnResponse::new().include_headers(true));
+    let cors_layer = CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods([Method::GET, Method::POST])
+        // allow requests from any origin
+        .allow_origin(Any);
     // Build our middleware stack
     let middleware = ServiceBuilder::new()
         .layer(SetRequestIdLayer::new(
             x_request_id.clone(),
             Radix36MakeRequestId::default(),
         ))
-        // tracing/logging
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::new().include_headers(true))
-                .on_body_chunk(DefaultOnBodyChunk::new())
-                .on_failure(DefaultOnFailure::new())
-                .on_request(DefaultOnRequest::new())
-                .on_response(DefaultOnResponse::new().include_headers(true)),
-        )
         // propagate `x-request-id` headers from request to response
         .layer(PropagateRequestIdLayer::new(x_request_id))
-        .layer(TimeoutLayer::new(Duration::from_secs(10)))
+        .layer(TimeoutLayer::new(Duration::from_secs(1)))
         .layer(compression_layer);
 
     // Build the app/router!
     let app = Router::new()
+        .layer(middleware)
         .route("/", get(root))
         .route("/favicon.ico", get(favicon::favicon))
         .route("/health", get(health))
@@ -152,7 +172,8 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
             get(get_dataset_tile_quadkey),
         )
         .route("/tiles/{dataset}/{z}/{x}/{y}", get(get_dataset_tile_zxy))
-        .layer(middleware)
+        .layer(cors_layer)
+        .layer(trace_layer)
         .with_state(shared_state) // shared app/server state
         .fallback(four_o_four); // 404
 
