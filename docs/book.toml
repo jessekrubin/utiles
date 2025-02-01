@@ -23,4 +23,4 @@ cname = "utiles.dev"
 input-404 = "four-o-four.md"
 
 [preprocessor.py_preprocessor]
-command = "uv run ryo3_version.py"
+command = "uv run utiles_version.py"
