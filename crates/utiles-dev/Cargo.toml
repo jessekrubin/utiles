@@ -36,3 +36,4 @@ clap = { version = "4.5.26", features = ["derive"] }
 rayon = "1.10.0"
 num_cpus = "1.16.0"
 crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
+geozero = { version = "0.14.0", features = ["with-mvt"] }
