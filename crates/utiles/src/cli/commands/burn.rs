@@ -6,7 +6,7 @@ use crate::{asleep0, UtilesError};
 use geojson::GeoJson;
 use utiles_core::TileLike;
 
-pub async fn burn_main(args: BurnArgs) -> UtilesResult<()> {
+pub(crate) async fn burn_main(args: BurnArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let mut string = String::new();
     for line_res in lines {

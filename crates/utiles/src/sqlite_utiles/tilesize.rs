@@ -7,7 +7,7 @@ use tracing::{debug, trace};
 /// Returns -1 if the image is not square.
 ///
 /// Returns NULL if not an image or errors... could do more here
-pub fn add_function_ut_tilesize(db: &Connection) -> rusqlite::Result<()> {
+pub(super) fn add_function_ut_tilesize(db: &Connection) -> rusqlite::Result<()> {
     debug!("Adding ut_tilesize function");
     db.create_scalar_function(
         "ut_tilesize",

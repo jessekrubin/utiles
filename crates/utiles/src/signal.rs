@@ -1,7 +1,7 @@
 use tokio::signal;
 use tracing::debug;
 
-pub async fn shutdown_signal() {
+pub(crate) async fn shutdown_signal() {
     let ctrl_c = async {
         signal::ctrl_c()
             .await

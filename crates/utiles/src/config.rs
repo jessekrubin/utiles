@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct LintConfig {
+pub(crate) struct LintConfig {
     pub include: Vec<String>,
     pub exclude: Vec<String>,
 
@@ -10,7 +10,7 @@ pub struct LintConfig {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct UtilesConfig {
+pub(crate) struct UtilesConfig {
     pub lint: LintConfig,
     // TODO: server/log config
     // pub log: LagerConfig,

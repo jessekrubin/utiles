@@ -56,7 +56,7 @@ async fn dev(args: DevArgs) -> UtilesResult<()> {
     Ok(())
 }
 
-pub async fn dev_main(args: DevArgs) -> UtilesResult<()> {
+pub(crate) async fn dev_main(args: DevArgs) -> UtilesResult<()> {
     warn!("__DEV_MAIN__");
     dev(args).await?;
     Ok(())

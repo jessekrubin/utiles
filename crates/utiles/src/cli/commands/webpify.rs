@@ -12,7 +12,7 @@ use crate::mbt::{MbtStreamWriterSync, MbtWriterStats};
 use crate::mbt::{Mbtiles, MbtilesAsync, MbtilesClientAsync};
 use crate::UtilesResult;
 
-pub async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
+pub(crate) async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let mbt = MbtilesClientAsync::open_existing(args.common.filepath.as_str()).await?;
     mbt.assert_mbtiles().await?;
     let total_count = mbt.tiles_count().await?;

@@ -1,7 +1,7 @@
 use crate::cli::stdinterator::StdInterator;
 use std::io;
 
-pub fn stdin_filtered(
+pub(crate) fn stdin_filtered(
     input: Option<String>,
 ) -> Box<dyn Iterator<Item = io::Result<String>>> {
     let input_lines = StdInterator::new(input);

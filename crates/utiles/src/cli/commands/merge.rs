@@ -5,7 +5,7 @@ use crate::cli::args::MergeArgs;
 use crate::cli::stdinterator_filter;
 use crate::errors::UtilesResult;
 
-pub async fn merge_main(args: MergeArgs) -> UtilesResult<()> {
+pub(crate) async fn merge_main(args: MergeArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let mut tiles: HashSet<Tile> = HashSet::new();
     for line_res in lines {

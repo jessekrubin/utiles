@@ -4,17 +4,17 @@ use std::io::BufRead;
 use std::str::FromStr;
 use tracing::debug;
 
-pub enum StdInteratorSource {
+pub(crate) enum StdInteratorSource {
     Args(VecDeque<String>),
     StdinRead(Box<dyn BufRead>),
 }
 
-pub struct StdInterator {
+pub(crate) struct StdInterator {
     source: StdInteratorSource,
 }
 
 impl StdInterator {
-    pub fn new(input: Option<String>) -> Self {
+    pub(crate) fn new(input: Option<String>) -> Self {
         let source = if let Some(file_content) = input {
             if file_content == "-" {
                 debug!("reading from stdin - got '-'");

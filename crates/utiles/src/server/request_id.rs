@@ -9,7 +9,7 @@ use tower_http::request_id::{MakeRequestId, RequestId};
 use super::radix36::u64_radix36;
 
 #[derive(Clone, Default)]
-pub struct Radix36MakeRequestId {
+pub(super) struct Radix36MakeRequestId {
     counter: Arc<AtomicU64>,
 }
 

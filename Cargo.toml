@@ -105,7 +105,7 @@ lto = "thin"
 [workspace.lints.rust]
 unsafe_code = "warn"
 # MUST CLEAN UP MAIN LIBRARY....
-#unreachable_pub = "warn"
+unreachable_pub = "warn"
 
 [workspace.lints.clippy]
 # groups

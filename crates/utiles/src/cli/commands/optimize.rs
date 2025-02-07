@@ -9,7 +9,7 @@ use crate::cli::args::OptimizeArgs;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::UtilesResult;
 
-pub async fn optimize_main(args: OptimizeArgs) -> UtilesResult<()> {
+pub(crate) async fn optimize_main(args: OptimizeArgs) -> UtilesResult<()> {
     info!("Optimizing mbtiles file: {}", args.common.filepath);
     warn!("NOT IMPLEMENTED YET");
     let mbt = MbtilesClientAsync::open_existing(args.common.filepath.as_str()).await?;

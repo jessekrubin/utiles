@@ -15,18 +15,18 @@ use crate::mbt::MbtTileRow;
 use crate::mbt::Mbtiles;
 
 #[derive(Debug)]
-pub struct WriterStats {
+pub(super) struct WriterStats {
     pub nwritten: Cell<u32>,
 }
 
 #[derive(Debug)]
-pub struct TilePyramidFsWriter {
+pub(super) struct TilePyramidFsWriter {
     root_dirpath: PathBuf,
     stats: WriterStats,
 }
 
 impl TilePyramidFsWriter {
-    pub fn new(root_dirpath: PathBuf) -> Self {
+    pub(super) fn new(root_dirpath: PathBuf) -> Self {
         Self {
             root_dirpath,
             stats: WriterStats {
@@ -41,7 +41,7 @@ impl TilePyramidFsWriter {
             .join(format!("{x}"))
     }
 
-    pub async fn mkdirpath(&self, z: u8, x: u32) -> UtilesResult<()> {
+    pub(super) async fn mkdirpath(&self, z: u8, x: u32) -> UtilesResult<()> {
         let dp = self.dirpath(z, x);
         match dp.to_str() {
             Some(dp) => {
@@ -52,7 +52,7 @@ impl TilePyramidFsWriter {
         }
     }
 
-    pub async fn write_tile(&self, tile: MbtTileRow) -> UtilesResult<()> {
+    pub(super) async fn write_tile(&self, tile: MbtTileRow) -> UtilesResult<()> {
         // HERE YOU NEED TO FLIP THE THING JESSE
         let filepath = self.dirpath(tile.z(), tile.x()).join(format!(
             "{}.{}",
@@ -65,7 +65,7 @@ impl TilePyramidFsWriter {
         Ok(())
     }
 
-    pub fn inc_nwritten(&self) {
+    pub(super) fn inc_nwritten(&self) {
         let n = self.stats.nwritten.get();
         self.stats.nwritten.set(n + 1);
     }

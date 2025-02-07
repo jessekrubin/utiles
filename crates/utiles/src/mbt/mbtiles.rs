@@ -30,7 +30,6 @@ use crate::sqlite::{
 use crate::sqlite::{application_id_set, InsertStrategy};
 use crate::sqlite::{pathlike2dbpath, DbPath};
 use crate::sqlite::{pragma_encoding_set, RusqliteResult};
-use crate::sqlite_utiles::add_ut_functions;
 use crate::utilejson::metadata2tilejson;
 use crate::UtilesError;
 
@@ -350,16 +349,6 @@ impl Mbtiles {
         update_metadata_minzoom_maxzoom_from_tiles(&self.conn)
     }
 }
-
-// =========================================================================
-// SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS ~ SQLITE FUNCTIONS
-// =========================================================================
-
-pub fn register_utiles_sqlite(conn: &Connection) -> RusqliteResult<()> {
-    sqlite_hashes::register_hash_functions(conn)?;
-    add_ut_functions(conn)
-}
-
 // =====================================================================
 // QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS ~ QUERY FUNCTIONS
 // =====================================================================

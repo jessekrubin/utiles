@@ -6,7 +6,7 @@ use crate::UtilesError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]
-pub enum InfoType {
+pub(crate) enum InfoType {
     Mbtiles,
     Pmtiles,
     Sqlite,
@@ -14,13 +14,13 @@ pub enum InfoType {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "kebab-case")]
-pub enum Info {
+pub(crate) enum Info {
     Mbtiles(MbtilesStats),
     Sqlite(SqliteHeader),
 }
 
 impl InfoType {
-    pub fn from_ext(s: &str) -> Option<Self> {
+    pub(crate) fn from_ext(s: &str) -> Option<Self> {
         match s.to_ascii_lowercase().as_str() {
             "mbtiles" | "mbt" => Some(Self::Mbtiles),
             "sqlite" | "db" => Some(Self::Sqlite),
@@ -29,7 +29,7 @@ impl InfoType {
         }
     }
 
-    pub async fn info(&self, filepath: &str, stats: bool) -> UtilesResult<Info> {
+    pub(crate) async fn info(&self, filepath: &str, stats: bool) -> UtilesResult<Info> {
         let info = match self {
             Self::Mbtiles => {
                 let mbtiles_info = mbinfo(filepath, Some(stats)).await?;
@@ -46,7 +46,7 @@ impl InfoType {
     }
 }
 
-pub async fn info(filepath: &str, stats: bool) -> UtilesResult<Info> {
+pub(crate) async fn info(filepath: &str, stats: bool) -> UtilesResult<Info> {
     let ext = filepath.split('.').last().unwrap_or_default();
     let info_type = InfoType::from_ext(ext);
     if let Some(info_type) = info_type {
@@ -57,7 +57,7 @@ pub async fn info(filepath: &str, stats: bool) -> UtilesResult<Info> {
     }
 }
 
-pub async fn info_main(args: &InfoArgs) -> UtilesResult<()> {
+pub(crate) async fn info_main(args: &InfoArgs) -> UtilesResult<()> {
     let info = info(&args.common.filepath, args.statistics).await?;
     let str = if args.common.min {
         serde_json::to_string(&info)

@@ -13,7 +13,7 @@ use crate::errors::UtilesResult;
 // #[group(required = false, id="projected")]
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false, id = "project")]
-pub struct ShapesProject {
+pub(crate) struct ShapesProject {
     /// Output in geographic coordinates (the default).
     #[arg(
         long, default_value = "false", conflicts_with = "mercator", action = clap::ArgAction::SetTrue
@@ -38,7 +38,7 @@ impl Default for ShapesProject {
 
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false, id = "output-mode")]
-pub struct ShapesOutputMode {
+pub(crate) struct ShapesOutputMode {
     /// Output as a `GeoJSON` feature collections
     #[arg(
         long, default_value = "false", conflicts_with = "bbox", action = clap::ArgAction::SetTrue
@@ -114,7 +114,7 @@ struct TileWithProperties {
     properties: Option<Map<String, Value>>,
 }
 
-pub fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
+pub(crate) fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
     debug!("{:?}", args);
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let parsed_lines = lines.map(|line_res| {

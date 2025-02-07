@@ -9,7 +9,7 @@ use tracing::{error, trace};
 /// Return xxh3-64 hash of string/blob as an integer (i64) value.
 ///
 /// Sqlite stores integers as 8-byte signed integers.
-pub fn add_function_base64_encode(db: &Connection) -> rusqlite::Result<()> {
+pub(super) fn add_function_base64_encode(db: &Connection) -> rusqlite::Result<()> {
     trace!("Adding base64_encode function");
     db.create_scalar_function(
         "base64_encode",

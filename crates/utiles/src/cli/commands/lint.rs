@@ -5,7 +5,7 @@ use crate::errors::UtilesResult;
 use crate::globster;
 use crate::lint::lint_filepaths;
 
-pub async fn lint_main(args: &LintArgs) -> UtilesResult<()> {
+pub(crate) async fn lint_main(args: &LintArgs) -> UtilesResult<()> {
     let filepaths = globster::find_filepaths(&args.fspaths)?;
     if args.fix {
         warn!("NOT IMPLEMENTED: `utiles lint --fix`");

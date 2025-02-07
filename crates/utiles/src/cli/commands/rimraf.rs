@@ -32,20 +32,20 @@ struct RimrafCfg {
 }
 
 #[derive(Debug, Default)]
-pub struct RimrafStats {
+pub(crate) struct RimrafStats {
     pub nfiles: u64,
     pub ndirs: u64,
     pub nbytes: u64,
 }
 
 #[derive(Debug, Default)]
-pub struct FinalRimrafStats {
+pub(crate) struct FinalRimrafStats {
     stats: RimrafStats,
     elapsed: Duration,
 }
 
 impl FinalRimrafStats {
-    pub fn log(&self) {
+    pub(crate) fn log(&self) {
         let nfiles = self.stats.nfiles;
         let ndirs = self.stats.ndirs;
         let nbytes = self.stats.nbytes;
@@ -63,7 +63,7 @@ impl FinalRimrafStats {
         }
     }
 
-    pub fn json_str(&self) -> String {
+    pub(crate) fn json_str(&self) -> String {
         let nfiles = self.stats.nfiles;
         let ndirs = self.stats.ndirs;
         let nbytes = self.stats.nbytes;
@@ -223,7 +223,7 @@ async fn remove_all_directories_in_stages(
 /// 2) Remove all directories
 ///     2a) gathers all dirs and then sorts by depth into map
 ///     2b) removes dirs in descending order of depth
-pub async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
+pub(crate) async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
     trace!("rimraf_main: args = {:?}", args);
     let dirpath = Path::new(&args.dirpath);
     if !dirpath.exists() {

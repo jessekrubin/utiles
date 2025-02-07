@@ -14,7 +14,7 @@ use crate::mbt::{
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
 
-pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
+pub(crate) async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
@@ -48,7 +48,7 @@ pub async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {
     Ok(())
 }
 
-pub async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
+pub(crate) async fn metadata_set_main(args: &MetadataSetArgs) -> UtilesResult<()> {
     debug!("meta: {}", args.common.filepath);
     // check that filepath exists and is file
     let filepath = Path::new(&args.common.filepath);
