@@ -40,6 +40,7 @@ use crate::mbt::MbtilesAsync;
 use crate::mbt::MbtilesClientAsync;
 pub use crate::server::cfg::UtilesServerConfig;
 use crate::server::health::Health;
+use crate::server::preflight::preflight;
 use crate::server::state::{Datasets, MbtilesDataset, ServerState};
 use crate::server::ui::uitiles;
 use crate::signal::shutdown_signal;
@@ -47,54 +48,11 @@ use crate::signal::shutdown_signal;
 mod cfg;
 mod favicon;
 mod health;
+mod preflight;
 pub mod radix36;
 mod request_id;
 mod state;
 mod ui;
-
-async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datasets> {
-    warn!("__PREFLIGHT__");
-    debug!("preflight fspaths: {:?}", config.fspaths);
-
-    let filepaths = find_filepaths(&config.fspaths)?;
-    debug!("filepaths: {:?}", filepaths);
-
-    let mut datasets = BTreeMap::new();
-    // let mut tilejsons = HashMap::new();
-    for fspath in &filepaths {
-        let mbt = MbtilesClientAsync::open_readonly(fspath).await?;
-        debug!("sanity check: {:?}", mbt.filepath());
-        let is_valid = mbt.is_mbtiles().await;
-        match &is_valid {
-            Ok(is_mbt) => {
-                if !is_mbt {
-                    warn!("{}: is not valid mbtiles", mbt.filepath());
-                    continue;
-                }
-                info!("{}: is valid mbtiles", mbt.filepath());
-                let tilejson = mbt.tilejson_ext().await?;
-                let filename = mbt.filename().to_string().replace(".mbtiles", "");
-                let mbt_ds = MbtilesDataset {
-                    mbtiles: mbt,
-                    tilejson,
-                };
-                datasets.insert(filename, mbt_ds);
-            }
-            Err(e) => {
-                warn!("{}: is not valid mbtiles: {:?}", mbt.filepath(), e);
-            }
-        }
-    }
-
-    // print the datasets
-    for (k, ds) in &datasets {
-        info!("{}: {}", k, ds.mbtiles.filepath());
-    }
-
-    info!("__PREFLIGHT_DONE__");
-
-    Ok(Datasets { mbtiles: datasets })
-}
 
 pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     info!("__UTILES_SERVE__");
@@ -112,7 +70,6 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
     // Wrap state in an Arc so that it can be shared with the app...
     // ...seems to be the idiomatic way to do this...
     let shared_state = Arc::new(state);
-    let x_request_id = HeaderName::from_static("x-request-id");
     let compression_layer: CompressionLayer =
         CompressionLayer::new().gzip(true).zstd(true);
 
@@ -120,27 +77,28 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
         .make_span_with(DefaultMakeSpan::new().include_headers(true))
         .on_body_chunk(DefaultOnBodyChunk::new())
         .on_failure(DefaultOnFailure::new())
-        // .on_request(|request: &axum::http::Request<_>, _span: &tracing::Span| {
-        //     tracing::info!(
-        //         method = ?request.method(),
-        //         uri = ?request.uri(),
-        //         // headers = ?request.headers(),
-        //         "Incoming request"
-        //     );
-        // })
+        .on_request(|request: &axum::http::Request<_>, _span: &tracing::Span| {
+            let request_headers = request.headers();
+            tracing::info!(
+                method = ?request.method(),
+                uri = ?request.uri(),
+                request_headers = ?request_headers,
+                "incoming request"
+            );
+        })
         .on_response(
             |response: &axum::http::Response<_>,
              latency: Duration,
              _span: &tracing::Span| {
+                let response_headers = response.headers();
                 tracing::info!(
                     status = ?response.status(),
                     latency = ?latency.as_millis(),
-                    "Response sent"
+                    response_headers = ?response_headers,
+                    "request completed"
                 );
             },
         );
-    // .on_request(DefaultOnRequest::new().level(tracing::Level::DEBUG))
-    // .on_response(DefaultOnResponse::new().include_headers(true));
     let cors_layer = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
         .allow_methods([Method::GET, Method::POST])
@@ -148,18 +106,16 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
         .allow_origin(Any);
     // Build our middleware stack
     let middleware = ServiceBuilder::new()
-        .layer(SetRequestIdLayer::new(
-            x_request_id.clone(),
+        .layer(SetRequestIdLayer::x_request_id(
             Radix36MakeRequestId::default(),
         ))
         // propagate `x-request-id` headers from request to response
-        .layer(PropagateRequestIdLayer::new(x_request_id))
+        .layer(PropagateRequestIdLayer::x_request_id())
         .layer(TimeoutLayer::new(Duration::from_secs(1)))
         .layer(compression_layer);
 
     // Build the app/router!
     let app = Router::new()
-        .layer(middleware)
         .route("/", get(root))
         .route("/favicon.ico", get(favicon::favicon))
         .route("/health", get(health))
@@ -172,8 +128,9 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
             get(get_dataset_tile_quadkey),
         )
         .route("/tiles/{dataset}/{z}/{x}/{y}", get(get_dataset_tile_zxy))
-        .layer(cors_layer)
         .layer(trace_layer)
+        .layer(middleware)
+        .layer(cors_layer)
         .with_state(shared_state) // shared app/server state
         .fallback(four_o_four); // 404
 

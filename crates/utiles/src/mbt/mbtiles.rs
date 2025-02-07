@@ -90,7 +90,7 @@ impl Mbtiles {
         path: P,
         mbtype: Option<MbtType>,
     ) -> UtilesResult<Self> {
-        let mbtype = mbtype.unwrap_or(MbtType::Flat);
+        let mbtype = mbtype.unwrap_or(MbtType::Hash);
 
         // make sure the path don't exist
         let dbpath = pathlike2dbpath(path)?;
