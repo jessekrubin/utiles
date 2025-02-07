@@ -1,14 +1,15 @@
 use std::collections::BTreeMap;
 
-use tilejson::TileJSON;
-
 use crate::mbt::MbtilesClientAsync;
 use crate::server::cfg::UtilesServerConfig;
+use tilejson::TileJSON;
+use utiles_core::tile_type::TileKind;
 
 #[derive(Debug)]
 pub struct MbtilesDataset {
     pub mbtiles: MbtilesClientAsync,
     pub tilejson: TileJSON,
+    pub tilekind: TileKind,
 }
 
 #[derive(Debug)]

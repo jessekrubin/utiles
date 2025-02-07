@@ -45,7 +45,7 @@ impl FromPyObject<'_> for PyTileFormat {
         if let Ok(s) = ob.downcast::<PyString>() {
             let f_str = s.to_string();
 
-            let tf: Option<TileFormat> = TileFormat::parse(&f_str);
+            let tf: Option<TileFormat> = TileFormat::try_parse(&f_str);
             match tf {
                 Some(f) => Ok(PyTileFormat(f)),
                 None => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(

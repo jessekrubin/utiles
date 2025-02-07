@@ -1,5 +1,4 @@
 use crate::globster::find_filepaths;
-use crate::lint::FileLintResults;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::server::state::{Datasets, MbtilesDataset};
 use crate::server::UtilesServerConfig;
@@ -23,9 +22,11 @@ async fn check_mbtiles(fspath: &PathBuf) -> UtilesResult<MbtilesDataset> {
             }
             info!("{}: is valid mbtiles", mbt.filepath());
             let tilejson = mbt.tilejson_ext().await?;
+            let tilekind = mbt.query_tilekind().await?;
             Ok(MbtilesDataset {
                 mbtiles: mbt,
                 tilejson,
+                tilekind,
             })
         }
         Err(e) => {
@@ -73,7 +74,7 @@ pub(crate) async fn preflight(config: &UtilesServerConfig) -> UtilesResult<Datas
         Ok(span) => {
             info!("__PREFLIGHT__ ~ done ({:#})", span);
         }
-        Err(e) => {
+        Err(_) => {
             info!("__PREFLIGHT__ ~ done ({:?})", elapsed_duration);
         }
     }

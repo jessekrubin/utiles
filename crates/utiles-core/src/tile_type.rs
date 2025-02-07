@@ -5,6 +5,7 @@
 //! the npm package `@mapbox/tiletype` and did not include `TileEncoding`.
 
 use std::fmt::Display;
+use std::str::FromStr;
 
 /// `TileKind` over arching type of tile data
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
@@ -166,19 +167,27 @@ impl RasterTileFormat {
     }
 }
 
+impl FromStr for TileFormat {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "png" => Ok(Self::Png),
+            "webp" => Ok(Self::Webp),
+            "pbf" | "mvt" => Ok(Self::Pbf),
+            "gif" => Ok(Self::Gif),
+            "jpg" | "jpeg" => Ok(Self::Jpg),
+            "json" => Ok(Self::Json),
+            "geojson" => Ok(Self::GeoJson),
+            _ => Err(()),
+        }
+    }
+}
+
 impl TileFormat {
     #[must_use]
-    pub fn parse(value: &str) -> Option<Self> {
-        Some(match value.to_ascii_lowercase().as_str() {
-            "png" => Self::Png,
-            "webp" => Self::Webp,
-            "pbf" | "mvt" => Self::Pbf,
-            "gif" => Self::Gif,
-            "jpg" | "jpeg" => Self::Jpg,
-            "json" => Self::Json,
-            "geojson" => Self::GeoJson,
-            _ => None?,
-        })
+    pub fn try_parse(value: &str) -> Option<Self> {
+        Self::from_str(value).map(Some).unwrap_or(None)
     }
 
     #[must_use]

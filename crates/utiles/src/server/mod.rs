@@ -1,10 +1,9 @@
-use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
 
 use axum::extract::Path;
-use axum::http::{HeaderName, Method};
+use axum::http::Method;
 use axum::{
     body::Body,
     extract::State,
@@ -23,25 +22,23 @@ use tilejson::TileJSON;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
-use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure, DefaultOnRequest};
+use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure};
 use tower_http::{
     timeout::TimeoutLayer,
-    trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
+    trace::{DefaultMakeSpan, TraceLayer},
 };
-use tracing::{debug, info, warn};
+use tracing::info;
 
 use request_id::Radix36MakeRequestId;
-use utiles_core::tile_type::blob2headers;
+use utiles_core::tile_type::{blob2headers, TileKind};
 use utiles_core::{quadkey2tile, utile, Tile};
 
 use crate::errors::UtilesResult;
-use crate::globster::find_filepaths;
 use crate::mbt::MbtilesAsync;
-use crate::mbt::MbtilesClientAsync;
 pub use crate::server::cfg::UtilesServerConfig;
 use crate::server::health::Health;
 use crate::server::preflight::preflight;
-use crate::server::state::{Datasets, MbtilesDataset, ServerState};
+use crate::server::state::{MbtilesDataset, ServerState};
 use crate::server::ui::uitiles;
 use crate::signal::shutdown_signal;
 
@@ -153,48 +150,75 @@ struct TileZxyPath {
     y: u32,
 }
 
+enum GetTileResponse {
+    Data(Vec<u8>),
+    NotFound,
+    NoContent,
+}
+
+async fn dataset_query_tile(
+    dataset: &MbtilesDataset,
+    tile: &Tile,
+) -> anyhow::Result<GetTileResponse> {
+    let tile_data = dataset.mbtiles.query_tile(tile).await?;
+    match tile_data {
+        Some(data) => Ok(GetTileResponse::Data(data)),
+        None => {
+            if dataset.tilekind == TileKind::Vector {
+                Ok(GetTileResponse::NoContent)
+            } else {
+                Ok(GetTileResponse::NotFound)
+            }
+        }
+    }
+}
+
 async fn get_dataset_tile_zxy(
     State(state): State<Arc<ServerState>>,
     Path(path): Path<TileZxyPath>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
     let mbtiles = state.datasets.mbtiles.get(&path.dataset);
-    if mbtiles.is_none() {
-        return Err((
-            StatusCode::NOT_FOUND,
-            Json(json!({
-                "error": "Dataset not found",
-                "dataset": path.dataset,
-                "status": 404,
-            }))
-            .to_string(),
-        ));
-    }
     let t = utile!(path.x, path.y, path.z);
-    match mbtiles {
-        Some(mbt_ds) => {
-            let tile_data = mbt_ds.mbtiles.query_tile(&t).await;
-            match tile_data {
-                Ok(data) => match data {
-                    Some(data) => {
-                        let headers = blob2headers(&data);
-                        let mut headers_map = HeaderMap::new();
+    if let Some(mbt_ds) = mbtiles {
+        let tile_data = dataset_query_tile(mbt_ds, &t).await;
 
-                        for (k, v) in headers {
-                            if let Ok(hvalue) = HeaderValue::from_str(v) {
-                                headers_map.insert(k, hvalue);
-                            }
-                        }
-                        Ok((StatusCode::OK, headers_map, Body::from(data)))
+        match tile_data {
+            Ok(GetTileResponse::Data(data)) => {
+                let headers = blob2headers(&data);
+                let mut headers_map = HeaderMap::new();
+                for (k, v) in headers {
+                    if let Ok(hvalue) = HeaderValue::from_str(v) {
+                        headers_map.insert(k, hvalue);
                     }
-                    None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
-                },
-                Err(e) => {
-                    warn!("Error querying tile: {:?}", e);
-                    Err((StatusCode::NOT_FOUND, "Tile not found".to_string()))
                 }
+                Ok((StatusCode::OK, headers_map, Body::from(data)))
             }
+            Ok(GetTileResponse::NoContent) => {
+                Ok((StatusCode::NO_CONTENT, HeaderMap::new(), Body::empty()))
+            }
+            Ok(GetTileResponse::NotFound) => Err((
+                StatusCode::NOT_FOUND,
+                Json(json!({
+                    "error": "Tile not found",
+                    "dataset": path.dataset,
+                    "tile": t,
+                    "status": 404,
+                }))
+                .to_string(),
+            )),
+            Err(e) => Err((
+                StatusCode::NOT_FOUND,
+                Json(json!({
+                    "error": e.to_string(),
+                    "dataset": path.dataset,
+                    "tile": t,
+                    "status": 404,
+                }))
+                .to_string(),
+            )),
         }
-        None => Err((
+    } else {
+        Err((
             StatusCode::NOT_FOUND,
             Json(json!({
                 "error": "Dataset not found",
@@ -202,7 +226,7 @@ async fn get_dataset_tile_zxy(
                 "status": 404,
             }))
             .to_string(),
-        )),
+        ))
     }
 }
 
@@ -217,43 +241,48 @@ async fn get_dataset_tile_quadkey(
     Path(path): Path<TileQuadkeyPath>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let mbt_ds = state.datasets.mbtiles.get(&path.dataset);
-    if mbt_ds.is_none() {
-        return Err((
-            StatusCode::NOT_FOUND,
-            Json(json!({
-                "error": "Dataset not found",
-                "dataset": path.dataset,
-                "status": 404,
-            }))
-            .to_string(),
-        ));
-    }
-    let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {
-        (
-            StatusCode::BAD_REQUEST,
-            format!("Error parsing quadkey: {e}"),
-        )
-    })?;
     if let Some(mbt_ds) = mbt_ds {
-        let tile_data = mbt_ds.mbtiles.query_tile(&parsed_tile).await;
+        let parsed_tile = quadkey2tile(&path.quadkey).map_err(|e| {
+            (
+                StatusCode::BAD_REQUEST,
+                format!("Error parsing quadkey: {e}"),
+            )
+        })?;
+        let tile_data = dataset_query_tile(mbt_ds, &parsed_tile).await;
         match tile_data {
-            Ok(data) => match data {
-                Some(data) => {
-                    let headers = blob2headers(&data);
-                    let mut headers_map = HeaderMap::new();
-                    for (k, v) in headers {
-                        if let Ok(hvalue) = HeaderValue::from_str(v) {
-                            headers_map.insert(k, hvalue);
-                        }
+            Ok(GetTileResponse::Data(data)) => {
+                let headers = blob2headers(&data);
+                let mut headers_map = HeaderMap::new();
+                for (k, v) in headers {
+                    if let Ok(hvalue) = HeaderValue::from_str(v) {
+                        headers_map.insert(k, hvalue);
                     }
-                    Ok((StatusCode::OK, headers_map, Body::from(data)))
                 }
-                None => Err((StatusCode::NOT_FOUND, "Tile not found".to_string())),
-            },
-            Err(e) => {
-                warn!("Error querying tile: {:?}", e);
-                Err((StatusCode::NOT_FOUND, "Tile not found".to_string()))
+                Ok((StatusCode::OK, headers_map, Body::from(data)))
             }
+            Ok(GetTileResponse::NoContent) => {
+                Ok((StatusCode::NO_CONTENT, HeaderMap::new(), Body::empty()))
+            }
+            Ok(GetTileResponse::NotFound) => Err((
+                StatusCode::NOT_FOUND,
+                Json(json!({
+                    "error": "Tile not found",
+                    "dataset": path.dataset,
+                    "tile": parsed_tile,
+                    "status": 404,
+                }))
+                .to_string(),
+            )),
+            Err(e) => Err((
+                StatusCode::NOT_FOUND,
+                Json(json!({
+                    "error": e.to_string(),
+                    "dataset": path.dataset,
+                    "tile": parsed_tile,
+                    "status": 404,
+                }))
+                .to_string(),
+            )),
         }
     } else {
         Err((
