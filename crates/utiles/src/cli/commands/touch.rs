@@ -20,7 +20,7 @@ fn check_page_size(page_size: i64) -> UtilesResult<i64> {
     }
 }
 
-pub async fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
+pub(crate) async fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
     let filepath = &args.filepath;
     let page_size = check_page_size(args.page_size.unwrap_or(4096))?;
     debug!("touch: {}", filepath);

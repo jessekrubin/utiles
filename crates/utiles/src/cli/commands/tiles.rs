@@ -12,7 +12,7 @@ use crate::cli::stdinterator_filter::stdin_filtered;
 use crate::errors::UtilesResult;
 use crate::gj::parsing::parse_bbox_geojson;
 
-pub async fn tiles_main(
+pub(crate) async fn tiles_main(
     args: TilesArgs,
     loop_fn: Option<&dyn Fn()>,
 ) -> UtilesResult<()> {

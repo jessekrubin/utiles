@@ -8,7 +8,7 @@ use crate::sqlite::{
     SqliteHeader,
 };
 
-pub async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {
+pub(crate) async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {
     info!("Analyzing sqlite file: {}", args.common.filepath);
     let db = SqliteDbAsyncClient::open_existing(&args.common.filepath, None).await?;
     if args.analysis_limit.is_some() {
@@ -27,7 +27,7 @@ pub async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {
     Ok(())
 }
 
-pub async fn header_main(args: &SqliteHeaderArgs) -> UtilesResult<()> {
+pub(crate) async fn header_main(args: &SqliteHeaderArgs) -> UtilesResult<()> {
     // get the first 100 bytes of the file
     let header_bytes = read_nbytes::<_, 100>(&args.common.filepath).await?;
     debug!("header-bytes: {:?}", header_bytes);

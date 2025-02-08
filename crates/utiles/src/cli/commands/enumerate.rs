@@ -36,7 +36,7 @@ async fn enumerate_db(
     Ok(())
 }
 
-pub async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
+pub(crate) async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
     debug!("args: {:?}", args);
     // check that all files exist...
     for fspath in &args.fspaths {

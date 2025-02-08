@@ -16,7 +16,7 @@ fn is_file(path: &str) -> bool {
     path.is_file()
 }
 
-pub fn find_datasets(fspath: &str) -> UtilesResult<Vec<PathBuf>> {
+pub(crate) fn find_datasets(fspath: &str) -> UtilesResult<Vec<PathBuf>> {
     // filepaths
     let mut filepaths: Vec<PathBuf> = vec![];
     let mut glob_builder = GlobSetBuilder::new();
@@ -42,7 +42,7 @@ pub fn find_datasets(fspath: &str) -> UtilesResult<Vec<PathBuf>> {
     Ok(filepaths)
 }
 
-pub fn find_filepaths(fspaths: &[String]) -> UtilesResult<Vec<PathBuf>> {
+pub(crate) fn find_filepaths(fspaths: &[String]) -> UtilesResult<Vec<PathBuf>> {
     // split the paths up into files and dirs/patterns
     let mut files: Vec<String> = vec![];
     let mut dirs: Vec<String> = vec![];

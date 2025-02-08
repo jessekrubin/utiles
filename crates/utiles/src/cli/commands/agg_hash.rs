@@ -15,7 +15,7 @@ use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 //     println!("{}", serde_json::to_string_pretty(&result)?);
 //     Ok(())
 // }
-pub async fn agg_hash_main(args: &AggHashArgs) -> UtilesResult<()> {
+pub(crate) async fn agg_hash_main(args: &AggHashArgs) -> UtilesResult<()> {
     let mbt = MbtilesClientAsync::open_readonly(&args.common.filepath).await?;
     mbt.register_utiles_sqlite_functions().await?;
     let hash_type = args.hash.unwrap_or(HashType::Md5);

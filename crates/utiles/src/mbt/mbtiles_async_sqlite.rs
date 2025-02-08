@@ -1,22 +1,20 @@
-use std::fmt;
-use std::fmt::Debug;
-use std::path::Path;
-
 use async_sqlite::{Client, ClientBuilder, Pool, PoolBuilder};
 use async_trait::async_trait;
 use futures::TryFutureExt;
 use rusqlite::{Connection, OpenFlags};
+use std::fmt;
+use std::fmt::Debug;
+use std::path::Path;
+use std::str::FromStr;
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
-
-use utiles_core::BBox;
 
 use crate::errors::UtilesResult;
 use crate::mbt::mbtiles::{
     has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
     has_zxy, init_mbtiles, mbtiles_metadata, mbtiles_metadata_row,
     metadata_duplicate_key_values, metadata_json, minzoom_maxzoom, query_zxy,
-    register_utiles_sqlite, tiles_count, tiles_is_empty,
+    tiles_count, tiles_is_empty,
 };
 use crate::mbt::mbtiles_async::MbtilesAsync;
 use crate::mbt::query::query_mbtiles_type;
@@ -30,8 +28,11 @@ use crate::sqlite::{
     RowsAffected, SqliteError,
 };
 use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
+use crate::sqlite_utiles::register_utiles_sqlite;
 use crate::utilejson::metadata2tilejson;
 use crate::UtilesError;
+use utiles_core::tile_type::{TileFormat, TileKind};
+use utiles_core::BBox;
 
 #[derive(Clone)]
 pub struct MbtilesClientAsync {
@@ -606,6 +607,30 @@ where
     async fn query_mbt_type(&self) -> UtilesResult<MbtType> {
         let mbt = self.conn(query_mbtiles_type).await?;
         Ok(mbt)
+    }
+
+    async fn query_metadata_value(&self, name: &str) -> UtilesResult<Option<String>> {
+        let row = self.metadata_row(name).await?;
+        match row {
+            Some(r) => Ok(Some(r.value)),
+            None => Ok(None),
+        }
+    }
+
+    async fn query_metadata_format(&self) -> UtilesResult<Option<String>> {
+        self.query_metadata_value("format").await
+    }
+
+    async fn query_tilekind(&self) -> UtilesResult<TileKind> {
+        let format_str = self.query_metadata_format().await?;
+        if let Some(format_str) = format_str {
+            let kind = TileFormat::from_str(&format_str)
+                .map(|f| f.kind())
+                .unwrap_or(TileKind::Unknown);
+            Ok(kind)
+        } else {
+            Ok(TileKind::Unknown)
+        }
     }
 
     async fn bbox(&self) -> UtilesResult<BBox> {

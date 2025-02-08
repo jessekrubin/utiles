@@ -227,7 +227,7 @@ mod tests {
     use crate::utilejson::{Terrain, UTileJSON};
 
     #[test]
-    pub fn test_utilejson_stringify() {
+    pub(super) fn test_utilejson_stringify() {
         // Example TileJSON instance
         let tile_json = TileJSON {
             tilejson: "3.0.0".to_string(),
@@ -270,7 +270,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_utilejson_macros() {
+    pub(super) fn test_utilejson_macros() {
         let utj = utilejson! {
             tiles: vec!["https://example.com/{z}/{x}/{y}.png".to_string()],
             minzoom: 0,

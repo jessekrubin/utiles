@@ -4,7 +4,7 @@ use tracing::debug;
 use utiles_core::tile_type::tiletype_str;
 
 /// Scalar function to return tile-type string.
-pub fn add_function_ut_tiletype(db: &Connection) -> rusqlite::Result<()> {
+pub(super) fn add_function_ut_tiletype(db: &Connection) -> rusqlite::Result<()> {
     debug!("Adding ut_tiletype function");
     db.create_scalar_function(
         "ut_tiletype",

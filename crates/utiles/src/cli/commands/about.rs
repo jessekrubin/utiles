@@ -1,6 +1,6 @@
 use crate::errors::UtilesResult;
 
-pub fn about_main() -> UtilesResult<()> {
+pub(crate) fn about_main() -> UtilesResult<()> {
     let current_exe =
         std::env::current_exe().unwrap_or_else(|_| std::path::PathBuf::from("unknown"));
     let prof = if cfg!(debug_assertions) {

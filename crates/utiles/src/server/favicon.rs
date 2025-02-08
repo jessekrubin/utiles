@@ -7,7 +7,7 @@ use axum::response::IntoResponse;
 // const MAP_EMOJI: &str = "🗺️";
 // const DINO_EMOJI: &str = "🦕";
 const FAVICON_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg"><text y="24" font-size="24">💯</text></svg>"#;
-pub async fn favicon() -> impl IntoResponse {
+pub(super) async fn favicon() -> impl IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert(
         header::CONTENT_TYPE,

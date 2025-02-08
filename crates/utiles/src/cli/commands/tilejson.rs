@@ -5,7 +5,7 @@ use crate::errors::UtilesResult;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::utilejson::tilejson_stringify;
 
-pub async fn tilejson_main(args: &TilejsonArgs) -> UtilesResult<()> {
+pub(crate) async fn tilejson_main(args: &TilejsonArgs) -> UtilesResult<()> {
     debug!("tilejson: {}", args.common.filepath);
     let mbt = MbtilesClientAsync::open_readonly(&args.common.filepath).await?;
     let mut tj = mbt.tilejson().await?;

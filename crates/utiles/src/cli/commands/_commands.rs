@@ -37,7 +37,7 @@ impl CommandInfo {
 }
 
 impl CommandInfo {
-    pub fn fmt_name_and_aliases(&self) -> String {
+    pub(crate) fn fmt_name_and_aliases(&self) -> String {
         let parent_and_name = match &self.parent {
             Some(path) => format!("{}::{}", path, self.name), // name is a String
             None => self.name.clone(),
@@ -82,7 +82,10 @@ fn list_commands(cmd: &clap::Command) -> Vec<CommandInfo> {
     cmd_infos
 }
 
-pub fn commands_main(cli: &clap::Command, args: &CommandsArgs) -> UtilesResult<()> {
+pub(crate) fn commands_main(
+    cli: &clap::Command,
+    args: &CommandsArgs,
+) -> UtilesResult<()> {
     let cmds_arr = list_commands(cli);
     let out_str = if args.table {
         cmds_arr

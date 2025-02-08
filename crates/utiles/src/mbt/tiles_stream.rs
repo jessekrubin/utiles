@@ -9,7 +9,7 @@ use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 use crate::tile_stream::TileReceiverStream;
 use crate::UtilesResult;
 
-pub fn make_tiles_rx(
+pub(super) fn make_tiles_rx(
     mbt: &MbtilesClientAsync,
     query_override: Option<&str>,
 ) -> UtilesResult<tokio::sync::mpsc::Receiver<(Tile, Vec<u8>)>> {
@@ -64,7 +64,7 @@ pub fn make_tiles_rx(
     Ok(rx)
 }
 
-pub fn make_enumerate_rx(
+pub(super) fn make_enumerate_rx(
     mbt: &MbtilesClientAsync,
     query_override: Option<&str>,
 ) -> UtilesResult<tokio::sync::mpsc::Receiver<Tile>> {

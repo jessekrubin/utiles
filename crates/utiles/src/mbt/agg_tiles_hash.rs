@@ -77,7 +77,7 @@ pub struct AggHashResult {
 //     })
 // }
 
-pub async fn hash_stream<T: Digest>(
+pub(super) async fn hash_stream<T: Digest>(
     mut data: impl Stream<Item = Vec<u8>> + Unpin,
 ) -> (String, usize) {
     let mut hasher = T::new();
@@ -89,7 +89,7 @@ pub async fn hash_stream<T: Digest>(
     // hasher.update(data);
     (hasher.finalize().to_vec().encode_hex_upper(), count)
 }
-pub fn tile_stream_to_bytes_stream(
+pub(super) fn tile_stream_to_bytes_stream(
     mut data: TileReceiverStream,
 ) -> ReceiverStream<Vec<u8>> {
     let (tx, rx) = tokio::sync::mpsc::channel(100);

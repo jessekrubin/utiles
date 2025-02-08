@@ -194,7 +194,7 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
     Ok(metadata_change)
 }
 
-pub async fn update_mbtiles_magic(
+pub(crate) async fn update_mbtiles_magic(
     mbt: &MbtilesClientAsync,
 ) -> UtilesResult<Option<PragmaChange>> {
     let magic = mbt.magic_number().await?;
@@ -209,7 +209,9 @@ pub async fn update_mbtiles_magic(
     }
 }
 
-pub async fn update_mbtiles(mbt: &MbtilesClientAsync) -> UtilesResult<Vec<DbChange>> {
+pub(crate) async fn update_mbtiles(
+    mbt: &MbtilesClientAsync,
+) -> UtilesResult<Vec<DbChange>> {
     let magic_change = update_mbtiles_magic(mbt).await?;
     let mut changes = vec![];
     if let Some(magic_change) = magic_change {
@@ -224,7 +226,7 @@ pub async fn update_mbtiles(mbt: &MbtilesClientAsync) -> UtilesResult<Vec<DbChan
     Ok(changes)
 }
 
-pub async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
+pub(crate) async fn update_main(args: &UpdateArgs) -> UtilesResult<()> {
     // let filepath = Path::new(&args.common.filepath);
     //
     // assert!(

@@ -17,7 +17,7 @@ use crate::UtilesError;
 /// - `check` detects problems and returns zero or more `MbtLint` results.
 /// - `fix` tries to fix them (if `fix` logic is supported for that rule).
 #[async_trait::async_trait]
-pub trait MbtLintRule {
+pub(super) trait MbtLintRule {
     /// Returns the name or short description of this rule.
     fn name(&self) -> &'static str;
 
@@ -32,7 +32,7 @@ pub trait MbtLintRule {
 }
 
 /// A rule that checks the `MBTiles` magic number.
-pub struct MagicNumberRule;
+pub(super) struct MagicNumberRule;
 
 #[async_trait::async_trait]
 impl MbtLintRule for MagicNumberRule {
@@ -69,7 +69,7 @@ impl MbtLintRule for MagicNumberRule {
 }
 
 /// A rule that checks whether the encoding is UTF-8.
-pub struct EncodingRule;
+pub(super) struct EncodingRule;
 
 #[async_trait::async_trait]
 impl MbtLintRule for EncodingRule {
@@ -96,7 +96,7 @@ impl MbtLintRule for EncodingRule {
     }
 }
 
-pub struct MetadataDuplicateKeyValues;
+pub(super) struct MetadataDuplicateKeyValues;
 
 #[async_trait::async_trait]
 impl MbtLintRule for MetadataDuplicateKeyValues {
@@ -127,7 +127,7 @@ impl MbtLintRule for MetadataDuplicateKeyValues {
     }
 }
 
-pub struct MetadataDuplicateKeys;
+pub(super) struct MetadataDuplicateKeys;
 
 #[async_trait::async_trait]
 impl MbtLintRule for MetadataDuplicateKeys {
@@ -161,7 +161,7 @@ impl MbtLintRule for MetadataDuplicateKeys {
     }
 }
 
-pub struct MetadataUniqueIndex;
+pub(super) struct MetadataUniqueIndex;
 
 #[async_trait::async_trait]
 impl MbtLintRule for MetadataUniqueIndex {
@@ -206,7 +206,7 @@ impl MbtLintRule for MetadataUniqueIndex {
 }
 
 /// A rule that checks for required metadata fields & duplicates.
-pub struct MetadataRequiredKeysRule;
+pub(super) struct MetadataRequiredKeysRule;
 
 #[async_trait::async_trait]
 impl MbtLintRule for MetadataRequiredKeysRule {
@@ -237,14 +237,14 @@ impl MbtLintRule for MetadataRequiredKeysRule {
 }
 
 #[derive(Debug)]
-pub struct MbtilesLinter {
+pub(super) struct MbtilesLinter {
     pub path: PathBuf,
     pub fix: bool,
 }
 
 impl MbtilesLinter {
     #[must_use]
-    pub fn new<T: AsRef<Path>>(path: T, fix: bool) -> Self {
+    pub(super) fn new<T: AsRef<Path>>(path: T, fix: bool) -> Self {
         Self {
             path: path.as_ref().to_path_buf(),
             fix,
@@ -279,7 +279,7 @@ impl MbtilesLinter {
     }
 
     /// Run all rules; collect their errors; optionally fix if `self.fix` is `true`.
-    pub async fn lint(&self) -> UtilesResult<Vec<MbtLint>> {
+    pub(super) async fn lint(&self) -> UtilesResult<Vec<MbtLint>> {
         let mbt = self.open_mbtiles().await?;
 
         // If not an MBTiles-like DB, exit early

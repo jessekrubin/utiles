@@ -1,12 +1,12 @@
 use async_trait::async_trait;
 use tilejson::TileJSON;
 
-use utiles_core::{BBox, Tile, TileLike};
-
 use crate::errors::UtilesResult;
 use crate::mbt::{MbtMetadataRow, MbtType, MbtilesStats, MetadataChangeFromTo};
 use crate::mbt::{MbtilesMetadataJson, MinZoomMaxZoom};
 use crate::sqlite::RowsAffected;
+use utiles_core::tile_type::TileKind;
+use utiles_core::{BBox, Tile, TileLike};
 
 #[async_trait]
 pub trait MbtilesAsync: Sized {
@@ -71,4 +71,7 @@ pub trait MbtilesAsync: Sized {
     async fn metadata_duplicate_key_values(
         &self,
     ) -> UtilesResult<Vec<(String, String, usize)>>;
+    async fn query_tilekind(&self) -> UtilesResult<TileKind>;
+    async fn query_metadata_value(&self, name: &str) -> UtilesResult<Option<String>>;
+    async fn query_metadata_format(&self) -> UtilesResult<Option<String>>;
 }

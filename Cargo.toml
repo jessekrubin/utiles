@@ -61,7 +61,7 @@ tilejson = "0.4.1"
 tokio = { version = "1.42.0", features = ["full"] }
 tokio-stream = "0.1.17"
 tower = { version = "0.5.2", features = ["timeout"] }
-tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression"] }
+tower-http = { version = "0.6.1", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"
@@ -105,7 +105,7 @@ lto = "thin"
 [workspace.lints.rust]
 unsafe_code = "warn"
 # MUST CLEAN UP MAIN LIBRARY....
-#unreachable_pub = "warn"
+unreachable_pub = "warn"
 
 [workspace.lints.clippy]
 # groups

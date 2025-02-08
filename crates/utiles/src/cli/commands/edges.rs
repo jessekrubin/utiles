@@ -5,7 +5,7 @@ use crate::cli::stdinterator_filter;
 use crate::edges::{find_edges, find_edges_wrap_x};
 use crate::errors::UtilesResult;
 
-pub async fn edges_main(args: EdgesArgs) -> UtilesResult<()> {
+pub(crate) async fn edges_main(args: EdgesArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let mut tiles: Vec<Tile> = vec![];
 

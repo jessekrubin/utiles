@@ -16,12 +16,12 @@ use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 use crate::UtilesError;
 
 #[derive(Debug)]
-pub struct CopyPasta {
+pub(super) struct CopyPasta {
     pub cfg: CopyConfig,
 }
 
 #[derive(Debug)]
-pub struct CopyPastaPreflightAnalysis {
+pub(super) struct CopyPastaPreflightAnalysis {
     pub dst_db_type: MbtType,
     pub dst_db: MbtilesClientAsync,
 
@@ -34,13 +34,13 @@ pub struct CopyPastaPreflightAnalysis {
 }
 
 impl CopyPasta {
-    pub fn new(cfg: CopyConfig) -> UtilesResult<CopyPasta> {
+    pub(super) fn new(cfg: CopyConfig) -> UtilesResult<CopyPasta> {
         cfg.check()?;
         // sanity check stuff here...
         Ok(Self { cfg })
     }
 
-    pub async fn get_src_db(&self) -> UtilesResult<MbtilesClientAsync> {
+    pub(super) async fn get_src_db(&self) -> UtilesResult<MbtilesClientAsync> {
         // do the thing
         let src_db = MbtilesClientAsync::open_existing(&self.cfg.src).await?;
         debug!("src_db: {:?}", src_db);
@@ -48,7 +48,7 @@ impl CopyPasta {
     }
 
     /// Returns the destination db and a bool indicating if it was created
-    pub async fn get_dst_db(
+    pub(super) async fn get_dst_db(
         &self,
         dst_db_type: Option<MbtType>,
     ) -> UtilesResult<(MbtilesClientAsync, bool, MbtType)> {
@@ -71,7 +71,7 @@ impl CopyPasta {
         Ok((dst_db, is_new, db_type_queried))
     }
 
-    pub async fn set_metadata(
+    pub(super) async fn set_metadata(
         &self,
         dst_db: &MbtilesClientAsync,
         metadata: MbtilesMetadataJson,
@@ -101,7 +101,7 @@ impl CopyPasta {
     //     self.set_metadata(dst_db, metadata_rows).await
     // }
 
-    pub async fn copy_tiles_zbox_flat(
+    pub(super) async fn copy_tiles_zbox_flat(
         &self,
         dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
@@ -131,7 +131,7 @@ impl CopyPasta {
         Ok(n_tiles_inserted)
     }
 
-    pub async fn copy_tiles_zbox_hash(
+    pub(super) async fn copy_tiles_zbox_hash(
         &self,
         dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
@@ -161,7 +161,7 @@ impl CopyPasta {
         Ok(n_tiles_inserted)
     }
 
-    pub async fn copy_tiles_zbox_norm(
+    pub(super) async fn copy_tiles_zbox_norm(
         &self,
         dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
@@ -221,7 +221,7 @@ ON
         Ok(n_tiles_inserted)
     }
 
-    pub async fn copy_tiles_with_attach(
+    pub(super) async fn copy_tiles_with_attach(
         &self,
         dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<usize> {
@@ -257,7 +257,9 @@ ON
         Ok(res)
     }
 
-    pub async fn preflight_check(&self) -> UtilesResult<CopyPastaPreflightAnalysis> {
+    pub(super) async fn preflight_check(
+        &self,
+    ) -> UtilesResult<CopyPastaPreflightAnalysis> {
         // do the thing
         debug!("Preflight check: {:?}", self.cfg);
         let src_db = self.get_src_db().await?;
@@ -294,7 +296,7 @@ ON
         })
     }
 
-    pub async fn check_conflict(
+    pub(super) async fn check_conflict(
         &self,
         dst_db: &MbtilesClientAsync,
     ) -> UtilesResult<bool> {
@@ -336,7 +338,7 @@ LIMIT 1;
         Ok(has_conflict > 0)
     }
 
-    pub async fn copy_tiles_stream(
+    pub(super) async fn copy_tiles_stream(
         &self,
         src_db: &MbtilesClientAsync,
         dst_db: MbtilesClientAsync,
@@ -406,7 +408,7 @@ LIMIT 1;
         Ok(0)
     }
 
-    pub async fn run(&self) -> UtilesResult<()> {
+    pub(super) async fn run(&self) -> UtilesResult<()> {
         warn!("mbtiles-2-mbtiles copy is a WIP");
         // doing preflight check
         debug!("Preflight check");

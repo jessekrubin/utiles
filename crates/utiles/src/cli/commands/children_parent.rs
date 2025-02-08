@@ -4,7 +4,7 @@ use crate::cli::args::ParentChildrenArgs;
 use crate::cli::stdinterator_filter;
 use crate::errors::UtilesResult;
 
-pub fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
+pub(crate) fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     for line in lines {
         let lstr = line?.trim_matches(|c| c == '"' || c == '\'').to_string();
@@ -20,7 +20,7 @@ pub fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     Ok(())
 }
 
-pub fn children_main(args: ParentChildrenArgs) -> UtilesResult<()> {
+pub(crate) fn children_main(args: ParentChildrenArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);
     let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
     for line in lines {

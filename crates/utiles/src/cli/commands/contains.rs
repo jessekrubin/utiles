@@ -8,7 +8,7 @@ use utiles_core::LngLat;
 /// Check if a mbtiles file contains a lnglat
 ///
 /// Added by [dan-costello](https://github.com/dan-costello)
-pub async fn contains_main(filepath: &str, lnglat: LngLat) -> UtilesResult<()> {
+pub(crate) async fn contains_main(filepath: &str, lnglat: LngLat) -> UtilesResult<()> {
     debug!("contains: {filepath}");
     // check that filepath exists and is file
     let filepath = Path::new(filepath);

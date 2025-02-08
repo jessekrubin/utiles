@@ -19,15 +19,17 @@ mod hash_int;
 mod tilesize;
 mod tiletype;
 
-pub fn add_ut_functions(db: &Connection) -> Result<()> {
+pub fn register_utiles_sqlite(conn: &Connection) -> Result<()> {
     debug!("registering sqlite-utiles functions...");
-    add_function_ut_tiletype(db)?;
-    add_function_ut_tilesize(db)?;
-    add_function_base64_encode(db)?;
+    sqlite_hashes::register_hash_functions(conn)?;
 
-    add_function_xxh3_i64(db)?;
-    add_function_xxh64_i64(db)?;
-    add_function_fnv_i64(db)?;
+    add_function_ut_tiletype(conn)?;
+    add_function_ut_tilesize(conn)?;
+    add_function_base64_encode(conn)?;
+
+    add_function_xxh3_i64(conn)?;
+    add_function_xxh64_i64(conn)?;
+    add_function_fnv_i64(conn)?;
     debug!("registered sqlite-utiles functions!");
     Ok(())
 }
@@ -64,7 +66,7 @@ mod tests {
     #[test]
     fn test_ut_tiletype() -> Result<(), BoxError> {
         let db = rusqlite::Connection::open_in_memory()?;
-        super::add_ut_functions(&db)?;
+        super::register_utiles_sqlite(&db)?;
 
         let test_data_dirpath = test_data_dirpath();
         let test_data_tile_types_dirpath = test_data_dirpath.join("tile-types");
@@ -147,7 +149,7 @@ mod tests {
     #[test]
     fn test_ut_base64() -> Result<(), BoxError> {
         let db = rusqlite::Connection::open_in_memory()?;
-        super::add_ut_functions(&db)?;
+        super::register_utiles_sqlite(&db)?;
         // maketablwe and insert data
         db.execute(
             "CREATE TABLE data (

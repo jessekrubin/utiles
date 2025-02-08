@@ -13,7 +13,7 @@ use xxhash_rust::const_xxh64::xxh64 as const_xxh64;
 /// Return xxh3-64 hash of string/blob as an integer (i64) value.
 ///
 /// Sqlite stores integers as 8-byte signed integers.
-pub fn add_function_xxh3_i64(db: &Connection) -> rusqlite::Result<()> {
+pub(super) fn add_function_xxh3_i64(db: &Connection) -> rusqlite::Result<()> {
     trace!("Adding xxh3_i64 function");
     db.create_scalar_function(
         "xxh3_i64",
@@ -43,7 +43,7 @@ pub fn add_function_xxh3_i64(db: &Connection) -> rusqlite::Result<()> {
 
 /// Return xxh32 hash of string/blob as integer (i64) value.
 ///
-pub fn add_function_xxh64_i64(db: &Connection) -> rusqlite::Result<()> {
+pub(super) fn add_function_xxh64_i64(db: &Connection) -> rusqlite::Result<()> {
     trace!("Adding xxh64_i64 function");
     db.create_scalar_function(
         "xxh64_i64",
@@ -77,7 +77,7 @@ fn fnv1a_u64(bytes: &[u8]) -> u64 {
     hasher.finish()
 }
 
-pub fn add_function_fnv_i64(db: &Connection) -> rusqlite::Result<()> {
+pub(super) fn add_function_fnv_i64(db: &Connection) -> rusqlite::Result<()> {
     trace!("Adding fnv_i64 function");
     db.create_scalar_function(
         "fnv_i64",

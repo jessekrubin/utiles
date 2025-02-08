@@ -23,11 +23,11 @@ type LagerFormatLayer = Handle<
     Layered<Box<dyn Layer<Registry> + Send + Sync>, Registry, Registry>,
 >;
 // Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
-pub static GLOBAL_FILTER_RELOAD_HANDLE: LazyLock<Mutex<Option<LagerLayer>>> =
+static GLOBAL_FILTER_RELOAD_HANDLE: LazyLock<Mutex<Option<LagerLayer>>> =
     LazyLock::new(|| Mutex::new(None));
-pub static GLOBAL_FORMAT_RELOAD_HANDLE: LazyLock<Mutex<Option<LagerFormatLayer>>> =
+static GLOBAL_FORMAT_RELOAD_HANDLE: LazyLock<Mutex<Option<LagerFormatLayer>>> =
     LazyLock::new(|| Mutex::new(None));
-pub static GLOBAL_LAGER_CONFIG: LazyLock<Mutex<LagerConfig>> =
+static GLOBAL_LAGER_CONFIG: LazyLock<Mutex<LagerConfig>> =
     LazyLock::new(|| Mutex::new(LagerConfig::default()));
 
 // #[derive(Debug, Default, Copy, Clone)]

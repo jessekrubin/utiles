@@ -8,7 +8,7 @@ use crate::sqlite::{Sqlike3Async, SqliteDbAsyncClient};
 use crate::UtilesError;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct VacuumInfo {
+pub(crate) struct VacuumInfo {
     pub fspath: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -22,7 +22,7 @@ pub struct VacuumInfo {
     pub size_diff: i64,
 }
 
-pub async fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
+pub(crate) async fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
     // check that the file exists
     let db = SqliteDbAsyncClient::open_existing(&args.common.filepath, None).await?;
     let pre_vac_file_size = std::fs::metadata(&args.common.filepath)?.len();
