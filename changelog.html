@@ -1,0 +1,425 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>CHANGELOG - utiles.dev</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">utiles.dev</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/jessekrubin/utiles" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/jessekrubin/utiles/edit/main/docs/src/changelog.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="changelog"><a class="header" href="#changelog">CHANGELOG</a></h1>
+<h2 id="todo"><a class="header" href="#todo">TODO</a></h2>
+<ul>
+<li>Docs/readme update</li>
+</ul>
+<hr />
+<h2 id="072-2025-01-14"><a class="header" href="#072-2025-01-14">0.7.2 (2025-01-14)</a></h2>
+<ul>
+<li><code>utiles webpify</code> and <code>utiles-oxipng</code> commands now show correct size difference
+if/when the size of a tiles-db is larger than it was previously</li>
+<li>fix axum 8 new routing paths</li>
+<li><code>utiles-pyo3</code> children now accept kwarg bool <code>zorder</code>:
+<ul>
+<li><code>zorder</code> returns quadkey ordering: <code>top-left</code>, <code>top-right</code>, <code>bottom-left</code>,
+<code>bottom-right</code></li>
+<li>For some reason (I do not know why) <code>mercantile</code> and <code>@mapbox/tilebelt</code> both
+return children in the order of <code>top-left</code>, <code>top-right</code>, <code>bottom-right</code>,
+<code>bottom-left</code> which I call ‘d-ordering’</li>
+</ul>
+</li>
+<li><code>cli</code>
+<ul>
+<li>format string <code>{projwin}</code> and <code>{projwin_web}</code> changed to return <code> </code> space separated coords</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="071-2025-01-09"><a class="header" href="#071-2025-01-09">0.7.1 (2025-01-09)</a></h2>
+<ul>
+<li>fix axum 8 new routing paths</li>
+</ul>
+<hr />
+<h2 id="070-2025-01-09"><a class="header" href="#070-2025-01-09">0.7.0 (2025-01-09)</a></h2>
+<ul>
+<li><strong>NO UNWRAPPING!</strong> there is no unwrapping in utiles!</li>
+<li>updated <code>thiserror</code> to v2</li>
+<li>remove <code>gil-refs</code> pyo3 feature from python lib</li>
+<li><code>pyo3</code> v0.23.x</li>
+<li>supermercado compatible <code>edges</code> and <code>burn</code> cli commands added as well a s rust
+lib functions (obviously)</li>
+<li><code>shapes</code> and <code>feature</code> functions for tile produce polygons that now DO follow
+the right-hand-rule; exterior rings are clockwise</li>
+<li><code>simplify</code>/<code>merge</code> function(s) optimized for faster merging and WAY less
+memory usage</li>
+<li>Parent methods now returns <code>None</code> if <code>z&lt;=0</code></li>
+<li>New command(s):
+<ul>
+<li><code>agg-hash</code> command that computes the <code>agg-tiles-hash</code> of a tiles-db as
+standardized by the martin/maplibre team (this supports more hash-types;
+<code>xxh3</code> appears to be the fastest and what utiles will likely default to if
+not <code>xxh64</code>)</li>
+<li><code>commands</code> list all available commands (including hidden/dev/unimplemented
+commands)</li>
+<li><code>enumerate</code> list xyz tiles in db(s) similar to <code>tippecanoe-enumerate</code>; for
+tippecanoe compatibility use <code>--tippecanoe</code>/<code>-t</code></li>
+<li><code>sqlite</code>/<code>db</code> sub-command group with <code>vac</code>/<code>analyze</code> commands and will
+likely contain future pure sqlite util(e)s… these could totally be shell
+scripts, but they’re nice to have on das-windows
+<ul>
+<li><code>header</code>/<code>head</code> command that prints the json of a sqlite db header (which
+has come in handy for weird dbs that use old code to write out sqlite dbs
+(yes I have seen this))</li>
+<li><code>vac</code>/<code>vacuum</code> command that vacuums a sqlite db (optionally into a new db)</li>
+<li><code>analyze</code> command that analyzes a sqlite db (basically the same as doing
+<code>sqlite3 database.sqlite "PRAGMA analyze;"</code>)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>copy</code> and <code>touch</code>
+<ul>
+<li>Now supports <code>flat</code>/<code>norm</code> (normalized)/<code>hash</code> (flat-with-hash) formats as
+standardized by the martin/maplibre people. Should also work with
+non-martin-conforming mbtiles schemas (appears to for me)</li>
+</ul>
+</li>
+<li>Dev/hidden commands:
+<ul>
+<li><code>webpify</code> command that converts all non-webp raster-tiles to webp (lossless
+only due to image-crate not supporting lossy encoding…)</li>
+<li><code>oxipng</code> command that optimizes png(s) in mbtiles db(s) using <code>oxipng</code> crate</li>
+</ul>
+</li>
+<li>figured out how to make async tile-stream(s)</li>
+<li>Removed even more <code>unwrap</code> usages</li>
+<li>lager/logging/tracing is reloadable from python; using the new fancy
+<code>std::sync::LazyLock</code> (yay)</li>
+<li>lint/copy overhaul</li>
+<li>Added <code>--page-size</code> to vacuum command</li>
+<li>Using <code>json-patch</code> for metadata updates</li>
+<li>Allow setting metadata value(s) from file if no value is provided (<code>-</code>/<code>--</code>)
+for stdin</li>
+<li>Figured out how to put the caller-site (eg <code>pyo3</code> in the cli help so you
+(likely me) can tell which utiles you are calling)</li>
+<li>python:
+<ul>
+<li>Added <code>TileFmts</code> string formatter object</li>
+<li><code>Lager</code> singleton that can toggle tracing format and level (WIP)</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="061-2024-07-01"><a class="header" href="#061-2024-07-01">0.6.1 (2024-07-01)</a></h2>
+<ul>
+<li>Fix calling <code>utiles.ut_cli</code> multiple times causing tracing-subscriber crash</li>
+</ul>
+<hr />
+<h2 id="060-2024-06-28"><a class="header" href="#060-2024-06-28">0.6.0 (2024-06-28)</a></h2>
+<ul>
+<li>Upgrade pyo3 to <code>v0.22.0</code> – had to add signatures to all fns with optional
+args/kwargs</li>
+<li>Update python dev deps</li>
+<li>Added <code>{bbox}</code>, <code>{projwin}</code>, <code>{bbox_web}</code> and <code>{projwin_web}</code> format tokens to
+tile-formatter (those projwins are handy for gdaling)</li>
+</ul>
+<hr />
+<h2 id="051-2024-06-19"><a class="header" href="#051-2024-06-19">0.5.1 (2024-06-19)</a></h2>
+<ul>
+<li>Fixed backpressure issue when <code>unpyramiding</code> directory to mbtiles; the loading
+of tiles was happening too fast and could cause memory issues on large
+tile-pyramids… (this was previously not an issue b/c I would run those jobs
+on my work machine which had 512gb or ram, but that machine died… RIP titus)</li>
+<li>Write out <code>metadata.json</code> when <code>pyramid-ing</code> mbtiles to directory if the
+metadata of the mbtiles does not contain duplicate keys (which it should not)</li>
+<li>Limit jobs/concurrency when <code>pyramid-ing</code> mbtiles to directory to 4 (if not
+specified by <code>--jobs</code>/<code>-j</code> option) to prevent nuking machines</li>
+</ul>
+<hr />
+<h2 id="050-2024-06-14"><a class="header" href="#050-2024-06-14">0.5.0 (2024-06-14)</a></h2>
+<ul>
+<li>Moved metadata structs and tools from <code>utiles-core</code> to <code>utiles</code></li>
+<li><code>utiles-python</code>
+<ul>
+<li>Refactoring and reorganizing of code</li>
+<li>Fixed comparison of LngLat obj</li>
+<li>Using rust lib for <code>python -m utiles</code> file size formatting</li>
+</ul>
+</li>
+<li><code>clippy::pedantic</code>
+<ul>
+<li>Many changes on the road to <code>clippy::pedantic</code></li>
+<li><code>utiles-core</code> is almost fully pedantic</li>
+<li><code>utiles</code> is becoming pedantic</li>
+<li><code>utiles-python</code> is not very pedantic yet</li>
+</ul>
+</li>
+<li>Testing:
+<ul>
+<li>More tests added (mostly testing w/ python)</li>
+<li>Added test mbtiles file <code>osm-standard.0z4.mbtiles</code></li>
+</ul>
+</li>
+<li>fmt-str command and option <code>--fmt</code> added <code>tiles</code> command; allows string
+formatting of json-tiles:</li>
+</ul>
+<pre><code>Format json-tiles format-string
+fmt-tokens:
+   `{json_arr}`/`{json}`  -&gt; [x, y, z]
+   `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
+   `{quadkey}`/`{qk}`     -&gt; quadkey string
+   `{pmtileid}`/`{pmid}`  -&gt; pmtile-id
+   `{x}`                  -&gt; x tile coord
+   `{y}`                  -&gt; y tile coord
+   `{z}`                  -&gt; z/zoom level
+   `{-y}`/`{yup}`         -&gt; y tile coord flipped/tms
+   `{zxy}`                -&gt; z/x/y
+
+
+Example:
+   &gt; echo "[486, 332, 10]" | utiles fmtstr
+   [486, 332, 10]
+   &gt; echo "[486, 332, 10]" | utiles fmtstr --fmt "{x},{y},{z}"
+   486,332,10
+   &gt; echo "[486, 332, 10]" | utiles fmt --fmt "SELECT * FROM tiles WHERE zoom_level = {z} AND tile_column = {x} AND tile_row = {y};"
+   SELECT * FROM tiles WHERE zoom_level = 10 AND tile_column = 486 AND tile_row = 332;
+</code></pre>
+<hr />
+<h2 id="041-2024-04-04"><a class="header" href="#041-2024-04-04">0.4.1 (2024-04-04)</a></h2>
+<ul>
+<li>Fixed problem with python tile <code>__richcmp__</code> not handling invalid tiles and
+non-tile-like objs</li>
+</ul>
+<h2 id="040-2024-03-28"><a class="header" href="#040-2024-03-28">0.4.0 (2024-03-28)</a></h2>
+<ul>
+<li>Updated to pyo3 <code>v0.21.0</code></li>
+<li>Cli help messages cleaned up</li>
+<li>General spring cleaning!</li>
+<li>Hid the <code>utiles tilejson</code> cli alias <code>trader-joes</code></li>
+</ul>
+<hr />
+<h2 id="031-2024-01-30"><a class="header" href="#031-2024-01-30">0.3.1 (2024-01-30)</a></h2>
+<ul>
+<li>Minor bug fixes</li>
+</ul>
+<h2 id="030-2024-01-16"><a class="header" href="#030-2024-01-16">0.3.0 (2024-01-16)</a></h2>
+<ul>
+<li>Expanded utiles cli with several more commands</li>
+</ul>
+<hr />
+<h2 id="020-2023-11-10"><a class="header" href="#020-2023-11-10">0.2.0 (2023-11-10)</a></h2>
+<ul>
+<li>Converted cli to rust as an exercise in learning clap</li>
+<li>Moved old click cli to <code>utiles._legacy.cli</code></li>
+<li>Added tilejson/tj command to rust cli to write out tilejson files for mbtiles</li>
+<li>Added meta command to rust cli to write out json of metadata table for mbtiles</li>
+</ul>
+<hr />
+<h2 id="010-2023-10-27"><a class="header" href="#010-2023-10-27">0.1.0 (2023-10-27)</a></h2>
+<ul>
+<li>Drop python 3.7 (was good knowing you)</li>
+<li>Update pyo3 to 0.20.0</li>
+<li>Added rasterio/rio entry points (‘utiles’ and ‘ut’ alias bc why type
+<code>rio utiles</code> over <code>rio ut</code>)</li>
+</ul>
+<hr />
+<h2 id="002"><a class="header" href="#002">0.0.2</a></h2>
+<ul>
+<li>Added <code>__len__</code> to TilesGenerator for pbars</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="zoom-levels.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="zoom-levels.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
