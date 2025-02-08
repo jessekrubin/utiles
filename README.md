@@ -4,6 +4,17 @@ utiles = utils + tiles
 
 _web map tile utilities, batching, serving, python and bears (oh-my)_
 
+[//]: # (badges)
+
+[![GitHub](https://img.shields.io/badge/github-utiles-8da0cb?logo=github)](https://github.com/jessekrubin/utiles)
+[![crates.io version](https://img.shields.io/crates/l/utiles.svg)](https://github.com/jessekrubin/utiles/blob/main/LICENSE-APACHE)
+[![crates.io version](https://img.shields.io/crates/v/utiles)](https://crates.io/crates/utiles)
+[![PyPI](https://img.shields.io/pypi/v/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
+[![PyPI - Wheel](https://img.shields.io/pypi/wheel/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
+
+[//]: # ([![docs.rs docs]&#40;https://docs.rs/utiles/badge.svg&#41;]&#40;https://docs.rs/utiles&#41;)
+
 ## Installation
 
 ```bash
@@ -37,7 +48,8 @@ For more details on the python package see: [./utiles-pyo3](https://github.com/j
 
 ## python
 
-A mostly drop-in replacement for [mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several other util(e)ities
+A mostly drop-in replacement for [mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several other
+util(e)ities
 
 [py-utiles](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
 
@@ -60,7 +72,7 @@ A mostly drop-in replacement for [mercantile](https://github.com/mapbox/mercanti
 <summary>zoom info</summary>
 
 | zoom |                    ntiles |                     total |  rowcol_range |    max_rowcol |
-| ---: | ------------------------: | ------------------------: | ------------: | ------------: |
+|-----:|--------------------------:|--------------------------:|--------------:|--------------:|
 |    0 |                         1 |                         1 |             0 |             1 |
 |    1 |                         4 |                         5 |             1 |             2 |
 |    2 |                        16 |                        21 |             3 |             4 |
