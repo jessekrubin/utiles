@@ -8,4 +8,4 @@
 
 ___
 
-- [CHANGELOG](./CHANGELOG.md)
+- [CHANGELOG](./changelog.md)
