@@ -241,7 +241,7 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
             row.value = new_minzoom.to_string();
         }
         if row.name == "maxzoom" {
-            let new_maxzoom = row.value.parse::<u8>().map(|mz| mz + 1)?;
+            let new_maxzoom = row.value.parse::<u8>().map(|mz| mz - 1)?;
             row.value = new_maxzoom.to_string();
         }
         if row.name == "tilesize" {
