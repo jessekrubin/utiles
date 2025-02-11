@@ -661,32 +661,6 @@ pub fn lnglat2tile_frac(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
     (x, y, z)
 }
 
-// fn lnglat2tile_frac_old(lng: f64, lat: f64, z: u8) -> (f64, f64, u8) {
-//     // let n = 2.0_f64.powi(z as i32);
-//     // let x = n * ((lng + 180.0) / 360.0);
-//     // let lat_rad = lat.to_radians();
-//     // let y = n * (1.0 - (lat_rad.sinh().atanh() / std::f64::consts::PI)) / 2.0;
-//     // (x, y, z)
-//     let sin = (lat * DEG2RAD).sin();
-//     let z2 = 2f64.powi(i32::from(z));
-//     let mut x = z2 * (lng / 360.0 + 0.5);
-//     let y = z2 * (0.5 - (0.25 * ((1.0 + sin) / (1.0 - sin)).ln()) / PI);
-//     // Wrap Tile X
-//     x %= z2;
-//     if x < 0.0 {
-//         x += z2;
-//     }
-//
-//     (x, y, z)
-// }
-// fn lnglat2tile_frac(lon: f64, lat: f64, zoom: u8) -> (f64, f64, u8) {
-//     let n = 2.0_f64.powi(zoom as i32);
-//     let x = n * ((lon + 180.0) / 360.0);
-//     let lat_rad = lat.to_radians();
-//     let y = n * (1.0 - (lat_rad.sinh().atanh() / std::f64::consts::PI)) / 2.0;
-//     (x, y, zoom)
-// }
-
 /// Return the bounding tile for a bounding box.
 ///
 /// # Errors

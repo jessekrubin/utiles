@@ -23,7 +23,7 @@ pub use bbox::{geobbox_merge, BBox};
 pub use errors::{UtilesCoreError, UtilesCoreResult};
 #[doc(inline)]
 pub use gdal::geotransform2optzoom;
-pub use lnglat::LngLat;
+pub use lnglat::{wrap_lon, LngLat};
 pub use point::{Point2d, Point3d};
 pub use textiles::*;
 #[doc(inline)]

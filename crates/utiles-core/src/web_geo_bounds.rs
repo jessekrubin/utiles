@@ -1,13 +1,15 @@
+use crate::wrap_lon;
+
 /// A bounding box in (west, south, east, north) format.
 /// Note that `west > east` implies crossing the antimeridian.
 pub(crate) type TBounds = (f64, f64, f64, f64);
 
-/// Computes a "union" bounding box that encloses all input bboxes.
+/// Computes a "union" bounds/bbox that contains/encloses input bounds/bboxes.
 /// The resulting bbox can cross the antimeridian (i.e. `west > east`).
 ///
 /// Special cases:
 /// - If there is only **one** bbox, we return it exactly (even if it crosses the antimeridian).
-/// - If there are no bboxes, we return (0, 0, 0, 0) or you could choose to return an `Option`.
+/// - If there are no bboxes, we return None
 ///
 /// Examples:
 ///
@@ -30,124 +32,32 @@ pub(crate) type TBounds = (f64, f64, f64, f64);
 /// let bbox = web_geo_bounds_union(&bboxes).unwrap();
 /// assert_eq!(bbox, (170.0, -10.0, -170.0, 5.0));
 /// ```
-///
-
+#[must_use]
 pub fn web_geo_bounds_union(bboxes: &[TBounds]) -> Option<TBounds> {
+    if bboxes.is_empty() {
+        return None;
+    }
     // collect:
     // 1) the min/max lat as that is going to be our min/max lat...
     // AND
     // 2) convert each bbox into one or two longitude ranges
-    println!("bboxes: {:?}", bboxes);
     let (south, north, mut ranges) = collect_minmax_lat_and_lng_ranges(bboxes);
-
-    // Edge case: no bboxes
-    if ranges.is_empty() {
-        return None;
-    }
-
-    println!("ranges: {:?}", ranges);
     // merge the ranges that overlap or are adjacent into contiguous ranges
     let merged = merge_lng_ranges(&mut ranges);
-
-    println!("merged: {:?}", merged);
-
-    // Return if there is only one range...
+    // return if only one range
     if merged.len() == 1 {
         let (final_west, final_east) = merged[0];
         return Some((final_west, south, final_east, north));
     }
 
-    // Find the largest void/gap/hole in the merged ranges, as that is the
+    // find the largest void/gap/hole in the merged ranges, as that is the
     // arc that is opposite of our desired bounds
     let (gap_start, gap_end) = largest_lng_range_hole(&merged);
     let west = wrap_lon(gap_end);
     let east = wrap_lon(gap_start);
     Some((west, south, east, north))
 }
-fn wrap_lon(lon: f64) -> f64 {
-    (lon + 180.0).rem_euclid(360.0) - 180.0
-}
 
-// fn gather_lat_and_intervals(bboxes: &[BBox]) -> (f64, f64, Vec<(f64, f64)>) {
-// }
-fn collect_minmax_lat_and_lng_ranges2222(
-    bboxes: &[TBounds],
-) -> (f64, f64, Vec<(f64, f64)>) {
-    let mut min_lat = f64::INFINITY;
-    let mut max_lat = f64::NEG_INFINITY;
-    let mut intervals = Vec::new();
-
-    for &bounds in bboxes {
-        println!("======= bounds: {:?}", bounds);
-
-        let (west, south, east, north) = bounds;
-
-        println!(
-            "west: {}, south: {}, east: {}, north: {}",
-            west, south, east, north
-        );
-        // Update latitude boundaries
-        min_lat = min_lat.min(south);
-        max_lat = max_lat.max(north);
-
-        // Convert to intervals
-        if west > east {
-            // Crosses the antimeridian
-            intervals.push((west, 180.0));
-            intervals.push((-180.0, east));
-        } else {
-            intervals.push((west, east));
-        }
-    }
-
-    println!(
-        "min_lat: {}, max_lat: {}, intervals: {:?}",
-        min_lat, max_lat, intervals
-    );
-    (min_lat, max_lat, intervals)
-    // bboxes.iter().fold(
-    //     (f64::INFINITY, f64::NEG_INFINITY, Vec::new()),
-    //     |(min_lat, max_lat, mut intervals), &(west, south, east, north)| {
-    //         Update latitude boundaries
-    // let new_min_lat = min_lat.min(south);
-    // let new_max_lat = max_lat.max(north);
-    //
-    // Convert to intervals (handle crossing the antimeridian)
-    // if west > east {
-    //     intervals.push((west, 180.0));
-    //     intervals.push((-180.0, east));
-    // } else {
-    //     intervals.push((west, east));
-    // }
-    //
-    // (new_min_lat, new_max_lat, intervals)
-    // },
-    // )
-}
-fn merge_lng_ranges(intervals: &mut Vec<(f64, f64)>) -> Vec<(f64, f64)> {
-    // Sort by start
-    intervals
-        .sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
-
-    println!("sorted intervals: {:?}", intervals);
-    // Merge
-    let mut merged = Vec::with_capacity(intervals.len());
-    for &(start, end) in intervals.iter() {
-        if let Some(last) = merged.last_mut() {
-            let (prev_start, prev_end) = *last;
-            // Overlapping or contiguous intervals
-            if start <= prev_end {
-                let new_end = prev_end.max(end);
-                *last = (prev_start, new_end);
-            } else {
-                merged.push((start, end));
-            }
-        } else {
-            merged.push((start, end));
-        }
-    }
-    merged
-}
 /// Gathers min/max latitude, and converts each bbox into one or two longitude intervals.
 /// Returns (`min_lat`, `max_lat`, Vec<(start, end)>).
 fn collect_minmax_lat_and_lng_ranges(
@@ -173,7 +83,7 @@ fn collect_minmax_lat_and_lng_ranges(
     )
 }
 
-fn merge_lng_rangesog(ranges: &mut [(f64, f64)]) -> Vec<(f64, f64)> {
+fn merge_lng_ranges(ranges: &mut [(f64, f64)]) -> Vec<(f64, f64)> {
     if ranges.is_empty() {
         return Vec::new();
     }
@@ -193,15 +103,8 @@ fn merge_lng_rangesog(ranges: &mut [(f64, f64)]) -> Vec<(f64, f64)> {
         if let Some((_prev_start, prev_end)) = acc.last_mut() {
             // diff between
             let abs_diff = (start - *prev_end).abs();
-            if abs_diff <= 1.0 {
-                *prev_end = prev_end.max(end);
-                // } else
-                // if start <= *prev_end - f64::EPSILON{
-                // if start <= *prev_end {
-                // this is the overlap... and that `*` is derefing I think
-                // so we're updating the end of the last interval in the acc
-                // to be the max of the end of the last interval and the
-                // end of the current interval
+            // 0.0001 is close enough
+            if abs_diff <= 0.0001 {
                 *prev_end = prev_end.max(end);
             } else {
                 acc.push((start, end));
@@ -213,6 +116,7 @@ fn merge_lng_rangesog(ranges: &mut [(f64, f64)]) -> Vec<(f64, f64)> {
         acc
     })
 }
+
 /// Finds the largest gap on the circular [-180..180] domain
 /// among the merged intervals, returning (`gap_start`, `gap_end`).
 ///
@@ -247,12 +151,13 @@ fn largest_lng_range_hole(merged: &[(f64, f64)]) -> (f64, f64) {
     }
 }
 
-/// Tests for the web_geo_bounds_union function.
+/// Tests for the `web_geo_bounds_union` function.
 ///
 /// I wrote this in python to start with and verified these w/ the python
 /// version which I dumped into geojson.io to verify visually with my eyeballs
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
     use super::*;
 
     #[test]

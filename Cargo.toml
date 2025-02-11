@@ -23,7 +23,7 @@ repository = "https://github.com/jessekrubin/utiles"
 [workspace.dependencies]
 ahash = "0.8.11"
 anyhow = "1.0.95"
-async-sqlite = { version = "0.4.0", features = ["bundled", "functions", "trace"] }
+async-sqlite = { version = "0.5.0", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.86"
 axum = { version = "0.8.1", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.0"
@@ -40,7 +40,7 @@ image = "0.25.5"
 imagesize = "0.13.0"
 indicatif = "0.17.11"
 indoc = "2.0.5"
-jiff = "0.1.29"
+jiff = "0.2.0"
 json-patch = "3.0.1"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.2"
@@ -49,13 +49,13 @@ owo-colors = { version = "4.1.0", features = ["supports-color"] }
 pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"] }
 pyo3 = "0.23.4"
 pyo3-build-config = "0.23.2"
-rusqlite = { version = "0.32.0", features = ["bundled", "vtab", "blob"] }
+rusqlite = { version = "0.33.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.138", features = ["preserve_order"] }
 size = { version = "=0.5.0-preview2", features = ["default"] }
-sqlite-hashes = { version = "0.7.8", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
-strum = { version = "0.26.3", features = ["derive"] }
-strum_macros = "0.26.3"
+sqlite-hashes = { version = "0.8.0", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+strum = { version = "0.27.0", features = ["derive"] }
+strum_macros = "0.27.0"
 thiserror = "2.0.11"
 tilejson = "0.4.1"
 tokio = { version = "1.42.0", features = ["full"] }
