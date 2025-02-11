@@ -4,7 +4,11 @@
 - [CLI](./cli.md)
   - [COMMANDS](./commands.md)
 - [PYTHON](./python.md)
-- [ZOOM-LEVELS](./zoom-levels.md)
+- [RELATED](./related.md)
+- [REFERENCE](./reference.md)
+  - [DEFINITIONS](./definitions.md)
+  - [ZOOM-LEVELS](./zoom-levels.md)
+
 
 ___
 
