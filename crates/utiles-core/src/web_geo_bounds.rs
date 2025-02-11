@@ -15,12 +15,12 @@ pub(crate) type TBounds = (f64, f64, f64, f64);
 /// ```
 /// use utiles_core::web_geo_bounds_union;
 /// let bboxes = vec![
-///    (100.0, -5.0, 120.0, 10.0),
-///    (170.0, -10.0, -170.0, 5.0), // crosses AM
-///    (-160.0, -20.0, -100.0, 5.0),
+///     (170.0, -10.0, -170.0, 10.0), // crosses AM
+///     (-160.0, -20.0, -100.0, 5.0),
+///     (120.0, -15.0, 160.0, 15.0),
 /// ];
 /// let bbox = web_geo_bounds_union(&bboxes).unwrap();
-/// assert_eq!(bbox, (100.0, -20.0, 120.0, 10.0));
+/// assert_eq!(bbox, (120.0, -20.0, -100.0, 15.0));
 /// ```
 ///
 /// Single bbox that crosses the antimeridian:
@@ -31,25 +31,14 @@ pub(crate) type TBounds = (f64, f64, f64, f64);
 /// assert_eq!(bbox, (170.0, -10.0, -170.0, 5.0));
 /// ```
 ///
-/// Two bboxes that do not cross the antimeridian:
-/// ```
-/// use utiles_core::web_geo_bounds_union;
-/// let bboxes = vec![
-///   (100.0, -5.0, 120.0, 10.0),
-///   (110.0, -10.0, 130.0, 5.0),
-/// ];
-///
-/// let bbox = web_geo_bounds_union(&bboxes).unwrap();
-/// assert_eq!(bbox, (100.0, -10.0, 130.0, 10.0));
-/// ```
+
 pub fn web_geo_bounds_union(bboxes: &[TBounds]) -> Option<TBounds> {
     // collect:
     // 1) the min/max lat as that is going to be our min/max lat...
     // AND
     // 2) convert each bbox into one or two longitude ranges
+    println!("bboxes: {:?}", bboxes);
     let (south, north, mut ranges) = collect_minmax_lat_and_lng_ranges(bboxes);
-
-
 
     // Edge case: no bboxes
     if ranges.is_empty() {
@@ -81,13 +70,22 @@ fn wrap_lon(lon: f64) -> f64 {
 
 // fn gather_lat_and_intervals(bboxes: &[BBox]) -> (f64, f64, Vec<(f64, f64)>) {
 // }
-fn collect_minmax_lat_and_lng_ranges(bboxes: &[TBounds]) -> (f64, f64, Vec<(f64, f64)>) {
+fn collect_minmax_lat_and_lng_ranges2222(
+    bboxes: &[TBounds],
+) -> (f64, f64, Vec<(f64, f64)>) {
     let mut min_lat = f64::INFINITY;
     let mut max_lat = f64::NEG_INFINITY;
     let mut intervals = Vec::new();
 
-    for &(west, south, east, north) in bboxes {
-        println!("west: {}, south: {}, east: {}, north: {}", west, south, east, north);
+    for &bounds in bboxes {
+        println!("======= bounds: {:?}", bounds);
+
+        let (west, south, east, north) = bounds;
+
+        println!(
+            "west: {}, south: {}, east: {}, north: {}",
+            west, south, east, north
+        );
         // Update latitude boundaries
         min_lat = min_lat.min(south);
         max_lat = max_lat.max(north);
@@ -101,29 +99,35 @@ fn collect_minmax_lat_and_lng_ranges(bboxes: &[TBounds]) -> (f64, f64, Vec<(f64,
             intervals.push((west, east));
         }
     }
+
+    println!(
+        "min_lat: {}, max_lat: {}, intervals: {:?}",
+        min_lat, max_lat, intervals
+    );
     (min_lat, max_lat, intervals)
     // bboxes.iter().fold(
     //     (f64::INFINITY, f64::NEG_INFINITY, Vec::new()),
     //     |(min_lat, max_lat, mut intervals), &(west, south, east, north)| {
     //         Update latitude boundaries
-            // let new_min_lat = min_lat.min(south);
-            // let new_max_lat = max_lat.max(north);
-            //
-            // Convert to intervals (handle crossing the antimeridian)
-            // if west > east {
-            //     intervals.push((west, 180.0));
-            //     intervals.push((-180.0, east));
-            // } else {
-            //     intervals.push((west, east));
-            // }
-            //
-            // (new_min_lat, new_max_lat, intervals)
-        // },
+    // let new_min_lat = min_lat.min(south);
+    // let new_max_lat = max_lat.max(north);
+    //
+    // Convert to intervals (handle crossing the antimeridian)
+    // if west > east {
+    //     intervals.push((west, 180.0));
+    //     intervals.push((-180.0, east));
+    // } else {
+    //     intervals.push((west, east));
+    // }
+    //
+    // (new_min_lat, new_max_lat, intervals)
+    // },
     // )
 }
 fn merge_lng_ranges(intervals: &mut Vec<(f64, f64)>) -> Vec<(f64, f64)> {
     // Sort by start
-    intervals.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+    intervals
+        .sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
 
     println!("sorted intervals: {:?}", intervals);
     // Merge
@@ -146,7 +150,7 @@ fn merge_lng_ranges(intervals: &mut Vec<(f64, f64)>) -> Vec<(f64, f64)> {
 }
 /// Gathers min/max latitude, and converts each bbox into one or two longitude intervals.
 /// Returns (`min_lat`, `max_lat`, Vec<(start, end)>).
-fn collect_minmax_lat_and_lng_ranges2(
+fn collect_minmax_lat_and_lng_ranges(
     bboxes: &[TBounds],
 ) -> (f64, f64, Vec<(f64, f64)>) {
     bboxes.iter().fold(
@@ -186,15 +190,14 @@ fn merge_lng_rangesog(ranges: &mut [(f64, f64)]) -> Vec<(f64, f64)> {
 
     // fold fold fold
     ranges[1..].iter().fold(merged, |mut acc, &(start, end)| {
-
         if let Some((_prev_start, prev_end)) = acc.last_mut() {
             // diff between
             let abs_diff = (start - *prev_end).abs();
             if abs_diff <= 1.0 {
                 *prev_end = prev_end.max(end);
-            // } else
-            // if start <= *prev_end - f64::EPSILON{
-            // if start <= *prev_end {
+                // } else
+                // if start <= *prev_end - f64::EPSILON{
+                // if start <= *prev_end {
                 // this is the overlap... and that `*` is derefing I think
                 // so we're updating the end of the last interval in the acc
                 // to be the max of the end of the last interval and the

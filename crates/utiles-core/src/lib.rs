@@ -47,6 +47,7 @@ pub mod geostats;
 pub mod lnglat;
 pub mod parsing;
 
+mod macros;
 mod merge;
 mod parent;
 #[cfg(feature = "pmtiles")]
@@ -69,7 +70,6 @@ mod tilecrz;
 mod traits;
 mod web_geo_bounds;
 pub mod zoom;
-mod macros;
 
 // pub use macros::{point2d, utile, utile_yup};
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
