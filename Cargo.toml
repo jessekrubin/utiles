@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [
+members = [ "crates/sqlite-utiles-ext",
     "crates/utiles",
     "crates/utiles-core",
     "crates/utiles-dev", "crates/utiles-doubledown",

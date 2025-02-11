@@ -1442,6 +1442,9 @@ checksum = "ad8935b44e7c13394a179a438e0cebba0fe08fe01b54f152e29a93b5cf993fd4"
 dependencies = [
  "cc",
  "pkg-config",
+ "prettyplease",
+ "quote",
+ "syn 2.0.98",
  "vcpkg",
 ]
 
@@ -1901,6 +1904,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
 dependencies = [
  "zerocopy",
+]
+
+[[package]]
+name = "prettyplease"
+version = "0.2.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6924ced06e1f7dfe3fa48d57b9f74f55d8915f5036121bef647ef4b204895fac"
+dependencies = [
+ "proc-macro2",
+ "syn 2.0.98",
 ]
 
 [[package]]
@@ -2440,6 +2453,14 @@ dependencies = [
  "md-5",
  "noncrypto-digests",
  "rusqlite",
+]
+
+[[package]]
+name = "sqlite-utiles-ext"
+version = "0.7.3"
+dependencies = [
+ "rusqlite",
+ "utiles",
 ]
 
 [[package]]

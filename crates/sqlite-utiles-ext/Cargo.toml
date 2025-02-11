@@ -1,0 +1,23 @@
+[package]
+name = "sqlite-utiles-ext"
+description = "sqlite-utiles extension module"
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "sqlite_utiles"
+crate-type = ["cdylib"]
+
+[dependencies]
+utiles = { version = "0.7.3", path = "../utiles" }
+rusqlite = {features = ["loadable_extension", "trace"],workspace =true}
+
+
+[lints]
+workspace = true
