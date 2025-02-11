@@ -156,7 +156,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p><strong>updated:</strong> <code>2025-02-10T17:42:38.152568942+00:00[Etc/UTC]</code></p>
+                        <p><strong>updated:</strong> <code>2025-02-11T21:55:05.033188672+00:00[Etc/UTC]</code></p>
 <h1 id="utiles"><a class="header" href="#utiles">utiles</a></h1>
 <p>utiles = utils + tiles</p>
 <p><em>web map tile utilities, batching, serving, python and bears (oh-my)</em></p>
@@ -2074,6 +2074,53 @@ Re-write cli in rust with clap?</li>
 </ul>
 </li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="related-tools--resources"><a class="header" href="#related-tools--resources">Related Tools &amp; Resources</a></h1>
+<h2 id="mapping"><a class="header" href="#mapping">Mapping</a></h2>
+<ul>
+<li><a href="https://github.com/OSGeo/gdal">OSGeo/gdal</a> - Geospatial Data Abstraction Library - a monster of a library</li>
+<li><a href="https://github.com/rasterio/rasterio">rasterio/rasterio</a> - pythonic GDAL bindings and much more!</li>
+<li><a href="https://github.com/felt/tippecanoe">felt/tippecanoe</a> - A tool for building vector tilesets from large collections of GeoJSON features.</li>
+<li><a href="https://github.com/onthegomap/planetiler">onthegomap/planetiler</a> - Flexible tool to build planet-scale vector tilesets from OpenStreetMap data fast</li>
+<li><a href="https://github.com/mapbox/mercantile">mapbox/mercantile</a> - python map tiling library - what <code>utiles</code> started as a port of</li>
+<li><a href="https://github.com/mapbox/supermercado">mapbox/supermercado</a> - mercantile extension(s) - utiles is able to do much of what supermercado can do</li>
+<li><a href="https://github.com/Turfjs/turf">turfjs/turf</a> - A modular geospatial engine written in JavaScript and TypeScript</li>
+<li><a href="https://github.com/maplibre/martin">maplibre/martin</a> - PostGIS/mbtiles/pmtiles server and tile generator + mbtiles utils</li>
+</ul>
+<h3 id="font-glyphs--sprites"><a class="header" href="#font-glyphs--sprites">Font Glyphs &amp; Sprites</a></h3>
+<ul>
+<li><a href="https://github.com/stadiamaps/sdf_font_tools">stadiamaps/sdf_font_tools</a> - A set of tools for generating SDF fonts for use with MapLibre/Mapbox</li>
+<li><a href="https://github.com/jessekrubin/pbfont">jessekrubin/pbfont</a> - js/ts font glyph decoding/encoding/combining</li>
+<li><a href="https://github.com/flother/spreet">flother/spreet</a> - A tool to generate sprite sheets from SVGs</li>
+</ul>
+<h3 id="frontend"><a class="header" href="#frontend">Frontend</a></h3>
+<ul>
+<li><a href="https://github.com/maplibre/maplibre-gl-js/">maplibre/maplibre-gl-js</a> - The open-source fork of Mapbox GL JS.</li>
+<li><a href="https://github.com/onthegomap/maplibre-contour">onthegomap/maplibre-contour</a> - A MapLibre plugin for rendering contour lines</li>
+<li><a href="https://github.com/visgl/deck.gl">visgl/deck.gl</a> - WebGL2 powered visualization Framework</li>
+<li><a href="https://github.com/visgl/react-map-gl">visgl/react-map-gl</a> - React + Maplibre/Mapbox</li>
+</ul>
+<h3 id="specs"><a class="header" href="#specs">Specs</a></h3>
+<ul>
+<li><a href="https://github.com/mapbox/mbtiles-spec">mapbox/mbtiles-spec</a> - The MBTiles specification</li>
+<li><a href="https://github.com/mapbox/tilejson-spec">mapbox/tilejson-spec</a> - The TileJSON specification</li>
+<li><a href="https://github.com/mapbox/vector-tile-spec">mapbox/vector-tile-spec</a> - The vector tile specification</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="reference"><a class="header" href="#reference">Reference</a></h1>
+<h2 id="definitionsglossary"><a class="header" href="#definitionsglossary">Definitions/Glossary</a></h2>
+<p><strong>textiles</strong>: <code>jsonl</code>/<code>ndjson</code> text file with each line containing tile-array-json (e.g. <code>[x, y, z]</code>) or tile-object-json (e.g. <code>{x: x, y: y, z: z}</code>).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="definitions"><a class="header" href="#definitions">Definitions</a></h1>
+<p><strong>yup:</strong> in the context of web-map-tiles <code>yup</code> means “y-up”; z/x/y tile servers serve tiles with <code>y-down</code> coordinates, while <code>mbtiles</code> and <code>geopackage</code> files store tiles as <code>y-up</code>. Converting between <code>y</code> and <code>yup</code> is done by <code>yup = 2^z - y - 1</code> where <code>z</code> is the zoom level. Converting in a <code>sqlite</code> database can be done like this:</p>
+<pre><code class="language-sql">SELECT zoom_level AS z,
+       tile_column AS x,
+       (2^zoom_level - tile_row - 1) AS y, 
+       tile_row AS yup,
+FROM tiles;
+</code></pre>
+<p><strong>zoom-level:</strong> Map zoom level 0 - 30</p>
+<p><strong>tile:</strong> A tile is a square image of a specific zoom level, typically 256x256 pixels. Tiles are used to display map data at different zoom levels.</p>
+<p><strong>zbox:</strong> Utiles name for a tile-bounding-box at a zoom level - defines zoom, min-x, min-y, max-x, max-y for querying tiles</p>
+<p><strong>tilejson:</strong> A JSON object that describes a tile set, including its name, description, and the URL template for accessing tiles. TileJSON is used to provide metadata about a tile set.</p>
+<p><strong>textiles:</strong> utiles name for an ndjson/jsonl file containing tiles as arrays or objects (e.g. <code>[x, y, z]</code> or <code>{x: x, y: y, z: z}</code>)</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ref"><a class="header" href="#ref">REF</a></h1>
 <h1 id="zoom-levels"><a class="header" href="#zoom-levels">ZOOM LEVELS</a></h1>
 <details>
