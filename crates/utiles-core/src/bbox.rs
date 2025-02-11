@@ -49,21 +49,28 @@ impl From<(f64, f64, f64, f64)> for BBox {
     }
 }
 
+impl From<BBox> for (f64, f64, f64, f64) {
+    fn from(bbox: BBox) -> Self {
+        (bbox.west, bbox.south, bbox.east, bbox.north)
+    }
+}
+
 impl From<(i32, i32, i32, i32)> for BBox {
     fn from(bbox: (i32, i32, i32, i32)) -> Self {
         // convert to f64
-        let bbox = (
+        (
             f64::from(bbox.0),
             f64::from(bbox.1),
             f64::from(bbox.2),
             f64::from(bbox.3),
-        );
-        BBox {
-            north: bbox.0,
-            south: bbox.1,
-            east: bbox.2,
-            west: bbox.3,
-        }
+        )
+            .into()
+        // BBox {
+        //     north: bbox.0,
+        //     south: bbox.1,
+        //     east: bbox.2,
+        //     west: bbox.3,
+        // }
     }
 }
 

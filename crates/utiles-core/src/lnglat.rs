@@ -144,3 +144,10 @@ impl FromStr for LngLat {
         Ok(LngLat::new(x, y))
     }
 }
+
+/// Wraps a longitude value to the range [-180, 180].
+#[must_use]
+#[inline]
+pub fn wrap_lon(lon: f64) -> f64 {
+    (lon + 180.0).rem_euclid(360.0) - 180.0
+}

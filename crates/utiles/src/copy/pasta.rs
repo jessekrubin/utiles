@@ -408,6 +408,12 @@ LIMIT 1;
         Ok(0)
     }
 
+    // pub(crate) async fn copy_tiles_attach(
+    //     &self,
+    //     dst_db: &MbtilesClientAsync,
+    // ) -> UtilesResult<usize> {
+    // }
+
     pub(super) async fn run(&self) -> UtilesResult<()> {
         warn!("mbtiles-2-mbtiles copy is a WIP");
         // doing preflight check
@@ -500,12 +506,7 @@ LIMIT 1;
             dst_db
                 .metadata_set(
                     "tileid",
-                    self.cfg
-                        .hash
-                        .unwrap_or_default()
-                        .to_string()
-                        .to_string()
-                        .as_str(),
+                    self.cfg.hash.unwrap_or_default().to_string().as_str(),
                 )
                 .await?;
         }
