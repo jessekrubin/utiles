@@ -5,6 +5,11 @@ authors.workspace = true
 edition.workspace = true
 include = ["src/**/*", "Cargo.toml", "LICENSE", "README.md"]
 license.workspace = true
+publish = false
+readme = "README.md"
+description = "utiles python bindings"
+homepage = "https://github.com/jessekrubin/utiles"
+repository = "https://github.com/jessekrubin/utiles"
 
 [lib]
 name = "_utiles"
