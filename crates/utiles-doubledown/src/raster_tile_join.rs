@@ -135,11 +135,15 @@ impl RasterTileJoiner {
 
     pub fn is_transparent(&self) -> bool {
         let non_null_tiles = self.non_null_tiles();
-        non_null_tiles.len() == 4
-            && self
-                .non_null_tiles()
-                .iter()
-                .any(|img| image_is_transparent(img))
+        if non_null_tiles.len() < 4 {
+            true
+        } else {
+            non_null_tiles.len() == 4
+                && self
+                    .non_null_tiles()
+                    .iter()
+                    .any(|img| image_is_transparent(img))
+        }
     }
 
     pub fn join(&self) -> anyhow::Result<image::DynamicImage> {
