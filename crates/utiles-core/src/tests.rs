@@ -1,5 +1,5 @@
 #![cfg(test)]
-#![allow(clippy::unwrap_used)]
+#![expect(clippy::unwrap_used)]
 #![deny(clippy::similar_names)]
 
 use crate::*;

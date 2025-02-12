@@ -5,20 +5,9 @@
 #![deny(clippy::style)]
 #![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(clippy::missing_panics_doc)]
-#![allow(clippy::missing_errors_doc)]
-#![allow(clippy::similar_names)]
-#![allow(clippy::cast_possible_truncation)]
 // road to clippy::pedantic
 #![deny(clippy::pedantic)]
-#![allow(clippy::redundant_closure_for_method_calls)]
-#![allow(clippy::missing_errors_doc)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(clippy::unnecessary_wraps)]
-#![allow(clippy::cast_possible_truncation)]
-#![allow(clippy::cast_sign_loss)]
-#![allow(clippy::cast_possible_wrap)]
+#![expect(clippy::cast_possible_wrap)]
 
 mod raster_tile_join;
 
@@ -71,7 +60,7 @@ struct Cli {
 
 enum ProgressEvent {
     SizeDiff(i64),
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     Msg(String),
 }
 
