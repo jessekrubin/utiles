@@ -23,6 +23,9 @@ pub use core::*;
 pub use errors::UtilesError;
 pub use errors::UtilesResult;
 
+#[macro_use]
+pub mod print;
+
 #[cfg(feature = "cli")]
 pub mod cli;
 mod config;

@@ -14,7 +14,7 @@ pub(crate) fn parent_main(args: ParentChildrenArgs) -> UtilesResult<()> {
         assert!(nup >= 0, "depth must be less than or equal to tile zoom");
         if let Some(parent) = tile.parent(Option::from(args.depth - 1)) {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
-            println!("{}{}", rs, parent.json_arr());
+            safe_println!("{}{}", rs, parent.json_arr());
         }
     }
     Ok(())
@@ -30,7 +30,7 @@ pub(crate) fn children_main(args: ParentChildrenArgs) -> UtilesResult<()> {
 
         let children = tile_zbox.into_iter().map(Tile::from);
         for child in children {
-            println!("{}{}", rs, child.json_arr());
+            safe_println!("{}{}", rs, child.json_arr());
         }
     }
     Ok(())
