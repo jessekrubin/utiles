@@ -343,8 +343,8 @@ impl Tile {
     /// # Errors
     ///
     /// Returns an error if the conversion fails resulting in invalid tile
-    #[allow(clippy::used_underscore_items)]
-    #[allow(clippy::cast_possible_truncation)]
+    #[expect(clippy::used_underscore_items)]
+    #[expect(clippy::cast_possible_truncation)]
     pub fn from_lnglat_zoom(
         lng: f64,
         lat: f64,
@@ -798,7 +798,7 @@ impl From<Tile> for (u32, u32, u8) {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
+    #![expect(clippy::unwrap_used)]
 
     use super::*;
 
