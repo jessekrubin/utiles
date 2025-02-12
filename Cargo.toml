@@ -122,3 +122,6 @@ missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 module_name_repetitions = "allow"
 similar_names = "allow"
+
+[workspace.metadata.release]
+tag-name = "v{version}"
