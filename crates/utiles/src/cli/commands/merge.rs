@@ -26,13 +26,13 @@ pub(crate) async fn merge_main(args: MergeArgs) -> UtilesResult<()> {
         for tile in sorted_tiles {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
             let tile_str = tile_formatter.fmt(tile);
-            println!("{rs}{tile_str}");
+            safe_println!("{rs}{tile_str}");
         }
     } else {
         for tile in merged_tiles {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
             let tile_str = tile_formatter.fmt(&tile);
-            println!("{rs}{tile_str}");
+            safe_println!("{rs}{tile_str}");
         }
     }
     Ok(())

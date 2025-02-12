@@ -12,7 +12,7 @@ use crate::lager::{init_tracing, LagerConfig, LagerLevel};
 use crate::signal::shutdown_signal;
 use crate::UtilesError;
 use clap::{CommandFactory, FromArgMatches};
-use tracing::{debug, error};
+use tracing::{debug, error, trace};
 use utiles_core::VERSION;
 
 pub struct CliOpts {
@@ -114,12 +114,14 @@ pub(crate) async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8>
     };
     init_tracing(logcfg)?;
 
-    debug!("args: {:?}", std::env::args().collect::<Vec<_>>());
-    debug!("argv: {:?}", argv);
-    debug!("args: {:?}", args);
+    trace!(
+        args = ?args,
+        argv = ?argv,
+    );
 
+    let ti = std::time::Instant::now();
     let res: UtilesResult<()> = match args.command {
-        Commands::About => about_main(),
+        Commands::About(args) => about_main(&args),
         Commands::Commands(args) => {
             let c = Cli::command();
             commands_main(&c, &args)
@@ -163,7 +165,10 @@ pub(crate) async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8>
         Commands::Addo => addo_main(None).await,
         Commands::Translate => translate_main(None).await,
     };
-
+    let elapsed = ti.elapsed();
+    let signed_duration = jiff::SignedDuration::try_from(elapsed)
+        .expect("jiff::SignedDuration::try_from failed");
+    trace!("utiles-cli-finished ~ {:#}", signed_duration);
     match res {
         Ok(()) => Ok(0),
         Err(e) => {

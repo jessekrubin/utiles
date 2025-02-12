@@ -20,13 +20,13 @@ pub(crate) async fn edges_main(args: EdgesArgs) -> UtilesResult<()> {
 
         for tile in titer {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
-            println!("{}{}", rs, tile.json_arr());
+            safe_println!("{}{}", rs, tile.json_arr());
         }
     } else {
         let titer = find_edges(&tiles)?;
         for tile in titer {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
-            println!("{}{}", rs, tile.json_arr());
+            safe_println!("{}{}", rs, tile.json_arr());
         }
     }
     Ok(())

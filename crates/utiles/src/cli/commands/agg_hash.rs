@@ -21,6 +21,6 @@ pub(crate) async fn agg_hash_main(args: &AggHashArgs) -> UtilesResult<()> {
     let hash_type = args.hash.unwrap_or(HashType::Md5);
     let filter = args.filter_args.tiles_filter_maybe();
     let result = mbt_agg_tiles_hash_stream(&mbt, hash_type, None, &filter).await?;
-    println!("{}", serde_json::to_string_pretty(&result)?);
+    safe_println!("{}", serde_json::to_string_pretty(&result)?);
     Ok(())
 }

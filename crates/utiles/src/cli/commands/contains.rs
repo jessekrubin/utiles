@@ -26,6 +26,6 @@ pub(crate) async fn contains_main(filepath: &str, lnglat: LngLat) -> UtilesResul
     let bbox = mbtiles.bbox().await?;
     let contains = bbox.contains_lnglat(&lnglat);
     debug!("contains: {contains}");
-    println!("{contains}");
+    safe_println!("{contains}");
     Ok(())
 }

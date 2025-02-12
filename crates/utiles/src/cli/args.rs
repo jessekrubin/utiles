@@ -35,6 +35,13 @@ fn about() -> String {
 }
 
 #[derive(Debug, Parser)]
+pub struct AboutArgs {
+    /// output `json`
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue,)]
+    pub json: bool,
+}
+
+#[derive(Debug, Parser)]
 #[command(name = "ut", about = about(), version = VERSION, author, max_term_width = 120)]
 pub struct Cli {
     /// debug mode (print/log more)
@@ -552,7 +559,7 @@ pub enum Commands {
     // colleagues who would otherwise have no idea what I'm talking about
     /// Echo info about utiles
     #[command(name = "about", visible_alias = "aboot")]
-    About,
+    About(AboutArgs),
 
     /// list all commands
     #[command(name = "commands", visible_alias = "cmds")]
