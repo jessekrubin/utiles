@@ -1,4 +1,5 @@
 //! Tile cover for geojson object(s) based on mapbox's tile-cover alg
+#![expect(clippy::cast_possible_truncation)]
 use crate::{UtilesError, UtilesResult};
 use geojson::GeoJson;
 use std::collections::{BTreeMap, HashSet};

@@ -36,7 +36,7 @@ pub fn register_utiles_sqlite(conn: &Connection) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
+    #![expect(clippy::unwrap_used)]
 
     use rusqlite::params;
 
