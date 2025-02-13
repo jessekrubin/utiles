@@ -1,4 +1,4 @@
-#![allow(clippy::too_many_lines)]
+#![expect(clippy::too_many_lines)]
 
 use crate::edges::find_edges;
 use std::collections::HashSet;
