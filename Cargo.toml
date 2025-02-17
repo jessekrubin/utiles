@@ -54,7 +54,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.138", features = ["preserve_order"] }
 size = { version = "=0.5.0-preview2", features = ["default"] }
 sqlite-hashes = { version = "0.8.0", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
-strum = { version = "0.27.0", features = ["derive"] }
+strum = { version = "0.27.1", features = ["derive"] }
 strum_macros = "0.27.1"
 thiserror = "2.0.11"
 tilejson = "0.4.1"
