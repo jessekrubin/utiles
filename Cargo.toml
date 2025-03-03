@@ -22,7 +22,7 @@ repository = "https://github.com/jessekrubin/utiles"
 
 [workspace.dependencies]
 ahash = "0.8.11"
-anyhow = "1.0.96"
+anyhow = "1.0.97"
 async-sqlite = { version = "0.5.0", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.86"
 axum = { version = "0.8.1", features = ["tokio", "json", "macros"] }
