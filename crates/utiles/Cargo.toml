@@ -61,7 +61,7 @@ tower-http.workspace = true
 tower.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 tracing.workspace = true
-utiles-core = { path = "../utiles-core", version = "0.7.2" }
+utiles-core = { path = "../utiles-core", version = "0.7.4" }
 walkdir.workspace = true
 xxhash-rust.workspace = true
 # optional
