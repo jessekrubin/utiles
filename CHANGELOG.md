@@ -4,6 +4,11 @@
 
 - docs website
 - Updated several dependencies
+  - several minor versions
+  - `json-patch` v4 
+- Clippy fixes
+  - useless conversions
+  - const functions
 
 ---
 
