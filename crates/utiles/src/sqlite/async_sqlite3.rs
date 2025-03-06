@@ -137,11 +137,11 @@ where
     T: AsyncSqliteConn + Debug,
 {
     async fn analyze(&self) -> SqliteResult<usize> {
-        self.conn(analyze).await.map_err(Into::into)
+        self.conn(analyze).await
     }
 
     async fn is_empty_db(&self) -> SqliteResult<bool> {
-        self.conn(is_empty_db).await.map_err(Into::into)
+        self.conn(is_empty_db).await
     }
 
     async fn pragma_index_list(
@@ -149,62 +149,51 @@ where
         table: &str,
     ) -> SqliteResult<Vec<PragmaIndexListRow>> {
         let table = table.to_string();
-        self.conn(move |conn| pragma_index_list(conn, &table))
-            .await
-            .map_err(Into::into)
+        self.conn(move |conn| pragma_index_list(conn, &table)).await
     }
 
     async fn pragma_page_count(&self) -> SqliteResult<i64> {
-        self.conn(pragma_page_count).await.map_err(Into::into)
+        self.conn(pragma_page_count).await
     }
 
     async fn pragma_freelist_count(&self) -> SqliteResult<i64> {
-        self.conn(pragma_freelist_count).await.map_err(Into::into)
+        self.conn(pragma_freelist_count).await
     }
 
     async fn pragma_page_size(&self) -> SqliteResult<i64> {
-        self.conn(|conn| pragma_page_size(conn, None))
-            .await
-            .map_err(Into::into)
+        self.conn(|conn| pragma_page_size(conn, None)).await
     }
 
     async fn pragma_page_size_set(&self, page_size: i64) -> SqliteResult<i64> {
         self.conn(move |conn| pragma_page_size_set(conn, page_size))
             .await
-            .map_err(Into::into)
     }
 
     async fn pragma_table_list(&self) -> SqliteResult<Vec<PragmaTableListRow>> {
-        self.conn(pragma_table_list).await.map_err(Into::into)
+        self.conn(pragma_table_list).await
     }
 
     async fn pragma_analysis_limit(&self) -> SqliteResult<usize> {
-        self.conn(analysis_limit).await.map_err(Into::into)
+        self.conn(analysis_limit).await
     }
 
     async fn vacuum(&self) -> SqliteResult<usize> {
-        self.conn(vacuum).await.map_err(Into::into)
+        self.conn(vacuum).await
     }
 
     async fn vacuum_into(&self, dst: String) -> SqliteResult<usize> {
         let dst = dst.to_string();
-        self.conn(move |conn| vacuum_into(conn, dst))
-            .await
-            .map_err(Into::into)
+        self.conn(move |conn| vacuum_into(conn, dst)).await
     }
 
     async fn attach_db(&self, db: &str, as_: &str) -> SqliteResult<()> {
         let db = db.to_string();
         let as_ = as_.to_string();
-        self.conn(move |conn| attach_db(conn, &db, &as_))
-            .await
-            .map_err(Into::into)
+        self.conn(move |conn| attach_db(conn, &db, &as_)).await
     }
 
     async fn detach_db(&self, db: &str) -> SqliteResult<()> {
         let db = db.to_string();
-        self.conn(move |conn| detach_db(conn, &db))
-            .await
-            .map_err(Into::into)
+        self.conn(move |conn| detach_db(conn, &db)).await
     }
 }

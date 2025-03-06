@@ -1,8 +1,20 @@
 # CHANGELOG
 
-## TODO
+## 0.7.4 (unreleased)
 
-- Docs/readme update
+- docs website
+- Updated several dependencies
+  - several minor versions
+  - `json-patch` v4 
+- Clippy fixes
+  - useless conversions
+  - const functions
+
+---
+
+## 0.7.3 (2025-02-11)
+
+- minor updates and re-jiggering
 
 ---
 
