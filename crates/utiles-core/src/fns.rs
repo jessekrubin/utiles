@@ -1,5 +1,6 @@
 //! Core util(e)ity functions for working with web mercator tiles, bounding boxes, et al
 #![deny(clippy::missing_const_for_fn)]
+
 use std::f64::consts::PI;
 use std::num::FpCategory;
 

@@ -47,7 +47,7 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: auto
           working-directory: ./utiles-pyo3
       - name: Upload wheels
@@ -90,7 +90,7 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: musllinux_1_2
           working-directory: ./utiles-pyo3
       - name: Upload wheels
@@ -121,7 +121,7 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           working-directory: ./utiles-pyo3
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -164,7 +164,7 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
-          sccache: 'true'
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           working-directory: ./utiles-pyo3
       - name: Upload wheels
         uses: actions/upload-artifact@v4
