@@ -1,8 +1,15 @@
 # CHANGELOG
 
-## TODO
+## 0.7.4 (unreleased)
 
-- Docs/readme update
+- docs website
+- Updated several dependencies
+
+---
+
+## 0.7.3 (2025-02-11)
+
+- minor updates and re-jiggering
 
 ---
 
