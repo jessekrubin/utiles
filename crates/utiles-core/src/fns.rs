@@ -244,13 +244,13 @@ pub fn bounds(x: u32, y: u32, z: u8) -> (f64, f64, f64, f64) {
 
 /// Truncate a longitude to the valid range of -180 to 180.
 #[must_use]
-pub fn truncate_lng(lng: f64) -> f64 {
+pub const fn truncate_lng(lng: f64) -> f64 {
     lng.clamp(-180.0, 180.0)
 }
 
 /// Truncate a latitude to the valid range of -90 to 90.
 #[must_use]
-pub fn truncate_lat(lat: f64) -> f64 {
+pub const fn truncate_lat(lat: f64) -> f64 {
     lat.clamp(-90.0, 90.0)
 }
 
