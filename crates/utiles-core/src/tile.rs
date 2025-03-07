@@ -798,7 +798,7 @@ impl From<Tile> for (u32, u32, u8) {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
+    #![expect(clippy::unwrap_used)]
 
     use super::*;
 

@@ -3,8 +3,6 @@ use crate::bbox::WebBBox;
 use crate::{BBox, TileLike};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
-// use utiles_core::bbox::WebBBox;
-// use utiles_core::{BBox, TileLike};
 
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub enum FormatTokens {
@@ -14,6 +12,7 @@ pub enum FormatTokens {
     Yup,
     ZxyFslash,
     Quadkey,
+    #[cfg(feature = "pmtiles")]
     PmtileId,
     JsonObj,
     JsonArr,
@@ -32,6 +31,7 @@ impl Display for FormatTokens {
             FormatTokens::Yup => "{-y}",
             FormatTokens::ZxyFslash => "{z}/{x}/{y}",
             FormatTokens::Quadkey => "{quadkey}",
+            #[cfg(feature = "pmtiles")]
             FormatTokens::PmtileId => "{pmtileid}",
             FormatTokens::JsonObj => "{json_obj}",
             FormatTokens::JsonArr => "{json_arr}",
@@ -58,6 +58,7 @@ impl From<FormatTokens> for &'static str {
             FormatTokens::Yup => "{-y}",
             FormatTokens::ZxyFslash => "{z}/{x}/{y}",
             FormatTokens::Quadkey => "{quadkey}",
+            #[cfg(feature = "pmtiles")]
             FormatTokens::PmtileId => "{pmtileid}",
             FormatTokens::JsonObj => "{json_obj}",
             FormatTokens::JsonArr => "{json_arr}",
@@ -78,6 +79,7 @@ impl From<&str> for FormatParts {
             "yup" | "-y" => FormatParts::Token(FormatTokens::Yup),
             "zxy" => FormatParts::Token(FormatTokens::ZxyFslash),
             "quadkey" | "qk" => FormatParts::Token(FormatTokens::Quadkey),
+            #[cfg(feature = "pmtiles")]
             "pmtileid" | "pmid" => FormatParts::Token(FormatTokens::PmtileId),
             "json" | "json_arr" => FormatParts::Token(FormatTokens::JsonArr),
             "json_obj" | "obj" => FormatParts::Token(FormatTokens::JsonObj),
@@ -100,6 +102,7 @@ impl From<&FormatTokens> for String {
             FormatTokens::Yup => "{-y}".to_string(),
             FormatTokens::ZxyFslash => "{z}/{x}/{y}".to_string(),
             FormatTokens::Quadkey => "{quadkey}".to_string(),
+            #[cfg(feature = "pmtiles")]
             FormatTokens::PmtileId => "{pmtileid}".to_string(),
             FormatTokens::JsonObj => "{json_obj}".to_string(),
             FormatTokens::JsonArr => "{json_arr}".to_string(),
@@ -260,6 +263,7 @@ impl TileStringFormatter {
                     FormatTokens::Quadkey => {
                         parts.push(FmtPart::Dynamic(|tile| tile.quadkey()));
                     }
+                    #[cfg(feature = "pmtiles")]
                     FormatTokens::PmtileId => {
                         parts
                             .push(FmtPart::Dynamic(|tile| tile.pmtileid().to_string()));

@@ -2,6 +2,7 @@
 
 ## 0.7.4 (unreleased)
 
+- all `allow` lints moved to `expect`
 - docs website
 - Updated several dependencies
   - several minor versions
