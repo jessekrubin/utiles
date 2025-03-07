@@ -113,7 +113,7 @@ mod tests {
 
 #[cfg(test)]
 mod i64_shift_tests {
-    #![allow(clippy::similar_names)]
+    #![expect(clippy::similar_names)]
 
     use super::*;
 

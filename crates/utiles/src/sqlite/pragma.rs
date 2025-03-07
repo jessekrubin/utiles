@@ -324,7 +324,7 @@ pub fn pragma_index_info(
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
+    #![expect(clippy::unwrap_used)]
     use crate::sqlite::open;
 
     use super::*;

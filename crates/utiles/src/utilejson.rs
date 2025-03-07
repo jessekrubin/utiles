@@ -218,7 +218,7 @@ macro_rules! utilejson {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
+    #![expect(clippy::unwrap_used)]
 
     use std::collections::BTreeMap;
 

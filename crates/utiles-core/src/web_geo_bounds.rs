@@ -157,7 +157,7 @@ fn largest_lng_range_hole(merged: &[(f64, f64)]) -> (f64, f64) {
 /// version which I dumped into geojson.io to verify visually with my eyeballs
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
+    #![expect(clippy::unwrap_used)]
     use super::*;
 
     #[test]

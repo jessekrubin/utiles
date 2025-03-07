@@ -9,8 +9,8 @@
 #![deny(clippy::complexity)]
 #![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(clippy::similar_names)]
+#![expect(clippy::module_name_repetitions)]
+#![expect(clippy::similar_names)]
 
 #[doc(inline)]
 pub use crate::fns::*;

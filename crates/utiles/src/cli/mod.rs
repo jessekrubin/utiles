@@ -1,11 +1,11 @@
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![warn(clippy::style)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(clippy::missing_errors_doc)]
-#![allow(clippy::missing_panics_doc)]
-#![allow(clippy::similar_names)]
-#![allow(clippy::too_many_lines)]
+#![expect(clippy::module_name_repetitions)]
+#![expect(clippy::missing_errors_doc)]
+#![expect(clippy::missing_panics_doc)]
+#![expect(clippy::similar_names)]
+#![expect(clippy::too_many_lines)]
 pub mod args;
 mod commands;
 mod entry;

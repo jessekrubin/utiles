@@ -1,22 +1,17 @@
 #![deny(clippy::all)]
 #![deny(clippy::perf)]
 #![deny(dead_code)]
-#![warn(clippy::style)]
+#![deny(clippy::style)]
 #![deny(clippy::pedantic)]
-#![warn(clippy::unnecessary_wraps)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(clippy::missing_errors_doc)]
-#![allow(clippy::missing_panics_doc)]
-#![allow(clippy::similar_names)]
-#![allow(clippy::too_many_lines)]
-// road to clippy pedantic
-#![allow(clippy::cast_possible_truncation)]
-#![allow(clippy::used_underscore_items)]
-#![allow(clippy::cast_sign_loss)]
-#![allow(clippy::float_cmp)]
-#![allow(clippy::needless_pass_by_value)]
-#![allow(clippy::unused_self)]
 #![deny(clippy::unwrap_used)]
+#![warn(clippy::unnecessary_wraps)]
+#![expect(clippy::cast_possible_truncation)]
+#![expect(clippy::cast_sign_loss)]
+#![expect(clippy::float_cmp)]
+#![expect(clippy::needless_pass_by_value)]
+#![expect(clippy::similar_names)]
+#![expect(clippy::unused_self)]
+#![expect(clippy::used_underscore_items)]
 
 use pyo3::prelude::*;
 
@@ -46,12 +41,6 @@ fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__build_profile__", BUILD_PROFILE)?;
     m.add("__build_timestamp__", BUILD_TIMESTAMP)?;
     m.add("__authors__", AUTHORS)?;
-    //
-    // m.add("__version_lib__", env!("CARGO_PKG_VERSION"))?;
-    // m.add("__build_profile__", env!("PROFILE"))?;
-    // m.add("__build_timestamp__", env!("BUILD_TIMESTAMP"))?;
-    // m.add("__authors__", env!("CARGO_PKG_AUTHORS"))?;
-
     Ok(())
 }
 
