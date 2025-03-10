@@ -14,15 +14,15 @@ pub fn parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
         if let Ok(tile) = arg.extract::<PyTile>() {
             return Ok(tile);
         } else if let Ok(seq) = arg.extract::<(u32, u32, u8)>() {
-            return Ok(PyTile::new(seq.0, seq.1, seq.2));
+            return Ok(PyTile::py_new(seq.0, seq.1, seq.2));
         } else if let Ok(seq) = arg.extract::<Vec<u32>>() {
-            return Ok(PyTile::new(seq[0], seq[1], seq[2] as u8));
+            return Ok(PyTile::py_new(seq[0], seq[1], seq[2] as u8));
         }
     } else if args.len() == 3 {
         let x = args.get_item(0)?.extract()?;
         let y = args.get_item(1)?.extract()?;
         let z = args.get_item(2)?.extract()?;
-        return Ok(PyTile::new(x, y, z));
+        return Ok(PyTile::py_new(x, y, z));
     }
 
     Err(PyErr::new::<PyValueError, _>(
@@ -38,9 +38,9 @@ pub fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
         1 => {
             let arg = args.get_item(0)?;
             if let Ok(bbox) = arg.extract::<(f64, f64, f64, f64)>() {
-                return Ok(PyLngLatBbox::new(bbox.0, bbox.1, bbox.2, bbox.3));
+                return Ok(PyLngLatBbox::py_new(bbox.0, bbox.1, bbox.2, bbox.3));
             } else if let Ok(seq) = arg.extract::<Vec<f64>>() {
-                return Ok(PyLngLatBbox::new(seq[0], seq[1], seq[2], seq[3]));
+                return Ok(PyLngLatBbox::py_new(seq[0], seq[1], seq[2], seq[3]));
             }
             // raise ValueError("the bbox argument may have 1 or 4 values")
             Err(PyErr::new::<PyValueError, _>(
@@ -50,14 +50,14 @@ pub fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
         2 => {
             let x = args.get_item(0)?.extract()?;
             let y = args.get_item(1)?.extract()?;
-            Ok(PyLngLatBbox::new(x, y, x, y))
+            Ok(PyLngLatBbox::py_new(x, y, x, y))
         }
         4 => {
             let x1 = args.get_item(0)?.extract()?;
             let y1 = args.get_item(1)?.extract()?;
             let x2 = args.get_item(2)?.extract()?;
             let y2 = args.get_item(3)?.extract()?;
-            Ok(PyLngLatBbox::new(x1, y1, x2, y2))
+            Ok(PyLngLatBbox::py_new(x1, y1, x2, y2))
         }
         _ => Err(PyErr::new::<PyValueError, _>(
             "the bbox argument may have 1, 2 or 4 values",
@@ -80,7 +80,7 @@ pub fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
         if let Ok(x) = args.get_item(0)?.extract::<u32>() {
             let y = args.get_item(1)?.extract()?;
             let z = args.get_item(2)?.extract()?;
-            return Ok(vec![PyTile::new(x, y, z)]);
+            return Ok(vec![PyTile::py_new(x, y, z)]);
         }
     }
 

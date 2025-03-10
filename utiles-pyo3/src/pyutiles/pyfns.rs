@@ -18,7 +18,7 @@ use crate::pyutiles::zoom::PyZoomOrZooms;
 
 #[pyfunction]
 pub fn xyz(x: u32, y: u32, z: u8) -> PyTile {
-    PyTile::new(x, y, z)
+    PyTile::py_new(x, y, z)
 }
 
 #[pyfunction]
@@ -57,7 +57,7 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
 #[pyo3(signature = (x, y, truncate = None))]
 pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
     let lnglat = utiles::lnglat(x, y, truncate);
-    PyLngLat::new(lnglat.lng(), lnglat.lat())
+    PyLngLat::py_new(lnglat.lng(), lnglat.lat())
 }
 
 #[pyfunction]
@@ -100,7 +100,7 @@ pub fn qk2xyz(quadkey: &str) -> PyResult<PyTile> {
 
 #[pyfunction]
 pub fn from_tuple(tile: TileTuple) -> PyTile {
-    PyTile::new(tile.0, tile.1, tile.2)
+    PyTile::py_new(tile.0, tile.1, tile.2)
 }
 #[pyfunction]
 #[pyo3(signature = (tile, fid = None, props = None, projected = None, buffer = None, precision = None)
@@ -138,12 +138,12 @@ pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
     } else if let Ok(seq) = arg.extract::<Vec<(u32, u32, u32)>>() {
         return Ok(seq
             .iter()
-            .map(|xyz| PyTile::new(xyz.0, xyz.1, xyz.2 as u8))
+            .map(|xyz| PyTile::py_new(xyz.0, xyz.1, xyz.2 as u8))
             .collect());
     } else if let Ok(seq) = arg.extract::<Vec<Vec<u32>>>() {
         return Ok(seq
             .iter()
-            .map(|xyz| PyTile::new(xyz[0], xyz[1], xyz[2] as u8))
+            .map(|xyz| PyTile::py_new(xyz[0], xyz[1], xyz[2] as u8))
             .collect());
     }
     Err(PyErr::new::<PyValueError, _>(
@@ -156,7 +156,7 @@ pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
 pub fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
     let tile = pyparsing::parse_tile_arg(args)?;
     let web_bbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-    Ok(PyBbox::new(
+    Ok(PyBbox::py_new(
         web_bbox.left(),
         web_bbox.bottom(),
         web_bbox.right(),
@@ -390,5 +390,5 @@ pub fn geojson_bounds(obj: &Bound<'_, PyAny>) -> PyResult<PyLngLatBbox> {
             bbox.3.max(lat),
         );
     }
-    Ok(PyLngLatBbox::new(bbox.0, bbox.1, bbox.2, bbox.3))
+    Ok(PyLngLatBbox::py_new(bbox.0, bbox.1, bbox.2, bbox.3))
 }

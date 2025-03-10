@@ -6,7 +6,7 @@ use pyo3::types::PyType;
 use pyo3::{exceptions, pyclass, pymethods, PyAny, PyErr, PyRef, PyResult, Python};
 use utiles::BBox;
 
-#[pyclass(name = "Bbox", module = "utiles._utiles")]
+#[pyclass(name = "Bbox", module = "utiles._utiles", frozen)]
 #[derive(Clone)]
 pub struct PyBbox {
     pub bbox: BBox,
@@ -15,7 +15,7 @@ pub struct PyBbox {
 #[pymethods]
 impl PyBbox {
     #[new]
-    pub fn new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
+    pub fn py_new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
         PyBbox {
             bbox: BBox {
                 west: left,
@@ -30,10 +30,10 @@ impl PyBbox {
     pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
         let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
+        Self::py_new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
     }
 
-    pub fn __str__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "Bbox(left={}, bottom={}, right={}, top={})",
             self.bbox.left(),
@@ -43,8 +43,8 @@ impl PyBbox {
         )
     }
 
-    pub fn __repr__(&self) -> String {
-        self.__str__()
+    pub fn __str__(&self) -> String {
+        self.__repr__()
     }
 
     #[getter]

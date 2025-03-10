@@ -7,7 +7,8 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyNotImplemented, PyTuple, PyType};
 use pyo3::{
-    exceptions, intern, pyclass, pymethods, Py, PyAny, PyErr, PyRef, PyResult, Python,
+    exceptions, intern, pyclass, pymethods, IntoPyObjectExt, Py, PyAny, PyErr, PyRef,
+    PyResult, Python,
 };
 use serde::Serialize;
 use utiles::bbox::BBox;
@@ -33,25 +34,23 @@ macro_rules! pytile {
     };
 }
 
-#[pyclass(name = "Tile", module = "utiles._utiles", sequence)]
+#[pyclass(name = "Tile", module = "utiles._utiles", sequence, frozen)]
 #[derive(Clone, Debug, PartialEq, Serialize, Eq, Hash, Copy)]
 pub struct PyTile {
     pub xyz: Tile,
 }
 
-// #[derive(FromPyObject)]
-// pub enum PyTileOrTuple {
-//     Tile(PyTile),
-//     Tuple(TileTuple),
-// }
-
 #[pymethods]
 impl PyTile {
     #[new]
-    pub fn new(x: u32, y: u32, z: u8) -> Self {
+    pub fn py_new(x: u32, y: u32, z: u8) -> Self {
         Self {
             xyz: Tile::new(x, y, z),
         }
+    }
+
+    fn __getnewargs__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyTuple>> {
+        PyTuple::new(py, [self.xyz.x(), self.xyz.y(), self.xyz.z() as u32])
     }
 
     pub fn valid(&self) -> bool {
@@ -64,8 +63,7 @@ impl PyTile {
     }
 
     pub fn json_arr(&self) -> String {
-        let s = format!("[{}, {}, {}]", self.xyz.x, self.xyz.y, self.xyz.z);
-        s
+        format!("[{}, {}, {}]", self.xyz.x, self.xyz.y, self.xyz.z)
     }
 
     #[pyo3(signature = (obj = true))]
@@ -224,10 +222,7 @@ impl PyTile {
         &self,
         idx: tuple_slice::SliceOrInt,
         py: Python<'py>,
-    ) -> PyResult<
-        // tuple_slice::TupleSliceResult<u32>
-        Bound<'py, PyAny>,
-    > {
+    ) -> PyResult<Bound<'py, PyAny>> {
         match idx {
             tuple_slice::SliceOrInt::Slice(slice) => {
                 let psi = slice.indices(3)?;
@@ -237,27 +232,18 @@ impl PyTile {
                     .step_by(step as usize)
                     .copied()
                     .collect();
-                let tuple =
-                    PyTuple::new(py, m)
-                        .map(pyo3::Bound::into_any)
-                        .map_err(|e| {
-                            PyErr::new::<PyValueError, _>(format!("Error: {e}"))
-                        })?;
+                let tuple = PyTuple::new(py, m).map(Bound::into_any).map_err(|e| {
+                    PyErr::new::<PyValueError, _>(format!("Error: {e}"))
+                })?;
                 Ok(tuple)
             }
             tuple_slice::SliceOrInt::Int(idx) => match idx {
-                0 | -3 => {
-                    let r = self.xyz.x.into_pyobject(py).map(pyo3::Bound::into_any)?;
-                    Ok(r)
-                }
-                1 | -2 => {
-                    let r = self.xyz.y.into_pyobject(py).map(pyo3::Bound::into_any)?;
-                    Ok(r)
-                }
+                0 | -3 => self.xyz.x().into_bound_py_any(py),
+                1 | -2 => self.xyz.y().into_bound_py_any(py),
                 2 | -1 => {
                     let r = u32::from(self.xyz.z)
                         .into_pyobject(py)
-                        .map(pyo3::Bound::into_any)?;
+                        .map(Bound::into_any)?;
                     Ok(r)
                 }
                 3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),

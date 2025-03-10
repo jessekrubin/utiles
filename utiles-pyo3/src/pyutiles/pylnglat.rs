@@ -4,7 +4,7 @@ use pyo3::exceptions::{self};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 
-#[pyclass(name = "LngLat", module = "utiles._utiles")]
+#[pyclass(name = "LngLat", module = "utiles._utiles", frozen)]
 pub struct PyLngLat {
     lnglat: utiles::LngLat,
 }
@@ -12,7 +12,7 @@ pub struct PyLngLat {
 #[pymethods]
 impl PyLngLat {
     #[new]
-    pub fn new(lng: f64, lat: f64) -> Self {
+    pub fn py_new(lng: f64, lat: f64) -> Self {
         Self {
             lnglat: utiles::LngLat::new(lng, lat),
         }
@@ -21,7 +21,7 @@ impl PyLngLat {
     #[classmethod]
     pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
         let ll = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Self::new(ll.lng(), ll.lat())
+        Self::py_new(ll.lng(), ll.lat())
     }
 
     pub fn __repr__(&self) -> String {
