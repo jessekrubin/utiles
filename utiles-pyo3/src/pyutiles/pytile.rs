@@ -50,7 +50,7 @@ impl PyTile {
     }
 
     fn __getnewargs__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyTuple>> {
-        PyTuple::new(py, [self.xyz.x(), self.xyz.y(), self.xyz.z() as u32])
+        PyTuple::new(py, [self.x(), self.y(), u32::from(self.z())])
     }
 
     pub fn valid(&self) -> bool {
