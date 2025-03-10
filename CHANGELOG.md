@@ -11,6 +11,7 @@
   - useless conversions
   - const functions
 - pyo3 v0.24.x
+- frozen py structs
 
 ---
 

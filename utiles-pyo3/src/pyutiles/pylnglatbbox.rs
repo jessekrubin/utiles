@@ -7,7 +7,7 @@ use pyo3::types::PyType;
 use pyo3::{exceptions, pyclass, pymethods, Py, PyAny, PyErr, PyRef, PyResult, Python};
 use utiles::bbox::BBox;
 
-#[pyclass(name = "LngLatBbox", module = "utiles._utiles")]
+#[pyclass(name = "LngLatBbox", module = "utiles._utiles", frozen)]
 #[derive(Clone)]
 pub struct PyLngLatBbox {
     pub bbox: BBox,
@@ -22,7 +22,7 @@ impl From<PyLngLatBbox> for BBox {
 #[pymethods]
 impl PyLngLatBbox {
     #[new]
-    pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
+    pub fn py_new(west: f64, south: f64, east: f64, north: f64) -> Self {
         PyLngLatBbox {
             bbox: BBox {
                 west,
@@ -66,7 +66,7 @@ impl PyLngLatBbox {
     pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
         let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-        Self::new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
+        Self::py_new(ul.lng(), lr.lat(), lr.lng(), ul.lat())
     }
 
     #[getter]

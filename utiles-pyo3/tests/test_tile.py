@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pickle
+
 import utiles as ut
 
 
@@ -25,6 +27,12 @@ def test_tile_children() -> None:
     ]
 
     assert children_2 == children_1
+
+
+def test_pickling() -> None:
+    pickled = pickle.dumps(ut.Tile(0, 0, 0))
+    loaded = pickle.loads(pickled)
+    assert loaded == ut.Tile(0, 0, 0)
 
 
 def test_tile_children_zorder() -> None:

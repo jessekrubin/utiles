@@ -170,7 +170,6 @@ impl MbtStreamWriterSync {
     pub async fn write(&mut self) -> UtilesResult<()> {
         let db_type = self.mbt.query_mbt_type()?;
         self.preflight()?;
-        // let db_type = MbtType::Flat;
         match db_type {
             MbtType::Flat => self.write_flat().await,
             MbtType::Hash => self.write_hash().await,

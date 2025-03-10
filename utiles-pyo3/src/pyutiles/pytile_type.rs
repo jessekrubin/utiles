@@ -37,7 +37,7 @@ impl FromPyObject<'_> for PyTileEncoding {
     }
 }
 
-pub struct PyTileFormat(tile_type::TileFormat);
+pub struct PyTileFormat(TileFormat);
 
 const TILE_FORMAT_STRINGS: &str = "png, webp, pbf, mvt, gif, jpg, jpeg, json, geojson";
 impl FromPyObject<'_> for PyTileFormat {
@@ -107,14 +107,7 @@ impl PyTileType {
 
     #[getter]
     fn compression<'py>(&self, py: Python<'py>) -> &Bound<'py, PyString> {
-        match self.0.encoding {
-            TileEncoding::Uncompressed => intern!(py, "uncompressed"),
-            TileEncoding::Internal => intern!(py, "internal"),
-            TileEncoding::Zlib => intern!(py, "zlib"),
-            TileEncoding::Gzip => intern!(py, "gzip"),
-            TileEncoding::Brotli => intern!(py, "brotli"),
-            TileEncoding::Zstd => intern!(py, "zstd"),
-        }
+        self.encoding(py)
     }
 
     #[getter]
