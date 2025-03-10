@@ -14,9 +14,6 @@
 #![deny(clippy::pedantic)]
 #![expect(clippy::cast_possible_wrap)]
 
-mod raster_tile_join;
-
-use crate::raster_tile_join::dynamic_img_2_webp;
 use crate::ProgressEvent::{Msg, SizeDiff};
 use clap::Parser;
 use futures::StreamExt;
@@ -24,6 +21,8 @@ use indoc::indoc;
 use std::time::Duration;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
+use utiles::img::raster_tile_join;
+use utiles::img::raster_tile_join::dynamic_img_2_webp;
 use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
 use utiles::mbt::{
     MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesAsync,
@@ -152,7 +151,7 @@ fn raster_join_tile_children_row(
     let b = raster_tile_join::join_raster_children(&raster_children_struct)?;
     let elapsed = start.elapsed();
     debug!("join_raster_children elapsed: {:?}", elapsed);
-    dynamic_img_2_webp(&b)
+    Ok(dynamic_img_2_webp(&b)?)
 }
 
 fn make_progress_future(
