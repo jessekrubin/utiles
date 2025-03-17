@@ -1610,9 +1610,9 @@ dependencies = [
 
 [[package]]
 name = "noncrypto-digests"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f69de4f1f8ec114a91b5a4ced1424074578db8d7cc4e4e0b01987804b78bb5b"
+checksum = "b6a13ed1e9f98da1513d6eada422161661b3c867a422b9c78d9b65b0f8685439"
 dependencies = [
  "digest",
  "fnv",
