@@ -47,7 +47,7 @@ impl InfoType {
 }
 
 pub(crate) async fn info(filepath: &str, stats: bool) -> UtilesResult<Info> {
-    let ext = filepath.split('.').last().unwrap_or_default();
+    let ext = filepath.split('.').next_back().unwrap_or_default();
     let info_type = InfoType::from_ext(ext);
     if let Some(info_type) = info_type {
         let info = info_type.info(filepath, stats).await?;

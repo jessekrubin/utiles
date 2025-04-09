@@ -90,10 +90,7 @@ pub fn tilejson_parse(s: &str) -> Result<TileJSON, serde_json::Error> {
 }
 
 fn to_val<V, E: Display>(val: Result<V, E>) -> Option<V> {
-    match val {
-        Ok(v) => Some(v),
-        Err(_err) => None,
-    }
+    val.ok()
 }
 
 /// Convert metadata rows to a `TileJSON` object
@@ -108,10 +105,10 @@ pub fn metadata2tilejson(metadata: Vec<MbtMetadataRow>) -> UtilesResult<TileJSON
         match name.as_ref() {
             "name" => tj.name = Some(value),
             "version" => tj.version = Some(value),
-            "bounds" => tj.bounds = to_val(Bounds::from_str(value.as_str())),
-            "center" => tj.center = to_val(Center::from_str(value.as_str())),
-            "minzoom" => tj.minzoom = to_val(value.parse()),
-            "maxzoom" => tj.maxzoom = to_val(value.parse()),
+            "bounds" => tj.bounds = Bounds::from_str(value.as_str()).ok(),
+            "center" => tj.center = Center::from_str(value.as_str()).ok(),
+            "minzoom" => tj.minzoom = value.parse().ok(),
+            "maxzoom" => tj.maxzoom = value.parse().ok(),
             "description" => tj.description = Some(value),
             "attribution" => tj.attribution = Some(value),
             "legend" => tj.legend = Some(value),
