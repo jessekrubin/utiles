@@ -83,6 +83,7 @@ impl PyLager {
         }
         Ok(())
     }
+
     #[setter]
     fn set_format(&self, fmt: &str) -> PyResult<()> {
         let parse_fmt = LagerFormat::from_str(fmt).map_err(|_e| {
