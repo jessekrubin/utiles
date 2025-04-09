@@ -221,8 +221,8 @@ async fn remove_all_directories_in_stages(
 /// Does this:
 /// 1) Remove all files
 /// 2) Remove all directories
-///     2a) gathers all dirs and then sorts by depth into map
-///     2b) removes dirs in descending order of depth
+///    2a) gathers all dirs and then sorts by depth into map
+///    2b) removes dirs in descending order of depth
 pub(crate) async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
     trace!("rimraf_main: args = {:?}", args);
     let dirpath = Path::new(&args.dirpath);

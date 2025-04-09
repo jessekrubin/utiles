@@ -80,7 +80,7 @@ impl PyLager {
             utiles::lager::set_log_level(level).map_err(|e| {
                 PyErr::new::<PyValueError, _>(format!("failed to set log level: {e}"))
             })?;
-        };
+        }
         Ok(())
     }
     #[setter]
@@ -98,7 +98,7 @@ impl PyLager {
             utiles::lager::set_log_format(is_json).map_err(|e| {
                 PyErr::new::<PyValueError, _>(format!("failed to set log level: {e}"))
             })?;
-        };
+        }
         Ok(())
     }
 
@@ -150,7 +150,7 @@ pub fn pymod_add(m: &Bound<'_, PyModule>) -> PyResult<()> {
             tracing::debug!("lager-config: {:?}", cfg);
         }
         Err(e) => tracing::debug!("failed to init tracing: {}", e),
-    };
+    }
     let lager = PyLager::new();
     m.add_class::<PyLager>()?;
     m.add("lager", lager)?;
