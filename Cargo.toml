@@ -26,7 +26,7 @@ anyhow = "1.0.98"
 async-sqlite = { version = "0.5.0", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.88"
 axum = { version = "0.8.3", features = ["tokio", "json", "macros"] }
-axum-extra = "0.10.0"
+axum-extra = "0.10.1"
 base64 = "0.22.1"
 clap = { version = "4.5.36", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.1"
