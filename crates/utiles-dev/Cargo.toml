@@ -34,7 +34,7 @@ futures.workspace = true
 futures-util = "0.3.31"
 image.workspace = true
 indoc.workspace = true
-clap = { version = "4.5.36", features = ["derive"] }
+clap = { version = "4.5.37", features = ["derive"] }
 rayon = "1.10.0"
 num_cpus = "1.16.0"
 crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
