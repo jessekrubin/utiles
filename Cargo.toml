@@ -23,12 +23,14 @@ repository = "https://github.com/jessekrubin/utiles"
 [workspace.dependencies]
 ahash = "0.8.11"
 anyhow = "1.0.98"
-async-sqlite = { version = "0.5.0", features = ["bundled", "functions", "trace"] }
+# TODO: remove git dependency when async-sqlite is published on crates.io
+# async-sqlite = { version = "0.5.0", features = ["bundled", "functions", "trace"] }
+async-sqlite = { git = "https://github.com/ryanfowler/async-sqlite.git" }
 async-trait = "0.1.88"
 axum = { version = "0.8.3", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.1"
 base64 = "0.22.1"
-clap = { version = "4.5.36", features = ["derive", "color", "wrap_help"] }
+clap = { version = "4.5.37", features = ["derive", "color", "wrap_help"] }
 fast_hilbert = "2.0.1"
 fnv = "1.0.7"
 futures = "0.3.31"
@@ -37,10 +39,10 @@ geojson = "0.24.2"
 globset = "0.4.16"
 hex = "0.4.3"
 image = "0.25.6"
-imagesize = "0.13.0"
+imagesize = "0.14.0"
 indicatif = "0.17.11"
 indoc = "2.0.5"
-jiff = "0.2.8"
+jiff = "0.2.9"
 json-patch = "4.0.0"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.3"
@@ -49,11 +51,11 @@ owo-colors = { version = "4.2.0", features = ["supports-color"] }
 pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"] }
 pyo3 = "0.24.1"
 pyo3-build-config = "0.24.0"
-rusqlite = { version = "0.33.0", features = ["bundled", "vtab", "blob"] }
+rusqlite = { version = "0.35.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 size = { version = "0.5.0", features = ["default"] }
-sqlite-hashes = { version = "0.8.0", default-features = false, features = ["hex", "window", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.9.0", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
 strum = { version = "0.27.1", features = ["derive"] }
 strum_macros = "0.27.1"
 thiserror = "2.0.12"
