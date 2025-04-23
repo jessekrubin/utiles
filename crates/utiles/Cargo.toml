@@ -69,7 +69,7 @@ clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional
 pmtiles = { workspace = true, optional= true}
 
 [dev-dependencies]
-criterion = "0.5.1"
+criterion.workspace = true
 
 [[bench]]
 name = "bench"

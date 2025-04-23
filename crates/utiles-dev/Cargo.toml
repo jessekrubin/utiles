@@ -28,13 +28,13 @@ tokio.workspace = true
 utiles-core = { path = "../utiles-core" }
 utiles = { path = "../utiles" }
 tokio-stream.workspace = true
-tracing = "0.1.41"
+tracing.workspace = true
 rusqlite.workspace = true
 futures.workspace = true
-futures-util = "0.3.31"
+futures-util.workspace = true
 image.workspace = true
 indoc.workspace = true
-clap = { version = "4.5.36", features = ["derive"] }
+clap.workspace = true
 rayon = "1.10.0"
 num_cpus = "1.16.0"
 crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }

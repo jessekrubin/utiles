@@ -24,16 +24,18 @@ repository = "https://github.com/jessekrubin/utiles"
 ahash = "0.8.11"
 anyhow = "1.0.98"
 # TODO: remove git dependency when async-sqlite is published on crates.io
-# async-sqlite = { version = "0.5.0", features = ["bundled", "functions", "trace"] }
-async-sqlite = { git = "https://github.com/ryanfowler/async-sqlite.git" }
+async-sqlite = { version = "0.5.1", features = ["bundled", "functions", "trace"] }
+# async-sqlite = { git = "https://github.com/ryanfowler/async-sqlite.git" }
 async-trait = "0.1.88"
 axum = { version = "0.8.3", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.1"
 base64 = "0.22.1"
 clap = { version = "4.5.37", features = ["derive", "color", "wrap_help"] }
+criterion = "0.5.1"
 fast_hilbert = "2.0.1"
 fnv = "1.0.7"
 futures = "0.3.31"
+futures-util = "0.3.31"
 geo-types = "0.7.16"
 geojson = "0.24.2"
 globset = "0.4.16"
@@ -42,15 +44,15 @@ image = "0.25.6"
 imagesize = "0.14.0"
 indicatif = "0.17.11"
 indoc = "2.0.5"
-jiff = "0.2.9"
+jiff = "0.2.10"
 json-patch = "4.0.0"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.3"
 num_cpus = "1.16.0"
 owo-colors = { version = "4.2.0", features = ["supports-color"] }
 pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"] }
-pyo3 = "0.24.1"
-pyo3-build-config = "0.24.0"
+pyo3 = "0.24.2"
+pyo3-build-config = "0.24.2"
 rusqlite = { version = "0.35.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
