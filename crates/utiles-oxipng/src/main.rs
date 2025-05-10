@@ -10,9 +10,7 @@ use utiles::internal::cli_tools::open_new_overwrite;
 use utiles::tile_type::TileFormat;
 use utiles::{
     lager::{init_tracing, LagerConfig, LagerLevel},
-    mbt::{
-        MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync,
-    },
+    mbt::{MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync},
     tile_type::tiletype,
 };
 
@@ -22,6 +20,7 @@ use utiles::{
 #[command(max_term_width = 120)]
 #[command(author)]
 #[command(about = "oxipng-ify png-format mbtiles", long_about = None)]
+#[expect(clippy::struct_excessive_bools)]
 struct Cli {
     /// debug
     #[arg(long, default_value = "false", action = clap::ArgAction::SetTrue)]
@@ -62,13 +61,20 @@ struct Cli {
 
 pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> Result<Vec<u8>> {
     if let TileFormat::Png = tiletype(data).format {
-        oxipng::optimize_from_memory(data, options).map_err(|e| e.into())
+        oxipng::optimize_from_memory(data, options).map_err(std::convert::Into::into)
     } else {
         warn!("Unsupported image type");
         Ok(data.to_vec())
     }
 }
 
+#[allow(clippy::cast_possible_wrap)]
+fn signed_size_diff(initial_size: usize, final_size: usize) -> i64 {
+    initial_size as i64 - final_size as i64
+}
+
+// TODO: remove this and break up into smaller functions...
+#[expect(clippy::too_many_lines)]
 async fn oxipng_main(args: Cli) -> anyhow::Result<()> {
     let mbt = MbtilesClientAsync::open_existing(args.src.as_str()).await?;
     mbt.assert_mbtiles().await?;
@@ -104,7 +110,6 @@ async fn oxipng_main(args: Cli) -> anyhow::Result<()> {
                 if args.palette {
                     oxipng_options.palette_reduction = true;
                 }
-
                 async move {
                     let initial_size = tile_data.len();
                     let blocking_res = tokio::task::spawn_blocking(move || {
@@ -119,7 +124,7 @@ async fn oxipng_main(args: Cli) -> anyhow::Result<()> {
                             Ok(img_result) => {
                                 let final_size = img_result.len();
                                 let size_diff =
-                                    (initial_size as i64) - (final_size as i64);
+                                    signed_size_diff(initial_size, final_size);
                                 debug!("size_diff: {}", size_diff);
                                 let send_res = tx_writer
                                     .send((tile, img_result, None).into())
@@ -221,6 +226,6 @@ async fn main() -> Result<()> {
     let res = oxipng_main(args).await;
     res.map_err(|e| {
         error!("{}", e);
-        e.into()
+        e
     })
 }

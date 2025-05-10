@@ -23,3 +23,6 @@ utiles = { version = "0.7.3", path = "../utiles", features = [
     "internal",
     "lager",
 ], default-features = false }
+
+[lints]
+workspace = true
