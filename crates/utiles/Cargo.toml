@@ -106,7 +106,6 @@ server = [
     "internal",
     "lager",
     "dep:anyhow",
-    "dep:tracing-subscriber",
     "dep:axum",
     "dep:axum-extra",
     "dep:tower",
