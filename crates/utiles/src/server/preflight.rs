@@ -1,4 +1,4 @@
-use crate::globster::find_filepaths;
+use crate::internal::globster::find_filepaths;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::server::state::{Datasets, MbtilesDataset};
 use crate::server::UtilesServerConfig;

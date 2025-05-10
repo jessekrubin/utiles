@@ -34,13 +34,13 @@ use utiles_core::tile_type::{blob2headers, TileKind};
 use utiles_core::{quadkey2tile, utile, Tile};
 
 use crate::errors::UtilesResult;
+use crate::internal::signal::shutdown_signal;
 use crate::mbt::MbtilesAsync;
 pub use crate::server::cfg::UtilesServerConfig;
 use crate::server::health::Health;
 use crate::server::preflight::preflight;
 use crate::server::state::{MbtilesDataset, ServerState};
 use crate::server::ui::uitiles;
-use crate::signal::shutdown_signal;
 
 mod cfg;
 mod favicon;

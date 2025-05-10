@@ -18,27 +18,26 @@ path = "src/lib.rs"
 [[bin]]
 name = "utiles"
 path = "src/bin.rs"
-required-features = [
-    "cli",
-]
+required-features = ["cli"]
 
 [dependencies]
 ahash = { workspace = true, optional = true }
-anyhow.workspace = true
-async-sqlite = { workspace = true, features = ["bundled", "functions", "trace", "blob"] }
+anyhow = { workspace = true, optional = true }
+async-sqlite = { workspace = true, features = [
+    "bundled",
+    "functions",
+    "trace",
+    "blob",
+] }
 async-trait.workspace = true
-axum-extra.workspace = true
-axum.workspace = true
 base64.workspace = true
 fnv.workspace = true
 futures.workspace = true
 geo-types.workspace = true
 geojson.workspace = true
-globset.workspace = true
 hex.workspace = true
 image.workspace = true
 imagesize.workspace = true
-indicatif.workspace = true
 indoc = { workspace = true }
 jiff.workspace = true
 json-patch.workspace = true
@@ -46,7 +45,13 @@ md-5.workspace = true
 noncrypto-digests.workspace = true
 num_cpus.workspace = true
 owo-colors.workspace = true
-rusqlite = { workspace = true, features = ["bundled", "blob", "backup", "functions", "trace"] }
+rusqlite = { workspace = true, features = [
+    "bundled",
+    "blob",
+    "backup",
+    "functions",
+    "trace",
+] }
 serde.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 size.workspace = true
@@ -54,19 +59,36 @@ sqlite-hashes.workspace = true
 strum.workspace = true
 strum_macros.workspace = true
 thiserror.workspace = true
+walkdir = { workspace = true }
 tilejson.workspace = true
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true
-tower-http.workspace = true
-tower.workspace = true
-tracing-subscriber = { workspace = true, features = ["fmt", "json", "env-filter"] }
 tracing.workspace = true
 utiles-core = { path = "../utiles-core", version = "0.7.4" }
-walkdir.workspace = true
 xxhash-rust.workspace = true
-# optional
-clap = { workspace = true, features = ["derive", "color", "wrap_help"], optional = true }
-pmtiles = { workspace = true, optional= true}
+# ===========================
+# == Optional dependencies ==
+# ===========================
+pmtiles = { workspace = true, optional = true }
+globset = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, optional = true, features = [
+    "fmt",
+    "json",
+    "env-filter",
+] }
+
+# cli dependencies
+indicatif = { workspace = true, optional = true }
+clap = { workspace = true, features = [
+    "derive",
+    "color",
+    "wrap_help",
+], optional = true }
+# server dependencies
+axum-extra = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
+tower-http = { workspace = true, optional = true }
+tower = { workspace = true, optional = true }
 
 [dev-dependencies]
 criterion.workspace = true
@@ -76,26 +98,31 @@ name = "bench"
 harness = false
 
 [features]
-default = [
-    "ahash",
-    "cli",
-    "pmtiles",
+default = ["ahash", "cli", "pmtiles"]
+internal = ["dep:anyhow"]
+globster = ["dep:globset"]
+server = [
+    "globster",
+    "internal",
+    "lager",
+    "dep:anyhow",
+    "dep:tracing-subscriber",
+    "dep:axum",
+    "dep:axum-extra",
+    "dep:tower",
+    "dep:tower-http",
 ]
-all = [
-    "ahash",
-    "cli",
-    "pmtiles",
-]
-#server = [
-#    "axum",
-#    "axum-extra",
-#]
-lager-reload = []
-python = [
-    "lager-reload"
-]
+lager = ["dep:tracing-subscriber"]
+python = ["lager", "cli", "pmtiles"]
 # dep-features
-cli = ["dep:clap", "dep:pmtiles"]
+cli = [
+    "server",
+    "globster",
+    "lager",
+    "dep:indicatif",
+    "dep:pmtiles",
+    "dep:clap",
+]
 pmtiles = ["dep:pmtiles"]
 
 [lints]

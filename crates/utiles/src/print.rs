@@ -3,20 +3,8 @@
 //! REF: <https://github.com/rust-lang/rust/blob/master/compiler/rustc_driver_impl/src/print.rs>
 use std::fmt;
 use std::io::{self, Write as _};
-//
-// #[macro_export]
-// macro_rules! safe_print {
-//     ($($arg:tt)*) => {{
-//         $crate::print::print(std::format_args!($($arg)*));
-//     }};
-// }
-//
-// #[macro_export]
-// macro_rules! safe_println {
-//     ($($arg:tt)*) => {
-//         $crate::print::safe_print!("{}\n", std::format_args!($($arg)*));
-//     };
-// }
+
+#[macro_export]
 macro_rules! safe_print {
     ($($arg:tt)*) => {{
         #[allow(clippy::unwrap_used)]
@@ -24,11 +12,13 @@ macro_rules! safe_print {
     }};
 }
 
+#[macro_export]
 macro_rules! safe_println {
     ($($arg:tt)*) => {
         safe_print!("{}\n", std::format_args!($($arg)*))
     };
 }
+
 pub fn print(args: fmt::Arguments<'_>) -> Result<(), io::Error> {
     if let Err(err) = io::stdout().write_fmt(args) {
         if err.kind() == io::ErrorKind::BrokenPipe {

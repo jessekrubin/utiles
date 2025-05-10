@@ -8,8 +8,8 @@ use crate::cli::commands::{
     translate_main, update_main, vacuum_main, webpify_main, zxyify_main,
 };
 use crate::errors::UtilesResult;
+use crate::internal::signal::shutdown_signal;
 use crate::lager::{init_tracing, LagerConfig, LagerLevel};
-use crate::signal::shutdown_signal;
 use crate::UtilesError;
 use clap::{CommandFactory, FromArgMatches};
 use tracing::{debug, error, trace};

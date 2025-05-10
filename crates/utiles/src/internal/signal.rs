@@ -1,7 +1,12 @@
 use tokio::signal;
 use tracing::debug;
 
-pub(crate) async fn shutdown_signal() {
+/// Wait for a shutdown signal (Ctrl+C or SIGTERM).
+///
+/// ## Panics
+///
+/// Panics if the signal handler cannot be installed.
+pub async fn shutdown_signal() {
     let ctrl_c = async {
         signal::ctrl_c()
             .await

@@ -6,15 +6,14 @@ use futures::StreamExt;
 use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
-
+use utiles::internal::cli_tools::open_new_overwrite;
 use utiles::tile_type::TileFormat;
 use utiles::{
     lager::{init_tracing, LagerConfig, LagerLevel},
     mbt::{
-        MbtStreamWriterSync, MbtWriterStats, Mbtiles, MbtilesAsync, MbtilesClientAsync,
+        MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync,
     },
     tile_type::tiletype,
-    UtilesResult,
 };
 
 #[derive(Debug, Parser)]
@@ -26,15 +25,15 @@ use utiles::{
 struct Cli {
     /// debug
     #[arg(long, default_value = "false", action = clap::ArgAction::SetTrue)]
-    pub debug: bool,
+    pub(crate) debug: bool,
 
     /// mbtiles-like fspath
     #[arg(required = true)]
-    pub src: String,
+    pub(crate) src: String,
 
     /// destination mbtiles fspath
     #[arg(required = true)]
-    pub dst: String,
+    pub(crate) dst: String,
 
     /// optimize level
     #[arg(required = false, long, short, default_value = "2")]
@@ -50,11 +49,15 @@ struct Cli {
 
     /// n-jobs ~ 0=ncpus (default: max(4, ncpus))
     #[arg(required = false, long, short)]
-    pub jobs: Option<u8>,
+    pub(crate) jobs: Option<u8>,
 
     /// quiet
     #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
     pub(crate) quiet: bool,
+
+    /// overwrite existing mbtiles if it exists
+    #[arg(required = false, long, short, action = clap::ArgAction::SetTrue)]
+    pub(crate) force: bool,
 }
 
 pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> Result<Vec<u8>> {
@@ -66,13 +69,14 @@ pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> Result<Vec<u8>> {
     }
 }
 
-async fn oxipng_main(args: Cli) -> UtilesResult<()> {
+async fn oxipng_main(args: Cli) -> anyhow::Result<()> {
     let mbt = MbtilesClientAsync::open_existing(args.src.as_str()).await?;
     mbt.assert_mbtiles().await?;
 
     let total_count = mbt.tiles_count().await?;
     let mbt_metadata = mbt.metadata_rows().await?;
-    let dst_mbtiles = Mbtiles::open_new(args.dst, None)?;
+    let dst_mbtiles = open_new_overwrite(&args.dst, args.force)?;
+    // let dst_mbtiles = Mbtiles::open_new(args.dst, None)?;
     dst_mbtiles.metadata_set_many(&mbt_metadata)?;
     let tiles_stream = mbt.tiles_stream(None)?;
 
