@@ -10,7 +10,7 @@ class MDBookSidebarScrollbox extends HTMLElement {
     connectedCallback() {
         this.innerHTML = '<ol class="chapter"><li class="chapter-item expanded "><a href="__index__.html"><strong aria-hidden="true">1.</strong> README</a></li><li class="chapter-item expanded "><a href="cli.html"><strong aria-hidden="true">2.</strong> CLI</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="commands.html"><strong aria-hidden="true">2.1.</strong> COMMANDS</a></li></ol></li><li class="chapter-item expanded "><a href="python.html"><strong aria-hidden="true">3.</strong> PYTHON</a></li><li class="chapter-item expanded "><a href="related.html"><strong aria-hidden="true">4.</strong> RELATED</a></li><li class="chapter-item expanded "><a href="reference.html"><strong aria-hidden="true">5.</strong> REFERENCE</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="definitions.html"><strong aria-hidden="true">5.1.</strong> DEFINITIONS</a></li><li class="chapter-item expanded "><a href="zoom-levels.html"><strong aria-hidden="true">5.2.</strong> ZOOM-LEVELS</a></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><a href="changelog.html"><strong aria-hidden="true">6.</strong> CHANGELOG</a></li></ol>';
         // Set the current, active page, and reveal it if it's hidden
-        let current_page = document.location.href.toString().split("#")[0];
+        let current_page = document.location.href.toString().split("#")[0].split("?")[0];
         if (current_page.endsWith("/")) {
             current_page += "index.html";
         }
