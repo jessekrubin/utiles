@@ -23,10 +23,10 @@ use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 use utiles::img::raster_tile_join;
 use utiles::img::raster_tile_join::dynamic_img_2_webp;
+use utiles::internal::cli_tools::open_new_overwrite;
 use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
 use utiles::mbt::{
-    MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesAsync,
-    MbtilesClientAsync,
+    MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync,
 };
 use utiles::Tile;
 
@@ -215,18 +215,7 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
     debug!("args: {:?}", args);
     let mbt = MbtilesClientAsync::open_existing(&args.src).await?;
     mbt.assert_mbtiles().await?;
-    // 2) Open or create the destination MBTiles
-    // let dst = Mbtiles::from(dst_mbtiles);
-    let dst_exists = std::fs::metadata(&args.dst).is_ok();
-    if dst_exists {
-        if args.force {
-            std::fs::remove_file(&args.dst)?;
-        } else {
-            return Err(anyhow::anyhow!("dst exists, use --force to overwrite"));
-        }
-    }
-    let dst = Mbtiles::open_new(&args.dst, Option::from(MbtType::Norm))?;
-
+    let dst = open_new_overwrite(&args.dst, args.force)?;
     let mut src_rows = mbt.metadata_rows().await?;
     for row in &mut src_rows {
         if row.name == "minzoom" && row.value != "0" {

@@ -110,6 +110,7 @@ pub enum UtilesError {
     GeojsonError(String),
 
     /// Error from globset
+    #[cfg(feature = "globster")]
     #[error("globset error: {0}")]
     GlobsetError(#[from] globset::Error),
 

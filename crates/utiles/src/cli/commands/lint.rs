@@ -2,7 +2,7 @@ use tracing::{debug, warn};
 
 use crate::cli::args::LintArgs;
 use crate::errors::UtilesResult;
-use crate::globster;
+use crate::internal::globster;
 use crate::lint::lint_filepaths;
 
 pub(crate) async fn lint_main(args: &LintArgs) -> UtilesResult<()> {

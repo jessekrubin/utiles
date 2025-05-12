@@ -6,16 +6,6 @@ use globset::{Glob, GlobSetBuilder};
 use tracing::{debug, warn};
 use walkdir::WalkDir;
 
-fn is_dir(path: &str) -> bool {
-    let path = std::path::Path::new(path);
-    path.is_dir()
-}
-
-fn is_file(path: &str) -> bool {
-    let path = std::path::Path::new(path);
-    path.is_file()
-}
-
 pub(crate) fn find_datasets(fspath: &str) -> UtilesResult<Vec<PathBuf>> {
     // filepaths
     let mut filepaths: Vec<PathBuf> = vec![];
@@ -49,6 +39,7 @@ pub(crate) fn find_filepaths(fspaths: &[String]) -> UtilesResult<Vec<PathBuf>> {
     debug!("searching fspaths: {:?}", fspaths);
     for fspath in fspaths {
         debug!("fspath: {}", fspath);
+        let path = std::path::Path::new(fspath);
         if fspath == "." {
             // get the current working directory and resolve it to an absolute path
             let cwd = std::env::current_dir()
@@ -56,9 +47,9 @@ pub(crate) fn find_filepaths(fspaths: &[String]) -> UtilesResult<Vec<PathBuf>> {
             let cwd_to_str =
                 cwd.to_str().ok_or(UtilesError::AdHoc("cwd".to_string()))?;
             dirs.push(cwd_to_str.to_string());
-        } else if is_file(fspath) {
+        } else if path.is_file() {
             files.push(fspath.clone());
-        } else if is_dir(fspath) {
+        } else if path.is_dir() {
             dirs.push(fspath.clone());
         } else {
             warn!("{} is not a file or directory", fspath);

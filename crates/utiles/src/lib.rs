@@ -29,14 +29,16 @@ pub mod dev;
 pub mod errors;
 pub mod fs_async;
 pub mod gj;
-mod globster;
 pub mod img;
+#[cfg(feature = "internal")]
+pub mod internal;
+#[cfg(feature = "lager")]
 pub mod lager;
 pub mod lint;
 pub mod mbt;
 mod pmt;
+#[cfg(feature = "server")]
 pub mod server;
-mod signal;
 pub mod sqlite;
 pub mod sqlite_utiles;
 pub mod utilejson;
