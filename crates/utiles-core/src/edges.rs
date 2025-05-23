@@ -24,11 +24,6 @@ pub fn find_edges(
             .neighbors(wrapx)
             .iter()
             .any(|neighbor| !tile_positions.contains(&(neighbor.x(), neighbor.y())));
-        // let is_edge =
-        //     neighbors_wrap_x((x, y), max_xy).any(|(neighbor_x, neighbor_y)| {
-        //         // If neighbor is out of bounds or not in tile_positions, it's considered an edge
-        //         !tile_positions.contains(&(neighbor_x, neighbor_y))
-        //     });
         if is_edge {
             Some(*tile)
         } else {
