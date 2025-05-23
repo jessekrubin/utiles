@@ -17,10 +17,11 @@ fast_hilbert = { workspace = true, optional = true }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+ahash = { workspace = true, optional = true }
 
 [features]
-default = ["pmtiles"]
-all = ["pmtiles"]
+default = ["pmtiles", "ahash"]
+ahash = ["dep:ahash"]
 pmtiles = ["dep:fast_hilbert"]
 
 [lints]

@@ -569,60 +569,102 @@ fn neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
 #[must_use]
 pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
     if z == 0 {
+        Vec::new()
+    } else if z == 1 {
+        siblings(x, y, z)
+    } else {
+        let edge_info = tile_edge_info(x, y, z);
+        match edge_info {
+            TileEdgeInfo::Middle => neighbors_middle_tile(x, y, z),
+            TileEdgeInfo::TopLeft => vec![
+                utile!(x + 1, y, z),
+                utile!(x, y + 1, z),
+                utile!(x + 1, y + 1, z),
+            ],
+            TileEdgeInfo::TopRight => vec![
+                utile!(x - 1, y, z),
+                utile!(x, y + 1, z),
+                utile!(x - 1, y + 1, z),
+            ],
+            TileEdgeInfo::BottomLeft => vec![
+                utile!(x + 1, y, z),
+                utile!(x, y - 1, z),
+                utile!(x + 1, y - 1, z),
+            ],
+            TileEdgeInfo::BottomRight => vec![
+                utile!(x - 1, y, z),
+                utile!(x, y - 1, z),
+                utile!(x - 1, y - 1, z),
+            ],
+            TileEdgeInfo::Left => vec![
+                utile!(x + 1, y, z),
+                utile!(x, y + 1, z),
+                utile!(x + 1, y + 1, z),
+                utile!(x, y - 1, z),
+                utile!(x + 1, y - 1, z),
+            ],
+            TileEdgeInfo::Right => vec![
+                utile!(x - 1, y, z),
+                utile!(x, y + 1, z),
+                utile!(x - 1, y + 1, z),
+                utile!(x, y - 1, z),
+                utile!(x - 1, y - 1, z),
+            ],
+            TileEdgeInfo::Top => vec![
+                utile!(x + 1, y, z),
+                utile!(x, y + 1, z),
+                utile!(x + 1, y + 1, z),
+                utile!(x - 1, y, z),
+                utile!(x - 1, y + 1, z),
+            ],
+            TileEdgeInfo::Bottom => vec![
+                utile!(x + 1, y, z),
+                utile!(x, y - 1, z),
+                utile!(x + 1, y - 1, z),
+                utile!(x - 1, y, z),
+                utile!(x - 1, y - 1, z),
+            ],
+        }
+    }
+}
+
+static NEIGHBOR_IDXS: &[(i64, i64)] = &[
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    (0, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+];
+
+#[must_use]
+#[expect(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+pub fn neighbors_wrap_x(x: u32, y: u32, z: u8) -> Vec<Tile> {
+    if z == 0 {
         return Vec::new();
     }
-    let edge_info = tile_edge_info(x, y, z);
-    match edge_info {
-        TileEdgeInfo::Middle => neighbors_middle_tile(x, y, z),
-        TileEdgeInfo::TopLeft => vec![
-            utile!(x + 1, y, z),
-            utile!(x, y + 1, z),
-            utile!(x + 1, y + 1, z),
-        ],
-        TileEdgeInfo::TopRight => vec![
-            utile!(x - 1, y, z),
-            utile!(x, y + 1, z),
-            utile!(x - 1, y + 1, z),
-        ],
-        TileEdgeInfo::BottomLeft => vec![
-            utile!(x + 1, y, z),
-            utile!(x, y - 1, z),
-            utile!(x + 1, y - 1, z),
-        ],
-        TileEdgeInfo::BottomRight => vec![
-            utile!(x - 1, y, z),
-            utile!(x, y - 1, z),
-            utile!(x - 1, y - 1, z),
-        ],
-        TileEdgeInfo::Left => vec![
-            utile!(x + 1, y, z),
-            utile!(x, y + 1, z),
-            utile!(x + 1, y + 1, z),
-            utile!(x, y - 1, z),
-            utile!(x + 1, y - 1, z),
-        ],
-        TileEdgeInfo::Right => vec![
-            utile!(x - 1, y, z),
-            utile!(x, y + 1, z),
-            utile!(x - 1, y + 1, z),
-            utile!(x, y - 1, z),
-            utile!(x - 1, y - 1, z),
-        ],
-        TileEdgeInfo::Top => vec![
-            utile!(x + 1, y, z),
-            utile!(x, y + 1, z),
-            utile!(x + 1, y + 1, z),
-            utile!(x - 1, y, z),
-            utile!(x - 1, y + 1, z),
-        ],
-        TileEdgeInfo::Bottom => vec![
-            utile!(x + 1, y, z),
-            utile!(x, y - 1, z),
-            utile!(x + 1, y - 1, z),
-            utile!(x - 1, y, z),
-            utile!(x - 1, y - 1, z),
-        ],
+    if z == 1 {
+        return siblings(x, y, z);
     }
+
+    let max_xy = 1u32 << z; // 2^z
+    let max_xy_i = i64::from(max_xy);
+
+    NEIGHBOR_IDXS
+        .iter()
+        .filter_map(|&(dx, dy)| {
+            let nx_i = (i64::from(x) + dx).rem_euclid(max_xy_i);
+            let ny_i = i64::from(y) + dy;
+
+            if ny_i < 0 || ny_i >= max_xy_i {
+                return None; // off the top/bottom edge
+            }
+
+            Some(utile!(nx_i as u32, ny_i as u32, z))
+        })
+        .collect()
 }
 
 /// Return Tile struct from longitude, latitude, and zoom.

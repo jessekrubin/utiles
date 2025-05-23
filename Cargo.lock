@@ -2979,6 +2979,7 @@ dependencies = [
 name = "utiles-core"
 version = "0.7.4"
 dependencies = [
+ "ahash",
  "fast_hilbert",
  "serde",
  "serde_json",

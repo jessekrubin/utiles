@@ -10,7 +10,7 @@ use serde_json::{Map, Value};
 use crate::constants::EPSILON;
 use crate::errors::UtilesCoreError;
 use crate::errors::UtilesCoreResult;
-use crate::fns::{bounds, children, neighbors, parent, siblings, xy};
+use crate::fns::{bounds, children, parent, siblings, xy};
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
@@ -137,6 +137,19 @@ impl FromStr for Tile {
         } else {
             Err(Box::from(UtilesCoreError::TileParseError(s.to_string())))
         }
+    }
+}
+impl TileLike for &Tile {
+    fn x(&self) -> u32 {
+        self.x
+    }
+
+    fn y(&self) -> u32 {
+        self.y
+    }
+
+    fn z(&self) -> u8 {
+        self.z
     }
 }
 
@@ -458,12 +471,6 @@ impl Tile {
             y: self.y + 1,
             z: self.z,
         }
-    }
-
-    /// Return a vector with the 3-8 neighbors of the tile
-    #[must_use]
-    pub fn neighbors(&self) -> Vec<Self> {
-        neighbors(self.x, self.y, self.z)
     }
 
     /// Return direct children

@@ -2,7 +2,7 @@ use utiles_core::{Tile, TileLike};
 
 use crate::cli::args::EdgesArgs;
 use crate::cli::stdinterator_filter;
-use crate::edges::{find_edges, find_edges_wrap_x};
+use crate::edges::find_edges;
 use crate::errors::UtilesResult;
 
 pub(crate) async fn edges_main(args: EdgesArgs) -> UtilesResult<()> {
@@ -15,19 +15,10 @@ pub(crate) async fn edges_main(args: EdgesArgs) -> UtilesResult<()> {
         tiles.push(tile);
     }
 
-    if args.wrapx {
-        let titer = find_edges_wrap_x(&tiles)?;
-
-        for tile in titer {
-            let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
-            safe_println!("{}{}", rs, tile.json_arr());
-        }
-    } else {
-        let titer = find_edges(&tiles)?;
-        for tile in titer {
-            let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
-            safe_println!("{}{}", rs, tile.json_arr());
-        }
+    let titer = find_edges(&tiles, args.wrapx)?;
+    for tile in titer {
+        let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
+        safe_println!("{}{}", rs, tile.json_arr());
     }
     Ok(())
 }
