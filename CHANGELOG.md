@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.4 (unreleased)
+## 0.8.0 (unreleased)
 
 - all `allow` lints moved to `expect`
 - docs website
@@ -12,6 +12,8 @@
   - const functions
 - pyo3 v0.24.x
 - frozen py structs
+- Moved `edges` from `utiels` to `utiles-core`
+
 
 ---
 
