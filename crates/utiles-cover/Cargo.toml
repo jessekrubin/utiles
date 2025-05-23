@@ -1,0 +1,18 @@
+[package]
+name = "utiles-cover"
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+geo-types.workspace = true
+geojson.workspace = true
+tracing.workspace = true
+utiles-core = { version = "0.8.0", path = "../utiles-core", default-features = false, features = [] }
+
+[lints]
+workspace = true

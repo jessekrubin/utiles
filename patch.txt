@@ -1,0 +1,878 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 83ac291..79f1f55 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -2979,6 +2979,7 @@ dependencies = [
+ name = "utiles-core"
+ version = "0.7.4"
+ dependencies = [
++ "ahash",
+  "fast_hilbert",
+  "serde",
+  "serde_json",
+diff --git a/crates/utiles-core/Cargo.toml b/crates/utiles-core/Cargo.toml
+index a51271c..57e1512 100644
+--- a/crates/utiles-core/Cargo.toml
++++ b/crates/utiles-core/Cargo.toml
+@@ -17,10 +17,11 @@ fast_hilbert = { workspace = true, optional = true }
+ serde.workspace = true
+ serde_json.workspace = true
+ thiserror.workspace = true
++ahash = { workspace = true, optional = true }
+ 
+ [features]
+-default = ["pmtiles"]
+-all = ["pmtiles"]
++default = ["pmtiles", "ahash"]
++ahash = ["dep:ahash"]
+ pmtiles = ["dep:fast_hilbert"]
+ 
+ [lints]
+diff --git a/crates/utiles-core/src/asserts.rs b/crates/utiles-core/src/asserts.rs
+index 4f38589..379a0ad 100644
+--- a/crates/utiles-core/src/asserts.rs
++++ b/crates/utiles-core/src/asserts.rs
+@@ -15,7 +15,7 @@ where
+                     "Tiles have different zoom levels".to_string(),
+                 ))
+             }
+-            _ => zoom = z,
++            _ => zoom = Some(z),
+         }
+     }
+     zoom.ok_or(UtilesCoreError::AdHoc("No tiles provided".to_string()))
+diff --git a/crates/utiles-core/src/edges.rs b/crates/utiles-core/src/edges.rs
+index 7f820b0..ae9eeef 100644
+--- a/crates/utiles-core/src/edges.rs
++++ b/crates/utiles-core/src/edges.rs
+@@ -1,48 +1,77 @@
+-use crate::{zoom_max_xy, Tile, TileLike, TileZBox, UtilesCoreResult};
+ // use ahash::HashSet;
++use crate::asserts::assert_all_same_zoom;
++use crate::{Tile, TileLike, UtilesCoreResult};
+ #[cfg(feature = "ahash")]
+ use ahash::HashSet;
+ #[cfg(not(feature = "ahash"))]
+ use std::collections::HashSet;
+ 
+-static NEIGHBOR_IDXS: &[(i32, i32)] = &[
+-    (-1, -1),
+-    (-1, 0),
+-    (-1, 1),
+-    (0, -1),
+-    (0, 1),
+-    (1, -1),
+-    (1, 0),
+-    (1, 1),
+-];
+-
+-fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u32)> {
+-    NEIGHBOR_IDXS.iter().filter_map(move |&(dx, dy)| {
+-        let x = xy.0 as i32;
+-        let y = xy.1 as i32;
++// static NEIGHBOR_IDXS: &[(i32, i32)] = &[
++//     (-1, -1),
++//     (-1, 0),
++//     (-1, 1),
++//     (0, -1),
++//     (0, 1),
++//     (1, -1),
++//     (1, 0),
++//     (1, 1),
++// ];
+ 
+-        // Wrap the x-coordinate if it goes out of bounds
+-        let wrapped_x = (x + dx).rem_euclid(max_xy as i32) as u32;
++// fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u32)> {
++//     NEIGHBOR_IDXS.iter().filter_map(move |&(dx, dy)| {
++//         let x = xy.0 as i32;
++//         let y = xy.1 as i32;
++//
++//         // Wrap the x-coordinate if it goes out of bounds
++//         let wrapped_x = (x + dx).rem_euclid(max_xy as i32) as u32;
++//
++//         // Ensure the y-coordinate does not wrap and is within bounds
++//         let neighbor_y = y + dy;
++//         if neighbor_y >= 0 && (neighbor_y as u32) < max_xy {
++//             Some((wrapped_x, neighbor_y as u32))
++//         } else {
++//             None
++//         }
++//     })
++// }
+ 
+-        // Ensure the y-coordinate does not wrap and is within bounds
+-        let neighbor_y = y + dy;
+-        if neighbor_y >= 0 && (neighbor_y as u32) < max_xy {
+-            Some((wrapped_x, neighbor_y as u32))
+-        } else {
+-            None
+-        }
+-    })
+-}
++// pub fn find_edges_wrap_x(
++//     tiles: &[Tile],
++// ) -> UtilesCoreResult<impl Iterator<Item = Tile> + '_> {
++//     assert_all_same_zoom(tiles)?;
++//     let tile_positions: HashSet<(u32, u32)> =
++//         tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
++//
++//     let edge_it = tiles.iter().filter_map(move |tile| {
++//         let is_edge = tile
++//             .neighbors(true)
++//             .iter()
++//             .any(|neighbor| tile_positions.contains(&(neighbor.x(), neighbor.y())));
++//         if is_edge {
++//             Some(*tile)
++//         } else {
++//             None
++//         }
++//     });
++//     Ok(edge_it)
++// }
+ 
+-pub fn find_edges_wrap_x(
++/// Finds edge tiles in a given set of tiles. optionally wraps the x-coordinate
++///
++/// # Errors
++///
++/// Errors if the tiles are not all the same zoom level
++pub fn find_edges(
+     tiles: &[Tile],
++    wrapx: bool,
+ ) -> UtilesCoreResult<impl Iterator<Item = Tile> + '_> {
++    assert_all_same_zoom(tiles)?;
+     let tile_positions: HashSet<(u32, u32)> =
+         tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
+ 
+     let edge_it = tiles.iter().filter_map(move |tile| {
+         let is_edge = tile
+-            .neighbors()
++            .neighbors(wrapx)
+             .iter()
+             .any(|neighbor| tile_positions.contains(&(neighbor.x(), neighbor.y())));
+         if is_edge {
+@@ -54,37 +83,6 @@ pub fn find_edges_wrap_x(
+     Ok(edge_it)
+ }
+ 
+-pub fn find_edges(tiles: &[Tile]) -> UtilesCoreResult<impl Iterator<Item = Tile> + '_> {
+-    TileZBox::from_tiles(tiles)?;
+-    let tile_positions: HashSet<(u32, u32)> =
+-        tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
+-
+-    let edge_it = tiles.iter().filter_map(move |tile| {
+-        let x = tile.x() as i32;
+-        let y = tile.y() as i32;
+-
+-        let is_edge = NEIGHBOR_IDXS.iter().any(|&(dx, dy)| {
+-            let neighbor_x = x + dx;
+-            let neighbor_y = y + dy;
+-
+-            // Handle negative coordinates or positions outside the tile_positions
+-            if neighbor_x < 0 || neighbor_y < 0 {
+-                true
+-            } else {
+-                let neighbor_pos = (neighbor_x as u32, neighbor_y as u32);
+-                !tile_positions.contains(&neighbor_pos)
+-            }
+-        });
+-
+-        if is_edge {
+-            Some(*tile)
+-        } else {
+-            None
+-        }
+-    });
+-    Ok(edge_it)
+-}
+-
+ // ============================================================================
+ // previous implementation that uses ndarray
+ // ============================================================================
+diff --git a/crates/utiles-core/src/fns.rs b/crates/utiles-core/src/fns.rs
+index c33fecb..5b98262 100644
+--- a/crates/utiles-core/src/fns.rs
++++ b/crates/utiles-core/src/fns.rs
+@@ -569,59 +569,110 @@ fn neighbors_middle_tile(x: u32, y: u32, z: u8) -> Vec<Tile> {
+ #[must_use]
+ pub fn neighbors(x: u32, y: u32, z: u8) -> Vec<Tile> {
+     if z == 0 {
+-        return Vec::new();
++        Vec::new()
++    } else if z == 1 {
++        siblings(x, y, z)
++    } else {
++        let edge_info = tile_edge_info(x, y, z);
++        match edge_info {
++            TileEdgeInfo::Middle => neighbors_middle_tile(x, y, z),
++            TileEdgeInfo::TopLeft => vec![
++                utile!(x + 1, y, z),
++                utile!(x, y + 1, z),
++                utile!(x + 1, y + 1, z),
++            ],
++            TileEdgeInfo::TopRight => vec![
++                utile!(x - 1, y, z),
++                utile!(x, y + 1, z),
++                utile!(x - 1, y + 1, z),
++            ],
++            TileEdgeInfo::BottomLeft => vec![
++                utile!(x + 1, y, z),
++                utile!(x, y - 1, z),
++                utile!(x + 1, y - 1, z),
++            ],
++            TileEdgeInfo::BottomRight => vec![
++                utile!(x - 1, y, z),
++                utile!(x, y - 1, z),
++                utile!(x - 1, y - 1, z),
++            ],
++            TileEdgeInfo::Left => vec![
++                utile!(x + 1, y, z),
++                utile!(x, y + 1, z),
++                utile!(x + 1, y + 1, z),
++                utile!(x, y - 1, z),
++                utile!(x + 1, y - 1, z),
++            ],
++            TileEdgeInfo::Right => vec![
++                utile!(x - 1, y, z),
++                utile!(x, y + 1, z),
++                utile!(x - 1, y + 1, z),
++                utile!(x, y - 1, z),
++                utile!(x - 1, y - 1, z),
++            ],
++            TileEdgeInfo::Top => vec![
++                utile!(x + 1, y, z),
++                utile!(x, y + 1, z),
++                utile!(x + 1, y + 1, z),
++                utile!(x - 1, y, z),
++                utile!(x - 1, y + 1, z),
++            ],
++            TileEdgeInfo::Bottom => vec![
++                utile!(x + 1, y, z),
++                utile!(x, y - 1, z),
++                utile!(x + 1, y - 1, z),
++                utile!(x - 1, y, z),
++                utile!(x - 1, y - 1, z),
++            ],
++        }
+     }
+-    let edge_info = tile_edge_info(x, y, z);
+-    match edge_info {
+-        TileEdgeInfo::Middle => neighbors_middle_tile(x, y, z),
+-        TileEdgeInfo::TopLeft => vec![
+-            utile!(x + 1, y, z),
+-            utile!(x, y + 1, z),
+-            utile!(x + 1, y + 1, z),
+-        ],
+-        TileEdgeInfo::TopRight => vec![
+-            utile!(x - 1, y, z),
+-            utile!(x, y + 1, z),
+-            utile!(x - 1, y + 1, z),
+-        ],
+-        TileEdgeInfo::BottomLeft => vec![
+-            utile!(x + 1, y, z),
+-            utile!(x, y - 1, z),
+-            utile!(x + 1, y - 1, z),
+-        ],
+-        TileEdgeInfo::BottomRight => vec![
+-            utile!(x - 1, y, z),
+-            utile!(x, y - 1, z),
+-            utile!(x - 1, y - 1, z),
+-        ],
+-        TileEdgeInfo::Left => vec![
+-            utile!(x + 1, y, z),
+-            utile!(x, y + 1, z),
+-            utile!(x + 1, y + 1, z),
+-            utile!(x, y - 1, z),
+-            utile!(x + 1, y - 1, z),
+-        ],
+-        TileEdgeInfo::Right => vec![
+-            utile!(x - 1, y, z),
+-            utile!(x, y + 1, z),
+-            utile!(x - 1, y + 1, z),
+-            utile!(x, y - 1, z),
+-            utile!(x - 1, y - 1, z),
+-        ],
+-        TileEdgeInfo::Top => vec![
+-            utile!(x + 1, y, z),
+-            utile!(x, y + 1, z),
+-            utile!(x + 1, y + 1, z),
+-            utile!(x - 1, y, z),
+-            utile!(x - 1, y + 1, z),
+-        ],
+-        TileEdgeInfo::Bottom => vec![
+-            utile!(x + 1, y, z),
+-            utile!(x, y - 1, z),
+-            utile!(x + 1, y - 1, z),
+-            utile!(x - 1, y, z),
+-            utile!(x - 1, y - 1, z),
+-        ],
++}
++
++static NEIGHBOR_IDXS: &[(i64, i64)] = &[
++    (-1, -1),
++    (-1, 0),
++    (-1, 1),
++    (0, -1),
++    (0, 1),
++    (1, -1),
++    (1, 0),
++    (1, 1),
++];
++
++#[must_use]
++#[expect(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
++pub fn neighbors_wrap_x(x: u32, y: u32, z: u8) -> Vec<Tile> {
++    if z == 0 {
++        Vec::new()
++    } else if z == 1 {
++        siblings(x, y, z)
++    } else {
++        let max_xy = 2u32.pow(u32::from(z));
++        NEIGHBOR_IDXS
++            .iter()
++            .filter_map(move |&(dx, dy)| {
++                let xi64 = i64::from(x);
++                let yi64 = i64::from(y);
++                let max_xy = i64::from(max_xy);
++
++                // Wrap the x-coordinate if it goes out of bounds
++                let wrapped_x = ((xi64 + dx) as u32).rem_euclid(max_xy as u32);
++
++                // Ensure the y-coordinate does not wrap and is within bounds
++                let neighbor_y = yi64 + dy;
++
++                if neighbor_y >= 0 && neighbor_y < max_xy {
++                    // Convert wrapped_x and neighbor_y to u32
++                    let wrapped_x = wrapped_x as u32;
++                    let neighbor_y = neighbor_y as u32;
++
++                    // Return the wrapped x and y coordinates
++                    Some(utile!(wrapped_x, neighbor_y, z))
++                } else {
++                    None
++                }
++            })
++            .collect()
+     }
+ }
+ 
+diff --git a/crates/utiles-core/src/lib.rs b/crates/utiles-core/src/lib.rs
+index 45f8972..a956e80 100644
+--- a/crates/utiles-core/src/lib.rs
++++ b/crates/utiles-core/src/lib.rs
+@@ -47,6 +47,8 @@ pub mod geostats;
+ pub mod lnglat;
+ pub mod parsing;
+ 
++mod asserts;
++mod edges;
+ mod macros;
+ mod merge;
+ mod parent;
+@@ -71,6 +73,8 @@ mod traits;
+ mod web_geo_bounds;
+ pub mod zoom;
+ 
++pub use edges::find_edges;
++
+ // pub use macros::{point2d, utile, utile_yup};
+ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+ //
+diff --git a/crates/utiles-core/src/tile.rs b/crates/utiles-core/src/tile.rs
+index 07a70bf..490d298 100644
+--- a/crates/utiles-core/src/tile.rs
++++ b/crates/utiles-core/src/tile.rs
+@@ -139,6 +139,19 @@ impl FromStr for Tile {
+         }
+     }
+ }
++impl TileLike for &Tile {
++    fn x(&self) -> u32 {
++        self.x
++    }
++
++    fn y(&self) -> u32 {
++        self.y
++    }
++
++    fn z(&self) -> u8 {
++        self.z
++    }
++}
+ 
+ impl TileLike for Tile {
+     fn x(&self) -> u32 {
+@@ -460,12 +473,6 @@ impl Tile {
+         }
+     }
+ 
+-    /// Return a vector with the 3-8 neighbors of the tile
+-    #[must_use]
+-    pub fn neighbors(&self) -> Vec<Self> {
+-        neighbors(self.x, self.y, self.z)
+-    }
+-
+     /// Return direct children
+     #[must_use]
+     pub fn children1(&self) -> [Tile; 4] {
+diff --git a/crates/utiles-core/src/tile_like.rs b/crates/utiles-core/src/tile_like.rs
+index fc1bdaf..b535f45 100644
+--- a/crates/utiles-core/src/tile_like.rs
++++ b/crates/utiles-core/src/tile_like.rs
+@@ -1,5 +1,7 @@
+ use crate::bbox::WebBBox;
+-use crate::{flipy, xyz2rmid, BBox, LngLat, Tile, TileZBox};
++use crate::{
++    flipy, neighbors, neighbors_wrap_x, xyz2rmid, BBox, LngLat, Tile, TileZBox,
++};
+ 
+ #[cfg(feature = "pmtiles")]
+ use crate::pmtiles;
+@@ -226,4 +228,14 @@ pub trait TileLike {
+         }
+         zbox
+     }
++
++    /// Return neighbor tiles for tile-like optionally wrapping x
++    #[must_use]
++    fn neighbors(&self, wrapx: bool) -> Vec<Tile> {
++        if wrapx {
++            neighbors_wrap_x(self.x(), self.y(), self.z())
++        } else {
++            neighbors(self.x(), self.y(), self.z())
++        }
++    }
+ }
+diff --git a/crates/utiles-core/tests/test_edges.rs b/crates/utiles-core/tests/test_edges.rs
+index fe0fbda..e3439d8 100644
+--- a/crates/utiles-core/tests/test_edges.rs
++++ b/crates/utiles-core/tests/test_edges.rs
+@@ -1,8 +1,8 @@
+ #![expect(clippy::too_many_lines)]
+ 
+ use std::collections::HashSet;
++use utiles_core::find_edges;
+ use utiles_core::{utile, Tile};
+-use utiles_core::{find_edges};
+ fn test_data_input() -> Vec<Tile> {
+     vec![
+         utile!(4188, 3104, 13),
+diff --git a/crates/utiles/src/cli/commands/edges.rs b/crates/utiles/src/cli/commands/edges.rs
+index 765f110..d02f071 100644
+--- a/crates/utiles/src/cli/commands/edges.rs
++++ b/crates/utiles/src/cli/commands/edges.rs
+@@ -2,7 +2,7 @@ use utiles_core::{Tile, TileLike};
+ 
+ use crate::cli::args::EdgesArgs;
+ use crate::cli::stdinterator_filter;
+-use crate::edges::{find_edges, find_edges_wrap_x};
++use crate::edges::find_edges;
+ use crate::errors::UtilesResult;
+ 
+ pub(crate) async fn edges_main(args: EdgesArgs) -> UtilesResult<()> {
+@@ -15,19 +15,10 @@ pub(crate) async fn edges_main(args: EdgesArgs) -> UtilesResult<()> {
+         tiles.push(tile);
+     }
+ 
+-    if args.wrapx {
+-        let titer = find_edges_wrap_x(&tiles)?;
+-
+-        for tile in titer {
+-            let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
+-            safe_println!("{}{}", rs, tile.json_arr());
+-        }
+-    } else {
+-        let titer = find_edges(&tiles)?;
+-        for tile in titer {
+-            let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
+-            safe_println!("{}{}", rs, tile.json_arr());
+-        }
++    let titer = find_edges(&tiles, args.wrapx)?;
++    for tile in titer {
++        let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
++        safe_println!("{}{}", rs, tile.json_arr());
+     }
+     Ok(())
+ }
+diff --git a/crates/utiles/src/cli/commands/tile_stream_cmds.rs b/crates/utiles/src/cli/commands/tile_stream_cmds.rs
+index 9b0b3e2..76956f6 100644
+--- a/crates/utiles/src/cli/commands/tile_stream_cmds.rs
++++ b/crates/utiles/src/cli/commands/tile_stream_cmds.rs
+@@ -26,7 +26,8 @@ pub(crate) fn neighbors_main(args: TileFmtArgs) -> UtilesResult<()> {
+     for line_res in lines {
+         let line = line_res?;
+         let tile = Tile::from_json(&line)?;
+-        let neighbors = tile.neighbors();
++        // TODO: add --wrapx flag?
++        let neighbors = tile.neighbors(false);
+         for neighbor in neighbors {
+             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
+             println!("{}{}", rs, neighbor.json_arr());
+diff --git a/crates/utiles/src/cover.rs b/crates/utiles/src/cover.rs
+index 19cc52a..e0cce57 100644
+--- a/crates/utiles/src/cover.rs
++++ b/crates/utiles/src/cover.rs
+@@ -169,8 +169,8 @@ fn polygon_cover(tiles_set: &mut HashSet<Tile>, geom: &[Vec<(f64, f64)>], zoom:
+     }
+ 
+     // Now process each scanline
+-    for (&y, xs) in &scanline_intersections {
+-        let mut xs = xs.clone();
++    for (y, mut xs) in scanline_intersections.into_iter() {
++        // let mut xs = xs.clone();
+         xs.sort_unstable();
+ 
+         let mut i = 0;
+@@ -178,13 +178,15 @@ fn polygon_cover(tiles_set: &mut HashSet<Tile>, geom: &[Vec<(f64, f64)>], zoom:
+             let x_start = xs[i];
+             let x_end = xs[i + 1];
+ 
+-            for x in x_start..x_end {
+-                let tile = Tile::new(x, y, zoom);
+-                tiles_set.insert(tile);
+-                // if !tiles_set.contains(&tile) {
+-                //     tiles_vec.push(tile);
+-                // }
+-            }
++            tiles_set.extend((x_start..=x_end).map(|x| Tile::new(x, y, zoom)));
++
++            // for x in x_start..x_end {
++            //     let tile = Tile::new(x, y, zoom);
++            //     tiles_set.insert(tile);
++            // if !tiles_set.contains(&tile) {
++            //     tiles_vec.push(tile);
++            // }
++            // }
+ 
+             i += 2;
+         }
+diff --git a/crates/utiles/src/edges.rs b/crates/utiles/src/edges.rs
+index 755ead7..19de5e3 100644
+--- a/crates/utiles/src/edges.rs
++++ b/crates/utiles/src/edges.rs
+@@ -1,251 +1 @@
+-use crate::UtilesResult;
+-// use ahash::HashSet;
+-#[cfg(feature = "ahash")]
+-use ahash::HashSet;
+-#[cfg(not(feature = "ahash"))]
+-use std::collections::HashSet;
+-
+-use utiles_core::{zoom_max_xy, Tile, TileLike, TileZBox};
+-
+-static NEIGHBOR_IDXS: &[(i32, i32)] = &[
+-    (-1, -1),
+-    (-1, 0),
+-    (-1, 1),
+-    (0, -1),
+-    (0, 1),
+-    (1, -1),
+-    (1, 0),
+-    (1, 1),
+-];
+-
+-fn neighbors_wrap_x(xy: (u32, u32), max_xy: u32) -> impl Iterator<Item = (u32, u32)> {
+-    NEIGHBOR_IDXS.iter().filter_map(move |&(dx, dy)| {
+-        let x = xy.0 as i32;
+-        let y = xy.1 as i32;
+-
+-        // Wrap the x-coordinate if it goes out of bounds
+-        let wrapped_x = (x + dx).rem_euclid(max_xy as i32) as u32;
+-
+-        // Ensure the y-coordinate does not wrap and is within bounds
+-        let neighbor_y = y + dy;
+-        if neighbor_y >= 0 && (neighbor_y as u32) < max_xy {
+-            Some((wrapped_x, neighbor_y as u32))
+-        } else {
+-            None
+-        }
+-    })
+-}
+-
+-pub fn find_edges_wrap_x(
+-    tiles: &[Tile],
+-) -> UtilesResult<impl Iterator<Item = Tile> + '_> {
+-    let zbox = TileZBox::from_tiles(tiles)?;
+-    let max_xy = zoom_max_xy(zbox.zoom);
+-    let tile_positions: HashSet<(u32, u32)> =
+-        tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
+-
+-    let edge_it = tiles.iter().filter_map(move |tile| {
+-        let x = tile.x();
+-        let y = tile.y();
+-
+-        let is_edge =
+-            neighbors_wrap_x((x, y), max_xy).any(|(neighbor_x, neighbor_y)| {
+-                // If neighbor is out of bounds or not in tile_positions, it's considered an edge
+-                !tile_positions.contains(&(neighbor_x, neighbor_y))
+-            });
+-
+-        if is_edge {
+-            Some(*tile)
+-        } else {
+-            None
+-        }
+-    });
+-    Ok(edge_it)
+-}
+-
+-pub fn find_edges(tiles: &[Tile]) -> UtilesResult<impl Iterator<Item = Tile> + '_> {
+-    TileZBox::from_tiles(tiles)?;
+-    let tile_positions: HashSet<(u32, u32)> =
+-        tiles.iter().map(|tile| (tile.x(), tile.y())).collect();
+-
+-    let edge_it = tiles.iter().filter_map(move |tile| {
+-        let x = tile.x() as i32;
+-        let y = tile.y() as i32;
+-
+-        let is_edge = NEIGHBOR_IDXS.iter().any(|&(dx, dy)| {
+-            let neighbor_x = x + dx;
+-            let neighbor_y = y + dy;
+-
+-            // Handle negative coordinates or positions outside the tile_positions
+-            if neighbor_x < 0 || neighbor_y < 0 {
+-                true
+-            } else {
+-                let neighbor_pos = (neighbor_x as u32, neighbor_y as u32);
+-                !tile_positions.contains(&neighbor_pos)
+-            }
+-        });
+-
+-        if is_edge {
+-            Some(*tile)
+-        } else {
+-            None
+-        }
+-    });
+-    Ok(edge_it)
+-}
+-
+-// ============================================================================
+-// previous implementation that uses ndarray
+-// ============================================================================
+-// fn burn_tiles(tiles: &[Tile], zbox: TileZBox) -> Array2<bool> {
+-//     let xmin = zbox.min.x as usize;
+-//     let ymin = zbox.min.y as usize;
+-//     // add 3 to pad as dydx ranges are inclusive
+-//     let dx = zbox.dx() as usize + 3;
+-//     let dy = zbox.dy() as usize + 3;
+-//     let mut burn = Array2::<bool>::default((dx, dy));
+-//     for tile in tiles {
+-//         let x_us = tile.x() as usize - xmin + 1; // +1 for padding
+-//         let y_us = tile.y() as usize - ymin + 1; // +1 for padding
+-//         burn[(x_us, y_us)] = true;
+-//     }
+-//     burn
+-// }
+-
+-// pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
+-//     let zbox = TileZBox::from_tiles(tiles)?;
+-//     // Create the burn array with padding
+-//     let burn = burn_tiles(tiles, zbox);
+-//     let uxmin = (zbox.minx() - 1) as usize; // Adjusted for padding
+-//     let uymin = (zbox.miny() - 1) as usize; // Adjusted for padding
+-//
+-//     let mut edge_tiles = Vec::new();
+-//     for ((i, j), &is_burn) in burn.indexed_iter() {
+-//         if is_burn {
+-//             for &(dx, dy) in IDXS.iter() {
+-//                 let ni = (i as isize + dx) as usize;
+-//                 let nj = (j as isize + dy) as usize;
+-//
+-//                 // Since we have padding, we don't need to check bounds
+-//                 if !burn[(ni, nj)] {
+-//                     // This is an edge tile
+-//                     let x = (i + uxmin) as u32;
+-//                     let y = (j + uymin) as u32;
+-//                     edge_tiles.push(Tile::new(x, y, zbox.zoom));
+-//                     break;
+-//                 }
+-//             }
+-//         }
+-//     }
+-//
+-//     Ok(edge_tiles)
+-// }
+-
+-// ============================================================================
+-// previous slower implementation
+-// ============================================================================
+-
+-// use crate::{UtilesError, UtilesResult};
+-// use ndarray::{stack, Array2, Axis};
+-// use utiles_core::{Tile, TileLike, TileZBox};
+-//
+-// static IDXS: &[(isize, isize)] = &[
+-//     (-1, -1),
+-//     (-1, 0),
+-//     (-1, 1),
+-//     (0, -1),
+-//     (0, 1),
+-//     (1, -1),
+-//     (1, 0),
+-//     (1, 1),
+-// ];
+-//
+-// fn burn_tiles(tiles: &[Tile], zbox: TileZBox) -> Array2<bool> {
+-//     let xmin = zbox.min.x as usize;
+-//     let ymin = zbox.min.y as usize;
+-//     let dx = zbox.dx() as usize;
+-//     let dy = zbox.dy() as usize;
+-//     let mut burn = Array2::<bool>::default((dx + 3, dy + 3));
+-//     for tile in tiles {
+-//         let x_us = tile.x() as usize;
+-//         let y_us = tile.y() as usize;
+-//         burn[(x_us - xmin + 1, y_us - ymin + 1)] = true;
+-//     }
+-//     burn
+-// }
+-//
+-// fn roll_2d(arr: &Array2<bool>, x_shift: isize, y_shift: isize) -> Array2<bool> {
+-//     let (rows, cols) = arr.dim();
+-//     let mut rolled = Array2::default((rows, cols));
+-//
+-//     // rolled.indexed_iter().par_map(
+-//     // )
+-//     for i in 0..rows {
+-//         for j in 0..cols {
+-//             let new_i = ((i as isize + x_shift).rem_euclid(rows as isize)) as usize;
+-//             let new_j = ((j as isize + y_shift).rem_euclid(cols as isize)) as usize;
+-//             rolled[(new_i, new_j)] = arr[(i, j)];
+-//         }
+-//     }
+-//     rolled
+-// }
+-//
+-// #[allow(clippy::similar_names)]
+-// pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
+-//     let zbox = TileZBox::from_tiles(tiles)?;
+-//     // make 2D burn array
+-//     let burn = burn_tiles(tiles, zbox);
+-//
+-//     // rolled arrays w/o adding an extra axis
+-//     let stacks: Vec<Array2<bool>> = IDXS
+-//         .iter()
+-//         .map(|(dx, dy)| roll_2d(&burn, *dx, *dy))
+-//         .collect();
+-//     // stack along axis2, which should be 3d arr
+-//     let stacked = stack(
+-//         Axis(2),
+-//         &stacks.iter().map(|a| a.view()).collect::<Vec<_>>(),
+-//     )
+-//     .map_err(UtilesError::NdarrayShapeError)?;
+-//
+-//     // edges
+-//     let min_array =
+-//         stacked.map_axis(Axis(2), |view| *view.iter().min().unwrap_or(&false));
+-//     // xor the 2 arrs
+-//     let xys_edge = &burn & !&min_array;
+-//
+-//     // collect the edge tiles
+-//     let uxmin = (zbox.minx() - 1) as usize;
+-//     let uymin = (zbox.miny() - 1) as usize;
+-//
+-//     // v1 of weird itering
+-//     // ==========================================
+-//     // let tiles = xys_edge.indexed_iter().map(
+-//     //     |((i, j), is_edge)| {
+-//     //         if *is_edge{
+-//     //             let tile = Tile::new(
+-//     //                 (i + uxmin) as u32,
+-//     //                 (j + uymin) as u32,
+-//     //                 zoom,
+-//     //             );
+-//     //             Some(
+-//     //              tile
+-//     //             )
+-//     //         }else{
+-//     //             None
+-//     //         }
+-//     //
+-//     //     }
+-//     //
+-//     // ).flatten().collect::<Vec<Tile>>();
+-//     // ==========================================
+-//     // more sane version:
+-//
+-//     let tiles = xys_edge
+-//         .indexed_iter()
+-//         .filter(|(_, &is_edge)| is_edge)
+-//         .map(|((i, j), _)| Tile::new((i + uxmin) as u32, (j + uymin) as u32, zbox.zoom))
+-//         .collect::<Vec<Tile>>();
+-//
+-//     Ok(tiles)
+-// }
++pub use utiles_core::find_edges;
+diff --git a/crates/utiles/src/tests/edges.rs b/crates/utiles/src/tests/edges.rs
+index 003a59e..9527987 100644
+--- a/crates/utiles/src/tests/edges.rs
++++ b/crates/utiles/src/tests/edges.rs
+@@ -1,9 +1,8 @@
+ #![expect(clippy::too_many_lines)]
+ 
+-use crate::edges::find_edges;
+ use std::collections::HashSet;
++use utiles_core::find_edges;
+ use utiles_core::{utile, Tile};
+-
+ fn test_data_input() -> Vec<Tile> {
+     vec![
+         utile!(4188, 3104, 13),
+@@ -203,7 +202,7 @@ fn test_edges() {
+     let tdata = test_data_input();
+ 
+     let mut edges = vec![];
+-    for t in find_edges(&tdata).unwrap() {
++    for t in find_edges(&tdata, false).unwrap() {
+         edges.push(t);
+     }
+     // let edges = find_edges_vec(&tdata).unwrap();
+diff --git a/utiles-pyo3/src/pyutiles/pyfns.rs b/utiles-pyo3/src/pyutiles/pyfns.rs
+index 486225d..9f575d3 100644
+--- a/utiles-pyo3/src/pyutiles/pyfns.rs
++++ b/utiles-pyo3/src/pyutiles/pyfns.rs
+@@ -266,8 +266,12 @@ pub fn children(
+ }
+ 
+ #[pyfunction]
+-#[pyo3(signature = (* args, zoom = None))]
+-pub fn neighbors(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
++#[pyo3(signature = (* args, zoom = None, wrapx = None))]
++pub fn neighbors(
++    args: &Bound<'_, PyTuple>,
++    zoom: Option<u8>,
++    wrapx: Option<bool>,
++) -> PyResult<Vec<PyTile>> {
+     let tile = pyparsing::parse_tile_arg(args)?;
+     let zoom = zoom.unwrap_or(tile.xyz.z);
+     if zoom < tile.xyz.z {
+@@ -276,7 +280,7 @@ pub fn neighbors(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<Py
+             tile.xyz.z
+         )))?;
+     }
+-    Ok(tile.neighbors())
++    Ok(tile.neighbors(wrapx))
+ }
+ 
+ #[pyfunction]
+diff --git a/utiles-pyo3/src/pyutiles/pytile.rs b/utiles-pyo3/src/pyutiles/pytile.rs
+index 2d11f60..04c36fa 100644
+--- a/utiles-pyo3/src/pyutiles/pytile.rs
++++ b/utiles-pyo3/src/pyutiles/pytile.rs
+@@ -412,8 +412,13 @@ impl PyTile {
+         self.xyz.siblings().into_iter().map(Self::from).collect()
+     }
+ 
+-    pub fn neighbors(&self) -> Vec<Self> {
+-        self.xyz.neighbors().into_iter().map(Self::from).collect()
++    #[pyo3(signature = (wrapx = None))]
++    pub fn neighbors(&self, wrapx: Option<bool>) -> Vec<Self> {
++        self.xyz
++            .neighbors(wrapx.unwrap_or(false))
++            .into_iter()
++            .map(Self::from)
++            .collect()
+     }
+ 
+     pub fn tuple(&self) -> (u32, u32, u8) {
