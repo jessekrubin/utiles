@@ -26,7 +26,8 @@ pub(crate) fn neighbors_main(args: TileFmtArgs) -> UtilesResult<()> {
     for line_res in lines {
         let line = line_res?;
         let tile = Tile::from_json(&line)?;
-        let neighbors = tile.neighbors();
+        // TODO: add --wrapx flag?
+        let neighbors = tile.neighbors(false);
         for neighbor in neighbors {
             let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
             println!("{}{}", rs, neighbor.json_arr());

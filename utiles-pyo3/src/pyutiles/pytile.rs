@@ -412,8 +412,13 @@ impl PyTile {
         self.xyz.siblings().into_iter().map(Self::from).collect()
     }
 
-    pub fn neighbors(&self) -> Vec<Self> {
-        self.xyz.neighbors().into_iter().map(Self::from).collect()
+    #[pyo3(signature = (wrapx = None))]
+    pub fn neighbors(&self, wrapx: Option<bool>) -> Vec<Self> {
+        self.xyz
+            .neighbors(wrapx.unwrap_or(false))
+            .into_iter()
+            .map(Self::from)
+            .collect()
     }
 
     pub fn tuple(&self) -> (u32, u32, u8) {

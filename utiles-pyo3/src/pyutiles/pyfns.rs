@@ -266,8 +266,12 @@ pub fn children(
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args, zoom = None))]
-pub fn neighbors(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<PyTile>> {
+#[pyo3(signature = (* args, zoom = None, wrapx = None))]
+pub fn neighbors(
+    args: &Bound<'_, PyTuple>,
+    zoom: Option<u8>,
+    wrapx: Option<bool>,
+) -> PyResult<Vec<PyTile>> {
     let tile = pyparsing::parse_tile_arg(args)?;
     let zoom = zoom.unwrap_or(tile.xyz.z);
     if zoom < tile.xyz.z {
@@ -276,7 +280,7 @@ pub fn neighbors(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Vec<Py
             tile.xyz.z
         )))?;
     }
-    Ok(tile.neighbors())
+    Ok(tile.neighbors(wrapx))
 }
 
 #[pyfunction]

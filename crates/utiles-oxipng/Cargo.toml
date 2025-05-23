@@ -19,7 +19,7 @@ size.workspace = true
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true
 tracing.workspace = true
-utiles = { version = "0.7.3", path = "../utiles", features = [
+utiles = { path = "../utiles", features = [
     "internal",
     "lager",
 ], default-features = false }

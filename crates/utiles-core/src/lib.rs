@@ -36,6 +36,7 @@ pub use tile_zbox::TileZBox;
 pub use traits::{Coord2dLike, IsOk, LngLatLike, TileChildren1, TileParent};
 pub use web_geo_bounds::web_geo_bounds_union;
 pub use zoom::*;
+
 pub mod bbox;
 pub mod constants;
 
@@ -47,6 +48,8 @@ pub mod geostats;
 pub mod lnglat;
 pub mod parsing;
 
+mod asserts;
+mod edges;
 mod macros;
 mod merge;
 mod parent;
@@ -54,7 +57,7 @@ mod parent;
 pub mod pmtiles;
 pub mod point;
 pub mod projection;
-pub mod quadkey;
+mod quadkey;
 pub mod sibling_relationship;
 mod tests;
 mod textiles;
@@ -71,43 +74,8 @@ mod traits;
 mod web_geo_bounds;
 pub mod zoom;
 
-// pub use macros::{point2d, utile, utile_yup};
+pub use edges::find_edges;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
-//
-// /// Tile macro to create a new tile.
-// ///  - do you need this? probably not
-// ///  - Did I write to figure out how to write a macro? yes
-// #[macro_export]
-// macro_rules! utile {
-//     ($x:expr, $y:expr, $z:expr) => {
-//         Tile::new($x, $y, $z)
-//     };
-// }
-//
-// #[macro_export]
-// macro_rules! utile_yup {
-//     ($x:expr, $y:expr, $z:expr) => {
-//         Tile::new($x, flipy($y, $z), $z)
-//     };
-// }
-//
-// /// point2d macro to create a new point.
-// /// Replacement for coord! macro from geo-types
-// ///
-// /// # Examples
-// ///
-// /// ```
-// /// use utiles_core::{point2d, Point2d};
-// /// let p = point2d!{ x: 1.0, y: 2.0 };
-// /// assert_eq!(p.x(), 1.0);
-// /// assert_eq!(p.y(), 2.0);
-// /// ```
-// #[macro_export]
-// macro_rules! point2d {
-//     { x: $x:expr, y: $y:expr } => {
-//         Point2d::new($x, $y)
-//     };
-// }
 
 pub mod prelude {
     pub use crate::flipy;

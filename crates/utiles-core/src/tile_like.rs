@@ -1,5 +1,7 @@
 use crate::bbox::WebBBox;
-use crate::{flipy, xyz2rmid, BBox, LngLat, Tile, TileZBox};
+use crate::{
+    flipy, neighbors, neighbors_wrap_x, xyz2rmid, BBox, LngLat, Tile, TileZBox,
+};
 
 #[cfg(feature = "pmtiles")]
 use crate::pmtiles;
@@ -225,5 +227,15 @@ pub trait TileLike {
             zbox = zbox.zoom_in();
         }
         zbox
+    }
+
+    /// Return neighbor tiles for tile-like optionally wrapping x
+    #[must_use]
+    fn neighbors(&self, wrapx: bool) -> Vec<Tile> {
+        if wrapx {
+            neighbors_wrap_x(self.x(), self.y(), self.z())
+        } else {
+            neighbors(self.x(), self.y(), self.z())
+        }
     }
 }

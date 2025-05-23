@@ -1,8 +1,26 @@
 #![expect(clippy::too_many_lines)]
+#![expect(clippy::unwrap_used)]
 
 use std::collections::HashSet;
 use utiles_core::find_edges;
 use utiles_core::{utile, Tile};
+
+#[test]
+fn test_edges() {
+    let tdata = test_data_input();
+
+    let mut edges = vec![];
+    for t in find_edges(&tdata, false).unwrap() {
+        edges.push(t);
+    }
+    // let edges = find_edges_vec(&tdata).unwrap();
+    let expected = test_expected();
+    let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
+    let edges_set = edges.into_iter().collect::<HashSet<Tile>>();
+
+    assert_eq!(expected_set, edges_set);
+}
+
 fn test_data_input() -> Vec<Tile> {
     vec![
         utile!(4188, 3104, 13),
@@ -196,19 +214,4 @@ fn test_expected() -> Vec<Tile> {
         utile!(4192, 3099, 13),
         utile!(4192, 3101, 13),
     ]
-}
-#[test]
-fn test_edges() {
-    let tdata = test_data_input();
-
-    let mut edges = vec![];
-    for t in find_edges(&tdata, false).unwrap() {
-        edges.push(t);
-    }
-    // let edges = find_edges_vec(&tdata).unwrap();
-    let expected = test_expected();
-    let expected_set = expected.into_iter().collect::<HashSet<Tile>>();
-    let edges_set = edges.into_iter().collect::<HashSet<Tile>>();
-
-    assert_eq!(expected_set, edges_set);
 }
