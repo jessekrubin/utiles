@@ -36,6 +36,7 @@ pub use tile_zbox::TileZBox;
 pub use traits::{Coord2dLike, IsOk, LngLatLike, TileChildren1, TileParent};
 pub use web_geo_bounds::web_geo_bounds_union;
 pub use zoom::*;
+
 pub mod bbox;
 pub mod constants;
 
@@ -56,7 +57,7 @@ mod parent;
 pub mod pmtiles;
 pub mod point;
 pub mod projection;
-pub mod quadkey;
+mod quadkey;
 pub mod sibling_relationship;
 mod tests;
 mod textiles;
