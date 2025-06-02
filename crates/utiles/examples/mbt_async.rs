@@ -22,7 +22,7 @@ fn printsep() {
 #[tokio::main]
 async fn main() -> Result<()> {
     let src = get_utiles_test_osm_mbtiles_path()?;
-    println!("mbtiles path: {src:?}");
+    println!("mbtiles path: {}", src.display());
 
     printsep();
     let mbt = MbtilesClientAsync::open_existing(src).await?; // .await

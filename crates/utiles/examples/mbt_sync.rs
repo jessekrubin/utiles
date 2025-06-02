@@ -22,7 +22,7 @@ fn printsep() {
 
 fn main() -> Result<()> {
     let src = get_utiles_test_osm_mbtiles_path()?;
-    println!("mbtiles path: {src:?}");
+    println!("mbtiles path: {}", src.display());
 
     printsep();
     let mbt = Mbtiles::open_existing(src)?;

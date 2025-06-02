@@ -228,8 +228,9 @@ pub(crate) async fn rimraf_main(args: RimrafArgs) -> UtilesResult<()> {
     let dirpath = Path::new(&args.dirpath);
     if !dirpath.exists() {
         error!("Path does not exist: {:?}", dirpath);
+        let dirpath_display = dirpath.display();
         return Err(UtilesError::Error(format!(
-            "dirpath does not exist: {dirpath:?}"
+            "dirpath does not exist: {dirpath_display}",
         )));
     }
 
