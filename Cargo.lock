@@ -2978,6 +2978,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "utiles-cover"
+version = "0.8.0"
+dependencies = [
+ "geo-types",
+ "geojson",
+ "tracing",
+ "utiles-core",
+]
+
+[[package]]
 name = "utiles-dev"
 version = "0.8.0"
 dependencies = [
