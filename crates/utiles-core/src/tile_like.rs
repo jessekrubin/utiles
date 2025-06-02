@@ -158,7 +158,10 @@ pub trait TileLike {
     fn center(&self) -> LngLat {
         let ul = self.ul();
         let lr = self.lr();
-        LngLat::new((ul.lng() + lr.lng()) / 2.0, (ul.lat() + lr.lat()) / 2.0)
+        LngLat::new(
+            f64::midpoint(ul.lng(), lr.lng()),
+            f64::midpoint(ul.lat(), lr.lat()),
+        )
     }
 
     /// Return json array string for tile with spaces after commas

@@ -43,12 +43,15 @@ impl TilePyramidFsWriter {
 
     pub(super) async fn mkdirpath(&self, z: u8, x: u32) -> UtilesResult<()> {
         let dp = self.dirpath(z, x);
-        match dp.to_str() {
-            Some(dp) => {
-                fs::create_dir_all(dp).await?;
-                Ok(())
-            }
-            None => Err(UtilesError::PathConversionError(format!("{dp:?}"))),
+        if let Some(dp) = dp.to_str() {
+            fs::create_dir_all(dp).await?;
+            Ok(())
+        } else {
+            let err_msg = format!(
+                "Failed to convert directory path to string: {}",
+                dp.display()
+            );
+            Err(UtilesError::PathConversionError(err_msg))
         }
     }
 

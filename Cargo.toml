@@ -30,7 +30,7 @@ async-trait = "0.1.88"
 axum = { version = "0.8.4", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.1"
 base64 = "0.22.1"
-clap = { version = "4.5.38", features = ["derive", "color", "wrap_help"] }
+clap = { version = "4.5.39", features = ["derive", "color", "wrap_help"] }
 criterion = "0.5.1"
 fast_hilbert = "2.0.1"
 fnv = "1.0.7"
@@ -48,16 +48,16 @@ jiff = "0.2.14"
 json-patch = "4.0.0"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.3"
-num_cpus = "1.16.0"
+num_cpus = "1.17.0"
 owo-colors = { version = "4.2.1", features = ["supports-color"] }
-pmtiles = { version = "0.11.0", features = ["mmap-async-tokio", "tilejson"] }
+pmtiles = { version = "0.13.0", features = ["mmap-async-tokio", "tilejson"] }
 pyo3 = "0.25.0"
 pyo3-build-config = "0.25.0"
 rusqlite = { version = "0.35.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 size = { version = "0.5.0", features = ["default"] }
-sqlite-hashes = { version = "0.10", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.10.1", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
 strum = { version = "0.27.1", features = ["derive"] }
 strum_macros = "0.27.1"
 thiserror = "2.0.12"
@@ -65,7 +65,7 @@ tilejson = "0.4.2"
 tokio = { version = "1.45", features = ["full"] }
 tokio-stream = "0.1.17"
 tower = { version = "0.5.2", features = ["timeout"] }
-tower-http = { version = "0.6.4", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
+tower-http = { version = "0.6.5", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"

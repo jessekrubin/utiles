@@ -62,7 +62,10 @@ impl CopyConfig {
         if self.src.exists() {
             Ok(())
         } else {
-            Err(UtilesCopyError::SrcNotExists(format!("src: {:?}", self.src)).into())
+            Err(
+                UtilesCopyError::SrcNotExists(format!("src: {}", self.src.display()))
+                    .into(),
+            )
         }
     }
 
