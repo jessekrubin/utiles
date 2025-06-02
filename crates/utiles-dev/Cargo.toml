@@ -36,5 +36,5 @@ image.workspace = true
 indoc.workspace = true
 clap.workspace = true
 rayon = "1.10.0"
-num_cpus = "1.16.0"
+num_cpus = "1.17.0"
 crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
