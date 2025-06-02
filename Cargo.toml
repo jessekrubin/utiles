@@ -48,7 +48,7 @@ jiff = "0.2.14"
 json-patch = "4.0.0"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.3"
-num_cpus = "1.16.0"
+num_cpus = "1.17.0"
 owo-colors = { version = "4.2.1", features = ["supports-color"] }
 pmtiles = { version = "0.13.0", features = ["mmap-async-tokio", "tilejson"] }
 pyo3 = "0.25.0"
