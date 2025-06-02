@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     println!("mbtiles path: {}", src.display());
 
     printsep();
-    let mbt = MbtilesClientAsync::open_existing(src).await?; // .await
+    let mbt = MbtilesClientAsync::open_existing(src).await?;
     println!("mbtiles: {mbt:?}");
 
     printsep();
