@@ -57,7 +57,7 @@ rusqlite = { version = "0.35.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 size = { version = "0.5.0", features = ["default"] }
-sqlite-hashes = { version = "0.10", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.10.1", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
 strum = { version = "0.27.1", features = ["derive"] }
 strum_macros = "0.27.1"
 thiserror = "2.0.12"
@@ -65,7 +65,7 @@ tilejson = "0.4.2"
 tokio = { version = "1.45", features = ["full"] }
 tokio-stream = "0.1.17"
 tower = { version = "0.5.2", features = ["timeout"] }
-tower-http = { version = "0.6.4", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
+tower-http = { version = "0.6.5", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"
