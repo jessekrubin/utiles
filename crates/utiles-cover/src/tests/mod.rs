@@ -1,2 +1,2 @@
 #![allow(clippy::unwrap_used)]
-mod burn;
+mod coverage;

@@ -1,6 +1,10 @@
 mod cover;
+mod cover_geotypes;
 mod errors;
 pub use cover::geojson2tiles;
+pub use cover_geotypes::{
+    geometry2tiles
+};
 pub use errors::UtilesCoverError;
 
 #[cfg(test)]

@@ -2,7 +2,6 @@
 use crate::{Result, UtilesCoverError};
 use geojson::GeoJson;
 use std::collections::{BTreeMap, HashSet};
-use std::io::BufRead;
 use tracing::debug;
 use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
 
@@ -173,81 +172,6 @@ fn polygon_cover(
             for x in x_start..x_end {
                 tiles_set.insert(Tile::new(x, y, zoom));
             }
-        }
-    }
-}
-#[allow(clippy::cast_precision_loss)]
-fn polygon_cover_og(tiles_set: &mut HashSet<Tile>, geom: &[Vec<(f64, f64)>], zoom: u8) {
-    let mut scanline_intersections: BTreeMap<u32, Vec<u32>> = BTreeMap::new();
-
-    for element in geom {
-        let mut ring = Vec::new();
-        line_string_cover(tiles_set, element, zoom, Some(&mut ring));
-        let len = ring.len();
-
-        if len == 0 {
-            continue;
-        }
-
-        let mut j = 0usize;
-        let mut k = len - 1;
-
-        while j < len {
-            let ring_j = ring[j];
-            let ring_k = ring[k];
-
-            let x0 = ring_k.0 as i32;
-            let y0 = ring_k.1 as i32;
-            let x1 = ring_j.0 as i32;
-            let y1 = ring_j.1 as i32;
-
-            // Skip horizontal edges
-            if y0 == y1 {
-                k = j;
-                j += 1;
-                continue;
-            }
-
-            // range of y values
-            let ymin = y0.min(y1);
-            let ymax = y0.max(y1);
-
-            let dx = x1 - x0;
-            let dy = y1 - y0;
-
-            for y in ymin..ymax {
-                // add intersection x coordinate
-                let t = f64::from(y - y0) / f64::from(dy);
-                let x = f64::from(x0) + t * f64::from(dx);
-                let x = x.floor() as u32;
-
-                // Add intersection point
-                scanline_intersections.entry(y as u32).or_default().push(x);
-            }
-            k = j;
-            j += 1;
-        }
-    }
-
-    // Now process each scanline
-    for (&y, xs) in &scanline_intersections {
-        let mut xs = xs.clone();
-        xs.sort_unstable();
-
-        let mut i = 0;
-        while i + 1 < xs.len() {
-            let x_start = xs[i];
-            let x_end = xs[i + 1];
-
-            for x in x_start..x_end {
-                let tile = Tile::new(x, y, zoom);
-                tiles_set.insert(tile);
-                // if !tiles_set.contains(&tile) {
-                //     tiles_vec.push(tile);
-                // }
-            }
-
-            i += 2;
         }
     }
 }
