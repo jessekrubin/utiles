@@ -44,8 +44,20 @@ pub struct PyTile {
 impl PyTile {
     #[new]
     pub fn py_new(x: u32, y: u32, z: u8) -> Self {
-        Self {
-            xyz: Tile::new(x, y, z),
+        // if debug
+        #[cfg(debug_assertions)]
+        {
+            Self {
+                // TODO: figure out if I should use the `new` fn which has debug
+                //       assertions and screws up py-tests
+                xyz: Tile::new_unchecked(x, y, z),
+            }
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            Self {
+                xyz: Tile::new(x, y, z),
+            }
         }
     }
 
