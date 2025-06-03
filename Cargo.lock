@@ -2962,6 +2962,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "utiles-core",
+ "utiles-cover",
  "walkdir",
  "xxhash-rust",
 ]
@@ -2983,7 +2984,6 @@ version = "0.8.0"
 dependencies = [
  "geo-types",
  "geojson",
- "tracing",
  "utiles-core",
 ]
 

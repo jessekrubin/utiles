@@ -2,7 +2,7 @@ use crate::pyutiles::PyTile;
 use geojson::GeoJson;
 use pyo3::exceptions::PyValueError;
 use pyo3::{pyfunction, PyErr, PyResult};
-use utiles::cover::geojson2tiles as ut_geojson2tiles;
+use utiles::cover::{geojson2tiles as ut_geojson2tiles, GeojsonCoverOptions};
 
 #[pyfunction]
 #[pyo3(signature = (geojson_str, maxzoom, minzoom=None))]
@@ -14,7 +14,11 @@ pub fn geojson2tiles(
     let geojson_res = geojson_str.parse::<GeoJson>();
     match geojson_res {
         Ok(gj) => {
-            let tiles = ut_geojson2tiles(&gj, maxzoom, minzoom)
+            let options = GeojsonCoverOptions {
+                zoom: maxzoom,
+                minzoom,
+            };
+            let tiles = ut_geojson2tiles(&gj, options)
                 .map_err(|e| Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))));
             match tiles {
                 Ok(tiles) => {

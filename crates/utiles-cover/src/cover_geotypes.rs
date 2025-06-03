@@ -1,11 +1,29 @@
 //! Tile cover for geojson object(s) based on mapbox's tile-cover alg
+#![expect(
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss
+)]
 use crate::Result;
 use std::collections::{BTreeMap, HashSet};
-use tracing::debug;
 use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
 
-#[allow(clippy::cast_precision_loss)]
-#[allow(clippy::similar_names)]
+pub struct GeoTypesCoverOptions {
+    pub zoom: u8,
+    pub minzoom: Option<u8>,
+}
+
+impl From<u8> for GeoTypesCoverOptions {
+    fn from(zoom: u8) -> Self {
+        Self {
+            zoom,
+            minzoom: None,
+        }
+    }
+}
+
+#[expect(clippy::cast_precision_loss)]
+#[expect(clippy::similar_names)]
 fn line_string_cover(
     tiles_set: &mut HashSet<Tile>,
     ls: &geo_types::LineString<f64>,
@@ -119,7 +137,7 @@ fn line_string_cover(
         }
     }
 }
-#[allow(clippy::cast_precision_loss)]
+
 fn polygon_cover(
     tiles_set: &mut HashSet<Tile>,
     geom: &geo_types::Polygon<f64>,
@@ -183,13 +201,7 @@ fn polygon_cover(
     }
 }
 
-// pub struct Geometry2TilesOptions {
-//     zoom: u8,
-//     minzoom: Option<u8>,
-//     polygons: bool,
-// }
-
-pub fn geometry2tiles(
+fn gt_geometry2tiles(
     geom: &geo_types::Geometry,
     zoom: u8,
     minzoom: Option<u8>,
@@ -205,64 +217,31 @@ pub fn geometry2tiles(
             let it = pts
                 .iter()
                 .filter_map(|pt| tile(pt.x(), pt.y(), zoom, None).ok());
-
             tilescoverage.extend(it);
         }
         geo_types::Geometry::Line(ln) => {
-            // let coords: Vec<(f64, f64)> = ln.points().map(|p| (p.x(), p.y())).collect();
             let ls = geo_types::LineString::from(ln);
             line_string_cover(&mut tilescoverage, &ls, zoom, None);
         }
         geo_types::Geometry::LineString(ls) => {
-            // let coords: Vec<(f64, f64)> = ls.points().map(|p| (p.x(), p.y())).collect();
             line_string_cover(&mut tilescoverage, ls, zoom, None);
         }
-
         geo_types::Geometry::MultiLineString(mls) => {
-            for ls in mls.iter() {
-                // let coords: Vec<(f64, f64)> =
-                // ls.points().map(|p| (p.x(), p.y())).collect();
+            mls.iter().for_each(|ls| {
                 line_string_cover(&mut tilescoverage, ls, zoom, None);
-            }
+            });
         }
-
         geo_types::Geometry::Polygon(poly) => {
-            // let exterior_coords =
-            // poly.exterior().points().map(|p| (p.x(), p.y())).collect();
-            // let mut coords: Vec<Vec<(f64, f64)>> = vec![exterior_coords];
             polygon_cover(&mut tilescoverage, poly, zoom);
-
-            // let coords: Vec<Vec<(f64, f64)>> = poly
-            //     .interiors()
-            //     .iter()
-            //     .map(|ring| ring.points().map(|p| (p.x(), p.y())).collect())
-            //     .collect();
-            // polygon_cover(&mut tilescoverage, &coords, zoom);
         }
-
         geo_types::Geometry::MultiPolygon(mpoly) => {
             for poly in mpoly.iter() {
-                // geometry2tiles(
-                //     zoom,
-                //     minzoom,
-                // )
-                // let exterior_coords =
-                //     poly.exterior().points().map(|p| (p.x(), p.y())).collect();
-                // let mut coords: Vec<Vec<(f64, f64)>> = vec![exterior_coords];
                 polygon_cover(&mut tilescoverage, poly, zoom);
-
-                // let coords: Vec<Vec<(f64, f64)>> = poly
-                //     .interiors()
-                //     .iter()
-                //     .map(|ring| ring.points().map(|p| (p.x(), p.y())).collect())
-                //     .collect();
-                // polygon_cover(&mut tilescoverage, &coords, zoom);
             }
         }
-
         geo_types::Geometry::GeometryCollection(gjcoll) => {
             for g in gjcoll {
-                tilescoverage.extend(geometry2tiles(g, zoom, minzoom)?);
+                tilescoverage.extend(gt_geometry2tiles(g, zoom, minzoom)?);
             }
         }
         geo_types::Geometry::Rect(_) => {
@@ -275,10 +254,17 @@ pub fn geometry2tiles(
 
     match minzoom {
         Some(z) => {
-            debug!("minzoom: {}", z);
             let cov = simplify(&tilescoverage, Some(z));
             Ok(cov)
         }
         None => Ok(tilescoverage),
     }
+}
+
+pub fn geometry2tiles<T>(geom: &geo_types::Geometry, opts: T) -> Result<HashSet<Tile>>
+where
+    T: Into<GeoTypesCoverOptions>,
+{
+    let opts = opts.into();
+    gt_geometry2tiles(geom, opts.zoom, opts.minzoom)
 }

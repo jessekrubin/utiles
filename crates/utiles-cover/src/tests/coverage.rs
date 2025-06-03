@@ -1,4 +1,4 @@
-use crate::cover::geojson2tiles;
+use crate::cover_geojson::geojson2tiles;
 use geojson::GeoJson;
 use std::collections::HashSet;
 use utiles_core::{parse_textiles, Tile};
@@ -10,7 +10,7 @@ fn cover_geotypes() {
     let geojson_string = include_str!("./cover-test.geo.json");
     let geojson: GeoJson = geojson_string.parse::<GeoJson>().unwrap();
     let gt_geometry = geo_types::Geometry::<f64>::try_from(geojson.clone()).unwrap();
-    let tilescoverage = geometry2tiles(&gt_geometry, 9, None).unwrap();
+    let tilescoverage = geometry2tiles(&gt_geometry, 9).unwrap();
     let tiles_set: HashSet<Tile> = tilescoverage.into_iter().collect();
     let expected_set: HashSet<Tile> = expected.into_iter().collect();
     for tile in expected_set {
@@ -26,7 +26,7 @@ fn cover_geojson() {
     let expected = expected_burn_test_tiles();
     let geojson_string = include_str!("./cover-test.geo.json");
     let geojson: GeoJson = geojson_string.parse::<GeoJson>().unwrap();
-    let tilescoverage = geojson2tiles(&geojson, 9, None).unwrap();
+    let tilescoverage = geojson2tiles(&geojson, 9).unwrap();
     let tiles_set: HashSet<Tile> = tilescoverage.into_iter().collect();
     let expected_set: HashSet<Tile> = expected.into_iter().collect();
 
@@ -54,11 +54,10 @@ macro_rules! mk_coverage_test {
                 geo_types::Geometry::<f64>::try_from(geojson.clone()).unwrap();
 
             let gt_coverage =
-                crate::cover_geotypes::geometry2tiles(&gt_geometry, $zoom, None)
-                    .unwrap();
+                crate::cover_geotypes::geometry2tiles(&gt_geometry, $zoom).unwrap();
             let gt_tiles_set: HashSet<Tile> = gt_coverage.into_iter().collect();
 
-            let tilescoverage = geojson2tiles(&geojson, $zoom, None).unwrap();
+            let tilescoverage = geojson2tiles(&geojson, $zoom).unwrap();
             let tiles_set: HashSet<Tile> = tilescoverage.into_iter().collect();
             let expected_set: HashSet<Tile> = expected.into_iter().collect();
 
@@ -114,7 +113,7 @@ mk_coverage_test!(
     "../../../../test-data/tile-cover/donut.tiles.jsonl"
 );
 
-#[allow(clippy::too_many_lines)]
+#[expect(clippy::too_many_lines)]
 fn expected_burn_test_tiles() -> Vec<Tile> {
     let tiles_str = include_str!("./cover-test.tiles.jsonl");
     parse_textiles(tiles_str)

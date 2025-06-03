@@ -1,12 +1,16 @@
 //! Tile cover for geojson object(s) based on mapbox's tile-cover alg
+#![expect(
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss
+)]
 use crate::{Result, UtilesCoverError};
 use geojson::GeoJson;
 use std::collections::{BTreeMap, HashSet};
-use tracing::debug;
 use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
 
-#[allow(clippy::cast_precision_loss)]
-#[allow(clippy::similar_names)]
+#[expect(clippy::cast_precision_loss)]
+#[expect(clippy::similar_names)]
 fn line_string_cover(
     tiles_set: &mut HashSet<Tile>,
     coords: &[(f64, f64)],
@@ -114,7 +118,7 @@ fn line_string_cover(
         }
     }
 }
-#[allow(clippy::cast_precision_loss)]
+
 fn polygon_cover(tiles_set: &mut HashSet<Tile>, geom: &[Vec<(f64, f64)>], zoom: u8) {
     // Collect all x-intersections per scanline (y)
     let mut scanlines: BTreeMap<u32, Vec<u32>> = BTreeMap::new();
@@ -237,40 +241,61 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> Result<Vec<Tile>> {
     let tiles_vec = tiles_set.into_iter().collect();
     Ok(tiles_vec)
 }
-pub fn geojson2tiles(
-    gj: &GeoJson,
-    zoom: u8,
-    minzoom: Option<u8>,
-) -> Result<HashSet<Tile>> {
-    let mut tilescoverage: HashSet<Tile> = HashSet::new();
 
+pub struct GeojsonCoverOptions {
+    pub zoom: u8,
+    pub minzoom: Option<u8>,
+}
+
+impl From<u8> for GeojsonCoverOptions {
+    fn from(zoom: u8) -> Self {
+        GeojsonCoverOptions {
+            zoom,
+            minzoom: None,
+        }
+    }
+}
+
+impl From<(u8, u8)> for GeojsonCoverOptions {
+    fn from((zoom, minzoom): (u8, u8)) -> Self {
+        GeojsonCoverOptions {
+            zoom,
+            minzoom: Some(minzoom),
+        }
+    }
+}
+
+pub fn geojson2tiles<TOpts>(gj: &GeoJson, opts: TOpts) -> Result<HashSet<Tile>>
+where
+    TOpts: Into<GeojsonCoverOptions>,
+{
+    let opts = opts.into();
+    let mut tiles: HashSet<Tile> = HashSet::new();
     match gj {
         GeoJson::FeatureCollection(ref ctn) => {
             for feature in &ctn.features {
                 if let Some(ref geom) = feature.geometry {
-                    let cov = geom2tiles(geom, zoom)?;
-                    tilescoverage.extend(cov);
+                    let cov = geom2tiles(geom, opts.zoom)?;
+                    tiles.extend(cov);
                 }
             }
         }
         GeoJson::Feature(ref feature) => {
             if let Some(ref geom) = feature.geometry {
-                let cov = geom2tiles(geom, zoom)?;
-                tilescoverage.extend(cov);
+                let cov = geom2tiles(geom, opts.zoom)?;
+                tiles.extend(cov);
             }
         }
         GeoJson::Geometry(ref geom) => {
-            let cov = geom2tiles(geom, zoom)?;
-            tilescoverage.extend(cov);
+            let cov = geom2tiles(geom, opts.zoom)?;
+            tiles.extend(cov);
         }
     }
-
-    match minzoom {
+    match opts.minzoom {
         Some(z) => {
-            debug!("minzoom: {}", z);
-            let cov = simplify(&tilescoverage, Some(z));
+            let cov = simplify(&tiles, Some(z));
             Ok(cov)
         }
-        None => Ok(tilescoverage),
+        None => Ok(tiles),
     }
 }

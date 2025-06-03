@@ -1,13 +1,12 @@
-#![expect(
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss
-)]
-mod cover;
+#[cfg(feature = "geojson")]
+mod cover_geojson;
+#[cfg(feature = "geo-types")]
 mod cover_geotypes;
 mod errors;
-pub use cover::geojson2tiles;
-pub use cover_geotypes::geometry2tiles;
+#[cfg(feature = "geojson")]
+pub use cover_geojson::{geojson2tiles, GeojsonCoverOptions};
+#[cfg(feature = "geo-types")]
+pub use cover_geotypes::{geometry2tiles, GeoTypesCoverOptions};
 pub use errors::UtilesCoverError;
 
 #[cfg(test)]
