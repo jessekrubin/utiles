@@ -54,7 +54,8 @@ macro_rules! mk_coverage_test {
                 geo_types::Geometry::<f64>::try_from(geojson.clone()).unwrap();
 
             let gt_coverage =
-                crate::cover_geotypes::geometry2tiles(&gt_geometry, $zoom, None).unwrap();
+                crate::cover_geotypes::geometry2tiles(&gt_geometry, $zoom, None)
+                    .unwrap();
             let gt_tiles_set: HashSet<Tile> = gt_coverage.into_iter().collect();
 
             let tilescoverage = geojson2tiles(&geojson, $zoom, None).unwrap();
@@ -72,7 +73,6 @@ macro_rules! mk_coverage_test {
                 tiles_set.len()
             );
             for tile in expected_set {
-
                 assert!(
                     tiles_set.contains(&tile),
                     "Expected tile {tile:?} is not in the tiles set."
@@ -82,9 +82,7 @@ macro_rules! mk_coverage_test {
                     gt_tiles_set.contains(&tile),
                     "Expected tile {tile:?} is not in the gt tiles set."
                 );
-
             }
-
         }
     };
 }
@@ -109,7 +107,12 @@ mk_coverage_test!(
     "../../../../test-data/tile-cover/blocky.tiles.jsonl"
 );
 
-mk_coverage_test!(donut, 16, "../../../../test-data/tile-cover/donut.geojson", "../../../../test-data/tile-cover/donut.tiles.jsonl");
+mk_coverage_test!(
+    donut,
+    16,
+    "../../../../test-data/tile-cover/donut.geojson",
+    "../../../../test-data/tile-cover/donut.tiles.jsonl"
+);
 
 #[allow(clippy::too_many_lines)]
 fn expected_burn_test_tiles() -> Vec<Tile> {

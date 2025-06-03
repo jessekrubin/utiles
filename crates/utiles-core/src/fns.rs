@@ -58,8 +58,9 @@ pub fn minmax(zoom: u8) -> (u32, u32) {
 /// Return true if x, y, z is a valid tile coordinate
 #[must_use]
 pub fn valid(x: u32, y: u32, z: u8) -> bool {
-    let max_xy = 2_u32.pow(u32::from(z)) - 1;
-    x <= max_xy && y <= max_xy
+    let (minx, maxx) = minmax(z);
+    let (miny, maxy) = minmax(z);
+    x >= minx && x <= maxx && y >= miny && y <= maxy
 }
 
 /// Return the inverted/y-flipped y coordinate for a given y and z
@@ -152,7 +153,7 @@ pub const fn int_2_offset_zoom(i: u64) -> (u64, u8) {
 #[must_use]
 pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
     if z == 0 {
-        return 0; // as there is only one tile at z0
+        return u64::from(x) + u64::from(y) * 2u64.pow(u32::from(z));
     }
     let base_id: u64 = (4u64.pow(u32::from(z)) - 1) / 3;
     base_id + u64::from(x) + u64::from(y) * 2u64.pow(u32::from(z))

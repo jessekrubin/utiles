@@ -4,8 +4,6 @@ use std::collections::{BTreeMap, HashSet};
 use tracing::debug;
 use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
 
-
-
 #[allow(clippy::cast_precision_loss)]
 #[allow(clippy::similar_names)]
 fn line_string_cover(
@@ -213,7 +211,7 @@ pub fn geometry2tiles(
         geo_types::Geometry::Line(ln) => {
             // let coords: Vec<(f64, f64)> = ln.points().map(|p| (p.x(), p.y())).collect();
             let ls = geo_types::LineString::from(ln);
-             line_string_cover(&mut tilescoverage,&ls, zoom, None);
+            line_string_cover(&mut tilescoverage, &ls, zoom, None);
         }
         geo_types::Geometry::LineString(ls) => {
             // let coords: Vec<(f64, f64)> = ls.points().map(|p| (p.x(), p.y())).collect();
