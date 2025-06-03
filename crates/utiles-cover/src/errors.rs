@@ -6,6 +6,7 @@ pub struct UtilesCoverError {
 }
 
 impl UtilesCoverError {
+    #[must_use]
     pub fn new(message: &str) -> Self {
         Self {
             message: message.to_string(),

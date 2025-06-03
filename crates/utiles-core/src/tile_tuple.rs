@@ -17,11 +17,6 @@ impl From<(u32, u32, u8)> for TileTuple {
         TileTuple(xyz.0, xyz.1, xyz.2)
     }
 }
-impl From<(u8, u32, u32)> for TileTuple {
-    fn from(xyz: (u8, u32, u32)) -> Self {
-        TileTuple(xyz.1, xyz.2, xyz.0)
-    }
-}
 
 impl TileLike for TileTuple {
     fn x(&self) -> u32 {

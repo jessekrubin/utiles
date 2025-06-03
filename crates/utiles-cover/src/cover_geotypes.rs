@@ -164,8 +164,8 @@ fn polygon_cover(
 
             for y in ymin..ymax {
                 // parametric t along the edge at integer y
-                let t = (y - y0) as f64 / dy as f64;
-                let x = (x0 as f64 + t * dx as f64).floor() as u32;
+                let t = f64::from(y - y0) / f64::from(dy);
+                let x = (f64::from(x0) + t * f64::from(dx)).floor() as u32;
                 scanlines.entry(y as u32).or_default().push(x);
             }
         }
@@ -206,7 +206,7 @@ pub fn geometry2tiles(
                 .iter()
                 .filter_map(|pt| tile(pt.x(), pt.y(), zoom, None).ok());
 
-            tilescoverage.extend(it.into_iter())
+            tilescoverage.extend(it);
         }
         geo_types::Geometry::Line(ln) => {
             // let coords: Vec<(f64, f64)> = ln.points().map(|p| (p.x(), p.y())).collect();
@@ -222,7 +222,7 @@ pub fn geometry2tiles(
             for ls in mls.iter() {
                 // let coords: Vec<(f64, f64)> =
                 // ls.points().map(|p| (p.x(), p.y())).collect();
-                line_string_cover(&mut tilescoverage, &ls, zoom, None);
+                line_string_cover(&mut tilescoverage, ls, zoom, None);
             }
         }
 
@@ -230,7 +230,7 @@ pub fn geometry2tiles(
             // let exterior_coords =
             // poly.exterior().points().map(|p| (p.x(), p.y())).collect();
             // let mut coords: Vec<Vec<(f64, f64)>> = vec![exterior_coords];
-            polygon_cover(&mut tilescoverage, &poly, zoom);
+            polygon_cover(&mut tilescoverage, poly, zoom);
 
             // let coords: Vec<Vec<(f64, f64)>> = poly
             //     .interiors()
@@ -249,7 +249,7 @@ pub fn geometry2tiles(
                 // let exterior_coords =
                 //     poly.exterior().points().map(|p| (p.x(), p.y())).collect();
                 // let mut coords: Vec<Vec<(f64, f64)>> = vec![exterior_coords];
-                polygon_cover(&mut tilescoverage, &poly, zoom);
+                polygon_cover(&mut tilescoverage, poly, zoom);
 
                 // let coords: Vec<Vec<(f64, f64)>> = poly
                 //     .interiors()

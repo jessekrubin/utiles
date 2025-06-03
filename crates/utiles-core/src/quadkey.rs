@@ -2,46 +2,11 @@
 use crate::errors::{UtilesCoreError, UtilesCoreResult};
 use crate::Tile;
 
-enum QuadkeyPart {
-    Zero,
-    One,
-    Two,
-    Three,
-}
-
-impl TryFrom<u8> for QuadkeyPart {
-    type Error = UtilesCoreError;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(QuadkeyPart::Zero),
-            1 => Ok(QuadkeyPart::One),
-            2 => Ok(QuadkeyPart::Two),
-            3 => Ok(QuadkeyPart::Three),
-            _ => Err(UtilesCoreError::AdHoc(format!(
-                "Invalid quadkey part value: {}",
-                value
-            ))),
-        }
-    }
-}
-
-impl QuadkeyPart {
-    fn from_char(c: char) -> Option<Self> {
-        match c {
-            '0' => Some(QuadkeyPart::Zero),
-            '1' => Some(QuadkeyPart::One),
-            '2' => Some(QuadkeyPart::Two),
-            '3' => Some(QuadkeyPart::Three),
-            _ => None,
-        }
-    }
-}
-
 /// Return the quadkey for a tile as a vector of u8 values (0, 1, 2, 3).
 #[must_use]
 pub fn xyz2quadkey_vec(x: u32, y: u32, z: u8) -> Vec<u8> {
     let mut qk_arr = Vec::with_capacity(z as usize);
+    // let mut quadkey = String::new();
     for i in (0..z).rev() {
         let mut digit: u8 = 0;
         let mask = 1 << i;

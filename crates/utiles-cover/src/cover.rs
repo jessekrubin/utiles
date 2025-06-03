@@ -151,8 +151,8 @@ fn polygon_cover(tiles_set: &mut HashSet<Tile>, geom: &[Vec<(f64, f64)>], zoom: 
 
             for y in ymin..ymax {
                 // parametric t along the edge at integer y
-                let t = (y - y0) as f64 / dy as f64;
-                let x = (x0 as f64 + t * dx as f64).floor() as u32;
+                let t = f64::from(y - y0) / f64::from(dy);
+                let x = (f64::from(x0) + t * f64::from(dx)).floor() as u32;
                 scanlines.entry(y as u32).or_default().push(x);
             }
         }
@@ -185,7 +185,7 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> Result<Vec<Tile>> {
                 .iter()
                 .map(|coords| {
                     tile(coords[0], coords[1], zoom, None)
-                        .map_err(|e| UtilesCoverError::from(e))
+                        .map_err(UtilesCoverError::from)
                 })
                 .collect::<Result<HashSet<_>>>()
                 .map(|set| {
