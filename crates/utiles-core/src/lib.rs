@@ -13,6 +13,8 @@
 #![expect(clippy::similar_names)]
 
 #[doc(inline)]
+pub use crate::constants::*;
+#[doc(inline)]
 pub use crate::fns::*;
 #[doc(inline)]
 pub use crate::merge::*;
@@ -50,6 +52,7 @@ pub mod parsing;
 
 mod asserts;
 mod edges;
+mod from;
 mod macros;
 mod merge;
 mod parent;
@@ -75,8 +78,11 @@ mod web_geo_bounds;
 pub mod zoom;
 
 pub use edges::find_edges;
+
+/// `utiles-core` version string.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// Utiles core prelude imports/things.
 pub mod prelude {
     pub use crate::flipy;
     pub use crate::point2d;

@@ -11,8 +11,8 @@ use crate::mbt::{
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
 use crate::UtilesError;
-use utiles_core::constants::MBTILES_MAGIC_NUMBER;
 use utiles_core::tile_type::{TileKind, TileType};
+use utiles_core::MBTILES_MAGIC_NUMBER;
 
 async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataChange> {
     let filepath = mbt.filepath();

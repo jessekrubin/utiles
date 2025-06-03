@@ -21,8 +21,6 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
             let bbox: (f64, f64, f64, f64) = serde_json::from_value(v["bbox"].clone())?;
             return Ok(BBox::from(bbox));
         }
-        // return Ok(geojson_bounds(s));
-
         return Err(UtilesCoreError::InvalidBbox(
             "Invalid bbox: ".to_string() + s,
         ));

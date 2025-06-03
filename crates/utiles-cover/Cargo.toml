@@ -1,0 +1,35 @@
+[package]
+name = "utiles-cover"
+description = "web-map-tile coverage for geojson/geo-types"
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+geojson = { workspace = true, optional = true }
+geo-types = { workspace = true, optional = true }
+utiles-core = { version = "0.8.0", path = "../utiles-core", default-features = false, features = [] }
+
+[features]
+default = [
+    "geo-types",
+    "geojson",
+]
+geojson = [
+    "dep:geojson",
+]
+geo-types = [
+    "dep:geo-types",
+]
+
+[dev-dependencies]
+geojson = { workspace = true }
+geo-types = { workspace = true }
+
+[lints]
+workspace = true
+

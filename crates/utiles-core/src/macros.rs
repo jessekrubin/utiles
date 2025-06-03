@@ -6,11 +6,20 @@ macro_rules! utile {
     ($x:expr, $y:expr, $z:expr) => {
         Tile::new($x, $y, $z)
     };
+    { x: $x:expr, y: $y:expr, z: $z:expr } => {
+        Tile::new($x, $y, $z)
+    };
 }
 
+/// Macro to create tile from x-y(up)-z
+///
+/// The `y` coordinate is imediately flipped.
 #[macro_export]
 macro_rules! utile_yup {
     ($x:expr, $y:expr, $z:expr) => {
+        Tile::new($x, flipy($y, $z), $z)
+    };
+    { x: $x:expr, y: $y:expr, z: $z:expr } => {
         Tile::new($x, flipy($y, $z), $z)
     };
 }
@@ -29,6 +38,9 @@ macro_rules! utile_yup {
 #[macro_export]
 macro_rules! point2d {
     { x: $x:expr, y: $y:expr } => {
+        Point2d::new($x, $y)
+    };
+    ($x:expr, $y:expr ) => {
         Point2d::new($x, $y)
     };
 }

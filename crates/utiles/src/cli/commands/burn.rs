@@ -17,7 +17,7 @@ pub(crate) async fn burn_main(args: BurnArgs) -> UtilesResult<()> {
         .parse::<GeoJson>()
         .map_err(|e| UtilesError::GeojsonError(e.to_string()));
     let geojson = geojson_parse_res?;
-    let tiles = geojson2tiles(&geojson, args.zoom, None)?;
+    let tiles = geojson2tiles(&geojson, args.zoom)?;
     for (i, tile) in tiles.iter().enumerate() {
         let rs = if args.fmtopts.seq { "\x1e\n" } else { "" };
         safe_println!("{}{}", rs, tile.json_arr());

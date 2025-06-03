@@ -2962,6 +2962,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "utiles-core",
+ "utiles-cover",
  "walkdir",
  "xxhash-rust",
 ]
@@ -2975,6 +2976,15 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.12",
+]
+
+[[package]]
+name = "utiles-cover"
+version = "0.8.0"
+dependencies = [
+ "geo-types",
+ "geojson",
+ "utiles-core",
 ]
 
 [[package]]
