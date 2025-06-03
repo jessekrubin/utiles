@@ -113,7 +113,6 @@ mk_coverage_test!(
     "../../../../test-data/tile-cover/donut.tiles.jsonl"
 );
 
-#[expect(clippy::too_many_lines)]
 fn expected_burn_test_tiles() -> Vec<Tile> {
     let tiles_str = include_str!("./cover-test.tiles.jsonl");
     parse_textiles(tiles_str)

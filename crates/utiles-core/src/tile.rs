@@ -14,7 +14,6 @@ use crate::fns::{bounds, children, parent, siblings, xy};
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
-use crate::tile_tuple::TileTuple;
 use crate::traits::TileParent;
 use crate::{
     children1_zorder, children_zorder, quadkey2tile, rmid2xyz, utile, xyz2quadkey,
@@ -75,16 +74,6 @@ impl Default for FeatureOptions {
             projection: Projection::Geographic,
             buffer: None,
             precision: None,
-        }
-    }
-}
-
-impl From<TileTuple> for Tile {
-    fn from(xyz: TileTuple) -> Self {
-        Tile {
-            x: xyz.0,
-            y: xyz.1,
-            z: xyz.2,
         }
     }
 }
@@ -184,10 +173,46 @@ impl TileChildren1 for Tile {
 }
 
 impl Tile {
-    /// Create a new Tile
+    /// Create a new Tile without checking validity
     #[must_use]
     pub fn new(x: u32, y: u32, z: u8) -> Self {
+        debug_assert!(
+            x < (1u32 << z) && y < (1u32 << z),
+            "Tile indices must satisfy 0 <= x < 2^z and 0 <= y < 2^z: (x={x}, y={y}, z={z})",
+        );
         Tile { x, y, z }
+    }
+
+    /// Create a Tile with validity check
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the tile is invalid (e.g. x or y >= 2^z)
+    pub fn try_new(x: u32, y: u32, z: u8) -> UtilesCoreResult<Self> {
+        let max_xy = 2_u32.pow(u32::from(z));
+        if x >= max_xy || y >= max_xy {
+            Err(UtilesCoreError::InvalidTile(format!(
+                "(x={x},y={y},z={z}) x < 2^z and y < 2^z",
+            )))
+        } else {
+            Ok(Self::new_unchecked(x, y, z))
+        }
+    }
+
+    /// Construct a tile with validity check - returns `Option<Tile>`
+    #[must_use]
+    pub fn new_checked(x: u32, y: u32, z: u8) -> Option<Self> {
+        if x < (1u32 << z) && y < (1u32 << z) {
+            Some(Self::new_unchecked(x, y, z))
+        } else {
+            None
+        }
+    }
+
+    /// Construct a tile **without** any checking.
+    #[must_use]
+    pub fn new_unchecked(x: u32, y: u32, z: u8) -> Self {
+        Self { x, y, z }
     }
 
     /// flip the y value (row) and return flipped tile
@@ -619,189 +644,131 @@ impl IsOk for Tile {
         }
     }
 }
-
-impl From<(u32, u32, u8)> for Tile {
-    fn from(tuple: (u32, u32, u8)) -> Self {
-        TileTuple::from(tuple).into()
-    }
-}
-
-impl TryFrom<&Map<String, Value>> for Tile {
-    type Error = UtilesCoreError;
-
-    fn try_from(map: &Map<String, Value>) -> Result<Self, Self::Error> {
-        let x = u32::try_from(map["x"].as_u64().ok_or_else(|| {
-            UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or_default(),
-            )
-        })?)
-        .map_err(|_| {
-            UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or_default(),
-            )
-        })?;
-        let y = u32::try_from(map["y"].as_u64().ok_or_else(|| {
-            UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or_default(),
-            )
-        })?)
-        .map_err(|_| {
-            UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or_default(),
-            )
-        })?;
-        let z = u8::try_from(map["z"].as_u64().ok_or_else(|| {
-            UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or_default(),
-            )
-        })?)
-        .map_err(|_| {
-            UtilesCoreError::InvalidJson(
-                serde_json::to_string(&map).unwrap_or_default(),
-            )
-        })?;
-        Ok(Tile::new(x, y, z))
-    }
-}
-
-impl TryFrom<(u64, u64, u64)> for Tile {
-    type Error = UtilesCoreError;
-
-    fn try_from(tuple: (u64, u64, u64)) -> Result<Self, Self::Error> {
-        let x = u32::try_from(tuple.0).map_err(|_| {
-            UtilesCoreError::InvalidTile(format!(
-                "({},{},{})",
-                tuple.0, tuple.1, tuple.2
-            ))
-        })?;
-        let y = u32::try_from(tuple.1).map_err(|_| {
-            UtilesCoreError::InvalidTile(format!(
-                "({},{},{})",
-                tuple.0, tuple.1, tuple.2
-            ))
-        })?;
-        let z = u8::try_from(tuple.2).map_err(|_| {
-            UtilesCoreError::InvalidTile(format!(
-                "({},{},{})",
-                tuple.0, tuple.1, tuple.2
-            ))
-        })?;
-        Ok(Tile::new(x, y, z))
-    }
-}
-
-impl TryFrom<&Vec<Value>> for Tile {
-    type Error = UtilesCoreError;
-
-    fn try_from(arr: &Vec<Value>) -> Result<Self, Self::Error> {
-        if arr.len() < 3 {
-            Err(UtilesCoreError::InvalidJson(
-                serde_json::to_string(&arr).unwrap_or_default(),
-            ))
-        } else {
-            let x = arr[0].as_u64().ok_or_else(|| {
-                UtilesCoreError::InvalidJson(
-                    serde_json::to_string(&arr).unwrap_or_default(),
-                )
-            })?;
-            let y = arr[1].as_u64().ok_or_else(|| {
-                UtilesCoreError::InvalidJson(
-                    serde_json::to_string(&arr).unwrap_or_default(),
-                )
-            })?;
-            let z = arr[2].as_u64().ok_or_else(|| {
-                UtilesCoreError::InvalidJson(
-                    serde_json::to_string(&arr).unwrap_or_default(),
-                )
-            })?;
-            Tile::try_from((x, y, z))
-        }
-    }
-}
-
-impl TryFrom<&Value> for Tile {
-    type Error = UtilesCoreError;
-
-    fn try_from(val: &Value) -> Result<Self, Self::Error> {
-        match val {
-            Value::Array(v) => {
-                let t = Tile::try_from(v)?;
-                Ok(t)
-            }
-            Value::Object(v) => {
-                if v.contains_key("x") && v.contains_key("y") && v.contains_key("z") {
-                    let x = v["x"].as_u64().ok_or_else(|| {
-                        UtilesCoreError::InvalidJson(
-                            serde_json::to_string(&v)
-                                .expect("Invalid json object for Tile from Value"),
-                        )
-                    })?;
-                    let y = v["y"].as_u64().ok_or_else(|| {
-                        UtilesCoreError::InvalidJson(
-                            serde_json::to_string(&v)
-                                .expect("Invalid json object for Tile from Value"),
-                        )
-                    })?;
-                    let z = v["z"].as_u64().ok_or_else(|| {
-                        UtilesCoreError::InvalidJson(
-                            serde_json::to_string(&v)
-                                .expect("Invalid json object for Tile from Value"),
-                        )
-                    })?;
-                    Tile::try_from((x, y, z))
-                } else if v.contains_key("tile")
-                    && v["tile"].is_array()
-                    && v["tile"]
-                        .as_array()
-                        .expect("Unable to get tile array from Value")
-                        .len()
-                        == 3
-                {
-                    let tuple = serde_json::from_value::<TileTuple>(v["tile"].clone())?;
-                    Ok(Tile::from(tuple))
-                } else {
-                    Err(UtilesCoreError::InvalidJson(
-                        serde_json::to_string(&v)
-                            .expect("Invalid json object for Tile from Value"),
-                    ))
-                }
-            }
-            _ => Err(UtilesCoreError::InvalidJson(val.to_string())),
-        }
-    }
-}
-
-impl TryFrom<Value> for Tile {
-    type Error = UtilesCoreError;
-
-    fn try_from(val: Value) -> Result<Self, Self::Error> {
-        Tile::try_from(&val)
-    }
-}
+//
+// impl TryFrom<&Map<String, Value>> for Tile {
+//     type Error = UtilesCoreError;
+//
+//     fn try_from(map: &Map<String, Value>) -> Result<Self, Self::Error> {
+//         let x = u32::try_from(map["x"].as_u64().ok_or_else(|| {
+//             UtilesCoreError::InvalidJson(
+//                 serde_json::to_string(&map).unwrap_or_default(),
+//             )
+//         })?)
+//         .map_err(|_| {
+//             UtilesCoreError::InvalidJson(
+//                 serde_json::to_string(&map).unwrap_or_default(),
+//             )
+//         })?;
+//         let y = u32::try_from(map["y"].as_u64().ok_or_else(|| {
+//             UtilesCoreError::InvalidJson(
+//                 serde_json::to_string(&map).unwrap_or_default(),
+//             )
+//         })?)
+//         .map_err(|_| {
+//             UtilesCoreError::InvalidJson(
+//                 serde_json::to_string(&map).unwrap_or_default(),
+//             )
+//         })?;
+//         let z = u8::try_from(map["z"].as_u64().ok_or_else(|| {
+//             UtilesCoreError::InvalidJson(
+//                 serde_json::to_string(&map).unwrap_or_default(),
+//             )
+//         })?)
+//         .map_err(|_| {
+//             UtilesCoreError::InvalidJson(
+//                 serde_json::to_string(&map).unwrap_or_default(),
+//             )
+//         })?;
+//         Ok(Tile::new(x, y, z))
+//     }
+// }
+//
+// impl TryFrom<&Vec<Value>> for Tile {
+//     type Error = UtilesCoreError;
+//
+//     fn try_from(arr: &Vec<Value>) -> Result<Self, Self::Error> {
+//         if arr.len() < 3 {
+//             Err(UtilesCoreError::InvalidJson(
+//                 serde_json::to_string(&arr).unwrap_or_default(),
+//             ))
+//         } else {
+//             let x = arr[0].as_u64().ok_or_else(|| {
+//                 UtilesCoreError::InvalidJson(
+//                     serde_json::to_string(&arr).unwrap_or_default(),
+//                 )
+//             })?;
+//             let y = arr[1].as_u64().ok_or_else(|| {
+//                 UtilesCoreError::InvalidJson(
+//                     serde_json::to_string(&arr).unwrap_or_default(),
+//                 )
+//             })?;
+//             let z = arr[2].as_u64().ok_or_else(|| {
+//                 UtilesCoreError::InvalidJson(
+//                     serde_json::to_string(&arr).unwrap_or_default(),
+//                 )
+//             })?;
+//             Tile::try_from((x, y, z))
+//         }
+//     }
+// }
+//
+// impl TryFrom<&Value> for Tile {
+//     type Error = UtilesCoreError;
+//
+//     fn try_from(val: &Value) -> Result<Self, Self::Error> {
+//         match val {
+//             Value::Array(v) => {
+//                 let t = Tile::try_from(v)?;
+//                 Ok(t)
+//             }
+//             Value::Object(v) => {
+//                 if v.contains_key("x") && v.contains_key("y") && v.contains_key("z") {
+//                     let x = v["x"].as_u64().ok_or_else(|| {
+//                         UtilesCoreError::InvalidJson(
+//                             serde_json::to_string(&v)
+//                                 .expect("Invalid json object for Tile from Value"),
+//                         )
+//                     })?;
+//                     let y = v["y"].as_u64().ok_or_else(|| {
+//                         UtilesCoreError::InvalidJson(
+//                             serde_json::to_string(&v)
+//                                 .expect("Invalid json object for Tile from Value"),
+//                         )
+//                     })?;
+//                     let z = v["z"].as_u64().ok_or_else(|| {
+//                         UtilesCoreError::InvalidJson(
+//                             serde_json::to_string(&v)
+//                                 .expect("Invalid json object for Tile from Value"),
+//                         )
+//                     })?;
+//                     Tile::try_from((x, y, z))
+//                 } else if v.contains_key("tile")
+//                     && v["tile"].is_array()
+//                     && v["tile"]
+//                         .as_array()
+//                         .expect("Unable to get tile array from Value")
+//                         .len()
+//                         == 3
+//                 {
+//                     let tuple = serde_json::from_value::<TileTuple>(v["tile"].clone())?;
+//                     Ok(Tile::from(tuple))
+//                 } else {
+//                     Err(UtilesCoreError::InvalidJson(
+//                         serde_json::to_string(&v)
+//                             .expect("Invalid json object for Tile from Value"),
+//                     ))
+//                 }
+//             }
+//             _ => Err(UtilesCoreError::InvalidJson(val.to_string())),
+//         }
+//     }
+// }
 
 // impl From<Value> for Tile {
 //     fn from(val: Value) -> Self {
 //         Tile::from(&val)
 //     }
 // }
-
-impl TryFrom<&str> for Tile {
-    type Error = UtilesCoreError;
-
-    fn try_from(s: &str) -> Result<Self, Self::Error> {
-        let res = Tile::from_str(s);
-        match res {
-            Ok(tile) => Ok(tile),
-            Err(e) => Err(UtilesCoreError::TileParseError(e.to_string())),
-        }
-    }
-}
-
-impl From<Tile> for (u32, u32, u8) {
-    fn from(tile: Tile) -> Self {
-        (tile.x, tile.y, tile.z)
-    }
-}
 
 #[cfg(test)]
 mod tests {

@@ -24,9 +24,9 @@ pub fn zoom_max_xy(zoom: u8) -> u32 {
 /// ```
 /// use utiles_core::zoom::ZoomSet;
 /// let zset_int_fwd = ZoomSet::new(0b0000_0000_0000_0000_0000_0000_0000_0111);
-/// //                            ^ is 1 so the order is forward/default
+/// //                                ^ is 1 so the order is forward/default
 /// let zset_int_rev = ZoomSet::new(0b1111_0000_0000_0000_0000_0000_0000_0000);
-/// //                            ^ is 1 so the order is reversed
+/// //                                ^ is 1 so the order is reversed
 /// let zooms_fwd_vec: Vec<u8> = zset_int_fwd.into();
 /// assert_eq!(zooms_fwd_vec, vec![0, 1, 2]);
 /// let zooms_rev_vec: Vec<u8> = zset_int_rev.into();

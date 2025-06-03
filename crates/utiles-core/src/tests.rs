@@ -59,10 +59,10 @@ fn tile_is_valid() {
 #[test]
 fn tile_is_invalid() {
     let invalid_tiles = vec![
-        Tile::new(0, 1, 0),
-        Tile::new(1, 0, 0),
-        Tile::new(1, 1, 0),
-        Tile::new(1, 234, 1),
+        Tile::new_unchecked(0, 1, 0),
+        Tile::new_unchecked(1, 0, 0),
+        Tile::new_unchecked(1, 1, 0),
+        Tile::new_unchecked(1, 234, 1),
     ];
 
     for tile in invalid_tiles {

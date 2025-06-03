@@ -7,9 +7,9 @@ use std::path::Path;
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
-use utiles_core::bbox::BBox;
-use utiles_core::constants::MBTILES_MAGIC_NUMBER;
 use utiles_core::tile_data_row::TileData;
+use utiles_core::BBox;
+use utiles_core::MBTILES_MAGIC_NUMBER;
 use utiles_core::{flipy, yflip, LngLat, Tile, TileLike};
 
 use crate::errors::UtilesResult;

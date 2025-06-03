@@ -1,7 +1,7 @@
 use geo_types::Coord;
 use serde_json::Value;
 
-use utiles_core::bbox::BBox;
+use utiles_core::BBox;
 use utiles_core::UtilesCoreError;
 
 use crate::errors::UtilesResult;
