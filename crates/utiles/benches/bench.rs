@@ -1,4 +1,5 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
 use utiles::dev::sqlite_u64::{
     i64_to_u64_ne_bytes, i64_to_u64_ptr, i64_to_u64_unsafe_transmute,
     u64_to_i64_ne_bytes, u64_to_i64_ptr, u64_to_i64_unsafe_transmute,

@@ -1,6 +1,4 @@
-use rusqlite::{
-    Connection, DatabaseName, Error as RusqliteError, Result as RusqliteResult,
-};
+use rusqlite::{Connection, Error as RusqliteError, Result as RusqliteResult};
 use tracing::debug;
 
 pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {
@@ -11,7 +9,7 @@ pub fn journal_mode(conn: &Connection) -> RusqliteResult<String> {
 pub fn journal_mode_set(
     conn: &Connection,
     mode: &str,
-    schema_name: Option<DatabaseName>,
+    schema_name: Option<&str>,
 ) -> RusqliteResult<bool> {
     let current_mode = conn.pragma_query_value(schema_name, "journal_mode", |row| {
         let val: String = row.get(0)?;

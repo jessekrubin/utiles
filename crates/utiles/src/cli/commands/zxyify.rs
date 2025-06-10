@@ -5,7 +5,7 @@ use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
 
 #[tracing::instrument]
-pub async fn zxyify_main(args: ZxyifyArgs) -> UtilesResult<()> {
+pub(crate) async fn zxyify_main(args: ZxyifyArgs) -> UtilesResult<()> {
     let mbt = MbtilesClientAsync::open_existing(args.common.filepath.as_str()).await?;
     mbt.assert_mbtiles().await?;
 
