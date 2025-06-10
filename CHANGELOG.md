@@ -2,11 +2,12 @@
 
 ## 0.8.0 (unreleased)
 
+- criterion-v6 though I am not sure I still need to be benchmarking that dumb experiment
 - all `allow` lints moved to `expect`
 - docs website
 - Updated several dependencies
   - several minor versions
-  - `json-patch` v4 
+  - `json-patch` v4
 - Clippy fixes
   - useless conversions
   - const functions
