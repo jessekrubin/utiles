@@ -4,10 +4,19 @@ from __future__ import annotations
 
 import json
 
+import click
 import pytest
 from click.testing import CliRunner
 
 from utiles._legacy.cli import cli
+
+click_version_is_8_2_1 = click.__version__ == "8.2.1"
+pytestmark = [
+    pytest.mark.skipif(
+        click_version_is_8_2_1,
+        reason="click 8.2.1 broken! (https://github.com/pallets/click/issues/2939)",
+    )
+]
 
 
 def test_cli_shapes_failure() -> None:
