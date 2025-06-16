@@ -51,7 +51,7 @@ noncrypto-digests = "0.3.6"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.2.1", features = ["supports-color"] }
 pmtiles = { version = "0.14.0", features = ["mmap-async-tokio", "tilejson"] }
-pyo3 = "0.25.0"
+pyo3 = "0.25.1"
 pyo3-build-config = "0.25.0"
 rusqlite = { version = "0.36.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0.208", features = ["derive"] }
