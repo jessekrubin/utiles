@@ -7,6 +7,7 @@ use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 use utiles::internal::cli_tools::open_new_overwrite;
+use utiles::sqlite::InsertStrategy;
 use utiles::tile_type::TileFormat;
 use utiles::{
     lager::{init_tracing, LagerConfig, LagerLevel},
@@ -91,6 +92,7 @@ async fn oxipng_main(args: Cli) -> anyhow::Result<()> {
     let mut writer = MbtStreamWriterSync {
         stream: ReceiverStream::new(rx_writer),
         mbt: dst_mbtiles,
+        on_conflict: InsertStrategy::None,
         stats: MbtWriterStats::default(),
     };
     let jobs: usize = args.jobs.unwrap_or(4) as usize;

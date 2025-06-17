@@ -10,6 +10,7 @@ use crate::cli::args::WebpifyArgs;
 use crate::img::webpify_image;
 use crate::mbt::{MbtStreamWriterSync, MbtWriterStats};
 use crate::mbt::{Mbtiles, MbtilesAsync, MbtilesClientAsync};
+use crate::sqlite::InsertStrategy;
 use crate::UtilesResult;
 
 pub(crate) async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
@@ -28,6 +29,7 @@ pub(crate) async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let mut writer = MbtStreamWriterSync {
         stream: ReceiverStream::new(rx_writer),
         mbt: dst_mbtiles,
+        on_conflict: InsertStrategy::None,
         stats: MbtWriterStats::default(),
     };
     let jobs: usize = args.jobs.unwrap_or(4) as usize;

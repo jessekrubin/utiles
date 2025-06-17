@@ -394,6 +394,7 @@ LIMIT 1;
         let mut writer = MbtStreamWriterSync {
             mbt: dst_mbt_sync,
             stream: ReceiverStream::new(rx),
+            on_conflict: self.cfg.istrat,
             stats: MbtWriterStats::default(),
         };
         let write_task = writer.write();
