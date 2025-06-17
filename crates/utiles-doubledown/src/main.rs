@@ -28,6 +28,7 @@ use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
 use utiles::mbt::{
     MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync,
 };
+use utiles::sqlite::InsertStrategy;
 use utiles::Tile;
 
 #[derive(Debug, Parser)]
@@ -243,6 +244,7 @@ async fn utiles_doubledown_main(args: Cli) -> anyhow::Result<()> {
     // mbt-writer stream....
     let mut writer = MbtStreamWriterSync {
         stream: ReceiverStream::new(rx_writer),
+        on_conflict: InsertStrategy::None,
         mbt: dst,
         stats: MbtWriterStats::default(),
     };

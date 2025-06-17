@@ -8,6 +8,7 @@ use utiles_core::{Tile, TileLike};
 
 use crate::hash::xxh64_be_hex_upper;
 use crate::mbt::{MbtType, Mbtiles};
+use crate::sqlite::InsertStrategy;
 use crate::{UtilesError, UtilesResult};
 
 pub enum MbtWriterStreamData {
@@ -30,6 +31,7 @@ pub struct MbtWriterStats {
 pub struct MbtStreamWriterSync {
     pub stream: ReceiverStream<MbtWriterStreamData>,
     pub mbt: Mbtiles,
+    pub on_conflict: InsertStrategy,
     pub stats: MbtWriterStats,
 }
 
@@ -65,9 +67,24 @@ impl MbtStreamWriterSync {
     }
 
     pub async fn write_flat(&mut self) -> UtilesResult<()> {
-        let mut stmt = self.mbt.conn.prepare(
-            "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);",
-        )?;
+        let stmt_str = match self.on_conflict {
+            InsertStrategy::Ignore => {
+                "INSERT OR IGNORE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);"
+            }
+            InsertStrategy::Replace => {
+                "INSERT OR REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);"
+            }
+            InsertStrategy::Abort => {
+                "INSERT OR ABORT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);"
+            }
+            InsertStrategy::Rollback => {
+                "INSERT OR ROLLBACK INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);"
+            }
+            _ => {
+                "INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4);"
+            }
+        };
+        let mut stmt = self.mbt.conn.prepare(stmt_str)?;
         let stream = &mut self.stream;
         while let Some(value) = stream.next().await {
             match value {
@@ -95,9 +112,24 @@ impl MbtStreamWriterSync {
     }
 
     pub async fn write_hash(&mut self) -> UtilesResult<()> {
-        let mut stmt = self.mbt.conn.prepare(
-            "INSERT INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);",
-        )?;
+        let stmt_str = match self.on_conflict {
+            InsertStrategy::Ignore => {
+                "INSERT OR IGNORE INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);"
+            }
+            InsertStrategy::Replace => {
+                "INSERT OR REPLACE INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);"
+            }
+            InsertStrategy::Abort => {
+                "INSERT OR ABORT INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);"
+            }
+            InsertStrategy::Rollback => {
+                "INSERT OR ROLLBACK INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);"
+            }
+            _=> {
+                "INSERT INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);"
+            }
+        };
+        let mut stmt = self.mbt.conn.prepare(stmt_str)?;
         let stream = &mut self.stream;
         while let Some(value) = stream.next().await {
             if let MbtWriterStreamData::Tile(tile, tile_data, hash_hex) = value {
@@ -122,9 +154,25 @@ impl MbtStreamWriterSync {
     }
 
     pub async fn write_norm(&mut self) -> UtilesResult<()> {
-        let mut map_stmt = self.mbt.conn.prepare(
-            "INSERT INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);",
-        )?;
+        let map_stmt_str = match self.on_conflict {
+            InsertStrategy::Ignore => {
+                "INSERT OR IGNORE INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);"
+            }
+            InsertStrategy::Replace => {
+                "INSERT OR REPLACE INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);"
+            }
+            InsertStrategy::Abort => {
+                "INSERT OR ABORT INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);"
+            }
+            InsertStrategy::Rollback => {
+                "INSERT OR ROLLBACK INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);"
+            }
+            _=> {
+                "INSERT INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);"
+            }
+
+        };
+        let mut map_stmt = self.mbt.conn.prepare(map_stmt_str)?;
         let mut blob_stmt = self.mbt.conn.prepare(
             "INSERT OR IGNORE INTO images (tile_id, tile_data) VALUES (?1, ?2);",
         )?;
