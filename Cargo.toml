@@ -50,7 +50,7 @@ md-5 = "0.10.6"
 noncrypto-digests = "0.3.6"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.2.2", features = ["supports-color"] }
-pmtiles = { version = "0.15.0", features = ["mmap-async-tokio", "tilejson"] }
+pmtiles = { version = "0.15.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
 pyo3 = "0.25"
 pyo3-build-config = "0.25"
 rusqlite = { version = "0.36.0", features = ["bundled", "vtab", "blob"] }
