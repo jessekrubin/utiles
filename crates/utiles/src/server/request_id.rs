@@ -1,7 +1,7 @@
 //! Request ID middleware for using radix36 encoded request IDs (like Fastify).
 
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use axum::http::Request;
 use tower_http::request_id::{MakeRequestId, RequestId};

@@ -1,5 +1,5 @@
-use rusqlite::functions::FunctionFlags;
 use rusqlite::Connection;
+use rusqlite::functions::FunctionFlags;
 use tracing::debug;
 use utiles_core::tile_type::tiletype_str;
 

@@ -9,6 +9,7 @@ use std::str::FromStr;
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::mbt::mbtiles::{
     has_metadata_table_or_view, has_tiles_table_or_view, has_zoom_row_col_index,
@@ -20,19 +21,18 @@ use crate::mbt::mbtiles_async::MbtilesAsync;
 use crate::mbt::query::query_mbtiles_type;
 use crate::mbt::zxyify::zxyify;
 use crate::mbt::{
-    query_mbt_stats, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
-    MetadataChangeFromTo, MinZoomMaxZoom,
+    MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats, MetadataChangeFromTo,
+    MinZoomMaxZoom, query_mbt_stats,
 };
 use crate::sqlite::{
-    journal_mode, magic_number, pragma_encoding, AsyncSqliteConn, AsyncSqliteConnMut,
-    RowsAffected, SqliteError,
+    AsyncSqliteConn, AsyncSqliteConnMut, RowsAffected, SqliteError, journal_mode,
+    magic_number, pragma_encoding,
 };
-use crate::sqlite::{pathlike2dbpath, DbPath, DbPathTrait};
+use crate::sqlite::{DbPath, DbPathTrait, pathlike2dbpath};
 use crate::sqlite_utiles::register_utiles_sqlite;
 use crate::utilejson::metadata2tilejson;
-use crate::UtilesError;
-use utiles_core::tile_type::{TileFormat, TileKind};
 use utiles_core::BBox;
+use utiles_core::tile_type::{TileFormat, TileKind};
 
 #[derive(Clone)]
 pub struct MbtilesClientAsync {

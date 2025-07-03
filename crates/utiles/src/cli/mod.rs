@@ -13,4 +13,4 @@ mod stdin2string;
 mod stdinterator;
 mod stdinterator_filter;
 
-pub use crate::cli::entry::{cli_main, cli_main_sync, CliOpts};
+pub use crate::cli::entry::{CliOpts, cli_main, cli_main_sync};

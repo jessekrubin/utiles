@@ -4,8 +4,8 @@ use crate::cli::args::{AnalyzeArgs, SqliteHeaderArgs};
 use crate::errors::UtilesResult;
 use crate::fs_async::read_nbytes;
 use crate::sqlite::{
-    analysis_limit_set, AsyncSqliteConn, Sqlike3Async, SqliteDbAsyncClient,
-    SqliteHeader,
+    AsyncSqliteConn, Sqlike3Async, SqliteDbAsyncClient, SqliteHeader,
+    analysis_limit_set,
 };
 
 pub(crate) async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {

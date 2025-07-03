@@ -2,7 +2,7 @@
 
 use std::collections::HashSet;
 use utiles_core::find_edges;
-use utiles_core::{utile, Tile};
+use utiles_core::{Tile, utile};
 fn test_data_input() -> Vec<Tile> {
     vec![
         utile!(4188, 3104, 13),

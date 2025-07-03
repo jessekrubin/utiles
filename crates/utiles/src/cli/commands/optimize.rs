@@ -5,9 +5,9 @@
 //! Plan on using oxipng for pngs and checking if de-duping tiles is worth it.
 use tracing::{info, warn};
 
+use crate::UtilesResult;
 use crate::cli::args::OptimizeArgs;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
-use crate::UtilesResult;
 
 pub(crate) async fn optimize_main(args: OptimizeArgs) -> UtilesResult<()> {
     info!("Optimizing mbtiles file: {}", args.common.filepath);

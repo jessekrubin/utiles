@@ -4,9 +4,9 @@ use serde_json::Value;
 use utiles_core::BBox;
 use utiles_core::UtilesCoreError;
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::gj::geojson_coords;
-use crate::UtilesError;
 
 pub fn parse_bbox_geojson(string: &str) -> UtilesResult<BBox> {
     // strip leading/trailing  whitespace

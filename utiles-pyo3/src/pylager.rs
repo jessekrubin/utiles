@@ -2,8 +2,8 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use std::str::FromStr;
 use utiles::lager::{
-    get_lager_format, get_lager_level, init_tracing, LagerConfig, LagerFormat,
-    LagerLevel,
+    LagerConfig, LagerFormat, LagerLevel, get_lager_format, get_lager_level,
+    init_tracing,
 };
 
 const VERSION_STRING: &str = "pylager";

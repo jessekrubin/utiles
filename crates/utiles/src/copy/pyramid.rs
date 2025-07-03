@@ -1,7 +1,7 @@
 use std::cell::Cell;
 use std::path::{Path, PathBuf};
 
-use crate::mbt::{metadata2map_val, metadata_vec_has_duplicates};
+use crate::mbt::{metadata_vec_has_duplicates, metadata2map_val};
 use futures::stream::{self, StreamExt};
 use tokio::fs;
 use tracing::{debug, warn};

@@ -1,4 +1,4 @@
-use pyo3::{pyclass, pymethods, PyRef, PyRefMut};
+use pyo3::{PyRef, PyRefMut, pyclass, pymethods};
 
 use crate::pyutiles::pytile::PyTile;
 

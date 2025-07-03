@@ -1,5 +1,5 @@
-use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
+use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 use pyo3::basic::CompareOp;
@@ -7,8 +7,8 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyNotImplemented, PyTuple, PyType};
 use pyo3::{
-    exceptions, intern, pyclass, pymethods, IntoPyObjectExt, Py, PyAny, PyErr, PyRef,
-    PyResult, Python,
+    IntoPyObjectExt, Py, PyAny, PyErr, PyRef, PyResult, Python, exceptions, intern,
+    pyclass, pymethods,
 };
 use serde::Serialize;
 use utiles::bbox::BBox;

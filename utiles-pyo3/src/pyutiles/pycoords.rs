@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use pyo3::{exceptions, pyfunction, Bound, FromPyObject, PyAny, PyErr, PyResult};
+use pyo3::{Bound, FromPyObject, PyAny, PyErr, PyResult, exceptions, pyfunction};
 
 use crate::pyutiles::pyiters::CoordinateIterator;
 

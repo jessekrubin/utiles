@@ -1,7 +1,7 @@
-use crate::errors::UtilesResult;
 use crate::UtilesError;
-use geo_types::coord;
+use crate::errors::UtilesResult;
 use geo_types::Coord;
+use geo_types::coord;
 use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};
 
 pub mod parsing;

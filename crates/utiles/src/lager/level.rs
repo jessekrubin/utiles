@@ -40,7 +40,9 @@ impl FromStr for LagerLevel {
             "warn" => Ok(LagerLevel::Warn),
             "error" => Ok(LagerLevel::Error),
             _ => {
-                let e = format!("invalid lager level '{s}' (expected one of: trace, debug, info, warn, error)");
+                let e = format!(
+                    "invalid lager level '{s}' (expected one of: trace, debug, info, warn, error)"
+                );
                 Err(UtilesError::AdHoc(e))
             }
         }

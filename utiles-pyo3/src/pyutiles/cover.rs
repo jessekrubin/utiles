@@ -1,8 +1,8 @@
 use crate::pyutiles::PyTile;
 use geojson::GeoJson;
 use pyo3::exceptions::PyValueError;
-use pyo3::{pyfunction, PyErr, PyResult};
-use utiles::cover::{geojson2tiles as ut_geojson2tiles, GeojsonCoverOptions};
+use pyo3::{PyErr, PyResult, pyfunction};
+use utiles::cover::{GeojsonCoverOptions, geojson2tiles as ut_geojson2tiles};
 
 #[pyfunction]
 #[pyo3(signature = (geojson_str, maxzoom, minzoom=None))]

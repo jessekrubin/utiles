@@ -1,7 +1,7 @@
 //! Utiles traits
 
-use crate::parent::Parents;
 use crate::TileLike;
+use crate::parent::Parents;
 use std::hash::Hash;
 
 /// `IsOk` trait for checking if a value is Ok and returns a result

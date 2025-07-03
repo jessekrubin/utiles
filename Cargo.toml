@@ -15,7 +15,7 @@ authors = [
     "Dan Costello <dan.costello2@gmail.com>",
 ]
 documentation = "https://github.com/jessekrubin/utiles"
-edition = "2021"
+edition = "2024"
 homepage = "https://github.com/jessekrubin/utiles"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/jessekrubin/utiles"

@@ -125,7 +125,7 @@ impl MbtStreamWriterSync {
             InsertStrategy::Rollback => {
                 "INSERT OR ROLLBACK INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);"
             }
-            _=> {
+            _ => {
                 "INSERT INTO tiles_with_hash (zoom_level, tile_column, tile_row, tile_data, tile_hash) VALUES (?1, ?2, ?3, ?4, ?5);"
             }
         };
@@ -167,10 +167,9 @@ impl MbtStreamWriterSync {
             InsertStrategy::Rollback => {
                 "INSERT OR ROLLBACK INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);"
             }
-            _=> {
+            _ => {
                 "INSERT INTO map (zoom_level, tile_column, tile_row, tile_id) VALUES (?1, ?2, ?3, ?4);"
             }
-
         };
         let mut map_stmt = self.mbt.conn.prepare(map_stmt_str)?;
         let mut blob_stmt = self.mbt.conn.prepare(

@@ -4,10 +4,10 @@ use tracing::{debug, error, warn};
 
 use utiles_core::prelude::*;
 
+use crate::UtilesResult;
 use crate::mbt::MbtilesClientAsync;
 use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 use crate::tile_stream::TileReceiverStream;
-use crate::UtilesResult;
 
 pub(super) fn make_tiles_rx(
     mbt: &MbtilesClientAsync,

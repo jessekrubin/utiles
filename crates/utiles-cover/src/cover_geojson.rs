@@ -7,7 +7,7 @@
 use crate::{Result, UtilesCoverError};
 use geojson::GeoJson;
 use std::collections::{BTreeMap, HashSet};
-use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
+use utiles_core::{Tile, lnglat2tile_frac, simplify, tile, utile};
 
 #[expect(clippy::cast_precision_loss)]
 #[expect(clippy::similar_names)]
@@ -272,7 +272,7 @@ where
     let opts = opts.into();
     let mut tiles: HashSet<Tile> = HashSet::new();
     match gj {
-        GeoJson::FeatureCollection(ref ctn) => {
+        GeoJson::FeatureCollection(ctn) => {
             for feature in &ctn.features {
                 if let Some(ref geom) = feature.geometry {
                     let cov = geom2tiles(geom, opts.zoom)?;
@@ -280,13 +280,13 @@ where
                 }
             }
         }
-        GeoJson::Feature(ref feature) => {
+        GeoJson::Feature(feature) => {
             if let Some(ref geom) = feature.geometry {
                 let cov = geom2tiles(geom, opts.zoom)?;
                 tiles.extend(cov);
             }
         }
-        GeoJson::Geometry(ref geom) => {
+        GeoJson::Geometry(geom) => {
             let cov = geom2tiles(geom, opts.zoom)?;
             tiles.extend(cov);
         }

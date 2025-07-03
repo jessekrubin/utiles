@@ -1,7 +1,7 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
-use pyo3::{pyfunction, Bound, PyErr, PyResult};
+use pyo3::{Bound, PyErr, PyResult, pyfunction};
 
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
 use crate::pyutiles::pytile::PyTile;
@@ -26,7 +26,7 @@ pub fn parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
     }
 
     Err(PyErr::new::<PyValueError, _>(
-        "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument"
+        "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
     ))
 }
 
@@ -85,7 +85,7 @@ pub fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
     }
 
     Err(PyErr::new::<PyValueError, _>(
-        "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument"
+        "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
     ))
 }
 

@@ -3,9 +3,9 @@ use std::path::Path;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::sqlite::SqliteError;
-use crate::UtilesError;
 
 pub async fn file_exists<P: AsRef<Path>>(p: P) -> bool {
     let metadata = fs::metadata(p).await;

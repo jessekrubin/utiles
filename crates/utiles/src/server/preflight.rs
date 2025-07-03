@@ -1,9 +1,9 @@
 use crate::internal::globster::find_filepaths;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
-use crate::server::state::{Datasets, MbtilesDataset};
 use crate::server::UtilesServerConfig;
+use crate::server::state::{Datasets, MbtilesDataset};
 use crate::{UtilesError, UtilesResult};
-use futures::{stream, StreamExt};
+use futures::{StreamExt, stream};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 use tracing::{debug, info, warn};

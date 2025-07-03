@@ -20,12 +20,12 @@ pub use crate::fns::*;
 pub use crate::merge::*;
 #[doc(inline)]
 pub use crate::quadkey::*;
-pub use bbox::{geobbox_merge, BBox};
+pub use bbox::{BBox, geobbox_merge};
 #[doc(inline)]
 pub use errors::{UtilesCoreError, UtilesCoreResult};
 #[doc(inline)]
 pub use gdal::geotransform2optzoom;
-pub use lnglat::{wrap_lon, LngLat};
+pub use lnglat::{LngLat, wrap_lon};
 pub use point::{Point2d, Point3d};
 pub use textiles::*;
 #[doc(inline)]
@@ -84,10 +84,10 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Utiles core prelude imports/things.
 pub mod prelude {
+    pub use crate::Tile;
+    pub use crate::TileLike;
     pub use crate::flipy;
     pub use crate::point2d;
     pub use crate::utile;
     pub use crate::utile_yup;
-    pub use crate::Tile;
-    pub use crate::TileLike;
 }

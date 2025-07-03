@@ -1,8 +1,8 @@
+use crate::UtilesError;
 use crate::cli::args::InfoArgs;
 use crate::errors::UtilesResult;
-use crate::mbt::{mbinfo, MbtilesStats};
+use crate::mbt::{MbtilesStats, mbinfo};
 use crate::sqlite::SqliteHeader;
-use crate::UtilesError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]

@@ -4,8 +4,8 @@ use crate::{TileStringFormatter, UtilesResult};
 use std::io;
 use std::io::{BufWriter, Write};
 use tokio::task::JoinHandle;
-use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt;
+use tokio_stream::wrappers::ReceiverStream;
 use tracing::debug;
 
 async fn enumerate_db(

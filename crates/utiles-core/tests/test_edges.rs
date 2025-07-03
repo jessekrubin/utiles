@@ -3,7 +3,7 @@
 
 use std::collections::HashSet;
 use utiles_core::find_edges;
-use utiles_core::{utile, Tile};
+use utiles_core::{Tile, utile};
 
 #[test]
 fn test_edges() {

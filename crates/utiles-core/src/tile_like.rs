@@ -1,6 +1,6 @@
 use crate::bbox::WebBBox;
 use crate::{
-    flipy, neighbors, neighbors_wrap_x, xyz2rmid, BBox, LngLat, Tile, TileZBox,
+    BBox, LngLat, Tile, TileZBox, flipy, neighbors, neighbors_wrap_x, xyz2rmid,
 };
 
 #[cfg(feature = "pmtiles")]

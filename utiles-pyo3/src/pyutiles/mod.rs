@@ -5,7 +5,7 @@ pub use pylnglat::PyLngLat;
 pub use pylnglatbbox::PyLngLatBbox;
 pub use pytile::PyTile;
 pub use pytile_fmts::PyTileFmts;
-pub use pytile_type::{tiletype, tiletype2headers, tiletype_str, PyTileType};
+pub use pytile_type::{PyTileType, tiletype, tiletype_str, tiletype2headers};
 pub use simplipy::simplify;
 
 mod cover;

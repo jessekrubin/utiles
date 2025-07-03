@@ -6,7 +6,7 @@
 )]
 use crate::Result;
 use std::collections::{BTreeMap, HashSet};
-use utiles_core::{lnglat2tile_frac, simplify, tile, utile, Tile};
+use utiles_core::{Tile, lnglat2tile_frac, simplify, tile, utile};
 
 pub struct GeoTypesCoverOptions {
     pub zoom: u8,

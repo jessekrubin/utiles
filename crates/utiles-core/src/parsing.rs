@@ -1,7 +1,7 @@
 //! Parsing util(e)ities
+use crate::UtilesCoreError;
 use crate::bbox::BBox;
 use crate::errors::UtilesCoreResult;
-use crate::UtilesCoreError;
 use serde_json::Value;
 
 /// Parse a string into a `BBox`

@@ -1,8 +1,8 @@
 use hex::ToHex;
 use md5::Digest;
 use noncrypto_digests::Fnv;
-use xxhash_rust::const_xxh3::xxh3_128 as const_xxh3_128;
 use xxhash_rust::const_xxh3::xxh3_64 as const_xxh3;
+use xxhash_rust::const_xxh3::xxh3_128 as const_xxh3_128;
 use xxhash_rust::const_xxh32::xxh32 as const_xxh32;
 use xxhash_rust::const_xxh64::xxh64 as const_xxh64;
 

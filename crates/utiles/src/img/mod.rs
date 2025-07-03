@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 use tracing::warn;
 
-use utiles_core::tile_type::{tiletype, TileFormat};
+use utiles_core::tile_type::{TileFormat, tiletype};
 
 use crate::UtilesResult;
 

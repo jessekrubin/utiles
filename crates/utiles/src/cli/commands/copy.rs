@@ -1,5 +1,5 @@
 use crate::cli::args::CopyArgs;
-use crate::copy::{copy, CopyConfig};
+use crate::copy::{CopyConfig, copy};
 use crate::errors::UtilesResult;
 use tracing::debug;
 

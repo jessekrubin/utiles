@@ -2,7 +2,7 @@ use anyhow::Result;
 use futures::StreamExt;
 use std::path::PathBuf;
 use utiles::mbt::{MbtilesAsync, MbtilesClientAsync};
-use utiles::{utile, Tile, TileLike};
+use utiles::{Tile, TileLike, utile};
 
 fn get_utiles_test_osm_mbtiles_path() -> Result<PathBuf> {
     let pwd = std::env::current_dir()?;

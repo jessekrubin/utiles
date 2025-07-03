@@ -1,6 +1,6 @@
+use crate::Tile;
 use crate::fns::flipy;
 use crate::tile_like::TileLike;
-use crate::Tile;
 
 #[derive(Debug)]
 pub struct TileCrz {

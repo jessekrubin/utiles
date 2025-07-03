@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 
 use utiles::mbt::Mbtiles;
-use utiles::{utile, Tile};
+use utiles::{Tile, utile};
 
 fn get_utiles_test_osm_mbtiles_path() -> Result<PathBuf> {
     let pwd = std::env::current_dir()?;

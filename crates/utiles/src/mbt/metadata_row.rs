@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::debug;
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::mbt::{MetadataChange, MetadataChangeFromTo};
-use crate::UtilesError;
 
 /// Metadata row struct for `mbtiles` metadata table
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
@@ -243,7 +243,7 @@ impl MbtilesMetadataJson {
             _ => {
                 return Err(UtilesError::MetadataError(
                     "Value is not an object".to_string(),
-                ))
+                ));
             }
         };
         let all_keys = from_map.keys().chain(to_map.keys());

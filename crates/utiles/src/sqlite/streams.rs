@@ -1,5 +1,5 @@
-use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 use crate::UtilesResult;
+use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 use rusqlite::Connection;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{error, warn};

@@ -8,8 +8,8 @@ use crate::cli::stdin2string::stdin2string;
 use crate::errors::UtilesResult;
 use crate::fs_async::file_exists_err;
 use crate::mbt::{
-    metadata2map, metadata2map_val, read_metadata_json, DbChange, DbChangeset,
-    MbtilesMetadataJson, MbtilesMetadataRowParsed,
+    DbChange, DbChangeset, MbtilesMetadataJson, MbtilesMetadataRowParsed, metadata2map,
+    metadata2map_val, read_metadata_json,
 };
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;

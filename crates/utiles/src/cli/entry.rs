@@ -1,3 +1,4 @@
+use crate::UtilesError;
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
     about_main, addo_main, agg_hash_main, bounding_tile_main, burn_main, children_main,
@@ -9,8 +10,7 @@ use crate::cli::commands::{
 };
 use crate::errors::UtilesResult;
 use crate::internal::signal::shutdown_signal;
-use crate::lager::{init_tracing, LagerConfig, LagerLevel};
-use crate::UtilesError;
+use crate::lager::{LagerConfig, LagerLevel, init_tracing};
 use clap::{CommandFactory, FromArgMatches};
 use tracing::{debug, error, trace};
 use utiles_core::VERSION;

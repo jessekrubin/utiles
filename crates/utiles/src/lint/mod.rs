@@ -4,7 +4,7 @@ use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use std::time::Duration;
 
-use futures::{stream, Stream, StreamExt};
+use futures::{Stream, StreamExt, stream};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::{debug, warn};
@@ -156,11 +156,7 @@ pub async fn lint_filepaths(
         .iter()
         .map(
             |r: &FileLintResults| {
-                if let Some(e) = &r.errors {
-                    e.len()
-                } else {
-                    0
-                }
+                if let Some(e) = &r.errors { e.len() } else { 0 }
             },
         )
         .sum::<usize>();
