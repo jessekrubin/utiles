@@ -112,7 +112,7 @@ pub fn lint_filepaths_stream(
                 let start_time = std::time::Instant::now();
                 let lint_results = linter.lint().await;
                 let elapsed = start_time.elapsed();
-                let file_results = match lint_results {
+                match lint_results {
                     Ok(r) => FileLintResults {
                         fspath: path.display().to_string(),
                         errors: Some(r),
@@ -126,8 +126,7 @@ pub fn lint_filepaths_stream(
                             dt: elapsed,
                         }
                     }
-                };
-                file_results
+                }
             }
         })
         .buffer_unordered(16)

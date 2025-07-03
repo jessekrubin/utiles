@@ -30,7 +30,7 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
 
     // Assume a single pair of coordinates represents a CoordTuple
     // and a four-element array represents a BBoxTuple
-    let bbox = match v.as_array().map(Vec::len) {
+    match v.as_array().map(Vec::len) {
         // match len 0, 1, 3
         Some(0 | 1 | 3) => Err(UtilesCoreError::InvalidBbox(
             "Invalid bbox: ".to_string() + s,
@@ -59,8 +59,7 @@ pub fn parse_bbox_json(string: &str) -> UtilesCoreResult<BBox> {
                 }
             }
         }
-    };
-    bbox
+    }
 }
 
 /// Parse a string into a `BBox`
@@ -163,7 +162,7 @@ pub fn parse_bbox_ext(string: &str) -> UtilesCoreResult<BBox> {
         .trim()
         .trim_matches(|c| c == '\'' || c == '"')
         .to_lowercase();
-    let r = match str_lower.as_str() {
+    match str_lower.as_str() {
         "world" | "planet" | "all" | "*" => Ok(BBox::new(-180.0, -90.0, 180.0, 90.0)),
         "n" | "north" => Ok(BBox::new(-180.0, 0.0, 180.0, 90.0)),
         "s" | "south" => Ok(BBox::new(-180.0, -90.0, 180.0, 0.0)),
@@ -174,8 +173,7 @@ pub fn parse_bbox_ext(string: &str) -> UtilesCoreResult<BBox> {
         "se" | "southeast" => Ok(BBox::new(0.0, -90.0, 180.0, 0.0)),
         "sw" | "southwest" => Ok(BBox::new(-180.0, -90.0, 0.0, 0.0)),
         _ => parse_bbox(&str_lower),
-    };
-    r
+    }
 }
 
 /// Parse a string into vector of integer strings

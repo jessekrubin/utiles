@@ -26,7 +26,7 @@ pub fn parse_bbox_geojson(string: &str) -> UtilesResult<BBox> {
     let v: Value = serde_json::from_str(s)?;
     // Assume a single pair of coordinates represents a CoordTuple
     // and a four-element array represents a BBoxTuple
-    let bbox = match v.as_array().map(Vec::len) {
+    match v.as_array().map(Vec::len) {
         // match len 0, 1, 3
         Some(0 | 1 | 3) => {
             Err(UtilesCoreError::InvalidBbox("Invalid bbox: ".to_string() + s).into())
@@ -54,20 +54,8 @@ pub fn parse_bbox_geojson(string: &str) -> UtilesResult<BBox> {
                     Err(UtilesError::ParsingError("Invalid bbox: ".to_string() + s))
                 }
             }
-
-            // let bbox_vec = v
-            //     .as_array()
-            //     .unwrap()
-            //     .iter()
-            //     .take(4)
-            //     .cloned()
-            //     .collect::<Vec<Value>>();
-            // Ok(BBox::from(serde_json::from_value::<(f64, f64, f64, f64)>(
-            //     Value::Array(bbox_vec),
-            // )?))
         }
-    };
-    bbox
+    }
 }
 
 pub fn coords2bounds<I>(mut coords: I) -> Option<(f64, f64, f64, f64)>
