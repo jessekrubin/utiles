@@ -1,5 +1,5 @@
-use rusqlite::functions::FunctionFlags;
 use rusqlite::Connection;
+use rusqlite::functions::FunctionFlags;
 use tracing::{debug, trace};
 
 /// Scalar function to return the size of a tile if it is a square image.

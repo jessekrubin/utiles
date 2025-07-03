@@ -4,7 +4,7 @@ use crate::pyutiles::pytile::PyTile;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use pyo3::{exceptions, pyclass, pymethods, Py, PyAny, PyErr, PyRef, PyResult, Python};
+use pyo3::{Py, PyAny, PyErr, PyRef, PyResult, Python, exceptions, pyclass, pymethods};
 use utiles::bbox::BBox;
 
 #[pyclass(name = "LngLatBbox", module = "utiles._utiles", frozen)]

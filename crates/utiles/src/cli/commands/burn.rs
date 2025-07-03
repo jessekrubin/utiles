@@ -2,7 +2,7 @@ use crate::cli::args::BurnArgs;
 use crate::cli::stdinterator_filter;
 use crate::cover::geojson2tiles;
 use crate::errors::UtilesResult;
-use crate::{asleep0, UtilesError};
+use crate::{UtilesError, asleep0};
 use geojson::GeoJson;
 use utiles_core::TileLike;
 

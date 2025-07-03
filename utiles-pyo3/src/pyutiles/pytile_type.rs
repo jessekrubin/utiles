@@ -1,8 +1,8 @@
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyString, PyType};
 use pyo3::{
-    intern, pyclass, pyfunction, pymethods, Bound, FromPyObject, PyAny, PyErr,
-    PyResult, Python,
+    Bound, FromPyObject, PyAny, PyErr, PyResult, Python, intern, pyclass, pyfunction,
+    pymethods,
 };
 use utiles::tile_type;
 use utiles::tile_type::{TileEncoding, TileFormat, TileType};

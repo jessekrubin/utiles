@@ -11,9 +11,9 @@ use tokio::{
 use tracing::{debug, error, info, trace};
 use walkdir::WalkDir;
 
+use crate::UtilesError;
 use crate::cli::args::RimrafArgs;
 use crate::errors::UtilesResult;
-use crate::UtilesError;
 
 /// stat update thing
 #[derive(Debug)]
@@ -126,8 +126,7 @@ async fn remove_all_files(
                             Err(e) => {
                                 trace!(
                                     "Failed to get metadata on file {:?}: {:?}",
-                                    path,
-                                    e
+                                    path, e
                                 );
                                 0
                             }

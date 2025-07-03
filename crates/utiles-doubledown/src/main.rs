@@ -21,15 +21,15 @@ use indoc::indoc;
 use std::time::Duration;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
+use utiles::Tile;
 use utiles::img::raster_tile_join;
 use utiles::img::raster_tile_join::dynamic_img_2_webp;
 use utiles::internal::cli_tools::open_new_overwrite;
-use utiles::lager::{init_tracing, LagerConfig, LagerLevel};
+use utiles::lager::{LagerConfig, LagerLevel, init_tracing};
 use utiles::mbt::{
     MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync,
 };
 use utiles::sqlite::InsertStrategy;
-use utiles::Tile;
 
 #[derive(Debug, Parser)]
 #[command(name = "utiles-doubledown")]

@@ -1,9 +1,9 @@
-use crate::pyutiles::pytile::PyTile;
 use crate::pyutiles::PyLngLatBbox;
+use crate::pyutiles::pytile::PyTile;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use pyo3::{exceptions, pyclass, pymethods, PyAny, PyErr, PyRef, PyResult, Python};
+use pyo3::{PyAny, PyErr, PyRef, PyResult, Python, exceptions, pyclass, pymethods};
 use utiles::BBox;
 
 #[pyclass(name = "Bbox", module = "utiles._utiles", frozen)]

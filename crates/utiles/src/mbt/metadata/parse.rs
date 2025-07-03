@@ -1,9 +1,9 @@
 use serde_json::Value;
 use tracing::error;
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::mbt::{MbtMetadataRow, MbtilesMetadataRowParsed, MbtilesMetadataRows};
-use crate::UtilesError;
 
 pub fn parse_metadata_json_value(val: Value) -> UtilesResult<MbtilesMetadataRows> {
     match val {

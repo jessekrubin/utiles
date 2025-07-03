@@ -4,9 +4,9 @@ use serde::Serialize;
 use std::num::ParseIntError;
 use std::ops::BitAnd;
 
-use crate::errors::UtilesCoreResult;
 use crate::UtilesCoreError;
 use crate::UtilesCoreError::InvalidZoom;
+use crate::errors::UtilesCoreResult;
 
 /// Return max-xy for a zoom level
 #[must_use]

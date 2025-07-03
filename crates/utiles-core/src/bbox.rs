@@ -3,7 +3,7 @@ use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
 use crate::tile_like::TileLike;
-use crate::{xy, Point2d};
+use crate::{Point2d, xy};
 use serde::{Deserialize, Serialize};
 
 /// Bounding box tuple

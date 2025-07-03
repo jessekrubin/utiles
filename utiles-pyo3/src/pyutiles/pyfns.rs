@@ -3,7 +3,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use pyo3::types::PyTuple;
-use pyo3::{pyfunction, PyErr, PyResult};
+use pyo3::{PyErr, PyResult, pyfunction};
 use utiles::zoom::ZoomOrZooms;
 
 use crate::pyutiles::pybbox::PyBbox;
@@ -147,7 +147,7 @@ pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
             .collect());
     }
     Err(PyErr::new::<PyValueError, _>(
-        "the tile argument may have 1 or 4 values. Note that zoom is a keyword-only argument"
+        "the tile argument may have 1 or 4 values. Note that zoom is a keyword-only argument",
     ))
 }
 

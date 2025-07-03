@@ -8,7 +8,7 @@ pub use metadata::*;
 pub use stream_writer::{MbtStreamWriterSync, MbtWriterStats};
 pub use tiles_row::MbtTileRow;
 
-pub use crate::mbt::mbt_stats::{query_mbt_stats, MbtilesStats, MbtilesZoomStats};
+pub use crate::mbt::mbt_stats::{MbtilesStats, MbtilesZoomStats, query_mbt_stats};
 pub use crate::mbt::metadata_row::{
     MbtMetadataRow, MbtilesMetadataJson, MbtilesMetadataJsonRaw,
     MbtilesMetadataRowParsed, MbtilesMetadataRows,

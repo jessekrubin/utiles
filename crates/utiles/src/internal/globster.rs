@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use crate::errors::UtilesResult;
 use crate::UtilesError;
+use crate::errors::UtilesResult;
 use globset::{Glob, GlobSetBuilder};
 use tracing::{debug, warn};
 use walkdir::WalkDir;

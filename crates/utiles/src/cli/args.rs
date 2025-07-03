@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use strum_macros::AsRefStr;
 
 use utiles_core::{
-    geobbox_merge, parsing::parse_bbox_ext, zoom, BBox, LngLat, TileStringFormatter,
-    ZoomSet, VERSION,
+    BBox, LngLat, TileStringFormatter, VERSION, ZoomSet, geobbox_merge,
+    parsing::parse_bbox_ext, zoom,
 };
 
 use crate::cli::commands::dev::DevArgs;

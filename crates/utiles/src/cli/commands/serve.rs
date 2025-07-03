@@ -2,7 +2,7 @@ use clap::Parser;
 use tracing::{debug, warn};
 
 use crate::errors::UtilesResult;
-use crate::server::{utiles_serve, UtilesServerConfig};
+use crate::server::{UtilesServerConfig, utiles_serve};
 
 #[derive(Debug, Parser)]
 pub struct ServeArgs {

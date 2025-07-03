@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use utiles_core::{simplify, Tile, TileLike};
+use utiles_core::{Tile, TileLike, simplify};
 
 use crate::cli::args::MergeArgs;
 use crate::cli::stdinterator_filter;

@@ -1,12 +1,12 @@
 use tracing::error;
 
-use utiles_core::{bounding_tile, Tile, TileLike};
+use utiles_core::{Tile, TileLike, bounding_tile};
 
+use crate::TileStringFormatter;
 use crate::cli::args::TileFmtArgs;
 use crate::cli::stdinterator_filter;
 use crate::errors::UtilesResult;
 use crate::gj::parsing::parse_bbox_geojson;
-use crate::TileStringFormatter;
 
 pub(crate) fn fmtstr_main(args: TileFmtArgs) -> UtilesResult<()> {
     let tile_formatter = TileStringFormatter::from(&args.fmtopts);

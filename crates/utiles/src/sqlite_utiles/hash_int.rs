@@ -2,10 +2,10 @@ use std::hash::Hasher;
 
 use fnv;
 use fnv::FnvHasher;
-use rusqlite::functions::FunctionFlags;
-use rusqlite::types::ValueRef;
 use rusqlite::Connection;
 use rusqlite::Error::{InvalidFunctionParameterType, InvalidParameterCount};
+use rusqlite::functions::FunctionFlags;
+use rusqlite::types::ValueRef;
 use tracing::{error, trace};
 use xxhash_rust::const_xxh3::xxh3_64 as const_xxh3;
 use xxhash_rust::const_xxh64::xxh64 as const_xxh64;

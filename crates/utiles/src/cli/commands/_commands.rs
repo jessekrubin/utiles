@@ -1,5 +1,5 @@
-use crate::cli::args::CommandsArgs;
 use crate::UtilesResult;
+use crate::cli::args::CommandsArgs;
 use serde::Serialize;
 #[derive(Debug, Serialize)]
 struct CommandInfo {

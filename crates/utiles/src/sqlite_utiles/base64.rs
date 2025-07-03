@@ -1,9 +1,9 @@
-use base64::{engine::general_purpose, Engine as _};
+use base64::{Engine as _, engine::general_purpose};
 
-use rusqlite::functions::FunctionFlags;
-use rusqlite::types::ValueRef;
 use rusqlite::Connection;
 use rusqlite::Error::{InvalidFunctionParameterType, InvalidParameterCount};
+use rusqlite::functions::FunctionFlags;
+use rusqlite::types::ValueRef;
 use tracing::{error, trace};
 
 /// Return xxh3-64 hash of string/blob as an integer (i64) value.

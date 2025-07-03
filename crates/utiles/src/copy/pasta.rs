@@ -4,6 +4,7 @@ use tracing::{debug, error, info, warn};
 
 use utiles_core::UtilesCoreError;
 
+use crate::UtilesError;
 use crate::copy::CopyConfig;
 use crate::errors::UtilesCopyError;
 use crate::errors::UtilesResult;
@@ -13,7 +14,6 @@ use crate::mbt::{
 };
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
-use crate::UtilesError;
 
 #[derive(Debug)]
 pub(super) struct CopyPasta {
@@ -267,7 +267,10 @@ ON
             || src_db.mbtype == MbtType::Tippecanoe)
             && (self.cfg.dst_type.is_none())
         {
-            let msg = format!("No dst-type provided and src-type is {} which is an unimplemented dst-type", src_db.mbtype);
+            let msg = format!(
+                "No dst-type provided and src-type is {} which is an unimplemented dst-type",
+                src_db.mbtype
+            );
             warn!("{msg}");
             MbtType::Norm
         } else {

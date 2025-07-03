@@ -24,11 +24,7 @@ pub fn find_edges(
             .neighbors(wrapx)
             .iter()
             .any(|neighbor| !tile_positions.contains(&(neighbor.x(), neighbor.y())));
-        if is_edge {
-            Some(*tile)
-        } else {
-            None
-        }
+        if is_edge { Some(*tile) } else { None }
     });
     Ok(edge_it)
 }

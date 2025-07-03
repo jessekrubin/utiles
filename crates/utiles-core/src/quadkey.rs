@@ -1,6 +1,6 @@
 //! Quadkey conversion util(e)ities.
-use crate::errors::{UtilesCoreError, UtilesCoreResult};
 use crate::Tile;
+use crate::errors::{UtilesCoreError, UtilesCoreResult};
 
 /// Return the quadkey for a tile as a vector of u8 values (0, 1, 2, 3).
 #[must_use]

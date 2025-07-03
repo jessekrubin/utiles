@@ -5,15 +5,15 @@ use tower_http::cors::{Any, CorsLayer};
 use axum::extract::Path;
 use axum::http::Method;
 use axum::{
+    Json, Router,
     body::Body,
     extract::State,
     http::{
-        header::{HeaderMap, HeaderValue},
         StatusCode,
+        header::{HeaderMap, HeaderValue},
     },
     response::IntoResponse,
     routing::get,
-    Json, Router,
 };
 use axum_extra::extract::Host;
 use serde::Deserialize;
@@ -30,8 +30,8 @@ use tower_http::{
 use tracing::info;
 
 use request_id::Radix36MakeRequestId;
-use utiles_core::tile_type::{blob2headers, TileKind};
-use utiles_core::{quadkey2tile, utile, Tile};
+use utiles_core::tile_type::{TileKind, blob2headers};
+use utiles_core::{Tile, quadkey2tile, utile};
 
 use crate::errors::UtilesResult;
 use crate::internal::signal::shutdown_signal;

@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use crate::pyutiles::pyparsing::parse_tiles;
 use crate::pyutiles::pytile::PyTile;
 use pyo3::types::PyTuple;
-use pyo3::{pyfunction, Bound, PyResult};
+use pyo3::{Bound, PyResult, pyfunction};
 
 #[pyfunction]
 #[pyo3(signature = (* args, minzoom=None))]

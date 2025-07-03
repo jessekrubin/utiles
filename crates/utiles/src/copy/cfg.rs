@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
-use utiles_core::zoom::ZoomSet;
 use utiles_core::BBox;
+use utiles_core::zoom::ZoomSet;
 
 use crate::errors::UtilesCopyError;
 use crate::errors::UtilesResult;
@@ -43,7 +43,9 @@ impl CopyConfig {
 
     pub fn tiles_stream_query(&self) -> UtilesResult<String> {
         let where_clause = self.mbtiles_sql_where()?;
-        let sql = format!("SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause}");
+        let sql = format!(
+            "SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles {where_clause}"
+        );
         Ok(sql)
     }
 
@@ -83,11 +85,7 @@ impl CopyConfig {
             let ncpus = num_cpus::get();
             // if less than 4 cpus then use 1 job otherwise just default to 4 to
             // not throttle errything
-            if ncpus < 4 {
-                1
-            } else {
-                4
-            }
+            if ncpus < 4 { 1 } else { 4 }
         }
     }
 }

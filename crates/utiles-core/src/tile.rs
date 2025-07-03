@@ -16,8 +16,8 @@ use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
 use crate::traits::TileParent;
 use crate::{
-    children1_zorder, children_zorder, quadkey2tile, rmid2xyz, utile, xyz2quadkey,
-    IsOk, TileChildren1,
+    IsOk, TileChildren1, children_zorder, children1_zorder, quadkey2tile, rmid2xyz,
+    utile, xyz2quadkey,
 };
 
 #[cfg(feature = "pmtiles")]

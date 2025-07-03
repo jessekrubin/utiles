@@ -1,7 +1,7 @@
 use crate::cover_geojson::geojson2tiles;
 use geojson::GeoJson;
 use std::collections::HashSet;
-use utiles_core::{parse_textiles, Tile};
+use utiles_core::{Tile, parse_textiles};
 
 #[test]
 fn cover_geotypes() {

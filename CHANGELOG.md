@@ -2,6 +2,7 @@
 
 ## 0.8.0 (unreleased)
 
+- rust-2024 editio
 - criterion-v6 though I am not sure I still need to be benchmarking that dumb experiment
 - all `allow` lints moved to `expect`
 - docs website

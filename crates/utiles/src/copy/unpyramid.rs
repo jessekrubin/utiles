@@ -5,14 +5,14 @@ use tokio::{fs, task};
 use tracing::{debug, error, warn};
 use walkdir::WalkDir;
 
-use utiles_core::tile_data_row::TileData;
 use utiles_core::Tile;
+use utiles_core::tile_data_row::TileData;
 
+use crate::UtilesError;
 use crate::copy::CopyConfig;
 use crate::errors::UtilesResult;
-use crate::mbt::parse_metadata_json;
 use crate::mbt::Mbtiles;
-use crate::UtilesError;
+use crate::mbt::parse_metadata_json;
 
 fn fspath2xyz(path: &Path) -> UtilesResult<(u32, u32, u8)> {
     let path = Path::new(path);

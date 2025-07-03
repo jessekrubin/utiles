@@ -13,7 +13,7 @@ where
             Some(prev) if prev != z => {
                 return Err(UtilesCoreError::AdHoc(
                     "Tiles have different zoom levels".to_string(),
-                ))
+                ));
             }
             _ => zoom = Some(z),
         }

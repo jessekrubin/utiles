@@ -4,6 +4,7 @@
 use std::f64::consts::PI;
 use std::num::FpCategory;
 
+use crate::Point2d;
 use crate::bbox::{BBox, WebBBox};
 use crate::constants::{DEG2RAD, EARTH_CIRCUMFERENCE, EARTH_RADIUS, LL_EPSILON};
 use crate::errors::UtilesCoreResult;
@@ -12,7 +13,6 @@ use crate::sibling_relationship::SiblingRelationship;
 use crate::tile_zbox::{TileZBox, TileZBoxes};
 use crate::utile;
 use crate::zoom::ZoomOrZooms;
-use crate::Point2d;
 use crate::{LngLat, Tile, UtilesCoreError};
 
 /// Return upper left lnglat as tuple `(f64, f64)` from x,y,z

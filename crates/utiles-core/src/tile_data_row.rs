@@ -1,6 +1,6 @@
 //! Tile + blob data container
-use crate::tile::Tile;
 use crate::TileLike;
+use crate::tile::Tile;
 
 /// `TileData` container with Tile and u8 bytes
 #[derive(Debug, Clone)]

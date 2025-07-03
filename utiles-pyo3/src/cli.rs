@@ -1,7 +1,7 @@
 use pyo3::exceptions::PyException;
-use pyo3::{pyfunction, PyResult};
+use pyo3::{PyResult, pyfunction};
 
-use utiles::cli::{cli_main_sync, CliOpts};
+use utiles::cli::{CliOpts, cli_main_sync};
 
 #[pyfunction]
 #[pyo3(signature = (args = None))]

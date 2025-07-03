@@ -3,12 +3,12 @@ use std::path::Path;
 
 use rusqlite::Connection;
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::sqlite::{
-    pragma_database_list, pragma_index_list, PragmaIndexListRow, RusqliteResult,
-    Sqlike3,
+    PragmaIndexListRow, RusqliteResult, Sqlike3, pragma_database_list,
+    pragma_index_list,
 };
-use crate::UtilesError;
 
 pub struct SqliteDb {
     pub conn: Connection,

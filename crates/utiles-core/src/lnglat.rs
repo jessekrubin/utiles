@@ -2,9 +2,9 @@
 use std::fmt::Display;
 use std::str::FromStr;
 
+use crate::UtilesCoreResult;
 use crate::point::Point2d;
 use crate::traits::{Coord2dLike, IsOk, LngLatLike};
-use crate::UtilesCoreResult;
 
 /// `LngLat` contains a longitude and latitude as f64.
 #[derive(Debug, Clone, Copy, PartialEq)]

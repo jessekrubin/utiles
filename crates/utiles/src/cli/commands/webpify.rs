@@ -6,12 +6,12 @@ use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{info, warn};
 
+use crate::UtilesResult;
 use crate::cli::args::WebpifyArgs;
 use crate::img::webpify_image;
 use crate::mbt::{MbtStreamWriterSync, MbtWriterStats};
 use crate::mbt::{Mbtiles, MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::InsertStrategy;
-use crate::UtilesResult;
 
 pub(crate) async fn webpify_main(args: WebpifyArgs) -> UtilesResult<()> {
     let mbt = MbtilesClientAsync::open_existing(args.common.filepath.as_str()).await?;

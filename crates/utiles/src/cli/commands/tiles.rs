@@ -5,7 +5,7 @@ use tracing::{debug, error};
 
 use utiles_core::parsing::parse_bbox_ext;
 use utiles_core::zoom::ZoomOrZooms;
-use utiles_core::{tiles, TileStringFormatter};
+use utiles_core::{TileStringFormatter, tiles};
 
 use crate::cli::args::TilesArgs;
 use crate::cli::stdinterator_filter::stdin_filtered;

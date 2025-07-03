@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 use crate::errors::UtilesResult;
+use crate::mbt::MbtType;
 use crate::mbt::mbtiles::{zoom_stats, zoom_stats_full};
 use crate::mbt::query::query_mbtiles_type;
-use crate::mbt::MbtType;
 use crate::sqlite::{pragma_freelist_count, pragma_page_count, pragma_page_size};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

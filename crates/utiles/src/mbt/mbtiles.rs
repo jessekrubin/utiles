@@ -1,5 +1,5 @@
 use indoc::indoc;
-use rusqlite::{params, Connection, OptionalExtension};
+use rusqlite::{Connection, OptionalExtension, params};
 use std::collections::HashSet;
 use std::error::Error;
 use std::fmt::Debug;
@@ -7,11 +7,12 @@ use std::path::Path;
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
 
-use utiles_core::tile_data_row::TileData;
 use utiles_core::BBox;
 use utiles_core::MBTILES_MAGIC_NUMBER;
-use utiles_core::{flipy, yflip, LngLat, Tile, TileLike};
+use utiles_core::tile_data_row::TileData;
+use utiles_core::{LngLat, Tile, TileLike, flipy, yflip};
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::mbt::query::{
     create_mbtiles_indexes_norm, create_mbtiles_tables_norm,
@@ -20,18 +21,17 @@ use crate::mbt::query::{
     create_tiles_view_hash, query_mbtiles_type,
 };
 use crate::mbt::{
-    query_mbt_stats, MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats,
-    MbtilesZoomStats, MinZoomMaxZoom,
+    MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats, MbtilesZoomStats,
+    MinZoomMaxZoom, query_mbt_stats,
 };
+use crate::sqlite::{DbPath, pathlike2dbpath};
+use crate::sqlite::{InsertStrategy, application_id_set};
+use crate::sqlite::{RusqliteResult, pragma_encoding_set};
 use crate::sqlite::{
-    application_id, open_existing, pragma_index_info, pragma_index_list,
-    pragma_table_list, query_db_fspath, Sqlike3,
+    Sqlike3, application_id, open_existing, pragma_index_info, pragma_index_list,
+    pragma_table_list, query_db_fspath,
 };
-use crate::sqlite::{application_id_set, InsertStrategy};
-use crate::sqlite::{pathlike2dbpath, DbPath};
-use crate::sqlite::{pragma_encoding_set, RusqliteResult};
 use crate::utilejson::metadata2tilejson;
-use crate::UtilesError;
 
 #[derive(Debug)]
 pub struct Mbtiles {
@@ -790,7 +790,9 @@ pub fn insert_tiles_flat_mbtiles(
     // scope so that stmt is not borrowed when tx.commit() is called
     let mut naff: usize = 0;
     {
-        let statement = format!("{insert_clause} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)");
+        let statement = format!(
+            "{insert_clause} INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?1, ?2, ?3, ?4)"
+        );
         let mut stmt = tx.prepare_cached(&statement)?;
         for tile in tiles {
             let r = stmt.execute(params![

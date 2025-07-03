@@ -2,16 +2,16 @@ use std::path::{Path, PathBuf};
 
 use tracing::debug;
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::lint::MbtLint;
 use crate::mbt::mbtiles::{
     delete_metadata_duplicate_key_values, has_unique_index_on_metadata,
     metadata_table_name_is_primary_key,
 };
-use crate::mbt::{metadata2duplicate_keys, metadata2duplicates};
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
+use crate::mbt::{metadata2duplicate_keys, metadata2duplicates};
 use crate::sqlite::AsyncSqliteConn;
-use crate::UtilesError;
 
 /// A trait for all lint rules.
 /// - `check` detects problems and returns zero or more `MbtLint` results.

@@ -8,9 +8,9 @@ use tracing_subscriber::layer::{Layered, SubscriberExt};
 use tracing_subscriber::reload::{self, Handle};
 use tracing_subscriber::{EnvFilter, Layer, Registry};
 
+use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::lager::{LagerConfig, LagerFormat, LagerLevel};
-use crate::UtilesError;
 
 type LagerLayer = Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
 // type LagerFormatLayer = Handle<<unknown>, Layered<Box<dyn Layer<Registry>+Send+Sync>, Registry, Registry>>
