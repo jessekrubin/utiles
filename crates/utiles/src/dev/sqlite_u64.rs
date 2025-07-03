@@ -23,7 +23,7 @@ pub fn i64_to_u64_shift(value: i64) -> u64 {
 #[must_use]
 #[allow(unsafe_code)]
 pub fn u64_to_i64_unsafe_transmute(value: u64) -> i64 {
-     u64::cast_signed(value)
+    u64::cast_signed(value)
 }
 
 #[must_use]
