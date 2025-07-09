@@ -570,15 +570,12 @@ pub fn has_zoom_row_col_autoindex(connection: &Connection) -> RusqliteResult<boo
                     indexes.iter().filter(|i| i.unique).collect::<Vec<_>>();
                 for index in unique_indexes {
                     let index_info = pragma_index_info(connection, &index.name)?;
-                    let index_info = index_info
-                        .iter()
-                        .filter(|i| {
-                            i.name == "zoom_level"
-                                || i.name == "tile_column"
-                                || i.name == "tile_row"
-                        })
-                        .collect::<Vec<_>>();
-                    if index_info.len() == 3 {
+                    let index_info = index_info.iter().filter(|i| {
+                        i.name == "zoom_level"
+                            || i.name == "tile_column"
+                            || i.name == "tile_row"
+                    });
+                    if index_info.count() == 3 {
                         return Ok(true);
                     }
                 }

@@ -100,15 +100,15 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
                     if format.value != queried_format {
                         metadata_changes.push(MetadataChangeFromTo {
                             name: "format".to_string(),
-                            from: Some(format.value.clone()),
-                            to: Some(queried_format.clone()),
+                            from: Some(format.value),
+                            to: Some(queried_format),
                         });
                     }
                 } else {
                     metadata_changes.push(MetadataChangeFromTo {
                         name: "format".to_string(),
                         from: None,
-                        to: Some(queried_format.clone()),
+                        to: Some(queried_format),
                     });
                 }
 
@@ -116,15 +116,15 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
                     if kind.value != queried_kind {
                         metadata_changes.push(MetadataChangeFromTo {
                             name: "kind".to_string(),
-                            from: Some(kind.value.clone()),
-                            to: Some(queried_kind.clone()),
+                            from: Some(kind.value),
+                            to: Some(queried_kind),
                         });
                     }
                 } else {
                     metadata_changes.push(MetadataChangeFromTo {
                         name: "kind".to_string(),
                         from: None,
-                        to: Some(queried_kind.clone()),
+                        to: Some(queried_kind),
                     });
                 }
             }
@@ -158,7 +158,7 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
                         if tilesize.value != ts_str {
                             metadata_changes.push(MetadataChangeFromTo {
                                 name: "tilesize".to_string(),
-                                from: Some(tilesize.value.clone()),
+                                from: Some(tilesize.value),
                                 to: Some(ts_str),
                             });
                         }

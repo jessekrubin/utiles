@@ -11,7 +11,7 @@ use utiles_core::geostats::TileStats;
 use crate::errors::UtilesResult;
 use crate::mbt::MbtMetadataRow;
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct TerrainRgbo {
     pub r: u8,
     pub g: u8,
@@ -19,7 +19,7 @@ pub struct TerrainRgbo {
     pub o: u8,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub enum Terrain {
     Rgbo(TerrainRgbo),
 

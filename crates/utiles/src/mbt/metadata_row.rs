@@ -284,7 +284,7 @@ impl MbtilesMetadataJson {
         }
         let forward_patch = json_patch::diff(&self_value, &merged);
         let reverse_patch = json_patch::diff(&merged, &self_value);
-        let mut patched_data = self_value.clone();
+        let mut patched_data = self_value;
         json_patch::patch(&mut patched_data, &forward_patch)?;
         let changes = self.diff_changes(&patched_data)?;
         debug!("calculated changes: {:?}", changes);

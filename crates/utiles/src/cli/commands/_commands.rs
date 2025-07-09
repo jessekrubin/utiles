@@ -90,10 +90,7 @@ pub(crate) fn commands_main(
     let out_str = if args.table {
         cmds_arr
             .iter()
-            .map(|cmd| {
-                let name_aliases = cmd.fmt_name_and_aliases();
-                name_aliases.to_string()
-            })
+            .map(|cmd| cmd.fmt_name_and_aliases())
             .collect::<Vec<String>>()
             .join("\n")
     } else {

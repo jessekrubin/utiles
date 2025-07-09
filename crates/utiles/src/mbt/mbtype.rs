@@ -8,6 +8,7 @@ use std::str::FromStr;
     Serialize,
     Deserialize,
     PartialEq,
+    Eq,
     Clone,
     strum_macros::Display,
 )]

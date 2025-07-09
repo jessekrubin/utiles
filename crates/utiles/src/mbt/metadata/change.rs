@@ -6,7 +6,7 @@ use tracing::warn;
 use crate::mbt::mbtiles::{metadata_delete, metadata_set};
 use crate::timestamp::timestamp_string;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct MetadataChangeFromTo {
     pub name: String,
     pub from: Option<String>,
@@ -65,7 +65,7 @@ impl MetadataChangeFromTo {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct MetadataChange {
     pub changes: Vec<MetadataChangeFromTo>,
     pub forward: Patch,
@@ -73,14 +73,14 @@ pub struct MetadataChange {
     pub data: Value,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PragmaChange {
     pub pragma: String,
     pub forward: String,
     pub reverse: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum DbChange {
     Metadata(MetadataChange),
@@ -123,7 +123,7 @@ impl DbChangeset {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct DbChangeset {
     pub timestamp: String,
     pub changes: Vec<DbChange>,
@@ -214,7 +214,6 @@ impl MetadataChange {
             .iter()
             .map(|op| op.path().to_string())
             .filter_map(|path| path.split('/').nth(1).map(|s| s.to_string()))
-            .map(|s| s.to_string())
             .collect()
     }
 
@@ -224,7 +223,6 @@ impl MetadataChange {
             .iter()
             .map(|op| op.path().to_string())
             .filter_map(|path| path.split('/').nth(1).map(|s| s.to_string()))
-            .map(|s| s.to_string())
             .collect()
     }
 
