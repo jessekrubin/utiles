@@ -11,5 +11,5 @@ fn main() {
         .round(Unit::Second)
         .expect("oh no, build time error");
     // build timestamp
-    println!("cargo:rustc-env=BUILD_TIMESTAMP={}", build_ts);
+    println!("cargo:rustc-env=BUILD_TIMESTAMP={build_ts}");
 }
