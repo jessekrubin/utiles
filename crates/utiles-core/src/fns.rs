@@ -19,7 +19,7 @@ use crate::{LngLat, Tile, UtilesCoreError};
 #[must_use]
 pub fn ult(x: u32, y: u32, z: u8) -> (f64, f64) {
     let z2 = f64::from(2_u32.pow(u32::from(z)));
-    let lon_deg = (f64::from(x) / z2) * 360.0 - 180.0;
+    let lon_deg = (f64::from(x) / z2).mul_add(360.0, -180.0);
     let lat_rad = ((1.0 - 2.0 * f64::from(y) / z2) * PI).sinh().atan();
     (lon_deg, lat_rad.to_degrees())
 }
@@ -474,7 +474,7 @@ pub fn lnglat2webmercator(lng: f64, lat: f64) -> (f64, f64) {
     } else if (lat + 90.0).abs() < f64::EPSILON {
         f64::NEG_INFINITY
     } else {
-        EARTH_RADIUS * (PI * 0.25 + 0.5 * lat.to_radians()).tan().ln()
+        EARTH_RADIUS * PI.mul_add(0.25, 0.5 * lat.to_radians()).tan().ln()
     };
     (x, y)
 }
@@ -492,8 +492,10 @@ pub fn lnglat2webmercator(lng: f64, lat: f64) -> (f64, f64) {
 #[must_use]
 #[inline]
 pub fn webmercator2lnglat(x: f64, y: f64) -> (f64, f64) {
-    let lng = x / EARTH_RADIUS * 180.0 / PI;
-    let lat = (2.0 * (y / EARTH_RADIUS).exp().atan() - PI * 0.5) * 180.0 / PI;
+    let lng = (x / EARTH_RADIUS).to_degrees();
+    let lat = 2.0f64
+        .mul_add((y / EARTH_RADIUS).exp().atan(), -(PI * 0.5))
+        .to_degrees();
     (lng, lat)
 }
 
@@ -733,8 +735,8 @@ pub fn bounding_tile(
 #[must_use]
 pub fn xyz2bbox(x: u32, y: u32, z: u8) -> WebBBox {
     let tile_size = EARTH_CIRCUMFERENCE / 2.0_f64.powi(i32::from(z));
-    let left = f64::from(x) * tile_size - EARTH_CIRCUMFERENCE / 2.0;
-    let top = EARTH_CIRCUMFERENCE / 2.0 - f64::from(y) * tile_size;
+    let left = f64::from(x).mul_add(tile_size, -(EARTH_CIRCUMFERENCE / 2.0));
+    let top = f64::from(y).mul_add(-tile_size, EARTH_CIRCUMFERENCE / 2.0);
 
     WebBBox::new(left, top - tile_size, left + tile_size, top)
 }
@@ -770,19 +772,15 @@ pub fn tile_ranges(
     zooms: ZoomOrZooms,
 ) -> Result<TileZBoxes, UtilesCoreError> {
     let zooms = as_zooms(zooms);
-    let bboxes: Vec<BBox> = BBox::from(bounds)
-        .bboxes()
-        .into_iter()
-        .map(|bbox| {
-            // clip to web mercator extent
-            BBox {
-                north: bbox.north.min(85.051_129),
-                south: bbox.south.max(-85.051_129),
-                east: bbox.east.min(180.0),
-                west: bbox.west.max(-180.0),
-            }
-        })
-        .collect();
+    let bboxes = BBox::from(bounds).bboxes().into_iter().map(|bbox| {
+        // clip to web mercator extent
+        BBox {
+            north: bbox.north.min(85.051_129),
+            south: bbox.south.max(-85.051_129),
+            east: bbox.east.min(180.0),
+            west: bbox.west.max(-180.0),
+        }
+    });
     let ranges: Vec<TileZBox> = bboxes
         .into_iter()
         .flat_map(move |bbox| {
@@ -844,19 +842,15 @@ pub fn tiles(
         east: bounds.2,
         west: bounds.0,
     };
-    let bboxes: Vec<BBox> = bboxthing
-        .bboxes()
-        .into_iter()
-        .map(|bbox| {
-            // clip to web mercator extent
-            BBox {
-                north: bbox.north.min(85.051_129),
-                south: bbox.south.max(-85.051_129),
-                east: bbox.east.min(180.0),
-                west: bbox.west.max(-180.0),
-            }
-        })
-        .collect();
+    let bboxes = bboxthing.bboxes().into_iter().map(|bbox| {
+        // clip to web mercator extent
+        BBox {
+            north: bbox.north.min(85.051_129),
+            south: bbox.south.max(-85.051_129),
+            east: bbox.east.min(180.0),
+            west: bbox.west.max(-180.0),
+        }
+    });
     bboxes.into_iter().flat_map(move |bbox| {
         let zooms = zooms.clone();
         zooms.into_iter().flat_map(move |zoom| {

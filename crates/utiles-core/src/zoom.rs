@@ -14,8 +14,9 @@ pub fn zoom_max_xy(zoom: u8) -> u32 {
     2_u32.pow(u32::from(zoom)) - 1
 }
 
-/// `ZoomSet` is a set of zoom levels represented as a 32-bit unsigned integer
-/// where each bit represents a zoom level (0 <= z <= 30). BY DEFAULT: The
+/// `ZoomSet` is a bit-set of zoom levels represented as a `u32`.
+///
+/// Each bit represents a zoom level (0 <= z <= 30). BY DEFAULT: The
 /// least significant bit represents zoom level 0 and the SECOND most significant
 /// bit represents zoom level 30. BUT if the MOST significant bit is 1, then the
 /// order is reversed.

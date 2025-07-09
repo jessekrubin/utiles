@@ -9,7 +9,7 @@ fn cover_geotypes() {
     let expected = expected_burn_test_tiles();
     let geojson_string = include_str!("./cover-test.geo.json");
     let geojson: GeoJson = geojson_string.parse::<GeoJson>().unwrap();
-    let gt_geometry = geo_types::Geometry::<f64>::try_from(geojson.clone()).unwrap();
+    let gt_geometry = geo_types::Geometry::<f64>::try_from(geojson).unwrap();
     let tilescoverage = geometry2tiles(&gt_geometry, 9).unwrap();
     let tiles_set: HashSet<Tile> = tilescoverage.into_iter().collect();
     let expected_set: HashSet<Tile> = expected.into_iter().collect();

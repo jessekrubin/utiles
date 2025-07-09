@@ -18,5 +18,5 @@ where
             _ => zoom = Some(z),
         }
     }
-    zoom.ok_or(UtilesCoreError::AdHoc("No tiles provided".to_string()))
+    zoom.ok_or_else(|| UtilesCoreError::AdHoc("No tiles provided".to_string()))
 }
