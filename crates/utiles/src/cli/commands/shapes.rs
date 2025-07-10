@@ -179,8 +179,6 @@ pub(crate) fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
         println!("\"type\": \"FeatureCollection\",");
         println!("\"features\": [");
     }
-    let mut lons: Vec<f64> = Vec::new();
-    let mut lats: Vec<f64> = Vec::new();
     let output_bbox = match args.output_mode {
         Some(output_mode) => matches!(
             output_mode,
@@ -207,8 +205,6 @@ pub(crate) fn shapes_main(args: ShapesArgs) -> UtilesResult<()> {
         if let Some(id) = tile_n_properties.id {
             f.id = id;
         }
-        lons.extend(f.bbox_lons());
-        lats.extend(f.bbox_lats());
         if args.extents {
             println!("{}", f.extents_string());
         } else if args.collect {

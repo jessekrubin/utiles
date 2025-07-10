@@ -142,13 +142,13 @@ impl MbtLintRule for MetadataDuplicateKeys {
         let duplicate_rows = metadata2duplicates(rows.clone());
         if !duplicate_rows.is_empty() {
             // convert to map of key -> list[values]
-            let map = metadata2duplicate_keys(rows.clone());
+            let map = metadata2duplicate_keys(rows);
             let violations = map
                 .into_iter()
                 .map(|(key, values)| {
                     let values_str = values
                         .into_iter()
-                        .map(|v| v.value.to_string())
+                        .map(|v| v.value)
                         .collect::<Vec<String>>()
                         .join(", ");
 

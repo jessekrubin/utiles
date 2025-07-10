@@ -183,7 +183,7 @@ fn polygon_cover(
             for y in ymin..ymax {
                 // parametric t along the edge at integer y
                 let t = f64::from(y - y0) / f64::from(dy);
-                let x = (f64::from(x0) + t * f64::from(dx)).floor() as u32;
+                let x = t.mul_add(f64::from(dx), f64::from(x0)).floor() as u32;
                 scanlines.entry(y as u32).or_default().push(x);
             }
         }

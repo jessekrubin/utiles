@@ -4,7 +4,7 @@ use crate::{Point2d, Tile, TileLike, UtilesCoreError, UtilesCoreResult, fns};
 use fns::flipy;
 
 /// A struct representing a bbox of tiles at a specific zoom level
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TileZBox {
     pub zoom: u8,
     pub min: Point2d<u32>,
