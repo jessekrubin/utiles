@@ -45,7 +45,7 @@ pub enum BBoxContainable {
 
 impl From<(f64, f64, f64, f64)> for BBox {
     fn from(bbox: (f64, f64, f64, f64)) -> Self {
-        BBox::new(bbox.0, bbox.1, bbox.2, bbox.3)
+        Self::new(bbox.0, bbox.1, bbox.2, bbox.3)
     }
 }
 
@@ -78,7 +78,7 @@ impl BBox {
     /// Create a new `BBox`
     #[must_use]
     pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
-        BBox {
+        Self {
             west,
             south,
             east,
@@ -89,7 +89,7 @@ impl BBox {
     /// Returns a bounding box that covers the entire world.
     #[must_use]
     pub fn world_planet() -> Self {
-        BBox {
+        Self {
             west: -180.0,
             south: -90.0,
             east: 180.0,
@@ -100,7 +100,7 @@ impl BBox {
     /// Returns a bounding box that covers the entire web mercator world.
     #[must_use]
     pub fn world_web() -> Self {
-        BBox {
+        Self {
             west: -180.0,
             south: -85.051_129,
             east: 180.0,
@@ -110,7 +110,7 @@ impl BBox {
 
     #[must_use]
     pub fn clamp_web(&self) -> Self {
-        BBox {
+        Self {
             west: self.west.max(-180.0),
             south: self.south.max(-85.051_129),
             east: self.east.min(180.0),
@@ -119,8 +119,8 @@ impl BBox {
     }
 
     #[must_use]
-    pub fn clamp(&self, o: &BBox) -> Self {
-        BBox {
+    pub fn clamp(&self, o: &Self) -> Self {
+        Self {
             west: self.west.max(o.west),
             south: self.south.max(o.south),
             east: self.east.min(o.east),
@@ -133,7 +133,7 @@ impl BBox {
         let east = LngLat::geo_wrap_lng(self.east);
         let west = LngLat::geo_wrap_lng(self.west);
 
-        BBox {
+        Self {
             west,
             south: self.south,
             east,
@@ -263,7 +263,7 @@ impl BBox {
 
     /// Returns true if the current instance contains the given `BBox`
     #[must_use]
-    pub fn contains_bbox(&self, other: &BBox) -> bool {
+    pub fn contains_bbox(&self, other: &Self) -> bool {
         if self.is_antimeridian() {
             // BBox crosses the antimeridian
             if other.is_antimeridian() {
@@ -301,7 +301,7 @@ impl BBox {
 
     /// Returns true if the current instance is within the given bounding box.
     #[must_use]
-    pub fn is_within(&self, other: &BBox) -> bool {
+    pub fn is_within(&self, other: &Self) -> bool {
         self.north <= other.north
             && self.south >= other.south
             && self.east <= other.east
@@ -310,7 +310,7 @@ impl BBox {
 
     /// Returns true if the current instance intersects with the given bounding box.
     #[must_use]
-    pub fn intersects(&self, other: &BBox) -> bool {
+    pub fn intersects(&self, other: &Self) -> bool {
         self.north >= other.south
             && self.south <= other.north
             && self.east >= other.west
@@ -343,16 +343,16 @@ impl BBox {
     /// assert_eq!(bboxes_crosses.len(), 2); // Split into two bounding boxes
     /// ```
     #[must_use]
-    pub fn bboxes(&self) -> Vec<BBox> {
+    pub fn bboxes(&self) -> Vec<Self> {
         if self.crosses_antimeridian() {
             vec![
-                BBox {
+                Self {
                     north: self.north,
                     south: self.south,
                     east: 180.0,
                     west: self.west,
                 },
-                BBox {
+                Self {
                     north: self.north,
                     south: self.south,
                     east: self.east,
@@ -429,13 +429,13 @@ pub fn geobbox_merge(bboxes: &[BBox]) -> BBox {
 
 impl From<BBox> for BBoxTuple {
     fn from(bbox: BBox) -> Self {
-        BBoxTuple(bbox.west, bbox.south, bbox.east, bbox.north)
+        Self(bbox.west, bbox.south, bbox.east, bbox.north)
     }
 }
 
 impl From<BBoxTuple> for BBox {
     fn from(tuple: BBoxTuple) -> Self {
-        BBox::new(tuple.0, tuple.1, tuple.2, tuple.3)
+        Self::new(tuple.0, tuple.1, tuple.2, tuple.3)
     }
 }
 
@@ -443,7 +443,7 @@ impl From<&String> for BBox {
     fn from(s: &String) -> Self {
         // remove leading and trailing quotes
         let s = s.trim_matches('"');
-        parse_bbox(s).unwrap_or_else(|_e| BBox::world_planet())
+        parse_bbox(s).unwrap_or_else(|_e| Self::world_planet())
     }
 }
 
@@ -458,7 +458,7 @@ impl TryFrom<&str> for BBox {
 impl WebBBox {
     #[must_use]
     pub fn new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
-        WebBBox {
+        Self {
             min: Point2d::new(left, bottom),
             max: Point2d::new(right, top),
         }
@@ -561,14 +561,14 @@ impl From<BBox> for WebBBox {
     fn from(bbox: BBox) -> Self {
         let (west_merc, south_merc) = xy(bbox.west(), bbox.south(), None);
         let (east_merc, north_merc) = xy(bbox.east(), bbox.north(), None);
-        WebBBox::new(west_merc, south_merc, east_merc, north_merc)
+        Self::new(west_merc, south_merc, east_merc, north_merc)
     }
 }
 
 impl From<Tile> for WebBBox {
     fn from(tile: Tile) -> Self {
         let bbox = tile.geobbox();
-        WebBBox::new(bbox.west, bbox.south, bbox.east, bbox.north)
+        Self::new(bbox.west, bbox.south, bbox.east, bbox.north)
     }
 }
 

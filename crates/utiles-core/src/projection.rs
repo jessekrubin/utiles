@@ -18,8 +18,8 @@ impl TryFrom<String> for Projection {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         match value.to_lowercase().as_str() {
-            "geographic" => Ok(Projection::Geographic),
-            "mercator" => Ok(Projection::Mercator),
+            "geographic" => Ok(Self::Geographic),
+            "mercator" => Ok(Self::Mercator),
             _ => Err(UtilesCoreError::InvalidProjection(value)),
         }
     }
@@ -28,8 +28,8 @@ impl TryFrom<String> for Projection {
 impl fmt::Display for Projection {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Projection::Geographic => write!(f, "geographic"),
-            Projection::Mercator => write!(f, "mercator"),
+            Self::Geographic => write!(f, "geographic"),
+            Self::Mercator => write!(f, "mercator"),
         }
     }
 }

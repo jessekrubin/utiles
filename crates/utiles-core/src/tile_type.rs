@@ -445,20 +445,20 @@ impl TileTypeV1 {
     #[must_use]
     pub fn headers(&self) -> Vec<(&'static str, &'static str)> {
         match self {
-            TileTypeV1::Png => vec![("Content-Type", "image/png")],
-            TileTypeV1::Jpg => vec![("Content-Type", "image/jpeg")],
-            TileTypeV1::Json => vec![("Content-Type", "application/json")],
-            TileTypeV1::Gif => vec![("Content-Type", "image/gif")],
-            TileTypeV1::Webp => vec![("Content-Type", "image/webp")],
-            TileTypeV1::Pbf => vec![
+            Self::Png => vec![("Content-Type", "image/png")],
+            Self::Jpg => vec![("Content-Type", "image/jpeg")],
+            Self::Json => vec![("Content-Type", "application/json")],
+            Self::Gif => vec![("Content-Type", "image/gif")],
+            Self::Webp => vec![("Content-Type", "image/webp")],
+            Self::Pbf => vec![
                 ("Content-Type", "application/x-protobuf"),
                 ("Content-Encoding", "deflate"),
             ],
-            TileTypeV1::Pbfgz => vec![
+            Self::Pbfgz => vec![
                 ("Content-Type", "application/x-protobuf"),
                 ("Content-Encoding", "gzip"),
             ],
-            TileTypeV1::Unknown => vec![],
+            Self::Unknown => vec![],
         }
     }
 }

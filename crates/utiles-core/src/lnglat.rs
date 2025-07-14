@@ -17,7 +17,7 @@ impl LngLat {
     /// Create a new `LngLat` from longitude & latitude.
     #[must_use]
     pub fn new(lng: f64, lat: f64) -> Self {
-        LngLat {
+        Self {
             xy: Point2d::new(lng, lat),
         }
     }
@@ -54,8 +54,8 @@ impl LngLat {
 
     /// Return wrapped lnglat
     #[must_use]
-    pub fn geo_wrap(&self) -> LngLat {
-        LngLat {
+    pub fn geo_wrap(&self) -> Self {
+        Self {
             xy: Point2d::new(Self::geo_wrap_lng(self.xy.x), self.xy.y),
         }
     }
@@ -128,7 +128,7 @@ impl IntoIterator for LngLat {
 
 impl From<(f64, f64)> for LngLat {
     fn from(xy: (f64, f64)) -> Self {
-        LngLat::new(xy.0, xy.1)
+        Self::new(xy.0, xy.1)
     }
 }
 
@@ -141,7 +141,7 @@ impl FromStr for LngLat {
         // parse parts to float
         let x = parts[0].parse::<f64>()?;
         let y = parts[1].parse::<f64>()?;
-        Ok(LngLat::new(x, y))
+        Ok(Self::new(x, y))
     }
 }
 

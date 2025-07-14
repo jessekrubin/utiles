@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 impl From<(u8, u32, u32)> for Tile {
     fn from(xyz: (u8, u32, u32)) -> Self {
-        Tile {
+        Self {
             z: xyz.0,
             x: xyz.1,
             y: xyz.2,
@@ -19,7 +19,7 @@ impl From<(u8, u32, u32)> for Tile {
 
 impl From<(u32, u32, u8)> for Tile {
     fn from(xyz: (u32, u32, u8)) -> Self {
-        Tile {
+        Self {
             x: xyz.0,
             y: xyz.1,
             z: xyz.2,
@@ -29,7 +29,7 @@ impl From<(u32, u32, u8)> for Tile {
 
 impl From<TileTuple> for Tile {
     fn from(xyz: TileTuple) -> Self {
-        Tile {
+        Self {
             x: xyz.0,
             y: xyz.1,
             z: xyz.2,
@@ -61,7 +61,7 @@ impl TryFrom<(u32, u32, u32)> for Tile {
                 xyz.0, xyz.1, xyz.2
             )))
         } else {
-            Ok(Tile {
+            Ok(Self {
                 x: xyz.0,
                 y: xyz.1,
                 z,
@@ -74,7 +74,7 @@ impl TryFrom<&str> for Tile {
     type Error = UtilesCoreError;
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
-        let res = Tile::from_str(s);
+        let res = Self::from_str(s);
         match res {
             Ok(tile) => Ok(tile),
             Err(e) => Err(UtilesCoreError::TileParseError(e.to_string())),
@@ -86,7 +86,7 @@ impl TryFrom<Value> for Tile {
     type Error = UtilesCoreError;
 
     fn try_from(val: Value) -> Result<Self, Self::Error> {
-        Tile::try_from(&val)
+        Self::try_from(&val)
     }
 }
 
@@ -112,7 +112,7 @@ impl TryFrom<(u64, u64, u64)> for Tile {
                 tuple.0, tuple.1, tuple.2
             ))
         })?;
-        Ok(Tile::new(x, y, z))
+        Ok(Self::new(x, y, z))
     }
 }
 
@@ -140,7 +140,7 @@ impl TryFrom<&Vec<Value>> for Tile {
                     serde_json::to_string(&arr).unwrap_or_default(),
                 )
             })?;
-            Tile::try_from((x, y, z))
+            Self::try_from((x, y, z))
         }
     }
 }
@@ -151,7 +151,7 @@ impl TryFrom<&Value> for Tile {
     fn try_from(val: &Value) -> Result<Self, Self::Error> {
         match val {
             Value::Array(v) => {
-                let t = Tile::try_from(v)?;
+                let t = Self::try_from(v)?;
                 Ok(t)
             }
             Value::Object(v) => {
@@ -174,7 +174,7 @@ impl TryFrom<&Value> for Tile {
                                 .expect("Invalid json object for Tile from Value"),
                         )
                     })?;
-                    Tile::try_from((x, y, z))
+                    Self::try_from((x, y, z))
                 } else if v.contains_key("tile")
                     && v["tile"].is_array()
                     && v["tile"]
@@ -184,7 +184,7 @@ impl TryFrom<&Value> for Tile {
                         == 3
                 {
                     let tuple = serde_json::from_value::<TileTuple>(v["tile"].clone())?;
-                    Ok(Tile::from(tuple))
+                    Ok(Self::from(tuple))
                 } else {
                     Err(UtilesCoreError::InvalidJson(
                         serde_json::to_string(&v)
@@ -231,6 +231,6 @@ impl TryFrom<&Map<String, Value>> for Tile {
                 serde_json::to_string(&map).unwrap_or_default(),
             )
         })?;
-        Ok(Tile::new(x, y, z))
+        Ok(Self::new(x, y, z))
     }
 }

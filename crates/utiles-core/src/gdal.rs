@@ -31,7 +31,7 @@ impl GeoTransform {
     /// Create a new `GeoTransform` with given coefficients.
     #[must_use]
     pub fn new(gt0: f64, gt1: f64, gt2: f64, gt3: f64, gt4: f64, gt5: f64) -> Self {
-        GeoTransform {
+        Self {
             gt0,
             gt1,
             gt2,
@@ -55,7 +55,7 @@ impl GeoTransform {
 
 impl From<(f64, f64, f64, f64, f64, f64)> for GeoTransform {
     fn from(gt: (f64, f64, f64, f64, f64, f64)) -> Self {
-        GeoTransform::new(gt.0, gt.1, gt.2, gt.3, gt.4, gt.5)
+        Self::new(gt.0, gt.1, gt.2, gt.3, gt.4, gt.5)
     }
 }
 

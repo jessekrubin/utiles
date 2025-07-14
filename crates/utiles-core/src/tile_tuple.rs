@@ -14,7 +14,7 @@ impl TileTuple {
 
 impl From<(u32, u32, u8)> for TileTuple {
     fn from(xyz: (u32, u32, u8)) -> Self {
-        TileTuple(xyz.0, xyz.1, xyz.2)
+        Self(xyz.0, xyz.1, xyz.2)
     }
 }
 
