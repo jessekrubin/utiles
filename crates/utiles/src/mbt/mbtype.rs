@@ -29,12 +29,12 @@ impl MbtType {
     #[must_use]
     pub fn as_str(&self) -> &str {
         match self {
-            MbtType::Flat => "flat",
-            MbtType::Hash => "hash",
-            MbtType::Norm => "norm",
-            MbtType::Tippecanoe => "tippecanoe",
-            MbtType::Planetiler => "planetiler",
-            MbtType::Unknown => "unknown",
+            Self::Flat => "flat",
+            Self::Hash => "hash",
+            Self::Norm => "norm",
+            Self::Tippecanoe => "tippecanoe",
+            Self::Planetiler => "planetiler",
+            Self::Unknown => "unknown",
         }
     }
 }
@@ -44,12 +44,12 @@ impl FromStr for MbtType {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let t = match s.to_ascii_lowercase().as_str() {
-            "flat" => MbtType::Flat,
-            "hash" | "flat-with-hash" => MbtType::Hash,
-            "norm" | "normalized" => MbtType::Norm,
-            "tippecanoe" => MbtType::Tippecanoe,
-            "planetiler" => MbtType::Planetiler,
-            _ => MbtType::Unknown,
+            "flat" => Self::Flat,
+            "hash" | "flat-with-hash" => Self::Hash,
+            "norm" | "normalized" => Self::Norm,
+            "tippecanoe" => Self::Tippecanoe,
+            "planetiler" => Self::Planetiler,
+            _ => Self::Unknown,
         };
         Ok(t)
     }

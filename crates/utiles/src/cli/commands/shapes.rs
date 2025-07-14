@@ -29,7 +29,7 @@ pub(crate) struct ShapesProject {
 
 impl Default for ShapesProject {
     fn default() -> Self {
-        ShapesProject {
+        Self {
             geographic: true,
             mercator: false,
         }
@@ -54,7 +54,7 @@ pub(crate) struct ShapesOutputMode {
 
 impl Default for ShapesOutputMode {
     fn default() -> Self {
-        ShapesOutputMode {
+        Self {
             feature: true,
             bbox: false,
         }
@@ -95,7 +95,7 @@ pub struct ShapesArgs {
 
 impl Default for ShapesArgs {
     fn default() -> Self {
-        ShapesArgs {
+        Self {
             inargs: TileInputStreamArgs { input: None },
             seq: false,
             precision: None,

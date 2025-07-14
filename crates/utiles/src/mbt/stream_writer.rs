@@ -18,7 +18,7 @@ pub enum MbtWriterStreamData {
 
 impl From<(Tile, Vec<u8>, Option<String>)> for MbtWriterStreamData {
     fn from(data: (Tile, Vec<u8>, Option<String>)) -> Self {
-        MbtWriterStreamData::Tile(data.0, data.1, data.2)
+        Self::Tile(data.0, data.1, data.2)
     }
 }
 

@@ -34,7 +34,7 @@ pub(super) struct CopyPastaPreflightAnalysis {
 }
 
 impl CopyPasta {
-    pub(super) fn new(cfg: CopyConfig) -> UtilesResult<CopyPasta> {
+    pub(super) fn new(cfg: CopyConfig) -> UtilesResult<Self> {
         cfg.check()?;
         // sanity check stuff here...
         Ok(Self { cfg })

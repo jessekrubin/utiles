@@ -68,7 +68,7 @@ impl FromStr for StdInterator {
     type Err = io::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(StdInterator::new(Some(s.to_string())))
+        Ok(Self::new(Some(s.to_string())))
     }
 }
 

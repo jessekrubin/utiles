@@ -233,7 +233,7 @@ impl MetadataChange {
 
     pub fn apply_changes_to_connection(
         conn: &rusqlite::Connection,
-        changes: &Vec<MetadataChange>,
+        changes: &Vec<Self>,
     ) -> Result<(), rusqlite::Error> {
         for change in changes {
             for patch in change.forward.iter() {

@@ -20,11 +20,11 @@ impl Default for LagerLevel {
 impl std::fmt::Display for LagerLevel {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match *self {
-            LagerLevel::Error => write!(f, "error"),
-            LagerLevel::Warn => write!(f, "warn"),
-            LagerLevel::Info => write!(f, "info"),
-            LagerLevel::Debug => write!(f, "debug"),
-            LagerLevel::Trace => write!(f, "trace"),
+            Self::Error => write!(f, "error"),
+            Self::Warn => write!(f, "warn"),
+            Self::Info => write!(f, "info"),
+            Self::Debug => write!(f, "debug"),
+            Self::Trace => write!(f, "trace"),
         }
     }
 }
@@ -34,11 +34,11 @@ impl FromStr for LagerLevel {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "trace" => Ok(LagerLevel::Trace),
-            "debug" => Ok(LagerLevel::Debug),
-            "info" => Ok(LagerLevel::Info),
-            "warn" => Ok(LagerLevel::Warn),
-            "error" => Ok(LagerLevel::Error),
+            "trace" => Ok(Self::Trace),
+            "debug" => Ok(Self::Debug),
+            "info" => Ok(Self::Info),
+            "warn" => Ok(Self::Warn),
+            "error" => Ok(Self::Error),
             _ => {
                 let e = format!(
                     "invalid lager level '{s}' (expected one of: trace, debug, info, warn, error)"
