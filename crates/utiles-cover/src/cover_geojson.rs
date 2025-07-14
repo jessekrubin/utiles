@@ -249,7 +249,7 @@ pub struct GeojsonCoverOptions {
 
 impl From<u8> for GeojsonCoverOptions {
     fn from(zoom: u8) -> Self {
-        GeojsonCoverOptions {
+        Self {
             zoom,
             minzoom: None,
         }
@@ -258,7 +258,7 @@ impl From<u8> for GeojsonCoverOptions {
 
 impl From<(u8, u8)> for GeojsonCoverOptions {
     fn from((zoom, minzoom): (u8, u8)) -> Self {
-        GeojsonCoverOptions {
+        Self {
             zoom,
             minzoom: Some(minzoom),
         }
