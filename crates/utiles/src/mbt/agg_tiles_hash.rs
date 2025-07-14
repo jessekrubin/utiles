@@ -113,14 +113,12 @@ pub(super) fn tile_stream_to_bytes_stream(
 impl HashType {
     async fn hash_stream(&self, data: ReceiverStream<Vec<u8>>) -> (String, usize) {
         match self {
-            HashType::Md5 => hash_stream::<md5::Md5>(data).await,
-            HashType::Fnv1a => hash_stream::<Fnv>(data).await,
-            HashType::Xxh32 => hash_stream::<noncrypto_digests::Xxh32>(data).await,
-            HashType::Xxh64 => hash_stream::<noncrypto_digests::Xxh64>(data).await,
-            HashType::Xxh3_64 => hash_stream::<noncrypto_digests::Xxh3_64>(data).await,
-            HashType::Xxh3_128 => {
-                hash_stream::<noncrypto_digests::Xxh3_128>(data).await
-            }
+            Self::Md5 => hash_stream::<md5::Md5>(data).await,
+            Self::Fnv1a => hash_stream::<Fnv>(data).await,
+            Self::Xxh32 => hash_stream::<noncrypto_digests::Xxh32>(data).await,
+            Self::Xxh64 => hash_stream::<noncrypto_digests::Xxh64>(data).await,
+            Self::Xxh3_64 => hash_stream::<noncrypto_digests::Xxh3_64>(data).await,
+            Self::Xxh3_128 => hash_stream::<noncrypto_digests::Xxh3_128>(data).await,
         }
     }
 }

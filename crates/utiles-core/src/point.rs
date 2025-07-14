@@ -30,7 +30,7 @@ pub struct Point3d<T: Copy + PartialOrd + PartialEq + Debug + Add + Sub> {
 impl<T: Copy + PartialOrd + PartialEq + Debug + Add + Sub> Point2d<T> {
     /// Create a new `Point2d`
     pub fn new(x: T, y: T) -> Self {
-        Point2d { x, y }
+        Self { x, y }
     }
 
     /// Return the x value
@@ -47,7 +47,7 @@ impl<T: Copy + PartialOrd + PartialEq + Debug + Add + Sub> Point2d<T> {
 impl<T: Copy + PartialOrd + PartialEq + Debug + Add + Sub> Point3d<T> {
     /// Create a new `Point3d`
     pub fn new(x: T, y: T, z: T) -> Self {
-        Point3d { x, y, z }
+        Self { x, y, z }
     }
 
     /// Return the x value

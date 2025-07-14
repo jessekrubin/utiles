@@ -23,7 +23,7 @@ impl DbPath {
     pub fn new(fspath: &str) -> Self {
         // let p = PathBuf::from(fspath);
         pathlike2dbpath(fspath).map_or(
-            DbPath {
+            Self {
                 fspath: "unknown".to_string(),
                 filename: "unknown".to_string(),
             },
@@ -33,7 +33,7 @@ impl DbPath {
 
     #[must_use]
     pub fn memory() -> Self {
-        DbPath {
+        Self {
             fspath: ":memory:".to_string(),
             filename: ":memory:".to_string(),
         }

@@ -74,7 +74,7 @@ impl SqliteDbAsyncClient {
             "Opening sqlite db readonly with client: {}",
             path.as_ref().display()
         );
-        SqliteDbAsyncClient::open(path, Some(flags)).await
+        Self::open(path, Some(flags)).await
     }
 
     pub async fn open_existing<P: AsRef<Path>>(
@@ -90,7 +90,7 @@ impl SqliteDbAsyncClient {
                 path.as_ref().display().to_string(),
             ));
         }
-        SqliteDbAsyncClient::open(path, flags).await
+        Self::open(path, flags).await
     }
 }
 #[async_trait]

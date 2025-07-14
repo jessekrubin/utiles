@@ -278,9 +278,9 @@ pub enum DbtypeOption {
 impl From<&DbtypeOption> for MbtType {
     fn from(opt: &DbtypeOption) -> Self {
         match opt {
-            DbtypeOption::Flat => MbtType::Flat,
-            DbtypeOption::Hash => MbtType::Hash,
-            DbtypeOption::Norm => MbtType::Norm,
+            DbtypeOption::Flat => Self::Flat,
+            DbtypeOption::Hash => Self::Hash,
+            DbtypeOption::Norm => Self::Norm,
         }
     }
 }
@@ -320,9 +320,9 @@ pub enum SqliteCommands {
 impl SqliteCommands {
     pub async fn run(&self) -> UtilesResult<()> {
         match self {
-            SqliteCommands::Analyze(args) => analyze_main(args).await,
-            SqliteCommands::Header(args) => header_main(args).await,
-            SqliteCommands::Vacuum(args) => vacuum_main(args).await,
+            Self::Analyze(args) => analyze_main(args).await,
+            Self::Header(args) => header_main(args).await,
+            Self::Vacuum(args) => vacuum_main(args).await,
         }
     }
 }
@@ -932,11 +932,11 @@ pub enum ConflictStrategy {
 impl From<ConflictStrategy> for InsertStrategy {
     fn from(cs: ConflictStrategy) -> Self {
         match cs {
-            ConflictStrategy::Undefined => InsertStrategy::None,
-            ConflictStrategy::Ignore => InsertStrategy::Ignore,
-            ConflictStrategy::Replace => InsertStrategy::Replace,
-            ConflictStrategy::Abort => InsertStrategy::Abort,
-            ConflictStrategy::Fail => InsertStrategy::Fail,
+            ConflictStrategy::Undefined => Self::None,
+            ConflictStrategy::Ignore => Self::Ignore,
+            ConflictStrategy::Replace => Self::Replace,
+            ConflictStrategy::Abort => Self::Abort,
+            ConflictStrategy::Fail => Self::Fail,
         }
     }
 }
@@ -1023,9 +1023,9 @@ impl CopyArgs {
 }
 
 impl From<&CopyArgs> for CopyConfig {
-    fn from(args: &CopyArgs) -> CopyConfig {
+    fn from(args: &CopyArgs) -> Self {
         let dbtype = args.dst_type.as_ref().map(|dbtype| dbtype.into());
-        CopyConfig {
+        Self {
             src: PathBuf::from(&args.src),
             dst: PathBuf::from(&args.dst),
             zset: args.zoom_set(),

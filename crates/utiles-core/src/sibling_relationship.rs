@@ -18,10 +18,10 @@ impl From<(u32, u32)> for SiblingRelationship {
         let is_left = value.0 % 2 == 0;
         let is_top = value.1 % 2 == 0;
         match (is_left, is_top) {
-            (true, true) => SiblingRelationship::UpperLeft,
-            (true, false) => SiblingRelationship::LowerLeft,
-            (false, true) => SiblingRelationship::UpperRight,
-            (false, false) => SiblingRelationship::LowerRight,
+            (true, true) => Self::UpperLeft,
+            (true, false) => Self::LowerLeft,
+            (false, true) => Self::UpperRight,
+            (false, false) => Self::LowerRight,
         }
     }
 }
@@ -31,10 +31,10 @@ impl From<Tile> for SiblingRelationship {
         let is_left = value.x % 2 == 0;
         let is_top = value.y % 2 == 0;
         match (is_left, is_top) {
-            (true, true) => SiblingRelationship::UpperLeft,
-            (true, false) => SiblingRelationship::LowerLeft,
-            (false, true) => SiblingRelationship::UpperRight,
-            (false, false) => SiblingRelationship::LowerRight,
+            (true, true) => Self::UpperLeft,
+            (true, false) => Self::LowerLeft,
+            (false, true) => Self::UpperRight,
+            (false, false) => Self::LowerRight,
         }
     }
 }

@@ -46,7 +46,7 @@ impl MbtMetadataRow {
     /// Create a new `MbtilesMetadataRow`
     #[must_use]
     pub fn new(name: String, value: String) -> Self {
-        MbtMetadataRow { name, value }
+        Self { name, value }
     }
 }
 
@@ -58,7 +58,7 @@ impl From<&MbtMetadataRow> for MbtilesMetadataRowParsed {
             Ok(v) => v,
             Err(_) => Value::String(row.value.clone()),
         };
-        MbtilesMetadataRowParsed {
+        Self {
             name: row.name.to_string(),
             value,
         }
@@ -67,7 +67,7 @@ impl From<&MbtMetadataRow> for MbtilesMetadataRowParsed {
 
 impl MbtilesMetadataJson {
     #[must_use]
-    pub fn from_key_value(key: &str, value: &str) -> MbtilesMetadataJson {
+    pub fn from_key_value(key: &str, value: &str) -> Self {
         let mut obj = BTreeMap::new();
         // try and parse the value...
         let val = match value.parse::<Value>() {
@@ -75,15 +75,15 @@ impl MbtilesMetadataJson {
             Err(_) => Value::String(value.to_string()),
         };
         obj.insert(key.to_string(), val);
-        MbtilesMetadataJson::Obj(obj)
+        Self::Obj(obj)
     }
 
     pub fn delete(&mut self, key: &str) {
         match self {
-            MbtilesMetadataJson::Obj(obj) => {
+            Self::Obj(obj) => {
                 obj.remove(key);
             }
-            MbtilesMetadataJson::Arr(arr) => {
+            Self::Arr(arr) => {
                 arr.retain(|row| row.name != key);
             }
         }
@@ -95,10 +95,10 @@ impl MbtilesMetadataJson {
             Err(_) => Value::String(value.to_string()),
         };
         match self {
-            MbtilesMetadataJson::Obj(obj) => {
+            Self::Obj(obj) => {
                 obj.insert(key.to_string(), val);
             }
-            MbtilesMetadataJson::Arr(arr) => {
+            Self::Arr(arr) => {
                 arr.push(MbtilesMetadataRowParsed {
                     name: key.to_string(),
                     value: val,
@@ -113,7 +113,7 @@ impl MbtilesMetadataJson {
             Err(_) => Value::String(value.to_string()),
         };
         match self {
-            MbtilesMetadataJson::Obj(obj) => {
+            Self::Obj(obj) => {
                 // if key exists, and value is different update value
                 if let Some(v) = obj.get_mut(key) {
                     if v != &val {
@@ -124,7 +124,7 @@ impl MbtilesMetadataJson {
                     obj.insert(key.to_string(), val);
                 } // baboom
             }
-            MbtilesMetadataJson::Arr(arr) => {
+            Self::Arr(arr) => {
                 // if key exists update value
                 if let Some(row) = arr.iter_mut().find(|row| row.name == key) {
                     if row.value != val {
@@ -143,8 +143,8 @@ impl MbtilesMetadataJson {
     #[must_use]
     pub fn as_obj(&self) -> BTreeMap<String, Value> {
         match self {
-            MbtilesMetadataJson::Obj(obj) => obj.clone(),
-            MbtilesMetadataJson::Arr(arr) => {
+            Self::Obj(obj) => obj.clone(),
+            Self::Arr(arr) => {
                 let obj: BTreeMap<String, Value> =
                     arr.iter().fold(BTreeMap::new(), |mut acc, row| {
                         acc.insert(row.name.clone(), row.value.clone());
@@ -159,7 +159,7 @@ impl MbtilesMetadataJson {
     #[must_use]
     pub fn as_obj_raw(&self) -> BTreeMap<String, String> {
         match self {
-            MbtilesMetadataJson::Obj(obj) => {
+            Self::Obj(obj) => {
                 let obj: BTreeMap<String, String> = obj
                     .iter()
                     .map(|(k, v)| {
@@ -172,7 +172,7 @@ impl MbtilesMetadataJson {
                     .collect();
                 obj
             }
-            MbtilesMetadataJson::Arr(arr) => {
+            Self::Arr(arr) => {
                 let obj: BTreeMap<String, String> = arr
                     .iter()
                     .map(|row| {
@@ -191,8 +191,8 @@ impl MbtilesMetadataJson {
     #[must_use]
     pub fn as_arr(&self) -> Vec<MbtilesMetadataRowParsed> {
         match self {
-            MbtilesMetadataJson::Arr(arr) => arr.clone(),
-            MbtilesMetadataJson::Obj(obj) => {
+            Self::Arr(arr) => arr.clone(),
+            Self::Obj(obj) => {
                 let arr: Vec<MbtilesMetadataRowParsed> = obj
                     .iter()
                     .map(|(k, v)| MbtilesMetadataRowParsed {
@@ -207,14 +207,14 @@ impl MbtilesMetadataJson {
 
     pub fn stringify(&self, pretty: bool) -> Result<String, serde_json::Error> {
         match self {
-            MbtilesMetadataJson::Obj(obj) => {
+            Self::Obj(obj) => {
                 if pretty {
                     serde_json::to_string_pretty(obj)
                 } else {
                     serde_json::to_string(obj)
                 }
             }
-            MbtilesMetadataJson::Arr(arr) => {
+            Self::Arr(arr) => {
                 if pretty {
                     serde_json::to_string_pretty(arr)
                 } else {
@@ -265,11 +265,7 @@ impl MbtilesMetadataJson {
         Ok(changes)
     }
 
-    pub fn diff(
-        &self,
-        other: &MbtilesMetadataJson,
-        merge: bool,
-    ) -> UtilesResult<MetadataChange> {
+    pub fn diff(&self, other: &Self, merge: bool) -> UtilesResult<MetadataChange> {
         let self_value = serde_json::to_value(self)?;
         let mut merged = self_value.clone();
         let other_value = serde_json::to_value(other)?;
@@ -309,14 +305,14 @@ impl From<&Vec<MbtMetadataRow>> for MbtilesMetadataJsonRaw {
             .any(|(_k, v)| v > 1);
 
         if has_duplicates {
-            MbtilesMetadataJsonRaw::Arr(rows.clone())
+            Self::Arr(rows.clone())
         } else {
             let obj: BTreeMap<String, String> =
                 rows.iter().fold(BTreeMap::new(), |mut acc, row| {
                     acc.insert(row.name.clone(), row.value.clone());
                     acc
                 });
-            MbtilesMetadataJsonRaw::Obj(obj)
+            Self::Obj(obj)
         }
     }
 }
@@ -334,14 +330,14 @@ impl From<&Vec<MbtMetadataRow>> for MbtilesMetadataJson {
             .any(|(_k, v)| v > 1);
 
         if has_duplicates {
-            MbtilesMetadataJson::Arr(arr)
+            Self::Arr(arr)
         } else {
             let obj: BTreeMap<String, Value> =
                 arr.iter().fold(BTreeMap::new(), |mut acc, row| {
                     acc.insert(row.name.clone(), row.value.clone());
                     acc
                 });
-            MbtilesMetadataJson::Obj(obj)
+            Self::Obj(obj)
         }
     }
 }

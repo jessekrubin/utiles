@@ -115,7 +115,7 @@ impl MbtilesClientAsync {
     pub async fn new(dbpath: DbPath, client: Client) -> UtilesResult<Self> {
         let mbtype = client.conn(query_mbtiles_type).await?;
 
-        Ok(MbtilesClientAsync {
+        Ok(Self {
             dbpath,
             mbtype,
             client,
@@ -153,7 +153,7 @@ impl MbtilesClientAsync {
                 })
                 .await?;
 
-            MbtilesClientAsync::new(dbpath, client).await
+            Self::new(dbpath, client).await
         }
     }
     pub async fn open<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -167,7 +167,7 @@ impl MbtilesClientAsync {
                 debug!("Error opening mbtiles file: {}", e);
                 e
             })?;
-        MbtilesClientAsync::new(dbpath, client).await
+        Self::new(dbpath, client).await
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -186,7 +186,7 @@ impl MbtilesClientAsync {
                 debug!("Error opening existing mbtiles file: {}", e);
                 e
             })?;
-        MbtilesClientAsync::new(dbpath, client).await
+        Self::new(dbpath, client).await
     }
 
     pub async fn close(self) -> UtilesResult<()> {
@@ -209,7 +209,7 @@ impl MbtilesClientAsync {
                 e
             })
             .await?;
-        MbtilesClientAsync::new(dbpath, client).await
+        Self::new(dbpath, client).await
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {
@@ -229,7 +229,7 @@ impl MbtilesClientAsync {
 impl MbtilesPoolAsync {
     pub async fn new(dbpath: DbPath, pool: Pool) -> UtilesResult<Self> {
         let mbtype = pool.conn(query_mbtiles_type).await?;
-        Ok(MbtilesPoolAsync {
+        Ok(Self {
             dbpath,
             mbtype,
             pool,
@@ -247,7 +247,7 @@ impl MbtilesPoolAsync {
             .num_conns(2)
             .open()
             .await?;
-        MbtilesPoolAsync::new(dbpath, pool).await
+        Self::new(dbpath, pool).await
     }
 
     pub async fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
@@ -263,7 +263,7 @@ impl MbtilesPoolAsync {
             .num_conns(2)
             .open()
             .await?;
-        MbtilesPoolAsync::new(dbpath, pool).await
+        Self::new(dbpath, pool).await
     }
 
     pub async fn journal_mode_wal(self) -> UtilesResult<Self> {

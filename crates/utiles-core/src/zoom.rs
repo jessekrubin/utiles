@@ -143,13 +143,13 @@ impl ZoomSet {
 
 impl From<u8> for ZoomSet {
     fn from(zoom: u8) -> Self {
-        ZoomSet(1 << zoom)
+        Self(1 << zoom)
     }
 }
 
 impl From<u32> for ZoomSet {
     fn from(zset: u32) -> Self {
-        ZoomSet(zset)
+        Self(zset)
     }
 }
 
@@ -170,23 +170,23 @@ impl TryFrom<Vec<u8>> for ZoomSet {
                 Ok(acc | (1 << z))
             }
         })?;
-        Ok(ZoomSet::new(result)) // Replace with actual construction method
+        Ok(Self::new(result)) // Replace with actual construction method
     }
 }
 
 impl BitAnd for ZoomSet {
-    type Output = ZoomSet;
+    type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        ZoomSet(self.0 & rhs.0)
+        Self(self.0 & rhs.0)
     }
 }
 
 impl BitAnd<u32> for ZoomSet {
-    type Output = ZoomSet;
+    type Output = Self;
 
     fn bitand(self, rhs: u32) -> Self::Output {
-        ZoomSet(self.0 & rhs)
+        Self(self.0 & rhs)
     }
 }
 
@@ -199,10 +199,10 @@ impl BitAnd<ZoomSet> for u32 {
 }
 
 impl BitAnd<u8> for ZoomSet {
-    type Output = ZoomSet;
+    type Output = Self;
 
     fn bitand(self, rhs: u8) -> Self::Output {
-        ZoomSet(self.0 & (1 << (31 - rhs)))
+        Self(self.0 & (1 << (31 - rhs)))
     }
 }
 
@@ -267,7 +267,7 @@ impl IntoIterator for ZoomRange {
 /// ```
 impl From<ZoomRange> for ZoomSet {
     fn from(zoom_range: ZoomRange) -> Self {
-        ZoomSet(zoom_range.into_iter().fold(0, |acc, z| acc | (1 << z)))
+        Self(zoom_range.into_iter().fold(0, |acc, z| acc | (1 << z)))
     }
 }
 
@@ -330,13 +330,13 @@ pub enum ZoomOrZooms {
 
 impl From<u8> for ZoomOrZooms {
     fn from(zoom: u8) -> Self {
-        ZoomOrZooms::Zoom(zoom)
+        Self::Zoom(zoom)
     }
 }
 
 impl From<Vec<u8>> for ZoomOrZooms {
     fn from(zooms: Vec<u8>) -> Self {
-        ZoomOrZooms::Zooms(zooms)
+        Self::Zooms(zooms)
     }
 }
 

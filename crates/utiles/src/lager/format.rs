@@ -17,8 +17,8 @@ impl Default for LagerFormat {
 impl std::fmt::Display for LagerFormat {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match *self {
-            LagerFormat::Full => write!(f, "full"),
-            LagerFormat::Json => write!(f, "json"),
+            Self::Full => write!(f, "full"),
+            Self::Json => write!(f, "json"),
         }
     }
 }
@@ -28,8 +28,8 @@ impl FromStr for LagerFormat {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "json" => Ok(LagerFormat::Json),
-            "full" => Ok(LagerFormat::Full),
+            "json" => Ok(Self::Json),
+            "full" => Ok(Self::Full),
             _ => Err(UtilesError::AdHoc("invalid lager level".to_string())),
         }
     }

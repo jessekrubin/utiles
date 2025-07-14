@@ -17,17 +17,17 @@ impl InsertStrategy {
     #[must_use]
     pub fn sql_prefix(&self) -> &str {
         match self {
-            InsertStrategy::None => "INSERT",
-            InsertStrategy::Replace => "INSERT OR REPLACE",
-            InsertStrategy::Ignore => "INSERT OR IGNORE",
-            InsertStrategy::Rollback => "INSERT OR ROLLBACK",
-            InsertStrategy::Abort => "INSERT OR ABORT",
-            InsertStrategy::Fail => "INSERT OR FAIL",
+            Self::None => "INSERT",
+            Self::Replace => "INSERT OR REPLACE",
+            Self::Ignore => "INSERT OR IGNORE",
+            Self::Rollback => "INSERT OR ROLLBACK",
+            Self::Abort => "INSERT OR ABORT",
+            Self::Fail => "INSERT OR FAIL",
         }
     }
 
     #[must_use]
     pub fn requires_check(&self) -> bool {
-        !matches!(self, InsertStrategy::Replace | InsertStrategy::Ignore)
+        !matches!(self, Self::Replace | Self::Ignore)
     }
 }

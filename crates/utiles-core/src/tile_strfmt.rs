@@ -25,20 +25,20 @@ pub enum FormatTokens {
 impl Display for FormatTokens {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(match *self {
-            FormatTokens::X => "{x}",
-            FormatTokens::Y => "{y}",
-            FormatTokens::Z => "{z}",
-            FormatTokens::Yup => "{-y}",
-            FormatTokens::ZxyFslash => "{z}/{x}/{y}",
-            FormatTokens::Quadkey => "{quadkey}",
+            Self::X => "{x}",
+            Self::Y => "{y}",
+            Self::Z => "{z}",
+            Self::Yup => "{-y}",
+            Self::ZxyFslash => "{z}/{x}/{y}",
+            Self::Quadkey => "{quadkey}",
             #[cfg(feature = "pmtiles")]
-            FormatTokens::PmtileId => "{pmtileid}",
-            FormatTokens::JsonObj => "{json_obj}",
-            FormatTokens::JsonArr => "{json_arr}",
-            FormatTokens::GeoBBox => "{bbox}",
-            FormatTokens::Projwin => "{projwin}",
-            FormatTokens::BBoxWeb => "{bbox_web}",
-            FormatTokens::ProjwinWeb => "{projwin_web}",
+            Self::PmtileId => "{pmtileid}",
+            Self::JsonObj => "{json_obj}",
+            Self::JsonArr => "{json_arr}",
+            Self::GeoBBox => "{bbox}",
+            Self::Projwin => "{projwin}",
+            Self::BBoxWeb => "{bbox_web}",
+            Self::ProjwinWeb => "{projwin_web}",
         })
     }
 }
@@ -73,22 +73,22 @@ impl From<FormatTokens> for &'static str {
 impl From<&str> for FormatParts {
     fn from(s: &str) -> Self {
         match s.to_lowercase().as_str() {
-            "x" => FormatParts::Token(FormatTokens::X),
-            "y" => FormatParts::Token(FormatTokens::Y),
-            "z" => FormatParts::Token(FormatTokens::Z),
-            "yup" | "-y" => FormatParts::Token(FormatTokens::Yup),
-            "zxy" => FormatParts::Token(FormatTokens::ZxyFslash),
-            "quadkey" | "qk" => FormatParts::Token(FormatTokens::Quadkey),
+            "x" => Self::Token(FormatTokens::X),
+            "y" => Self::Token(FormatTokens::Y),
+            "z" => Self::Token(FormatTokens::Z),
+            "yup" | "-y" => Self::Token(FormatTokens::Yup),
+            "zxy" => Self::Token(FormatTokens::ZxyFslash),
+            "quadkey" | "qk" => Self::Token(FormatTokens::Quadkey),
             #[cfg(feature = "pmtiles")]
-            "pmtileid" | "pmid" => FormatParts::Token(FormatTokens::PmtileId),
-            "json" | "json_arr" => FormatParts::Token(FormatTokens::JsonArr),
-            "json_obj" | "obj" => FormatParts::Token(FormatTokens::JsonObj),
-            "bbox" => FormatParts::Token(FormatTokens::GeoBBox),
-            "projwin" => FormatParts::Token(FormatTokens::Projwin),
-            "bbox_web" => FormatParts::Token(FormatTokens::BBoxWeb),
-            "projwin_web" => FormatParts::Token(FormatTokens::ProjwinWeb),
+            "pmtileid" | "pmid" => Self::Token(FormatTokens::PmtileId),
+            "json" | "json_arr" => Self::Token(FormatTokens::JsonArr),
+            "json_obj" | "obj" => Self::Token(FormatTokens::JsonObj),
+            "bbox" => Self::Token(FormatTokens::GeoBBox),
+            "projwin" => Self::Token(FormatTokens::Projwin),
+            "bbox_web" => Self::Token(FormatTokens::BBoxWeb),
+            "projwin_web" => Self::Token(FormatTokens::ProjwinWeb),
 
-            _ => FormatParts::Str(s.to_string()),
+            _ => Self::Str(s.to_string()),
         }
     }
 }
@@ -118,7 +118,7 @@ impl From<&FormatParts> for String {
     fn from(p: &FormatParts) -> Self {
         match p {
             FormatParts::Str(s) => s.to_string(),
-            FormatParts::Token(t) => String::from(t),
+            FormatParts::Token(t) => Self::from(t),
         }
     }
 }
@@ -142,7 +142,7 @@ impl Default for TileStringFormat {
 
 impl TileStringFormat {
     pub fn new(fmt: &str) -> Self {
-        let (tokens, n_tokens) = TileStringFormat::parse(fmt);
+        let (tokens, n_tokens) = Self::parse(fmt);
         let fmt_str = tokens.iter().map(String::from).collect::<String>();
         Self {
             fmtstr: fmt_str,
@@ -213,7 +213,7 @@ impl Debug for TileStringFormatter {
 impl Clone for TileStringFormatter {
     fn clone(&self) -> Self {
         let tile_fmt = self.tile_fmt.clone();
-        let parts = TileStringFormatter::parse_parts(&tile_fmt);
+        let parts = Self::parse_parts(&tile_fmt);
         Self { tile_fmt, parts }
     }
 }
@@ -233,7 +233,7 @@ impl TileStringFormatter {
     #[must_use]
     pub fn new(fmt: &str) -> Self {
         let tile_fmt = TileStringFormat::new(fmt);
-        let parts = TileStringFormatter::parse_parts(&tile_fmt);
+        let parts = Self::parse_parts(&tile_fmt);
         Self { tile_fmt, parts }
     }
 

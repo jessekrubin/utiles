@@ -54,7 +54,7 @@ impl Mbtiles {
         // if it is ':memory:' then open_in_memory
         let dbpath = pathlike2dbpath(path)?;
         let conn_res = Connection::open(&dbpath.fspath)?;
-        Ok(Mbtiles {
+        Ok(Self {
             conn: conn_res,
             dbpath,
         })
@@ -66,12 +66,12 @@ impl Mbtiles {
     ) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(path)?;
         let conn = Connection::open_with_flags(&dbpath.fspath, flags)?;
-        Ok(Mbtiles { dbpath, conn })
+        Ok(Self { dbpath, conn })
     }
 
     pub fn open_in_memory() -> UtilesResult<Self> {
         let conn = Connection::open_in_memory()?;
-        Ok(Mbtiles {
+        Ok(Self {
             conn,
             dbpath: DbPath::memory(),
         })
@@ -80,7 +80,7 @@ impl Mbtiles {
     pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let c = open_existing(path);
         match c {
-            Ok(c) => Mbtiles::from_conn(c),
+            Ok(c) => Self::from_conn(c),
             Err(e) => Err(e),
         }
     }
@@ -97,7 +97,7 @@ impl Mbtiles {
             Err(UtilesError::PathExistsError(dbpath.fspath))
         } else {
             debug!("Creating new mbtiles file with client: {}", dbpath);
-            Mbtiles::create(&dbpath.fspath, Some(mbtype))
+            Self::create(&dbpath.fspath, Some(mbtype))
         }
     }
 
@@ -124,7 +124,7 @@ impl Mbtiles {
     ) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(&path)?;
         let res = create_mbtiles_file(&path, &mbtype.unwrap_or_default())?;
-        Ok(Mbtiles { conn: res, dbpath })
+        Ok(Self { conn: res, dbpath })
     }
 
     pub fn query_zxy(&self, z: u8, x: u32, y: u32) -> RusqliteResult<Option<Vec<u8>>> {
@@ -135,7 +135,7 @@ impl Mbtiles {
         query_tile(&self.conn, tile)
     }
 
-    pub fn from_conn(conn: Connection) -> UtilesResult<Mbtiles> {
+    pub fn from_conn(conn: Connection) -> UtilesResult<Self> {
         let guessed_fspath = query_db_fspath(&conn);
         let dbpath = match guessed_fspath {
             Ok(Some(fspath)) => pathlike2dbpath(fspath)?,
@@ -145,7 +145,7 @@ impl Mbtiles {
                 DbPath::memory()
             }
         };
-        Ok(Mbtiles { dbpath, conn })
+        Ok(Self { dbpath, conn })
     }
 
     pub fn conn(&self) -> &Connection {
@@ -256,14 +256,14 @@ impl Mbtiles {
         self.tilejson()
     }
 
-    pub fn from_filepath(fspath: &str) -> UtilesResult<Mbtiles> {
+    pub fn from_filepath(fspath: &str) -> UtilesResult<Self> {
         let dbpath = pathlike2dbpath(fspath)?;
         let conn = Connection::open(fspath)?;
-        Ok(Mbtiles { dbpath, conn })
+        Ok(Self { dbpath, conn })
     }
 
-    pub fn from_filepath_str(fspath: &str) -> Result<Mbtiles, Box<dyn Error>> {
-        Mbtiles::from_filepath(fspath).map_err(std::convert::Into::into)
+    pub fn from_filepath_str(fspath: &str) -> Result<Self, Box<dyn Error>> {
+        Self::from_filepath(fspath).map_err(std::convert::Into::into)
     }
 
     // check that 'metadata' table exists and has a unique index on 'name'

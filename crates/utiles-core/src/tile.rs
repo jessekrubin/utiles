@@ -68,7 +68,7 @@ pub struct FeatureOptions {
 
 impl Default for FeatureOptions {
     fn default() -> Self {
-        FeatureOptions {
+        Self {
             fid: None,
             props: None,
             projection: Projection::Geographic,
@@ -107,7 +107,7 @@ impl FromStr for Tile {
         // if it starts with '{' assume json obj
         if s.starts_with('{') {
             // if '{' assume its an obj
-            let r = Tile::from_json_obj(s);
+            let r = Self::from_json_obj(s);
             match r {
                 Ok(tile) => Ok(tile),
                 Err(_e) => {
@@ -116,7 +116,7 @@ impl FromStr for Tile {
             }
         } else if s.starts_with('[') {
             // if '[' assume its an arr
-            let r = Tile::from_json_arr(s);
+            let r = Self::from_json_arr(s);
             match r {
                 Ok(tile) => Ok(tile),
                 Err(_e) => {
@@ -157,11 +157,11 @@ impl TileLike for Tile {
 }
 
 impl TileParent for Tile {
-    fn parent(&self, zoom: Option<u8>) -> Option<Tile> {
+    fn parent(&self, zoom: Option<u8>) -> Option<Self> {
         self.parent(zoom)
     }
 
-    fn root() -> Tile {
+    fn root() -> Self {
         utile!(0, 0, 0)
     }
 }
@@ -180,7 +180,7 @@ impl Tile {
             x < (1u32 << z) && y < (1u32 << z),
             "Tile indices must satisfy 0 <= x < 2^z and 0 <= y < 2^z: (x={x}, y={y}, z={z})",
         );
-        Tile { x, y, z }
+        Self { x, y, z }
     }
 
     /// Create a Tile with validity check
@@ -218,7 +218,7 @@ impl Tile {
     /// flip the y value (row) and return flipped tile
     #[must_use]
     pub fn flip(&self) -> Self {
-        Tile::new(self.x, self.flipy(), self.z)
+        Self::new(self.x, self.flipy(), self.z)
     }
 
     /// Return bounds tuple (west, south, east, north) for the tile
@@ -230,13 +230,13 @@ impl Tile {
     /// Return tile from row-major tile-id
     #[must_use]
     pub fn from_row_major_id(id: u64) -> Self {
-        Tile::from(rmid2xyz(id))
+        Self::from(rmid2xyz(id))
     }
 
     /// Return tile from row-major tile-id (alias for `from_row_major_id`)
     #[must_use]
     pub fn from_rmid(id: u64) -> Self {
-        Tile::from_row_major_id(id)
+        Self::from_row_major_id(id)
     }
 
     /// Return zxy string with optional separator (default is '/')
@@ -298,7 +298,7 @@ impl Tile {
     /// assert_eq!(tile, Tile::new(1, 2, 3));
     /// ```
     pub fn from_json_obj(json: &str) -> UtilesCoreResult<Self> {
-        let res = serde_json::from_str::<Tile>(json);
+        let res = serde_json::from_str::<Self>(json);
         match res {
             Ok(tile) => Ok(tile),
             Err(_e) => Err(UtilesCoreError::TileParseError(json.to_string())),
@@ -320,7 +320,7 @@ impl Tile {
     pub fn from_json_arr(json: &str) -> UtilesCoreResult<Self> {
         let res = serde_json::from_str::<(u32, u32, u8)>(json);
         match res {
-            Ok((x, y, z)) => Ok(Tile::new(x, y, z)),
+            Ok((x, y, z)) => Ok(Self::new(x, y, z)),
             Err(_e) => Err(UtilesCoreError::TileParseError(json.to_string())),
         }
     }
@@ -360,7 +360,7 @@ impl Tile {
     /// Returns error if unable to parse json string
     pub fn from_json_loose(json: &str) -> UtilesCoreResult<Self> {
         let v = serde_json::from_str::<Value>(json)?;
-        let t = Tile::try_from(&v)?;
+        let t = Self::try_from(&v)?;
         Ok(t)
     }
 
@@ -500,19 +500,19 @@ impl Tile {
 
     /// Return direct children
     #[must_use]
-    pub fn children1(&self) -> [Tile; 4] {
+    pub fn children1(&self) -> [Self; 4] {
         children1_zorder(self.x, self.y, self.z)
     }
 
     /// Return the children tiles of the tile
     #[must_use]
-    pub fn children(&self, zoom: Option<u8>) -> Vec<Tile> {
+    pub fn children(&self, zoom: Option<u8>) -> Vec<Self> {
         children(self.x, self.y, self.z, zoom)
     }
 
     /// Return the children tiles of the tile
     #[must_use]
-    pub fn children_zorder(&self, zoom: Option<u8>) -> Vec<Tile> {
+    pub fn children_zorder(&self, zoom: Option<u8>) -> Vec<Self> {
         children_zorder(self.x, self.y, self.z, zoom)
     }
 

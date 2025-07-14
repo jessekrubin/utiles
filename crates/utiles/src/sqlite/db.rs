@@ -27,13 +27,13 @@ impl Sqlike3 for SqliteDb {
 impl SqliteDb {
     pub fn open_existing<P: AsRef<Path>>(path: P) -> UtilesResult<Self> {
         let conn = open_existing(path)?;
-        Ok(SqliteDb { conn })
+        Ok(Self { conn })
     }
 }
 
 impl From<Connection> for SqliteDb {
     fn from(conn: Connection) -> Self {
-        SqliteDb { conn }
+        Self { conn }
     }
 }
 

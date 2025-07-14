@@ -53,8 +53,8 @@ pub type SqliteResult<T> = Result<T, SqliteError>;
 impl From<async_sqlite::Error> for SqliteError {
     fn from(value: async_sqlite::Error) -> Self {
         match value {
-            async_sqlite::Error::Rusqlite(value) => SqliteError::RusqliteError(value),
-            _ => SqliteError::AsyncSqliteError(value),
+            async_sqlite::Error::Rusqlite(value) => Self::RusqliteError(value),
+            _ => Self::AsyncSqliteError(value),
         }
     }
 }
