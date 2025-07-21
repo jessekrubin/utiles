@@ -55,7 +55,7 @@ pyo3 = "0.25"
 pyo3-build-config = "0.25"
 rusqlite = { version = "0.36.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = { version = "1.0.140", features = ["preserve_order"] }
+serde_json = { version = "1.0.141", features = ["preserve_order"] }
 size = { version = "0.5.0", features = ["default"] }
 sqlite-hashes = { version = "0.10.6", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
 strum = { version = "0.27.1", features = ["derive"] }
