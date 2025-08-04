@@ -14,7 +14,7 @@ anyhow.workspace = true
 clap = { workspace = true, features = ["derive", "color", "wrap_help"] }
 futures.workspace = true
 indicatif.workspace = true
-oxipng = { version = "9.1.5", features = [] }
+oxipng.workspace = true
 size.workspace = true
 tokio = { workspace = true, features = ["fs"] }
 tokio-stream.workspace = true

@@ -24,14 +24,15 @@ repository = "https://github.com/jessekrubin/utiles"
 ahash = "0.8.12"
 anyhow = "1.0.98"
 # TODO: remove git dependency when async-sqlite is published on crates.io
-async-sqlite = { version = "0.5.3", features = ["bundled", "functions", "trace"] }
 # async-sqlite = { git = "https://github.com/ryanfowler/async-sqlite.git" }
+async-sqlite = { version = "0.5.3", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.88"
 axum = { version = "0.8.4", features = ["tokio", "json", "macros"] }
 axum-extra = "0.10.1"
 base64 = "0.22.1"
-clap = { version = "4.5.41", features = ["derive", "color", "wrap_help"] }
-criterion = "0.6.0"
+clap = { version = "4.5", features = ["derive", "color", "wrap_help"] }
+criterion = "0.7.0"
+crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
 fast_hilbert = "2.0.1"
 fnv = "1.0.7"
 futures = "0.3.31"
@@ -50,12 +51,13 @@ md-5 = "0.10.6"
 noncrypto-digests = "0.3.6"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.2.2", features = ["supports-color"] }
+oxipng = { version = "9.1.5", features = [] }
 pmtiles = { version = "0.15.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
 pyo3 = "0.25"
 pyo3-build-config = "0.25"
 rusqlite = { version = "0.37.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = { version = "1.0.141", features = ["preserve_order"] }
+serde_json = { version = "1", features = ["preserve_order"] }
 size = { version = "0.5.0", features = ["default"] }
 sqlite-hashes = { version = "0.10.6", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
 strum = { version = "0.27.2", features = ["derive"] }

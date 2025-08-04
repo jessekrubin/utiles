@@ -21,20 +21,19 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
-geojson.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-tokio.workspace = true
-utiles-core = { path = "../utiles-core" }
-utiles = { path = "../utiles" }
-tokio-stream.workspace = true
-tracing.workspace = true
-rusqlite.workspace = true
-futures.workspace = true
+clap.workspace = true
+crossbeam.workspace = true
 futures-util.workspace = true
+futures.workspace = true
+geojson.workspace = true
 image.workspace = true
 indoc.workspace = true
-clap.workspace = true
-rayon = "1.10.0"
-num_cpus = "1.16.0"
-crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
+num_cpus.workspace = true
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio-stream.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+utiles = { path = "../utiles" }
+utiles-core = { path = "../utiles-core" }
