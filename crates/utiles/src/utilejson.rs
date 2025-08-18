@@ -131,14 +131,14 @@ pub fn metadata2tilejson(metadata: Vec<MbtMetadataRow>) -> UtilesResult<TileJSON
                 tj.vector_layers = Some(v);
             }
         }
-        if let Some(value) = obj.remove("tilestats") {
-            if let Ok(v) = serde_json::from_value::<TileStats>(value) {
-                let key = "tilestats".to_string();
-                let val = serde_json::to_value(v);
-                // try to insert the tilestats into the other field
-                if let Ok(val) = val {
-                    tj.other.insert(key, val);
-                }
+        if let Some(value) = obj.remove("tilestats")
+            && let Ok(v) = serde_json::from_value::<TileStats>(value)
+        {
+            let key = "tilestats".to_string();
+            let val = serde_json::to_value(v);
+            // try to insert the tilestats into the other field
+            if let Ok(val) = val {
+                tj.other.insert(key, val);
             }
         }
         // insert the rest
