@@ -40,8 +40,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: |
-            3.10
-            pypy3.10
+            3.11
+            pypy3.11
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -56,7 +56,7 @@ jobs:
           name: wheels-linux-${{ matrix.platform.target }}
           path: utiles-pyo3/dist
       - name: pytest
-        if: ${{ startsWith(matrix.target, 'x86_64') }}
+        if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
         shell: bash
         run: |
           set -e
@@ -83,8 +83,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: |
-            3.10
-            pypy3.10
+            3.11
+            pypy3.11
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -113,8 +113,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: |
-            3.10
-            pypy3.10
+            3.11
+            pypy3.11
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
