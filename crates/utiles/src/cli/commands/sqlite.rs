@@ -13,11 +13,11 @@ pub(crate) async fn analyze_main(args: &AnalyzeArgs) -> UtilesResult<()> {
     let db = SqliteDbAsyncClient::open_existing(&args.common.filepath, None).await?;
     if args.analysis_limit.is_some() {
         let current_limit = db.pragma_analysis_limit().await?;
-        if let Some(limit) = args.analysis_limit {
-            if current_limit != limit {
-                trace!("setting analysis limit: {} -> {}", current_limit, limit);
-                db.conn(move |conn| analysis_limit_set(conn, limit)).await?;
-            }
+        if let Some(limit) = args.analysis_limit
+            && current_limit != limit
+        {
+            trace!("setting analysis limit: {} -> {}", current_limit, limit);
+            db.conn(move |conn| analysis_limit_set(conn, limit)).await?;
         }
     }
     let start_time = std::time::Instant::now();

@@ -21,10 +21,10 @@ pub(super) trait MbtLintRule {
     /// Returns the name or short description of this rule.
     fn name(&self) -> &'static str;
 
-    /// Check the MBTiles, returning any lint findings.
+    /// Check the `MBTiles`, returning any lint findings.
     async fn check(&self, mbt: &MbtilesClientAsync) -> UtilesResult<Vec<MbtLint>>;
 
-    /// Optionally fix the MBTiles. If a rule cannot fix, this can be a no-op or an `Err`.
+    /// Optionally fix the `MBTiles`. If a rule cannot fix, this can be a no-op or an `Err`.
     async fn fix(&self, _mbt: &MbtilesClientAsync) -> UtilesResult<()> {
         // default: do nothing
         Ok(())

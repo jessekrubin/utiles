@@ -1,3 +1,12 @@
+#![deny(clippy::pedantic)]
+#![deny(clippy::all)]
+#![deny(clippy::correctness)]
+#![deny(clippy::panic)]
+#![deny(clippy::perf)]
+#![deny(clippy::style)]
+#![deny(clippy::suspicious)]
+#![deny(clippy::complexity)]
+#![deny(clippy::unwrap_used)]
 #[cfg(feature = "geojson")]
 mod cover_geojson;
 #[cfg(feature = "geo-types")]

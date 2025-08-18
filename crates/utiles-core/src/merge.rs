@@ -66,10 +66,10 @@ pub fn simplify_v1<
 
         // Check if any parent tile at zoom levels from minzoom to tile.z() -1 exists in root_set
         for i in (minzoom..tile.z()).rev() {
-            if let Some(par) = tile.parent(Some(i)) {
-                if root_set.contains(&par) {
-                    continue 'outer;
-                }
+            if let Some(par) = tile.parent(Some(i))
+                && root_set.contains(&par)
+            {
+                continue 'outer;
             }
         }
 
