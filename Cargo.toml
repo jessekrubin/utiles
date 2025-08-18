@@ -62,7 +62,7 @@ size = { version = "0.5.0", features = ["default"] }
 sqlite-hashes = { version = "0.10.6", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
 strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = "0.27.2"
-thiserror = "2.0.12"
+thiserror = "2.0.15"
 tilejson = "0.4.3"
 tokio = { version = "1.47", features = ["full"] }
 tokio-stream = "0.1.17"
