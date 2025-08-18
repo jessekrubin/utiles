@@ -44,9 +44,9 @@ fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-/// Raise RuntimeWarning for debug build(s)
+/// Raise `RuntimeWarning` for debug build(s)
 ///
-/// Taken from `obstore` pyo3 library (obstore)[https://github.com/developmentseed/obstore.git]
+/// Taken from `obstore` pyo3 library [obstore](https://github.com/developmentseed/obstore.git)
 #[cfg(debug_assertions)]
 #[pyfunction]
 fn warn_debug_build(py: Python) -> PyResult<()> {

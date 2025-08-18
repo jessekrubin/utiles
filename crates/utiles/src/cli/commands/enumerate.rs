@@ -62,11 +62,11 @@ pub(crate) async fn enumerate_main(args: &EnumerateArgs) -> UtilesResult<()> {
                     break;
                 }
                 count += 1;
-                if count % 1024 == 0 {
-                    if let Err(e) = buf.flush() {
-                        debug!("flushing err: {:?}", e);
-                        break;
-                    }
+                if count % 1024 == 0
+                    && let Err(e) = buf.flush()
+                {
+                    debug!("flushing err: {:?}", e);
+                    break;
                 }
             }
 

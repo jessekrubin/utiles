@@ -22,10 +22,10 @@ pub(crate) fn find_datasets(fspath: &str) -> UtilesResult<Vec<PathBuf>> {
         // filter_map(std::result::Result::ok)
         if entry.file_type().is_file() {
             let path = entry.path();
-            if let Some(path) = path.to_str() {
-                if globset.is_match(path) {
-                    filepaths.push(path.into());
-                }
+            if let Some(path) = path.to_str()
+                && globset.is_match(path)
+            {
+                filepaths.push(path.into());
             }
         }
     }

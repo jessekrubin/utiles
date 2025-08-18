@@ -137,45 +137,45 @@ async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataC
     };
 
     // if it is an image format check tilesize...
-    if let Some(ttile) = maybe_ttype {
-        if ttile.kind == TileKind::Raster {
-            let tilesize = mbt.metadata_row("tilesize").await?;
-            let query_tilesize = mbt
-                .conn(
-                    // whatever clone it!
-                    move |c| query_distinct_tilesize_fast(c, minmax),
-                )
-                .await?;
+    if let Some(ttile) = maybe_ttype
+        && ttile.kind == TileKind::Raster
+    {
+        let tilesize = mbt.metadata_row("tilesize").await?;
+        let query_tilesize = mbt
+            .conn(
+                // whatever clone it!
+                move |c| query_distinct_tilesize_fast(c, minmax),
+            )
+            .await?;
 
-            match query_tilesize.len() {
-                0 => {
-                    debug!("no tilesize found: {}", filepath);
-                }
-                1 => {
-                    let ts = query_tilesize[0];
-                    let ts_str: String = ts.to_string();
-                    if let Some(tilesize) = tilesize {
-                        if tilesize.value != ts_str {
-                            metadata_changes.push(MetadataChangeFromTo {
-                                name: "tilesize".to_string(),
-                                from: Some(tilesize.value),
-                                to: Some(ts_str),
-                            });
-                        }
-                    } else {
+        match query_tilesize.len() {
+            0 => {
+                debug!("no tilesize found: {}", filepath);
+            }
+            1 => {
+                let ts = query_tilesize[0];
+                let ts_str: String = ts.to_string();
+                if let Some(tilesize) = tilesize {
+                    if tilesize.value != ts_str {
                         metadata_changes.push(MetadataChangeFromTo {
                             name: "tilesize".to_string(),
-                            from: None,
+                            from: Some(tilesize.value),
                             to: Some(ts_str),
                         });
                     }
+                } else {
+                    metadata_changes.push(MetadataChangeFromTo {
+                        name: "tilesize".to_string(),
+                        from: None,
+                        to: Some(ts_str),
+                    });
                 }
-                _ => {
-                    warn!(
-                        "NOT IMPLEMENTED multiple tilesize found: {:?}",
-                        query_tilesize
-                    );
-                }
+            }
+            _ => {
+                warn!(
+                    "NOT IMPLEMENTED multiple tilesize found: {:?}",
+                    query_tilesize
+                );
             }
         }
     }

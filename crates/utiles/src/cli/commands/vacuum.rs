@@ -29,11 +29,11 @@ pub(crate) async fn vacuum_main(args: &VacuumArgs) -> UtilesResult<()> {
 
     if args.page_size.is_some() {
         let current_page_size = db.pragma_page_size().await?;
-        if let Some(page_size) = args.page_size {
-            if current_page_size != page_size {
-                debug!("setting page size: {} -> {}", current_page_size, page_size);
-                db.pragma_page_size_set(page_size).await?;
-            }
+        if let Some(page_size) = args.page_size
+            && current_page_size != page_size
+        {
+            debug!("setting page size: {} -> {}", current_page_size, page_size);
+            db.pragma_page_size_set(page_size).await?;
         }
     }
 

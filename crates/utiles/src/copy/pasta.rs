@@ -493,12 +493,12 @@ LIMIT 1;
         // ====================================================================
         // COPY METADATA
         // ====================================================================
-        if let Some(src_db_metadata) = preflight.src_db_metadata {
-            if preflight.dst_is_new {
-                let n_metadata_inserted =
-                    self.set_metadata(&dst_db, src_db_metadata).await?;
-                debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
-            }
+        if let Some(src_db_metadata) = preflight.src_db_metadata
+            && preflight.dst_is_new
+        {
+            let n_metadata_inserted =
+                self.set_metadata(&dst_db, src_db_metadata).await?;
+            debug!("n_metadata_inserted: {:?}", n_metadata_inserted);
         }
 
         // update metadata minzoom and maxzoom
