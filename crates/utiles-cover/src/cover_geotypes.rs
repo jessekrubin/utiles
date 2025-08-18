@@ -8,6 +8,7 @@ use crate::Result;
 use std::collections::{BTreeMap, HashSet};
 use utiles_core::{Tile, lnglat2tile_frac, simplify, tile, utile};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GeoTypesCoverOptions {
     pub zoom: u8,
     pub minzoom: Option<u8>,
@@ -202,56 +203,57 @@ fn polygon_cover(
 
 fn gt_geometry2tiles(
     geom: &geo_types::Geometry,
-    zoom: u8,
-    minzoom: Option<u8>,
+    opts: GeoTypesCoverOptions,
 ) -> Result<HashSet<Tile>> {
     let mut tilescoverage: HashSet<Tile> = HashSet::new();
 
     match geom {
         geo_types::Geometry::Point(pt) => {
-            let tile = tile(pt.x(), pt.y(), zoom, None)?;
+            let tile = tile(pt.x(), pt.y(), opts.zoom, None)?;
             tilescoverage.insert(tile);
         }
         geo_types::Geometry::MultiPoint(pts) => {
             let it = pts
                 .iter()
-                .filter_map(|pt| tile(pt.x(), pt.y(), zoom, None).ok());
+                .filter_map(|pt| tile(pt.x(), pt.y(), opts.zoom, None).ok());
             tilescoverage.extend(it);
         }
         geo_types::Geometry::Line(ln) => {
             let ls = geo_types::LineString::from(ln);
-            line_string_cover(&mut tilescoverage, &ls, zoom, None);
+            line_string_cover(&mut tilescoverage, &ls, opts.zoom, None);
         }
         geo_types::Geometry::LineString(ls) => {
-            line_string_cover(&mut tilescoverage, ls, zoom, None);
+            line_string_cover(&mut tilescoverage, ls, opts.zoom, None);
         }
         geo_types::Geometry::MultiLineString(mls) => {
             mls.iter().for_each(|ls| {
-                line_string_cover(&mut tilescoverage, ls, zoom, None);
+                line_string_cover(&mut tilescoverage, ls, opts.zoom, None);
             });
         }
         geo_types::Geometry::Polygon(poly) => {
-            polygon_cover(&mut tilescoverage, poly, zoom);
+            polygon_cover(&mut tilescoverage, poly, opts.zoom);
         }
         geo_types::Geometry::MultiPolygon(mpoly) => {
             for poly in mpoly.iter() {
-                polygon_cover(&mut tilescoverage, poly, zoom);
+                polygon_cover(&mut tilescoverage, poly, opts.zoom);
             }
         }
         geo_types::Geometry::GeometryCollection(gjcoll) => {
             for g in gjcoll {
-                tilescoverage.extend(gt_geometry2tiles(g, zoom, minzoom)?);
+                tilescoverage.extend(gt_geometry2tiles(g, opts)?);
             }
         }
-        geo_types::Geometry::Rect(_) => {
-            todo!("Rectangles are not supported yet, use Polygon instead");
+        geo_types::Geometry::Rect(r) => {
+            let poly = geo_types::Polygon::from(*r);
+            polygon_cover(&mut tilescoverage, &poly, opts.zoom);
         }
-        geo_types::Geometry::Triangle(_) => {
-            todo!("Triangles are not supported yet, use Polygon instead");
+        geo_types::Geometry::Triangle(t) => {
+            let poly = geo_types::Polygon::from(*t);
+            polygon_cover(&mut tilescoverage, &poly, opts.zoom);
         }
     }
 
-    match minzoom {
+    match opts.minzoom {
         Some(z) => {
             let cov = simplify(&tilescoverage, Some(z));
             Ok(cov)
@@ -260,10 +262,16 @@ fn gt_geometry2tiles(
     }
 }
 
+/// Convert a `geo_types::Geometry` to a set of tiles at the specified zoom level.
+///
+/// # Errors
+///
+/// If the `GeoJSON` object is invalid or if the conversion fails due to
+/// projecting coordinate issues.
 pub fn geometry2tiles<T>(geom: &geo_types::Geometry, opts: T) -> Result<HashSet<Tile>>
 where
     T: Into<GeoTypesCoverOptions>,
 {
     let opts = opts.into();
-    gt_geometry2tiles(geom, opts.zoom, opts.minzoom)
+    gt_geometry2tiles(geom, opts)
 }

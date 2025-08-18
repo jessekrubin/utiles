@@ -18,7 +18,7 @@ TileArgs = tuple[int, int, int] | list[tuple[int, int, int]] | list[mercantile.T
 def test_ul(args: TileArgs) -> None:
     expected = (-9.140625, 53.33087298301705)
     lnglat = mercantile.ul(*args)
-    for a, b in zip(expected, lnglat):
+    for a, b in zip(expected, lnglat, strict=False):
         assert round(a - b, 7) == 0
     assert lnglat[0] == lnglat.lng
     assert lnglat[1] == lnglat.lat
@@ -30,7 +30,7 @@ def test_ul(args: TileArgs) -> None:
 def test_bbox(args: TileArgs) -> None:
     expected = (-9.140625, 53.12040528310657, -8.7890625, 53.33087298301705)
     bbox = mercantile.bounds(*args)
-    for a, b in zip(expected, bbox):
+    for a, b in zip(expected, bbox, strict=False):
         assert round(a - b, 7) == 0
     assert bbox.west == bbox[0]
     assert bbox.south == bbox[1]
@@ -43,7 +43,7 @@ def test_xy_tile() -> None:
     ul = mercantile.ul(486, 332, 10)
     xy = mercantile.xy(*ul)
     expected = (-1017529.7205322663, 7044436.526761846)
-    for a, b in zip(expected, xy):
+    for a, b in zip(expected, xy, strict=False):
         assert round(a - b, 7) == 0
 
 
@@ -51,7 +51,7 @@ def test_xy_null_island() -> None:
     """x, y for (0, 0) is correctly calculated"""
     xy = mercantile.xy(0.0, 0.0)
     expected = (0.0, 0.0)
-    for a, b in zip(expected, xy):
+    for a, b in zip(expected, xy, strict=False):
         assert round(a - b, 7) == 0
 
 
@@ -73,21 +73,21 @@ def test_xy_truncate() -> None:
 def test_lnglat() -> None:
     xy = (-8366731.739810849, -1655181.9927159143)
     lng_lat = mercantile.lnglat(*xy)
-    for a, b in zip((-75.15963, -14.704620000000013), lng_lat):
+    for a, b in zip((-75.15963, -14.704620000000013), lng_lat, strict=False):
         assert round(a - b, 7) == 0
 
 
 def test_lnglat_truncate() -> None:
     xy = (-28366731.739810849, -1655181.9927159143)
     lng_lat_truncated = mercantile.lnglat(*xy, truncate=True)
-    for a, b in zip((-180, -14.704620000000013), lng_lat_truncated):
+    for a, b in zip((-180, -14.704620000000013), lng_lat_truncated, strict=False):
         assert round(a - b, 7) == 0
 
 
 def test_lnglat_xy_roundtrip() -> None:
     lnglat = (-105.0844, 40.5853)
     roundtrip = mercantile.lnglat(*mercantile.xy(*lnglat))
-    for a, b in zip(roundtrip, lnglat):
+    for a, b in zip(roundtrip, lnglat, strict=False):
         assert round(a - b, 7) == 0
 
 
@@ -103,7 +103,7 @@ def test_xy_bounds(args: TileArgs) -> None:
     )
     bounds = mercantile.xy_bounds(*args)
 
-    for a, b in zip(expected, bounds):
+    for a, b in zip(expected, bounds, strict=False):
         assert round(a - b, 7) == 0
 
 

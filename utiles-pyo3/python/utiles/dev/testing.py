@@ -145,4 +145,6 @@ def query_metadata_rows(
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM metadata;")
         rows = cursor.fetchall()
-    return [dict(zip((d[0] for d in cursor.description), row)) for row in rows]
+    return [
+        dict(zip((d[0] for d in cursor.description), row, strict=False)) for row in rows
+    ]

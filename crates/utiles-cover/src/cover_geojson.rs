@@ -264,6 +264,12 @@ impl From<(u8, u8)> for GeojsonCoverOptions {
     }
 }
 
+/// Convert a `GeoJSON` object to a set of tiles at the specified zoom level.
+///
+/// # Errors
+///
+/// If the `GeoJSON` object is invalid or if the conversion fails due to
+/// projecting coordinate issues.
 pub fn geojson2tiles<TOpts>(gj: &GeoJson, opts: TOpts) -> Result<HashSet<Tile>>
 where
     TOpts: Into<GeojsonCoverOptions>,
