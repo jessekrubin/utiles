@@ -312,12 +312,13 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
             }
             _ => {
                 // For any other character, end the current number block if it exists and is valid
-                if let Some(s) = start {
-                    if !is_negative || s < i - 1 {
-                        // Ensure it's not just a '-' without digits
-                        blocks.push(&input[s..i]);
-                    }
+                if let Some(s) = start
+                    && (!is_negative || s < i - 1)
+                {
+                    // Ensure it's not just a '-' without digits
+                    blocks.push(&input[s..i]);
                 }
+
                 // Reset for the next number
                 start = None;
                 is_negative = false;
@@ -325,11 +326,11 @@ pub fn parse_int_strings(input: &str) -> Vec<&str> {
         }
     }
     // Capture the last number block if there's one and it's valid
-    if let Some(s) = start {
-        if !is_negative || s < input.len() - 1 {
-            // Ensure it's not just a '-' without digits
-            blocks.push(&input[s..]);
-        }
+    if let Some(s) = start
+        && (!is_negative || s < input.len() - 1)
+    {
+        // Ensure it's not just a '-' without digits
+        blocks.push(&input[s..]);
     }
     blocks
 }
@@ -381,11 +382,11 @@ pub fn parse_float_blocks(input: &str) -> Vec<&str> {
                     start = Some(i);
                 } else if has_digit || has_decimal || start.is_some() {
                     // Malformed if in the middle of a number
-                    if let Some(s) = start {
-                        if has_digit {
-                            // Ensure there's at least one digit
-                            blocks.push(&input[s..i]);
-                        }
+                    if let Some(s) = start
+                        && has_digit
+                    {
+                        // Ensure there's at least one digit
+                        blocks.push(&input[s..i]);
                     }
                     start = Some(i); // Reset for a new potential number
                     has_decimal = false;
@@ -399,11 +400,11 @@ pub fn parse_float_blocks(input: &str) -> Vec<&str> {
                     has_decimal = true;
                 } else if has_decimal || start.is_none() {
                     // Malformed if another decimal or no start
-                    if let Some(s) = start {
-                        if has_digit {
-                            // Ensure there's at least one digit
-                            blocks.push(&input[s..i]);
-                        }
+                    if let Some(s) = start
+                        && has_digit
+                    {
+                        // Ensure there's at least one digit
+                        blocks.push(&input[s..i]);
                     }
                     start = Some(i); // Start a new potential number
                     has_decimal = true; // Current char is '.'
@@ -414,11 +415,11 @@ pub fn parse_float_blocks(input: &str) -> Vec<&str> {
                 }
             }
             _ => {
-                if let Some(s) = start {
-                    if has_digit {
-                        // Ensure there's at least one digit
-                        blocks.push(&input[s..i]);
-                    }
+                if let Some(s) = start
+                    && has_digit
+                {
+                    // Ensure there's at least one digit
+                    blocks.push(&input[s..i]);
                 }
                 // Reset for the next number
                 start = None;
@@ -429,11 +430,11 @@ pub fn parse_float_blocks(input: &str) -> Vec<&str> {
     }
 
     // Handle the last block if it's well-formed
-    if let Some(s) = start {
-        if has_digit {
-            // Ensure there's at least one digit
-            blocks.push(&input[s..]);
-        }
+    if let Some(s) = start
+        && has_digit
+    {
+        // Ensure there's at least one digit
+        blocks.push(&input[s..]);
     }
 
     blocks

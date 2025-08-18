@@ -68,10 +68,10 @@ fn line_string_cover(
         if prev_x != Some(x) || prev_y != Some(y) {
             let tile = utile!(x as u32, y as u32, maxzoom);
             tiles_set.insert(tile);
-            if let Some(ring) = &mut ring {
-                if prev_y != Some(y) {
-                    ring.push((x as u32, y as u32));
-                }
+            if let Some(ring) = &mut ring
+                && prev_y != Some(y)
+            {
+                ring.push((x as u32, y as u32));
             }
             prev_x = Some(x);
             prev_y = Some(y);
@@ -96,10 +96,10 @@ fn line_string_cover(
             if prev_x != Some(x) || prev_y != Some(y) {
                 let tile = utile!(x as u32, y as u32, maxzoom);
                 tiles_set.insert(tile);
-                if let Some(ring) = &mut ring {
-                    if prev_y != Some(y) {
-                        ring.push((x as u32, y as u32));
-                    }
+                if let Some(ring) = &mut ring
+                    && prev_y != Some(y)
+                {
+                    ring.push((x as u32, y as u32));
                 }
                 prev_x = Some(x);
                 prev_y = Some(y);
@@ -110,12 +110,11 @@ fn line_string_cover(
     }
 
     // adjust the ring if needed
-    if let Some(ring) = &mut ring {
-        if let (Some(first_ring), Some(y_value)) = (ring.first(), y_value) {
-            if y_value == i64::from(first_ring.1) {
-                ring.pop();
-            }
-        }
+    if let Some(ring) = &mut ring
+        && let (Some(first_ring), Some(y_value)) = (ring.first(), y_value)
+        && y_value == i64::from(first_ring.1)
+    {
+        ring.pop();
     }
 }
 
