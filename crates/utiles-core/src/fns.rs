@@ -453,9 +453,9 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> UtilesCoreResult<(f64,
     let yish = (1.0 + sinlat) / (1.0 - sinlat);
     match yish.classify() {
         FpCategory::Infinite | FpCategory::Nan => {
-            Err(UtilesCoreError::LngLat2WebMercator(
-                "Y can not be computed: lat={lat}".to_string(),
-            ))
+            Err(UtilesCoreError::LngLat2WebMercator(format!(
+                "Y can not be computed: lat={lat}"
+            )))
         }
         _ => {
             let y = 0.5 - 0.25 * (yish.ln()) / PI;

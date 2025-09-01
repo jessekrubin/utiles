@@ -110,43 +110,51 @@ lto = "thin"
 
 [workspace.lints.rust]
 unsafe_code = "warn"
-# MUST CLEAN UP MAIN LIBRARY....
 unreachable_pub = "warn"
 
 [workspace.lints.clippy]
 # groups
+cargo = { level = "warn", priority = -2 }
 all = { level = "warn", priority = -2 }
+# periodically check nursery lints
 # nursery = { level = "warn", priority = -2 }
 pedantic = { level = "warn", priority = -2 }
 correctness = { level = "warn", priority = 2 }
 panic = { level = "warn", priority = -1 }
 style = { level = "warn", priority = 1 }
 perf = { level = "warn", priority = 3 }
-# DENY lints
+# deny lints
 unwrap_used = "deny"
+# warn
+# arithmetic_side_effects = "warn"
 # allow pedantic
 missing_errors_doc = "allow"
-missing_panics_doc = "allow"
 module_name_repetitions = "allow"
-similar_names = "allow"
-# nursery
+# cargo allowed
+multiple_crate_versions = "allow"
+
+# nursery always on
 use_self = "warn"
 
+# =======
 # nursery
-# as_ptr_cast_mut = 'allow'
-# equatable_if_let = "allow"
-# literal_string_with_formatting_args = "allow"
+# =======
+# __turn_these_on_occasionally__
+# equatable_if_let = "warn"
+# literal_string_with_formatting_args = "warn"
+# significant_drop_in_scrutinee = "warn"
+# __TBD__
+# as_ptr_cast_mut = 'warn'
+# derive_partial_eq_without_eq = "allow"
 # missing_const_for_fn = "allow"
-# option_if_let_else = "allow"
+# option_if_let_else = "warn"
+# or_fun_call = "warn"
 # redundant_pub_crate = "allow"
-# significant_drop_in_scrutinee = "allow"
 # significant_drop_tightening = "allow"
 # needless_pass_by_ref_mut = "allow"
 # cognitive_complexity = "allow"
-# unnecessary_struct_initialization = "allow"
-# future_not_send = "allow"
-# branches_sharing_code = "allow"
-# useless_let_if_seq = "allow"
+
+
 
 [workspace.metadata.release]
 tag-name = "v{{version}}"

@@ -8,6 +8,8 @@ edition.workspace = true
 homepage.workspace = true
 license.workspace = true
 repository.workspace = true
+keywords = ["geo", "mercator", "tile", "geojson"]
+categories = ["science::geo"]
 
 [dependencies]
 geojson = { workspace = true, optional = true }

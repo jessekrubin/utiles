@@ -5,6 +5,7 @@ use utiles::dev::sqlite_u64::{
     u64_to_i64_ne_bytes, u64_to_i64_ptr, u64_to_i64_unsafe_transmute,
 };
 
+#[expect(clippy::similar_names)]
 fn benchmark_conversion(
     c: &mut Criterion,
     name: &str,

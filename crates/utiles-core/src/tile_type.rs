@@ -378,14 +378,15 @@ impl TileType {
 
     #[must_use]
     pub fn headers_vec(&self) -> Vec<(&'static str, &'static str)> {
-        if let Some(content_encoding) = self.content_encoding() {
-            vec![
-                ("Content-Type", self.content_type()),
-                ("Content-Encoding", content_encoding),
-            ]
-        } else {
-            vec![("Content-Type", self.content_type())]
-        }
+        self.content_encoding().map_or_else(
+            || vec![("Content-Type", self.content_type())],
+            |content_encoding| {
+                vec![
+                    ("Content-Type", self.content_type()),
+                    ("Content-Encoding", content_encoding),
+                ]
+            },
+        )
     }
 
     #[must_use]

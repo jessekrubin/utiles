@@ -242,11 +242,10 @@ impl Tile {
     /// Return zxy string with optional separator (default is '/')
     #[must_use]
     pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
-        if let Some(sep) = sep {
-            format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y)
-        } else {
-            format!("{}/{}/{}", self.z, self.x, self.y)
-        }
+        sep.map_or_else(
+            || format!("{}/{}/{}", self.z, self.x, self.y),
+            |sep| format!("{}{}{}{}{}", self.z, sep, self.x, sep, self.y),
+        )
     }
 
     /// Return zxy string with extension and optional separator (default is '/')
@@ -260,11 +259,10 @@ impl Tile {
     /// ```
     #[must_use]
     pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
-        if let Some(sep) = sep {
-            format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext)
-        } else {
-            format!("{}/{}/{}.{}", self.z, self.x, self.y, ext)
-        }
+        sep.map_or_else(
+            || format!("{}/{}/{}.{}", self.z, self.x, self.y, ext),
+            |sep| format!("{}{}{}{}{}.{}", self.z, sep, self.x, sep, self.y, ext),
+        )
     }
 
     /// Convert quadkey string to Tile
