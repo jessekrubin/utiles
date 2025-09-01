@@ -53,8 +53,8 @@ num_cpus = "1.17.0"
 owo-colors = { version = "4.2.2", features = ["supports-color"] }
 oxipng = { version = "9.1.5", features = [] }
 pmtiles = { version = "0.15.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
-pyo3 = "0.25"
-pyo3-build-config = "0.25"
+pyo3 = "0.26"
+pyo3-build-config = "0.26"
 rusqlite = { version = "0.37.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
@@ -69,7 +69,7 @@ tokio-stream = "0.1.17"
 tower = { version = "0.5.2", features = ["timeout"] }
 tower-http = { version = "0.6.6", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
 tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.19", features = ["serde", "serde_json", "env-filter"] }
+tracing-subscriber = { version = "0.3.20", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"
 xxhash-rust = { version = "0.8.15", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
 
