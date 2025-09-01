@@ -61,7 +61,7 @@ struct Cli {
 }
 
 pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> Result<Vec<u8>> {
-    if let TileFormat::Png = tiletype(data).format {
+    if tiletype(data).format == TileFormat::Png {
         oxipng::optimize_from_memory(data, options).map_err(std::convert::Into::into)
     } else {
         warn!("Unsupported image type");
