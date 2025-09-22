@@ -10,6 +10,7 @@ pub(crate) struct LintConfig {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[expect(dead_code)]
 pub(crate) struct UtilesConfig {
     pub lint: LintConfig,
     // TODO: server/log config
