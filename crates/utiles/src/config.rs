@@ -9,7 +9,7 @@ pub(crate) struct LintConfig {
     pub rules: Vec<String>,
 }
 
-#[expect(dead_code)]
+#[allow(dead_code)]
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct UtilesConfig {
     pub lint: LintConfig,
