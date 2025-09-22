@@ -9,8 +9,8 @@ pub(crate) struct LintConfig {
     pub rules: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
 #[expect(dead_code)]
+#[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct UtilesConfig {
     pub lint: LintConfig,
     // TODO: server/log config
