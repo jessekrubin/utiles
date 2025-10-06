@@ -50,7 +50,7 @@ json-patch = "4.0.0"
 md-5 = "0.10.6"
 noncrypto-digests = "0.3.6"
 num_cpus = "1.17.0"
-owo-colors = { version = "4.2.2", features = ["supports-color"] }
+owo-colors = { version = "4.2.3", features = ["supports-color"] }
 oxipng = { version = "9.1.5", features = [] }
 pmtiles = { version = "0.15.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
 pyo3 = "0.26"
