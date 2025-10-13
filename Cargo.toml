@@ -48,7 +48,7 @@ indoc = "2.0.6"
 jiff = "0.2.15"
 json-patch = "4.0.0"
 md-5 = "0.10.6"
-noncrypto-digests = "0.3.6"
+noncrypto-digests = "0.3.7"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.2.3", features = ["supports-color"] }
 oxipng = { version = "9.1.5", features = [] }
