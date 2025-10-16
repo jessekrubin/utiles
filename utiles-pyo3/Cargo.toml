@@ -1,5 +1,5 @@
 [package]
-name = "pyutiles"
+name = "utiles-pyo3"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

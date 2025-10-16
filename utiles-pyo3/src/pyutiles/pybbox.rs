@@ -16,7 +16,7 @@ pub struct PyBbox {
 impl PyBbox {
     #[new]
     pub fn py_new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
-        PyBbox {
+        Self {
             bbox: BBox {
                 west: left,
                 south: bottom,

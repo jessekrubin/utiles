@@ -7,7 +7,7 @@ use pyo3::{Bound, PyResult, pyfunction};
 
 #[pyfunction]
 #[pyo3(signature = (* args, minzoom=None))]
-pub fn simplify(
+pub(crate) fn simplify(
     args: &Bound<'_, PyTuple>,
     minzoom: Option<u8>,
 ) -> PyResult<HashSet<PyTile>> {

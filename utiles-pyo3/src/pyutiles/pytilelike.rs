@@ -13,7 +13,7 @@ pub enum PyTileLike {
 impl From<PyTileLike> for PyTile {
     fn from(val: PyTileLike) -> Self {
         match val {
-            PyTileLike::Tuple3d((x, y, z)) => PyTile::from(utiles::Tile::new(x, y, z)),
+            PyTileLike::Tuple3d((x, y, z)) => Self::from(utiles::Tile::new(x, y, z)),
             PyTileLike::PyTile(t) => t,
         }
     }

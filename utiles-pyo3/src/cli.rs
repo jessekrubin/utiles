@@ -5,7 +5,7 @@ use utiles::cli::{CliOpts, cli_main_sync};
 
 #[pyfunction]
 #[pyo3(signature = (args = None))]
-pub fn ut_cli(args: Option<Vec<String>>) -> PyResult<u8> {
+pub(crate) fn ut_cli(args: Option<Vec<String>>) -> PyResult<u8> {
     let argv = args.unwrap_or_else(|| std::env::args().collect());
 
     // clap needs the program name as first argument "utiles" or "ut"

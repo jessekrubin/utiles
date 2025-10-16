@@ -2049,22 +2049,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pyutiles"
-version = "0.8.0"
-dependencies = [
- "geojson",
- "jiff",
- "pyo3",
- "pyo3-build-config",
- "serde",
- "serde_json",
- "size",
- "tracing",
- "tracing-subscriber",
- "utiles",
-]
-
-[[package]]
 name = "qoi"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3077,6 +3061,22 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tracing",
+ "utiles",
+]
+
+[[package]]
+name = "utiles-pyo3"
+version = "0.8.0"
+dependencies = [
+ "geojson",
+ "jiff",
+ "pyo3",
+ "pyo3-build-config",
+ "serde",
+ "serde_json",
+ "size",
+ "tracing",
+ "tracing-subscriber",
  "utiles",
 ]
 

@@ -55,9 +55,9 @@ impl PyLngLat {
         other: &Bound<'_, PyAny>,
         op: CompareOp,
     ) -> PyResult<bool> {
-        let is_lnglat = other.is_instance_of::<PyLngLat>();
+        let is_lnglat = other.is_instance_of::<Self>();
         if is_lnglat {
-            let maybe_lnglat = other.extract::<PyRef<PyLngLat>>();
+            let maybe_lnglat = other.extract::<PyRef<Self>>();
             if let Ok(lnglat) = maybe_lnglat {
                 match op {
                     CompareOp::Eq => {
@@ -97,6 +97,7 @@ impl PyLngLat {
             }
         }
     }
+
     pub fn __len__(&self) -> usize {
         2
     }

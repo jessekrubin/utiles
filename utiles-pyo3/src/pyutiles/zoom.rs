@@ -11,8 +11,8 @@ pub enum PyZoomOrZooms {
 impl From<PyZoomOrZooms> for ZoomOrZooms {
     fn from(val: PyZoomOrZooms) -> Self {
         match val {
-            PyZoomOrZooms::Zoom(z) => ZoomOrZooms::Zoom(z),
-            PyZoomOrZooms::Zooms(zs) => ZoomOrZooms::Zooms(zs),
+            PyZoomOrZooms::Zoom(z) => Self::Zoom(z),
+            PyZoomOrZooms::Zooms(zs) => Self::Zooms(zs),
         }
     }
 }

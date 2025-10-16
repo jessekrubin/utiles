@@ -118,7 +118,7 @@ impl PyTile {
     pub fn from_quadkey(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
         let xyz = Tile::from_quadkey(&quadkey);
         match xyz {
-            Ok(xyz) => Ok(PyTile::from(xyz)),
+            Ok(xyz) => Ok(Self::from(xyz)),
             Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
         }
     }
@@ -127,7 +127,7 @@ impl PyTile {
     pub fn from_qk(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
         let xyz = Tile::from_quadkey(&quadkey);
         match xyz {
-            Ok(xyz) => Ok(PyTile::from(xyz)),
+            Ok(xyz) => Ok(Self::from(xyz)),
             Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
         }
     }
@@ -135,13 +135,13 @@ impl PyTile {
     #[classmethod]
     pub fn from_row_major_id(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
-        PyTile::from(xyz)
+        Self::from(xyz)
     }
 
     #[classmethod]
     pub fn from_rmid(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
-        PyTile::from(xyz)
+        Self::from(xyz)
     }
 
     pub fn quadkey(&self) -> String {
@@ -155,7 +155,7 @@ impl PyTile {
     #[classmethod]
     pub fn from_pmtileid(_cls: &Bound<'_, PyType>, tileid: u64) -> Self {
         let xyz = Tile::from_pmtileid(tileid);
-        PyTile::from(xyz)
+        Self::from(xyz)
     }
 
     pub fn pmtileid(&self) -> u64 {
@@ -185,7 +185,7 @@ impl PyTile {
     ) -> PyResult<Self> {
         let xyz = Tile::from_lnglat_zoom(lng, lat, zoom, truncate)
             .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
-        Ok(PyTile::from(xyz))
+        Ok(Self::from(xyz))
     }
 
     pub fn __repr__(&self) -> String {
@@ -291,9 +291,9 @@ impl PyTile {
         other: &Bound<'_, PyAny>,
         op: CompareOp,
     ) -> PyResult<bool> {
-        let is_pytile = other.is_instance_of::<PyTile>();
+        let is_pytile = other.is_instance_of::<Self>();
         if is_pytile {
-            let maybe_pytile = other.extract::<PyTile>();
+            let maybe_pytile = other.extract::<Self>();
             match maybe_pytile {
                 Ok(other) => {
                     let b = match op {
@@ -399,7 +399,7 @@ impl PyTile {
 
     #[pyo3(signature = (n = None))]
     pub fn parent(&self, n: Option<u8>) -> Option<Self> {
-        self.xyz.parent(n).map(PyTile::from)
+        self.xyz.parent(n).map(Self::from)
     }
 
     #[pyo3(signature = (zoom = None, *, zorder = None))]
@@ -575,7 +575,7 @@ impl TileParent for PyTile {
 }
 
 impl TileChildren1 for PyTile {
-    fn children1(&self) -> [PyTile; 4] {
+    fn children1(&self) -> [Self; 4] {
         self.children1()
     }
 }

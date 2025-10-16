@@ -9,27 +9,27 @@ use utiles::lager::{
 const VERSION_STRING: &str = "pylager";
 
 #[pyfunction]
-pub fn trace(msg: &str) {
+pub(crate) fn trace(msg: &str) {
     tracing::trace!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
-pub fn debug(msg: &str) {
+pub(crate) fn debug(msg: &str) {
     tracing::debug!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
-pub fn info(msg: &str) {
+pub(crate) fn info(msg: &str) {
     tracing::info!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
-pub fn warn(msg: &str) {
+pub(crate) fn warn(msg: &str) {
     tracing::warn!(target: VERSION_STRING, "{}", msg);
 }
 
 #[pyfunction]
-pub fn error(msg: &str) {
+pub(crate) fn error(msg: &str) {
     tracing::error!(target: VERSION_STRING, "{}", msg);
 }
 
@@ -131,20 +131,20 @@ impl PyLager {
 }
 
 #[pyfunction]
-pub fn set_lager_level(level: &str) -> PyResult<()> {
+pub(crate) fn set_lager_level(level: &str) -> PyResult<()> {
     utiles::lager::set_log_level(level).map_err(|e| {
         PyErr::new::<PyValueError, _>(format!("failed to set log level: {e}"))
     })
 }
 
 #[pyfunction]
-pub fn set_lager_format(json: bool) -> PyResult<()> {
+pub(crate) fn set_lager_format(json: bool) -> PyResult<()> {
     utiles::lager::set_log_format(json).map_err(|e| {
         PyErr::new::<PyValueError, _>(format!("failed to set log format: {e}"))
     })
 }
 
-pub fn pymod_add(m: &Bound<'_, PyModule>) -> PyResult<()> {
+pub(crate) fn pymod_add(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let cfg = LagerConfig::default();
     match init_tracing(cfg) {
         Ok(()) => {
