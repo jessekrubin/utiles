@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
-
-Extensions = Union[str, bool]
 
 PWD = Path(__file__).parent
 
@@ -70,7 +67,7 @@ def is_mvt_like(buffer: bytes) -> bool:
     return True
 
 
-def tiletype(buffer: bytes) -> Extensions:
+def tiletype(buffer: bytes) -> str | bool:
     if buffer.startswith(b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"):
         return "png"
     # if (
@@ -240,7 +237,7 @@ def test_benchmark_tiletype_py(
     tile: tuple[str, bytes],
     benchmark: BenchmarkFixture,
 ) -> None:
-    filename, buffer = tile
+    _filename, buffer = tile
     benchmark(tiletype, buffer)
 
 
@@ -252,5 +249,5 @@ def test_benchmark_tiletype_rs(
     tile: tuple[str, bytes],
     benchmark: BenchmarkFixture,
 ) -> None:
-    filename, buffer = tile
+    _filename, buffer = tile
     benchmark(utiles.tiletype_str, buffer)

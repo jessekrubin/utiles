@@ -2,7 +2,7 @@
 
 ## 0.8.0 (unreleased)
 
-- rust-2024 editio
+- rust-2024 edition
 - criterion-v6 though I am not sure I still need to be benchmarking that dumb experiment
 - all `allow` lints moved to `expect`
 - docs website
@@ -14,8 +14,7 @@
   - const functions
 - pyo3 v0.24.x
 - frozen py structs
-- Moved `edges` from `utiels` to `utiles-core`
-
+- Moved `edges` from `utiles` to `utiles-core`
 
 ---
 

@@ -39,7 +39,7 @@ futures = "0.3.31"
 futures-util = "0.3.31"
 geo-types = "0.7.17"
 geojson = "0.24.2"
-globset = "0.4.16"
+globset = "0.4.17"
 hex = "0.4.3"
 image = "0.25.8"
 imagesize = "0.14.0"
@@ -52,7 +52,7 @@ noncrypto-digests = "0.3.7"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.2.3", features = ["supports-color"] }
 oxipng = { version = "9.1.5", features = [] }
-pmtiles = { version = "0.15.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
+pmtiles = { version = "0.17.1", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
 pyo3 = "0.26"
 pyo3-build-config = "0.26"
 rusqlite = { version = "0.37.0", features = ["bundled", "vtab", "blob"] }
@@ -64,7 +64,7 @@ strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = "0.27.2"
 thiserror = "2.0.17"
 tilejson = "0.4.3"
-tokio = { version = "1.47", features = ["full"] }
+tokio = { version = "1.48", features = ["full"] }
 tokio-stream = "0.1.17"
 tower = { version = "0.5.2", features = ["timeout"] }
 tower-http = { version = "0.6.6", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }

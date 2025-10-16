@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import dataclasses
-import typing as t
 from pathlib import Path
 
 import pytest
@@ -36,7 +35,8 @@ def db_copy_cfg(request: pytest.FixtureRequest) -> DbCopyCfg:
     if isinstance(request.param, DbCopyCfg):
         return request.param
     else:
-        raise ValueError("Should not happen - request.param is not a DbCopyCfg")
+        msg = "Should not happen - request.param is not a DbCopyCfg"
+        raise ValueError(msg)
 
 
 def _osm_standard_z0z4_mbtiles(test_data: Path) -> Path:
