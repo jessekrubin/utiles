@@ -13,7 +13,9 @@ _web map tile utilities, batching, serving, python and bears (oh-my)_
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
 [![PyPI - Wheel](https://img.shields.io/pypi/wheel/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
 
-[//]: # "[![docs.rs docs](https://docs.rs/utiles/badge.svg)](https://docs.rs/utiles)"
+[//]:
+  #
+  "[![docs.rs docs](https://docs.rs/utiles/badge.svg)](https://docs.rs/utiles)"
 
 ## Installation
 
@@ -40,16 +42,18 @@ cargo add utiles-core utiles
 ## About
 
 `utiles` started off as a python port of mapbox's web-mercator utils
-python-library [mercantile](https://github.com/mapbox/mercantile) written
-in rust. It has since been expanded into a slim rust crate (`utiles-core`)
-a less slim crate with a lib/cli (`utiles`), that has a python package wrapper.
+python-library [mercantile](https://github.com/mapbox/mercantile) written in
+rust. It has since been expanded into a slim rust crate (`utiles-core`) a less
+slim crate with a lib/cli (`utiles`), that has a python package wrapper.
 
-For more details on the python package see: [./utiles-pyo3](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
+For more details on the python package see:
+[./utiles-pyo3](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
 
 ## python
 
-A mostly drop-in replacement for [mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several other
-util(e)ities
+A mostly drop-in replacement for
+[mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several
+other util(e)ities
 
 [py-utiles](https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3)
 
@@ -61,8 +65,10 @@ util(e)ities
 
 - Please do! Would love some feedback!
 - Be kind!
-- DO NOT USE the phrases `blazing fast`/`blazingly fast` in any PRs, issues or docs.
-- I will happily accept PRs, and add you to the currently (5/26/2023) non-existent contributors list.
+- DO NOT USE the phrases `blazing fast`/`blazingly fast` in any PRs, issues or
+  docs.
+- I will happily accept PRs, and add you to the currently (5/26/2023)
+  non-existent contributors list.
 
 ---
 

@@ -3,7 +3,8 @@
 ## 0.8.0 (unreleased)
 
 - rust-2024 edition
-- criterion-v6 though I am not sure I still need to be benchmarking that dumb experiment
+- criterion-v6 though I am not sure I still need to be benchmarking that dumb
+  experiment
 - all `allow` lints moved to `expect`
 - docs website
 - Updated several dependencies
@@ -36,7 +37,8 @@
     return children in the order of `top-left`, `top-right`, `bottom-right`,
     `bottom-left` which I call 'd-ordering'
 - `cli`
-  - format string `{projwin}` and `{projwin_web}` changed to return ` ` space separated coords
+  - format string `{projwin}` and `{projwin_web}` changed to return ` ` space
+    separated coords
 
 ---
 
