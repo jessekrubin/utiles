@@ -23,7 +23,7 @@ impl From<PyLngLatBbox> for BBox {
 impl PyLngLatBbox {
     #[new]
     pub fn py_new(west: f64, south: f64, east: f64, north: f64) -> Self {
-        PyLngLatBbox {
+        Self {
             bbox: BBox {
                 west,
                 south,
@@ -140,7 +140,7 @@ impl PyLngLatBbox {
                 )),
             }
         } else {
-            let other = other.extract::<PyRef<PyLngLatBbox>>();
+            let other = other.extract::<PyRef<Self>>();
             match other {
                 Ok(other) => match op {
                     CompareOp::Eq => Ok(self.bbox.west() == other.bbox.west()

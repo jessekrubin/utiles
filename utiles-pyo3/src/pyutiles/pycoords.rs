@@ -7,7 +7,7 @@ use pyo3::{Bound, FromPyObject, PyAny, PyErr, PyResult, exceptions, pyfunction};
 use crate::pyutiles::pyiters::CoordinateIterator;
 
 #[derive(FromPyObject, Debug)]
-pub enum CoordsExtractor<'a> {
+pub(crate) enum CoordsExtractor<'a> {
     ListVecF64(Vec<Vec<f64>>),
     VecF64(Vec<f64>),
     IntTuple3d((i32, i32, i32)),
@@ -20,7 +20,7 @@ pub enum CoordsExtractor<'a> {
 }
 
 #[pyfunction]
-pub fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
+pub(crate) fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
     let thing = CoordsExtractor::extract_bound(obj)?;
     match thing {
         CoordsExtractor::ListVecF64(v) => {
@@ -130,6 +130,6 @@ pub fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
 }
 
 #[pyfunction]
-pub fn coords(obj: &Bound<'_, PyAny>) -> PyResult<Vec<(f64, f64)>> {
+pub(crate) fn coords(obj: &Bound<'_, PyAny>) -> PyResult<Vec<(f64, f64)>> {
     Ok(_coords(obj)?.iter.collect())
 }

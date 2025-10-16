@@ -1,5 +1,5 @@
 [package]
-name = "pyutiles"
+name = "utiles-pyo3"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -31,3 +31,7 @@ pyo3 = { workspace = true, features = ["auto-initialize"] }
 [build-dependencies]
 pyo3-build-config.workspace = true
 jiff.workspace = true
+
+[lints]
+workspace = true
+

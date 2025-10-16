@@ -31,7 +31,7 @@ def test_tile_children() -> None:
 
 def test_pickling() -> None:
     pickled = pickle.dumps(ut.Tile(0, 0, 0))
-    loaded = pickle.loads(pickled)
+    loaded = pickle.loads(pickled)  # noqa: S301
     assert loaded == ut.Tile(0, 0, 0)
 
 

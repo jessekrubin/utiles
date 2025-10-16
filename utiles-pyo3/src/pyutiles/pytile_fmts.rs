@@ -18,7 +18,7 @@ pub struct PyTileFmts {
 impl PyTileFmts {
     #[new]
     pub fn py_new(fmtstr: &str) -> Self {
-        PyTileFmts {
+        Self {
             tformatter: TileStringFormatter::new(fmtstr),
         }
     }

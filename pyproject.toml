@@ -3,28 +3,41 @@ name = "utiles-dev"
 version = "0.0.1"
 description = "utiles-root-pyproject"
 readme = "README.md"
-requires-python = ">=3.9"
-dependencies = []
-
-[tool.uv]
-dev-dependencies = [
-    "click>=8.1.0,<8.2.1",
-    "hypothesis>=6.135.4",
-    "maturin>=1.8.7",
-    "mercantile>=1.2.1",
-    "mypy>=1.16.0",
-    "nox>=2025.5.1",
-    "pmtiles>=3.4.1",
-    "pytest>=8.4.0",
-    "pytest-benchmark>=5.1.0",
-    "pytest-cov>=6.1.1",
-    "pytest-xdist>=3.7.0",
-    "ruff>=0.11.13",
-    "tomli>=2.2.1",
-    "typing-extensions>=4.14.0",
+requires-python = ">=3.11"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
+dependencies = [  ]
+
+#[tool.uv]
+#dev-dependencies = [
+  #"click>=8.1.0,<8.2.1",
+  #"hypothesis>=6.135.4",
+#]
 
 [tool.uv.workspace]
 members = [
-    "utiles-pyo3",
-    ]
+  "utiles-pyo3",
+]
+
+[dependency-groups]
+dev = [
+    # click not equal to 8.2.1 because of breaking changes in 8.2.1
+    "click>=8.1.0,!=8.2.1",
+    "hypothesis>=6.142.0",
+    "maturin>=1.9.6",
+    "mercantile>=1.2.1",
+    "nox>=2025.10.14",
+    "pmtiles>=3.4.1",
+    "pytest>=8.4.2",
+    "pytest-benchmark>=5.1.0",
+    "pytest-cov>=7.0.0",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.14.1",
+    "tomli>=2.3.0",
+    "typing-extensions>=4.15.0",
+]

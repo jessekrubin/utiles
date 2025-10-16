@@ -8,7 +8,7 @@ use crate::pyutiles::pytile::PyTile;
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
+pub(crate) fn parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
     if args.len() == 1 {
         let arg = args.get_item(0)?;
         if let Ok(tile) = arg.extract::<PyTile>() {
@@ -32,7 +32,7 @@ pub fn parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
+pub(crate) fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
     let arglen = args.len();
     match arglen {
         1 => {
@@ -66,13 +66,13 @@ pub fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
 }
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn _parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
+pub(crate) fn _parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
     parse_tile_arg(args)
 }
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
+pub(crate) fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
     if args.len() == 1 {
         return crate::pyutiles::_extract(&args.get_item(0)?);
     } else if args.len() == 3 {
@@ -90,7 +90,7 @@ pub fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
 }
 
 #[pyfunction]
-pub fn parse_textiles(string: &str) -> Vec<PyTile> {
+pub(crate) fn parse_textiles(string: &str) -> Vec<PyTile> {
     utiles::parse_textiles(string)
         .into_iter()
         .map(PyTile::from)

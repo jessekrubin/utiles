@@ -23,7 +23,6 @@ use pyutiles::PyTile;
 use utiles::tile_type;
 mod cli;
 mod fmt_nbytes;
-// mod lager;
 mod pylager;
 mod pyutiles;
 const PACKAGE: &str = "utiles";

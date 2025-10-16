@@ -15,16 +15,16 @@ const ENCODING_STRINGS: &str = "uncompressed, internal, zlib, gzip, brotli, zstd
 pub struct PyTileEncoding(TileEncoding);
 
 impl FromPyObject<'_> for PyTileEncoding {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<PyTileEncoding> {
+    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
         if let Ok(s) = ob.downcast::<PyString>() {
             let s = s.to_string().to_ascii_lowercase();
             match s.as_str() {
-                "uncompressed" => Ok(PyTileEncoding(TileEncoding::Uncompressed)),
-                "internal" => Ok(PyTileEncoding(TileEncoding::Internal)),
-                "zlib" => Ok(PyTileEncoding(TileEncoding::Zlib)),
-                "gzip" => Ok(PyTileEncoding(TileEncoding::Gzip)),
-                "brotli" => Ok(PyTileEncoding(TileEncoding::Brotli)),
-                "zstd" => Ok(PyTileEncoding(TileEncoding::Zstd)),
+                "uncompressed" => Ok(Self(TileEncoding::Uncompressed)),
+                "internal" => Ok(Self(TileEncoding::Internal)),
+                "zlib" => Ok(Self(TileEncoding::Zlib)),
+                "gzip" => Ok(Self(TileEncoding::Gzip)),
+                "brotli" => Ok(Self(TileEncoding::Brotli)),
+                "zstd" => Ok(Self(TileEncoding::Zstd)),
                 _ => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(
                     "Invalid TileEncoding: {s} (options: {ENCODING_STRINGS})"
                 ))),
@@ -41,13 +41,13 @@ pub struct PyTileFormat(TileFormat);
 
 const TILE_FORMAT_STRINGS: &str = "png, webp, pbf, mvt, gif, jpg, jpeg, json, geojson";
 impl FromPyObject<'_> for PyTileFormat {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<PyTileFormat> {
+    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
         if let Ok(s) = ob.downcast::<PyString>() {
             let f_str = s.to_string();
 
             let tf: Option<TileFormat> = TileFormat::try_parse(&f_str);
             match tf {
-                Some(f) => Ok(PyTileFormat(f)),
+                Some(f) => Ok(Self(f)),
                 None => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(
                     "Invalid TileFormat: {f_str} (options: {TILE_FORMAT_STRINGS})"
                 ))),
@@ -67,7 +67,7 @@ impl PyTileType {
         let encoding = encoding.0;
         let format = format.0;
         let ttype = TileType::new(format, encoding);
-        PyTileType(ttype)
+        Self(ttype)
     }
 
     pub fn __repr__(&self) -> String {
@@ -117,26 +117,26 @@ impl PyTileType {
 
     #[classmethod]
     fn from_bytes(_cls: &Bound<'_, PyType>, buffer: &[u8]) -> Self {
-        PyTileType(tile_type::tiletype(buffer))
+        Self(tile_type::tiletype(buffer))
     }
 
-    fn __eq__(&self, other: &PyTileType) -> bool {
+    fn __eq__(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
 #[pyfunction]
-pub fn tiletype(buffer: &[u8]) -> PyTileType {
+pub(crate) fn tiletype(buffer: &[u8]) -> PyTileType {
     let ttype = tile_type::tiletype(buffer);
     PyTileType(ttype)
 }
 
 #[pyfunction]
-pub fn tiletype_str(buffer: &[u8]) -> String {
+pub(crate) fn tiletype_str(buffer: &[u8]) -> String {
     tile_type::tiletype_str(buffer)
 }
 
 #[pyfunction]
-pub fn tiletype2headers(tiletype: usize) -> Vec<(&'static str, &'static str)> {
+pub(crate) fn tiletype2headers(tiletype: usize) -> Vec<(&'static str, &'static str)> {
     tile_type::headers(&tile_type::const2enum(tiletype))
 }

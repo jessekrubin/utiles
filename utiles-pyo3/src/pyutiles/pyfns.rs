@@ -17,13 +17,13 @@ use crate::pyutiles::pytiles_generator::TilesGenerator;
 use crate::pyutiles::zoom::PyZoomOrZooms;
 
 #[pyfunction]
-pub fn xyz(x: u32, y: u32, z: u8) -> PyTile {
+pub(crate) fn xyz(x: u32, y: u32, z: u8) -> PyTile {
     PyTile::py_new(x, y, z)
 }
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn ul(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLat> {
+pub(crate) fn ul(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLat> {
     let tile = parse_tile_arg(args)?;
     let lnglat = tile.ul();
     Ok(lnglat)
@@ -31,13 +31,13 @@ pub fn ul(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLat> {
 
 #[pyfunction]
 #[pyo3(signature = (lng, lat, truncate = None))]
-pub fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
+pub(crate) fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
     utiles::xy(lng, lat, truncate)
 }
 
 #[pyfunction]
 #[pyo3(signature = (lng, lat, truncate = None))]
-pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
+pub(crate) fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
     let trunc = truncate.unwrap_or(false);
     if !trunc && (lat <= -90.0 || lat >= 90.0) {
         Err(PyErr::new::<PyValueError, _>(format!(
@@ -55,21 +55,21 @@ pub fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
 
 #[pyfunction]
 #[pyo3(signature = (x, y, truncate = None))]
-pub fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
+pub(crate) fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
     let lnglat = utiles::lnglat(x, y, truncate);
     PyLngLat::py_new(lnglat.lng(), lnglat.lat())
 }
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
+pub(crate) fn bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
     let tile = parse_tile_arg(args)?;
     let bbox = tile.bounds();
     Ok(bbox)
 }
 
 #[pyfunction]
-pub fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
+pub(crate) fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
     if !(0..=32).contains(&zoom) {
         Err(PyErr::new::<PyValueError, _>(format!(
             "zoom must be between 0 and 32: {zoom}"
@@ -80,12 +80,12 @@ pub fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
 }
 
 #[pyfunction]
-pub fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
+pub(crate) fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
     utiles::xyz2quadkey(x, y, z)
 }
 
 #[pyfunction]
-pub fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
+pub(crate) fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
     let xyz = utiles::quadkey2tile(quadkey);
     match xyz {
         Ok(xyz) => Ok(PyTile::from(xyz)),
@@ -94,18 +94,19 @@ pub fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
 }
 
 #[pyfunction]
-pub fn qk2xyz(quadkey: &str) -> PyResult<PyTile> {
+pub(crate) fn qk2xyz(quadkey: &str) -> PyResult<PyTile> {
     quadkey2xyz(quadkey)
 }
 
 #[pyfunction]
-pub fn from_tuple(tile: TileTuple) -> PyTile {
+pub(crate) fn from_tuple(tile: TileTuple) -> PyTile {
     PyTile::py_new(tile.0, tile.1, tile.2)
 }
+
 #[pyfunction]
 #[pyo3(signature = (tile, fid = None, props = None, projected = None, buffer = None, precision = None)
 )]
-pub fn feature<'py>(
+pub(crate) fn feature<'py>(
     py: Python<'py>,
     tile: PyTileLike,
     // (u32, u32, u8),
@@ -121,15 +122,12 @@ pub fn feature<'py>(
     let pytile: PyTile = tile.into();
     let f = pytile.feature(py, fid, props, projected, buffer, precision)?;
     Ok(f)
-    // dummy hashmap for now
-    // let mut h = HashMap::new();
-    // Ok(h)
 }
 
 /// Extract a tile or tiles to Vec<PyTile>
 ///
 /// Consolidated logic from `parse_tiles()` per rec by `@nyurikS` in PR #38
-pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
+pub(crate) fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
     // TODO: this code is identical to parse_tiles() and should be consolidated
     if let Ok(tiles) = arg.extract::<PyTile>() {
         return Ok(vec![tiles]);
@@ -153,7 +151,7 @@ pub fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
+pub(crate) fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
     let tile = pyparsing::parse_tile_arg(args)?;
     let web_bbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
     Ok(PyBbox::py_new(
@@ -166,7 +164,12 @@ pub fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
 
 #[pyfunction]
 #[pyo3(signature = (lng, lat, zoom, truncate=None))]
-pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<PyTile> {
+pub(crate) fn tile(
+    lng: f64,
+    lat: f64,
+    zoom: u8,
+    truncate: Option<bool>,
+) -> PyResult<PyTile> {
     if lat <= -90.0 || lat >= 90.0 {
         Err(PyErr::new::<PyValueError, _>(format!(
             "Invalid latitude: {lat}"
@@ -181,38 +184,41 @@ pub fn tile(lng: f64, lat: f64, zoom: u8, truncate: Option<bool>) -> PyResult<Py
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn pmtileid(args: &Bound<'_, PyTuple>) -> PyResult<u64> {
+pub(crate) fn pmtileid(args: &Bound<'_, PyTuple>) -> PyResult<u64> {
     let tile = pyparsing::parse_tile_arg(args)?;
     Ok(tile.pmtileid())
 }
 
 #[pyfunction]
-pub fn pmtileid2xyz(pmtileid: u64) -> PyTile {
+pub(crate) fn pmtileid2xyz(pmtileid: u64) -> PyTile {
     let xyz = utiles::Tile::from_pmtileid(pmtileid);
     PyTile::from(xyz)
 }
 
 #[pyfunction]
-pub fn from_pmtileid(pmtileid: u64) -> PyTile {
+pub(crate) fn from_pmtileid(pmtileid: u64) -> PyTile {
     let xyz = utiles::Tile::from_pmtileid(pmtileid);
     PyTile::from(xyz)
 }
 
 #[pyfunction]
 #[pyo3(signature = (* args))]
-pub fn quadkey(args: &Bound<'_, PyTuple>) -> PyResult<String> {
+pub(crate) fn quadkey(args: &Bound<'_, PyTuple>) -> PyResult<String> {
     let tile = pyparsing::parse_tile_arg(args)?;
     Ok(utiles::xyz2quadkey(tile.xyz.x, tile.xyz.y, tile.xyz.z))
 }
 
 #[pyfunction]
-pub fn quadkey_to_tile(quadkey: &str) -> PyResult<PyTile> {
+pub(crate) fn quadkey_to_tile(quadkey: &str) -> PyResult<PyTile> {
     quadkey2xyz(quadkey)
 }
 
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None))]
-pub fn parent(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Option<PyTile>> {
+pub(crate) fn parent(
+    args: &Bound<'_, PyTuple>,
+    zoom: Option<u8>,
+) -> PyResult<Option<PyTile>> {
     // Parse the tile argument
     let tile = pyparsing::parse_tile_arg(args)?;
     if tile.xyz.z == 0 {
@@ -248,7 +254,7 @@ pub fn parent(args: &Bound<'_, PyTuple>, zoom: Option<u8>) -> PyResult<Option<Py
 
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None, zorder = None))]
-pub fn children(
+pub(crate) fn children(
     args: &Bound<'_, PyTuple>,
     zoom: Option<u8>,
     zorder: Option<bool>,
@@ -267,7 +273,7 @@ pub fn children(
 
 #[pyfunction]
 #[pyo3(signature = (* args, zoom = None, wrapx = None))]
-pub fn neighbors(
+pub(crate) fn neighbors(
     args: &Bound<'_, PyTuple>,
     zoom: Option<u8>,
     wrapx: Option<bool>,
@@ -285,7 +291,7 @@ pub fn neighbors(
 
 #[pyfunction]
 #[pyo3(signature = (* args, truncate = None))]
-pub fn bounding_tile(
+pub(crate) fn bounding_tile(
     args: &Bound<'_, PyTuple>,
     truncate: Option<bool>,
 ) -> PyResult<PyTile> {
@@ -300,7 +306,7 @@ pub fn bounding_tile(
 }
 
 #[pyfunction]
-pub fn truncate_lnglat(lng: f64, lat: f64) -> (f64, f64) {
+pub(crate) fn truncate_lnglat(lng: f64, lat: f64) -> (f64, f64) {
     let ll = utiles::LngLat::new(lng, lat);
     let truncated = utiles::truncate_lnglat(&ll);
     (truncated.lng(), truncated.lat())
@@ -308,7 +314,7 @@ pub fn truncate_lnglat(lng: f64, lat: f64) -> (f64, f64) {
 
 #[pyfunction]
 #[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
-pub fn tiles_count(
+pub(crate) fn tiles_count(
     west: f64,
     south: f64,
     east: f64,
@@ -325,7 +331,7 @@ pub fn tiles_count(
 
 #[pyfunction]
 #[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
-pub fn tiles(
+pub(crate) fn tiles(
     west: f64,
     south: f64,
     east: f64,
@@ -356,7 +362,7 @@ pub fn tiles(
 
 #[pyfunction]
 #[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
-pub fn tiles_list(
+pub(crate) fn tiles_list(
     west: f64,
     south: f64,
     east: f64,
@@ -372,12 +378,12 @@ pub fn tiles_list(
 }
 
 #[pyfunction]
-pub fn geotransform2optzoom(geotransform: (f64, f64, f64, f64, f64, f64)) -> u8 {
+pub(crate) fn geotransform2optzoom(geotransform: (f64, f64, f64, f64, f64, f64)) -> u8 {
     utiles::geotransform2optzoom(geotransform)
 }
 
 #[pyfunction]
-pub fn geojson_bounds(obj: &Bound<'_, PyAny>) -> PyResult<PyLngLatBbox> {
+pub(crate) fn geojson_bounds(obj: &Bound<'_, PyAny>) -> PyResult<PyLngLatBbox> {
     let coordsvec = pycoords::coords(obj)?;
     let mut bbox: (f64, f64, f64, f64) = (180.0, 90.0, -180.0, -90.0);
 

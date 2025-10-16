@@ -6,7 +6,7 @@ use utiles::cover::{GeojsonCoverOptions, geojson2tiles as ut_geojson2tiles};
 
 #[pyfunction]
 #[pyo3(signature = (geojson_str, maxzoom, minzoom=None))]
-pub fn geojson2tiles(
+pub(crate) fn geojson2tiles(
     geojson_str: &str,
     maxzoom: u8,
     minzoom: Option<u8>,
