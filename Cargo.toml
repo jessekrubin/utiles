@@ -53,7 +53,7 @@ num_cpus = "1.17.0"
 owo-colors = { version = "4.2.3", features = ["supports-color"] }
 oxipng = { version = "9.1.5", features = [] }
 pmtiles = { version = "0.17.1", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
-pyo3 = "0.26"
+pyo3 = "0.27"
 pyo3-build-config = "0.26"
 rusqlite = { version = "0.37.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0.228", features = ["derive"] }
