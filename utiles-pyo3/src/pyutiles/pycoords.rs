@@ -21,7 +21,7 @@ pub(crate) enum CoordsExtractor<'a> {
 
 #[pyfunction]
 pub(crate) fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
-    let thing = CoordsExtractor::extract_bound(obj)?;
+    let thing = CoordsExtractor::extract(obj.as_borrowed())?;
     match thing {
         CoordsExtractor::ListVecF64(v) => {
             // ensure 2d

@@ -1,8 +1,7 @@
-use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyString, PyType};
 use pyo3::{
-    Bound, FromPyObject, PyAny, PyErr, PyResult, Python, intern, pyclass, pyfunction,
-    pymethods,
+    Borrowed, Bound, FromPyObject, PyAny, PyErr, PyResult, Python, intern, pyclass,
+    pyfunction, pymethods,
 };
 use utiles::tile_type;
 use utiles::tile_type::{TileEncoding, TileFormat, TileType};
@@ -14,9 +13,11 @@ const ENCODING_STRINGS: &str = "uncompressed, internal, zlib, gzip, brotli, zstd
 
 pub struct PyTileEncoding(TileEncoding);
 
-impl FromPyObject<'_> for PyTileEncoding {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-        if let Ok(s) = ob.downcast::<PyString>() {
+impl<'py> FromPyObject<'_, 'py> for PyTileEncoding {
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'_, 'py, PyAny>) -> PyResult<Self> {
+        if let Ok(s) = ob.cast::<PyString>() {
             let s = s.to_string().to_ascii_lowercase();
             match s.as_str() {
                 "uncompressed" => Ok(Self(TileEncoding::Uncompressed)),
@@ -31,7 +32,7 @@ impl FromPyObject<'_> for PyTileEncoding {
             }
         } else {
             Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
-                "Invalid encoding: {ob} (options: {ENCODING_STRINGS})"
+                "Invalid encoding (options: {ENCODING_STRINGS})"
             )))
         }
     }
@@ -40,9 +41,10 @@ impl FromPyObject<'_> for PyTileEncoding {
 pub struct PyTileFormat(TileFormat);
 
 const TILE_FORMAT_STRINGS: &str = "png, webp, pbf, mvt, gif, jpg, jpeg, json, geojson";
-impl FromPyObject<'_> for PyTileFormat {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-        if let Ok(s) = ob.downcast::<PyString>() {
+impl<'py> FromPyObject<'_, 'py> for PyTileFormat {
+    type Error = PyErr;
+    fn extract(ob: Borrowed<'_, 'py, PyAny>) -> PyResult<Self> {
+        if let Ok(s) = ob.cast::<PyString>() {
             let f_str = s.to_string();
 
             let tf: Option<TileFormat> = TileFormat::try_parse(&f_str);
@@ -54,7 +56,7 @@ impl FromPyObject<'_> for PyTileFormat {
             }
         } else {
             Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
-                "Invalid encoding: {ob} (options: {TILE_FORMAT_STRINGS})"
+                "Invalid encoding (options: {TILE_FORMAT_STRINGS})"
             )))
         }
     }
