@@ -182,7 +182,7 @@ where
     }
 
     async fn vacuum_into(&self, dst: String) -> SqliteResult<usize> {
-        let dst = dst.to_string();
+        let dst = dst.clone();
         self.conn(move |conn| vacuum_into(conn, dst)).await
     }
 

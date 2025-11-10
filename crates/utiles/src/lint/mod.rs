@@ -92,7 +92,7 @@ impl FileLintResults {
             Some(e) => {
                 let strings = e
                     .iter()
-                    .map(|e| e.format_error(&self.fspath.to_string()))
+                    .map(|e| e.format_error(&self.fspath.clone()))
                     .collect::<Vec<String>>();
                 strings.join("\n")
             }
