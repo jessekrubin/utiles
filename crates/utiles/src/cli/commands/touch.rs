@@ -30,11 +30,11 @@ pub(crate) async fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
     let fpth = Path::new(filepath);
     // check that has an extension...
     if fpth.extension().is_none() {
-        Err(UtilesError::NoFspathExtension(filepath.to_string()))
+        Err(UtilesError::NoFspathExtension(filepath.clone()))
     } else {
         let stem_str = fpth.file_stem();
         if stem_str.is_none() {
-            Err(UtilesError::NoFspathExtension(filepath.to_string()))
+            Err(UtilesError::NoFspathExtension(filepath.clone()))
         } else {
             let filename_no_ext = stem_str;
             match filename_no_ext {
@@ -44,7 +44,7 @@ pub(crate) async fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
                             Some(filename_no_ext) => filename_no_ext.to_string(),
                             None => {
                                 return Err(UtilesError::PathConversionError(
-                                    filepath.to_string(),
+                                    filepath.clone(),
                                 ));
                             }
                         }
@@ -62,7 +62,7 @@ pub(crate) async fn touch_main(args: &TouchArgs) -> UtilesResult<()> {
                     mbtiles.vacuum().await?;
                     Ok(())
                 }
-                None => Err(UtilesError::NoFspathStem(filepath.to_string())),
+                None => Err(UtilesError::NoFspathStem(filepath.clone())),
             }
         }
     }

@@ -59,7 +59,7 @@ impl From<&MbtMetadataRow> for MbtilesMetadataRowParsed {
             Err(_) => Value::String(row.value.clone()),
         };
         Self {
-            name: row.name.to_string(),
+            name: row.name.clone(),
             value,
         }
     }

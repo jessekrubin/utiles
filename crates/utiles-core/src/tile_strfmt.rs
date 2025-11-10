@@ -117,7 +117,7 @@ impl From<&FormatTokens> for String {
 impl From<&FormatParts> for String {
     fn from(p: &FormatParts) -> Self {
         match p {
-            FormatParts::Str(s) => s.to_string(),
+            FormatParts::Str(s) => s.clone(), // yolo clone here
             FormatParts::Token(t) => Self::from(t),
         }
     }

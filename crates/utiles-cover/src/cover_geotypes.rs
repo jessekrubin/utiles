@@ -24,7 +24,6 @@ impl From<u8> for GeoTypesCoverOptions {
 }
 
 #[expect(clippy::cast_precision_loss)]
-#[expect(clippy::similar_names)]
 fn line_string_cover(
     tiles_set: &mut HashSet<Tile>,
     ls: &geo_types::LineString<f64>,

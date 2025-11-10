@@ -2,16 +2,11 @@ use crate::UtilesError;
 use std::fmt::Formatter;
 use std::str::FromStr;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
 pub enum LagerFormat {
+    #[default]
     Full = 0,
     Json = 1,
-}
-
-impl Default for LagerFormat {
-    fn default() -> Self {
-        Self::Full
-    }
 }
 
 impl std::fmt::Display for LagerFormat {

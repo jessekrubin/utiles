@@ -10,7 +10,6 @@ use std::collections::{BTreeMap, HashSet};
 use utiles_core::{Tile, lnglat2tile_frac, simplify, tile, utile};
 
 #[expect(clippy::cast_precision_loss)]
-#[expect(clippy::similar_names)]
 fn line_string_cover(
     tiles_set: &mut HashSet<Tile>,
     coords: &[(f64, f64)],

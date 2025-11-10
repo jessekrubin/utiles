@@ -245,7 +245,7 @@ impl MetadataChange {
                         json_patch::PatchOperation::Add(_op) => {
                             if let Some(value) = change.data.get(metadata_key) {
                                 let value_string = match value {
-                                    Value::String(s) => Ok(s.to_string()),
+                                    Value::String(s) => Ok(s.clone()),
                                     _ => serde_json::to_string(&value),
                                 };
                                 if let Ok(value_string) = value_string {
@@ -258,7 +258,7 @@ impl MetadataChange {
                         json_patch::PatchOperation::Replace(_op) => {
                             if let Some(value) = change.data.get(metadata_key) {
                                 let value_string = match value {
-                                    Value::String(s) => Ok(s.to_string()),
+                                    Value::String(s) => Ok(s.clone()),
                                     _ => serde_json::to_string(&value),
                                 };
                                 if let Ok(value_string) = value_string {
