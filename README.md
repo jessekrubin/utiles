@@ -12,10 +12,7 @@ _web map tile utilities, batching, serving, python and bears (oh-my)_
 [![PyPI](https://img.shields.io/pypi/v/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
 [![PyPI - Wheel](https://img.shields.io/pypi/wheel/utiles?cacheSeconds=600)](https://pypi.org/project/utiles/)
-
-[//]:
-  #
-  "[![docs.rs docs](https://docs.rs/utiles/badge.svg)](https://docs.rs/utiles)"
+[![docs.rs docs](https://docs.rs/utiles/badge.svg)](https://docs.rs/utiles)
 
 ## Installation
 
