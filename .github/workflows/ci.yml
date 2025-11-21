@@ -6,7 +6,7 @@ on:
       - main
       - master
     tags:
-      - '*'
+      - "*"
   pull_request:
   workflow_dispatch:
 
@@ -113,7 +113,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           # python-version: 3.x
-          python-version: '3.13'
+          python-version: "3.13"
           # Need to include architecture: https://github.com/PyO3/maturin-action/issues/375
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
@@ -128,30 +128,13 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.platform.target }}
           path: utiles-pyo3/dist
-#      for some insane reason pip is not able to find the wheel in cicd 
-#      - name: pytest
-#        if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
-#        shell: bash
-#        run: |
-#          set -e
-#          cd utiles-pyo3
-#          ls dist
-#          python -m venv .venv
-#          python -m pip install --upgrade pip
-#          source .venv/Scripts/activate
-#          pip install click
-#          pip install utiles --find-links dist --force-reinstall --no-index --no-deps
-#          pip install -r requirements.dev.txt
-#          pytest
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
         platform:
-          - runner: macos-13
-            target: x86_64
-          - runner: macos-14
+          - runner: macos-15
             target: aarch64
     steps:
       - uses: actions/checkout@v6
@@ -194,7 +177,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
-    needs: [ linux, musllinux, windows, macos, sdist ]
+    needs: [linux, musllinux, windows, macos, sdist]
     permissions:
       # Use to sign the release artifacts
       id-token: write
@@ -207,7 +190,7 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
-          subject-path: 'wheels-*/*'
+          subject-path: "wheels-*/*"
       - name: Publish to PyPI
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: PyO3/maturin-action@v1
@@ -216,4 +199,3 @@ jobs:
         with:
           command: upload
           args: --non-interactive --skip-existing wheels-*/*
-
