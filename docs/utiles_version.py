@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "ry",
+#     "ry>=0.0.68"
 # ]
 # ///
 """mdbook preprocessor to inject build stuff into docs
@@ -13,24 +13,15 @@ Replaces:
 
 """
 
-import datetime
-import json
 import sys
 
+import ry
 
-def _tokens():
-    try:
-        import ry
 
-        return {
-            "UTILES_DOCS_BUILD_TIMESTAMP": ry.ZonedDateTime.now().string(),
-        }
-    except ImportError:
-        return {
-            "UTILES_DOCS_BUILD_TIMESTAMP": datetime.datetime.now(
-                tz=datetime.timezone.utc
-            ).isoformat(),
-        }
+def _tokens() -> dict[str, str]:
+    return {
+        "UTILES_DOCS_BUILD_TIMESTAMP": ry.ZonedDateTime.now().to_string(),
+    }
 
 
 TOKENS = {"{{#" + k + "}}": v for k, v in _tokens().items()}
@@ -55,10 +46,10 @@ def replace_section_content(section):
 def main():
     for line in sys.stdin:
         if line:
-            [_context, book] = json.loads(line)
-            for section in book["sections"]:
+            [_context, book] = ry.JSON.parse(line)
+            for section in book["items"]:
                 replace_section_content(section)
-            json.dump(book, fp=sys.stdout)
+            sys.stdout.buffer.write(ry.stringify(book))
 
 
 if __name__ == "__main__":
