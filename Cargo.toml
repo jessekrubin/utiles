@@ -59,7 +59,7 @@ rusqlite = { version = "0.37.0", features = ["bundled", "vtab", "blob"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 size = { version = "0.5.0", features = ["default"] }
-sqlite-hashes = { version = "0.10.7", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
+sqlite-hashes = { version = "0.10.8", default-features = false, features = ["hex", "md5", "fnv", "xxhash"] }
 strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = "0.27.2"
 thiserror = "2.0.17"
