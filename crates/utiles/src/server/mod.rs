@@ -108,7 +108,10 @@ pub async fn utiles_serve(cfg: UtilesServerConfig) -> UtilesResult<()> {
         ))
         // propagate `x-request-id` headers from request to response
         .layer(PropagateRequestIdLayer::x_request_id())
-        .layer(TimeoutLayer::new(Duration::from_secs(1)))
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(1),
+        ))
         .layer(compression_layer);
 
     // Build the app/router!
