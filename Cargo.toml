@@ -68,7 +68,7 @@ tokio = { version = "1.48", features = ["full"] }
 tokio-stream = "0.1.17"
 tower = { version = "0.5.2", features = ["timeout"] }
 tower-http = { version = "0.6.6", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
-tracing = "0.1.41"
+tracing = "0.1.43"
 tracing-subscriber = { version = "0.3.20", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"
 xxhash-rust = { version = "0.8.15", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
