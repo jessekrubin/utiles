@@ -1911,9 +1911,9 @@ dependencies = [
 
 [[package]]
 name = "oxipng"
-version = "9.1.5"
+version = "10.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26c613f0f566526a647c7473f6a8556dbce22c91b13485ee4b4ec7ab648e4973"
+checksum = "d8c9a19c0bec7ec84da567e0a87abd378c0f6e988793f858ea5d58f4b87a81a8"
 dependencies = [
  "bitvec",
  "clap",
@@ -1924,6 +1924,7 @@ dependencies = [
  "indexmap",
  "libdeflater",
  "log",
+ "parse-size",
  "rayon",
  "rgb",
  "rustc-hash",
@@ -1987,6 +1988,12 @@ dependencies = [
  "structmeta",
  "syn",
 ]
+
+[[package]]
+name = "parse-size"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "487f2ccd1e17ce8c1bfab3a65c89525af41cfad4c8659021a1e9a2aacd73b89b"
 
 [[package]]
 name = "paste"
