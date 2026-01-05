@@ -64,7 +64,7 @@ strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = "0.27.2"
 thiserror = "2.0.17"
 tilejson = "0.4.3"
-tokio = { version = "1.48", features = ["full"] }
+tokio = { version = "1.49", features = ["full"] }
 tokio-stream = "0.1.17"
 tower = { version = "0.5.2", features = ["timeout"] }
 tower-http = { version = "0.6.8", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
