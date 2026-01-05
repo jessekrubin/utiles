@@ -1,3 +1,4 @@
+use axum_extra::TypedHeader;
 use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
@@ -15,7 +16,7 @@ use axum::{
     response::IntoResponse,
     routing::get,
 };
-use axum_extra::extract::Host;
+use headers::Host;
 use serde::Deserialize;
 use serde_json::json;
 use tilejson::TileJSON;
@@ -311,7 +312,7 @@ async fn get_datasets(State(state): State<Arc<ServerState>>) -> impl IntoRespons
 }
 
 async fn get_dataset_tilejson(
-    Host(hostname): Host,
+    TypedHeader(host): TypedHeader<Host>,
     State(state): State<Arc<ServerState>>,
     Path(path): Path<String>,
 ) -> impl IntoResponse {
@@ -320,7 +321,7 @@ async fn get_dataset_tilejson(
     let ds = state.datasets.mbtiles.get(&dataset);
     if let Some(ds) = ds {
         let tilejson = ds.tilejson.clone();
-        let tiles_url = format!("http://{hostname}/tiles/{dataset}/{{z}}/{{x}}/{{y}}");
+        let tiles_url = format!("http://{host}/tiles/{dataset}/{{z}}/{{x}}/{{y}}");
         let tilejson_with_tiles = TileJSON {
             tiles: vec![tiles_url],
             ..tilejson
