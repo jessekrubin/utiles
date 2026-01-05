@@ -88,6 +88,7 @@ clap = { workspace = true, features = [
 # server dependencies
 axum-extra = { workspace = true, optional = true }
 axum = { workspace = true, optional = true }
+headers.workspace = true
 tower-http = { workspace = true, optional = true }
 tower = { workspace = true, optional = true }
 

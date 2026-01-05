@@ -1,6 +1,12 @@
 # CHANGELOG
 
-## 0.8.0 (unreleased)
+## 0.8.1 (unreleased)
+
+- Use `typed-header` feature of `axum-extra` for tilejson(s)
+
+---
+
+## 0.8.0 (2025-12-15)
 
 - rust-2024 edition
 - criterion-v6 though I am not sure I still need to be benchmarking that dumb
