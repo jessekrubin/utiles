@@ -53,7 +53,7 @@ noncrypto-digests = "0.3.7"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.2.3", features = ["supports-color"] }
 oxipng = { version = "10.0.0", features = [] }
-pmtiles = { version = "0.19.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
+pmtiles = { version = "0.19.1", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
 pyo3 = "0.27"
 pyo3-build-config = "0.27"
 rusqlite = { version = "0.37.0", features = ["bundled", "vtab", "blob"] }
