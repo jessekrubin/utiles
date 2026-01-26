@@ -52,7 +52,7 @@ md-5 = "0.10.6"
 noncrypto-digests = "0.3.7"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.2.3", features = ["supports-color"] }
-oxipng = { version = "10.0.0", features = [] }
+oxipng = { version = "10.1.0", features = [] }
 pmtiles = { version = "0.19.1", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
 pyo3 = "0.27"
 pyo3-build-config = "0.27"
