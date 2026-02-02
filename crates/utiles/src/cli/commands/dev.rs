@@ -39,7 +39,7 @@ pub struct DevArgs {
 //     Ok(())
 // }
 //
-#[allow(clippy::unused_async)]
+#[expect(clippy::unused_async)]
 async fn dev(args: DevArgs) -> UtilesResult<()> {
     // DEV START
     debug!("args: {:?}", args);

@@ -12,7 +12,6 @@ pub fn xyz2pmid(x: u32, y: u32, z: u8) -> u64 {
 }
 
 /// Convert z,x,y to pmtile-id.
-#[allow(dead_code)]
 #[must_use]
 pub fn zxy2pmid(z: u8, x: u32, y: u32) -> u64 {
     xyz2pmid(x, y, z)
@@ -30,7 +29,6 @@ pub fn pmid2xyz(i: u64) -> (u32, u32, u8) {
 }
 
 /// Convert pmtile-id to (z, x, y).
-#[allow(dead_code)]
 #[must_use]
 pub fn pmid2zxy(i: u64) -> (u8, u32, u32) {
     let (x, y, z) = pmid2xyz(i);

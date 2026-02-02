@@ -910,7 +910,7 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(
 /// # Panics
 ///
 /// Panics if ntiles is negative (should not happen)
-#[allow(clippy::cast_precision_loss)]
+#[expect(clippy::cast_precision_loss)]
 pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
     let mut stmt = conn.prepare_cached(
@@ -967,7 +967,6 @@ pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats
 /// # Panics
 ///
 /// Panics if ntiles is negative (should not happen)
-#[allow(clippy::cast_precision_loss)]
 pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
     let mut stmt = conn.prepare_cached(indoc! {

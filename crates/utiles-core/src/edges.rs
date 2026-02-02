@@ -125,7 +125,7 @@ pub fn find_edges(
 //     rolled
 // }
 //
-// #[allow(clippy::similar_names)]
+// #[expect(clippy::similar_names)]
 // pub fn find_edges(tiles: &[Tile]) -> UtilesResult<Vec<Tile>> {
 //     let zbox = TileZBox::from_tiles(tiles)?;
 //     // make 2D burn array

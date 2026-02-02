@@ -36,13 +36,12 @@ pub fn register_utiles_sqlite(conn: &Connection) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::unwrap_used)]
+    #![expect(clippy::unwrap_used)]
 
     use rusqlite::params;
 
     type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-    #[allow(clippy::panic)]
     fn repo_root() -> std::path::PathBuf {
         // recurse up until we find a dir called "test-data"
         let mut p = std::env::current_dir().unwrap();

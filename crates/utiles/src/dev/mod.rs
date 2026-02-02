@@ -2,6 +2,5 @@
 //!
 //! DEAD CODE IS ALLOWED!
 #![doc(hidden)]
-#![allow(dead_code)]
 
 pub mod sqlite_u64;

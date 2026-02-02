@@ -7,7 +7,6 @@ use std::io::{self, Write as _};
 #[macro_export]
 macro_rules! safe_print {
     ($($arg:tt)*) => {{
-        #[allow(clippy::unwrap_used)]
         $crate::print::print(std::format_args!($($arg)*)) .unwrap();
     }};
 }
