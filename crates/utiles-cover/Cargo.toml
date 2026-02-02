@@ -14,7 +14,7 @@ categories = ["science::geo"]
 [dependencies]
 geojson = { workspace = true, optional = true }
 geo-types = { workspace = true, optional = true }
-utiles-core = { version = "0.8.0", path = "../utiles-core", default-features = false, features = [] }
+utiles-core = { version = "0.9.0", path = "../utiles-core", default-features = false, features = [] }
 
 [features]
 default = [
