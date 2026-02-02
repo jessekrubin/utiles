@@ -42,7 +42,6 @@ pub(crate) fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
             } else if let Ok(seq) = arg.extract::<Vec<f64>>() {
                 return Ok(PyLngLatBbox::py_new(seq[0], seq[1], seq[2], seq[3]));
             }
-            // raise ValueError("the bbox argument may have 1 or 4 values")
             Err(PyErr::new::<PyValueError, _>(
                 "the bbox argument may have 1, 2 or 4 values",
             ))

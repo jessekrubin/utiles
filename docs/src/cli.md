@@ -144,4 +144,3 @@ The default hashing alg is `md5` to match the martin `mbtiles` cli; but may chan
 }
 
 ```
-

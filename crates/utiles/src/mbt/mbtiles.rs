@@ -401,13 +401,13 @@ pub fn mbtiles_metadata_row(
 /// Returns list of metadata rows where the name, value pairs are identical
 pub fn metadata_duplicate_key_values(
     conn: &Connection,
-) -> RusqliteResult<Vec<(String, String, usize)>> {
+) -> RusqliteResult<Vec<(String, String, u32)>> {
     let mut stmt = conn.prepare(include_str!("sql/mbt-metadata-duplicate-rows.sql"))?;
     let mdata = stmt
         .query_map([], |row| {
             let name: String = row.get(0)?;
             let value: String = row.get(1)?;
-            let count: usize = row.get(2)?;
+            let count: u32 = row.get(2)?;
             Ok((name, value, count))
         })?
         .collect::<RusqliteResult<Vec<_>, rusqlite::Error>>()?;
@@ -904,6 +904,12 @@ pub fn update_metadata_minzoom_maxzoom_from_tiles(
         None => Ok(0),
     }
 }
+
+/// Get zoom level statistics WITH byte size info
+///
+/// # Panics
+///
+/// Panics if ntiles is negative (should not happen)
 #[allow(clippy::cast_precision_loss)]
 pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
@@ -928,7 +934,7 @@ pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats
         .query_map([], |row| {
             let zoom: u32 = row.get(0)?;
 
-            let ntiles = row.get(1)?;
+            let ntiles: i64 = row.get(1)?;
             let min_tile_column: i64 = row.get(4)?;
             let max_tile_column: i64 = row.get(5)?;
             let min_tile_row: i64 = row.get(2)?;
@@ -937,16 +943,18 @@ pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats
             let zu8 = zoom as u8;
             let ymin = yflip(max_tile_row as u32, zu8);
             let ymax = yflip(min_tile_row as u32, zu8);
-            let nbytes: u64 = row.get(6)?;
+            let nbytes: i64 = row.get(6)?;
             let nbytes_avg: f64 = nbytes as f64 / ntiles as f64;
             Ok(MbtilesZoomStats {
                 zoom,
-                ntiles,
+                ntiles: u64::try_from(ntiles).expect("ntiles should be non-negative"),
                 xmin: min_tile_column as u32,
                 xmax: max_tile_column as u32,
                 ymin,
                 ymax,
-                nbytes: Some(nbytes),
+                nbytes: Some(
+                    u64::try_from(nbytes).expect("nbytes should be non-negative"),
+                ),
                 nbytes_avg: Some(nbytes_avg),
             })
         })?
@@ -954,6 +962,11 @@ pub fn zoom_stats_full(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats
     Ok(rows)
 }
 
+/// Get zoom level statistics without byte size info
+///
+/// # Panics
+///
+/// Panics if ntiles is negative (should not happen)
 #[allow(clippy::cast_precision_loss)]
 pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
     // total tiles
@@ -977,7 +990,7 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
         .query_map([], |row| {
             let zoom: u32 = row.get(0)?;
 
-            let ntiles = row.get(1)?;
+            let ntiles: i64 = row.get(1)?;
             let min_tile_column: i64 = row.get(4)?;
             let max_tile_column: i64 = row.get(5)?;
             let min_tile_row: i64 = row.get(2)?;
@@ -989,7 +1002,7 @@ pub fn zoom_stats(conn: &Connection) -> RusqliteResult<Vec<MbtilesZoomStats>> {
 
             Ok(MbtilesZoomStats {
                 zoom,
-                ntiles,
+                ntiles: u64::try_from(ntiles).expect("ntiles should be non-negative"),
                 xmin: min_tile_column as u32,
                 xmax: max_tile_column as u32,
                 ymin,

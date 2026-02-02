@@ -19,5 +19,3 @@ FROM tiles;
 **tilejson:** A JSON object that describes a tile set, including its name, description, and the URL template for accessing tiles. TileJSON is used to provide metadata about a tile set.
 
 **textiles:** utiles name for an ndjson/jsonl file containing tiles as arrays or objects (e.g. `[x, y, z]` or `{x: x, y: y, z: z}`)
-
-

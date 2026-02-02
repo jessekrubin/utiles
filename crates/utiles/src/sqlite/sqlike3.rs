@@ -36,7 +36,7 @@ sqlike3_methods! {
         pragma_page_size() -> SqliteResult<i64> => pragma_page_size_get;
         pragma_page_size_set(page_size: i64) -> SqliteResult<i64> => pragma_page_size_set;
         pragma_table_list() -> SqliteResult<Vec<PragmaTableListRow>> => pragma_table_list;
-        pragma_analysis_limit() -> SqliteResult<usize> => analysis_limit;
+        pragma_analysis_limit() -> SqliteResult<i64> => analysis_limit;
         vacuum() -> SqliteResult<usize> => vacuum;
         vacuum_into(dst: String) -> SqliteResult<usize> => vacuum_into;
         attach_db(db: &str, as_: &str) -> SqliteResult<()> => attach_db;
@@ -69,7 +69,7 @@ sqlike3_async_methods! {
         pragma_page_size() -> SqliteResult<i64> => pragma_page_size_get;
         pragma_page_size_set(page_size: i64) -> SqliteResult<i64> => pragma_page_size_set;
         pragma_table_list() -> SqliteResult<Vec<PragmaTableListRow>> => pragma_table_list;
-        pragma_analysis_limit() -> SqliteResult<usize> => pragma_analysis_limit;
+        pragma_analysis_limit() -> SqliteResult<i64> => pragma_analysis_limit;
         vacuum() -> SqliteResult<usize> => vacuum;
         vacuum_into(dst: String) -> SqliteResult<usize> => vacuum_into;
         attach_db(db: &str, as_: &str) -> SqliteResult<()> => attach_db;

@@ -173,7 +173,7 @@ where
         self.conn(pragma_table_list).await
     }
 
-    async fn pragma_analysis_limit(&self) -> SqliteResult<usize> {
+    async fn pragma_analysis_limit(&self) -> SqliteResult<i64> {
         self.conn(analysis_limit).await
     }
 

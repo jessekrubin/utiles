@@ -36,12 +36,13 @@ pub fn pragma_page_count(conn: &Connection) -> RusqliteResult<i64> {
     Ok(count)
 }
 
-pub fn analysis_limit(conn: &Connection) -> RusqliteResult<usize> {
-    let limit = conn.pragma_query_value(None, "analysis_limit", |row| row.get(0))?;
-    Ok(limit)
+pub fn analysis_limit(conn: &Connection) -> RusqliteResult<i64> {
+    let limit_i64: i64 =
+        conn.pragma_query_value(None, "analysis_limit", |row| row.get(0))?;
+    Ok(limit_i64)
 }
 
-pub fn analysis_limit_set(conn: &Connection, limit: usize) -> RusqliteResult<usize> {
+pub fn analysis_limit_set(conn: &Connection, limit: i64) -> RusqliteResult<i64> {
     let current_limit = analysis_limit(conn)?;
     if current_limit == limit {
         debug!("analysis_limit_set: current limit == limit: {}", limit);

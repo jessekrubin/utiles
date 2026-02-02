@@ -34,7 +34,13 @@ macro_rules! pytile {
     };
 }
 
-#[pyclass(name = "Tile", module = "utiles._utiles", sequence, frozen)]
+#[pyclass(
+    name = "Tile",
+    module = "utiles._utiles",
+    sequence,
+    frozen,
+    skip_from_py_object
+)]
 #[derive(Clone, Debug, PartialEq, Serialize, Eq, Hash, Copy)]
 pub struct PyTile {
     pub xyz: Tile,
@@ -583,6 +589,30 @@ impl TileChildren1 for PyTile {
 impl From<PyTile> for Tile {
     fn from(val: PyTile) -> Self {
         val.xyz
+    }
+}
+
+impl From<(u32, u32, u8)> for PyTile {
+    fn from(xyz: (u32, u32, u8)) -> Self {
+        let xyz = xyz.into();
+        Self { xyz }
+    }
+}
+
+impl<'py> FromPyObject<'_, 'py> for PyTile {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if let Ok(t) = obj.cast_exact::<Self>() {
+            let a = t.get();
+            Ok(*a)
+        } else if let Ok(tuple) = obj.extract::<(u32, u32, u8)>() {
+            Ok(Self::from(tuple))
+        } else {
+            Err(PyErr::new::<PyValueError, _>(
+                "Could not extract PyTile from object",
+            ))
+        }
     }
 }
 

@@ -190,4 +190,3 @@ crates/**/*.mbtiles
 crates/**/*.pmtiles
 crates/**/*.sqlite
 crates/**/*.utiles
-
