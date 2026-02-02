@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-dca0e19c.js";
+            window.path_to_searchindex_js = "searchindex-413ec23e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-6965a66f.js"></script>
@@ -181,9 +181,16 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="changelog"><a class="header" href="#changelog">CHANGELOG</a></h1>
-<h2 id="081-unreleased"><a class="header" href="#081-unreleased">0.8.1 (unreleased)</a></h2>
+<h2 id="090-unreleased"><a class="header" href="#090-unreleased">0.9.0 (unreleased)</a></h2>
 <ul>
 <li>Use <code>typed-header</code> feature of <code>axum-extra</code> for tilejson(s)</li>
+<li>Upgrade <code>rusqlite</code> to v0.38.0
+<ul>
+<li><code>metadata_duplicate_key_values</code> now returns <code>(String, String, u32)</code> count instead of
+<code>usize</code></li>
+<li>use <code>i64</code> where appropriate for sqlite integer values instead of <code>usize</code>/<code>u64</code></li>
+</ul>
+</li>
 </ul>
 <hr>
 <h2 id="080-2025-12-15"><a class="header" href="#080-2025-12-15">0.8.0 (2025-12-15)</a></h2>
