@@ -34,4 +34,3 @@ geo-types = { workspace = true }
 
 [lints]
 workspace = true
-
