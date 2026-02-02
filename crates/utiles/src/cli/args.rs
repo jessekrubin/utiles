@@ -340,7 +340,7 @@ pub struct AnalyzeArgs {
     pub common: SqliteDbCommonArgs,
 
     #[arg(required = false, long)]
-    pub analysis_limit: Option<usize>,
+    pub analysis_limit: Option<u64>,
 }
 
 #[derive(Debug, Parser)]

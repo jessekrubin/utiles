@@ -70,7 +70,7 @@ pub trait MbtilesAsync: Sized {
     ) -> UtilesResult<Option<Vec<MetadataChangeFromTo>>>;
     async fn metadata_duplicate_key_values(
         &self,
-    ) -> UtilesResult<Vec<(String, String, usize)>>;
+    ) -> UtilesResult<Vec<(String, String, u32)>>;
     async fn query_tilekind(&self) -> UtilesResult<TileKind>;
     async fn query_metadata_value(&self, name: &str) -> UtilesResult<Option<String>>;
     async fn query_metadata_format(&self) -> UtilesResult<Option<String>>;

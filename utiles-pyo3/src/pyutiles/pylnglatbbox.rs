@@ -7,7 +7,12 @@ use pyo3::types::PyType;
 use pyo3::{Py, PyAny, PyErr, PyRef, PyResult, Python, exceptions, pyclass, pymethods};
 use utiles::bbox::BBox;
 
-#[pyclass(name = "LngLatBbox", module = "utiles._utiles", frozen)]
+#[pyclass(
+    name = "LngLatBbox",
+    module = "utiles._utiles",
+    frozen,
+    skip_from_py_object
+)]
 #[derive(Clone)]
 pub struct PyLngLatBbox {
     pub bbox: BBox,

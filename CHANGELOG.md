@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## 0.8.1 (unreleased)
+## 0.9.0 (unreleased)
 
 - Use `typed-header` feature of `axum-extra` for tilejson(s)
+- Upgrade `rusqlite` to v0.38.0
+  - `metadata_duplicate_key_values` now returns `(String, String, u32)` count instead of
+    `usize`
+  - use `i64` where appropriate for sqlite integer values instead of `usize`/`u64`
 
 ---
 

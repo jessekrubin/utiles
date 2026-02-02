@@ -9,7 +9,12 @@ use utiles::TileStringFormatter;
 use crate::pyutiles::pyparsing::parse_tile_arg;
 
 #[derive(Clone, Debug, PartialEq, Hash)]
-#[pyclass(name = "TileFmts", module = "utiles._utiles", frozen)]
+#[pyclass(
+    name = "TileFmts",
+    module = "utiles._utiles",
+    frozen,
+    skip_from_py_object
+)]
 pub struct PyTileFmts {
     pub tformatter: TileStringFormatter,
 }

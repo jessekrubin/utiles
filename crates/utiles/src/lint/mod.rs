@@ -50,7 +50,7 @@ pub enum MbtLint {
     DuplicateMetadataKey(String, String),
 
     #[error("duplicate metadata key-value: {0}, {1} (#{2})")]
-    DuplicateMetadataKeyValue(String, String, usize),
+    DuplicateMetadataKeyValue(String, String, u32),
 
     #[error("metadata k/v missing: {0}")]
     MissingMetadataKv(String),

@@ -312,7 +312,7 @@ where
 
     async fn metadata_duplicate_key_values(
         &self,
-    ) -> UtilesResult<Vec<(String, String, usize)>> {
+    ) -> UtilesResult<Vec<(String, String, u32)>> {
         let r = self
             .conn(|conn| {
                 let a = metadata_duplicate_key_values(conn)?;

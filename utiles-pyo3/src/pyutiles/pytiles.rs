@@ -5,7 +5,13 @@ use serde::Serialize;
 
 use std::hash::Hash;
 
-#[pyclass(name = "Tiles", module = "utiles._utiles", sequence)]
+#[pyclass(
+    name = "Tiles",
+    module = "utiles._utiles",
+    sequence,
+    frozen,
+    skip_from_py_object
+)]
 #[derive(Clone, Debug, PartialEq, Serialize, Eq, Hash)]
 struct PyTiles {
     tiles: Vec<PyTile>,

@@ -6,7 +6,7 @@ use pyo3::types::PyType;
 use pyo3::{PyAny, PyErr, PyRef, PyResult, Python, exceptions, pyclass, pymethods};
 use utiles::BBox;
 
-#[pyclass(name = "Bbox", module = "utiles._utiles", frozen)]
+#[pyclass(name = "Bbox", module = "utiles._utiles", frozen, skip_from_py_object)]
 #[derive(Clone)]
 pub struct PyBbox {
     pub bbox: BBox,
