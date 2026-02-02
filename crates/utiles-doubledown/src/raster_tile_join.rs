@@ -151,7 +151,7 @@ impl RasterTileJoiner {
     }
 }
 
-#[allow(clippy::struct_field_names)]
+#[expect(clippy::struct_field_names)]
 pub struct RasterChildren<'a> {
     pub child_0: Option<&'a [u8]>,
     pub child_1: Option<&'a [u8]>,

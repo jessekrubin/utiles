@@ -42,8 +42,8 @@ impl GeoTransform {
     }
 
     /// Compute the optimal zoom level for a geo-transform.
-    #[allow(clippy::cast_sign_loss)]
-    #[allow(clippy::cast_possible_truncation)]
+    #[expect(clippy::cast_sign_loss)]
+    #[expect(clippy::cast_possible_truncation)]
     #[must_use]
     pub fn optzoom(&self) -> u8 {
         let equator = 2.0 * std::f64::consts::PI * 6_378_137.0; // 2 * pi * radius of earth in meters

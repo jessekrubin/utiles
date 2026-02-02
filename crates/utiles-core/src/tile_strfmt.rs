@@ -199,7 +199,7 @@ impl Hash for TileStringFormatter {
     }
 }
 
-#[allow(clippy::missing_fields_in_debug)]
+#[expect(clippy::missing_fields_in_debug)]
 impl Debug for TileStringFormatter {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TileStringFormatter")

@@ -12,7 +12,6 @@ pub enum SqliteError {
     RusqliteError(#[from] rusqlite::Error),
 
     /// Error from `async_sqlite`
-    #[allow(clippy::enum_variant_names)]
     #[error("sqlite err: {0}")]
     AsyncSqliteError(async_sqlite::Error),
 

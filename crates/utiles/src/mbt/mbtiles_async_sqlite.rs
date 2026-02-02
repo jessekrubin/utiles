@@ -48,7 +48,7 @@ pub struct MbtilesPoolAsync {
     pub pool: Pool,
 }
 
-#[allow(clippy::missing_fields_in_debug)]
+#[expect(clippy::missing_fields_in_debug)]
 impl Debug for MbtilesPoolAsync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //     use the dbpath to debug
@@ -58,7 +58,7 @@ impl Debug for MbtilesPoolAsync {
     }
 }
 
-#[allow(clippy::missing_fields_in_debug)]
+#[expect(clippy::missing_fields_in_debug)]
 impl Debug for MbtilesClientAsync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("MbtilesAsyncSqliteClient")

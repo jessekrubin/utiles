@@ -63,7 +63,6 @@ pub async fn cli_main(cliops: Option<CliOpts>) -> UtilesResult<u8> {
     }
 }
 
-#[allow(clippy::unused_async)]
 pub(crate) async fn cli_main_inner(cliopts: Option<CliOpts>) -> UtilesResult<u8> {
     // print args
     let opts = cliopts.unwrap_or_default();

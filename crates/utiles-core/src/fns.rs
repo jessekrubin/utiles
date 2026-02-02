@@ -204,7 +204,7 @@ pub fn xyz2rmid(x: u32, y: u32, z: u8) -> u64 {
 /// assert_eq!(last_tile_in_z12, (4095, 4095, 12));
 /// ```
 #[must_use]
-#[allow(clippy::cast_possible_truncation)]
+#[expect(clippy::cast_possible_truncation)]
 pub fn rmid2xyz(i: u64) -> (u32, u32, u8) {
     if i == 0 {
         return (0, 0, 0);
@@ -902,7 +902,7 @@ pub fn to_id(x: u32, y: u32, z: u8) -> u64 {
 /// # Panics
 ///
 /// Errors on integer conversion error (should not happen) should not happen
-#[allow(clippy::cast_possible_truncation)]
+#[expect(clippy::cast_possible_truncation)]
 #[must_use]
 pub fn from_id(id: u64) -> Tile {
     let z = (id % 32) as u8;

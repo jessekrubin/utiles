@@ -5,11 +5,6 @@
 #![deny(clippy::style)]
 #![deny(clippy::unwrap_used)]
 #![warn(clippy::must_use_candidate)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(clippy::missing_panics_doc)]
-#![allow(clippy::missing_errors_doc)]
-#![allow(clippy::similar_names)]
-#![allow(clippy::cast_possible_truncation)]
 // road to clippy::pedantic
 #![deny(clippy::pedantic)]
 #![expect(clippy::cast_possible_wrap)]
@@ -65,7 +60,7 @@ struct Cli {
 
 enum ProgressEvent {
     SizeDiff(i64),
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     Msg(String),
 }
 

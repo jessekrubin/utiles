@@ -18,7 +18,7 @@ pub struct SqliteDbAsyncClient {
     pub dbpath: DbPath,
     pub client: Client,
 }
-#[allow(clippy::missing_fields_in_debug)]
+#[expect(clippy::missing_fields_in_debug)]
 impl Debug for SqliteDbAsyncClient {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //     use the dbpath to debug

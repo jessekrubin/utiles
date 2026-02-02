@@ -33,7 +33,6 @@ impl ServeArgs {
     }
 }
 
-#[allow(clippy::unused_async)]
 pub(crate) async fn serve_main(args: ServeArgs) -> UtilesResult<()> {
     debug!("args: {:?}", args);
     if let Some(ref fspaths) = args.fspaths {
