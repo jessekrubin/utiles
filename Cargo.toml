@@ -22,7 +22,7 @@ repository = "https://github.com/jessekrubin/utiles"
 
 [workspace.dependencies]
 ahash = "0.8.12"
-anyhow = "1.0.98"
+anyhow = "1.0.101"
 # TODO: remove git dependency when async-sqlite is published on crates.io
 # async-sqlite = { git = "https://github.com/ryanfowler/async-sqlite.git" }
 async-sqlite = { version = "0.5.6", features = ["bundled", "functions", "trace"] }
