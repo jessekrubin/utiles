@@ -36,7 +36,7 @@ crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
 fast_hilbert = "2.1.0"
 fnv = "1.0.7"
 futures = "0.3.31"
-futures-util = "0.3.31"
+futures-util = "0.3.32"
 geo-types = "0.7.17"
 geojson = "0.24.2"
 globset = "0.4.18"
