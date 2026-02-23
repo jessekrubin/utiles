@@ -53,7 +53,7 @@ noncrypto-digests = "0.3.7"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.3.0", features = ["supports-color"] }
 oxipng = { version = "10.1.0", features = [] }
-pmtiles = { version = "0.19.2", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
+pmtiles = { version = "0.20.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
 pyo3 = "0.28"
 pyo3-build-config = "0.28"
 # TODO: remove fallible_uint usage
