@@ -1,4 +1,4 @@
-use geo_types::Coord;
+use geojson::Position;
 use serde_json::Value;
 
 use utiles_core::BBox;
@@ -60,28 +60,28 @@ pub fn parse_bbox_geojson(string: &str) -> UtilesResult<BBox> {
 
 pub fn coords2bounds<I>(mut coords: I) -> Option<(f64, f64, f64, f64)>
 where
-    I: Iterator<Item = Coord>,
+    I: Iterator<Item = Position>,
 {
     // Initialize the bounds with the first coordinate.
     let first_coord = coords.next()?;
-    let mut min_x = first_coord.x;
-    let mut max_x = first_coord.x;
-    let mut min_y = first_coord.y;
-    let mut max_y = first_coord.y;
+    let mut min_x = first_coord[0];
+    let mut max_x = first_coord[0];
+    let mut min_y = first_coord[1];
+    let mut max_y = first_coord[1];
 
     // Iterate through the coordinates to find the extremes.
     for coord in coords {
-        if coord.x < min_x {
-            min_x = coord.x;
+        if coord[0] < min_x {
+            min_x = coord[0];
         }
-        if coord.x > max_x {
-            max_x = coord.x;
+        if coord[0] > max_x {
+            max_x = coord[0];
         }
-        if coord.y < min_y {
-            min_y = coord.y;
+        if coord[1] < min_y {
+            min_y = coord[1];
         }
-        if coord.y > max_y {
-            max_y = coord.y;
+        if coord[1] > max_y {
+            max_y = coord[1];
         }
     }
 
