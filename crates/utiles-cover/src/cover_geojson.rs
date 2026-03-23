@@ -176,14 +176,15 @@ fn polygon_cover(tiles_set: &mut HashSet<Tile>, geom: &[Vec<(f64, f64)>], zoom: 
 
 fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> Result<Vec<Tile>> {
     let mut tiles_set = HashSet::new();
+    // TODO: fixup all the funkyness w/ respect to the geojson version 1 transition
     let res = match &geom.value {
-        geojson::Value::Point(coords) => {
-            let tile = tile(coords[0], coords[1], zoom, None)?;
+        geojson::GeometryValue::Point { coordinates } => {
+            let tile = tile(coordinates[0], coordinates[1], zoom, None)?;
             tiles_set.insert(tile);
             Ok::<(), UtilesCoverError>(())
         }
-        geojson::Value::MultiPoint(coords_list) => {
-            coords_list
+        geojson::GeometryValue::MultiPoint { coordinates } => {
+            coordinates
                 .iter()
                 .map(|coords| {
                     tile(coords[0], coords[1], zoom, None)
@@ -195,30 +196,30 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> Result<Vec<Tile>> {
                 })?;
             Ok(())
         }
-        geojson::Value::LineString(coords_list) => {
+        geojson::GeometryValue::LineString { coordinates } => {
             let coords: Vec<(f64, f64)> =
-                coords_list.iter().map(|c| (c[0], c[1])).collect();
+                coordinates.iter().map(|c| (c[0], c[1])).collect();
             line_string_cover(&mut tiles_set, &coords, zoom, None);
             Ok(())
         }
-        geojson::Value::MultiLineString(coords_lists) => {
-            for coords_list in coords_lists {
+        geojson::GeometryValue::MultiLineString { coordinates } => {
+            for coords_list in coordinates {
                 let coords: Vec<(f64, f64)> =
                     coords_list.iter().map(|c| (c[0], c[1])).collect();
                 line_string_cover(&mut tiles_set, &coords, zoom, None);
             }
             Ok(())
         }
-        geojson::Value::Polygon(coords_lists) => {
-            let coords: Vec<Vec<(f64, f64)>> = coords_lists
+        geojson::GeometryValue::Polygon { coordinates } => {
+            let coords: Vec<Vec<(f64, f64)>> = coordinates
                 .iter()
                 .map(|ring| ring.iter().map(|c| (c[0], c[1])).collect())
                 .collect();
             polygon_cover(&mut tiles_set, &coords, zoom);
             Ok(())
         }
-        geojson::Value::MultiPolygon(coords_list_of_lists) => {
-            for coords_lists in coords_list_of_lists {
+        geojson::GeometryValue::MultiPolygon { coordinates } => {
+            for coords_lists in coordinates {
                 let coords: Vec<Vec<(f64, f64)>> = coords_lists
                     .iter()
                     .map(|ring| ring.iter().map(|c| (c[0], c[1])).collect())
@@ -227,8 +228,8 @@ fn geom2tiles(geom: &geojson::Geometry, zoom: u8) -> Result<Vec<Tile>> {
             }
             Ok(())
         }
-        geojson::Value::GeometryCollection(gjcoll) => {
-            for geom in gjcoll {
+        geojson::GeometryValue::GeometryCollection { geometries } => {
+            for geom in geometries {
                 let recurse_res = geom2tiles(geom, zoom)?;
                 tiles_set.extend(recurse_res);
             }

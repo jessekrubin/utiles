@@ -1,48 +1,50 @@
 use crate::UtilesError;
 use crate::errors::UtilesResult;
-use geo_types::Coord;
-use geo_types::coord;
-use geojson::{Feature, GeoJson, Geometry, Value as GeoJsonValue};
+use geojson::{Feature, GeoJson, Geometry, GeometryValue, Position};
 
 pub mod parsing;
 
-pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Vec<f64>>> {
+pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Position>> {
     match g.value {
-        GeoJsonValue::Point(c) => Box::new(std::iter::once(c)),
-        GeoJsonValue::MultiPoint(points) => Box::new(points.into_iter()),
-        GeoJsonValue::LineString(line_string) => Box::new(line_string.into_iter()),
-        GeoJsonValue::MultiLineString(multi_line_string) => {
-            Box::new(multi_line_string.into_iter().flatten())
+        GeometryValue::Point { coordinates } => Box::new(std::iter::once(coordinates)),
+        GeometryValue::MultiPoint { coordinates }
+        | GeometryValue::LineString { coordinates } => {
+            Box::new(coordinates.into_iter())
         }
-        GeoJsonValue::Polygon(polygon) => Box::new(polygon.into_iter().flatten()),
-        GeoJsonValue::MultiPolygon(multi_polygon) => {
-            Box::new(multi_polygon.into_iter().flatten().flatten())
+        GeometryValue::MultiLineString { coordinates }
+        | GeometryValue::Polygon { coordinates } => {
+            Box::new(coordinates.into_iter().flatten())
         }
-        GeoJsonValue::GeometryCollection(geometries) => {
+        GeometryValue::MultiPolygon { coordinates } => {
+            Box::new(coordinates.into_iter().flatten().flatten())
+        }
+        GeometryValue::GeometryCollection { geometries } => {
             Box::new(geometries.into_iter().flat_map(geojson_geometry_points))
         }
     }
 }
 
 #[must_use]
-pub fn geojson_geometry_coords(g: Geometry) -> Box<dyn Iterator<Item = Coord>> {
+pub fn geojson_geometry_coords(g: Geometry) -> Box<dyn Iterator<Item = Position>> {
     let coord_vecs = geojson_geometry_points(g);
-    Box::new(coord_vecs.into_iter().map(|v| {
-        coord! { x: v[0], y: v[1]}
-    }))
+    Box::new(coord_vecs.into_iter())
 }
 
-pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
+pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Position> {
     match g.value {
-        GeoJsonValue::Point(c) => vec![c],
-        GeoJsonValue::MultiPoint(c) | GeoJsonValue::LineString(c) => {
-            c.into_iter().collect()
+        GeometryValue::Point { coordinates } => vec![coordinates],
+        GeometryValue::MultiPoint { coordinates }
+        | GeometryValue::LineString { coordinates } => {
+            coordinates.into_iter().collect()
         }
-        GeoJsonValue::MultiLineString(c) | GeoJsonValue::Polygon(c) => {
-            c.into_iter().flatten().collect()
+        GeometryValue::MultiLineString { coordinates }
+        | GeometryValue::Polygon { coordinates } => {
+            coordinates.into_iter().flatten().collect()
         }
-        GeoJsonValue::MultiPolygon(c) => c.into_iter().flatten().flatten().collect(),
-        GeoJsonValue::GeometryCollection(c) => c
+        GeometryValue::MultiPolygon { coordinates } => {
+            coordinates.into_iter().flatten().flatten().collect()
+        }
+        GeometryValue::GeometryCollection { geometries } => geometries
             .into_iter()
             .flat_map(geojson_geometry_points_vec)
             .collect(),
@@ -50,7 +52,7 @@ pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Vec<f64>> {
 }
 
 #[must_use]
-pub fn geojson_feature_coords(feature: Feature) -> Box<dyn Iterator<Item = Coord>> {
+pub fn geojson_feature_coords(feature: Feature) -> Box<dyn Iterator<Item = Position>> {
     match feature.geometry {
         Some(g) => geojson_geometry_coords(g),
         None => Box::new(std::iter::empty()),
@@ -59,7 +61,7 @@ pub fn geojson_feature_coords(feature: Feature) -> Box<dyn Iterator<Item = Coord
 
 pub fn geojson_coords(
     geojson_str: &str,
-) -> UtilesResult<Box<dyn Iterator<Item = Coord>>> {
+) -> UtilesResult<Box<dyn Iterator<Item = Position>>> {
     let gj = geojson_str
         .parse::<GeoJson>()
         .map_err(|e| UtilesError::ParsingError(e.to_string()))?;
