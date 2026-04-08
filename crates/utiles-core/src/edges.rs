@@ -1,10 +1,12 @@
 // use ahash::HashSet;
-use crate::asserts::assert_all_same_zoom;
-use crate::{Tile, TileLike, UtilesCoreResult};
-#[cfg(feature = "ahash")]
-use ahash::HashSet;
 #[cfg(not(feature = "ahash"))]
 use std::collections::HashSet;
+
+#[cfg(feature = "ahash")]
+use ahash::HashSet;
+
+use crate::asserts::assert_all_same_zoom;
+use crate::{Tile, TileLike, UtilesCoreResult};
 
 /// Finds edge tiles in a given set of tiles. optionally wraps the x-coordinate
 ///

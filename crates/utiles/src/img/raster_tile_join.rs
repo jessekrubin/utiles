@@ -1,8 +1,9 @@
-use crate::{UtilesError, UtilesResult};
-use image::{GenericImage, GenericImageView};
 use std::io::Cursor;
 
+use image::{GenericImage, GenericImageView};
+
 use super::load_from_memory;
+use crate::{UtilesError, UtilesResult};
 
 struct RasterTileJoiner {
     pub tl: Option<image::DynamicImage>,

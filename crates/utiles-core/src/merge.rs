@@ -1,8 +1,9 @@
-use crate::TileParent;
-use crate::traits::TileChildren1;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::hash::Hash;
+
+use crate::TileParent;
+use crate::traits::TileChildren1;
 
 /// Merge a set of tiles into a simplified set of tiles
 ///

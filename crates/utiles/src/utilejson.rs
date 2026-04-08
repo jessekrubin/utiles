@@ -5,7 +5,6 @@ use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value as JSONValue, Value};
 use tilejson::{Bounds, Center, TileJSON, tilejson};
-
 use utiles_core::geostats::TileStats;
 
 use crate::errors::UtilesResult;

@@ -1,8 +1,6 @@
-use crate::pyutiles::{pycoords, pyparsing};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
-use pyo3::types::PyTuple;
+use pyo3::types::{PyDict, PyTuple};
 use pyo3::{PyErr, PyResult, pyfunction};
 use utiles::zoom::ZoomOrZooms;
 
@@ -15,6 +13,7 @@ use crate::pyutiles::pytile_tuple::TileTuple;
 use crate::pyutiles::pytilelike::PyTileLike;
 use crate::pyutiles::pytiles_generator::TilesGenerator;
 use crate::pyutiles::zoom::PyZoomOrZooms;
+use crate::pyutiles::{pycoords, pyparsing};
 
 #[pyfunction]
 pub(crate) fn xyz(x: u32, y: u32, z: u8) -> PyTile {

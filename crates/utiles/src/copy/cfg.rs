@@ -1,12 +1,10 @@
 use std::path::PathBuf;
 
 use serde::Serialize;
-
 use utiles_core::BBox;
 use utiles_core::zoom::ZoomSet;
 
-use crate::errors::UtilesCopyError;
-use crate::errors::UtilesResult;
+use crate::errors::{UtilesCopyError, UtilesResult};
 use crate::hash_types::HashType;
 use crate::mbt::{MbtType, TilesFilter};
 use crate::sqlite::InsertStrategy;

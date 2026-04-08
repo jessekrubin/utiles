@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
-use crate::UtilesError;
-use crate::errors::UtilesResult;
 use globset::{Glob, GlobSetBuilder};
 use tracing::{debug, warn};
 use walkdir::WalkDir;
+
+use crate::UtilesError;
+use crate::errors::UtilesResult;
 
 pub(crate) fn find_datasets(fspath: &str) -> UtilesResult<Vec<PathBuf>> {
     // filepaths

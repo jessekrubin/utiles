@@ -1,7 +1,6 @@
 use clap::{Args, Parser};
 use serde_json::{Map, Value};
 use tracing::{debug, error};
-
 use utiles_core::projection::Projection;
 use utiles_core::tile::FeatureOptions;
 use utiles_core::{Tile, UtilesCoreError};

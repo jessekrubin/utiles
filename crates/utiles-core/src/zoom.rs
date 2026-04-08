@@ -1,11 +1,12 @@
 //! Zoom levels, zoom-collections and ranges oh my!
-use crate::constants::MAX_ZOOM;
-use serde::Serialize;
 use std::num::ParseIntError;
 use std::ops::BitAnd;
 
+use serde::Serialize;
+
 use crate::UtilesCoreError;
 use crate::UtilesCoreError::InvalidZoom;
+use crate::constants::MAX_ZOOM;
 use crate::errors::UtilesCoreResult;
 
 /// Return max-xy for a zoom level

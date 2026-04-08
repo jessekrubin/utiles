@@ -1,8 +1,9 @@
-use crate::UtilesResult;
-use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 use rusqlite::Connection;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{error, warn};
+
+use crate::UtilesResult;
+use crate::sqlite::{AsyncSqliteConn, RusqliteResult};
 
 /// Creates and returns an async `Receiver` of items derived from rows in the DB.
 /// `T` is the custom output type.

@@ -1,5 +1,6 @@
-use crate::errors::UtilesResult;
 use std::io::{self, Read};
+
+use crate::errors::UtilesResult;
 
 pub(crate) fn stdin2string() -> UtilesResult<String> {
     let mut input = String::new();

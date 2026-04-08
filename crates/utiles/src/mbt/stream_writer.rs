@@ -3,7 +3,6 @@ use rusqlite::params_from_iter;
 use rusqlite::types::Value;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, warn};
-
 use utiles_core::{Tile, TileLike};
 
 use crate::hash::xxh64_be_hex_upper;

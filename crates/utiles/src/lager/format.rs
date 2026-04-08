@@ -1,6 +1,7 @@
-use crate::UtilesError;
 use std::fmt::Formatter;
 use std::str::FromStr;
+
+use crate::UtilesError;
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
 pub enum LagerFormat {

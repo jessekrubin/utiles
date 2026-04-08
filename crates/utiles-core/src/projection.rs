@@ -1,7 +1,9 @@
 //! Coordinate projection
-use crate::UtilesCoreError;
-use serde::{Deserialize, Serialize};
 use std::fmt;
+
+use serde::{Deserialize, Serialize};
+
+use crate::UtilesCoreError;
 
 /// Projection enum
 #[derive(Debug, Serialize, Deserialize)]

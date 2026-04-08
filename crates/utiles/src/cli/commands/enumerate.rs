@@ -1,12 +1,14 @@
-use crate::cli::args::EnumerateArgs;
-use crate::mbt::TilesFilter;
-use crate::{TileStringFormatter, UtilesResult};
 use std::io;
 use std::io::{BufWriter, Write};
+
 use tokio::task::JoinHandle;
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::debug;
+
+use crate::cli::args::EnumerateArgs;
+use crate::mbt::TilesFilter;
+use crate::{TileStringFormatter, UtilesResult};
 
 async fn enumerate_db(
     fspath: &str,

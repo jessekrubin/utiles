@@ -1,18 +1,18 @@
 use std::path::Path;
 
 use tracing::{debug, info, warn};
+use utiles_core::MBTILES_MAGIC_NUMBER;
+use utiles_core::tile_type::{TileKind, TileType};
 
 use crate::UtilesError;
 use crate::cli::args::UpdateArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::mbtiles::{query_distinct_tilesize_fast, query_distinct_tiletype_fast};
 use crate::mbt::{
-    DbChange, DbChangeset, MetadataChange, MetadataChangeFromTo, PragmaChange,
+    DbChange, DbChangeset, MbtilesAsync, MbtilesClientAsync, MetadataChange,
+    MetadataChangeFromTo, PragmaChange,
 };
-use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
-use utiles_core::MBTILES_MAGIC_NUMBER;
-use utiles_core::tile_type::{TileKind, TileType};
 
 async fn update_mbt_metadata(mbt: &MbtilesClientAsync) -> UtilesResult<MetadataChange> {
     let filepath = mbt.filepath();

@@ -1,18 +1,14 @@
 use std::cell::Cell;
 use std::path::{Path, PathBuf};
 
-use crate::mbt::{metadata_vec_has_duplicates, metadata2map_val};
 use futures::stream::{self, StreamExt};
 use tokio::fs;
 use tracing::{debug, warn};
-
 use utiles_core::TileLike;
 
 use crate::copy::CopyConfig;
-use crate::errors::UtilesError;
-use crate::errors::UtilesResult;
-use crate::mbt::MbtTileRow;
-use crate::mbt::Mbtiles;
+use crate::errors::{UtilesError, UtilesResult};
+use crate::mbt::{MbtTileRow, Mbtiles, metadata_vec_has_duplicates, metadata2map_val};
 
 #[derive(Debug)]
 pub(super) struct WriterStats {

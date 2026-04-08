@@ -1,17 +1,15 @@
 use std::path::Path;
 
-use tracing::warn;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 use crate::cli::args::{MetadataArgs, MetadataSetArgs};
 use crate::cli::stdin2string::stdin2string;
 use crate::errors::UtilesResult;
 use crate::fs_async::file_exists_err;
 use crate::mbt::{
-    DbChange, DbChangeset, MbtilesMetadataJson, MbtilesMetadataRowParsed, metadata2map,
-    metadata2map_val, read_metadata_json,
+    DbChange, DbChangeset, MbtilesAsync, MbtilesClientAsync, MbtilesMetadataJson,
+    MbtilesMetadataRowParsed, metadata2map, metadata2map_val, read_metadata_json,
 };
-use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::AsyncSqliteConn;
 
 pub(crate) async fn metadata_main(args: &MetadataArgs) -> UtilesResult<()> {

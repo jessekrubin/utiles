@@ -7,13 +7,12 @@ use tokio::join;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 use utiles::internal::cli_tools::open_new_overwrite;
-use utiles::sqlite::InsertStrategy;
-use utiles::tile_type::TileFormat;
-use utiles::{
-    lager::{LagerConfig, LagerLevel, init_tracing},
-    mbt::{MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync},
-    tile_type::tiletype,
+use utiles::lager::{LagerConfig, LagerLevel, init_tracing};
+use utiles::mbt::{
+    MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync,
 };
+use utiles::sqlite::InsertStrategy;
+use utiles::tile_type::{TileFormat, tiletype};
 
 #[derive(Debug, Parser)]
 #[command(name = "utiles-oxipng")]

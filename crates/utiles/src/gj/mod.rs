@@ -1,6 +1,7 @@
+use geojson::{Feature, GeoJson, Geometry, GeometryValue, Position};
+
 use crate::UtilesError;
 use crate::errors::UtilesResult;
-use geojson::{Feature, GeoJson, Geometry, GeometryValue, Position};
 
 pub mod parsing;
 

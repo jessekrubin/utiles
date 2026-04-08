@@ -1,9 +1,9 @@
-use crate::pyutiles::pytile::PyTile;
+use std::hash::Hash;
 
 use pyo3::pyclass;
 use serde::Serialize;
 
-use std::hash::Hash;
+use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(
     name = "Tiles",

@@ -1,12 +1,10 @@
 use std::io;
-use std::sync::LazyLock;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 
 use tracing::debug;
-use tracing_subscriber::fmt;
 use tracing_subscriber::layer::{Layered, SubscriberExt};
 use tracing_subscriber::reload::{self, Handle};
-use tracing_subscriber::{EnvFilter, Layer, Registry};
+use tracing_subscriber::{EnvFilter, Layer, Registry, fmt};
 
 use crate::UtilesError;
 use crate::errors::UtilesResult;

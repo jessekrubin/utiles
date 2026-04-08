@@ -1,13 +1,11 @@
 use std::path::Path;
 
-use tracing::{debug, info};
-
 pub use cfg::CopyConfig;
 pub use pyramid::copy_mbtiles2fs;
+use tracing::{debug, info};
 pub use unpyramid::copy_fs2mbtiles;
 
-use crate::errors::UtilesError;
-use crate::errors::UtilesResult;
+use crate::errors::{UtilesError, UtilesResult};
 
 mod cfg;
 mod pasta;

@@ -1,5 +1,4 @@
 use tracing::error;
-
 use utiles_core::{Tile, TileLike, bounding_tile};
 
 use crate::TileStringFormatter;

@@ -1,36 +1,28 @@
-use axum_extra::TypedHeader;
 use std::sync::Arc;
 use std::time::Duration;
-use tower_http::cors::{Any, CorsLayer};
 
-use axum::extract::Path;
-use axum::http::Method;
-use axum::{
-    Json, Router,
-    body::Body,
-    extract::State,
-    http::{
-        StatusCode,
-        header::{HeaderMap, HeaderValue},
-    },
-    response::IntoResponse,
-    routing::get,
-};
+use axum::body::Body;
+use axum::extract::{Path, State};
+use axum::http::header::{HeaderMap, HeaderValue};
+use axum::http::{Method, StatusCode};
+use axum::response::IntoResponse;
+use axum::routing::get;
+use axum::{Json, Router};
+use axum_extra::TypedHeader;
 use headers::Host;
+use request_id::Radix36MakeRequestId;
 use serde::Deserialize;
 use serde_json::json;
 use tilejson::TileJSON;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
-use tower_http::trace::{DefaultOnBodyChunk, DefaultOnFailure};
-use tower_http::{
-    timeout::TimeoutLayer,
-    trace::{DefaultMakeSpan, TraceLayer},
+use tower_http::timeout::TimeoutLayer;
+use tower_http::trace::{
+    DefaultMakeSpan, DefaultOnBodyChunk, DefaultOnFailure, TraceLayer,
 };
 use tracing::info;
-
-use request_id::Radix36MakeRequestId;
 use utiles_core::tile_type::{TileKind, blob2headers};
 use utiles_core::{Tile, quadkey2tile, utile};
 

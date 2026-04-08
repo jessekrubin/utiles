@@ -1,6 +1,7 @@
-use crate::sqlite::{AffectedType, RowsAffected, RusqliteResult};
 use rusqlite::Connection;
 use tracing::debug;
+
+use crate::sqlite::{AffectedType, RowsAffected, RusqliteResult};
 
 const HAS_ZY_MAP_QUERY: &str = include_str!("sql/has-zy-map-query.sql");
 

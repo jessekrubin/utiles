@@ -2,8 +2,9 @@
 #![expect(clippy::unwrap_used)]
 #![deny(clippy::similar_names)]
 
-use crate::*;
 use std::collections::HashSet;
+
+use crate::*;
 
 #[test]
 fn zoom_or_zooms() {

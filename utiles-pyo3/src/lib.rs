@@ -14,13 +14,10 @@
 #![expect(clippy::used_underscore_items)]
 
 use pyo3::prelude::*;
+use pyutiles::{PyBbox, PyLngLat, PyLngLatBbox, PyTile};
+use utiles::tile_type;
 
 use crate::pyutiles::PyTileType;
-use pyutiles::PyBbox;
-use pyutiles::PyLngLat;
-use pyutiles::PyLngLatBbox;
-use pyutiles::PyTile;
-use utiles::tile_type;
 mod cli;
 mod fmt_nbytes;
 mod pylager;

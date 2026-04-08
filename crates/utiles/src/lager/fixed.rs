@@ -1,9 +1,10 @@
 use std::io::{self};
 
-use crate::errors::UtilesResult;
-use crate::lager::LagerConfig;
 use tracing::debug;
 use tracing_subscriber::fmt::{self};
+
+use crate::errors::UtilesResult;
+use crate::lager::LagerConfig;
 
 pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
     let filter = log_config.env_filter();

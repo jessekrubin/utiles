@@ -324,9 +324,8 @@ pub fn pragma_index_info(
 #[cfg(test)]
 mod tests {
     #![expect(clippy::unwrap_used)]
-    use crate::sqlite::open;
-
     use super::*;
+    use crate::sqlite::open;
 
     #[test]
     fn journal_mode_pragma() {

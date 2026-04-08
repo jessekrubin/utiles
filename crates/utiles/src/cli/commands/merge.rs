@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+
 use utiles_core::{Tile, TileLike, simplify};
 
 use crate::cli::args::MergeArgs;
