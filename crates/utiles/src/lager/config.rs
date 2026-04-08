@@ -1,5 +1,6 @@
-use crate::lager::LagerLevel;
 use tracing_subscriber::EnvFilter;
+
+use crate::lager::LagerLevel;
 
 #[derive(Debug, Default, Copy, Clone)]
 pub struct LagerConfig {

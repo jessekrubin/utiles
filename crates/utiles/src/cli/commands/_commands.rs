@@ -1,6 +1,7 @@
+use serde::Serialize;
+
 use crate::UtilesResult;
 use crate::cli::args::CommandsArgs;
-use serde::Serialize;
 #[derive(Debug, Serialize)]
 struct CommandInfo {
     name: String,

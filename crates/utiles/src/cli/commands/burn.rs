@@ -1,10 +1,11 @@
+use geojson::GeoJson;
+use utiles_core::TileLike;
+
 use crate::cli::args::BurnArgs;
 use crate::cli::stdinterator_filter;
 use crate::cover::geojson2tiles;
 use crate::errors::UtilesResult;
 use crate::{UtilesError, asleep0};
-use geojson::GeoJson;
-use utiles_core::TileLike;
 
 pub(crate) async fn burn_main(args: BurnArgs) -> UtilesResult<()> {
     let lines = stdinterator_filter::stdin_filtered(args.inargs.input);

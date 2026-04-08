@@ -2,8 +2,8 @@
 #![expect(clippy::unwrap_used)]
 
 use std::collections::HashSet;
-use utiles_core::find_edges;
-use utiles_core::{Tile, utile};
+
+use utiles_core::{Tile, find_edges, utile};
 
 #[test]
 fn test_edges() {

@@ -1,7 +1,8 @@
 //! `TileZBox` - zoom-x-y bounding box
 
-use crate::{Point2d, Tile, TileLike, UtilesCoreError, UtilesCoreResult, fns};
 use fns::flipy;
+
+use crate::{Point2d, Tile, TileLike, UtilesCoreError, UtilesCoreResult, fns};
 
 /// A struct representing a bbox of tiles at a specific zoom level
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

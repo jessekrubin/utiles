@@ -3,8 +3,7 @@ use std::path::Path;
 
 use crate::errors::UtilesResult;
 use crate::fs_async::file_exists;
-use crate::mbt::MbtilesStats;
-use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
+use crate::mbt::{MbtilesAsync, MbtilesClientAsync, MbtilesStats};
 
 pub async fn mbinfo(filepath: &str, stats: Option<bool>) -> UtilesResult<MbtilesStats> {
     let fspath = Path::new(filepath);

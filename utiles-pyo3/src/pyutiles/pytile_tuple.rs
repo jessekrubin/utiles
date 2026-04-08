@@ -1,5 +1,6 @@
-use crate::pyutiles::pytile::PyTile;
 use pyo3::FromPyObject;
+
+use crate::pyutiles::pytile::PyTile;
 
 #[derive(FromPyObject)]
 pub struct TileTuple(pub(crate) u32, pub(crate) u32, pub(crate) u8);

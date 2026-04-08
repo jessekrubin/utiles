@@ -1,9 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::UtilesError;
 use crate::cli::args::InfoArgs;
 use crate::errors::UtilesResult;
 use crate::mbt::{MbtilesStats, mbinfo};
 use crate::sqlite::SqliteHeader;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]
 pub(crate) enum InfoType {

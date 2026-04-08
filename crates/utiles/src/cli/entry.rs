@@ -1,3 +1,7 @@
+use clap::{CommandFactory, FromArgMatches};
+use tracing::{debug, error, trace};
+use utiles_core::VERSION;
+
 use crate::UtilesError;
 use crate::cli::args::{Cli, Commands};
 use crate::cli::commands::{
@@ -11,9 +15,6 @@ use crate::cli::commands::{
 use crate::errors::UtilesResult;
 use crate::internal::signal::shutdown_signal;
 use crate::lager::{LagerConfig, LagerLevel, init_tracing};
-use clap::{CommandFactory, FromArgMatches};
-use tracing::{debug, error, trace};
-use utiles_core::VERSION;
 
 pub struct CliOpts {
     pub argv: Option<Vec<String>>,

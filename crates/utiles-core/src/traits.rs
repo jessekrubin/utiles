@@ -1,8 +1,9 @@
 //! Utiles traits
 
+use std::hash::Hash;
+
 use crate::TileLike;
 use crate::parent::Parents;
-use std::hash::Hash;
 
 /// `IsOk` trait for checking if a value is Ok and returns a result
 /// of self or an error

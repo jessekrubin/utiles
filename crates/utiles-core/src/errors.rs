@@ -1,6 +1,7 @@
 //! utiles-core errors mod
 
 use std::num::TryFromIntError;
+
 use thiserror::Error;
 
 /// Error type for utiles-core

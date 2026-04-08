@@ -1,8 +1,7 @@
-use std::io::BufWriter;
-use std::{io, io::Write};
+use std::io;
+use std::io::{BufWriter, Write};
 
 use tracing::{debug, error};
-
 use utiles_core::parsing::parse_bbox_ext;
 use utiles_core::zoom::ZoomOrZooms;
 use utiles_core::{TileStringFormatter, tiles};

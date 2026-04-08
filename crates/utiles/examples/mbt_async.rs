@@ -1,6 +1,7 @@
+use std::path::PathBuf;
+
 use anyhow::Result;
 use futures::StreamExt;
-use std::path::PathBuf;
 use utiles::mbt::{MbtilesAsync, MbtilesClientAsync};
 use utiles::{Tile, TileLike, utile};
 

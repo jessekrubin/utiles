@@ -1,8 +1,6 @@
 use geojson::Position;
 use serde_json::Value;
-
-use utiles_core::BBox;
-use utiles_core::UtilesCoreError;
+use utiles_core::{BBox, UtilesCoreError};
 
 use crate::UtilesError;
 use crate::errors::UtilesResult;

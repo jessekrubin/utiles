@@ -8,9 +8,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::constants::EPSILON;
-use crate::errors::UtilesCoreError;
-use crate::errors::UtilesCoreResult;
+use crate::errors::{UtilesCoreError, UtilesCoreResult};
 use crate::fns::{bounds, children, parent, siblings, xy};
+#[cfg(feature = "pmtiles")]
+use crate::pmtiles;
 use crate::projection::Projection;
 use crate::tile_feature::TileFeature;
 use crate::tile_like::TileLike;
@@ -19,9 +20,6 @@ use crate::{
     IsOk, TileChildren1, children_zorder, children1_zorder, quadkey2tile, rmid2xyz,
     utile, xyz2quadkey,
 };
-
-#[cfg(feature = "pmtiles")]
-use crate::pmtiles;
 
 /// Tile X-Y-Z struct
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

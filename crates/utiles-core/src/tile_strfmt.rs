@@ -1,8 +1,9 @@
 //! Tile string formatting
-use crate::bbox::WebBBox;
-use crate::{BBox, TileLike};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
+
+use crate::bbox::WebBBox;
+use crate::{BBox, TileLike};
 
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub enum FormatTokens {

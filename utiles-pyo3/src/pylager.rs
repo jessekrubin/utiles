@@ -1,6 +1,7 @@
+use std::str::FromStr;
+
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use std::str::FromStr;
 use utiles::lager::{
     LagerConfig, LagerFormat, LagerLevel, get_lager_format, get_lager_level,
     init_tracing,

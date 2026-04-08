@@ -1,8 +1,9 @@
-use crate::pyutiles::pytile::PyTile;
 use pyo3::class::basic::CompareOp;
 use pyo3::exceptions::{self};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
+
+use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(name = "LngLat", module = "utiles._utiles", frozen)]
 pub struct PyLngLat {

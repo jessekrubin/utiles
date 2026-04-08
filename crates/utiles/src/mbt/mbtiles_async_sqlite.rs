@@ -1,13 +1,16 @@
-use async_sqlite::{Client, ClientBuilder, Pool, PoolBuilder};
-use async_trait::async_trait;
-use futures::TryFutureExt;
-use rusqlite::{Connection, OpenFlags};
 use std::fmt;
 use std::fmt::Debug;
 use std::path::Path;
 use std::str::FromStr;
+
+use async_sqlite::{Client, ClientBuilder, Pool, PoolBuilder};
+use async_trait::async_trait;
+use futures::TryFutureExt;
+use rusqlite::{Connection, OpenFlags};
 use tilejson::TileJSON;
 use tracing::{debug, error, info, warn};
+use utiles_core::BBox;
+use utiles_core::tile_type::{TileFormat, TileKind};
 
 use crate::UtilesError;
 use crate::errors::UtilesResult;
@@ -25,14 +28,11 @@ use crate::mbt::{
     MinZoomMaxZoom, query_mbt_stats,
 };
 use crate::sqlite::{
-    AsyncSqliteConn, AsyncSqliteConnMut, RowsAffected, SqliteError, journal_mode,
-    magic_number, pragma_encoding,
+    AsyncSqliteConn, AsyncSqliteConnMut, DbPath, DbPathTrait, RowsAffected,
+    SqliteError, journal_mode, magic_number, pathlike2dbpath, pragma_encoding,
 };
-use crate::sqlite::{DbPath, DbPathTrait, pathlike2dbpath};
 use crate::sqlite_utiles::register_utiles_sqlite;
 use crate::utilejson::metadata2tilejson;
-use utiles_core::BBox;
-use utiles_core::tile_type::{TileFormat, TileKind};
 
 #[derive(Clone)]
 pub struct MbtilesClientAsync {

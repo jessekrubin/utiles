@@ -1,10 +1,10 @@
-use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
-use strum_macros::AsRefStr;
 
+use clap::{Args, Parser, Subcommand};
+use strum_macros::AsRefStr;
+use utiles_core::parsing::parse_bbox_ext;
 use utiles_core::{
-    BBox, LngLat, TileStringFormatter, VERSION, ZoomSet, geobbox_merge,
-    parsing::parse_bbox_ext, zoom,
+    BBox, LngLat, TileStringFormatter, VERSION, ZoomSet, geobbox_merge, zoom,
 };
 
 use crate::cli::commands::dev::DevArgs;

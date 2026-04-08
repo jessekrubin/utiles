@@ -14,8 +14,8 @@
 #![expect(clippy::redundant_closure_for_method_calls)]
 #![expect(clippy::unnecessary_wraps)]
 pub use core::*;
-pub use errors::UtilesError;
-pub use errors::UtilesResult;
+
+pub use errors::{UtilesError, UtilesResult};
 
 #[macro_use]
 pub mod print;

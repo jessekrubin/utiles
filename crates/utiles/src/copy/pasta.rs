@@ -1,18 +1,16 @@
 use futures::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
-
 use utiles_core::UtilesCoreError;
 
 use crate::UtilesError;
 use crate::copy::CopyConfig;
-use crate::errors::UtilesCopyError;
-use crate::errors::UtilesResult;
+use crate::errors::{UtilesCopyError, UtilesResult};
 use crate::hash::xxh64_be_hex_upper;
 use crate::mbt::{
-    MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesMetadataJson,
+    MbtStreamWriterSync, MbtType, MbtWriterStats, Mbtiles, MbtilesAsync,
+    MbtilesClientAsync, MbtilesMetadataJson,
 };
-use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::sqlite::{AsyncSqliteConn, Sqlike3Async};
 
 #[derive(Debug)]

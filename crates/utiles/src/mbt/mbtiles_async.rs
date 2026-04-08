@@ -1,12 +1,14 @@
 use async_trait::async_trait;
 use tilejson::TileJSON;
-
-use crate::errors::UtilesResult;
-use crate::mbt::{MbtMetadataRow, MbtType, MbtilesStats, MetadataChangeFromTo};
-use crate::mbt::{MbtilesMetadataJson, MinZoomMaxZoom};
-use crate::sqlite::RowsAffected;
 use utiles_core::tile_type::TileKind;
 use utiles_core::{BBox, Tile, TileLike};
+
+use crate::errors::UtilesResult;
+use crate::mbt::{
+    MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats, MetadataChangeFromTo,
+    MinZoomMaxZoom,
+};
+use crate::sqlite::RowsAffected;
 
 #[async_trait]
 pub trait MbtilesAsync: Sized {

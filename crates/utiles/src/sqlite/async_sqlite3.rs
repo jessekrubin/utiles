@@ -1,3 +1,12 @@
+use std::fmt;
+use std::fmt::Debug;
+use std::path::Path;
+
+use async_sqlite::{Client, ClientBuilder};
+use async_trait::async_trait;
+use rusqlite::{Connection, OpenFlags};
+use tracing::debug;
+
 use crate::fs_async::file_exists;
 use crate::sqlite::sqlike3::Sqlike3Async;
 use crate::sqlite::{
@@ -6,13 +15,6 @@ use crate::sqlite::{
     pragma_index_list, pragma_page_count, pragma_page_size, pragma_page_size_set,
     pragma_table_list, vacuum, vacuum_into,
 };
-use async_sqlite::{Client, ClientBuilder};
-use async_trait::async_trait;
-use rusqlite::{Connection, OpenFlags};
-use std::fmt;
-use std::fmt::Debug;
-use std::path::Path;
-use tracing::debug;
 
 pub struct SqliteDbAsyncClient {
     pub dbpath: DbPath,

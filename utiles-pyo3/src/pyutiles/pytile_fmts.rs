@@ -3,7 +3,6 @@ use std::hash::Hash;
 
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
-
 use utiles::TileStringFormatter;
 
 use crate::pyutiles::pyparsing::parse_tile_arg;

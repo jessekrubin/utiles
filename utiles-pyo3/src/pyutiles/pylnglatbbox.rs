@@ -1,11 +1,11 @@
-use crate::pyutiles::pyiters::FloatIterator;
-use crate::pyutiles::pytile::PyTile;
-
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{Py, PyAny, PyErr, PyRef, PyResult, Python, exceptions, pyclass, pymethods};
 use utiles::bbox::BBox;
+
+use crate::pyutiles::pyiters::FloatIterator;
+use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(
     name = "LngLatBbox",

@@ -1,5 +1,6 @@
-use crate::cli::stdinterator::StdInterator;
 use std::io;
+
+use crate::cli::stdinterator::StdInterator;
 
 pub(crate) fn stdin_filtered(
     input: Option<String>,

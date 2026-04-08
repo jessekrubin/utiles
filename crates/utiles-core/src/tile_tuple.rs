@@ -1,5 +1,6 @@
-use crate::tile_like::TileLike;
 use serde::Deserialize;
+
+use crate::tile_like::TileLike;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
 pub struct TileTuple(pub u32, pub u32, pub u8);

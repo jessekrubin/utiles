@@ -4,10 +4,12 @@
     clippy::cast_possible_wrap,
     clippy::cast_sign_loss
 )]
-use crate::{Result, UtilesCoverError};
-use geojson::GeoJson;
 use std::collections::{BTreeMap, HashSet};
+
+use geojson::GeoJson;
 use utiles_core::{Tile, lnglat2tile_frac, simplify, tile, utile};
+
+use crate::{Result, UtilesCoverError};
 
 #[expect(clippy::cast_precision_loss)]
 fn line_string_cover(

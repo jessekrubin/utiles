@@ -12,14 +12,6 @@
 #![expect(clippy::module_name_repetitions)]
 #![expect(clippy::similar_names)]
 
-#[doc(inline)]
-pub use crate::constants::*;
-#[doc(inline)]
-pub use crate::fns::*;
-#[doc(inline)]
-pub use crate::merge::*;
-#[doc(inline)]
-pub use crate::quadkey::*;
 pub use bbox::{BBox, geobbox_merge};
 #[doc(inline)]
 pub use errors::{UtilesCoreError, UtilesCoreResult};
@@ -38,6 +30,15 @@ pub use tile_zbox::TileZBox;
 pub use traits::{Coord2dLike, IsOk, LngLatLike, TileChildren1, TileParent};
 pub use web_geo_bounds::web_geo_bounds_union;
 pub use zoom::*;
+
+#[doc(inline)]
+pub use crate::constants::*;
+#[doc(inline)]
+pub use crate::fns::*;
+#[doc(inline)]
+pub use crate::merge::*;
+#[doc(inline)]
+pub use crate::quadkey::*;
 
 pub mod bbox;
 pub mod constants;
@@ -84,10 +85,5 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Utiles core prelude imports/things.
 pub mod prelude {
-    pub use crate::Tile;
-    pub use crate::TileLike;
-    pub use crate::flipy;
-    pub use crate::point2d;
-    pub use crate::utile;
-    pub use crate::utile_yup;
+    pub use crate::{Tile, TileLike, flipy, point2d, utile, utile_yup};
 }

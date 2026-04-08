@@ -1,8 +1,6 @@
 //! Sqlite3 database util(e)s
 //!
 //! Pure sqlite database utils, helpers and bears oh my!
-pub use rusqlite::{Connection, Result as RusqliteResult};
-
 pub use affected::{AffectedType, RowsAffected};
 pub use async_sqlite3::{AsyncSqliteConn, AsyncSqliteConnMut, SqliteDbAsyncClient};
 pub use attach::{attach_db, detach_db};
@@ -13,6 +11,7 @@ pub use header::*;
 pub use insert_strategy::InsertStrategy;
 pub use page_size::is_valid_page_size;
 pub use pragma::*;
+pub use rusqlite::{Connection, Result as RusqliteResult};
 pub use sqlike3::{Sqlike3, Sqlike3Async};
 mod affected;
 mod async_sqlite3;

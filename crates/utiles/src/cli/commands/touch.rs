@@ -5,10 +5,8 @@ use tracing::{debug, info};
 use crate::UtilesError;
 use crate::cli::args::TouchArgs;
 use crate::errors::UtilesResult;
-use crate::mbt::MbtType;
-use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
-use crate::sqlite::is_valid_page_size;
-use crate::sqlite::{Sqlike3Async, SqliteError};
+use crate::mbt::{MbtType, MbtilesAsync, MbtilesClientAsync};
+use crate::sqlite::{Sqlike3Async, SqliteError, is_valid_page_size};
 use crate::timestamp::timestamp_string;
 
 fn check_page_size(page_size: i64) -> UtilesResult<i64> {

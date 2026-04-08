@@ -1,7 +1,6 @@
 use std::hash::Hasher;
 
-use fnv;
-use fnv::FnvHasher;
+use fnv::{self, FnvHasher};
 use rusqlite::Connection;
 use rusqlite::Error::{InvalidFunctionParameterType, InvalidParameterCount};
 use rusqlite::functions::FunctionFlags;

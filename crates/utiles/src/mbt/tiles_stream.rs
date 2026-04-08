@@ -1,7 +1,6 @@
 use rusqlite::Connection;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, warn};
-
 use utiles_core::prelude::*;
 
 use crate::UtilesResult;

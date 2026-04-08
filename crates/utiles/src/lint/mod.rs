@@ -1,15 +1,14 @@
-use owo_colors::OwoColorize;
 use std::io;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use std::time::Duration;
 
 use futures::{Stream, StreamExt, stream};
+use mbt_linter::MbtilesLinter;
+use owo_colors::OwoColorize;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::{debug, warn};
-
-use mbt_linter::MbtilesLinter;
 
 use crate::errors::UtilesResult;
 

@@ -53,7 +53,8 @@ bench: dev-rel
     pytest -vv --benchmark-only --config-file={{ pyut_pyproject_toml }} {{ pyut }}
 
 cargo-fmt:
-    cargo fmt
+    cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true
+    cargo fmt --all
 
 # sort imports
 sort-all:

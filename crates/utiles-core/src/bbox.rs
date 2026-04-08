@@ -1,10 +1,11 @@
 //! Bounding-boxes!
+use serde::{Deserialize, Serialize};
+
 use crate::lnglat::LngLat;
 use crate::parsing::parse_bbox;
 use crate::tile::Tile;
 use crate::tile_like::TileLike;
 use crate::{Point2d, xy};
-use serde::{Deserialize, Serialize};
 
 /// Bounding box tuple
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]

@@ -1,8 +1,10 @@
+use std::path::PathBuf;
+
+use tracing::debug;
+
 use crate::UtilesError;
 use crate::errors::UtilesResult;
 use crate::fs_async::file_exists;
-use std::path::PathBuf;
-use tracing::debug;
 
 #[derive(Debug, Clone)]
 pub struct DbPath {

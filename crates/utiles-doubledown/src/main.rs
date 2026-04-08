@@ -9,11 +9,11 @@
 #![deny(clippy::pedantic)]
 #![expect(clippy::cast_possible_wrap)]
 
-use crate::ProgressEvent::{Msg, SizeDiff};
+use std::time::Duration;
+
 use clap::Parser;
 use futures::StreamExt;
 use indoc::indoc;
-use std::time::Duration;
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{debug, error, info, warn};
 use utiles::Tile;
@@ -25,6 +25,8 @@ use utiles::mbt::{
     MbtStreamWriterSync, MbtWriterStats, MbtilesAsync, MbtilesClientAsync,
 };
 use utiles::sqlite::InsertStrategy;
+
+use crate::ProgressEvent::{Msg, SizeDiff};
 
 #[derive(Debug, Parser)]
 #[command(name = "utiles-doubledown")]

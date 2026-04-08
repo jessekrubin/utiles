@@ -1,10 +1,9 @@
 use crate::bbox::WebBBox;
+#[cfg(feature = "pmtiles")]
+use crate::pmtiles;
 use crate::{
     BBox, LngLat, Tile, TileZBox, flipy, neighbors, neighbors_wrap_x, xyz2rmid,
 };
-
-#[cfg(feature = "pmtiles")]
-use crate::pmtiles;
 
 /// Trait def for tile-like objects/structs/things/whatevers
 pub trait TileLike {

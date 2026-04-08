@@ -4,9 +4,11 @@
     clippy::cast_possible_wrap,
     clippy::cast_sign_loss
 )]
-use crate::Result;
 use std::collections::{BTreeMap, HashSet};
+
 use utiles_core::{Tile, lnglat2tile_frac, simplify, tile, utile};
+
+use crate::Result;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GeoTypesCoverOptions {

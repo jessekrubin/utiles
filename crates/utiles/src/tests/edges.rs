@@ -1,8 +1,8 @@
 #![expect(clippy::too_many_lines)]
 
 use std::collections::HashSet;
-use utiles_core::find_edges;
-use utiles_core::{Tile, utile};
+
+use utiles_core::{Tile, find_edges, utile};
 fn test_data_input() -> Vec<Tile> {
     vec![
         utile!(4188, 3104, 13),

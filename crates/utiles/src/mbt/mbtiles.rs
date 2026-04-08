@@ -1,16 +1,14 @@
-use indoc::indoc;
-use rusqlite::{Connection, OptionalExtension, params};
 use std::collections::HashSet;
 use std::error::Error;
 use std::fmt::Debug;
 use std::path::Path;
+
+use indoc::indoc;
+use rusqlite::{Connection, OptionalExtension, params};
 use tilejson::TileJSON;
 use tracing::{debug, error, warn};
-
-use utiles_core::BBox;
-use utiles_core::MBTILES_MAGIC_NUMBER;
 use utiles_core::tile_data_row::TileData;
-use utiles_core::{LngLat, Tile, TileLike, flipy, yflip};
+use utiles_core::{BBox, LngLat, MBTILES_MAGIC_NUMBER, Tile, TileLike, flipy, yflip};
 
 use crate::UtilesError;
 use crate::errors::UtilesResult;
@@ -24,12 +22,10 @@ use crate::mbt::{
     MbtMetadataRow, MbtType, MbtilesMetadataJson, MbtilesStats, MbtilesZoomStats,
     MinZoomMaxZoom, query_mbt_stats,
 };
-use crate::sqlite::{DbPath, pathlike2dbpath};
-use crate::sqlite::{InsertStrategy, application_id_set};
-use crate::sqlite::{RusqliteResult, pragma_encoding_set};
 use crate::sqlite::{
-    Sqlike3, application_id, open_existing, pragma_index_info, pragma_index_list,
-    pragma_table_list, query_db_fspath,
+    DbPath, InsertStrategy, RusqliteResult, Sqlike3, application_id,
+    application_id_set, open_existing, pathlike2dbpath, pragma_encoding_set,
+    pragma_index_info, pragma_index_list, pragma_table_list, query_db_fspath,
 };
 use crate::utilejson::metadata2tilejson;
 

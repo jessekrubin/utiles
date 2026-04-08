@@ -1,12 +1,14 @@
+use std::collections::BTreeMap;
+use std::path::PathBuf;
+
+use futures::{StreamExt, stream};
+use tracing::{debug, info, warn};
+
 use crate::internal::globster::find_filepaths;
 use crate::mbt::{MbtilesAsync, MbtilesClientAsync};
 use crate::server::UtilesServerConfig;
 use crate::server::state::{Datasets, MbtilesDataset};
 use crate::{UtilesError, UtilesResult};
-use futures::{StreamExt, stream};
-use std::collections::BTreeMap;
-use std::path::PathBuf;
-use tracing::{debug, info, warn};
 
 async fn check_mbtiles(fspath: &PathBuf) -> UtilesResult<MbtilesDataset> {
     let mbt = MbtilesClientAsync::open_readonly(fspath).await?;
