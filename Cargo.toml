@@ -27,7 +27,7 @@ anyhow = "1.0.102"
 # async-sqlite = { git = "https://github.com/ryanfowler/async-sqlite.git" }
 async-sqlite = { version = "0.5.7", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.88"
-axum = { version = "0.8.8", features = ["tokio", "json", "macros"] }
+axum = { version = "0.8.9", features = ["tokio", "json", "macros"] }
 axum-extra = { version = "0.12.5", features = [ "typed-header" ] }
 base64 = "0.22.1"
 clap = { version = "4.6", features = ["derive", "color", "wrap_help"] }
