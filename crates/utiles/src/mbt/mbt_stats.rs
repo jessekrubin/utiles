@@ -43,7 +43,7 @@ pub fn query_mbt_stats(
     let query_ti = std::time::Instant::now();
     let maybe_filepath = conn.path().map(|p| p.to_string());
     let filesize = match maybe_filepath {
-        Some(fp) => std::fs::metadata(fp).map(|md| md.len()).unwrap_or(0),
+        Some(fp) => std::fs::metadata(fp).map_or(0, |md| md.len()),
         None => 0,
     };
 

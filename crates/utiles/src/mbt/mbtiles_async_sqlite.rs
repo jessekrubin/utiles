@@ -625,8 +625,7 @@ where
         let format_str = self.query_metadata_format().await?;
         if let Some(format_str) = format_str {
             let kind = TileFormat::from_str(&format_str)
-                .map(|f| f.kind())
-                .unwrap_or(TileKind::Unknown);
+                .map_or(TileKind::Unknown, |f| f.kind());
             Ok(kind)
         } else {
             Ok(TileKind::Unknown)

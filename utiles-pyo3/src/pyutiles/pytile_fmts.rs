@@ -2,10 +2,9 @@
 use std::hash::Hash;
 
 use pyo3::prelude::*;
-use pyo3::types::PyTuple;
 use utiles::TileStringFormatter;
 
-use crate::pyutiles::pyparsing::parse_tile_arg;
+use crate::pyutiles::pyparsing::PyTileArg;
 
 #[derive(Clone, Debug, PartialEq, Hash)]
 #[pyclass(
@@ -28,15 +27,13 @@ impl PyTileFmts {
     }
 
     #[pyo3(signature = (* args))]
-    pub fn fmt(&self, args: &Bound<'_, PyTuple>) -> PyResult<String> {
-        let tile = parse_tile_arg(args)?;
-        Ok(self.tformatter.fmt(&tile.xyz))
+    pub fn fmt(&self, args: PyTileArg) -> String {
+        self.tformatter.fmt(&args)
     }
 
     #[pyo3(signature = (* args))]
-    pub fn format(&self, args: &Bound<'_, PyTuple>) -> PyResult<String> {
-        let tile = parse_tile_arg(args)?;
-        Ok(self.tformatter.fmt(&tile.xyz))
+    pub fn format(&self, args: PyTileArg) -> String {
+        self.tformatter.fmt(&args)
     }
 
     #[getter]
