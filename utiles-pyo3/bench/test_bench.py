@@ -61,6 +61,7 @@ def test_quadkey_bench(
     [
         pytest.param(mercantile.ul, id="mercantile"),
         pytest.param(utiles.ul, id="utiles"),
+        # pytest.param(utiles.ul2, id="utiles-v2"),
     ],
 )
 @pytest.mark.benchmark(
@@ -72,6 +73,24 @@ def test_ul_bench(
     benchmark: BenchmarkFixture,
 ) -> None:
     benchmark(func, *tile)
+
+
+@pytest.mark.parametrize(
+    "func",
+    [
+        pytest.param(mercantile.ul, id="mercantile"),
+        pytest.param(utiles.ul, id="utiles"),
+        # pytest.param(utiles.ul2, id="utiles-v2"),
+    ],
+)
+@pytest.mark.benchmark(
+    group="ul-many",
+)
+def test_ul_many_bench(
+    func: Callable[[tuple[int, int, int]], tuple[float, float]],
+    benchmark: BenchmarkFixture,
+) -> None:
+    benchmark(lambda: [func(*tile) for tile in TEST_TILES])
 
 
 def mercantile_tiles_gen() -> None:

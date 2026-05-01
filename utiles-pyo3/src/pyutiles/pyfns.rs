@@ -1,13 +1,12 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
-use pyo3::{PyErr, PyResult, pyfunction};
 use utiles::zoom::ZoomOrZooms;
 
 use crate::pyutiles::pybbox::PyBbox;
 use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
-use crate::pyutiles::pyparsing::parse_tile_arg;
+use crate::pyutiles::pyparsing::PyTileArg;
 use crate::pyutiles::pytile::PyTile;
 use crate::pyutiles::pytile_tuple::TileTuple;
 use crate::pyutiles::pytilelike::PyTileLike;
@@ -21,11 +20,9 @@ pub(crate) fn xyz(x: u32, y: u32, z: u8) -> PyTile {
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args))]
-pub(crate) fn ul(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLat> {
-    let tile = parse_tile_arg(args)?;
-    let lnglat = tile.ul();
-    Ok(lnglat)
+#[pyo3(signature = (*args))]
+pub(crate) fn ul(args: PyTileArg) -> PyLngLat {
+    args.ul()
 }
 
 #[pyfunction]
@@ -60,11 +57,9 @@ pub(crate) fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args))]
-pub(crate) fn bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
-    let tile = parse_tile_arg(args)?;
-    let bbox = tile.bounds();
-    Ok(bbox)
+#[pyo3(signature = (*args))]
+pub(crate) fn bounds(args: PyTileArg) -> PyLngLatBbox {
+    args.bounds()
 }
 
 #[pyfunction]
@@ -149,16 +144,15 @@ pub(crate) fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args))]
-pub(crate) fn xy_bounds(args: &Bound<'_, PyTuple>) -> PyResult<PyBbox> {
-    let tile = pyparsing::parse_tile_arg(args)?;
-    let web_bbox = utiles::xyz2bbox(tile.xyz.x, tile.xyz.y, tile.xyz.z);
-    Ok(PyBbox::py_new(
+#[pyo3(signature = (*args))]
+pub(crate) fn xy_bounds(args: PyTileArg) -> PyBbox {
+    let web_bbox = utiles::xyz2bbox(args.x(), args.y(), args.z());
+    PyBbox::py_new(
         web_bbox.left(),
         web_bbox.bottom(),
         web_bbox.right(),
         web_bbox.top(),
-    ))
+    )
 }
 
 #[pyfunction]
@@ -182,10 +176,9 @@ pub(crate) fn tile(
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args))]
-pub(crate) fn pmtileid(args: &Bound<'_, PyTuple>) -> PyResult<u64> {
-    let tile = pyparsing::parse_tile_arg(args)?;
-    Ok(tile.pmtileid())
+#[pyo3(signature = (*args))]
+pub(crate) fn pmtileid(args: PyTileArg) -> u64 {
+    args.pmtileid()
 }
 
 #[pyfunction]
@@ -201,10 +194,9 @@ pub(crate) fn from_pmtileid(pmtileid: u64) -> PyTile {
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args))]
-pub(crate) fn quadkey(args: &Bound<'_, PyTuple>) -> PyResult<String> {
-    let tile = pyparsing::parse_tile_arg(args)?;
-    Ok(utiles::xyz2quadkey(tile.xyz.x, tile.xyz.y, tile.xyz.z))
+#[pyo3(signature = (*args))]
+pub(crate) fn quadkey(args: PyTileArg) -> String {
+    args.quadkey()
 }
 
 #[pyfunction]
@@ -213,83 +205,69 @@ pub(crate) fn quadkey_to_tile(quadkey: &str) -> PyResult<PyTile> {
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args, zoom = None))]
-pub(crate) fn parent(
-    args: &Bound<'_, PyTuple>,
-    zoom: Option<u8>,
-) -> PyResult<Option<PyTile>> {
+#[pyo3(signature = (*args, zoom = None))]
+pub(crate) fn parent(args: PyTileArg, zoom: Option<u8>) -> PyResult<Option<PyTile>> {
     // Parse the tile argument
-    let tile = pyparsing::parse_tile_arg(args)?;
-    if tile.xyz.z == 0 {
+    let tile = args;
+    if tile.z() == 0 {
         return Ok(None);
     }
 
     // If zoom is not provided, set it to tile.z - 1
-    let zoom = zoom.unwrap_or(tile.xyz.z - 1);
+    let zoom = zoom.unwrap_or(tile.z() - 1);
 
     // Check that the zoom level is valid
-    if zoom >= tile.xyz.z {
+    if zoom >= tile.z() {
         Err(PyErr::new::<PyValueError, _>(format!(
             "zoom level {} is invalid for tile with zoom {}",
-            zoom, tile.xyz.z
+            zoom,
+            tile.z()
         )))?;
     }
 
-    // Calculate the parent tile
-    let p = utiles::parent(
-        tile.xyz.x,
-        tile.xyz.y,
-        tile.xyz.z,
-        Some(tile.xyz.z - zoom - 1),
-    )
-    .map(PyTile::from);
+    let p = utiles::parent(tile.x(), tile.y(), tile.z(), Some(tile.z() - zoom - 1))
+        .map(PyTile::from);
     Ok(p)
-    // if let Some(pt) = p {
-    //     Ok(Some(PyTile::from(pt)))
-    // } else {
-    //     Ok(None)
-    // }
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args, zoom = None, zorder = None))]
+#[pyo3(signature = (*args, zoom = None, zorder = None))]
 pub(crate) fn children(
-    args: &Bound<'_, PyTuple>,
+    args: PyTileArg,
     zoom: Option<u8>,
     zorder: Option<bool>,
 ) -> PyResult<Vec<PyTile>> {
-    let tile = pyparsing::parse_tile_arg(args)?;
-    let zoom = zoom.unwrap_or(tile.xyz.z + 1);
-    if zoom < tile.xyz.z {
+    let zoom = zoom.unwrap_or(args.z() + 1);
+    if zoom < args.z() {
         Err(PyErr::new::<PyValueError, _>(format!(
             "zoom must be greater than or equal to tile zoom: {}",
-            tile.xyz.z
+            args.z()
         )))?;
     }
-    let children = tile.children(Some(zoom), zorder);
+    let children = args.children(Some(zoom), zorder);
     Ok(children)
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args, zoom = None, wrapx = None))]
+#[pyo3(signature = (*args, zoom = None, wrapx = None))]
 pub(crate) fn neighbors(
-    args: &Bound<'_, PyTuple>,
+    args: PyTileArg,
     zoom: Option<u8>,
     wrapx: Option<bool>,
 ) -> PyResult<Vec<PyTile>> {
-    let tile = pyparsing::parse_tile_arg(args)?;
-    let zoom = zoom.unwrap_or(tile.xyz.z);
-    if zoom < tile.xyz.z {
+    let tile = args;
+    let zoom = zoom.unwrap_or(tile.z());
+    if zoom < tile.z() {
         Err(PyErr::new::<PyValueError, _>(format!(
             "zoom must be greater than or equal to tile zoom: {}",
-            tile.xyz.z
+            tile.z()
         )))?;
     }
     Ok(tile.neighbors(wrapx))
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args, truncate = None))]
+#[pyo3(signature = (*args, truncate = None))]
 pub(crate) fn bounding_tile(
     args: &Bound<'_, PyTuple>,
     truncate: Option<bool>,

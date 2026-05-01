@@ -1,33 +1,120 @@
+use std::ops::Deref;
+
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
-use pyo3::{Bound, PyErr, PyResult, pyfunction};
+use utiles::TileLike;
 
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
 use crate::pyutiles::pytile::PyTile;
 
-#[pyfunction]
-#[pyo3(signature = (* args))]
-pub(crate) fn parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
-    if args.len() == 1 {
-        let arg = args.get_item(0)?;
-        if let Ok(tile) = arg.extract::<PyTile>() {
-            return Ok(tile);
-        } else if let Ok(seq) = arg.extract::<(u32, u32, u8)>() {
-            return Ok(PyTile::py_new(seq.0, seq.1, seq.2));
-        } else if let Ok(seq) = arg.extract::<Vec<u32>>() {
-            return Ok(PyTile::py_new(seq[0], seq[1], seq[2] as u8));
+#[derive(Debug)]
+pub enum PyTileArg<'a, 'py> {
+    PyTile(Borrowed<'a, 'py, PyTile>),
+    PyTileLike(PyTile),
+}
+
+impl TileLike for PyTileArg<'_, '_> {
+    fn x(&self) -> u32 {
+        match self {
+            PyTileArg::PyTile(tile) => tile.get().x(),
+            PyTileArg::PyTileLike(tile) => tile.x(),
         }
-    } else if args.len() == 3 {
-        let x = args.get_item(0)?.extract()?;
-        let y = args.get_item(1)?.extract()?;
-        let z = args.get_item(2)?.extract()?;
-        return Ok(PyTile::py_new(x, y, z));
     }
 
-    Err(PyErr::new::<PyValueError, _>(
-        "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
-    ))
+    fn y(&self) -> u32 {
+        match self {
+            PyTileArg::PyTile(tile) => tile.get().y(),
+            PyTileArg::PyTileLike(tile) => tile.y(),
+        }
+    }
+
+    fn z(&self) -> u8 {
+        match self {
+            PyTileArg::PyTile(tile) => tile.get().z(),
+            PyTileArg::PyTileLike(tile) => tile.z(),
+        }
+    }
+}
+
+impl Deref for PyTileArg<'_, '_> {
+    type Target = PyTile;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            PyTileArg::PyTile(tile) => tile.get(),
+            PyTileArg::PyTileLike(tile) => tile,
+        }
+    }
+}
+
+impl From<PyTile> for PyTileArg<'_, '_> {
+    fn from(tile: PyTile) -> Self {
+        PyTileArg::PyTileLike(tile)
+    }
+}
+
+impl From<PyTileArg<'_, '_>> for PyTile {
+    fn from(arg: PyTileArg) -> Self {
+        match arg {
+            PyTileArg::PyTile(tile) => *tile.get(),
+            PyTileArg::PyTileLike(tile) => tile,
+        }
+    }
+}
+
+impl<'a, 'py> From<Borrowed<'a, 'py, PyTile>> for PyTileArg<'a, 'py> {
+    fn from(tile: Borrowed<'a, 'py, PyTile>) -> Self {
+        PyTileArg::PyTile(tile)
+    }
+}
+
+impl From<(u32, u32, u8)> for PyTileArg<'_, '_> {
+    fn from(xyz: (u32, u32, u8)) -> Self {
+        PyTileArg::from(PyTile::py_new(xyz.0, xyz.1, xyz.2))
+    }
+}
+
+// impl FromPyObject
+impl<'a, 'py> FromPyObject<'a, 'py> for PyTileArg<'a, 'py> {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'a, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if let Ok(tup) = obj.cast_exact::<PyTuple>() {
+            match tup.len() {
+                1 => {
+                    let item = tup.get_item(0)?;
+                    if let Ok(tile) = item.extract::<PyTile>() {
+                        Ok(PyTileArg::from(tile))
+                    } else if let Ok(seq) = item.extract::<(u32, u32, u8)>() {
+                        Ok(PyTileArg::from(seq))
+                    } else if let Ok(seq) = item.extract::<Vec<u32>>() {
+                        Ok(PyTileArg::from((seq[0], seq[1], seq[2] as u8)))
+                    } else {
+                        Err(PyErr::new::<PyValueError, _>(
+                            "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
+                        ))?
+                    }
+                }
+                3 => tup.extract::<(u32, u32, u8)>().map(Self::from),
+                _ => Err(PyErr::new::<PyValueError, _>(
+                    "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
+                ))?,
+            }
+        } else if let Ok(pt) = obj.cast_exact::<PyTile>() {
+            Ok(PyTileArg::from(pt))
+        } else {
+            Err(PyErr::new::<PyValueError, _>(
+                "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
+            ))?
+        }
+    }
+}
+
+#[pyfunction]
+#[pyo3(signature = (* args))]
+pub(crate) fn parse_tile_arg(args: PyTileArg) -> PyTile {
+    PyTile::from(args)
 }
 
 #[pyfunction]
@@ -63,14 +150,15 @@ pub(crate) fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
         ))?,
     }
 }
+
 #[pyfunction]
-#[pyo3(signature = (* args))]
-pub(crate) fn _parse_tile_arg(args: &Bound<'_, PyTuple>) -> PyResult<PyTile> {
+#[pyo3(signature = (*args))]
+pub(crate) fn _parse_tile_arg(args: PyTileArg) -> PyTile {
     parse_tile_arg(args)
 }
 
 #[pyfunction]
-#[pyo3(signature = (* args))]
+#[pyo3(signature = (*args))]
 pub(crate) fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
     if args.len() == 1 {
         return crate::pyutiles::_extract(&args.get_item(0)?);

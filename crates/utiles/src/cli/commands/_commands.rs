@@ -79,7 +79,7 @@ fn list_commands(cmd: &clap::Command) -> Vec<CommandInfo> {
     for sub in cmd.get_subcommands() {
         cmd_info_recursive(sub, None, &mut cmd_infos);
     }
-    cmd_infos.sort_by(|a, b| a.path.to_lowercase().cmp(&b.path.to_lowercase()));
+    cmd_infos.sort_by_key(|a| a.path.to_lowercase());
     cmd_infos
 }
 

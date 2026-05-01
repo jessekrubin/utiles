@@ -1,4 +1,4 @@
-use pyo3::FromPyObject;
+use pyo3::prelude::*;
 
 use crate::pyutiles::pytile::PyTile;
 

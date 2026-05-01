@@ -187,7 +187,7 @@ impl FromStr for TileFormat {
 impl TileFormat {
     #[must_use]
     pub fn try_parse(value: &str) -> Option<Self> {
-        Self::from_str(value).map(Some).unwrap_or(None)
+        Self::from_str(value).ok()
     }
 
     #[must_use]

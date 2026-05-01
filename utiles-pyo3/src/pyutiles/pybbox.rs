@@ -1,7 +1,7 @@
 use pyo3::basic::CompareOp;
+use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyStopIteration};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use pyo3::{PyAny, PyErr, PyRef, PyResult, Python, exceptions, pyclass, pymethods};
 use utiles::BBox;
 
 use crate::pyutiles::PyLngLatBbox;
@@ -10,7 +10,7 @@ use crate::pyutiles::pytile::PyTile;
 #[pyclass(name = "Bbox", module = "utiles._utiles", frozen, skip_from_py_object)]
 #[derive(Clone)]
 pub struct PyBbox {
-    pub bbox: BBox,
+    bbox: BBox,
 }
 
 #[pymethods]
@@ -106,8 +106,8 @@ impl PyBbox {
             1 | -3 => Ok(self.bbox.bottom()),
             2 | -2 => Ok(self.bbox.right()),
             3 | -1 => Ok(self.bbox.top()),
-            4 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-            _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
+            4 => Err(PyErr::new::<PyStopIteration, _>("")),
+            _ => Err(PyErr::new::<PyIndexError, _>(
                 "index out of range (must be -4..4)",
             )),
         }
@@ -133,9 +133,7 @@ impl PyBbox {
                     || self.bbox.south() < tuple.1
                     || self.bbox.east() < tuple.2
                     || self.bbox.north() < tuple.3),
-                _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
-                    "Not implemented",
-                )),
+                _ => Err(PyErr::new::<PyNotImplementedError, _>("Not implemented")),
             }
         } else {
             let other = other.extract::<PyRef<PyLngLatBbox>>();
@@ -153,16 +151,12 @@ impl PyBbox {
                         || self.bbox.south() < other.bbox.south()
                         || self.bbox.east() < other.bbox.east()
                         || self.bbox.north() < other.bbox.north()),
-                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
-                        "Not implemented",
-                    )),
+                    _ => Err(PyErr::new::<PyNotImplementedError, _>("Not implemented")),
                 },
                 Err(_) => match op {
                     CompareOp::Eq => Ok(false),
                     CompareOp::Ne => Ok(true),
-                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
-                        "Not implemented",
-                    )),
+                    _ => Err(PyErr::new::<PyNotImplementedError, _>("Not implemented")),
                 },
             }
         }

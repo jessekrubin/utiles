@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import json
+from importlib.metadata import version
 
-import click
 import pytest
 from click.testing import CliRunner
 
 from utiles._legacy.cli import cli
 
-click_version_is_8_2_1 = click.__version__ == "8.2.1"
+click_version_is_8_2_1 = version("click") == "8.2.1"
 pytestmark = [
     pytest.mark.skipif(
         click_version_is_8_2_1,

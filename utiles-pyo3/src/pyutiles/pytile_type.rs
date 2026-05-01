@@ -1,8 +1,5 @@
+use pyo3::prelude::*;
 use pyo3::types::{PyString, PyType};
-use pyo3::{
-    Borrowed, Bound, FromPyObject, PyAny, PyErr, PyResult, Python, intern, pyclass,
-    pyfunction, pymethods,
-};
 use utiles::tile_type;
 use utiles::tile_type::{TileEncoding, TileFormat, TileType};
 
@@ -11,13 +8,13 @@ pub struct PyTileType(TileType);
 
 const ENCODING_STRINGS: &str = "uncompressed, internal, zlib, gzip, brotli, zstd";
 
-pub struct PyTileEncoding(TileEncoding);
+struct PyTileEncoding(TileEncoding);
 
 impl<'py> FromPyObject<'_, 'py> for PyTileEncoding {
     type Error = PyErr;
 
     fn extract(ob: Borrowed<'_, 'py, PyAny>) -> PyResult<Self> {
-        if let Ok(s) = ob.cast::<PyString>() {
+        if let Ok(s) = ob.cast_exact::<PyString>() {
             let s = s.to_string().to_ascii_lowercase();
             match s.as_str() {
                 "uncompressed" => Ok(Self(TileEncoding::Uncompressed)),
@@ -38,13 +35,13 @@ impl<'py> FromPyObject<'_, 'py> for PyTileEncoding {
     }
 }
 
-pub struct PyTileFormat(TileFormat);
+struct PyTileFormat(TileFormat);
 
 const TILE_FORMAT_STRINGS: &str = "png, webp, pbf, mvt, gif, jpg, jpeg, json, geojson";
 impl<'py> FromPyObject<'_, 'py> for PyTileFormat {
     type Error = PyErr;
     fn extract(ob: Borrowed<'_, 'py, PyAny>) -> PyResult<Self> {
-        if let Ok(s) = ob.cast::<PyString>() {
+        if let Ok(s) = ob.cast_exact::<PyString>() {
             let f_str = s.to_string();
 
             let tf: Option<TileFormat> = TileFormat::try_parse(&f_str);
@@ -56,7 +53,7 @@ impl<'py> FromPyObject<'_, 'py> for PyTileFormat {
             }
         } else {
             Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
-                "Invalid encoding (options: {TILE_FORMAT_STRINGS})"
+                "Invalid format (options: {TILE_FORMAT_STRINGS})"
             )))
         }
     }
@@ -65,14 +62,14 @@ impl<'py> FromPyObject<'_, 'py> for PyTileFormat {
 #[pymethods]
 impl PyTileType {
     #[new]
-    pub fn py_new(format: PyTileFormat, encoding: PyTileEncoding) -> Self {
+    fn py_new(format: PyTileFormat, encoding: PyTileEncoding) -> Self {
         let encoding = encoding.0;
         let format = format.0;
         let ttype = TileType::new(format, encoding);
         Self(ttype)
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         format!(
             "TileType(format=\"{}\", encoding=\"{}\")",
             self.0.format, self.0.encoding
@@ -82,28 +79,28 @@ impl PyTileType {
     #[getter]
     fn format<'py>(&self, py: Python<'py>) -> &Bound<'py, PyString> {
         match self.0.format {
-            TileFormat::Png => intern!(py, "png"),
-            TileFormat::Jpg => intern!(py, "jpg"),
-            TileFormat::Gif => intern!(py, "gif"),
-            TileFormat::Webp => intern!(py, "webp"),
-            TileFormat::Pbf => intern!(py, "pbf"),
-            TileFormat::Mlt => intern!(py, "mlt"),
-            TileFormat::Json => intern!(py, "json"),
-            TileFormat::GeoJson => intern!(py, "geojson"),
-            TileFormat::Tiff => intern!(py, "tiff"),
-            TileFormat::Unknown => intern!(py, "unknown"),
+            TileFormat::Png => pyo3::intern!(py, "png"),
+            TileFormat::Jpg => pyo3::intern!(py, "jpg"),
+            TileFormat::Gif => pyo3::intern!(py, "gif"),
+            TileFormat::Webp => pyo3::intern!(py, "webp"),
+            TileFormat::Pbf => pyo3::intern!(py, "pbf"),
+            TileFormat::Mlt => pyo3::intern!(py, "mlt"),
+            TileFormat::Json => pyo3::intern!(py, "json"),
+            TileFormat::GeoJson => pyo3::intern!(py, "geojson"),
+            TileFormat::Tiff => pyo3::intern!(py, "tiff"),
+            TileFormat::Unknown => pyo3::intern!(py, "unknown"),
         }
     }
 
     #[getter]
     fn encoding<'py>(&self, py: Python<'py>) -> &Bound<'py, PyString> {
         match self.0.encoding {
-            TileEncoding::Uncompressed => intern!(py, "uncompressed"),
-            TileEncoding::Internal => intern!(py, "internal"),
-            TileEncoding::Zlib => intern!(py, "zlib"),
-            TileEncoding::Gzip => intern!(py, "gzip"),
-            TileEncoding::Brotli => intern!(py, "brotli"),
-            TileEncoding::Zstd => intern!(py, "zstd"),
+            TileEncoding::Uncompressed => pyo3::intern!(py, "uncompressed"),
+            TileEncoding::Internal => pyo3::intern!(py, "internal"),
+            TileEncoding::Zlib => pyo3::intern!(py, "zlib"),
+            TileEncoding::Gzip => pyo3::intern!(py, "gzip"),
+            TileEncoding::Brotli => pyo3::intern!(py, "brotli"),
+            TileEncoding::Zstd => pyo3::intern!(py, "zstd"),
         }
     }
 

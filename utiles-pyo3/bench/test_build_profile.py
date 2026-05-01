@@ -25,6 +25,7 @@ def test_benchmarking_with_debug_build_profile(benchmark: BenchmarkFixture) -> N
         _warn_benchmarking_with_debug_build()
     # stupid benchmark to silence pytest-benchmark warning about no benchmarks...
     benchmark(
-        lambda: utiles.__build_profile__ == "debug"
-        or utiles.__build_profile__ == "release",
+        lambda: (
+            utiles.__build_profile__ == "debug" or utiles.__build_profile__ == "release"
+        ),
     )

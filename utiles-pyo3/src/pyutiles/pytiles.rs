@@ -1,6 +1,6 @@
 use std::hash::Hash;
 
-use pyo3::pyclass;
+use pyo3::prelude::*;
 use serde::Serialize;
 
 use crate::pyutiles::pytile::PyTile;

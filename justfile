@@ -16,7 +16,7 @@ dev: fmt develop pytest cargo-test
 # maturin develop
 develop:
     cd {{ pyut }}
-    maturin develop -m {{ pyut_manifest }}
+    uv run maturin develop -m {{ pyut_manifest }}
 
 # cargo test
 cargo-test:
@@ -25,32 +25,32 @@ cargo-test:
 # maturin build
 build: cargo-test
     cd {{ pyut }}
-    maturin build -m {{ pyut_manifest }}
+    uv run maturin build -m {{ pyut_manifest }}
 
 # maturin build --release
 build-release:
     cd {{ pyut }}
-    maturin build --release  -m {{ pyut_manifest }}
+    uv run maturin build --release  -m {{ pyut_manifest }}
 
 # maturin develop --release
 dev-rel:
     cd {{ pyut }}
-    maturin develop --release -m {{ pyut_manifest }}
+    uv run maturin develop --release -m {{ pyut_manifest }}
 
 # pytest
 pytest:
     cd {{ pyut }}
-    pytest --benchmark-disable -n 4 --config-file={{ pyut_pyproject_toml }} {{ pyut }}
+    uv run pytest --benchmark-disable -n 4 --config-file={{ pyut_pyproject_toml }} {{ pyut }}
 
 # test release build python
 test-release: build-release
     cd {{ pyut }}
-    pytest --benchmark-disable --config-file={{ pyut_pyproject_toml }} {{ pyut }}
+    uv run pytest --benchmark-disable --config-file={{ pyut_pyproject_toml }} {{ pyut }}
 
 # run benchmarks via pytest-benchmark
 bench: dev-rel
     cd {{ pyut }}
-    pytest -vv --benchmark-only --config-file={{ pyut_pyproject_toml }} {{ pyut }}
+    uv run pytest -vv --benchmark-only --config-file={{ pyut_pyproject_toml }} {{ pyut }}
 
 cargo-fmt:
     cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true
@@ -66,28 +66,28 @@ black:
 
 # format python
 fmtpy:
-    ruff format
-    ruff check --select "I" --show-fixes --fix .
+    uv run ruff format
+    uv run ruff check --select "I" --show-fixes --fix .
 
 # format-check
 fmtcpy:
-    ruff format --check
-    ruff check --select "I" --show-fixes .
+    uv run ruff format --check
+    uv run ruff check --select "I" --show-fixes .
 
 # format rust and python
 fmt: cargo-fmt fmtpy
 
 # typecheck w/ mypy
 mypy:
-    mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests
+    uv run mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests
 
 # ruff check/lint
 ruff:
-    ruff check .
+    uv run ruff check .
 
 # ruff check fix
 ruffix:
-    ruff check . --fix --show-fixes
+    uv run ruff check . --fix --show-fixes
 
 # clippy lint
 clippy:
