@@ -1,5 +1,5 @@
 use pyo3::class::basic::CompareOp;
-use pyo3::exceptions::{self};
+use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyStopIteration};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 
@@ -38,24 +38,16 @@ impl PyLngLat {
     }
 
     #[getter]
-    pub fn lng(&self) -> f64 {
+    fn lng(&self) -> f64 {
         self._lng()
     }
 
     #[getter]
-    pub fn lat(&self) -> f64 {
+    fn lat(&self) -> f64 {
         self._lat()
     }
 
-    pub fn __str__(&self) -> String {
-        self.__repr__()
-    }
-
-    pub fn __richcmp__(
-        &self,
-        other: &Bound<'_, PyAny>,
-        op: CompareOp,
-    ) -> PyResult<bool> {
+    fn __richcmp__(&self, other: &Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
         let is_lnglat = other.is_instance_of::<Self>();
         if is_lnglat {
             let maybe_lnglat = other.extract::<PyRef<Self>>();
@@ -70,56 +62,46 @@ impl PyLngLat {
                     CompareOp::Lt => {
                         Ok(self._lng() < lnglat._lng() || self._lat() < lnglat._lat())
                     }
-                    _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
-                        "Not implemented",
-                    )),
+                    _ => Err(PyErr::new::<PyNotImplementedError, _>("Not implemented")),
                 }
             } else {
-                Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
-                    "Not implemented",
-                ))
+                Err(PyErr::new::<PyNotImplementedError, _>("Not implemented"))
             }
         } else if let Ok(tuple) = other.extract::<(f64, f64)>() {
             match op {
                 CompareOp::Eq => Ok(self._lng() == tuple.0 && self._lat() == tuple.1),
                 CompareOp::Ne => Ok(self._lng() != tuple.0 || self._lat() != tuple.1),
                 CompareOp::Lt => Ok(self._lng() < tuple.0 || self._lat() < tuple.1),
-                _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
-                    "Not implemented",
-                )),
+                _ => Err(PyErr::new::<PyNotImplementedError, _>("Not implemented")),
             }
         } else {
             match op {
                 CompareOp::Eq | CompareOp::Lt => Ok(false),
                 CompareOp::Ne => Ok(true),
-                _ => Err(PyErr::new::<exceptions::PyNotImplementedError, _>(
-                    "Not implemented",
-                )),
+                _ => Err(PyErr::new::<PyNotImplementedError, _>("Not implemented")),
             }
         }
     }
 
-    pub fn __len__(&self) -> usize {
+    fn __len__(&self) -> usize {
         2
     }
 
-    pub fn members(&self) -> (f64, f64) {
+    fn members(&self) -> (f64, f64) {
         self.tuple()
     }
 
-    pub fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
+    fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
         match idx {
             0 | -2 => Ok(self._lng()),
             1 | -1 => Ok(self._lat()),
-            2 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
+            2 => Err(PyErr::new::<PyStopIteration, _>("")),
 
-            _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
-                "Index out of range",
-            )),
+            _ => Err(PyErr::new::<PyIndexError, _>("Index out of range")),
         }
     }
 
-    pub fn tuple(&self) -> (f64, f64) {
+    fn tuple(&self) -> (f64, f64) {
         (self._lng(), self._lat())
     }
 }

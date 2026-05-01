@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
+use pyo3::prelude::*;
 use pyo3::types::PyTuple;
-use pyo3::{Bound, PyResult, pyfunction};
 
 use crate::pyutiles::pyparsing::parse_tiles;
 use crate::pyutiles::pytile::PyTile;

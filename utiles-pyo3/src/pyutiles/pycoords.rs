@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use pyo3::{Bound, FromPyObject, PyAny, PyErr, PyResult, exceptions, pyfunction};
 
 use crate::pyutiles::pyiters::CoordinateIterator;
 
@@ -123,9 +123,7 @@ pub(crate) fn _coords(obj: &Bound<'_, PyAny>) -> PyResult<CoordinateIterator> {
                 iter: Box::new(vec![].into_iter()),
             })
         }
-        CoordsExtractor::CatchAll(_c) => {
-            Err(PyErr::new::<exceptions::PyTypeError, _>("NO COORDS"))
-        }
+        CoordsExtractor::CatchAll(_c) => Err(PyErr::new::<PyTypeError, _>("NO COORDS")),
     }
 }
 

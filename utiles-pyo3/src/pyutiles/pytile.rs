@@ -2,14 +2,11 @@ use std::collections::BTreeMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyNotImplemented, PyTuple, PyType};
-use pyo3::{
-    IntoPyObjectExt, Py, PyAny, PyErr, PyRef, PyResult, Python, exceptions, intern,
-    pyclass, pymethods,
-};
 use serde::Serialize;
 use utiles::bbox::BBox;
 use utiles::projection::Projection;
@@ -71,21 +68,21 @@ impl PyTile {
         PyTuple::new(py, [self.x(), self.y(), u32::from(self.z())])
     }
 
-    pub fn valid(&self) -> bool {
+    fn valid(&self) -> bool {
         self.xyz.valid()
     }
 
-    pub fn json_obj(&self) -> String {
+    fn json_obj(&self) -> String {
         let json = serde_json::to_string(&self.xyz);
         json.unwrap_or_else(|e| format!("Error: {e}"))
     }
 
-    pub fn json_arr(&self) -> String {
+    fn json_arr(&self) -> String {
         format!("[{}, {}, {}]", self.xyz.x, self.xyz.y, self.xyz.z)
     }
 
     #[pyo3(signature = (obj = true))]
-    pub fn json(&self, obj: Option<bool>) -> String {
+    fn json(&self, obj: Option<bool>) -> String {
         if obj.unwrap_or(true) {
             self.json_obj()
         } else {
@@ -93,7 +90,7 @@ impl PyTile {
         }
     }
 
-    pub fn asdict(&self) -> BTreeMap<&str, u32> {
+    fn asdict(&self) -> BTreeMap<&str, u32> {
         let mut map = BTreeMap::new();
         map.insert("x", self.xyz.x());
         map.insert("y", self.xyz.y());
@@ -101,7 +98,7 @@ impl PyTile {
         map
     }
 
-    pub fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<IntIterator>> {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<IntIterator>> {
         let iter = IntIterator {
             iter: Box::new(
                 vec![slf.xyz.x, slf.xyz.y, u32::from(slf.xyz.z)].into_iter(),
@@ -111,17 +108,17 @@ impl PyTile {
     }
 
     #[pyo3(signature = (sep = None))]
-    pub fn fmt_zxy(&self, sep: Option<&str>) -> String {
+    fn fmt_zxy(&self, sep: Option<&str>) -> String {
         self.xyz.fmt_zxy(sep)
     }
 
     #[pyo3(signature = (ext = "", sep = None))]
-    pub fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
+    fn fmt_zxy_ext(&self, ext: &str, sep: Option<&str>) -> String {
         self.xyz.fmt_zxy_ext(ext, sep)
     }
 
     #[classmethod]
-    pub fn from_quadkey(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
+    fn from_quadkey(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
         let xyz = Tile::from_quadkey(&quadkey);
         match xyz {
             Ok(xyz) => Ok(Self::from(xyz)),
@@ -130,7 +127,7 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_qk(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
+    fn from_qk(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
         let xyz = Tile::from_quadkey(&quadkey);
         match xyz {
             Ok(xyz) => Ok(Self::from(xyz)),
@@ -139,50 +136,50 @@ impl PyTile {
     }
 
     #[classmethod]
-    pub fn from_row_major_id(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
+    fn from_row_major_id(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
         Self::from(xyz)
     }
 
     #[classmethod]
-    pub fn from_rmid(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
+    fn from_rmid(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
         Self::from(xyz)
     }
 
-    pub fn quadkey(&self) -> String {
+    pub(crate) fn quadkey(&self) -> String {
         self.xyz.quadkey()
     }
 
-    pub fn qk(&self) -> String {
+    fn qk(&self) -> String {
         self.xyz.quadkey()
     }
 
     #[classmethod]
-    pub fn from_pmtileid(_cls: &Bound<'_, PyType>, tileid: u64) -> Self {
+    fn from_pmtileid(_cls: &Bound<'_, PyType>, tileid: u64) -> Self {
         let xyz = Tile::from_pmtileid(tileid);
         Self::from(xyz)
     }
 
-    pub fn pmtileid(&self) -> u64 {
+    pub(crate) fn pmtileid(&self) -> u64 {
         self.xyz.pmtileid()
     }
 
-    pub fn parent_pmtileid(&self) -> Option<u64> {
+    fn parent_pmtileid(&self) -> Option<u64> {
         self.xyz.parent_pmtileid()
     }
 
-    pub fn row_major_id(&self) -> u64 {
+    fn row_major_id(&self) -> u64 {
         self.xyz.row_major_id()
     }
 
-    pub fn rmid(&self) -> u64 {
+    fn rmid(&self) -> u64 {
         self.xyz.row_major_id()
     }
 
     #[classmethod]
     #[pyo3(signature = (lng, lat, zoom, truncate = None))]
-    pub fn from_lnglat_zoom(
+    fn from_lnglat_zoom(
         _cls: &Bound<'_, PyType>,
         lng: f64,
         lat: f64,
@@ -199,21 +196,21 @@ impl PyTile {
     }
 
     #[getter]
-    pub fn x(&self) -> u32 {
+    pub(crate) fn x(&self) -> u32 {
         self.xyz.x
     }
 
     #[getter]
-    pub fn y(&self) -> u32 {
+    pub(crate) fn y(&self) -> u32 {
         self.xyz.y
     }
 
     #[getter]
-    pub fn z(&self) -> u8 {
+    pub(crate) fn z(&self) -> u8 {
         self.xyz.z
     }
 
-    pub fn __str__(&self) -> String {
+    fn __str__(&self) -> String {
         self.__repr__()
     }
 
@@ -228,7 +225,7 @@ impl PyTile {
         self.__invert__()
     }
 
-    pub fn __len__(&self) -> usize {
+    fn __len__(&self) -> usize {
         3
     }
 
@@ -236,7 +233,7 @@ impl PyTile {
         vec![self.xyz.x, self.xyz.y, u32::from(self.xyz.z)]
     }
 
-    pub fn __getitem__<'py>(
+    fn __getitem__<'py>(
         &self,
         idx: tuple_slice::SliceOrInt,
         py: Python<'py>,
@@ -264,15 +261,15 @@ impl PyTile {
                         .map(Bound::into_any)?;
                     Ok(r)
                 }
-                3 => Err(PyErr::new::<exceptions::PyStopIteration, _>("")),
-                _ => Err(PyErr::new::<exceptions::PyIndexError, _>(
+                3 => Err(PyErr::new::<pyo3::exceptions::PyStopIteration, _>("")),
+                _ => Err(PyErr::new::<pyo3::exceptions::PyIndexError, _>(
                     "Index out of range",
                 )),
             },
         }
     }
 
-    pub fn bounds(&self) -> PyLngLatBbox {
+    pub(crate) fn bounds(&self) -> PyLngLatBbox {
         let (west, south, east, north) = self.xyz.bounds();
         PyLngLatBbox {
             bbox: BBox {
@@ -284,7 +281,7 @@ impl PyTile {
         }
     }
 
-    pub fn __hash__(&self) -> u64 {
+    fn __hash__(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.xyz.x.hash(&mut hasher);
         self.xyz.y.hash(&mut hasher);
@@ -292,11 +289,7 @@ impl PyTile {
         hasher.finish()
     }
 
-    pub fn __richcmp__(
-        &self,
-        other: &Bound<'_, PyAny>,
-        op: CompareOp,
-    ) -> PyResult<bool> {
+    fn __richcmp__(&self, other: &Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
         let is_pytile = other.is_instance_of::<Self>();
         if is_pytile {
             let maybe_pytile = other.extract::<Self>();
@@ -383,33 +376,33 @@ impl PyTile {
         }
     }
 
-    pub fn ul(&self) -> PyLngLat {
+    pub(crate) fn ul(&self) -> PyLngLat {
         self.xyz.ul().into()
     }
 
-    pub fn ll(&self) -> PyLngLat {
+    fn ll(&self) -> PyLngLat {
         self.xyz.ll().into()
     }
 
-    pub fn ur(&self) -> PyLngLat {
+    fn ur(&self) -> PyLngLat {
         self.xyz.ur().into()
     }
 
-    pub fn lr(&self) -> PyLngLat {
+    fn lr(&self) -> PyLngLat {
         self.xyz.lr().into()
     }
 
-    pub fn center(&self) -> PyLngLat {
+    fn center(&self) -> PyLngLat {
         self.xyz.center().into()
     }
 
     #[pyo3(signature = (n = None))]
-    pub fn parent(&self, n: Option<u8>) -> Option<Self> {
+    fn parent(&self, n: Option<u8>) -> Option<Self> {
         self.xyz.parent(n).map(Self::from)
     }
 
     #[pyo3(signature = (zoom = None, *, zorder = None))]
-    pub fn children(&self, zoom: Option<u8>, zorder: Option<bool>) -> Vec<Self> {
+    pub(crate) fn children(&self, zoom: Option<u8>, zorder: Option<bool>) -> Vec<Self> {
         let zorder = zorder.unwrap_or(false);
         let xyzs = {
             if zorder {
@@ -421,7 +414,7 @@ impl PyTile {
         xyzs.into_iter().map(Self::from).collect()
     }
 
-    pub fn children1(&self) -> [Self; 4] {
+    fn children1(&self) -> [Self; 4] {
         let direct_child_tiles = self.xyz.children1();
         direct_child_tiles.map(Self::from)
     }
@@ -479,43 +472,27 @@ impl PyTile {
         let bbox_vec = vec![tfeat.bbox.0, tfeat.bbox.1, tfeat.bbox.2, tfeat.bbox.3];
         let feat_geom_type_string = tfeat.geometry.type_;
         let geometry_dict = PyDict::new(py);
-        geometry_dict.set_item("type", feat_geom_type_string)?;
-        geometry_dict.set_item("coordinates", tfeat.geometry.coordinates)?;
-        // let geometry_items = vec![
-        //     ("type".to_string(),
-        //
-        //         PyString::new(py, feat_geom_type_string)
-        //     ),
-        //     (
-        //         "coordinates".to_string(),
-        //         tfeat.geometry.coordinates.to_object(py),
-        //     ),
-        // ]
-        // .into_iter()
-        // .collect::<HashMap<String, PyObject>>();
-        // Create the properties dictionary
-        // let mut properties_dict: HashMap<String, Py<PyAny>> = HashMap::new();
+        geometry_dict.set_item(pyo3::intern!(py, "type"), feat_geom_type_string)?;
+        geometry_dict
+            .set_item(pyo3::intern!(py, "coordinates"), tfeat.geometry.coordinates)?;
+
         let properties_dict = PyDict::new(py);
         let (x, y, z) = self.tuple();
         let xyz_tuple_string = format!("({x}, {y}, {z})");
         let title_string = format!("XYZ tile {xyz_tuple_string}");
 
-        properties_dict.set_item("title", title_string)?;
-        // properties_dict.insert(
-        //     "title".to_string(),
-        //     format!("XYZ tile {xyz_tuple_string}").into_py(py),
-        // );
+        properties_dict.set_item(pyo3::intern!(py, "title"), title_string)?;
         if let Some(props) = props {
             for (k, v) in props.iter() {
                 properties_dict.set_item(k, v)?;
             }
         }
-        feature_dict.set_item(intern!(py, "type"), "Feature")?;
+        feature_dict.set_item(pyo3::intern!(py, "type"), "Feature")?;
 
-        feature_dict.set_item(intern!(py, "bbox"), bbox_vec)?;
-        feature_dict.set_item(intern!(py, "id"), tfeat.id)?;
-        feature_dict.set_item(intern!(py, "geometry"), geometry_dict)?;
-        feature_dict.set_item("properties".to_string(), properties_dict)?;
+        feature_dict.set_item(pyo3::intern!(py, "bbox"), bbox_vec)?;
+        feature_dict.set_item(pyo3::intern!(py, "id"), tfeat.id)?;
+        feature_dict.set_item(pyo3::intern!(py, "geometry"), geometry_dict)?;
+        feature_dict.set_item(pyo3::intern!(py, "properties"), properties_dict)?;
         Ok(feature_dict)
     }
 }

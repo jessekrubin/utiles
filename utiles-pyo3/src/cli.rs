@@ -1,5 +1,5 @@
 use pyo3::exceptions::PyException;
-use pyo3::{PyResult, pyfunction};
+use pyo3::prelude::*;
 use utiles::cli::{CliOpts, cli_main_sync};
 
 #[pyfunction]

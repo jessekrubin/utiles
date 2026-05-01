@@ -1,7 +1,6 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
-use pyo3::{PyErr, PyResult, pyfunction};
 use utiles::zoom::ZoomOrZooms;
 
 use crate::pyutiles::pybbox::PyBbox;
@@ -226,15 +225,9 @@ pub(crate) fn parent(args: PyTileArg, zoom: Option<u8>) -> PyResult<Option<PyTil
         )))?;
     }
 
-    // Calculate the parent tile
     let p = utiles::parent(tile.x(), tile.y(), tile.z(), Some(tile.z() - zoom - 1))
         .map(PyTile::from);
     Ok(p)
-    // if let Some(pt) = p {
-    //     Ok(Some(PyTile::from(pt)))
-    // } else {
-    //     Ok(None)
-    // }
 }
 
 #[pyfunction]

@@ -1,11 +1,11 @@
-use pyo3::{PyRef, PyRefMut, pyclass, pymethods};
+use pyo3::prelude::*;
 
 use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(name = "TilesGenerator", module = "utiles._utiles")]
 pub struct TilesGenerator {
-    pub iter: Box<dyn Iterator<Item = PyTile> + Send + Sync>,
-    pub length: u64,
+    pub(crate) iter: Box<dyn Iterator<Item = PyTile> + Send + Sync>,
+    pub(crate) length: u64,
 }
 
 #[pymethods]

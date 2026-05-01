@@ -3,7 +3,6 @@ use std::ops::Deref;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
-use pyo3::{Bound, PyErr, PyResult, pyfunction};
 use utiles::TileLike;
 
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
@@ -37,7 +36,6 @@ impl TileLike for PyTileArg<'_, '_> {
         }
     }
 }
-// pub(crate) struct PyTileArg(pub(crate) PyTile);
 
 impl Deref for PyTileArg<'_, '_> {
     type Target = PyTile;
@@ -152,6 +150,7 @@ pub(crate) fn parse_bbox(args: &Bound<'_, PyTuple>) -> PyResult<PyLngLatBbox> {
         ))?,
     }
 }
+
 #[pyfunction]
 #[pyo3(signature = (*args))]
 pub(crate) fn _parse_tile_arg(args: PyTileArg) -> PyTile {

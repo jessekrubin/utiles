@@ -1,8 +1,8 @@
-use pyo3::{PyRef, PyRefMut, pyclass, pymethods};
+use pyo3::prelude::*;
 
 #[pyclass]
-pub struct IntIterator {
-    pub iter: Box<dyn Iterator<Item = u32> + Send + Sync>,
+pub(crate) struct IntIterator {
+    pub(crate) iter: Box<dyn Iterator<Item = u32> + Send + Sync>,
 }
 
 #[pymethods]
@@ -16,8 +16,8 @@ impl IntIterator {
 }
 
 #[pyclass]
-pub struct FloatIterator {
-    pub iter: Box<dyn Iterator<Item = f64> + Send + Sync>,
+pub(crate) struct FloatIterator {
+    pub(crate) iter: Box<dyn Iterator<Item = f64> + Send + Sync>,
 }
 
 #[pymethods]
@@ -31,8 +31,8 @@ impl FloatIterator {
 }
 
 #[pyclass]
-pub struct CoordinateIterator {
-    pub iter: Box<dyn Iterator<Item = (f64, f64)> + Send + Sync>,
+pub(crate) struct CoordinateIterator {
+    pub(crate) iter: Box<dyn Iterator<Item = (f64, f64)> + Send + Sync>,
 }
 
 #[pymethods]

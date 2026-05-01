@@ -13,44 +13,40 @@ use crate::pyutiles::pyparsing::PyTileArg;
     frozen,
     skip_from_py_object
 )]
-pub struct PyTileFmts {
-    pub tformatter: TileStringFormatter,
-}
+pub struct PyTileFmts(TileStringFormatter);
 
 #[pymethods]
 impl PyTileFmts {
     #[new]
-    pub fn py_new(fmtstr: &str) -> Self {
-        Self {
-            tformatter: TileStringFormatter::new(fmtstr),
-        }
+    fn py_new(fmtstr: &str) -> Self {
+        Self(TileStringFormatter::new(fmtstr))
     }
 
     #[pyo3(signature = (* args))]
-    pub fn fmt(&self, args: PyTileArg) -> String {
-        self.tformatter.fmt(&args)
+    fn fmt(&self, args: PyTileArg) -> String {
+        self.0.fmt(&args)
     }
 
     #[pyo3(signature = (* args))]
-    pub fn format(&self, args: PyTileArg) -> String {
-        self.tformatter.fmt(&args)
+    fn format(&self, args: PyTileArg) -> String {
+        self.0.fmt(&args)
     }
 
     #[getter]
-    pub fn fmtstr(&self) -> &str {
-        self.tformatter.fmtstr()
+    fn fmtstr(&self) -> &str {
+        self.0.fmtstr()
     }
 
-    pub fn __str__(&self) -> String {
-        format!("TileFmts({})", self.tformatter.fmtstr())
+    fn __str__(&self) -> String {
+        format!("TileFmts({})", self.0.fmtstr())
     }
 
-    pub fn __repr__(&self) -> String {
+    fn __repr__(&self) -> String {
         format!(
             "TileFmts({:?}) # tokens ({:?}): {:?}",
-            self.tformatter.fmtstr(),
-            self.tformatter.tokens().len(),
-            self.tformatter.tokens(),
+            self.0.fmtstr(),
+            self.0.tokens().len(),
+            self.0.tokens(),
         )
     }
 }
