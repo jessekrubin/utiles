@@ -15,7 +15,7 @@ pub enum InsertStrategy {
 
 impl InsertStrategy {
     #[must_use]
-    pub fn sql_prefix(&self) -> &str {
+    pub const fn sql_prefix(&self) -> &str {
         match self {
             Self::None => "INSERT",
             Self::Replace => "INSERT OR REPLACE",
@@ -27,7 +27,7 @@ impl InsertStrategy {
     }
 
     #[must_use]
-    pub fn requires_check(&self) -> bool {
+    pub const fn requires_check(&self) -> bool {
         !matches!(self, Self::Replace | Self::Ignore)
     }
 }

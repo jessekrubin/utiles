@@ -77,7 +77,7 @@ pub struct FileLintResults {
 
 impl FileLintResults {
     #[must_use]
-    pub fn has_errors(&self) -> bool {
+    pub const fn has_errors(&self) -> bool {
         if let Some(e) = &self.errors {
             !e.is_empty()
         } else {

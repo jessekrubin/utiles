@@ -15,7 +15,7 @@ pub struct TileData {
 impl TileData {
     /// Create a new `TileData`
     #[must_use]
-    pub fn new(xyz: Tile, data: Vec<u8>) -> Self {
+    pub const fn new(xyz: Tile, data: Vec<u8>) -> Self {
         Self { xyz, data }
     }
 }

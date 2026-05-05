@@ -69,8 +69,8 @@ pub fn oxipngify(data: &[u8], options: &oxipng::Options) -> Result<Vec<u8>> {
 }
 
 #[expect(clippy::cast_possible_wrap)]
-fn signed_size_diff(initial_size: usize, final_size: usize) -> i64 {
-    initial_size as i64 - final_size as i64
+const fn signed_size_diff(initial_size: usize, final_size: usize) -> i64 {
+    final_size as i64 - initial_size as i64
 }
 
 // TODO: remove this and break up into smaller functions...

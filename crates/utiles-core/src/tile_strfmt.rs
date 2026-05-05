@@ -307,12 +307,12 @@ impl TileStringFormatter {
     }
 
     #[must_use]
-    pub fn tokens(&self) -> &Vec<FormatParts> {
+    pub const fn tokens(&self) -> &Vec<FormatParts> {
         &self.tile_fmt.tokens
     }
 
     #[must_use]
-    pub fn n_tokens(&self) -> usize {
+    pub const fn n_tokens(&self) -> usize {
         self.tile_fmt.n_tokens
     }
 
@@ -341,7 +341,7 @@ impl TileStringFormatter {
     }
 
     #[must_use]
-    pub fn has_token(&self) -> bool {
+    pub const fn has_token(&self) -> bool {
         self.tile_fmt.n_tokens > 0
     }
 

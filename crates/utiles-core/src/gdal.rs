@@ -30,7 +30,14 @@ pub struct GeoTransform {
 impl GeoTransform {
     /// Create a new `GeoTransform` with given coefficients.
     #[must_use]
-    pub fn new(gt0: f64, gt1: f64, gt2: f64, gt3: f64, gt4: f64, gt5: f64) -> Self {
+    pub const fn new(
+        gt0: f64,
+        gt1: f64,
+        gt2: f64,
+        gt3: f64,
+        gt4: f64,
+        gt5: f64,
+    ) -> Self {
         Self {
             gt0,
             gt1,

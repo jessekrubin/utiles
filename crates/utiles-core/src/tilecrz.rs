@@ -13,7 +13,7 @@ pub struct TileCrz {
 }
 
 impl TileCrz {
-    pub fn new(tile_column: u32, tile_row: u32, zoom_level: u8) -> Self {
+    pub const fn new(tile_column: u32, tile_row: u32, zoom_level: u8) -> Self {
         Self {
             tile_column,
             tile_row,

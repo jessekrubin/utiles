@@ -10,7 +10,6 @@ pub fn init_tracing(log_config: LagerConfig) -> UtilesResult<()> {
     let filter = log_config.env_filter();
 
     #[expect(clippy::match_bool)]
-    #[expect(clippy::single_match_else)]
     match log_config.json {
         true => {
             let subscriber = fmt::Subscriber::builder()

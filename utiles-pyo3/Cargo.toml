@@ -26,7 +26,7 @@ tracing-subscriber.workspace = true
 utiles = { path = "../crates/utiles", features = ["python"] }
 
 [dev-dependencies]
-pyo3 = { workspace = true, features = ["auto-initialize"] }
+pyo3 = { workspace = true, features = [] }
 
 [build-dependencies]
 pyo3-build-config.workspace = true

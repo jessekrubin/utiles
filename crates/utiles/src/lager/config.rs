@@ -21,7 +21,7 @@ impl LagerConfig {
     }
 
     #[must_use]
-    pub fn is_debug_or_trace(&self) -> bool {
+    pub const fn is_debug_or_trace(&self) -> bool {
         matches!(self.level, LagerLevel::Debug | LagerLevel::Trace)
     }
 }

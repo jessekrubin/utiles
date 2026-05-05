@@ -45,7 +45,7 @@ pub enum MbtilesMetadataJson {
 impl MbtMetadataRow {
     /// Create a new `MbtilesMetadataRow`
     #[must_use]
-    pub fn new(name: String, value: String) -> Self {
+    pub const fn new(name: String, value: String) -> Self {
         Self { name, value }
     }
 }

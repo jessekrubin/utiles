@@ -37,7 +37,7 @@ pub fn pmid2zxy(i: u64) -> (u8, u32, u32) {
 
 /// Fast parent ID calculation without converting to ZXY (ported from pmtiles go)
 #[must_use]
-pub fn parent_id(i: u64) -> u64 {
+pub const fn parent_id(i: u64) -> u64 {
     let mut acc: u64 = 0;
     let mut last_acc: u64 = 0;
     let mut z: u8 = 0;

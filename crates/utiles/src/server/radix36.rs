@@ -10,7 +10,7 @@
 /// ```
 #[must_use]
 #[inline]
-pub fn u8_radix36_char(num: u8) -> char {
+pub const fn u8_radix36_char(num: u8) -> char {
     if num < 10 {
         (b'0' + num) as char
     } else {
