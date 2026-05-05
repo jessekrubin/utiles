@@ -22,7 +22,7 @@ pub(super) struct TilePyramidFsWriter {
 }
 
 impl TilePyramidFsWriter {
-    pub(super) fn new(root_dirpath: PathBuf) -> Self {
+    pub(super) const fn new(root_dirpath: PathBuf) -> Self {
         Self {
             root_dirpath,
             stats: WriterStats {

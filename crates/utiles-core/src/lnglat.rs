@@ -16,7 +16,7 @@ pub struct LngLat {
 impl LngLat {
     /// Create a new `LngLat` from longitude & latitude.
     #[must_use]
-    pub fn new(lng: f64, lat: f64) -> Self {
+    pub const fn new(lng: f64, lat: f64) -> Self {
         Self {
             xy: Point2d::new(lng, lat),
         }
@@ -24,31 +24,31 @@ impl LngLat {
 
     /// Return the x/lng/lon/long/longitude value.
     #[must_use]
-    pub fn lng(&self) -> f64 {
+    pub const fn lng(&self) -> f64 {
         self.xy.x
     }
 
     /// Return the y/lat/latitude value.
     #[must_use]
-    pub fn lat(&self) -> f64 {
+    pub const fn lat(&self) -> f64 {
         self.xy.y
     }
 
     /// Return the x/lng/lon/long/longitude value.
     #[must_use]
-    pub fn lon(&self) -> f64 {
+    pub const fn lon(&self) -> f64 {
         self.xy.x
     }
 
     /// Return the y/lat/latitude value.
     #[must_use]
-    pub fn x(&self) -> f64 {
+    pub const fn x(&self) -> f64 {
         self.xy.x
     }
 
     /// Return the y/lat/latitude value.
     #[must_use]
-    pub fn y(&self) -> f64 {
+    pub const fn y(&self) -> f64 {
         self.xy.y
     }
 

@@ -95,7 +95,7 @@ pub fn zvec2zset_rev(zvec: &[u8]) -> u32 {
 impl ZoomSet {
     /// Create a new `ZoomSet` from a u32
     #[must_use]
-    pub fn new(zset: u32) -> Self {
+    pub const fn new(zset: u32) -> Self {
         Self(zset)
     }
 
@@ -112,7 +112,7 @@ impl ZoomSet {
     }
 
     #[must_use]
-    pub fn all() -> Self {
+    pub const fn all() -> Self {
         Self(0b0111_1111_1111_1111_1111_1111_1111_1111)
     }
 
@@ -231,19 +231,19 @@ impl Default for ZoomRange {
 impl ZoomRange {
     /// Create a new `ZoomRange`
     #[must_use]
-    pub fn new(min: u8, max: u8) -> Self {
+    pub const fn new(min: u8, max: u8) -> Self {
         Self { min, max }
     }
 
     /// Create a new `ZoomRange` from a maximum zoom level (0 to max)
     #[must_use]
-    pub fn from_max(max: u8) -> Self {
+    pub const fn from_max(max: u8) -> Self {
         Self { min: 0, max }
     }
 
     /// Create a new `ZoomRange` from a minimum zoom level (min to 30)
     #[must_use]
-    pub fn from_min(min: u8) -> Self {
+    pub const fn from_min(min: u8) -> Self {
         Self { min, max: 30 }
     }
 }

@@ -102,7 +102,7 @@ impl PyLngLatBbox {
         4
     }
 
-    fn __getitem__(&self, idx: i32, _py: Python<'_>) -> PyResult<f64> {
+    fn __getitem__(&self, idx: i32) -> PyResult<f64> {
         match idx {
             0 | -4 => Ok(self.bbox.west),
             1 | -3 => Ok(self.bbox.south),

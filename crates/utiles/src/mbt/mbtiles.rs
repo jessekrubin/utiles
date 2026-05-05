@@ -144,7 +144,7 @@ impl Mbtiles {
         Ok(Self { dbpath, conn })
     }
 
-    pub fn conn(&self) -> &Connection {
+    pub const fn conn(&self) -> &Connection {
         &self.conn
     }
 

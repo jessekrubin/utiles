@@ -10,7 +10,7 @@ pub struct UtilesServerConfig {
 
 impl UtilesServerConfig {
     #[must_use]
-    pub fn new(host: String, port: u16, fspaths: Vec<String>) -> Self {
+    pub const fn new(host: String, port: u16, fspaths: Vec<String>) -> Self {
         Self {
             host,
             port,

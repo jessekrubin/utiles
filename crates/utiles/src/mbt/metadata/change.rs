@@ -139,7 +139,7 @@ impl DbChangeset {
     }
 
     #[must_use]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.changes.is_empty()
     }
     #[must_use]
@@ -199,7 +199,7 @@ impl From<DbChange> for DbChangeset {
 
 impl MetadataChange {
     #[must_use]
-    pub fn new_empty() -> Self {
+    pub const fn new_empty() -> Self {
         Self {
             changes: vec![],
             forward: Patch(vec![]),

@@ -29,7 +29,7 @@ pub struct TileZBoxIterator {
 impl TileZBox {
     /// Create a new `TileZBox`
     #[must_use]
-    pub fn new(min_x: u32, max_x: u32, min_y: u32, max_y: u32, zoom: u8) -> Self {
+    pub const fn new(min_x: u32, max_x: u32, min_y: u32, max_y: u32, zoom: u8) -> Self {
         Self {
             zoom,
             min: Point2d::new(min_x, min_y),
@@ -39,68 +39,68 @@ impl TileZBox {
 
     /// Return the minimum x value
     #[must_use]
-    pub fn minx(&self) -> u32 {
+    pub const fn minx(&self) -> u32 {
         self.min.x
     }
 
     /// Return the maximum x value
     #[must_use]
-    pub fn maxx(&self) -> u32 {
+    pub const fn maxx(&self) -> u32 {
         self.max.x
     }
 
     /// Return the minimum y value
     #[must_use]
-    pub fn miny(&self) -> u32 {
+    pub const fn miny(&self) -> u32 {
         self.min.y
     }
 
     /// Return the maximum y value
     #[must_use]
-    pub fn maxy(&self) -> u32 {
+    pub const fn maxy(&self) -> u32 {
         self.max.y
     }
 
     #[must_use]
-    pub fn dx(&self) -> u32 {
+    pub const fn dx(&self) -> u32 {
         self.max.x - self.min.x
     }
 
     #[must_use]
-    pub fn width(&self) -> u32 {
+    pub const fn width(&self) -> u32 {
         self.dx()
     }
 
     #[must_use]
-    pub fn dy(&self) -> u32 {
+    pub const fn dy(&self) -> u32 {
         self.max.y - self.min.y
     }
 
     #[must_use]
-    pub fn height(&self) -> u32 {
+    pub const fn height(&self) -> u32 {
         self.dy()
     }
 
     #[must_use]
-    pub fn dxdy(&self) -> (u32, u32) {
+    pub const fn dxdy(&self) -> (u32, u32) {
         (self.max.x - self.min.x, self.max.y - self.min.y)
     }
 
     /// Return the zoom level
     #[must_use]
-    pub fn z(&self) -> u8 {
+    pub const fn z(&self) -> u8 {
         self.zoom
     }
 
     /// Return the zoom level
     #[must_use]
-    pub fn zoom(&self) -> u8 {
+    pub const fn zoom(&self) -> u8 {
         self.zoom
     }
 
     /// Return dimensions of the `TileZBox`
     #[must_use]
-    pub fn dimensions(&self) -> (u32, u32) {
+    pub const fn dimensions(&self) -> (u32, u32) {
         (self.max.x - self.min.x + 1, self.max.y - self.min.y + 1)
     }
 
@@ -227,7 +227,7 @@ impl TileZBox {
 
     /// Return new zbox one zoom level higher/down z2 -> z3
     #[must_use]
-    pub fn zoom_in(&self) -> Self {
+    pub const fn zoom_in(&self) -> Self {
         Self {
             zoom: self.zoom + 1,
             min: Point2d::new(self.min.x * 2, self.min.y * 2),
@@ -237,7 +237,7 @@ impl TileZBox {
 
     /// Return new zbox one zoom level lower/up z3 -> z2
     #[must_use]
-    pub fn zoom_depth(&self, depth: u8) -> Self {
+    pub const fn zoom_depth(&self, depth: u8) -> Self {
         let target_zoom = self.zoom + depth;
         let mut zbox = *self;
         while zbox.zoom < target_zoom {
@@ -250,7 +250,7 @@ impl TileZBox {
 impl TileZBoxIterator {
     /// Create a new `TileZBoxIterator`
     #[must_use]
-    pub fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
+    pub const fn new(minx: u32, maxx: u32, miny: u32, maxy: u32, zoom: u8) -> Self {
         Self {
             range: TileZBox::new(minx, maxx, miny, maxy, zoom),
             cur_x: minx,

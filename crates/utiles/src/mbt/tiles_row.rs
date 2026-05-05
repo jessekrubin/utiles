@@ -19,7 +19,7 @@ pub struct MbtTileRow {
 impl MbtTileRow {
     /// Create a new `MbtTileRow`
     #[must_use]
-    pub fn new(
+    pub const fn new(
         zoom_level: u8,
         tile_column: u32,
         tile_row: u32,

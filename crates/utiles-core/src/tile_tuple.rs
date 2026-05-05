@@ -7,7 +7,7 @@ pub struct TileTuple(pub u32, pub u32, pub u8);
 
 impl TileTuple {
     #[must_use]
-    pub fn new(x: u32, y: u32, z: u8) -> Self {
+    pub const fn new(x: u32, y: u32, z: u8) -> Self {
         Self(x, y, z)
     }
 }

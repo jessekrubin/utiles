@@ -254,7 +254,7 @@ pub const fn truncate_lat(lat: f64) -> f64 {
 
 /// Truncate a `LngLat` to valid range of longitude and latitude.
 #[must_use]
-pub fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
+pub const fn truncate_lnglat(lnglat: &LngLat) -> LngLat {
     LngLat::new(truncate_lng(lnglat.lng()), truncate_lat(lnglat.lat()))
 }
 

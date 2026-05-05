@@ -1,5 +1,5 @@
 #[must_use]
-pub fn u64_to_i64_shift(value: u64) -> i64 {
+pub const fn u64_to_i64_shift(value: u64) -> i64 {
     // The constant 9,223,372,036,854,775,807 is the maximum value for i64
     const OFFSET: u64 = 9_223_372_036_854_775_808;
 
@@ -10,7 +10,7 @@ pub fn u64_to_i64_shift(value: u64) -> i64 {
 }
 
 #[must_use]
-pub fn i64_to_u64_shift(value: i64) -> u64 {
+pub const fn i64_to_u64_shift(value: i64) -> u64 {
     // The constant 9,223,372,036,854,775,807 is the maximum value for i64
     const OFFSET: u64 = 9_223_372_036_854_775_808;
 
@@ -21,36 +21,36 @@ pub fn i64_to_u64_shift(value: i64) -> u64 {
 }
 
 #[must_use]
-pub fn u64_to_i64_unsafe_transmute(value: u64) -> i64 {
+pub const fn u64_to_i64_unsafe_transmute(value: u64) -> i64 {
     u64::cast_signed(value)
 }
 
 #[must_use]
-pub fn i64_to_u64_unsafe_transmute(value: i64) -> u64 {
+pub const fn i64_to_u64_unsafe_transmute(value: i64) -> u64 {
     i64::cast_unsigned(value)
 }
 
 #[must_use]
 #[expect(unsafe_code)]
-pub fn u64_to_i64_ptr(value: u64) -> i64 {
+pub const fn u64_to_i64_ptr(value: u64) -> i64 {
     let ptr = std::ptr::addr_of!(value).cast::<i64>();
     unsafe { *ptr }
 }
 
 #[must_use]
 #[expect(unsafe_code)]
-pub fn i64_to_u64_ptr(value: i64) -> u64 {
+pub const fn i64_to_u64_ptr(value: i64) -> u64 {
     let ptr = std::ptr::addr_of!(value).cast::<u64>();
     unsafe { *ptr }
 }
 
 #[must_use]
-pub fn u64_to_i64_ne_bytes(value: u64) -> i64 {
+pub const fn u64_to_i64_ne_bytes(value: u64) -> i64 {
     i64::from_ne_bytes(value.to_ne_bytes())
 }
 
 #[must_use]
-pub fn i64_to_u64_ne_bytes(value: i64) -> u64 {
+pub const fn i64_to_u64_ne_bytes(value: i64) -> u64 {
     u64::from_ne_bytes(value.to_ne_bytes())
 }
 

@@ -28,7 +28,7 @@ pub enum MbtType {
 
 impl MbtType {
     #[must_use]
-    pub fn as_str(&self) -> &str {
+    pub const fn as_str(&self) -> &str {
         match self {
             Self::Flat => "flat",
             Self::Hash => "hash",

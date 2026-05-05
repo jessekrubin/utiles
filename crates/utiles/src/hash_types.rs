@@ -51,7 +51,7 @@ impl FromStr for HashType {
 
 impl HashType {
     #[must_use]
-    pub fn sqlite_fn_name(&self) -> &'static str {
+    pub const fn sqlite_fn_name(&self) -> &'static str {
         match self {
             Self::Md5 => "md5",
             Self::Fnv1a => "fnv1a",
@@ -63,7 +63,7 @@ impl HashType {
     }
 
     #[must_use]
-    pub fn sqlite_hex_fn_name(&self) -> &'static str {
+    pub const fn sqlite_hex_fn_name(&self) -> &'static str {
         match self {
             Self::Md5 => "md5_hex",
             Self::Fnv1a => "fnv1a_hex",
@@ -75,7 +75,7 @@ impl HashType {
     }
 
     #[must_use]
-    pub fn digest_size(&self) -> usize {
+    pub const fn digest_size(&self) -> usize {
         match self {
             Self::Xxh32 => 4,
             Self::Md5 | Self::Xxh3_128 => 16,

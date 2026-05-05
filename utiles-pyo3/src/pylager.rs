@@ -34,7 +34,7 @@ pub(crate) fn error(msg: &str) {
     tracing::error!(target: VERSION_STRING, "{}", msg);
 }
 
-#[derive(Clone, Debug, PartialEq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[pyclass(name = "Lager", module = "utiles._utiles", frozen, skip_from_py_object)]
 pub struct PyLager;
 

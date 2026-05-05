@@ -12,7 +12,7 @@
 #![expect(clippy::similar_names)]
 #![expect(clippy::unused_self)]
 #![expect(clippy::used_underscore_items)]
-
+#![expect(clippy::missing_const_for_fn)]
 use pyo3::prelude::*;
 use pyutiles::{PyBbox, PyLngLat, PyLngLatBbox, PyTile};
 use utiles::tile_type;

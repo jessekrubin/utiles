@@ -199,7 +199,7 @@ impl Tile {
 
     /// Construct a tile with validity check - returns `Option<Tile>`
     #[must_use]
-    pub fn new_checked(x: u32, y: u32, z: u8) -> Option<Self> {
+    pub const fn new_checked(x: u32, y: u32, z: u8) -> Option<Self> {
         if x < (1u32 << z) && y < (1u32 << z) {
             Some(Self::new_unchecked(x, y, z))
         } else {
@@ -209,7 +209,7 @@ impl Tile {
 
     /// Construct a tile **without** any checking.
     #[must_use]
-    pub fn new_unchecked(x: u32, y: u32, z: u8) -> Self {
+    pub const fn new_unchecked(x: u32, y: u32, z: u8) -> Self {
         Self { x, y, z }
     }
 
@@ -416,7 +416,7 @@ impl Tile {
 
     /// Return the bounding box of the tile
     #[must_use]
-    pub fn up(&self) -> Self {
+    pub const fn up(&self) -> Self {
         Self {
             x: self.x + 1,
             y: self.y,
@@ -426,7 +426,7 @@ impl Tile {
 
     /// Return the tile to the bottom
     #[must_use]
-    pub fn down(&self) -> Self {
+    pub const fn down(&self) -> Self {
         Self {
             x: self.x - 1,
             y: self.y,
@@ -436,7 +436,7 @@ impl Tile {
 
     /// Return the tile to the left
     #[must_use]
-    pub fn left(&self) -> Self {
+    pub const fn left(&self) -> Self {
         Self {
             x: self.x,
             y: self.y - 1,
@@ -446,7 +446,7 @@ impl Tile {
 
     /// Return the tile to the right
     #[must_use]
-    pub fn right(&self) -> Self {
+    pub const fn right(&self) -> Self {
         Self {
             x: self.x,
             y: self.y + 1,
@@ -456,7 +456,7 @@ impl Tile {
 
     /// Return the tile to the top left
     #[must_use]
-    pub fn up_left(&self) -> Self {
+    pub const fn up_left(&self) -> Self {
         Self {
             x: self.x + 1,
             y: self.y - 1,
@@ -466,7 +466,7 @@ impl Tile {
 
     /// Return the tile to the top right
     #[must_use]
-    pub fn up_right(&self) -> Self {
+    pub const fn up_right(&self) -> Self {
         Self {
             x: self.x + 1,
             y: self.y + 1,
@@ -476,7 +476,7 @@ impl Tile {
 
     /// Return the tile to the bottom left
     #[must_use]
-    pub fn down_left(&self) -> Self {
+    pub const fn down_left(&self) -> Self {
         Self {
             x: self.x - 1,
             y: self.y - 1,
@@ -486,7 +486,7 @@ impl Tile {
 
     /// Return the tile to the bottom right
     #[must_use]
-    pub fn down_right(&self) -> Self {
+    pub const fn down_right(&self) -> Self {
         Self {
             x: self.x - 1,
             y: self.y + 1,

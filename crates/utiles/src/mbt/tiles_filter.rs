@@ -10,7 +10,7 @@ pub struct TilesFilter {
 
 impl TilesFilter {
     #[must_use]
-    pub fn new(bboxes: Option<Vec<BBox>>, zooms: Option<Vec<u8>>) -> Self {
+    pub const fn new(bboxes: Option<Vec<BBox>>, zooms: Option<Vec<u8>>) -> Self {
         Self { bboxes, zooms }
     }
 

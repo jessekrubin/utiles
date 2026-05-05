@@ -7,7 +7,7 @@ pub(crate) struct Health {
 }
 
 impl Health {
-    pub(crate) fn new(status: String, uptime: u64) -> Self {
+    pub(crate) const fn new(status: String, uptime: u64) -> Self {
         Self { status, uptime }
     }
 }

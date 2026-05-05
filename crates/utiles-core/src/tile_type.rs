@@ -156,7 +156,7 @@ impl RasterTileFormat {
     }
 
     #[must_use]
-    pub fn content_type(&self) -> &'static str {
+    pub const fn content_type(&self) -> &'static str {
         match self {
             Self::Png => "image/png",
             Self::Jpg => "image/jpeg",
@@ -191,7 +191,7 @@ impl TileFormat {
     }
 
     #[must_use]
-    pub fn is_img(&self) -> bool {
+    pub const fn is_img(&self) -> bool {
         matches!(
             self,
             Self::Png | Self::Jpg | Self::Gif | Self::Webp | Self::Tiff
@@ -199,7 +199,7 @@ impl TileFormat {
     }
 
     #[must_use]
-    pub fn kind(&self) -> TileKind {
+    pub const fn kind(&self) -> TileKind {
         match self {
             Self::Pbf | Self::Mlt => TileKind::Vector,
             Self::Gif | Self::Jpg | Self::Png | Self::Webp | Self::Tiff => {
@@ -212,7 +212,7 @@ impl TileFormat {
     }
 
     #[must_use]
-    pub fn content_type(&self) -> &'static str {
+    pub const fn content_type(&self) -> &'static str {
         match self {
             Self::Png => "image/png",
             Self::Jpg => "image/jpeg",
@@ -259,7 +259,7 @@ impl TileEncoding {
     }
 
     #[must_use]
-    pub fn content_encoding(&self) -> Option<&'static str> {
+    pub const fn content_encoding(&self) -> Option<&'static str> {
         match self {
             Self::Internal | Self::Uncompressed => None,
             Self::Gzip => Some("gzip"),
@@ -270,7 +270,7 @@ impl TileEncoding {
     }
 
     #[must_use]
-    pub fn as_str(&self) -> &'static str {
+    pub const fn as_str(&self) -> &'static str {
         match self {
             Self::Uncompressed => "none",
             Self::Internal => "internal",
@@ -298,7 +298,7 @@ pub struct TileType {
 
 impl TileType {
     #[must_use]
-    pub fn new(format: TileFormat, encoding: TileEncoding) -> Self {
+    pub const fn new(format: TileFormat, encoding: TileEncoding) -> Self {
         Self {
             encoding,
             format,
@@ -367,12 +367,12 @@ impl TileType {
     }
 
     #[must_use]
-    pub fn content_type(&self) -> &'static str {
+    pub const fn content_type(&self) -> &'static str {
         self.format.content_type()
     }
 
     #[must_use]
-    pub fn content_encoding(&self) -> Option<&'static str> {
+    pub const fn content_encoding(&self) -> Option<&'static str> {
         self.encoding.content_encoding()
     }
 
@@ -581,7 +581,7 @@ pub fn tiletype(buffer: &[u8]) -> TileType {
 
 /// Return the tile type as a constant
 #[must_use]
-pub fn enum2const(tiletype: &TileTypeV1) -> usize {
+pub const fn enum2const(tiletype: &TileTypeV1) -> usize {
     match tiletype {
         TileTypeV1::Unknown => TILETYPE_UNKNOWN,
         TileTypeV1::Gif => TILETYPE_GIF,
@@ -596,7 +596,7 @@ pub fn enum2const(tiletype: &TileTypeV1) -> usize {
 
 /// Return the tile type as an enum
 #[must_use]
-pub fn const2enum(tiletype: usize) -> TileTypeV1 {
+pub const fn const2enum(tiletype: usize) -> TileTypeV1 {
     match tiletype {
         TILETYPE_GIF => TileTypeV1::Gif,
         TILETYPE_JPG => TileTypeV1::Jpg,

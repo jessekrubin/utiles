@@ -78,7 +78,7 @@ impl From<(i32, i32, i32, i32)> for BBox {
 impl BBox {
     /// Create a new `BBox`
     #[must_use]
-    pub fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
+    pub const fn new(west: f64, south: f64, east: f64, north: f64) -> Self {
         Self {
             west,
             south,
@@ -89,7 +89,7 @@ impl BBox {
 
     /// Returns a bounding box that covers the entire world.
     #[must_use]
-    pub fn world_planet() -> Self {
+    pub const fn world_planet() -> Self {
         Self {
             west: -180.0,
             south: -90.0,
@@ -100,7 +100,7 @@ impl BBox {
 
     /// Returns a bounding box that covers the entire web mercator world.
     #[must_use]
-    pub fn world_web() -> Self {
+    pub const fn world_web() -> Self {
         Self {
             west: -180.0,
             south: -85.051_129,
@@ -110,7 +110,7 @@ impl BBox {
     }
 
     #[must_use]
-    pub fn clamp_web(&self) -> Self {
+    pub const fn clamp_web(&self) -> Self {
         Self {
             west: self.west.max(-180.0),
             south: self.south.max(-85.051_129),
@@ -120,7 +120,7 @@ impl BBox {
     }
 
     #[must_use]
-    pub fn clamp(&self, o: &Self) -> Self {
+    pub const fn clamp(&self, o: &Self) -> Self {
         Self {
             west: self.west.max(o.west),
             south: self.south.max(o.south),
@@ -155,55 +155,55 @@ impl BBox {
 
     /// Returns the bounding box as a tuple
     #[must_use]
-    pub fn tuple(&self) -> (f64, f64, f64, f64) {
+    pub const fn tuple(&self) -> (f64, f64, f64, f64) {
         (self.west(), self.south(), self.east(), self.north())
     }
 
     /// Returns the top/north boundary of the bounding box
     #[must_use]
-    pub fn north(&self) -> f64 {
+    pub const fn north(&self) -> f64 {
         self.north
     }
 
     /// Returns the bottom/south boundary of the bounding box
     #[must_use]
-    pub fn south(&self) -> f64 {
+    pub const fn south(&self) -> f64 {
         self.south
     }
 
     /// Returns the right/east boundary of the bounding box
     #[must_use]
-    pub fn east(&self) -> f64 {
+    pub const fn east(&self) -> f64 {
         self.east
     }
 
     /// Returns the left/west boundary of the bounding box
     #[must_use]
-    pub fn west(&self) -> f64 {
+    pub const fn west(&self) -> f64 {
         self.west
     }
 
     /// Returns the top/north boundary of the bounding box
     #[must_use]
-    pub fn top(&self) -> f64 {
+    pub const fn top(&self) -> f64 {
         self.north
     }
 
     /// Returns the bottom/south boundary of the bounding box
     #[must_use]
-    pub fn bottom(&self) -> f64 {
+    pub const fn bottom(&self) -> f64 {
         self.south
     }
 
     /// Returns the right/east boundary of the bounding box
     #[must_use]
-    pub fn right(&self) -> f64 {
+    pub const fn right(&self) -> f64 {
         self.east
     }
 
     /// Returns the left/west boundary of the bounding box
     #[must_use]
-    pub fn left(&self) -> f64 {
+    pub const fn left(&self) -> f64 {
         self.west
     }
 
@@ -367,25 +367,25 @@ impl BBox {
 
     /// Return upper left corner of bounding box as `LngLat`
     #[must_use]
-    pub fn ul(&self) -> LngLat {
+    pub const fn ul(&self) -> LngLat {
         LngLat::new(self.west, self.north)
     }
 
     /// Return upper right corner of bounding box as `LngLat`
     #[must_use]
-    pub fn ur(&self) -> LngLat {
+    pub const fn ur(&self) -> LngLat {
         LngLat::new(self.east, self.north)
     }
 
     /// Return lower right corner of bounding box as `LngLat`
     #[must_use]
-    pub fn lr(&self) -> LngLat {
+    pub const fn lr(&self) -> LngLat {
         LngLat::new(self.east, self.south)
     }
 
     /// Return lower left corner of bounding box as `LngLat`
     #[must_use]
-    pub fn ll(&self) -> LngLat {
+    pub const fn ll(&self) -> LngLat {
         LngLat::new(self.west, self.south)
     }
 
@@ -458,7 +458,7 @@ impl TryFrom<&str> for BBox {
 
 impl WebBBox {
     #[must_use]
-    pub fn new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
+    pub const fn new(left: f64, bottom: f64, right: f64, top: f64) -> Self {
         Self {
             min: Point2d::new(left, bottom),
             max: Point2d::new(right, top),
@@ -467,37 +467,37 @@ impl WebBBox {
 
     #[must_use]
     #[inline]
-    pub fn min(&self) -> Point2d<f64> {
+    pub const fn min(&self) -> Point2d<f64> {
         self.min
     }
 
     #[must_use]
     #[inline]
-    pub fn max(&self) -> Point2d<f64> {
+    pub const fn max(&self) -> Point2d<f64> {
         self.max
     }
 
     #[must_use]
     #[inline]
-    pub fn left(&self) -> f64 {
+    pub const fn left(&self) -> f64 {
         self.min.x
     }
 
     #[must_use]
     #[inline]
-    pub fn bottom(&self) -> f64 {
+    pub const fn bottom(&self) -> f64 {
         self.min.y
     }
 
     #[must_use]
     #[inline]
-    pub fn right(&self) -> f64 {
+    pub const fn right(&self) -> f64 {
         self.max.x
     }
 
     #[must_use]
     #[inline]
-    pub fn top(&self) -> f64 {
+    pub const fn top(&self) -> f64 {
         self.max.y
     }
 
@@ -509,25 +509,25 @@ impl WebBBox {
 
     #[must_use]
     #[inline]
-    pub fn west(&self) -> f64 {
+    pub const fn west(&self) -> f64 {
         self.min.x
     }
 
     #[must_use]
     #[inline]
-    pub fn south(&self) -> f64 {
+    pub const fn south(&self) -> f64 {
         self.min.y
     }
 
     #[must_use]
     #[inline]
-    pub fn east(&self) -> f64 {
+    pub const fn east(&self) -> f64 {
         self.max.x
     }
 
     #[must_use]
     #[inline]
-    pub fn north(&self) -> f64 {
+    pub const fn north(&self) -> f64 {
         self.max.y
     }
 
