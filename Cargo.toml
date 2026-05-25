@@ -70,7 +70,7 @@ tilejson = "0.4.3"
 tokio = { version = "1.52", features = ["full"] }
 tokio-stream = "0.1.18"
 tower = { version = "0.5.3", features = ["timeout"] }
-tower-http = { version = "0.6.10", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
+tower-http = { version = "0.6.11", features = ["trace", "timeout", "add-extension", "util", "request-id", "compression-gzip", "compression-zstd", "async-compression", "cors"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"
