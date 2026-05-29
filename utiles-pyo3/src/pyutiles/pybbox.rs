@@ -3,7 +3,6 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyStopIteration};
 use pyo3::prelude::*;
-use pyo3::types::PyType;
 use utiles::BBox;
 
 use crate::float_hash::Float64Hash;
@@ -39,8 +38,8 @@ impl PyBbox {
         }
     }
 
-    #[classmethod]
-    pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
+    #[staticmethod]
+    pub fn from_tile(tile: &PyTile) -> Self {
         let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         Self::py_new(ul.lng(), lr.lat(), lr.lng(), ul.lat())

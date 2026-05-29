@@ -389,9 +389,9 @@ impl PyTile {
         self.xyz.center().into()
     }
 
-    #[pyo3(signature = (n = None))]
-    fn parent(&self, n: Option<u8>) -> Option<Self> {
-        self.xyz.parent(n).map(Self::from)
+    #[pyo3(signature = (n = 0))]
+    fn parent(&self, n: u8) -> Option<Self> {
+        self.xyz.parent(Some(n)).map(Self::from)
     }
 
     #[pyo3(signature = (zoom = None, *, zorder = false))]
@@ -541,7 +541,7 @@ impl TileLike for &PyTile {
 
 impl TileParent for PyTile {
     fn parent(&self, zoom: Option<u8>) -> Option<Self> {
-        self.parent(zoom)
+        self.parent(zoom.unwrap_or(0))
     }
 
     fn root() -> Self {

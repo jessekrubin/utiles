@@ -261,17 +261,13 @@ pub(crate) fn neighbors(
 }
 
 #[pyfunction]
-#[pyo3(signature = (*args, truncate = None))]
+#[pyo3(signature = (*args, truncate = false))]
 pub(crate) fn bounding_tile(
     args: &Bound<'_, PyTuple>,
-    truncate: Option<bool>,
+    truncate: bool,
 ) -> PyResult<PyTile> {
     let bbox = pyparsing::parse_bbox(args)?;
-    // if res.is_err() {
-    //     return Err(res.err().unwrap());
-    // }
-    // let bbox = res;
-    let res = utiles::bounding_tile(bbox.into(), truncate)
+    let res = utiles::bounding_tile(bbox.into(), Some(truncate))
         .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
     Ok(PyTile::from(res))
 }
