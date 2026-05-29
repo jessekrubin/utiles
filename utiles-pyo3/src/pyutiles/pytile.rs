@@ -6,7 +6,7 @@ use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyNotImplemented, PyTuple, PyType};
+use pyo3::types::{PyDict, PyNotImplemented, PyTuple};
 use serde::Serialize;
 use utiles::bbox::BBox;
 use utiles::projection::Projection;
@@ -117,8 +117,8 @@ impl PyTile {
         self.xyz.fmt_zxy_ext(ext, sep)
     }
 
-    #[classmethod]
-    fn from_quadkey(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
+    #[staticmethod]
+    fn from_quadkey(quadkey: String) -> PyResult<Self> {
         let xyz = Tile::from_quadkey(&quadkey);
         match xyz {
             Ok(xyz) => Ok(Self::from(xyz)),
@@ -126,23 +126,19 @@ impl PyTile {
         }
     }
 
-    #[classmethod]
-    fn from_qk(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
-        let xyz = Tile::from_quadkey(&quadkey);
-        match xyz {
-            Ok(xyz) => Ok(Self::from(xyz)),
-            Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
-        }
+    #[staticmethod]
+    fn from_qk(qk: String) -> PyResult<Self> {
+        Self::from_quadkey(qk)
     }
 
-    #[classmethod]
-    fn from_row_major_id(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
+    #[staticmethod]
+    fn from_row_major_id(row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
         Self::from(xyz)
     }
 
-    #[classmethod]
-    fn from_rmid(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
+    #[staticmethod]
+    fn from_rmid(row_major_id: u64) -> Self {
         let xyz = Tile::from_row_major_id(row_major_id);
         Self::from(xyz)
     }
@@ -155,9 +151,9 @@ impl PyTile {
         self.xyz.quadkey()
     }
 
-    #[classmethod]
-    fn from_pmtileid(_cls: &Bound<'_, PyType>, tileid: u64) -> Self {
-        let xyz = Tile::from_pmtileid(tileid);
+    #[staticmethod]
+    fn from_pmtileid(pmtileid: u64) -> Self {
+        let xyz = Tile::from_pmtileid(pmtileid);
         Self::from(xyz)
     }
 
@@ -177,10 +173,9 @@ impl PyTile {
         self.xyz.row_major_id()
     }
 
-    #[classmethod]
+    #[staticmethod]
     #[pyo3(signature = (lng, lat, zoom, truncate = None))]
     fn from_lnglat_zoom(
-        _cls: &Bound<'_, PyType>,
         lng: f64,
         lat: f64,
         zoom: u8,
@@ -283,9 +278,7 @@ impl PyTile {
 
     fn __hash__(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
-        self.xyz.x.hash(&mut hasher);
-        self.xyz.y.hash(&mut hasher);
-        self.xyz.z.hash(&mut hasher);
+        self.xyz.hash(&mut hasher);
         hasher.finish()
     }
 
@@ -401,9 +394,8 @@ impl PyTile {
         self.xyz.parent(n).map(Self::from)
     }
 
-    #[pyo3(signature = (zoom = None, *, zorder = None))]
-    pub(crate) fn children(&self, zoom: Option<u8>, zorder: Option<bool>) -> Vec<Self> {
-        let zorder = zorder.unwrap_or(false);
+    #[pyo3(signature = (zoom = None, *, zorder = false))]
+    pub(crate) fn children(&self, zoom: Option<u8>, zorder: bool) -> Vec<Self> {
         let xyzs = {
             if zorder {
                 self.xyz.children_zorder(zoom)
@@ -423,10 +415,10 @@ impl PyTile {
         self.xyz.siblings().into_iter().map(Self::from).collect()
     }
 
-    #[pyo3(signature = (wrapx = None))]
-    pub fn neighbors(&self, wrapx: Option<bool>) -> Vec<Self> {
+    #[pyo3(signature = (*, wrapx = false))]
+    pub fn neighbors(&self, wrapx: bool) -> Vec<Self> {
         self.xyz
-            .neighbors(wrapx.unwrap_or(false))
+            .neighbors(wrapx)
             .into_iter()
             .map(Self::from)
             .collect()

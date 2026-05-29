@@ -207,3 +207,7 @@ exclude_lines = [
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
+
+[tool.uv]
+sources.ry = { workspace = true }
+package = false  # don't build package w/ uv

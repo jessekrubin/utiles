@@ -1,9 +1,11 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyStopIteration};
 use pyo3::prelude::*;
-use pyo3::types::PyType;
 use utiles::bbox::BBox;
 
+use crate::float_hash::Float64Hash;
 use crate::pyutiles::pyiters::FloatIterator;
 use crate::pyutiles::pytile::PyTile;
 
@@ -21,6 +23,15 @@ pub struct PyLngLatBbox {
 impl From<PyLngLatBbox> for BBox {
     fn from(val: PyLngLatBbox) -> Self {
         val.bbox
+    }
+}
+
+impl Hash for PyLngLatBbox {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        Float64Hash::from(self.bbox.west).hash(state);
+        Float64Hash::from(self.bbox.south).hash(state);
+        Float64Hash::from(self.bbox.east).hash(state);
+        Float64Hash::from(self.bbox.north).hash(state);
     }
 }
 
@@ -63,12 +74,18 @@ impl PyLngLatBbox {
         )
     }
 
+    fn __hash__(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
+    }
+
     fn __str__(&self) -> String {
         self.__repr__()
     }
 
-    #[classmethod]
-    fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
+    #[staticmethod]
+    fn from_tile(tile: &PyTile) -> Self {
         let ul = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         let lr = utiles::lr(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         Self::py_new(ul.lng(), lr.lat(), lr.lng(), ul.lat())

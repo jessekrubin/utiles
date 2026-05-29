@@ -7,13 +7,13 @@ use crate::pyutiles::pyparsing::parse_tiles;
 use crate::pyutiles::pytile::PyTile;
 
 #[pyfunction]
-#[pyo3(signature = (* args, minzoom=None))]
+#[pyo3(signature = (*args, minzoom = 0))]
 pub(crate) fn simplify(
     args: &Bound<'_, PyTuple>,
-    minzoom: Option<u8>,
+    minzoom: u8,
 ) -> PyResult<HashSet<PyTile>> {
     let pytiles_vec = parse_tiles(args)?;
     let pytiles_set = pytiles_vec.into_iter().collect::<HashSet<PyTile>>();
-    let root_set = utiles::simplify(&pytiles_set, minzoom);
+    let root_set = utiles::simplify(&pytiles_set, Some(minzoom));
     Ok(root_set)
 }

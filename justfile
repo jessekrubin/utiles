@@ -74,8 +74,16 @@ fmtcpy:
     uv run ruff format --check
     uv run ruff check --select "I" --show-fixes .
 
+# justfile format
+justfilefmt:
+    just --fmt --unstable
+
+# justfile format check
+justfilefmtc:
+    just --check --fmt --unstable
+
 # format rust and python
-fmt: cargo-fmt fmtpy
+fmt: cargo-fmt fmtpy justfilefmt
 
 # typecheck w/ mypy
 mypy:
@@ -117,8 +125,6 @@ check-features:
 
 powerset:
     cargo hack --exclude-features internal --feature-powerset check
-
-
 
 pipsync:
     uv pip sync ./utiles-pyo3/requirements.dev.txt

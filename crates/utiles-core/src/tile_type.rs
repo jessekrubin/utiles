@@ -379,11 +379,11 @@ impl TileType {
     #[must_use]
     pub fn headers_vec(&self) -> Vec<(&'static str, &'static str)> {
         self.content_encoding().map_or_else(
-            || vec![("Content-Type", self.content_type())],
+            || vec![("content-type", self.content_type())],
             |content_encoding| {
                 vec![
-                    ("Content-Type", self.content_type()),
-                    ("Content-Encoding", content_encoding),
+                    ("content-type", self.content_type()),
+                    ("content-encoding", content_encoding),
                 ]
             },
         )

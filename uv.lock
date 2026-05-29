@@ -529,7 +529,7 @@ wheels = [
 
 [[package]]
 name = "utiles"
-source = { editable = "utiles-pyo3" }
+source = { virtual = "utiles-pyo3" }
 
 [[package]]
 name = "utiles-dev"

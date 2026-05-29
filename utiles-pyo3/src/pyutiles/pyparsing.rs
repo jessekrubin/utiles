@@ -160,20 +160,33 @@ pub(crate) fn _parse_tile_arg(args: PyTileArg) -> PyTile {
 #[pyfunction]
 #[pyo3(signature = (*args))]
 pub(crate) fn parse_tiles(args: &Bound<'_, PyTuple>) -> PyResult<Vec<PyTile>> {
-    if args.len() == 1 {
+    let nargs = args.len();
+    if nargs == 1 {
         return crate::pyutiles::_extract(&args.get_item(0)?);
-    } else if args.len() == 3 {
+    } else if nargs == 3 {
         // if the first value is a number assume the thing is a tile
-        if let Ok(x) = args.get_item(0)?.extract::<u32>() {
-            let y = args.get_item(1)?.extract()?;
-            let z = args.get_item(2)?.extract()?;
-            return Ok(vec![PyTile::py_new(x, y, z)]);
+        if let Ok(t) = args.extract::<PyTileArg>() {
+            Ok(vec![PyTile::from(t)])
+        } else {
+            let uno = args
+                .get_item(0)
+                .map(|item| item.extract::<PyTileArg>().map(PyTile::from))??;
+            let dos = args
+                .get_item(1)
+                .map(|item| item.extract::<PyTileArg>().map(PyTile::from))??;
+            let tres = args
+                .get_item(2)
+                .map(|item| item.extract::<PyTileArg>().map(PyTile::from))??;
+            Ok(vec![uno, dos, tres])
         }
+    } else {
+        let mut tiles = Vec::with_capacity(nargs);
+        for el in args.iter_borrowed() {
+            let tile = el.extract::<PyTileArg>().map(PyTile::from)?;
+            tiles.push(tile);
+        }
+        Ok(tiles)
     }
-
-    Err(PyErr::new::<PyValueError, _>(
-        "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
-    ))
 }
 
 #[pyfunction]

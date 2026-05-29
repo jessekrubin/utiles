@@ -125,14 +125,14 @@ impl PyTileType {
 }
 
 #[pyfunction]
-pub(crate) fn tiletype(buffer: &[u8]) -> PyTileType {
-    let ttype = tile_type::tiletype(buffer);
+pub(crate) fn tiletype(buf: &[u8]) -> PyTileType {
+    let ttype = tile_type::tiletype(buf);
     PyTileType(ttype)
 }
 
 #[pyfunction]
-pub(crate) fn tiletype_str(buffer: &[u8]) -> String {
-    tile_type::tiletype_str(buffer)
+pub(crate) fn tiletype_str(buf: &[u8]) -> String {
+    tile_type::tiletype_str(buf)
 }
 
 #[pyfunction]

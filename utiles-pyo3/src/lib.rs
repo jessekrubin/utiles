@@ -16,7 +16,7 @@
 use pyo3::prelude::*;
 use pyutiles::{PyBbox, PyLngLat, PyLngLatBbox, PyTile};
 use utiles::tile_type;
-
+mod float_hash;
 use crate::pyutiles::PyTileType;
 mod cli;
 mod fmt_nbytes;

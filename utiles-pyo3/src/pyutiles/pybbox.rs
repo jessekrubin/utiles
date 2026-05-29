@@ -1,9 +1,12 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use pyo3::basic::CompareOp;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyStopIteration};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use utiles::BBox;
 
+use crate::float_hash::Float64Hash;
 use crate::pyutiles::PyLngLatBbox;
 use crate::pyutiles::pytile::PyTile;
 
@@ -11,6 +14,15 @@ use crate::pyutiles::pytile::PyTile;
 #[derive(Clone)]
 pub struct PyBbox {
     bbox: BBox,
+}
+
+impl std::hash::Hash for PyBbox {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        Float64Hash::from(self.bbox.west).hash(state);
+        Float64Hash::from(self.bbox.south).hash(state);
+        Float64Hash::from(self.bbox.east).hash(state);
+        Float64Hash::from(self.bbox.north).hash(state);
+    }
 }
 
 #[pymethods]
@@ -42,6 +54,12 @@ impl PyBbox {
             self.bbox.right(),
             self.bbox.top()
         )
+    }
+
+    fn __hash__(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
     }
 
     pub fn __str__(&self) -> String {
