@@ -67,20 +67,9 @@ def is_mvt_like(buffer: bytes) -> bool:
     return True
 
 
-def tiletype(buffer: bytes) -> str | bool:
+def tiletype(buffer: bytes) -> str | bool:  # noqa: PLR0911
     if buffer.startswith(b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"):
         return "png"
-    # if (
-    #     buffer[0] == 0x89
-    #     and buffer[1] == 0x50
-    #     and buffer[2] == 0x4E
-    #     and buffer[3] == 0x47
-    #     and buffer[4] == 0x0D
-    #     and buffer[5] == 0x0A
-    #     and buffer[6] == 0x1A
-    #     and buffer[7] == 0x0A
-    # ):
-    #     return "png"
     elif (
         buffer[0] == 0xFF
         and buffer[1] == 0xD8

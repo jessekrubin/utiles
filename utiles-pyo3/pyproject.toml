@@ -1,90 +1,53 @@
 [build-system]
-requires = ["maturin>=1,<2"]
 build-backend = "maturin"
+requires = [ "maturin>=1,<2" ]
 
 [project]
 name = "utiles"
 description = "utiles = (utils + tiles) * rust"
+maintainers = [ { name = "jesse rubin", email = "jessekrubin@gmail.com" } ]
+authors = [ { name = "jesse rubin", email = "jessekrubin@gmail.com" } ]
 requires-python = ">=3.11"
 classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
   "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
-  "Programming Language :: Python",
   "Programming Language :: Rust",
   "Typing :: Typed",
 ]
-authors = [{ name = "jesse rubin", email = "jessekrubin@gmail.com" }]
-maintainers = [{ name = "jesse rubin", email = "jessekrubin@gmail.com" }]
+dynamic = [ "readme", "version" ]
 dependencies = []
-dynamic = ["readme", "version"]
-
-[project.urls]
-Changelog = "https://github.com/jessekrubin/utiles/blob/main/CHANGELOG.md"
-Documentation = "https://github.com/jessekrubin/utiles/blob/main/utiles-pyo3/README.md"
-Homepage = "https://github.com/jessekrubin/utiles"
-Repository = "https://github.com/jessekrubin/utiles"
-
-[project.scripts]
-utiles = "utiles.cli:cli"
-ut = "utiles.cli:cli"
-utilesv1 = "utiles._legacy.cli:cli"
-
-[project.entry-points."rasterio.rio_plugins"]
-utiles = "utiles.rio_plugin:rio_utiles"
-ut = "utiles.rio_plugin:rio_ut"
+urls.Changelog = "https://github.com/jessekrubin/utiles/blob/main/CHANGELOG.md"
+urls.Documentation = "https://github.com/jessekrubin/utiles/blob/main/utiles-pyo3/README.md"
+urls.Homepage = "https://github.com/jessekrubin/utiles"
+urls.Repository = "https://github.com/jessekrubin/utiles"
+scripts.ut = "utiles.cli:cli"
+scripts.utiles = "utiles.cli:cli"
+scripts.utilesv1 = "utiles._legacy.cli:cli"
+entry-points."rasterio.rio_plugins".ut = "utiles.rio_plugin:rio_ut"
+entry-points."rasterio.rio_plugins".utiles = "utiles.rio_plugin:rio_utiles"
 
 [tool.maturin]
 python-source = "python"
-features = ["pyo3/extension-module"]
+features = [ "pyo3/extension-module" ]
 bindings = "pyo3"
 module-name = "utiles._utiles"
-
-[tool.pytest.ini_options]
-testpaths = [
-  "tests",
-]
-addopts = [
-  "--doctest-modules",
-  # "--benchmark-disable",
-]
-norecursedirs = [
-  ".git",
-  ".nox",
-  ".pytest_cache",
-  ".venv",
-  "build",
-  "dist",
-  "scratch",
-  "node_modules",
-  "venv",
-  "*.bak",
-  "*.egg-info",
-  "*.egg",
-  ".*",
-  "target",
-  "utiles-cli", # in testing I write out a bunch of stuff to this dir...
-]
-markers = [
-  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-  "bench",
-]
 
 [tool.ruff]
 target-version = "py311"
 line-length = 88
 include = [
+  "bench/**/*.{py,pyi}",
   "python/utiles/**/*.{py,pyi}",
   "tests/**/*.{py,pyi}",
-  "bench/**/*.{py,pyi}",
 ]
 exclude = [
   ".bzr",
@@ -109,9 +72,7 @@ exclude = [
   "node_modules",
   "venv",
 ]
-
-[tool.ruff.lint]
-select = [
+lint.select = [
   "A",
   "ARG",
   "B",
@@ -120,7 +81,7 @@ select = [
   "E",
   "EM",
   "F",
-   "FBT",
+  "FBT",
   "I",
   "ICN",
   "N",
@@ -138,73 +99,63 @@ select = [
   "W",
   "YTT",
 ]
-ignore = [
-  "TID252",
-  "A003",
-  # Allow non-abstract empty methods in abstract base classes
-  "B027",
-  # Allow boolean positional values in function calls, like `dict.get(... True)`
-  "FBT003",
-  # Ignore checks for possible passwords
-  "S105",
-  "S106",
-  "S107",
-  # Ignore complexity
-  "C901",
-  "PLR0911",
-  "PLR0912",
-  "PLR0913",
-  "PLR0915",
-  #  shadowing builtins
-  "A002",
-  "E501", # line length
-  # type annotations union
-#   "UP007",
-  # todo figure out if this is needed
-#   "UP006",
-  # magic value cmp super annoying
-  "PLR2004",
-  "PLW0120",
+lint.ignore = [
+  "A002",    # builtin-argument-shadowing
+  "C901",    # complex-structure
+  "E501",    # line-too-long
+  "PLR0912", # too-many-branches
+  "PLR0913", # too-many-arguments
+  "PLR2004", # magic-value-comparison
 ]
-unfixable = [
+lint.per-file-ignores."bench/**/*" = [ "PLR1714", "PLR2004", "S101", "TID252" ]
+lint.per-file-ignores."python/utiles/_legacy/cli.py" = [ "A002", "FBT001", "FBT002", "PLW0120" ]
+# Tests can use magic values, assertions, and relative imports
+lint.per-file-ignores."tests/**/*" = [ "E501", "PLR1714", "PLR2004", "S101", "S608", "TID252" ]
+lint.unfixable = [
   # Don't touch unused imports
   "F401",
 ]
-
-[tool.ruff.lint.isort]
-known-first-party = ["utiles"]
-
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
-
-[tool.ruff.lint.per-file-ignores]
-# Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252", "PLR1714", "S608"]
-"bench/**/*" = ["PLR2004", "S101", "TID252", "PLR1714"]
-"python/utiles/_legacy/cli.py" = ["FBT001", "FBT002"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.coverage.run]
-source_pkgs = ["utiles", "tests"]
-branch = true
-parallel = true
-omit = [
-  "python/utiles/__about__.py",
-]
-
-[tool.coverage.paths]
-utiles = ["utiles", "*/utiles/utiles"]
-tests = ["tests", "*/utiles/tests"]
-
-[tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
+lint.flake8-tidy-imports.ban-relative-imports = "all"
+lint.isort.known-first-party = [ "utiles" ]
+lint.pydocstyle.convention = "google"
 
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
+
+[tool.pytest]
+ini_options.testpaths = [ "tests" ]
+ini_options.addopts = [
+  "--doctest-modules",
+  # "--benchmark-disable",
+]
+ini_options.norecursedirs = [
+  ".git",
+  ".nox",
+  ".pytest_cache",
+  ".venv",
+  "build",
+  "dist",
+  "scratch",
+  "node_modules",
+  "venv",
+  "*.bak",
+  "*.egg-info",
+  "*.egg",
+  ".*",
+  "target",
+  "utiles-cli",    # in testing I write out a bunch of stuff to this dir...
+]
+ini_options.markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "bench",
+]
+
+[tool.coverage]
+run.branch = true
+run.omit = [ "python/utiles/__about__.py" ]
+run.parallel = true
+run.source_pkgs = [ "tests", "utiles" ]
+paths.tests = [ "tests", "*/utiles/tests" ]
+paths.utiles = [ "utiles", "*/utiles/utiles" ]
+report.exclude_lines = [ "if __name__ == .__main__.:", "if TYPE_CHECKING:", "no cov" ]

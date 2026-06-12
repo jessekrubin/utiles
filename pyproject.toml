@@ -35,9 +35,7 @@ dev = [
 [tool.uv]
 # [tool.uv]
 # dev-dependencies = [
-
 # "click>=8.1.0,<8.2.1",
-
 # "hypothesis>=6.135.4",
 # ]
 workspace.members = [
