@@ -16,6 +16,7 @@
 - use `prek` instead of `pre-commit`
 - pin github actions
 - format docs/markdown files
+- update to pyo3-v0.29
 
 ---
 
