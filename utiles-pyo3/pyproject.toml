@@ -161,7 +161,7 @@ ignore = [
   # type annotations union
 #   "UP007",
   # todo figure out if this is needed
-  "UP006",
+#   "UP006",
   # magic value cmp super annoying
   "PLR2004",
   "PLW0120",

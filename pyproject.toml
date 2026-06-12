@@ -18,7 +18,7 @@ dev = [
   # click not equal to 8.2.1 because of breaking changes in 8.2.1
   "click>=8.1.0,!=8.2.1",
   "hypothesis>=6.142.0",
-  "maturin>=1.9.6",
+  "maturin>=1.14.0",
   "mercantile>=1.2.1",
   "nox>=2025.10.14",
   "pmtiles>=3.4.1",
