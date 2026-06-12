@@ -42,12 +42,12 @@ jobs:
         with:
           enable-cache: true
       - name: install-python
-        run: uv python install 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11
+        run: uv python install 3.11 3.12 3.13 3.14 pypy3.11
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11
+          args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: auto
           working-directory: ./utiles-pyo3
@@ -86,12 +86,12 @@ jobs:
         with:
           enable-cache: true
       - name: install-python
-        run: uv python install 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11
+        run: uv python install 3.11 3.12 3.13 3.14 3.14t pypy3.11
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11
+          args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
           sccache: "true"
           manylinux: musllinux_1_2
           working-directory: ./utiles-pyo3
@@ -143,12 +143,12 @@ jobs:
         with:
           enable-cache: true
       - name: install-python
-        run: uv python install 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11
+        run: uv python install 3.11 3.12 3.13 3.14 3.14t pypy3.11
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11
+          args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           working-directory: ./utiles-pyo3
       - name: Upload wheels

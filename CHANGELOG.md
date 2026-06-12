@@ -5,12 +5,16 @@
 - python
   - custom tile args parsing
 - src
-  - use unstable formatting options `cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true`
+  - use unstable formatting options
+    `cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true`
 - Use `typed-header` feature of `axum-extra` for tilejson(s)
 - Upgrade `rusqlite` to v0.38.0
-  - `metadata_duplicate_key_values` now returns `(String, String, u32)` count instead of
-    `usize`
-  - use `i64` where appropriate for sqlite integer values instead of `usize`/`u64`
+  - `metadata_duplicate_key_values` now returns `(String, String, u32)` count
+    instead of `usize`
+  - use `i64` where appropriate for sqlite integer values instead of
+    `usize`/`u64`
+- use `prek` instead of `pre-commit`
+- pin github actions
 
 ---
 

@@ -2,43 +2,43 @@
 
 ## Table of contents
 
-| Command | Description |
-| ------- | ----------- |
-| [about](#about) | Echo info about utiles |
-| [agg-hash](#agg-hash) | Aggregate tile hashes for tiles-db |
-| [bounding-tile](#bounding-tile) | Echo bounding tile at zoom for bbox / geojson |
-| [burn](#burn) | Burn tiles from `GeoJSON` stream at zoom level (tile coverage) |
-| [children](#children) | Echo children tiles of input tiles |
-| [commands](#commands) | list all commands |
-| [copy](#copy) | Copy tiles from src -> dst |
-| [dbcontains](#dbcontains) | Determine if mbtiles contains a latlong |
-| [dev](#dev) | Development/Playground command (hidden) |
-| [edges](#edges) | Echo edge tiles from stream of xyz tiles |
-| [enumerate](#enumerate) | Enumerate tiles db |
-| [fmtstr](#fmtstr) | Format json-tiles `[x, y, z]` tiles w/ format-string |
-| [info](#info) | Echo mbtiles info/stats |
-| [lint](#lint) | Lint mbtiles file(s) (wip) |
-| [merge](#merge) | Merge tiles from stream removing parent tiles if children are present |
-| [metadata](#metadata) | Echo metadata (table) as json arr/obj |
-| [metadata-set](#metadata-set) | Set metadata key/value or from `json` file if key is fspath |
-| [neighbors](#neighbors) | Echo the neighbor tiles for input tiles |
-| [optimize](#optimize) | Optimize tiles-db |
-| [parent](#parent) | Echo parent tile of input tiles |
-| [pmtileid](#pmtileid) | Converts tile(s) to/from pmtile-id/[x, y, z] |
-| [quadkey](#quadkey) | Converts tiles to/from quadkey/[x, y, z] |
-| [rimraf](#rimraf) | rm-rf dirpath |
-| [serve](#serve) | utiles server (wip) |
-| [shapes](#shapes) | Echo tiles as `GeoJSON` feature collections/sequences |
-| [sqlite](#sqlite) | sqlite utils/cmds |
-| [tilejson](#tilejson) | Echo the `tile.json` for mbtiles file |
-| [tiles](#tiles) | Echo tiles at zoom intersecting geojson bbox / feature / collection |
-| [touch](#touch) | Create new mbtiles db w/ schema |
-| [update](#update) | Update mbtiles db |
-| [vacuum](#vacuum) | vacuum sqlite db inplace/into |
-| [webpify](#webpify) | Convert raster mbtiles to webp format |
-| [zxyify](#zxyify) | zxyify/unzxyify tiles-db |
+| Command                         | Description                                                           |
+| ------------------------------- | --------------------------------------------------------------------- |
+| [about](#about)                 | Echo info about utiles                                                |
+| [agg-hash](#agg-hash)           | Aggregate tile hashes for tiles-db                                    |
+| [bounding-tile](#bounding-tile) | Echo bounding tile at zoom for bbox / geojson                         |
+| [burn](#burn)                   | Burn tiles from `GeoJSON` stream at zoom level (tile coverage)        |
+| [children](#children)           | Echo children tiles of input tiles                                    |
+| [commands](#commands)           | list all commands                                                     |
+| [copy](#copy)                   | Copy tiles from src -> dst                                            |
+| [dbcontains](#dbcontains)       | Determine if mbtiles contains a latlong                               |
+| [dev](#dev)                     | Development/Playground command (hidden)                               |
+| [edges](#edges)                 | Echo edge tiles from stream of xyz tiles                              |
+| [enumerate](#enumerate)         | Enumerate tiles db                                                    |
+| [fmtstr](#fmtstr)               | Format json-tiles `[x, y, z]` tiles w/ format-string                  |
+| [info](#info)                   | Echo mbtiles info/stats                                               |
+| [lint](#lint)                   | Lint mbtiles file(s) (wip)                                            |
+| [merge](#merge)                 | Merge tiles from stream removing parent tiles if children are present |
+| [metadata](#metadata)           | Echo metadata (table) as json arr/obj                                 |
+| [metadata-set](#metadata-set)   | Set metadata key/value or from `json` file if key is fspath           |
+| [neighbors](#neighbors)         | Echo the neighbor tiles for input tiles                               |
+| [optimize](#optimize)           | Optimize tiles-db                                                     |
+| [parent](#parent)               | Echo parent tile of input tiles                                       |
+| [pmtileid](#pmtileid)           | Converts tile(s) to/from pmtile-id/[x, y, z]                          |
+| [quadkey](#quadkey)             | Converts tiles to/from quadkey/[x, y, z]                              |
+| [rimraf](#rimraf)               | rm-rf dirpath                                                         |
+| [serve](#serve)                 | utiles server (wip)                                                   |
+| [shapes](#shapes)               | Echo tiles as `GeoJSON` feature collections/sequences                 |
+| [sqlite](#sqlite)               | sqlite utils/cmds                                                     |
+| [tilejson](#tilejson)           | Echo the `tile.json` for mbtiles file                                 |
+| [tiles](#tiles)                 | Echo tiles at zoom intersecting geojson bbox / feature / collection   |
+| [touch](#touch)                 | Create new mbtiles db w/ schema                                       |
+| [update](#update)               | Update mbtiles db                                                     |
+| [vacuum](#vacuum)               | vacuum sqlite db inplace/into                                         |
+| [webpify](#webpify)             | Convert raster mbtiles to webp format                                 |
+| [zxyify](#zxyify)               | zxyify/unzxyify tiles-db                                              |
 
-___
+---
 
 ## about
 
@@ -55,7 +55,7 @@ Options:
 
 ```
 
-___
+---
 
 ## agg-hash
 
@@ -82,7 +82,7 @@ Options:
 
 ```
 
-___
+---
 
 ## bounding-tile
 
@@ -104,7 +104,7 @@ Usage: utiles bounding-tile [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -121,7 +121,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -134,7 +134,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -158,7 +158,7 @@ Options:
 
 ```
 
-___
+---
 
 ## burn
 
@@ -172,7 +172,7 @@ Arguments:
           Zoom level (0-30)
 
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -189,7 +189,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -202,7 +202,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -226,7 +226,7 @@ Options:
 
 ```
 
-___
+---
 
 ## children
 
@@ -247,7 +247,7 @@ Usage: utiles children [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -264,7 +264,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -277,7 +277,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -304,7 +304,7 @@ Options:
 
 ```
 
-___
+---
 
 ## commands
 
@@ -315,15 +315,15 @@ Usage: utiles commands [OPTIONS]
 
 Options:
       --debug     debug mode (print/log more)
-  -f, --full      
-  -t, --table     
+  -f, --full
+  -t, --table
       --trace     trace mode (print/log EVEN more)
       --log-json  format log as NDJSON
   -h, --help      Print help
 
 ```
 
-___
+---
 
 ## copy
 
@@ -356,7 +356,7 @@ Options:
 
 ```
 
-___
+---
 
 ## dbcontains
 
@@ -377,7 +377,7 @@ Options:
 
 ```
 
-___
+---
 
 ## dev
 
@@ -387,7 +387,7 @@ Development/Playground command (hidden)
 Usage: utiles dev [OPTIONS] [FSPATH]
 
 Arguments:
-  [FSPATH]  
+  [FSPATH]
 
 Options:
       --debug     debug mode (print/log more)
@@ -397,7 +397,7 @@ Options:
 
 ```
 
-___
+---
 
 ## edges
 
@@ -408,14 +408,14 @@ Usage: utiles edges [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
           debug mode (print/log more)
 
       --wrapx
-          
+
 
       --seq
           Write tiles as RS-delimited JSON sequence
@@ -431,7 +431,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -444,7 +444,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -465,7 +465,7 @@ Options:
 
 ```
 
-___
+---
 
 ## enumerate
 
@@ -475,7 +475,7 @@ Enumerate tiles db
 Usage: utiles enumerate [OPTIONS] <FSPATHS>...
 
 Arguments:
-  <FSPATHS>...  
+  <FSPATHS>...
 
 Options:
       --bbox <BBOX>        bbox(es) (west, south, east, north)
@@ -490,11 +490,11 @@ Options:
 
 ```
 
-___
+---
 
 ## fmtstr
 
-```bash
+````bash
 Format json-tiles `[x, y, z]` tiles w/ format-string
 
 fmt-tokens:
@@ -524,7 +524,7 @@ Usage: utiles fmtstr [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -541,7 +541,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -554,7 +554,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -576,9 +576,9 @@ Options:
   -h, --help
           Print help (see a summary with '-h')
 
-```
+````
 
-___
+---
 
 ## info
 
@@ -593,7 +593,7 @@ Arguments:
 Options:
       --debug       debug mode (print/log more)
   -m, --min         compact/minified json (default: false)
-      --full        
+      --full
       --trace       trace mode (print/log EVEN more)
       --log-json    format log as NDJSON
   -s, --statistics  [aliases: stats]
@@ -601,7 +601,7 @@ Options:
 
 ```
 
-___
+---
 
 ## lint
 
@@ -621,7 +621,7 @@ Options:
 
 ```
 
-___
+---
 
 ## merge
 
@@ -632,7 +632,7 @@ Usage: utiles merge [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -640,11 +640,11 @@ Options:
 
   -Z, --minzoom <MINZOOM>
           min zoom level (0-30) to merge to
-          
+
           [default: 0]
 
   -s, --sort
-          
+
 
       --trace
           trace mode (print/log EVEN more)
@@ -660,7 +660,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -673,7 +673,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -694,7 +694,7 @@ Options:
 
 ```
 
-___
+---
 
 ## metadata
 
@@ -717,7 +717,7 @@ Options:
 
 ```
 
-___
+---
 
 ## metadata-set
 
@@ -741,7 +741,7 @@ Options:
 
 ```
 
-___
+---
 
 ## neighbors
 
@@ -756,7 +756,7 @@ Usage: utiles neighbors [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -773,7 +773,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -786,7 +786,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -810,7 +810,7 @@ Options:
 
 ```
 
-___
+---
 
 ## optimize
 
@@ -832,7 +832,7 @@ Options:
 
 ```
 
-___
+---
 
 ## parent
 
@@ -843,7 +843,7 @@ Usage: utiles parent [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -860,7 +860,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -873,7 +873,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -900,7 +900,7 @@ Options:
 
 ```
 
-___
+---
 
 ## pmtileid
 
@@ -925,7 +925,7 @@ Usage: utiles pmtileid [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -942,7 +942,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -955,7 +955,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -979,7 +979,7 @@ Options:
 
 ```
 
-___
+---
 
 ## quadkey
 
@@ -1004,7 +1004,7 @@ Usage: utiles quadkey [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1021,7 +1021,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1034,7 +1034,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -1058,7 +1058,7 @@ Options:
 
 ```
 
-___
+---
 
 ## rimraf
 
@@ -1076,12 +1076,12 @@ Options:
   -n, --dryrun    dryrun (don't actually rm)
       --trace     trace mode (print/log EVEN more)
       --log-json  format log as NDJSON
-      --verbose   
+      --verbose
   -h, --help      Print help
 
 ```
 
-___
+---
 
 ## serve
 
@@ -1104,7 +1104,7 @@ Options:
 
 ```
 
-___
+---
 
 ## shapes
 
@@ -1123,14 +1123,14 @@ Usage: utiles shapes [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
           debug mode (print/log more)
 
       --seq
-          
+
 
       --precision <PRECISION>
           Decimal precision of coordinates
@@ -1167,7 +1167,7 @@ Options:
 
 ```
 
-___
+---
 
 ## sqlite
 
@@ -1190,7 +1190,7 @@ Options:
 
 ```
 
-___
+---
 
 ## tilejson
 
@@ -1212,7 +1212,7 @@ Options:
 
 ```
 
-___
+---
 
 ## tiles
 
@@ -1259,7 +1259,7 @@ Arguments:
           Zoom level (0-30)
 
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1276,7 +1276,7 @@ Options:
 
   -F, --fmt <FMT>
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               > utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1289,7 +1289,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -> [x, y, z]
               `{json_obj}`/`{obj}`   -> {x: x, y: y, z: z}
@@ -1313,7 +1313,7 @@ Options:
 
 ```
 
-___
+---
 
 ## touch
 
@@ -1336,7 +1336,7 @@ Options:
 
 ```
 
-___
+---
 
 ## update
 
@@ -1358,7 +1358,7 @@ Options:
 
 ```
 
-___
+---
 
 ## vacuum
 
@@ -1382,7 +1382,7 @@ Options:
 
 ```
 
-___
+---
 
 ## webpify
 
@@ -1406,7 +1406,7 @@ Options:
 
 ```
 
-___
+---
 
 ## zxyify
 

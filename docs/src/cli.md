@@ -1,35 +1,43 @@
 # cli
 
-The utiles cli can be installed via cargo or pip; the python library bundles
-a version of the cli that can be run just as `utiles` and/or `python -m utiles`.
+The utiles cli can be installed via cargo or pip; the python library bundles a
+version of the cli that can be run just as `utiles` and/or `python -m utiles`.
 
-The cli is a collection of commands for streaming tiles in text format (excellent for piping) and working with mbtiles/tile-db files.
+The cli is a collection of commands for streaming tiles in text format
+(excellent for piping) and working with mbtiles/tile-db files.
 
-All of the `mercantile` cli commands are available, and `burn` and `edges` from `supermercado` are also available.
+All of the `mercantile` cli commands are available, and `burn` and `edges` from
+`supermercado` are also available.
 
-
-___
+---
 
 ## What about the `mbtiles` cli in the martin repo? [2025-01-14]
 
-The `mbtiles` cli is very good and has significant overlap with the `utiles` cli. 
+The `mbtiles` cli is very good and has significant overlap with the `utiles`
+cli.
 
-(imo) The most intriguing feature of the `mbtiles` cli is the `diff`/`patch` commands
-that allow for comparing and updating mbtiles files; `utiles` does not have this feature.
+(imo) The most intriguing feature of the `mbtiles` cli is the `diff`/`patch`
+commands that allow for comparing and updating mbtiles files; `utiles` does not
+have this feature.
 
-`utiles` does have a streaming mode copy command that allows copying tiles from one mbtiles db to another without using the `sqlite-ATTACH` command; this is in my testing and experience less crash-prone and much faster on super large tile-dbs.
+`utiles` does have a streaming mode copy command that allows copying tiles from
+one mbtiles db to another without using the `sqlite-ATTACH` command; this is in
+my testing and experience less crash-prone and much faster on super large
+tile-dbs.
 
-The cli commands in `utiles` that interact with mbtiles are more focused `raster` format `mbtiles` files.
-
+The cli commands in `utiles` that interact with mbtiles are more focused
+`raster` format `mbtiles` files.
 
 ### `agg-hash`
 
+`utiles` adopted the standardized way of calculating an `aggregate-tiles-hash`
+for an mbtiles file, and builds on it to allow for hash-algorithms aside from
+`md5`. The cli command also allows for selecting zoom-levels, and bounding-boxes
+to calculate the hash over.
 
-`utiles` adopted the standardized way of calculating an `aggregate-tiles-hash` for an mbtiles file, and builds on it to allow for hash-algorithms aside from `md5`. The cli command also allows for selecting zoom-levels, and bounding-boxes to calculate the hash over.
-
-The default hashing alg is `md5` to match the martin `mbtiles` cli; but may change if I get around to updating some of our (dgi's) very large datasets; 
+The default hashing alg is `md5` to match the martin `mbtiles` cli; but may
+change if I get around to updating some of our (dgi's) very large datasets;
 `xxh64` is generally very fast.
-
 
 ```bash
 > utiles agg-hash -z 2 osm-standard.z0z4.mbtiles
@@ -67,8 +75,6 @@ The default hashing alg is `md5` to match the martin `mbtiles` cli; but may chan
 ```
 
 ## `copy`
-
-
 
 ```bash
 > utiles tj osm-standard.z0z4.mbtiles
