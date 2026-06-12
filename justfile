@@ -118,8 +118,6 @@ check-features:
 powerset:
     cargo hack --exclude-features internal --feature-powerset check
 
-
-
 pipsync:
     uv pip sync ./utiles-pyo3/requirements.dev.txt
 

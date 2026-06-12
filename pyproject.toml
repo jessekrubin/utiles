@@ -11,34 +11,42 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
 ]
-dependencies = [  ]
-
-#[tool.uv]
-#dev-dependencies = [
-  #"click>=8.1.0,<8.2.1",
-  #"hypothesis>=6.135.4",
-#]
-
-[tool.uv.workspace]
-members = [
-  "utiles-pyo3",
-]
+dependencies = []
 
 [dependency-groups]
 dev = [
-    # click not equal to 8.2.1 because of breaking changes in 8.2.1
-    "click>=8.1.0,!=8.2.1",
-    "hypothesis>=6.142.0",
-    "maturin>=1.9.6",
-    "mercantile>=1.2.1",
-    "nox>=2025.10.14",
-    "pmtiles>=3.4.1",
-    "prek>=0.3.1",
-    "pytest>=8.4.2",
-    "pytest-benchmark>=5.1.0",
-    "pytest-cov>=7.0.0",
-    "pytest-xdist>=3.8.0",
-    "ruff>=0.14.1",
-    "tomli>=2.3.0",
-    "typing-extensions>=4.15.0",
+  # click not equal to 8.2.1 because of breaking changes in 8.2.1
+  "click>=8.1.0,!=8.2.1",
+  "hypothesis>=6.142.0",
+  "maturin>=1.9.6",
+  "mercantile>=1.2.1",
+  "nox>=2025.10.14",
+  "pmtiles>=3.4.1",
+  "prek>=0.3.1",
+  "pytest>=8.4.2",
+  "pytest-benchmark>=5.1.0",
+  "pytest-cov>=7.0.0",
+  "pytest-xdist>=3.8.0",
+  "ruff>=0.14.1",
+  "tomli>=2.3.0",
+  "typing-extensions>=4.15.0",
 ]
+
+[tool.uv]
+# [tool.uv]
+# dev-dependencies = [
+
+# "click>=8.1.0,<8.2.1",
+
+# "hypothesis>=6.135.4",
+# ]
+workspace.members = [
+  "utiles-pyo3",
+]
+
+[tool.rumdl]
+disable = [ "MD033" ]
+exclude = []
+MD013.code_blocks = false
+# per-file-ignores."README.md" = [ "MD036" ]
+per-file-ignores."docs/src/__index__.md" = [ "MD041" ]

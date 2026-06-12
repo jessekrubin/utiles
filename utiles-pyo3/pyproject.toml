@@ -120,7 +120,7 @@ select = [
   "E",
   "EM",
   "F",
-  #  "FBT",
+   "FBT",
   "I",
   "ICN",
   "N",
@@ -181,6 +181,7 @@ ban-relative-imports = "all"
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252", "PLR1714", "S608"]
 "bench/**/*" = ["PLR2004", "S101", "TID252", "PLR1714"]
+"python/utiles/_legacy/cli.py" = ["FBT001", "FBT002"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

@@ -1,6 +1,6 @@
 # REF
 
-# ZOOM LEVELS
+## ZOOM LEVELS
 
 <details>
 <summary>zoom info</summary>
@@ -44,7 +44,7 @@
 
 Zoom levels
 
-```
+```text
     zoom               ntiles                total  rowcol_range  max_rowcol
 0      0                    1                    1             0           1
 1      1                    4                    5             1           2

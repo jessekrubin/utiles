@@ -15,6 +15,7 @@
     `usize`/`u64`
 - use `prek` instead of `pre-commit`
 - pin github actions
+- format docs/markdown files
 
 ---
 
@@ -55,8 +56,8 @@
     return children in the order of `top-left`, `top-right`, `bottom-right`,
     `bottom-left` which I call 'd-ordering'
 - `cli`
-  - format string `{projwin}` and `{projwin_web}` changed to return ` ` space
-    separated coords
+  - format string `{projwin}` and `{projwin_web}` changed to return `" "`
+    (space) separated coords
 
 ---
 
@@ -169,7 +170,7 @@
 - fmt-str command and option `--fmt` added `tiles` command; allows string
   formatting of json-tiles:
 
-```
+```text
 Format json-tiles format-string
 fmt-tokens:
    `{json_arr}`/`{json}`  -> [x, y, z]
