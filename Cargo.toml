@@ -54,8 +54,8 @@ num_cpus = "1.17.0"
 owo-colors = { version = "4.3.0", features = ["supports-color"] }
 oxipng = { version = "10.1.1", features = [] }
 pmtiles = { version = "0.23.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
-pyo3 = "0.28"
-pyo3-build-config = "0.28"
+pyo3 = "0.29"
+pyo3-build-config = "0.29"
 # TODO: remove fallible_uint usage
 rusqlite = { version = "0.39.0", features = ["bundled", "vtab", "blob"] }
 # rusqlite = { version = "0.38.0", features = ["bundled", "vtab", "blob", "fallible_uint"] }
