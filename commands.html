@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-b0ef477b.js";
+            window.path_to_searchindex_js = "searchindex-579587f4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-3a5d799e.js"></script>
@@ -279,7 +279,7 @@ Usage: utiles bounding-tile [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -296,7 +296,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -309,7 +309,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -343,7 +343,7 @@ Arguments:
           Zoom level (0-30)
 
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -360,7 +360,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -373,7 +373,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -414,7 +414,7 @@ Usage: utiles children [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -431,7 +431,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -444,7 +444,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -478,8 +478,8 @@ Usage: utiles commands [OPTIONS]
 
 Options:
       --debug     debug mode (print/log more)
-  -f, --full      
-  -t, --table     
+  -f, --full
+  -t, --table
       --trace     trace mode (print/log EVEN more)
       --log-json  format log as NDJSON
   -h, --help      Print help
@@ -538,7 +538,7 @@ Options:
 Usage: utiles dev [OPTIONS] [FSPATH]
 
 Arguments:
-  [FSPATH]  
+  [FSPATH]
 
 Options:
       --debug     debug mode (print/log more)
@@ -555,14 +555,14 @@ Usage: utiles edges [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
           debug mode (print/log more)
 
       --wrapx
-          
+
 
       --seq
           Write tiles as RS-delimited JSON sequence
@@ -578,7 +578,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -591,7 +591,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -618,7 +618,7 @@ Options:
 Usage: utiles enumerate [OPTIONS] &lt;FSPATHS&gt;...
 
 Arguments:
-  &lt;FSPATHS&gt;...  
+  &lt;FSPATHS&gt;...
 
 Options:
       --bbox &lt;BBOX&gt;        bbox(es) (west, south, east, north)
@@ -663,7 +663,7 @@ Usage: utiles fmtstr [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -680,7 +680,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -693,7 +693,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -728,7 +728,7 @@ Arguments:
 Options:
       --debug       debug mode (print/log more)
   -m, --min         compact/minified json (default: false)
-      --full        
+      --full
       --trace       trace mode (print/log EVEN more)
       --log-json    format log as NDJSON
   -s, --statistics  [aliases: stats]
@@ -759,7 +759,7 @@ Usage: utiles merge [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -767,11 +767,11 @@ Options:
 
   -Z, --minzoom &lt;MINZOOM&gt;
           min zoom level (0-30) to merge to
-          
+
           [default: 0]
 
   -s, --sort
-          
+
 
       --trace
           trace mode (print/log EVEN more)
@@ -787,7 +787,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -800,7 +800,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -871,7 +871,7 @@ Usage: utiles neighbors [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -888,7 +888,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -901,7 +901,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -950,7 +950,7 @@ Usage: utiles parent [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -967,7 +967,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -980,7 +980,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1028,7 +1028,7 @@ Usage: utiles pmtileid [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1045,7 +1045,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1058,7 +1058,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1103,7 +1103,7 @@ Usage: utiles quadkey [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1120,7 +1120,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1133,7 +1133,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1171,7 +1171,7 @@ Options:
   -n, --dryrun    dryrun (don't actually rm)
       --trace     trace mode (print/log EVEN more)
       --log-json  format log as NDJSON
-      --verbose   
+      --verbose
   -h, --help      Print help
 
 </code></pre>
@@ -1210,14 +1210,14 @@ Usage: utiles shapes [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
           debug mode (print/log more)
 
       --seq
-          
+
 
       --precision &lt;PRECISION&gt;
           Decimal precision of coordinates
@@ -1334,7 +1334,7 @@ Arguments:
           Zoom level (0-30)
 
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1351,7 +1351,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1364,7 +1364,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}

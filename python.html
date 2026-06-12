@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-b0ef477b.js";
+            window.path_to_searchindex_js = "searchindex-579587f4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-3a5d799e.js"></script>
@@ -186,8 +186,9 @@
 <a href="https://img.shields.io/pypi/wheel/utiles.svg"><img src="https://img.shields.io/pypi/wheel/utiles.svg?style=flat-square" alt="Wheel"></a></p>
 <p><code>utiles = utils + tiles</code> OR <code>utiles = ultra-tiles</code> depending on the day.</p>
 <p>Fast spherical mercator geo/tile util(e)ities.</p>
-<p>A mostly drop-in replacement for <a href="https://github.com/mapbox/mercantile">mercantile</a> written w/ rust, plus several other
-util(e)ities.</p>
+<p>A mostly drop-in replacement for
+<a href="https://github.com/mapbox/mercantile">mercantile</a> written w/ rust, plus several
+other util(e)ities.</p>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <pre><code class="language-bash">pip install utiles
 uv add utiles
@@ -246,18 +247,19 @@ False
 </code></pre>
 <h2 id="about"><a class="header" href="#about">About</a></h2>
 <h3 id="why"><a class="header" href="#why">Why?</a></h3>
-<p>I use mercantile regularly and wished it were a bit more ergonomic, had type annotations, and was faster, but overall
-it’s a great library.</p>
+<p>I use mercantile regularly and wished it were a bit more ergonomic, had type
+annotations, and was faster, but overall it’s a great library.</p>
 <p>This was an excuse to learn some more rust as well as pyo3.</p>
 <p><strong>Do I/you REALLY need a rust-port of mercantile?</strong></p>
-<p>I don’t know, decide for yourself. <code>utiles</code> is certainly faster than <code>mercantile</code> for some things (see benchmarks below)</p>
+<p>I don’t know, decide for yourself. <code>utiles</code> is certainly faster than
+<code>mercantile</code> for some things (see benchmarks below)</p>
 <p><strong>Is it really a drop in replacement for mercantile?</strong></p>
-<p>Not quite, but it’s close. utiles doesn’t throw the same exceptions as mercantile, instead it throws <code>ValueError</code>’s and
-<code>TypeError</code>’s.</p>
-<p>There might be other differences, but I have been using it instead of mercantile for a bit now and it works pretty
-decent, tho I am open to suggestions!</p>
+<p>Not quite, but it’s close. utiles doesn’t throw the same exceptions as
+mercantile, instead it throws <code>ValueError</code>’s and <code>TypeError</code>’s.</p>
+<p>There might be other differences, but I have been using it instead of mercantile
+for a bit now and it works pretty decent, tho I am open to suggestions!</p>
 <h2 id="benchmarks-wip"><a class="header" href="#benchmarks-wip">Benchmarks (WIP)</a></h2>
-<pre><code>---------------------------------------------------------------------------------------------------- benchmark 'quadkey': 12 tests -----------------------------------------------------------------------------------------------------
+<pre><code class="language-text">---------------------------------------------------------------------------------------------------- benchmark 'quadkey': 12 tests -----------------------------------------------------------------------------------------------------
 Name (time in ns)                                        Min                     Max                  Mean              StdDev                Median                 IQR            Outliers  OPS (Kops/s)            Rounds  Iterations
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 test_quadkey_bench[utiles-(0, 0, 0)]                199.9942 (1.0)       47,100.0021 (8.78)       284.7909 (1.0)      315.1058 (6.70)       299.9950 (1.06)     100.0008 (&gt;1000.0)  966;1164    3,511.3476 (1.0)       38911           1
@@ -298,18 +300,6 @@ test_ul_bench[mercantile-(486, 332, 10)]     1,099.9938 (5.38)      90,200.0029 
 test_ul_bench[mercantile-(486, 332, 20)]     1,099.9938 (5.38)     107,300.0021 (14.98)    1,264.2361 (4.79)       594.6154 (4.77)     1,200.0019 (5.41)     100.0008 (5.00)      1522;2265      790.9915 (0.21)     123457           1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 </code></pre>
-<h2 id="todo"><a class="header" href="#todo">TODO:</a></h2>
-<ul>
-<li><input disabled="" type="checkbox" checked=""> benchmark against mercantile</li>
-<li><input disabled="" type="checkbox" checked=""> Split library into <code>utiles</code> (rust lib) and <code>utiles-python</code> (python/pip package)?</li>
-<li><input disabled="" type="checkbox" checked=""> Re-write cli in rust with clap?</li>
-<li><strong>Maybe:</strong>
-<ul>
-<li>[] Mbtiles support for the python lib??</li>
-<li>[] Reading/writing mvt files?</li>
-</ul>
-</li>
-</ul>
 
                     </main>
 

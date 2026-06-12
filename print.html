@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-b0ef477b.js";
+            window.path_to_searchindex_js = "searchindex-579587f4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-3a5d799e.js"></script>
@@ -178,7 +178,7 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <p><strong>updated:</strong> <code>2026-06-01T18:41:39.888029208+00:00[Etc/UTC]</code></p>
+                        <p><strong>updated:</strong> <code>2026-06-12T18:22:35.694003593+00:00[Etc/UTC]</code></p>
 <h1 id="utiles"><a class="header" href="#utiles">utiles</a></h1>
 <p>utiles = utils + tiles</p>
 <p><em>web map tile utilities, batching, serving, python and bears (oh-my)</em></p>
@@ -221,8 +221,7 @@ slim crate with a lib/cli (<code>utiles</code>), that has a python package wrapp
 other util(e)ities</p>
 <p><a href="https://github.com/jessekrubin/utiles/tree/main/utiles-pyo3">py-utiles</a></p>
 <hr>
-<h1 id="dev"><a class="header" href="#dev">dev</a></h1>
-<h2 id="contributing"><a class="header" href="#contributing">Contributing</a></h2>
+<h2 id="development--contributing"><a class="header" href="#development--contributing">development &amp; contributing</a></h2>
 <ul>
 <li>Please do! Would love some feedback!</li>
 <li>Be kind!</li>
@@ -278,7 +277,7 @@ non-existent contributors list.</li>
 </div>
 </details>
 <p>Zoom levels</p>
-<pre><code>    zoom               ntiles                total  rowcol_range  max_rowcol
+<pre><code class="language-text">    zoom               ntiles                total  rowcol_range  max_rowcol
 0      0                    1                    1             0           1
 1      1                    4                    5             1           2
 2      2                   16                   21             3           4
@@ -544,20 +543,32 @@ non-existent contributors list.</li>
 </details>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="cli"><a class="header" href="#cli">cli</a></h1>
-<p>The utiles cli can be installed via cargo or pip; the python library bundles
-a version of the cli that can be run just as <code>utiles</code> and/or <code>python -m utiles</code>.</p>
-<p>The cli is a collection of commands for streaming tiles in text format (excellent for piping) and working with mbtiles/tile-db files.</p>
-<p>All of the <code>mercantile</code> cli commands are available, and <code>burn</code> and <code>edges</code> from <code>supermercado</code> are also available.</p>
+<p>The utiles cli can be installed via cargo or pip; the python library bundles a
+version of the cli that can be run just as <code>utiles</code> and/or <code>python -m utiles</code>.</p>
+<p>The cli is a collection of commands for streaming tiles in text format
+(excellent for piping) and working with mbtiles/tile-db files.</p>
+<p>All of the <code>mercantile</code> cli commands are available, and <code>burn</code> and <code>edges</code> from
+<code>supermercado</code> are also available.</p>
 <hr>
 <h2 id="what-about-the-mbtiles-cli-in-the-martin-repo-2025-01-14"><a class="header" href="#what-about-the-mbtiles-cli-in-the-martin-repo-2025-01-14">What about the <code>mbtiles</code> cli in the martin repo? [2025-01-14]</a></h2>
-<p>The <code>mbtiles</code> cli is very good and has significant overlap with the <code>utiles</code> cli.</p>
-<p>(imo) The most intriguing feature of the <code>mbtiles</code> cli is the <code>diff</code>/<code>patch</code> commands
-that allow for comparing and updating mbtiles files; <code>utiles</code> does not have this feature.</p>
-<p><code>utiles</code> does have a streaming mode copy command that allows copying tiles from one mbtiles db to another without using the <code>sqlite-ATTACH</code> command; this is in my testing and experience less crash-prone and much faster on super large tile-dbs.</p>
-<p>The cli commands in <code>utiles</code> that interact with mbtiles are more focused <code>raster</code> format <code>mbtiles</code> files.</p>
+<p>The <code>mbtiles</code> cli is very good and has significant overlap with the <code>utiles</code>
+cli.</p>
+<p>(imo) The most intriguing feature of the <code>mbtiles</code> cli is the <code>diff</code>/<code>patch</code>
+commands that allow for comparing and updating mbtiles files; <code>utiles</code> does not
+have this feature.</p>
+<p><code>utiles</code> does have a streaming mode copy command that allows copying tiles from
+one mbtiles db to another without using the <code>sqlite-ATTACH</code> command; this is in
+my testing and experience less crash-prone and much faster on super large
+tile-dbs.</p>
+<p>The cli commands in <code>utiles</code> that interact with mbtiles are more focused
+<code>raster</code> format <code>mbtiles</code> files.</p>
 <h3 id="agg-hash"><a class="header" href="#agg-hash"><code>agg-hash</code></a></h3>
-<p><code>utiles</code> adopted the standardized way of calculating an <code>aggregate-tiles-hash</code> for an mbtiles file, and builds on it to allow for hash-algorithms aside from <code>md5</code>. The cli command also allows for selecting zoom-levels, and bounding-boxes to calculate the hash over.</p>
-<p>The default hashing alg is <code>md5</code> to match the martin <code>mbtiles</code> cli; but may change if I get around to updating some of our (dgi’s) very large datasets;
+<p><code>utiles</code> adopted the standardized way of calculating an <code>aggregate-tiles-hash</code>
+for an mbtiles file, and builds on it to allow for hash-algorithms aside from
+<code>md5</code>. The cli command also allows for selecting zoom-levels, and bounding-boxes
+to calculate the hash over.</p>
+<p>The default hashing alg is <code>md5</code> to match the martin <code>mbtiles</code> cli; but may
+change if I get around to updating some of our (dgi’s) very large datasets;
 <code>xxh64</code> is generally very fast.</p>
 <pre><code class="language-bash">&gt; utiles agg-hash -z 2 osm-standard.z0z4.mbtiles
 {
@@ -683,7 +694,7 @@ that allow for comparing and updating mbtiles files; <code>utiles</code> does no
 <tr><td><a href="#commands">commands</a></td><td>list all commands</td></tr>
 <tr><td><a href="#copy-1">copy</a></td><td>Copy tiles from src -&gt; dst</td></tr>
 <tr><td><a href="#dbcontains">dbcontains</a></td><td>Determine if mbtiles contains a latlong</td></tr>
-<tr><td><a href="#dev-1">dev</a></td><td>Development/Playground command (hidden)</td></tr>
+<tr><td><a href="#dev">dev</a></td><td>Development/Playground command (hidden)</td></tr>
 <tr><td><a href="#edges">edges</a></td><td>Echo edge tiles from stream of xyz tiles</td></tr>
 <tr><td><a href="#enumerate">enumerate</a></td><td>Enumerate tiles db</td></tr>
 <tr><td><a href="#fmtstr">fmtstr</a></td><td>Format json-tiles <code>[x, y, z]</code> tiles w/ format-string</td></tr>
@@ -766,7 +777,7 @@ Usage: utiles bounding-tile [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -783,7 +794,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -796,7 +807,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -830,7 +841,7 @@ Arguments:
           Zoom level (0-30)
 
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -847,7 +858,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -860,7 +871,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -901,7 +912,7 @@ Usage: utiles children [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -918,7 +929,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -931,7 +942,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -965,8 +976,8 @@ Usage: utiles commands [OPTIONS]
 
 Options:
       --debug     debug mode (print/log more)
-  -f, --full      
-  -t, --table     
+  -f, --full
+  -t, --table
       --trace     trace mode (print/log EVEN more)
       --log-json  format log as NDJSON
   -h, --help      Print help
@@ -1019,13 +1030,13 @@ Options:
 
 </code></pre>
 <hr>
-<h2 id="dev-1"><a class="header" href="#dev-1">dev</a></h2>
+<h2 id="dev"><a class="header" href="#dev">dev</a></h2>
 <pre><code class="language-bash">Development/Playground command (hidden)
 
 Usage: utiles dev [OPTIONS] [FSPATH]
 
 Arguments:
-  [FSPATH]  
+  [FSPATH]
 
 Options:
       --debug     debug mode (print/log more)
@@ -1042,14 +1053,14 @@ Usage: utiles edges [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
           debug mode (print/log more)
 
       --wrapx
-          
+
 
       --seq
           Write tiles as RS-delimited JSON sequence
@@ -1065,7 +1076,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1078,7 +1089,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1105,7 +1116,7 @@ Options:
 Usage: utiles enumerate [OPTIONS] &lt;FSPATHS&gt;...
 
 Arguments:
-  &lt;FSPATHS&gt;...  
+  &lt;FSPATHS&gt;...
 
 Options:
       --bbox &lt;BBOX&gt;        bbox(es) (west, south, east, north)
@@ -1150,7 +1161,7 @@ Usage: utiles fmtstr [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1167,7 +1178,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1180,7 +1191,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1215,7 +1226,7 @@ Arguments:
 Options:
       --debug       debug mode (print/log more)
   -m, --min         compact/minified json (default: false)
-      --full        
+      --full
       --trace       trace mode (print/log EVEN more)
       --log-json    format log as NDJSON
   -s, --statistics  [aliases: stats]
@@ -1246,7 +1257,7 @@ Usage: utiles merge [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1254,11 +1265,11 @@ Options:
 
   -Z, --minzoom &lt;MINZOOM&gt;
           min zoom level (0-30) to merge to
-          
+
           [default: 0]
 
   -s, --sort
-          
+
 
       --trace
           trace mode (print/log EVEN more)
@@ -1274,7 +1285,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1287,7 +1298,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1358,7 +1369,7 @@ Usage: utiles neighbors [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1375,7 +1386,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1388,7 +1399,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1437,7 +1448,7 @@ Usage: utiles parent [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1454,7 +1465,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1467,7 +1478,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1515,7 +1526,7 @@ Usage: utiles pmtileid [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1532,7 +1543,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1545,7 +1556,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1590,7 +1601,7 @@ Usage: utiles quadkey [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1607,7 +1618,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1620,7 +1631,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1658,7 +1669,7 @@ Options:
   -n, --dryrun    dryrun (don't actually rm)
       --trace     trace mode (print/log EVEN more)
       --log-json  format log as NDJSON
-      --verbose   
+      --verbose
   -h, --help      Print help
 
 </code></pre>
@@ -1697,14 +1708,14 @@ Usage: utiles shapes [OPTIONS] [INPUT]
 
 Arguments:
   [INPUT]
-          
+
 
 Options:
       --debug
           debug mode (print/log more)
 
       --seq
-          
+
 
       --precision &lt;PRECISION&gt;
           Decimal precision of coordinates
@@ -1821,7 +1832,7 @@ Arguments:
           Zoom level (0-30)
 
   [INPUT]
-          
+
 
 Options:
       --debug
@@ -1838,7 +1849,7 @@ Options:
 
   -F, --fmt &lt;FMT&gt;
           Format string for tiles (default: `{json_arr}`)
-          
+
           Example:
               &gt; utiles tiles 1 * --fmt "http://thingy.com/{z}/{x}/{y}.png"
               http://thingy.com/1/0/0.png
@@ -1851,7 +1862,7 @@ Options:
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 0 AND tile_row = 0;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 1;
               SELECT * FROM tiles WHERE zoom_level = 1 AND tile_column = 1 AND tile_row = 0;
-          
+
           fmt-tokens:
               `{json_arr}`/`{json}`  -&gt; [x, y, z]
               `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
@@ -1990,8 +2001,9 @@ Options:
 <a href="https://img.shields.io/pypi/wheel/utiles.svg"><img src="https://img.shields.io/pypi/wheel/utiles.svg?style=flat-square" alt="Wheel"></a></p>
 <p><code>utiles = utils + tiles</code> OR <code>utiles = ultra-tiles</code> depending on the day.</p>
 <p>Fast spherical mercator geo/tile util(e)ities.</p>
-<p>A mostly drop-in replacement for <a href="https://github.com/mapbox/mercantile">mercantile</a> written w/ rust, plus several other
-util(e)ities.</p>
+<p>A mostly drop-in replacement for
+<a href="https://github.com/mapbox/mercantile">mercantile</a> written w/ rust, plus several
+other util(e)ities.</p>
 <h2 id="installation-1"><a class="header" href="#installation-1">Installation</a></h2>
 <pre><code class="language-bash">pip install utiles
 uv add utiles
@@ -2050,18 +2062,19 @@ False
 </code></pre>
 <h2 id="about-2"><a class="header" href="#about-2">About</a></h2>
 <h3 id="why"><a class="header" href="#why">Why?</a></h3>
-<p>I use mercantile regularly and wished it were a bit more ergonomic, had type annotations, and was faster, but overall
-it’s a great library.</p>
+<p>I use mercantile regularly and wished it were a bit more ergonomic, had type
+annotations, and was faster, but overall it’s a great library.</p>
 <p>This was an excuse to learn some more rust as well as pyo3.</p>
 <p><strong>Do I/you REALLY need a rust-port of mercantile?</strong></p>
-<p>I don’t know, decide for yourself. <code>utiles</code> is certainly faster than <code>mercantile</code> for some things (see benchmarks below)</p>
+<p>I don’t know, decide for yourself. <code>utiles</code> is certainly faster than
+<code>mercantile</code> for some things (see benchmarks below)</p>
 <p><strong>Is it really a drop in replacement for mercantile?</strong></p>
-<p>Not quite, but it’s close. utiles doesn’t throw the same exceptions as mercantile, instead it throws <code>ValueError</code>’s and
-<code>TypeError</code>’s.</p>
-<p>There might be other differences, but I have been using it instead of mercantile for a bit now and it works pretty
-decent, tho I am open to suggestions!</p>
+<p>Not quite, but it’s close. utiles doesn’t throw the same exceptions as
+mercantile, instead it throws <code>ValueError</code>’s and <code>TypeError</code>’s.</p>
+<p>There might be other differences, but I have been using it instead of mercantile
+for a bit now and it works pretty decent, tho I am open to suggestions!</p>
 <h2 id="benchmarks-wip"><a class="header" href="#benchmarks-wip">Benchmarks (WIP)</a></h2>
-<pre><code>---------------------------------------------------------------------------------------------------- benchmark 'quadkey': 12 tests -----------------------------------------------------------------------------------------------------
+<pre><code class="language-text">---------------------------------------------------------------------------------------------------- benchmark 'quadkey': 12 tests -----------------------------------------------------------------------------------------------------
 Name (time in ns)                                        Min                     Max                  Mean              StdDev                Median                 IQR            Outliers  OPS (Kops/s)            Rounds  Iterations
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 test_quadkey_bench[utiles-(0, 0, 0)]                199.9942 (1.0)       47,100.0021 (8.78)       284.7909 (1.0)      315.1058 (6.70)       299.9950 (1.06)     100.0008 (&gt;1000.0)  966;1164    3,511.3476 (1.0)       38911           1
@@ -2102,71 +2115,88 @@ test_ul_bench[mercantile-(486, 332, 10)]     1,099.9938 (5.38)      90,200.0029 
 test_ul_bench[mercantile-(486, 332, 20)]     1,099.9938 (5.38)     107,300.0021 (14.98)    1,264.2361 (4.79)       594.6154 (4.77)     1,200.0019 (5.41)     100.0008 (5.00)      1522;2265      790.9915 (0.21)     123457           1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 </code></pre>
-<h2 id="todo"><a class="header" href="#todo">TODO:</a></h2>
-<ul>
-<li><input disabled="" type="checkbox" checked=""> benchmark against mercantile</li>
-<li><input disabled="" type="checkbox" checked=""> Split library into <code>utiles</code> (rust lib) and <code>utiles-python</code> (python/pip package)?</li>
-<li><input disabled="" type="checkbox" checked=""> Re-write cli in rust with clap?</li>
-<li><strong>Maybe:</strong>
-<ul>
-<li>[] Mbtiles support for the python lib??</li>
-<li>[] Reading/writing mvt files?</li>
-</ul>
-</li>
-</ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="related-tools--resources"><a class="header" href="#related-tools--resources">Related Tools &amp; Resources</a></h1>
 <h2 id="mapping"><a class="header" href="#mapping">Mapping</a></h2>
 <ul>
-<li><a href="https://github.com/OSGeo/gdal">OSGeo/gdal</a> - Geospatial Data Abstraction Library - a monster of a library</li>
-<li><a href="https://github.com/rasterio/rasterio">rasterio/rasterio</a> - pythonic GDAL bindings and much more!</li>
-<li><a href="https://github.com/felt/tippecanoe">felt/tippecanoe</a> - A tool for building vector tilesets from large collections of GeoJSON features.</li>
-<li><a href="https://github.com/onthegomap/planetiler">onthegomap/planetiler</a> - Flexible tool to build planet-scale vector tilesets from OpenStreetMap data fast</li>
-<li><a href="https://github.com/mapbox/mercantile">mapbox/mercantile</a> - python map tiling library - what <code>utiles</code> started as a port of</li>
-<li><a href="https://github.com/mapbox/supermercado">mapbox/supermercado</a> - mercantile extension(s) - utiles is able to do much of what supermercado can do</li>
-<li><a href="https://github.com/Turfjs/turf">turfjs/turf</a> - A modular geospatial engine written in JavaScript and TypeScript</li>
-<li><a href="https://github.com/maplibre/martin">maplibre/martin</a> - PostGIS/mbtiles/pmtiles server and tile generator + mbtiles utils</li>
+<li><a href="https://github.com/OSGeo/gdal">OSGeo/gdal</a> - Geospatial Data Abstraction
+Library - a monster of a library</li>
+<li><a href="https://github.com/rasterio/rasterio">rasterio/rasterio</a> - pythonic GDAL
+bindings and much more!</li>
+<li><a href="https://github.com/felt/tippecanoe">felt/tippecanoe</a> - A tool for building
+vector tilesets from large collections of GeoJSON features.</li>
+<li><a href="https://github.com/onthegomap/planetiler">onthegomap/planetiler</a> - Flexible
+tool to build planet-scale vector tilesets from OpenStreetMap data fast</li>
+<li><a href="https://github.com/mapbox/mercantile">mapbox/mercantile</a> - python map tiling
+library - what <code>utiles</code> started as a port of</li>
+<li><a href="https://github.com/mapbox/supermercado">mapbox/supermercado</a> - mercantile
+extension(s) - utiles is able to do much of what supermercado can do</li>
+<li><a href="https://github.com/Turfjs/turf">turfjs/turf</a> - A modular geospatial engine
+written in JavaScript and TypeScript</li>
+<li><a href="https://github.com/maplibre/martin">maplibre/martin</a> -
+PostGIS/mbtiles/pmtiles server and tile generator + mbtiles utils</li>
 </ul>
 <h3 id="font-glyphs--sprites"><a class="header" href="#font-glyphs--sprites">Font Glyphs &amp; Sprites</a></h3>
 <ul>
-<li><a href="https://github.com/stadiamaps/sdf_font_tools">stadiamaps/sdf_font_tools</a> - A set of tools for generating SDF fonts for use with MapLibre/Mapbox</li>
-<li><a href="https://github.com/jessekrubin/pbfont">jessekrubin/pbfont</a> - js/ts font glyph decoding/encoding/combining</li>
-<li><a href="https://github.com/flother/spreet">flother/spreet</a> - A tool to generate sprite sheets from SVGs</li>
+<li><a href="https://github.com/stadiamaps/sdf_font_tools">stadiamaps/sdf_font_tools</a> - A
+set of tools for generating SDF fonts for use with MapLibre/Mapbox</li>
+<li><a href="https://github.com/jessekrubin/pbfont">jessekrubin/pbfont</a> - js/ts font glyph
+decoding/encoding/combining</li>
+<li><a href="https://github.com/flother/spreet">flother/spreet</a> - A tool to generate
+sprite sheets from SVGs</li>
 </ul>
 <h3 id="frontend"><a class="header" href="#frontend">Frontend</a></h3>
 <ul>
-<li><a href="https://github.com/maplibre/maplibre-gl-js/">maplibre/maplibre-gl-js</a> - The open-source fork of Mapbox GL JS.</li>
-<li><a href="https://github.com/onthegomap/maplibre-contour">onthegomap/maplibre-contour</a> - A MapLibre plugin for rendering contour lines</li>
-<li><a href="https://github.com/visgl/deck.gl">visgl/deck.gl</a> - WebGL2 powered visualization Framework</li>
-<li><a href="https://github.com/visgl/react-map-gl">visgl/react-map-gl</a> - React + Maplibre/Mapbox</li>
+<li><a href="https://github.com/maplibre/maplibre-gl-js/">maplibre/maplibre-gl-js</a> - The
+open-source fork of Mapbox GL JS.</li>
+<li><a href="https://github.com/onthegomap/maplibre-contour">onthegomap/maplibre-contour</a> -
+A MapLibre plugin for rendering contour lines</li>
+<li><a href="https://github.com/visgl/deck.gl">visgl/deck.gl</a> - WebGL2 powered
+visualization Framework</li>
+<li><a href="https://github.com/visgl/react-map-gl">visgl/react-map-gl</a> - React +
+Maplibre/Mapbox</li>
 </ul>
 <h3 id="specs"><a class="header" href="#specs">Specs</a></h3>
 <ul>
-<li><a href="https://github.com/mapbox/mbtiles-spec">mapbox/mbtiles-spec</a> - The MBTiles specification</li>
-<li><a href="https://github.com/mapbox/tilejson-spec">mapbox/tilejson-spec</a> - The TileJSON specification</li>
-<li><a href="https://github.com/mapbox/vector-tile-spec">mapbox/vector-tile-spec</a> - The vector tile specification</li>
+<li><a href="https://github.com/mapbox/mbtiles-spec">mapbox/mbtiles-spec</a> - The MBTiles
+specification</li>
+<li><a href="https://github.com/mapbox/tilejson-spec">mapbox/tilejson-spec</a> - The TileJSON
+specification</li>
+<li><a href="https://github.com/mapbox/vector-tile-spec">mapbox/vector-tile-spec</a> - The
+vector tile specification</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="reference"><a class="header" href="#reference">Reference</a></h1>
 <h2 id="definitionsglossary"><a class="header" href="#definitionsglossary">Definitions/Glossary</a></h2>
-<p><strong>textiles</strong>: <code>jsonl</code>/<code>ndjson</code> text file with each line containing tile-array-json (e.g. <code>[x, y, z]</code>) or tile-object-json (e.g. <code>{x: x, y: y, z: z}</code>).</p>
+<p><strong>textiles</strong>: <code>jsonl</code>/<code>ndjson</code> text file with each line containing
+tile-array-json (e.g. <code>[x, y, z]</code>) or tile-object-json (e.g.
+<code>{x: x, y: y, z: z}</code>).</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="definitions"><a class="header" href="#definitions">Definitions</a></h1>
-<p><strong>yup:</strong> in the context of web-map-tiles <code>yup</code> means “y-up”; z/x/y tile servers serve tiles with <code>y-down</code> coordinates, while <code>mbtiles</code> and <code>geopackage</code> files store tiles as <code>y-up</code>. Converting between <code>y</code> and <code>yup</code> is done by <code>yup = 2^z - y - 1</code> where <code>z</code> is the zoom level. Converting in a <code>sqlite</code> database can be done like this:</p>
+<p><strong>yup:</strong> in the context of web-map-tiles <code>yup</code> means “y-up”; z/x/y tile servers
+serve tiles with <code>y-down</code> coordinates, while <code>mbtiles</code> and <code>geopackage</code> files
+store tiles as <code>y-up</code>. Converting between <code>y</code> and <code>yup</code> is done by
+<code>yup = 2^z - y - 1</code> where <code>z</code> is the zoom level. Converting in a <code>sqlite</code>
+database can be done like this:</p>
 <pre><code class="language-sql">SELECT zoom_level AS z,
        tile_column AS x,
-       (2^zoom_level - tile_row - 1) AS y, 
+       (2^zoom_level - tile_row - 1) AS y,
        tile_row AS yup,
 FROM tiles;
 </code></pre>
 <p><strong>zoom-level:</strong> Map zoom level 0 - 30</p>
-<p><strong>tile:</strong> A tile is a square image of a specific zoom level, typically 256x256 pixels. Tiles are used to display map data at different zoom levels.</p>
-<p><strong>zbox:</strong> Utiles name for a tile-bounding-box at a zoom level - defines zoom, min-x, min-y, max-x, max-y for querying tiles</p>
-<p><strong>tilejson:</strong> A JSON object that describes a tile set, including its name, description, and the URL template for accessing tiles. TileJSON is used to provide metadata about a tile set.</p>
-<p><strong>textiles:</strong> utiles name for an ndjson/jsonl file containing tiles as arrays or objects (e.g. <code>[x, y, z]</code> or <code>{x: x, y: y, z: z}</code>)</p>
+<p><strong>tile:</strong> A tile is a square image of a specific zoom level, typically 256x256
+pixels. Tiles are used to display map data at different zoom levels.</p>
+<p><strong>zbox:</strong> Utiles name for a tile-bounding-box at a zoom level - defines zoom,
+min-x, min-y, max-x, max-y for querying tiles</p>
+<p><strong>tilejson:</strong> A JSON object that describes a tile set, including its name,
+description, and the URL template for accessing tiles. TileJSON is used to
+provide metadata about a tile set.</p>
+<p><strong>textiles:</strong> utiles name for an ndjson/jsonl file containing tiles as arrays or
+objects (e.g. <code>[x, y, z]</code> or <code>{x: x, y: y, z: z}</code>)</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="ref"><a class="header" href="#ref">REF</a></h1>
-<h1 id="zoom-levels"><a class="header" href="#zoom-levels">ZOOM LEVELS</a></h1>
+<h2 id="zoom-levels"><a class="header" href="#zoom-levels">ZOOM LEVELS</a></h2>
 <details>
 <summary>zoom info</summary>
 <div class="table-wrapper">
@@ -2212,7 +2242,7 @@ FROM tiles;
 </div>
 </details>
 <p>Zoom levels</p>
-<pre><code>    zoom               ntiles                total  rowcol_range  max_rowcol
+<pre><code class="language-text">    zoom               ntiles                total  rowcol_range  max_rowcol
 0      0                    1                    1             0           1
 1      1                    4                    5             1           2
 2      2                   16                   21             3           4
@@ -2487,17 +2517,23 @@ FROM tiles;
 </li>
 <li>src
 <ul>
-<li>use unstable formatting options <code>cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true</code></li>
+<li>use unstable formatting options
+<code>cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true</code></li>
 </ul>
 </li>
 <li>Use <code>typed-header</code> feature of <code>axum-extra</code> for tilejson(s)</li>
 <li>Upgrade <code>rusqlite</code> to v0.38.0
 <ul>
-<li><code>metadata_duplicate_key_values</code> now returns <code>(String, String, u32)</code> count instead of
-<code>usize</code></li>
-<li>use <code>i64</code> where appropriate for sqlite integer values instead of <code>usize</code>/<code>u64</code></li>
+<li><code>metadata_duplicate_key_values</code> now returns <code>(String, String, u32)</code> count
+instead of <code>usize</code></li>
+<li>use <code>i64</code> where appropriate for sqlite integer values instead of
+<code>usize</code>/<code>u64</code></li>
 </ul>
 </li>
+<li>use <code>prek</code> instead of <code>pre-commit</code></li>
+<li>pin github actions</li>
+<li>format docs/markdown files</li>
+<li>update to pyo3-v0.29</li>
 </ul>
 <hr>
 <h2 id="080-2025-12-15"><a class="header" href="#080-2025-12-15">0.8.0 (2025-12-15)</a></h2>
@@ -2545,8 +2581,8 @@ return children in the order of <code>top-left</code>, <code>top-right</code>, <
 </li>
 <li><code>cli</code>
 <ul>
-<li>format string <code>{projwin}</code> and <code>{projwin_web}</code> changed to return <code> </code> space
-separated coords</li>
+<li>format string <code>{projwin}</code> and <code>{projwin_web}</code> changed to return <code>" "</code>
+(space) separated coords</li>
 </ul>
 </li>
 </ul>
@@ -2679,7 +2715,7 @@ specified by <code>--jobs</code>/<code>-j</code> option) to prevent nuking machi
 <li>fmt-str command and option <code>--fmt</code> added <code>tiles</code> command; allows string
 formatting of json-tiles:</li>
 </ul>
-<pre><code>Format json-tiles format-string
+<pre><code class="language-text">Format json-tiles format-string
 fmt-tokens:
    `{json_arr}`/`{json}`  -&gt; [x, y, z]
    `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}

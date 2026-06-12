@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-b0ef477b.js";
+            window.path_to_searchindex_js = "searchindex-579587f4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-3a5d799e.js"></script>
@@ -181,20 +181,32 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="cli"><a class="header" href="#cli">cli</a></h1>
-<p>The utiles cli can be installed via cargo or pip; the python library bundles
-a version of the cli that can be run just as <code>utiles</code> and/or <code>python -m utiles</code>.</p>
-<p>The cli is a collection of commands for streaming tiles in text format (excellent for piping) and working with mbtiles/tile-db files.</p>
-<p>All of the <code>mercantile</code> cli commands are available, and <code>burn</code> and <code>edges</code> from <code>supermercado</code> are also available.</p>
+<p>The utiles cli can be installed via cargo or pip; the python library bundles a
+version of the cli that can be run just as <code>utiles</code> and/or <code>python -m utiles</code>.</p>
+<p>The cli is a collection of commands for streaming tiles in text format
+(excellent for piping) and working with mbtiles/tile-db files.</p>
+<p>All of the <code>mercantile</code> cli commands are available, and <code>burn</code> and <code>edges</code> from
+<code>supermercado</code> are also available.</p>
 <hr>
 <h2 id="what-about-the-mbtiles-cli-in-the-martin-repo-2025-01-14"><a class="header" href="#what-about-the-mbtiles-cli-in-the-martin-repo-2025-01-14">What about the <code>mbtiles</code> cli in the martin repo? [2025-01-14]</a></h2>
-<p>The <code>mbtiles</code> cli is very good and has significant overlap with the <code>utiles</code> cli.</p>
-<p>(imo) The most intriguing feature of the <code>mbtiles</code> cli is the <code>diff</code>/<code>patch</code> commands
-that allow for comparing and updating mbtiles files; <code>utiles</code> does not have this feature.</p>
-<p><code>utiles</code> does have a streaming mode copy command that allows copying tiles from one mbtiles db to another without using the <code>sqlite-ATTACH</code> command; this is in my testing and experience less crash-prone and much faster on super large tile-dbs.</p>
-<p>The cli commands in <code>utiles</code> that interact with mbtiles are more focused <code>raster</code> format <code>mbtiles</code> files.</p>
+<p>The <code>mbtiles</code> cli is very good and has significant overlap with the <code>utiles</code>
+cli.</p>
+<p>(imo) The most intriguing feature of the <code>mbtiles</code> cli is the <code>diff</code>/<code>patch</code>
+commands that allow for comparing and updating mbtiles files; <code>utiles</code> does not
+have this feature.</p>
+<p><code>utiles</code> does have a streaming mode copy command that allows copying tiles from
+one mbtiles db to another without using the <code>sqlite-ATTACH</code> command; this is in
+my testing and experience less crash-prone and much faster on super large
+tile-dbs.</p>
+<p>The cli commands in <code>utiles</code> that interact with mbtiles are more focused
+<code>raster</code> format <code>mbtiles</code> files.</p>
 <h3 id="agg-hash"><a class="header" href="#agg-hash"><code>agg-hash</code></a></h3>
-<p><code>utiles</code> adopted the standardized way of calculating an <code>aggregate-tiles-hash</code> for an mbtiles file, and builds on it to allow for hash-algorithms aside from <code>md5</code>. The cli command also allows for selecting zoom-levels, and bounding-boxes to calculate the hash over.</p>
-<p>The default hashing alg is <code>md5</code> to match the martin <code>mbtiles</code> cli; but may change if I get around to updating some of our (dgi’s) very large datasets;
+<p><code>utiles</code> adopted the standardized way of calculating an <code>aggregate-tiles-hash</code>
+for an mbtiles file, and builds on it to allow for hash-algorithms aside from
+<code>md5</code>. The cli command also allows for selecting zoom-levels, and bounding-boxes
+to calculate the hash over.</p>
+<p>The default hashing alg is <code>md5</code> to match the martin <code>mbtiles</code> cli; but may
+change if I get around to updating some of our (dgi’s) very large datasets;
 <code>xxh64</code> is generally very fast.</p>
 <pre><code class="language-bash">&gt; utiles agg-hash -z 2 osm-standard.z0z4.mbtiles
 {

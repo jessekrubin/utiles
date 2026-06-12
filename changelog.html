@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-b0ef477b.js";
+            window.path_to_searchindex_js = "searchindex-579587f4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-3a5d799e.js"></script>
@@ -190,17 +190,23 @@
 </li>
 <li>src
 <ul>
-<li>use unstable formatting options <code>cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true</code></li>
+<li>use unstable formatting options
+<code>cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true</code></li>
 </ul>
 </li>
 <li>Use <code>typed-header</code> feature of <code>axum-extra</code> for tilejson(s)</li>
 <li>Upgrade <code>rusqlite</code> to v0.38.0
 <ul>
-<li><code>metadata_duplicate_key_values</code> now returns <code>(String, String, u32)</code> count instead of
-<code>usize</code></li>
-<li>use <code>i64</code> where appropriate for sqlite integer values instead of <code>usize</code>/<code>u64</code></li>
+<li><code>metadata_duplicate_key_values</code> now returns <code>(String, String, u32)</code> count
+instead of <code>usize</code></li>
+<li>use <code>i64</code> where appropriate for sqlite integer values instead of
+<code>usize</code>/<code>u64</code></li>
 </ul>
 </li>
+<li>use <code>prek</code> instead of <code>pre-commit</code></li>
+<li>pin github actions</li>
+<li>format docs/markdown files</li>
+<li>update to pyo3-v0.29</li>
 </ul>
 <hr>
 <h2 id="080-2025-12-15"><a class="header" href="#080-2025-12-15">0.8.0 (2025-12-15)</a></h2>
@@ -248,8 +254,8 @@ return children in the order of <code>top-left</code>, <code>top-right</code>, <
 </li>
 <li><code>cli</code>
 <ul>
-<li>format string <code>{projwin}</code> and <code>{projwin_web}</code> changed to return <code> </code> space
-separated coords</li>
+<li>format string <code>{projwin}</code> and <code>{projwin_web}</code> changed to return <code>" "</code>
+(space) separated coords</li>
 </ul>
 </li>
 </ul>
@@ -382,7 +388,7 @@ specified by <code>--jobs</code>/<code>-j</code> option) to prevent nuking machi
 <li>fmt-str command and option <code>--fmt</code> added <code>tiles</code> command; allows string
 formatting of json-tiles:</li>
 </ul>
-<pre><code>Format json-tiles format-string
+<pre><code class="language-text">Format json-tiles format-string
 fmt-tokens:
    `{json_arr}`/`{json}`  -&gt; [x, y, z]
    `{json_obj}`/`{obj}`   -&gt; {x: x, y: y, z: z}
