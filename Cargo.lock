@@ -1878,17 +1878,6 @@ dependencies = [
 
 [[package]]
 name = "noncrypto-digests"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ccead1e07636a7113b9008741a5045260645835971cc807f217e24e0b95e69fe"
-dependencies = [
- "digest 0.10.7",
- "fnv",
- "xxhash-rust",
-]
-
-[[package]]
-name = "noncrypto-digests"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dff2c6107ce0dc4e97c195ab1197c90bc1badf76d0d772bbe167df8cb6f7cf7d"
@@ -2843,7 +2832,7 @@ dependencies = [
  "digest 0.11.3",
  "hex",
  "md-5 0.11.0",
- "noncrypto-digests 0.4.0",
+ "noncrypto-digests",
  "rusqlite",
 ]
 
@@ -3290,7 +3279,7 @@ dependencies = [
  "jiff",
  "json-patch",
  "md-5 0.10.6",
- "noncrypto-digests 0.3.7",
+ "noncrypto-digests",
  "num_cpus",
  "owo-colors",
  "pmtiles",
