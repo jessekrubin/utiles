@@ -29,7 +29,7 @@ async-sqlite = { version = "0.6", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.88"
 axum = { version = "0.8.9", features = ["tokio", "json", "macros"] }
 axum-extra = { version = "0.12.5", features = [ "typed-header" ] }
-base64 = "0.22.1"
+base64 = "0.23.0"
 clap = { version = "4.6", features = ["derive", "color", "wrap_help"] }
 criterion = "0.8.2"
 crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
