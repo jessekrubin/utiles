@@ -27,7 +27,7 @@ dev = [
   "pytest-benchmark>=5.1.0",
   "pytest-cov>=7.0.0",
   "pytest-xdist>=3.8.0",
-  "ruff>=0.14.1",
+  "ruff>=0.16.1",
   "tomli>=2.3.0",
   "typing-extensions>=4.15.0",
 ]
