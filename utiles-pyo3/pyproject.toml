@@ -1,29 +1,29 @@
 [build-system]
 build-backend = "maturin"
-requires = [ "maturin>=1,<2" ]
+requires = ["maturin>=1,<2"]
 
 [project]
 name = "utiles"
 description = "utiles = (utils + tiles) * rust"
-maintainers = [ { name = "jesse rubin", email = "jessekrubin@gmail.com" } ]
-authors = [ { name = "jesse rubin", email = "jessekrubin@gmail.com" } ]
+maintainers = [{ name = "jesse rubin", email = "jessekrubin@gmail.com" }]
+authors = [{ name = "jesse rubin", email = "jessekrubin@gmail.com" }]
 requires-python = ">=3.11"
 classifiers = [
-  "Intended Audience :: Developers",
-  "License :: OSI Approved :: Apache Software License",
-  "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: 3.14",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
-  "Programming Language :: Rust",
-  "Typing :: Typed",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Rust",
+    "Typing :: Typed",
 ]
-dynamic = [ "readme", "version" ]
+dynamic = ["readme", "version"]
 dependencies = []
 urls.Changelog = "https://github.com/jessekrubin/utiles/blob/main/CHANGELOG.md"
 urls.Documentation = "https://github.com/jessekrubin/utiles/blob/main/utiles-pyo3/README.md"
@@ -36,126 +36,199 @@ entry-points."rasterio.rio_plugins".ut = "utiles.rio_plugin:rio_ut"
 entry-points."rasterio.rio_plugins".utiles = "utiles.rio_plugin:rio_utiles"
 
 [tool.maturin]
-python-source = "python"
-features = [ "pyo3/extension-module" ]
-bindings = "pyo3"
 module-name = "utiles._utiles"
+bindings = "pyo3"
+python-source = "python"
+features = ["pyo3/extension-module"]
 
 [tool.ruff]
 target-version = "py311"
 line-length = 88
 include = [
-  "bench/**/*.{py,pyi}",
-  "python/utiles/**/*.{py,pyi}",
-  "tests/**/*.{py,pyi}",
+    "bench/**/*.{py,pyi}",
+    "python/utiles/**/*.{py,pyi}",
+    "tests/**/*.{py,pyi}",
 ]
 exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".git-rewrite",
-  ".hg",
-  ".mypy_cache",
-  ".nox",
-  ".pants.d",
-  ".pytype",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "venv",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
 ]
 lint.select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "N",
-  "PLC",
-  # "ERA001",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
+    "A",
+    "ANN",
+    "ARG",
+    "B",
+    "C",
+    "D",
+    "DTZ",
+    "E",
+    "EM",
+    "ERA001",
+    "F",
+    "FA",
+    "FBT",
+    "I",
+    "ICN",
+    "N",
+    "PIE",
+    "PLC",
+    "PLC2801",
+    "PLE",
+    "PLR",
+    "PLW",
+    "PT",      # pytest
+    "PYI",
+    "Q",
+    "RET",
+    "RUF",
+    "S",
+    "SIM",
+    "T",
+    "TC",
+    "TID",
+    "UP",
+    "W",
+    "YTT",
+    # "A",
+    # "ARG",
+    # "B",
+    # "C",
+    # "DTZ",
+    # "E",
+    # "EM",
+    # "F",
+    # "FBT",
+    # "I",
+    # "ICN",
+    # "N",
+    # "PLC",
+    # # "ERA001",
+    # "PLE",
+    # "PLR",
+    # "PLW",
+    # "Q",
+    # "RUF",
+    # "S",
+    # "T",
+    # "TID",
+    # "UP",
+    # "W",
+    # "YTT",
 ]
 lint.ignore = [
-  "A002",    # builtin-argument-shadowing
-  "C901",    # complex-structure
-  "E501",    # line-too-long
-  "PLR0912", # too-many-branches
-  "PLR0913", # too-many-arguments
-  "PLR2004", # magic-value-comparison
+    "A002",    # builtin-argument-shadowing
+    "C901",    # complex-structure
+    "D100",
+    "D102",
+    "D103",    # todo
+    "D105",
+    "D104",
+    "D403",
+    "D415",
+    "ANN401",
+    "E501",    # line-too-long
+    "PLR0912", # too-many-branches
+    "PLR0913", # too-many-arguments
+    "PLR2004", # magic-value-comparison
 ]
-lint.per-file-ignores."bench/**/*" = [ "PLR1714", "PLR2004", "S101", "TID252" ]
-lint.per-file-ignores."python/utiles/_legacy/cli.py" = [ "A002", "FBT001", "FBT002", "PLW0120" ]
+
+lint.per-file-ignores."python/utiles/_utiles.pyi" = ["PYI021", "PYI029"]
+lint.per-file-ignores."bench/**/*" = [
+    "ANN401",
+    "D",
+    "PLR1714",
+    "PLR2004",
+    "S101",
+    "TID252",
+]
+lint.per-file-ignores."python/utiles/_legacy/cli.py" = [
+    "A002",
+    "D",
+    "FBT001",
+    "FBT002",
+    "PLW0120",
+]
 # Tests can use magic values, assertions, and relative imports
-lint.per-file-ignores."tests/**/*" = [ "E501", "PLR1714", "PLR2004", "S101", "S608", "TID252" ]
+lint.per-file-ignores."tests/**/*" = [
+    "ANN401",
+    "D",
+    "E501",
+    "PLR1714",
+    "PLR2004",
+    "RET505",
+    "S101",
+    "S608",
+    "TID252",
+]
 lint.unfixable = [
-  # Don't touch unused imports
-  "F401",
+    # Don't touch unused imports
+    "F401",
 ]
 lint.flake8-tidy-imports.ban-relative-imports = "all"
-lint.isort.known-first-party = [ "utiles" ]
+lint.isort.known-first-party = ["utiles"]
 lint.pydocstyle.convention = "google"
 
 [tool.mypy]
-strict = true
+mypy_path = "python"
 ignore_missing_imports = true
+strict = true
 
 [tool.pytest]
-ini_options.testpaths = [ "tests" ]
-ini_options.addopts = [
-  "--doctest-modules",
-  # "--benchmark-disable",
-]
+ini_options.testpaths = ["tests"]
 ini_options.norecursedirs = [
-  ".git",
-  ".nox",
-  ".pytest_cache",
-  ".venv",
-  "build",
-  "dist",
-  "scratch",
-  "node_modules",
-  "venv",
-  "*.bak",
-  "*.egg-info",
-  "*.egg",
-  ".*",
-  "target",
-  "utiles-cli",    # in testing I write out a bunch of stuff to this dir...
+    "*.bak",
+    "*.egg",
+    "*.egg-info",
+    ".*",
+    ".git",
+    ".nox",
+    ".pytest_cache",
+    ".venv",
+    "build",
+    "dist",
+    "node_modules",
+    "scratch",
+    "target",
+    "utiles-cli",    # in testing I write out a bunch of stuff to this dir...
+    "venv",
+]
+ini_options.addopts = [
+    "--doctest-modules",
+    # "--benchmark-disable",
 ]
 ini_options.markers = [
-  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-  "bench",
+    "bench",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
 
 [tool.coverage]
 run.branch = true
-run.omit = [ "python/utiles/__about__.py" ]
+run.omit = ["python/utiles/__about__.py"]
 run.parallel = true
-run.source_pkgs = [ "tests", "utiles" ]
-paths.tests = [ "tests", "*/utiles/tests" ]
-paths.utiles = [ "utiles", "*/utiles/utiles" ]
-report.exclude_lines = [ "if __name__ == .__main__.:", "if TYPE_CHECKING:", "no cov" ]
+run.source_pkgs = ["tests", "utiles"]
+paths.tests = ["tests", "*/utiles/tests"]
+paths.utiles = ["utiles", "*/utiles/utiles"]
+report.exclude_lines = [
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "no cov",
+]

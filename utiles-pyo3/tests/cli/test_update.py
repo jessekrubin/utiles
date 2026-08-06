@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import sqlite3
-from pathlib import Path
 from shutil import copyfile
+from typing import TYPE_CHECKING
 
 from utiles.dev.testing import run_cli as _run_cli
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _osm_standard_z0z4_mbtiles(test_data: Path) -> Path:
@@ -48,5 +51,3 @@ def test_update_metadata(tmp_path: Path, test_data_root: Path) -> None:
     assert metadata_updated["format"] == "png"
     assert metadata_updated["minzoom"] == 0
     assert metadata_updated["maxzoom"] == 4
-    # assert metadata_updated["tilesize"] == 256
-    # assert metadata_updated["name"] == "osm-standard.z0z4"

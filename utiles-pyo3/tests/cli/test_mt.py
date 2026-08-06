@@ -212,8 +212,6 @@ class TestNeighbors:
         tiles = [tuple(json.loads(t)) for t in tiles_lines]
         assert len(tiles) == 8
 
-        # We do not provide ordering guarantees
-        # tiles = set([tuple(t) for t in tiles])
         tiles_set = set(tiles)
         assert (243, 166, 9) not in tiles_set, "input not in neighbors"
 
@@ -298,8 +296,6 @@ class TestShapes:
         assert json.loads(result.stdout) == expected
 
     def test_cli_shapes_arg(self) -> None:
-        # runner = CliRunner()
-        # result = runner.invoke(cli, ["shapes", "[106, 193, 9]", "--precision", "6"])
         result = _run_cli(["shapes", "[106, 193, 9]", "--precision", "6"])
         assert result.returncode == 0
         result_output_json = json.loads(result.stdout)

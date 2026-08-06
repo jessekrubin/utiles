@@ -11,7 +11,7 @@ def echo(*args, **kwargs):
 
 
 def get_cmd_help(command_name: str) -> str:
-    res = sp.run(["utiles", command_name, "--help"], capture_output=True)
+    res = sp.run(["utiles", command_name, "--help"], capture_output=True, check=True)
     return res.stdout.decode()
 
 
@@ -19,7 +19,7 @@ def main():
     cur_env = os.environ.copy()
     # set `UTILES_MAX_TERM_WIDTH` to 80 for docs formating to not look dumb
     cur_env["UTILES_MAX_TERM_WIDTH"] = "80"
-    res = sp.run(["utiles", "commands"], capture_output=True, env=cur_env)
+    res = sp.run(["utiles", "commands"], capture_output=True, env=cur_env, check=True)
     echo(res.stdout.decode())
     commands = json.loads(res.stdout.decode())
 

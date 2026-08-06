@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
-
-from pytest_benchmark.fixture import BenchmarkFixture
+from typing import TYPE_CHECKING, Any
 
 import utiles
+
+if TYPE_CHECKING:
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 
 def test_tile_equality() -> None:

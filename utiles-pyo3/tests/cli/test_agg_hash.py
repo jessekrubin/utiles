@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utiles.dev.testing import run_cli as _run_cli
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _osm_standard_z0z4_mbtiles(test_data: Path) -> Path:

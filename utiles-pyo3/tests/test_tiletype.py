@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
+
+if TYPE_CHECKING:
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 PWD = Path(__file__).parent
 
