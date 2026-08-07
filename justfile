@@ -74,12 +74,17 @@ fmtcpy:
     uv run ruff format --check
     uv run ruff check --select "I" --show-fixes .
 
+# format pyproject.toml
+fmtpyproject:
+    uvx pyproject-fmt . --keep-full-version
+    uvx pyproject-fmt utiles-pyo3 --keep-full-version
+
 # format rust and python
 fmt: cargo-fmt fmtpy
 
 # typecheck w/ mypy
 mypy:
-    uv run mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests
+    uv run mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests {{ pyut }}/bench
 
 # ruff check/lint
 ruff:

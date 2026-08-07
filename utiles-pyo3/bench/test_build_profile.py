@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import warnings
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
+
+if TYPE_CHECKING:
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 
 def test_check_build_profile() -> None:

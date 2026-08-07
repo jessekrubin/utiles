@@ -75,18 +75,17 @@ def _test_geojson_cover(geojson_filepath: str) -> None:
     expected_tiles = set(ut.parse_textiles(textiles))
     coverage = set(ut.geojson2tiles(data, maxzoom, minzoom))
 
-    # if set(expected_tiles) != set(coverage):
-    #     not_in_expected_tiles = expected_tiles.difference(coverage)
-    #     not_in_coverage = coverage.difference(expected_tiles)
-    #     print("============")
-    #     print(geojson_filepath)
-    #     pprint(
-    #         {
-    #             "not_in_expected_tiles": not_in_expected_tiles,
-    #             "not_in_coverage": not_in_coverage,
-    #             # 'common_tiles': common_tiles,
-    #         }
-    #     )
+    if set(expected_tiles) != set(coverage):
+        not_in_expected_tiles = expected_tiles.difference(coverage)
+        not_in_coverage = coverage.difference(expected_tiles)
+        print("============")  # noqa: T201
+        print(geojson_filepath)  # noqa: T201
+        print(  # noqa: T201
+            {
+                "not_in_expected_tiles": not_in_expected_tiles,
+                "not_in_coverage": not_in_coverage,
+            }
+        )
     assert set(expected_tiles) == set(coverage)
 
 

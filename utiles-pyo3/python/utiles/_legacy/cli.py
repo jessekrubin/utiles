@@ -5,12 +5,14 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from collections.abc import Iterable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import click
 
 import utiles
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def configure_logging(verbosity: int) -> None:
@@ -144,6 +146,7 @@ def cli(ctx: click.Context, verbose: int, quiet: int) -> None:
 def shapes(
     _ctx: click.Context,
     input: str,
+    *,
     precision: int | None = None,
     indent: int | None = None,
     projected: str = "geographic",
@@ -313,10 +316,7 @@ def tiles(
                 msg = f"{bbox}"
                 raise click.BadParameter(msg, param=input, param_hint="input")
         elif isinstance(obj, dict):
-            if "bbox" in obj:
-                bbox = obj["bbox"]
-            else:
-                bbox = utiles.geojson_bounds(obj)
+            bbox = obj["bbox"] if "bbox" in obj else utiles.geojson_bounds(obj)
 
         west, south, east, north = bbox
         epsilon = 1.0e-10
@@ -404,10 +404,7 @@ def bounding_tile(_ctx: click.Context, input: str, seq: bool = False) -> None:
                 raise click.BadParameter(msg, param=input, param_hint="input")
 
         elif isinstance(obj, dict):
-            if "bbox" in obj:
-                bbox = obj["bbox"]
-            else:
-                bbox = utiles.geojson_bounds(obj)
+            bbox = obj["bbox"] if "bbox" in obj else utiles.geojson_bounds(obj)
 
         west, south, east, north = bbox
         vals = utiles.bounding_tile(west, south, east, north, truncate=False)
@@ -540,7 +537,7 @@ def neighbors(_ctx: click.Context, input: str) -> None:
 @click.argument("input", default="-", required=False)
 @click.pass_context
 def quadkey(_ctx: click.Context, input: str) -> None:
-    """Takes [x, y, z] tiles or quadkeys as input and writes
+    r"""Takes [x, y, z] tiles or quadkeys as input and writes
     quadkeys or a [x, y, z] tiles to stdout, respectively.
 
     Input may be a compact newline-delimited sequences of JSON or

@@ -20,7 +20,6 @@ __all__ = (
     "__pkgroot__",
     "__title__",
     "__version__",
-    "__version__",
 )
 __title__ = "utiles"
 __pkgroot__ = __file__.replace("__about__.py", "").rstrip("/\\")

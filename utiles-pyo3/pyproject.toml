@@ -36,10 +36,10 @@ entry-points."rasterio.rio_plugins".ut = "utiles.rio_plugin:rio_ut"
 entry-points."rasterio.rio_plugins".utiles = "utiles.rio_plugin:rio_utiles"
 
 [tool.maturin]
+module-name = "utiles._utiles"
+bindings = "pyo3"
 python-source = "python"
 features = [ "pyo3/extension-module" ]
-bindings = "pyo3"
-module-name = "utiles._utiles"
 
 [tool.ruff]
 target-version = "py311"
@@ -74,26 +74,36 @@ exclude = [
 ]
 lint.select = [
   "A",
+  "ANN",
   "ARG",
   "B",
   "C",
+  "D",
   "DTZ",
   "E",
   "EM",
+  "ERA001",
   "F",
+  "FA",
   "FBT",
   "I",
   "ICN",
   "N",
+  "PIE",
   "PLC",
-  # "ERA001",
+  "PLC2801",
   "PLE",
   "PLR",
   "PLW",
+  "PT",      # pytest
+  "PYI",
   "Q",
+  "RET",
   "RUF",
   "S",
+  "SIM",
   "T",
+  "TC",
   "TID",
   "UP",
   "W",
@@ -101,16 +111,48 @@ lint.select = [
 ]
 lint.ignore = [
   "A002",    # builtin-argument-shadowing
+  "ANN401",
   "C901",    # complex-structure
+  "D100",
+  "D102",
+  "D103",    # todo
+  "D104",
+  "D105",
+  "D403",
+  "D415",
   "E501",    # line-too-long
   "PLR0912", # too-many-branches
   "PLR0913", # too-many-arguments
   "PLR2004", # magic-value-comparison
 ]
-lint.per-file-ignores."bench/**/*" = [ "PLR1714", "PLR2004", "S101", "TID252" ]
-lint.per-file-ignores."python/utiles/_legacy/cli.py" = [ "A002", "FBT001", "FBT002", "PLW0120" ]
+lint.per-file-ignores."bench/**/*" = [
+  "ANN401",
+  "D",
+  "PLR1714",
+  "PLR2004",
+  "S101",
+  "TID252",
+]
+lint.per-file-ignores."python/utiles/_legacy/cli.py" = [
+  "A002",
+  "D",
+  "FBT001",
+  "FBT002",
+  "PLW0120",
+]
+lint.per-file-ignores."python/utiles/_utiles.pyi" = [ "PYI021", "PYI029" ]
 # Tests can use magic values, assertions, and relative imports
-lint.per-file-ignores."tests/**/*" = [ "E501", "PLR1714", "PLR2004", "S101", "S608", "TID252" ]
+lint.per-file-ignores."tests/**/*" = [
+  "ANN401",
+  "D",
+  "E501",
+  "PLR1714",
+  "PLR2004",
+  "RET505",
+  "S101",
+  "S608",
+  "TID252",
+]
 lint.unfixable = [
   # Don't touch unused imports
   "F401",
@@ -120,35 +162,36 @@ lint.isort.known-first-party = [ "utiles" ]
 lint.pydocstyle.convention = "google"
 
 [tool.mypy]
-strict = true
+mypy_path = "python"
 ignore_missing_imports = true
+strict = true
 
 [tool.pytest]
 ini_options.testpaths = [ "tests" ]
-ini_options.addopts = [
-  "--doctest-modules",
-  # "--benchmark-disable",
-]
 ini_options.norecursedirs = [
+  "*.bak",
+  "*.egg",
+  "*.egg-info",
+  ".*",
   ".git",
   ".nox",
   ".pytest_cache",
   ".venv",
   "build",
   "dist",
-  "scratch",
   "node_modules",
-  "venv",
-  "*.bak",
-  "*.egg-info",
-  "*.egg",
-  ".*",
+  "scratch",
   "target",
   "utiles-cli",    # in testing I write out a bunch of stuff to this dir...
+  "venv",
+]
+ini_options.addopts = [
+  "--doctest-modules",
+  # "--benchmark-disable",
 ]
 ini_options.markers = [
-  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
   "bench",
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
 
 [tool.coverage]
@@ -158,4 +201,8 @@ run.parallel = true
 run.source_pkgs = [ "tests", "utiles" ]
 paths.tests = [ "tests", "*/utiles/tests" ]
 paths.utiles = [ "utiles", "*/utiles/utiles" ]
-report.exclude_lines = [ "if __name__ == .__main__.:", "if TYPE_CHECKING:", "no cov" ]
+report.exclude_lines = [
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "no cov",
+]
