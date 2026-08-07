@@ -15,7 +15,10 @@ from rich.console import Console
 console = Console()
 
 _T = t.TypeVar("_T")
-OUT_DIR = "osm-tiles"
+REPO_ROOT = path.dirname(path.dirname(path.abspath(__file__)))
+TMP_DIR = path.join(REPO_ROOT, "_tmp")
+OUT_DIR = path.join(TMP_DIR, "osm-tiles")
+MBTILES_PATH = path.join(TMP_DIR, "osm-standard.z0z4.mbtiles")
 
 tile_formatter = ut.TileFmts("https://tile.openstreetmap.org/{z}/{x}/{y}.png")
 
@@ -76,6 +79,7 @@ def _chunks(it: Iterable[_T], n: int) -> Iterable[list[_T]]:
 
 
 async def main(client: ry.Client):
+    ry.mkdirp(OUT_DIR)
     tiles_gen = ut.tiles(-180, -90, 180, 90, list(range(5)))
     total_tiles = len(tiles_gen)
     ndownloaded = 0
@@ -105,14 +109,16 @@ async def main(client: ry.Client):
             fmt=True,
         ),
     )
+    if ry.exists(MBTILES_PATH):
+        ry.remove_file(MBTILES_PATH)
     ut.ut_cli(
         [
             "cp",
             OUT_DIR,
-            "osm-standard.z0z4.mbtiles",
+            MBTILES_PATH,
         ]
     )
-    console.log("BABOOM! DONE!")
+    console.log(f"BABOOM! DONE! {MBTILES_PATH}")
 
 
 async def _main():
