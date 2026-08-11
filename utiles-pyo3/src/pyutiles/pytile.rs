@@ -242,9 +242,10 @@ impl PyTile {
             tuple_slice::SliceOrInt::Slice(slice) => {
                 let psi = slice.indices(3)?;
                 let (start, stop, step) = (psi.start, psi.stop, psi.step);
-                let m: Vec<u32> = self.members()[start as usize..stop as usize]
+                let m: Vec<u32> = self.members()
+                    [start.cast_unsigned()..stop.cast_unsigned()]
                     .iter()
-                    .step_by(step as usize)
+                    .step_by(step.cast_unsigned())
                     .copied()
                     .collect();
                 let tuple = PyTuple::new(py, m).map(Bound::into_any).map_err(|e| {

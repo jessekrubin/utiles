@@ -65,14 +65,11 @@ pub(crate) fn bounds(args: PyTileArg) -> PyLngLatBbox {
 }
 
 #[pyfunction]
-pub(crate) fn minmax(zoom: i32) -> PyResult<(u32, u32)> {
-    if !(0..=32).contains(&zoom) {
-        Err(PyErr::new::<PyValueError, _>(format!(
-            "zoom must be between 0 and 32: {zoom}"
-        )))?;
-    }
-    let r = utiles::minmax(zoom as u8);
-    Ok(r)
+pub(crate) fn minmax(zoom: isize) -> PyResult<(u32, u32)> {
+    let z = u8::try_from(zoom).map_err(|_| {
+        PyValueError::new_err(format!("zoom must be between 0 and 32: {zoom}"))
+    })?;
+    Ok(utiles::minmax(z))
 }
 
 #[pyfunction]
@@ -82,11 +79,9 @@ pub(crate) fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
 
 #[pyfunction]
 pub(crate) fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
-    let xyz = utiles::quadkey2tile(quadkey);
-    match xyz {
-        Ok(xyz) => Ok(PyTile::from(xyz)),
-        Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
-    }
+    utiles::quadkey2tile(quadkey)
+        .map(|tile| PyTile::from(tile))
+        .map_err(|e| PyValueError::new_err(format!("Error: {e}")))
 }
 
 #[pyfunction]
@@ -115,9 +110,7 @@ pub(crate) fn feature<'py>(
     py: Python<'py>,
     tile: PyTileLike,
     fid: Option<String>,
-    props: Option<
-        Bound<'py, PyDict>, // HashMap<String, Bound<PyAny>>
-    >,
+    props: Option<Bound<'py, PyDict>>,
     projected: Option<String>,
     buffer: Option<f64>,
     precision: Option<i32>,
