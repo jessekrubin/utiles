@@ -19,6 +19,7 @@ pub(crate) fn xyz(x: u32, y: u32, z: u8) -> PyTile {
     PyTile::py_new(x, y, z)
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
 #[pyo3(signature = (*args))]
 pub(crate) fn ul(args: PyTileArg) -> PyLngLat {
@@ -56,6 +57,7 @@ pub(crate) fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
     PyLngLat::py_new(lnglat.lng(), lnglat.lat())
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
 #[pyo3(signature = (*args))]
 pub(crate) fn bounds(args: PyTileArg) -> PyLngLatBbox {
@@ -92,18 +94,26 @@ pub(crate) fn qk2xyz(quadkey: &str) -> PyResult<PyTile> {
     quadkey2xyz(quadkey)
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
 pub(crate) fn from_tuple(tile: TileTuple) -> PyTile {
     PyTile::py_new(tile.0, tile.1, tile.2)
 }
 
 #[pyfunction]
-#[pyo3(signature = (tile, fid = None, props = None, projected = None, buffer = None, precision = None)
+#[pyo3(
+    signature = (
+        tile,
+        fid = None,
+        props = None,
+        projected = None,
+        buffer = None,
+        precision = None
+    )
 )]
 pub(crate) fn feature<'py>(
     py: Python<'py>,
     tile: PyTileLike,
-    // (u32, u32, u8),
     fid: Option<String>,
     props: Option<
         Bound<'py, PyDict>, // HashMap<String, Bound<PyAny>>
@@ -143,6 +153,7 @@ pub(crate) fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
     ))
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
 #[pyo3(signature = (*args))]
 pub(crate) fn xy_bounds(args: PyTileArg) -> PyBbox {
@@ -175,6 +186,7 @@ pub(crate) fn tile(
     }
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
 #[pyo3(signature = (*args))]
 pub(crate) fn pmtileid(args: PyTileArg) -> u64 {
@@ -193,6 +205,7 @@ pub(crate) fn from_pmtileid(pmtileid: u64) -> PyTile {
     PyTile::from(xyz)
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
 #[pyo3(signature = (*args))]
 pub(crate) fn quadkey(args: PyTileArg) -> String {
@@ -230,6 +243,7 @@ pub(crate) fn parent(args: PyTileArg, zoom: Option<u8>) -> PyResult<Option<PyTil
     Ok(p)
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
 #[pyo3(signature = (*args, zoom = None, zorder = None))]
 pub(crate) fn children(
@@ -244,8 +258,7 @@ pub(crate) fn children(
             args.z()
         )))?;
     }
-    let children = args.children(Some(zoom), zorder);
-    Ok(children)
+    Ok(args.children(Some(zoom), zorder))
 }
 
 #[pyfunction]
@@ -273,10 +286,6 @@ pub(crate) fn bounding_tile(
     truncate: Option<bool>,
 ) -> PyResult<PyTile> {
     let bbox = pyparsing::parse_bbox(args)?;
-    // if res.is_err() {
-    //     return Err(res.err().unwrap());
-    // }
-    // let bbox = res;
     let res = utiles::bounding_tile(bbox.into(), truncate)
         .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
     Ok(PyTile::from(res))

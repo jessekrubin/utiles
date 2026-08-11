@@ -18,6 +18,7 @@ impl TilesGenerator {
         slf.iter.next()
     }
 
+    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
     fn __len__(slf: PyRefMut<'_, Self>) -> usize {
         slf.length as usize
     }

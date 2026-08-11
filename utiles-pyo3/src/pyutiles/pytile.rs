@@ -98,6 +98,7 @@ impl PyTile {
         map
     }
 
+    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
     fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<IntIterator>> {
         let iter = IntIterator {
             iter: Box::new(
@@ -118,8 +119,8 @@ impl PyTile {
     }
 
     #[classmethod]
-    fn from_quadkey(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
-        let xyz = Tile::from_quadkey(&quadkey);
+    fn from_quadkey(_cls: &Bound<'_, PyType>, quadkey: &str) -> PyResult<Self> {
+        let xyz = Tile::from_quadkey(quadkey);
         match xyz {
             Ok(xyz) => Ok(Self::from(xyz)),
             Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
@@ -127,8 +128,8 @@ impl PyTile {
     }
 
     #[classmethod]
-    fn from_qk(_cls: &Bound<'_, PyType>, quadkey: String) -> PyResult<Self> {
-        let xyz = Tile::from_quadkey(&quadkey);
+    fn from_qk(_cls: &Bound<'_, PyType>, quadkey: &str) -> PyResult<Self> {
+        let xyz = Tile::from_quadkey(quadkey);
         match xyz {
             Ok(xyz) => Ok(Self::from(xyz)),
             Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
@@ -137,14 +138,12 @@ impl PyTile {
 
     #[classmethod]
     fn from_row_major_id(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
-        let xyz = Tile::from_row_major_id(row_major_id);
-        Self::from(xyz)
+        Self::from(Tile::from_row_major_id(row_major_id))
     }
 
     #[classmethod]
     fn from_rmid(_cls: &Bound<'_, PyType>, row_major_id: u64) -> Self {
-        let xyz = Tile::from_row_major_id(row_major_id);
-        Self::from(xyz)
+        Self::from(Tile::from_row_major_id(row_major_id))
     }
 
     pub(crate) fn quadkey(&self) -> String {
@@ -225,6 +224,7 @@ impl PyTile {
         self.__invert__()
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     fn __len__(&self) -> usize {
         3
     }

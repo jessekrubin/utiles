@@ -8,6 +8,7 @@ pub struct PyTileType(TileType);
 
 const ENCODING_STRINGS: &str = "uncompressed, internal, zlib, gzip, brotli, zstd";
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 struct PyTileEncoding(TileEncoding);
 
 impl<'py> FromPyObject<'_, 'py> for PyTileEncoding {
@@ -35,6 +36,7 @@ impl<'py> FromPyObject<'_, 'py> for PyTileEncoding {
     }
 }
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 struct PyTileFormat(TileFormat);
 
 const TILE_FORMAT_STRINGS: &str = "png, webp, pbf, mvt, gif, jpg, jpeg, json, geojson";
