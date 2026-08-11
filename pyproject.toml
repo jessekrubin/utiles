@@ -30,7 +30,7 @@ dev = [
   "pytest-xdist>=3.8.0",
   "ruff>=0.16.2",
   "tomli>=2.3.0",
-  "typing-extensions>=4.15.0",
+  "typing-extensions>=4.16.0",
 ]
 
 [tool.uv]
