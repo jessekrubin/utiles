@@ -80,7 +80,7 @@ pub(crate) fn xyz2quadkey(x: u32, y: u32, z: u8) -> String {
 #[pyfunction]
 pub(crate) fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
     utiles::quadkey2tile(quadkey)
-        .map(|tile| PyTile::from(tile))
+        .map(PyTile::from)
         .map_err(|e| PyValueError::new_err(format!("Error: {e}")))
 }
 
@@ -124,6 +124,7 @@ pub(crate) fn feature<'py>(
 /// Extract a tile or tiles to Vec<PyTile>
 ///
 /// Consolidated logic from `parse_tiles()` per rec by `@nyurikS` in PR #38
+#[expect(clippy::cast_possible_truncation, reason = "TODO")]
 pub(crate) fn _extract(arg: &Bound<'_, PyAny>) -> PyResult<Vec<PyTile>> {
     // TODO: this code is identical to parse_tiles() and should be consolidated
     if let Ok(tiles) = arg.extract::<PyTile>() {

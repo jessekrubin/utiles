@@ -47,20 +47,8 @@ pub struct PyTile {
 impl PyTile {
     #[new]
     pub fn py_new(x: u32, y: u32, z: u8) -> Self {
-        // if debug
-        #[cfg(debug_assertions)]
-        {
-            Self {
-                // TODO: figure out if I should use the `new` fn which has debug
-                //       assertions and screws up py-tests
-                xyz: Tile::new_unchecked(x, y, z),
-            }
-        }
-        #[cfg(not(debug_assertions))]
-        {
-            Self {
-                xyz: Tile::new(x, y, z),
-            }
+        Self {
+            xyz: Tile::new_unchecked(x, y, z),
         }
     }
 
@@ -505,6 +493,7 @@ impl From<Tile> for PyTile {
 }
 
 impl From<(u32, u32, u32)> for PyTile {
+    #[expect(clippy::cast_possible_truncation, reason = "TODO")]
     fn from(xyz: (u32, u32, u32)) -> Self {
         Self {
             xyz: Tile::new(xyz.0, xyz.1, xyz.2 as u8),

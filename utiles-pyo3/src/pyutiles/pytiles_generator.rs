@@ -19,6 +19,7 @@ impl TilesGenerator {
     }
 
     #[expect(clippy::needless_pass_by_value, reason = "python ref")]
+    #[expect(clippy::cast_possible_truncation, reason = "TODO")]
     fn __len__(slf: PyRefMut<'_, Self>) -> usize {
         slf.length as usize
     }
