@@ -22,12 +22,14 @@ impl PyTileFmts {
         Self(TileStringFormatter::new(fmtstr))
     }
 
-    #[pyo3(signature = (* args))]
+    #[expect(clippy::needless_pass_by_value, reason = "python extractor")]
+    #[pyo3(signature = (*args))]
     fn fmt(&self, args: PyTileArg) -> String {
         self.0.fmt(&args)
     }
 
-    #[pyo3(signature = (* args))]
+    #[expect(clippy::needless_pass_by_value, reason = "python extractor")]
+    #[pyo3(signature = (*args))]
     fn format(&self, args: PyTileArg) -> String {
         self.0.fmt(&args)
     }

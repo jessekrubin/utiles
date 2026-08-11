@@ -96,6 +96,7 @@ impl PyBbox {
         self.bbox.tuple()
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     pub fn __len__(&self) -> usize {
         4
     }

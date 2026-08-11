@@ -83,6 +83,7 @@ impl PyLngLat {
         }
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     fn __len__(&self) -> usize {
         2
     }

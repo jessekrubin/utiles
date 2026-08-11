@@ -5,12 +5,9 @@
 #![deny(clippy::pedantic)]
 #![deny(clippy::unwrap_used)]
 #![warn(clippy::unnecessary_wraps)]
-#![expect(clippy::cast_possible_truncation)]
-#![expect(clippy::cast_sign_loss)]
+// #![expect(clippy::cast_possible_truncation)]
 #![expect(clippy::float_cmp)]
-#![expect(clippy::needless_pass_by_value)]
 #![expect(clippy::similar_names)]
-#![expect(clippy::unused_self)]
 #![expect(clippy::used_underscore_items)]
 #![expect(clippy::missing_const_for_fn)]
 use pyo3::prelude::*;
@@ -122,7 +119,6 @@ fn _utiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("TILETYPE_PNG", tile_type::TILETYPE_PNG)?;
     m.add("TILETYPE_WEBP", tile_type::TILETYPE_WEBP)?;
 
-    // m.add_class::<TileTuple>()?;
     m.add_class::<PyTile>()?;
     m.add_class::<PyLngLat>()?;
     m.add_class::<PyLngLatBbox>()?;
@@ -131,18 +127,11 @@ fn _utiles(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // tile str formatter
     m.add_class::<pyutiles::PyTileFmts>()?;
 
-    // mbutiles...
-    // m.add_class::<PyMbtiles>()?;
-    // m.add_function(wrap_pyfunction!(query_db, m)?)?;
-
     // rust-cli
     m.add_function(wrap_pyfunction!(cli::ut_cli, m)?)?;
 
     // misc
     m.add_function(wrap_pyfunction!(fmt_nbytes::fmt_nbytes, m)?)?;
-
-    // lager
-    // lager::pymod_add(m)?;
 
     Ok(())
 }
