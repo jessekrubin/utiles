@@ -30,7 +30,7 @@ iniconfig==2.3.0
     # via pytest
 librt==0.15.0
     # via mypy
-maturin==1.14.0
+maturin==1.14.1
     # via -r utiles-pyo3/requirements.dev.in
 mercantile==1.2.1
     # via -r utiles-pyo3/requirements.dev.in
