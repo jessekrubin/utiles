@@ -75,7 +75,7 @@ pytest-xdist==3.8.0
     # via -r utiles-pyo3/requirements.dev.in
 python-discovery==1.4.2
     # via virtualenv
-ruff==0.16.2
+ruff==0.16.4
     # via -r utiles-pyo3/requirements.dev.in
 sortedcontainers==2.4.0
     # via hypothesis
