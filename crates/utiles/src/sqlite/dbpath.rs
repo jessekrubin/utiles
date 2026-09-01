@@ -23,14 +23,10 @@ impl std::fmt::Display for DbPath {
 impl DbPath {
     #[must_use]
     pub fn new(fspath: &str) -> Self {
-        // let p = PathBuf::from(fspath);
-        pathlike2dbpath(fspath).map_or(
-            Self {
-                fspath: "unknown".to_string(),
-                filename: "unknown".to_string(),
-            },
-            |a| a,
-        )
+        pathlike2dbpath(fspath).unwrap_or(Self {
+            fspath: "unknown".to_string(),
+            filename: "unknown".to_string(),
+        })
     }
 
     #[must_use]
