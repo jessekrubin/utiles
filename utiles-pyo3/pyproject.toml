@@ -195,10 +195,10 @@ ini_options.markers = [
 ]
 
 [tool.coverage]
-run.branch = true
-run.omit = [ "python/utiles/__about__.py" ]
-run.parallel = true
 run.source_pkgs = [ "tests", "utiles" ]
+run.omit = [ "python/utiles/__about__.py" ]
+run.branch = true
+run.parallel = true
 paths.tests = [ "tests", "*/utiles/tests" ]
 paths.utiles = [ "utiles", "*/utiles/utiles" ]
 report.exclude_lines = [
