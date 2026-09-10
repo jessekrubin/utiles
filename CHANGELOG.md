@@ -5,6 +5,7 @@
 - python
   - custom tile args parsing
   - stub testing and fixing based on mypy's stubtest
+  - update the metadata for `python -m utiles`
 - src
   - use unstable formatting options
     `cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true`
