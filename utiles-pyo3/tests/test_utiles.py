@@ -97,11 +97,9 @@ def test_parse_tiles() -> None:
     assert all(isinstance(t, utiles.Tile) for t in tiles_list)
 
 
-@pytest.mark.skip(reason="oldimpl/notimplemented")
 def test_parse_tiles_spread() -> None:
     tile_obj = utiles.Tile(7, 8, 9)
-    t = [(1, 2, 3), (4, 5, 6), tile_obj]
-    tiles_list = utiles.parse_tiles(*t)  # type: ignore[arg-type]
+    tiles_list = utiles.parse_tiles((1, 2, 3), (4, 5, 6), tile_obj)
     assert tiles_list == [
         utiles.Tile(1, 2, 3),
         utiles.Tile(4, 5, 6),

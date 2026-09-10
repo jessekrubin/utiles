@@ -7,7 +7,7 @@ use crate::point::Point2d;
 use crate::traits::{Coord2dLike, IsOk, LngLatLike};
 
 /// `LngLat` contains a longitude and latitude as f64.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Hash)]
 pub struct LngLat {
     /// 2d point - x -> longitude, y -> latitude
     pub xy: Point2d<f64>,

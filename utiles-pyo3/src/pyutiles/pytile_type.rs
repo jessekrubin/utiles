@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use pyo3::types::{PyString, PyType};
+use pyo3::types::PyString;
 use utiles::tile_type;
 use utiles::tile_type::{TileEncoding, TileFormat, TileType};
 
@@ -116,9 +116,9 @@ impl PyTileType {
         self.0.headers_vec()
     }
 
-    #[classmethod]
-    fn from_bytes(_cls: &Bound<'_, PyType>, buffer: &[u8]) -> Self {
-        Self(tile_type::tiletype(buffer))
+    #[staticmethod]
+    fn from_bytes(buf: &[u8]) -> Self {
+        Self(tile_type::tiletype(buf))
     }
 
     fn __eq__(&self, other: &Self) -> bool {
@@ -127,14 +127,14 @@ impl PyTileType {
 }
 
 #[pyfunction]
-pub(crate) fn tiletype(buffer: &[u8]) -> PyTileType {
-    let ttype = tile_type::tiletype(buffer);
+pub(crate) fn tiletype(buf: &[u8]) -> PyTileType {
+    let ttype = tile_type::tiletype(buf);
     PyTileType(ttype)
 }
 
 #[pyfunction]
-pub(crate) fn tiletype_str(buffer: &[u8]) -> String {
-    tile_type::tiletype_str(buffer)
+pub(crate) fn tiletype_str(buf: &[u8]) -> String {
+    tile_type::tiletype_str(buf)
 }
 
 #[pyfunction]

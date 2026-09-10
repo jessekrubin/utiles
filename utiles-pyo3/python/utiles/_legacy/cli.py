@@ -557,20 +557,14 @@ def quadkey(_ctx: click.Context, input: str) -> None:
 
     """
     src = normalize_input(input)
-    try:
-        for line in iter_lines(src):
-            if line[0] == "[":
-                tile = json.loads(line)[:3]
-                output = utiles.quadkey(tile)
-            else:
-                tile = utiles.quadkey_to_tile(line)
-                output = tile.json(obj=False)
-            click.echo(output)
-    except ValueError as ve:
-        e = click.BadParameter(
-            f"{input}", param=click.Parameter("input", type=str), param_hint="input"
-        )
-        raise e from ve
+    for line in iter_lines(src):
+        if line[0] == "[":
+            tile = json.loads(line)[:3]
+            output = utiles.quadkey(tile)
+        else:
+            tile = utiles.quadkey_to_tile(line)
+            output = tile.json(obj=False)
+        click.echo(output)
 
 
 if __name__ == "__main__":

@@ -27,21 +27,20 @@ pub(crate) fn ul(args: PyTileArg) -> PyLngLat {
 }
 
 #[pyfunction]
-#[pyo3(signature = (lng, lat, truncate = None))]
-pub(crate) fn xy(lng: f64, lat: f64, truncate: Option<bool>) -> (f64, f64) {
-    utiles::xy(lng, lat, truncate)
+#[pyo3(signature = (lng, lat, *, truncate = false))]
+pub(crate) fn xy(lng: f64, lat: f64, truncate: bool) -> (f64, f64) {
+    utiles::xy(lng, lat, Some(truncate))
 }
 
 #[pyfunction]
-#[pyo3(signature = (lng, lat, truncate = None))]
-pub(crate) fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, f64)> {
-    let trunc = truncate.unwrap_or(false);
-    if !trunc && (lat <= -90.0 || lat >= 90.0) {
+#[pyo3(signature = (lng, lat, *, truncate = false))]
+pub(crate) fn _xy(lng: f64, lat: f64, truncate: bool) -> PyResult<(f64, f64)> {
+    if !truncate && (lat <= -90.0 || lat >= 90.0) {
         Err(PyErr::new::<PyValueError, _>(format!(
             "Invalid latitude: {lat}"
         )))?;
     }
-    let xy = utiles::_xy(lng, lat, truncate);
+    let xy = utiles::_xy(lng, lat, Some(truncate));
     match xy {
         Ok(xy) => Ok(xy),
         Err(_e) => Err(PyErr::new::<PyValueError, _>(format!(
@@ -51,9 +50,9 @@ pub(crate) fn _xy(lng: f64, lat: f64, truncate: Option<bool>) -> PyResult<(f64, 
 }
 
 #[pyfunction]
-#[pyo3(signature = (x, y, truncate = None))]
-pub(crate) fn lnglat(x: f64, y: f64, truncate: Option<bool>) -> PyLngLat {
-    let lnglat = utiles::lnglat(x, y, truncate);
+#[pyo3(signature = (lng, lat, *, truncate = false))]
+pub(crate) fn lnglat(lng: f64, lat: f64, truncate: bool) -> PyLngLat {
+    let lnglat = utiles::lnglat(lng, lat, Some(truncate));
     PyLngLat::py_new(lnglat.lng(), lnglat.lat())
 }
 
@@ -85,8 +84,8 @@ pub(crate) fn quadkey2xyz(quadkey: &str) -> PyResult<PyTile> {
 }
 
 #[pyfunction]
-pub(crate) fn qk2xyz(quadkey: &str) -> PyResult<PyTile> {
-    quadkey2xyz(quadkey)
+pub(crate) fn qk2xyz(qk: &str) -> PyResult<PyTile> {
+    quadkey2xyz(qk)
 }
 
 #[expect(clippy::needless_pass_by_value, reason = "python extractor")]
@@ -161,19 +160,14 @@ pub(crate) fn xy_bounds(args: PyTileArg) -> PyBbox {
 }
 
 #[pyfunction]
-#[pyo3(signature = (lng, lat, zoom, truncate=None))]
-pub(crate) fn tile(
-    lng: f64,
-    lat: f64,
-    zoom: u8,
-    truncate: Option<bool>,
-) -> PyResult<PyTile> {
+#[pyo3(signature = (lng, lat, zoom, *, truncate = false))]
+pub(crate) fn tile(lng: f64, lat: f64, zoom: u8, truncate: bool) -> PyResult<PyTile> {
     if lat <= -90.0 || lat >= 90.0 {
         Err(PyErr::new::<PyValueError, _>(format!(
             "Invalid latitude: {lat}"
         )))?;
     }
-    let xyz = utiles::Tile::from_lnglat_zoom(lng, lat, zoom, truncate);
+    let xyz = utiles::Tile::from_lnglat_zoom(lng, lat, zoom, Some(truncate));
     match xyz {
         Ok(xyz) => Ok(PyTile::from(xyz)),
         Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
@@ -239,11 +233,11 @@ pub(crate) fn parent(args: PyTileArg, zoom: Option<u8>) -> PyResult<Option<PyTil
 
 #[expect(clippy::needless_pass_by_value, reason = "python extractor")]
 #[pyfunction]
-#[pyo3(signature = (*args, zoom = None, zorder = None))]
+#[pyo3(signature = (*args, zoom = None, zorder = false))]
 pub(crate) fn children(
     args: PyTileArg,
     zoom: Option<u8>,
-    zorder: Option<bool>,
+    zorder: bool,
 ) -> PyResult<Vec<PyTile>> {
     let zoom = zoom.unwrap_or(args.z() + 1);
     if zoom < args.z() {
@@ -256,11 +250,11 @@ pub(crate) fn children(
 }
 
 #[pyfunction]
-#[pyo3(signature = (*args, zoom = None, wrapx = None))]
+#[pyo3(signature = (*args, zoom = None, wrapx = false))]
 pub(crate) fn neighbors(
     args: PyTileArg,
     zoom: Option<u8>,
-    wrapx: Option<bool>,
+    wrapx: bool,
 ) -> PyResult<Vec<PyTile>> {
     let tile = args;
     let zoom = zoom.unwrap_or(tile.z());
@@ -274,13 +268,13 @@ pub(crate) fn neighbors(
 }
 
 #[pyfunction]
-#[pyo3(signature = (*args, truncate = None))]
+#[pyo3(signature = (*args, truncate = false))]
 pub(crate) fn bounding_tile(
     args: &Bound<'_, PyTuple>,
-    truncate: Option<bool>,
+    truncate: bool,
 ) -> PyResult<PyTile> {
     let bbox = pyparsing::parse_bbox(args)?;
-    let res = utiles::bounding_tile(bbox.into(), truncate)
+    let res = utiles::bounding_tile(bbox.into(), Some(truncate))
         .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))?;
     Ok(PyTile::from(res))
 }
@@ -293,34 +287,34 @@ pub(crate) fn truncate_lnglat(lng: f64, lat: f64) -> (f64, f64) {
 }
 
 #[pyfunction]
-#[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
+#[pyo3(signature = (west, south, east, north, zooms, *, truncate = false))]
 pub(crate) fn tiles_count(
     west: f64,
     south: f64,
     east: f64,
     north: f64,
     zooms: PyZoomOrZooms,
-    truncate: Option<bool>,
+    truncate: bool,
 ) -> PyResult<u64> {
     let (west, south, east, north) =
-        utiles::bbox_truncate(west, south, east, north, truncate);
+        utiles::bbox_truncate(west, south, east, north, Some(truncate));
 
     utiles::tiles_count((west, south, east, north), ZoomOrZooms::from(zooms))
         .map_err(|e| PyErr::new::<PyValueError, _>(format!("Error: {e}")))
 }
 
 #[pyfunction]
-#[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
+#[pyo3(signature = (west, south, east, north, zooms, *, truncate = false))]
 pub(crate) fn tiles(
     west: f64,
     south: f64,
     east: f64,
     north: f64,
     zooms: PyZoomOrZooms,
-    truncate: Option<bool>,
+    truncate: bool,
 ) -> PyResult<TilesGenerator> {
     let (west, south, east, north) =
-        utiles::bbox_truncate(west, south, east, north, truncate);
+        utiles::bbox_truncate(west, south, east, north, Some(truncate));
     let zooms_vec = match zooms {
         PyZoomOrZooms::Zoom(z) => vec![z],
         PyZoomOrZooms::Zooms(zs) => zs,
@@ -341,17 +335,17 @@ pub(crate) fn tiles(
 }
 
 #[pyfunction]
-#[pyo3(signature = (west, south, east, north, zooms, truncate=None))]
+#[pyo3(signature = (west, south, east, north, zooms, *, truncate = false))]
 pub(crate) fn tiles_list(
     west: f64,
     south: f64,
     east: f64,
     north: f64,
     zooms: PyZoomOrZooms,
-    truncate: Option<bool>,
+    truncate: bool,
 ) -> Vec<PyTile> {
     let (west, south, east, north) =
-        utiles::bbox_truncate(west, south, east, north, truncate);
+        utiles::bbox_truncate(west, south, east, north, Some(truncate));
     utiles::tiles((west, south, east, north), ZoomOrZooms::from(zooms))
         .map(PyTile::from)
         .collect::<Vec<_>>()

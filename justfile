@@ -74,13 +74,16 @@ fmtcpy:
     uv run ruff format --check
     uv run ruff check --select "I" --show-fixes .
 
-# format pyproject.toml
-fmtpyproject:
-    uvx pyproject-fmt . --keep-full-version
-    uvx pyproject-fmt utiles-pyo3 --keep-full-version
+# justfile format
+justfilefmt:
+    just --fmt --unstable
+
+# justfile format check
+justfilefmtc:
+    just --check --fmt --unstable
 
 # format rust and python
-fmt: cargo-fmt fmtpy
+fmt: cargo-fmt fmtpy justfilefmt
 
 # typecheck w/ mypy
 mypy:

@@ -1,11 +1,18 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use pyo3::class::basic::CompareOp;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyStopIteration};
 use pyo3::prelude::*;
-use pyo3::types::PyType;
 
 use crate::pyutiles::pytile::PyTile;
 
-#[pyclass(name = "LngLat", module = "utiles._utiles", frozen)]
+#[pyclass(
+    name = "LngLat",
+    module = "utiles._utiles",
+    frozen,
+    skip_from_py_object
+)]
+#[derive(Clone, Copy, PartialEq, PartialOrd, Hash)]
 pub struct PyLngLat {
     lnglat: utiles::LngLat,
 }
@@ -19,8 +26,8 @@ impl PyLngLat {
         }
     }
 
-    #[classmethod]
-    pub fn from_tile(_cls: &Bound<'_, PyType>, tile: &PyTile) -> Self {
+    #[staticmethod]
+    pub fn from_tile(tile: &PyTile) -> Self {
         let ll = utiles::ul(tile.xyz.x, tile.xyz.y, tile.xyz.z);
         Self::py_new(ll.lng(), ll.lat())
     }
@@ -45,6 +52,12 @@ impl PyLngLat {
     #[getter]
     fn lat(&self) -> f64 {
         self._lat()
+    }
+
+    fn __hash__(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.lnglat.hash(&mut hasher);
+        hasher.finish()
     }
 
     fn __richcmp__(&self, other: &Bound<'_, PyAny>, op: CompareOp) -> PyResult<bool> {
