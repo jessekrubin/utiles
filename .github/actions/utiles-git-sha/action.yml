@@ -1,0 +1,24 @@
+name: utiles-git-sha
+description: Export the release commit SHA and persist it for sdist builds.
+
+outputs:
+  sha:
+    description: The git SHA used for package build metadata.
+    value: ${{ steps.utiles-git-sha.outputs.sha }}
+
+runs:
+  using: composite
+  steps:
+    - id: utiles-git-sha
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        sha="${UTILES_GIT_SHA:-}"
+        if [ -z "$sha" ]; then
+          sha="$(git rev-parse HEAD)"
+        fi
+
+        printf 'UTILES_GIT_SHA=%s\n' "$sha" >> "$GITHUB_ENV"
+        printf '%s\n' "$sha" > utiles-pyo3/python/utiles/.git-sha
+        printf 'sha=%s\n' "$sha" >> "$GITHUB_OUTPUT"
