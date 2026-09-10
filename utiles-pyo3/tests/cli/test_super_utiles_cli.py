@@ -8,17 +8,20 @@ import pytest
 import utiles as ut
 from utiles.dev.testing import run_cli as _run_cli
 
+
 ## TODO union is not implemented as of right now...
-# def test_union_cli():
-#     filename = os.path.join(os.path.dirname(__file__), 'fixtures/union.txt')
-#     expectedFilename = os.path.join(os.path.dirname(__file__), 'expected/union.txt')
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ['union', filename])
-#     assert result.exit_code == 0
-#     with open(expectedFilename) as ofile:
-#         expected = ofile.readlines()
-#     # TODO fuzzy test of featurecollection equality
-#     assert len(result.output.strip().split("\n")) == len(expected)
+@pytest.mark.skip(reason="union is not implemented as of right now...")
+def test_union_cli() -> None:
+    filename = os.path.join(os.path.dirname(__file__), "fixtures/union.txt")
+    exp_filename = os.path.join(os.path.dirname(__file__), "expected/union.txt")
+    with open(filename) as f:
+        contents = f.read()
+    result = _run_cli(["union"], input=contents)
+    assert result.exit_code == 0
+    with open(exp_filename) as ofile:
+        expected = ofile.readlines()
+    # TODO fuzzy test of featurecollection equality
+    assert len(result.output.strip().split("\n")) == len(expected)
 
 
 def test_edge_cli() -> None:
@@ -91,26 +94,8 @@ def test_burn_tile_center_lines_roundtrip() -> None:
     assert sorted(output_tiles) == sorted([list(t) for t in tiles])
 
 
-@pytest.mark.skip()
+@pytest.mark.skip
 def test_burn_cli_tile_shape() -> None:
-    # tile_geom = {
-    #     "bbox": [-122.4755859375, 37.75334401310657, -122.431640625, 37.78808138412046],
-    #     "geometry": {
-    #         "coordinates": [
-    #             [
-    #                 [-122.4755859375, 37.75334401310657],
-    #                 [-122.4755859375, 37.78808138412046],
-    #                 [-122.431640625, 37.78808138412046],
-    #                 [-122.431640625, 37.75334401310657],
-    #                 [-122.4755859375, 37.75334401310657],
-    #             ]
-    #         ],
-    #         "type": "Polygon",
-    #     },
-    #     "id": "(1309, 3166, 13)",
-    #     "properties": {"title": "XYZ tile (1309, 3166, 13)"},
-    #     "type": "Feature",
-    # }
     tile_geom = {
         "bbox": [-122.4755859375, 37.75334401310657, -122.431640625, 37.78808138412046],
         "id": "(1309, 3166, 13)",

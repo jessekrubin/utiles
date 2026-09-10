@@ -2,19 +2,22 @@
 
 from __future__ import annotations
 
+import sys
+import typing as t
+from dataclasses import dataclass
+from sqlite3 import connect
+from subprocess import CompletedProcess, run
+from time import time_ns
+
 import utiles
 
 try:
     from orjson import loads as json_loads
 except ImportError:
     from json import loads as json_loads
-import sys
-from dataclasses import dataclass
-from pathlib import Path
-from sqlite3 import connect
-from subprocess import CompletedProcess, run
-from time import time_ns
-from typing import Any
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
 
 echo = print
 
@@ -67,11 +70,11 @@ class CliResult:
         return self.stdout
 
     @property
-    def parse_json(self) -> Any:
+    def parse_json(self) -> t.Any:
         """Parse json"""
         return json_loads(self.stdout)
 
-    def parse_jsonl(self) -> list[Any]:
+    def parse_jsonl(self) -> list[t.Any]:
         """Parse json"""
         return [json_loads(line) for line in self.stdout.splitlines()]
 
@@ -110,6 +113,7 @@ def run_cli(
     args: list[str] | None,
     input: str | None = None,
 ) -> CliResult:
+    """Run the utiles cli."""
     _python = sys.executable
     _args = args or []
     ti = time_ns()
@@ -138,9 +142,8 @@ def run_cli(
 
 def query_metadata_rows(
     dbpath: str | Path,
-) -> list[dict[str, Any]]:
-    """Query metadata rows"""
-
+) -> list[dict[str, t.Any]]:
+    """Query metadata rows."""
     with connect(dbpath) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM metadata;")

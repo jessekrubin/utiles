@@ -87,7 +87,7 @@ fmt: cargo-fmt fmtpy justfilefmt
 
 # typecheck w/ mypy
 mypy:
-    uv run mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests
+    uv run mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests {{ pyut }}/bench
 
 # ruff check/lint
 ruff:

@@ -49,6 +49,7 @@ impl PyLngLatBbox {
         }
     }
 
+    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
     fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<FloatIterator>> {
         let iter = FloatIterator {
             iter: Box::new(
@@ -115,6 +116,7 @@ impl PyLngLatBbox {
         self.tuple()
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     fn __len__(&self) -> usize {
         4
     }

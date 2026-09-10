@@ -51,6 +51,7 @@ impl PyLager {
         Self {}
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     #[getter]
     fn get_level(&self) -> PyResult<String> {
         let r = get_lager_level()
@@ -59,6 +60,7 @@ impl PyLager {
         Ok(r)
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     #[getter]
     fn get_format(&self) -> PyResult<String> {
         let r = get_lager_format().map(|e| format!("{e}")).map_err(|_e| {
@@ -67,6 +69,7 @@ impl PyLager {
         Ok(r)
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     #[setter]
     fn set_level(&self, level: &str) -> PyResult<()> {
         let parse_lev = LagerLevel::from_str(level).map_err(|_| {
@@ -85,6 +88,7 @@ impl PyLager {
         Ok(())
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     #[setter]
     fn set_format(&self, fmt: &str) -> PyResult<()> {
         let parse_fmt = LagerFormat::from_str(fmt).map_err(|_e| {
@@ -110,22 +114,27 @@ impl PyLager {
         Ok(format!("Lager(level={lev}, format={fmt})"))
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     pub fn trace(&self, msg: &str) {
         tracing::trace!(target: VERSION_STRING, "{}", msg);
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     pub fn debug(&self, msg: &str) {
         tracing::debug!(target: VERSION_STRING, "{}", msg);
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     pub fn info(&self, msg: &str) {
         tracing::info!(target: VERSION_STRING, "{}", msg);
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     pub fn warn(&self, msg: &str) {
         tracing::warn!(target: VERSION_STRING, "{}", msg);
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     pub fn error(&self, msg: &str) {
         tracing::error!(target: VERSION_STRING, "{}", msg);
     }

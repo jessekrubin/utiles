@@ -18,31 +18,31 @@ jobs:
     name: Build, test and deploy docs
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # To push a branch 
+      contents: write  # To push a branch
       pull-requests: write  # To create a PR from that branch
     steps:
-      - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@5b842231ba77f5c045dba54ac5560fed2db780e2 # nightly
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           enable-cache: true
       - name: Setup mdBook
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@7b8d4719ee4aaa279bdf55df38dacb9ebfe12a6c # v2
         with:
           tool: mdbook,lychee
       - name: build-docs
         run: cd docs && mdbook build
 #        run: cd docs && mdbook build && lychee book
       - name: upload-artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: book
           path: docs/book
 
       - name: deploy-docs
         if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/book

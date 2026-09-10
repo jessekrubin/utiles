@@ -47,20 +47,8 @@ pub struct PyTile {
 impl PyTile {
     #[new]
     pub fn py_new(x: u32, y: u32, z: u8) -> Self {
-        // if debug
-        #[cfg(debug_assertions)]
-        {
-            Self {
-                // TODO: figure out if I should use the `new` fn which has debug
-                //       assertions and screws up py-tests
-                xyz: Tile::new_unchecked(x, y, z),
-            }
-        }
-        #[cfg(not(debug_assertions))]
-        {
-            Self {
-                xyz: Tile::new(x, y, z),
-            }
+        Self {
+            xyz: Tile::new_unchecked(x, y, z),
         }
     }
 
@@ -98,6 +86,7 @@ impl PyTile {
         map
     }
 
+    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
     fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<IntIterator>> {
         let iter = IntIterator {
             iter: Box::new(
@@ -220,6 +209,7 @@ impl PyTile {
         self.__invert__()
     }
 
+    #[expect(clippy::unused_self, reason = "python method")]
     fn __len__(&self) -> usize {
         3
     }
@@ -237,9 +227,10 @@ impl PyTile {
             tuple_slice::SliceOrInt::Slice(slice) => {
                 let psi = slice.indices(3)?;
                 let (start, stop, step) = (psi.start, psi.stop, psi.step);
-                let m: Vec<u32> = self.members()[start as usize..stop as usize]
+                let m: Vec<u32> = self.members()
+                    [start.cast_unsigned()..stop.cast_unsigned()]
                     .iter()
-                    .step_by(step as usize)
+                    .step_by(step.cast_unsigned())
                     .copied()
                     .collect();
                 let tuple = PyTuple::new(py, m).map(Bound::into_any).map_err(|e| {
@@ -496,6 +487,7 @@ impl From<Tile> for PyTile {
 }
 
 impl From<(u32, u32, u32)> for PyTile {
+    #[expect(clippy::cast_possible_truncation, reason = "TODO")]
     fn from(xyz: (u32, u32, u32)) -> Self {
         Self {
             xyz: Tile::new(xyz.0, xyz.1, xyz.2 as u8),

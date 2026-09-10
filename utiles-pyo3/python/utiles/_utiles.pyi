@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import typing as t
 from collections.abc import Collection, Iterable, Iterator, Sequence
 from typing import (
     Any,
@@ -12,12 +11,84 @@ from typing import (
 )
 
 __version__: str
-__build_profile__: Literal["debug", "release"]
+__build_profile__: t.Literal["debug", "release"]
 __build_timestamp__: str
 __authors__: str
 __description__: str
 __pkg_name__: str
-__all__: list[str]
+__all__: list[str] = [
+    "TILETYPE_GIF",
+    "TILETYPE_JPG",
+    "TILETYPE_JSON",
+    "TILETYPE_PBF",
+    "TILETYPE_PBFGZ",
+    "TILETYPE_PNG",
+    "TILETYPE_UNKNOWN",
+    "TILETYPE_WEBP",
+    "Bbox",
+    "Lager",
+    "LngLat",
+    "LngLatBbox",
+    "Tile",
+    "TileFmts",
+    "TileType",
+    "__authors__",
+    "__build_profile__",
+    "__build_timestamp__",
+    "__description__",
+    "__pkg_name__",
+    "__version__",
+    "_coords",
+    "_parse_tile_arg",
+    "_xy",
+    "bounding_tile",
+    "bounds",
+    "children",
+    "coords",
+    "debug",
+    "error",
+    "feature",
+    "fmt_nbytes",
+    "from_pmtileid",
+    "from_tuple",
+    "geojson2tiles",
+    "geojson_bounds",
+    "geotransform2optzoom",
+    "info",
+    "lager",
+    "lnglat",
+    "minmax",
+    "neighbors",
+    "parent",
+    "parse_textiles",
+    "parse_tile_arg",
+    "parse_tiles",
+    "pmtileid",
+    "pmtileid2xyz",
+    "qk2xyz",
+    "quadkey",
+    "quadkey2xyz",
+    "quadkey_to_tile",
+    "set_lager_format",
+    "set_lager_level",
+    "simplify",
+    "tile",
+    "tiles",
+    "tiles_count",
+    "tiles_list",
+    "tiletype",
+    "tiletype2headers",
+    "tiletype_str",
+    "trace",
+    "truncate_lnglat",
+    "ul",
+    "ut_cli",
+    "warn",
+    "xy",
+    "xy_bounds",
+    "xyz",
+    "xyz2quadkey",
+]
 TILETYPE_GIF: int
 TILETYPE_JPG: int
 TILETYPE_JSON: int
@@ -243,11 +314,11 @@ class Tile:
     def feature(
         self,
         fid: str | None = ...,
-        props: dict[Any, Any] | None = ...,
+        props: dict[t.Any, t.Any] | None = ...,
         projected: str | None = ...,
         buffer: float | None = ...,
         precision: int | None = ...,
-    ) -> Any: ...
+    ) -> t.Any: ...
     def center(self) -> LngLat: ...
 
 @final
@@ -273,11 +344,11 @@ def children(
 def feature(
     tile: _TileLike,
     fid: str | None = ...,
-    props: dict[Any, Any] | None = ...,
+    props: dict[t.Any, t.Any] | None = ...,
     projected: str | None = ...,
     buffer: float | None = ...,
     precision: int | None = ...,
-) -> Any: ...
+) -> t.Any: ...
 def from_tuple(tile: tuple[int, int, int]) -> Tile: ...
 def lnglat(lng: float, lat: float, *, truncate: bool = False) -> LngLat: ...
 def minmax(zoom: int) -> tuple[int, int]: ...
@@ -364,7 +435,6 @@ class Lager:
     format: Literal["full", "json"]
 
     def __init__(self) -> None: ...
-    def __str__(self) -> str: ...
     def trace(self, msg: str) -> None: ...
     def debug(self, msg: str) -> None: ...
     def info(self, msg: str) -> None: ...

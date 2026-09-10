@@ -1,20 +1,22 @@
 from __future__ import annotations
 
+import typing
 from pathlib import Path
-from typing import Any
 
 import pytest
-from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
 from utiles import Tile
+
+if typing.TYPE_CHECKING:
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 PWD = Path(__file__).parent
 PYPROJECT_TOML = PWD.parent / "pyproject.toml"
 
 
 @pytest.mark.parametrize(
-    "tile,quadkey",
+    ("tile", "quadkey"),
     [
         ((0, 0, 0), ""),
         ((1, 0, 1), "1"),
@@ -137,14 +139,16 @@ def test_lnglat_bbox_equality() -> None:
     assert bbox == t
 
 
-def _equal(a: Any, b: Any) -> bool:
+_TEqual = typing.TypeVar("_TEqual")
+
+
+def _equal(a: _TEqual, b: _TEqual) -> bool:
     return bool(a == b)
 
 
 def test_tile_equality_tuple2tuple(benchmark: BenchmarkFixture) -> None:
     t = (1, 2, 3)
     t2 = (1, 2, 3)
-    # tile_obj = utiles.from_tuple(t)
     benchmark(_equal, t, t2)
 
 

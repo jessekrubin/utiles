@@ -141,13 +141,6 @@ def test_tiles_single_zoom() -> None:
     assert sorted(tiles) == sorted(expect)
 
 
-# def test_tiles_truncate():
-#     """Input is truncated"""
-#     assert list(
-#         mercantile.tiles(-181.0, 0.0, -170.0, 10.0, zooms=[2], truncate=True)
-#     ) == list(mercantile.tiles(-180.0, 0.0, -170.0, 10.0, zooms=[2]))
-
-
 def test_tiles_antimerdian_crossing_bbox() -> None:
     """Antimeridian-crossing bounding boxes are handled"""
     bounds = (175.0, 5.0, -175.0, 10.0)
@@ -214,11 +207,8 @@ def test_empty_quadkey_to_tile() -> None:
 
 def test_quadkey_failure() -> None:
     """expect a deprecation warning"""
-    # warnings.simplefilter("always")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="invalid quadkey"):
         mercantile.quadkey_to_tile("lolwut")
-    # assert len(recwarn) == 1
-    # assert recwarn.pop(DeprecationWarning)
 
 
 def test_root_parent() -> None:
@@ -230,7 +220,7 @@ def test_parent_invalid_args(
     args: tuple[int, int, int, int] | tuple[tuple[int, int, int], int],
 ) -> None:
     """tile arg must have length 1 or 3"""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="tile argument may have 1 or 3 values"):
         mercantile.parent(*args)
 
 
@@ -328,29 +318,28 @@ def test_child_fractional_zoom() -> None:
 
 
 def test_child_bad_tile_zoom() -> None:
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(
+        ValueError, match="zoom must be greater than or equal to tile zoom: 9"
+    ) as e:
         mercantile.children((243, 166, 9), zoom=8)
     assert "zoom must be greater than or equal to tile zoom: 9" in str(e.value)
 
 
 def test_parent_fractional_tile() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="tile argument may have 1 or 3 values"):
         mercantile.parent((243.3, 166.2, 9), zoom=1)  # type: ignore
-
-
-# assert "the parent of a non-integer tile is undefined" in str(e.value)
 
 
 def test_parent_fractional_zoom() -> None:
     with pytest.raises(TypeError):
         mercantile.parent((243, 166, 9), zoom=1.2)  # type: ignore
-    # assert "zoom must be an integer and less than" in str(e.value)
 
 
 def test_parent_bad_tile_zoom() -> None:
-    with pytest.raises(ValueError):
-        mercantile.parent((243.3, 166.2, 9), zoom=10)  # type: ignore
-    # assert "zoom must be an integer and less than" in str(e.value)
+    with pytest.raises(
+        ValueError, match="zoom level 10 is invalid for tile with zoom 9"
+    ):
+        mercantile.parent((243, 166, 9), zoom=10)
 
 
 def test_neighbors() -> None:
@@ -411,7 +400,7 @@ def test_simplify_removal() -> None:
 
 
 @pytest.mark.parametrize(
-    "bounds,tile",
+    ("bounds", "tile"),
     [
         ((-92.5, 0.5, -90.5, 1.5), (31, 63, 7)),
         ((-90.5, 0.5, -89.5, 0.5), (0, 0, 1)),
@@ -462,11 +451,11 @@ def test_truncate_lat_over() -> None:
 
 
 @pytest.mark.parametrize(
-    "args, tile",
+    ("args", "tile"),
     [
         ((0, 0, 0), (0, 0, 0)),
         (mercantile.Tile(0, 0, 0), (0, 0, 0)),
-        (((0, 0, 0)), (0, 0, 0)),
+        (((0, 0, 0),), (0, 0, 0)),
     ],
 )
 def test_arg_parse(
@@ -482,7 +471,7 @@ def test_arg_parse_error(
     args: tuple[int, int] | tuple[int, int, int, int],
 ) -> None:
     """Helper function raises exception as expected"""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="tile argument may have 1 or 3 values"):
         mercantile._parse_tile_arg(*args)
 
 
@@ -536,17 +525,19 @@ def test_lower_left_tile() -> None:
 
 @pytest.mark.parametrize("lat", [-90.0, 90.0])
 def test_tile_poles(lat: float) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid latitude"):
         mercantile.tile(0.0, lat, zoom=17)
 
 
 @pytest.mark.parametrize("lat", [-90.0, 90.0])
 def test__xy_poles(lat: float) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid latitude"):
         mercantile._xy(0.0, lat)
 
 
-@pytest.mark.parametrize("lat,fy", [(85.0511287798066, 0.0), (-85.0511287798066, 1.0)])
+@pytest.mark.parametrize(
+    ("lat", "fy"), [(85.0511287798066, 0.0), (-85.0511287798066, 1.0)]
+)
 def test__xy_limits(lat: float, fy: float) -> None:
     x, y = mercantile._xy(0.0, lat)
     assert x == 0.5
@@ -572,7 +563,7 @@ def test_minmax() -> None:
     assert mercantile.minmax(zoom=0) == (0, 0)
     assert mercantile.minmax(zoom=1) == (0, 1)
 
-    for z in range(0, 28):
+    for z in range(28):
         minimum, maximum = mercantile.minmax(z)
 
         assert minimum == 0
@@ -581,7 +572,7 @@ def test_minmax() -> None:
 
 
 @pytest.mark.parametrize("z", [1.2, "lol", -1])
-def test_minmax_error(z: int | float | str) -> None:
+def test_minmax_error(z: float | str) -> None:
     """Get an exception when zoom is invalid"""
     with pytest.raises((ValueError, TypeError)):
         mercantile.minmax(z)  # type: ignore
@@ -627,7 +618,7 @@ def test_geojson_bounds(obj: Any) -> None:
     assert bbox.north == 2.0
 
 
-@pytest.mark.parametrize("x,y", [(0, 1), (1, 0), (-1, 0), (0, -1)])
+@pytest.mark.parametrize(("x", "y"), [(0, 1), (1, 0), (-1, 0), (0, -1)])
 @pytest.mark.skip(reason="Not relevant")
 def test_xy_future_warnings(x: int, y: int) -> None:
     with pytest.warns(FutureWarning):

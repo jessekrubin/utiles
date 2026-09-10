@@ -9,7 +9,6 @@
   - [DEFINITIONS](./definitions.md)
   - [ZOOM-LEVELS](./zoom-levels.md)
 
-
-___
+---
 
 - [CHANGELOG](./changelog.md)

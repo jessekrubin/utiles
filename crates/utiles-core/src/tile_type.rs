@@ -522,7 +522,7 @@ pub fn is_webp_buf(data: &[u8]) -> bool {
 }
 
 /// Return true if buffer is **maybe** a mapbox-vector-tile (without parsing)
-fn is_mvt_like(buffer: &[u8]) -> bool {
+const fn is_mvt_like(buffer: &[u8]) -> bool {
     if buffer.len() < 2 {
         return false; // Too small to be a valid MVT
     }

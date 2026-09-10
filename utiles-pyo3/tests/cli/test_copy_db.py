@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import dataclasses
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from utiles.dev.testing import run_cli as _run_cli
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclasses.dataclass
@@ -211,7 +214,6 @@ def test_copy_mbtiles_bbox(
         "--bbox",
         "-180,-90,0,90",
     ]
-    # print(" ".join(west_half_o_world_args))
     copy_result_a = _run_cli(west_half_o_world_args)
 
     assert copy_result_a.returncode == 0
@@ -239,5 +241,4 @@ def test_copy_mbtiles_bbox(
 
     info_result_final = _run_cli(["info", str(out_path)])
     info_dict_final = info_result_final.parse_json
-    # print(info_dict_final)
     assert info_dict_final["ntiles"] == expected_ntiles_total

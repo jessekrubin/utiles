@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import mercantile
 import pytest
 from pmtiles.tile import tileid_to_zxy, zxy_to_tileid
-from pytest_benchmark.fixture import BenchmarkFixture
 
 import utiles
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 # mark all as benchmarks
 pytestmark = [pytest.mark.benchmark(group="utiles"), pytest.mark.bench]
@@ -61,7 +64,6 @@ def test_quadkey_bench(
     [
         pytest.param(mercantile.ul, id="mercantile"),
         pytest.param(utiles.ul, id="utiles"),
-        # pytest.param(utiles.ul2, id="utiles-v2"),
     ],
 )
 @pytest.mark.benchmark(
@@ -80,17 +82,20 @@ def test_ul_bench(
     [
         pytest.param(mercantile.ul, id="mercantile"),
         pytest.param(utiles.ul, id="utiles"),
-        # pytest.param(utiles.ul2, id="utiles-v2"),
     ],
 )
 @pytest.mark.benchmark(
     group="ul-many",
 )
 def test_ul_many_bench(
-    func: Callable[[tuple[int, int, int]], tuple[float, float]],
+    func: Callable[..., tuple[float, float]],
     benchmark: BenchmarkFixture,
 ) -> None:
-    benchmark(lambda: [func(*tile) for tile in TEST_TILES])
+    def _fn() -> None:
+        _tiles = [func(*tile) for tile in TEST_TILES]
+        assert len(_tiles) == len(TEST_TILES)
+
+    benchmark(_fn)
 
 
 def mercantile_tiles_gen() -> None:
@@ -169,7 +174,7 @@ def test_coords(
     ],
 )
 def test_feature(
-    func: Callable[[mercantile.Tile], dict], benchmark: BenchmarkFixture
+    func: Callable[[mercantile.Tile], dict[str, Any]], benchmark: BenchmarkFixture
 ) -> None:
     """Get feature of tile"""
     benchmark(func, mercantile.Tile(1, 2, 3))
@@ -183,18 +188,19 @@ def _ut_xyz2pmtileid(x: int, y: int, z: int) -> int:
 
 
 def _pm_xyz2pmtileid(x: int, y: int, z: int) -> int:
-    return zxy_to_tileid(z, x, y)
+    return int(zxy_to_tileid(z, x, y))
 
 
 def _ut_pmtileid2xyz(tileid: int) -> tuple[int, int, int]:
-    return utiles.from_pmtileid(tileid)
+    return utiles.from_pmtileid(tileid).tuple()
 
 
 def _pm_pmtileid2xyz(tileid: int) -> tuple[int, int, int]:
-    return tileid_to_zxy(tileid)
+    z, x, y = tileid_to_zxy(tileid)
+    return (z, x, y)
 
 
-def test_xyz2pmtileid_eq():
+def test_xyz2pmtileid_eq() -> None:
     for tile in TEST_TILES:
         x, y, z = tile
         pmtileid_from_pmtiles = zxy_to_tileid(

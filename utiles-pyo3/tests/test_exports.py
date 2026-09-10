@@ -54,7 +54,6 @@ def test_missing_from_libutiles() -> None:
     if missing:
         msg = f"Missing from libutiles: {missing}"
         raise AssertionError(msg)
-    # print(libutiles_imports_str)
 
 
 def main() -> None:

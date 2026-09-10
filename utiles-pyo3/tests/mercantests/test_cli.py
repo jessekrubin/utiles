@@ -41,7 +41,6 @@ def test_cli_shapes_arg() -> None:
     assert result.exit_code == 0
     result_output_json = json.loads(result.output)
 
-    # '{"bbox": [-105.46875, 39.909736, -104.765625, 40.446947], "geometry": {"coordinates": [[[-105.46875, 39.909736], [-105.46875, 40.446947], [-104.765625, 40.446947], [-104.765625, 39.909736], [-105.46875, 39.909736]]], "type": "Polygon"}, "id": "(106, 193, 9)", "properties": {"title": "XYZ tile (106, 193, 9)"}, "type": "Feature"}\n'
     expected_dict = {
         "bbox": [-105.46875, 39.909736, -104.765625, 40.446947],
         "geometry": {
@@ -325,8 +324,6 @@ def test_cli_neighbors() -> None:
     tiles = [tuple(json.loads(t)) for t in tiles_lines]
     assert len(tiles) == 8
 
-    # We do not provide ordering guarantees
-    # tiles = set([tuple(t) for t in tiles])
     tiles_set = set(tiles)
     assert (243, 166, 9) not in tiles_set, "input not in neighbors"
 
@@ -376,7 +373,7 @@ def test_cli_tiles_point_geojson() -> None:
 def test_cli_quadkey_failure() -> None:
     """Abort when an invalid quadkey is passed"""
     runner = CliRunner()
-    with pytest.warns(DeprecationWarning):
+    with pytest.warns(DeprecationWarning, match="NOTIMPL"):
         result = runner.invoke(cli, ["quadkey", "lolwut"])
     assert result.exit_code == 2
     assert "lolwut" in result.output

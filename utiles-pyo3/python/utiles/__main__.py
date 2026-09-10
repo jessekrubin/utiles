@@ -21,7 +21,6 @@ def _utiles_ext_info() -> dict[str, str | int]:
 
 def main() -> None:
     """Print package metadata"""
-
     sys.stdout.write(
         json.dumps(
             {

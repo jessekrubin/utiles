@@ -79,6 +79,7 @@ impl From<(u32, u32, u8)> for PyTileArg<'_, '_> {
 impl<'a, 'py> FromPyObject<'a, 'py> for PyTileArg<'a, 'py> {
     type Error = PyErr;
 
+    #[expect(clippy::cast_possible_truncation, reason = "TODO")]
     fn extract(obj: Borrowed<'a, 'py, PyAny>) -> Result<Self, Self::Error> {
         if let Ok(tup) = obj.cast_exact::<PyTuple>() {
             match tup.len() {
@@ -92,13 +93,13 @@ impl<'a, 'py> FromPyObject<'a, 'py> for PyTileArg<'a, 'py> {
                         Ok(PyTileArg::from((seq[0], seq[1], seq[2] as u8)))
                     } else {
                         Err(PyErr::new::<PyValueError, _>(
-                            "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
+                            "the tile argument may have 1 or 3 values",
                         ))?
                     }
                 }
                 3 => tup.extract::<(u32, u32, u8)>().map(Self::from),
                 _ => Err(PyErr::new::<PyValueError, _>(
-                    "the tile argument may have 1 or 3 values. Note that zoom is a keyword-only argument",
+                    "the tile argument may have 1 or 3 values",
                 ))?,
             }
         } else if let Ok(pt) = obj.cast_exact::<PyTile>() {

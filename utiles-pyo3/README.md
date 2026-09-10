@@ -8,8 +8,9 @@
 
 Fast spherical mercator geo/tile util(e)ities.
 
-A mostly drop-in replacement for [mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several other
-util(e)ities.
+A mostly drop-in replacement for
+[mercantile](https://github.com/mapbox/mercantile) written w/ rust, plus several
+other util(e)ities.
 
 ## Installation
 
@@ -77,26 +78,27 @@ False
 
 ### Why?
 
-I use mercantile regularly and wished it were a bit more ergonomic, had type annotations, and was faster, but overall
-it's a great library.
+I use mercantile regularly and wished it were a bit more ergonomic, had type
+annotations, and was faster, but overall it's a great library.
 
 This was an excuse to learn some more rust as well as pyo3.
 
 **Do I/you REALLY need a rust-port of mercantile?**
 
-I don't know, decide for yourself. `utiles` is certainly faster than `mercantile` for some things (see benchmarks below)
+I don't know, decide for yourself. `utiles` is certainly faster than
+`mercantile` for some things (see benchmarks below)
 
 **Is it really a drop in replacement for mercantile?**
 
-Not quite, but it's close. utiles doesn't throw the same exceptions as mercantile, instead it throws `ValueError`'s and
-`TypeError`'s.
+Not quite, but it's close. utiles doesn't throw the same exceptions as
+mercantile, instead it throws `ValueError`'s and `TypeError`'s.
 
-There might be other differences, but I have been using it instead of mercantile for a bit now and it works pretty
-decent, tho I am open to suggestions!
+There might be other differences, but I have been using it instead of mercantile
+for a bit now and it works pretty decent, tho I am open to suggestions!
 
 ## Benchmarks (WIP)
 
-```
+```text
 ---------------------------------------------------------------------------------------------------- benchmark 'quadkey': 12 tests -----------------------------------------------------------------------------------------------------
 Name (time in ns)                                        Min                     Max                  Mean              StdDev                Median                 IQR            Outliers  OPS (Kops/s)            Rounds  Iterations
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -138,12 +140,3 @@ test_ul_bench[mercantile-(486, 332, 10)]     1,099.9938 (5.38)      90,200.0029 
 test_ul_bench[mercantile-(486, 332, 20)]     1,099.9938 (5.38)     107,300.0021 (14.98)    1,264.2361 (4.79)       594.6154 (4.77)     1,200.0019 (5.41)     100.0008 (5.00)      1522;2265      790.9915 (0.21)     123457           1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ```
-
-## TODO:
-
-- [x] benchmark against mercantile
-- [x] Split library into `utiles` (rust lib) and `utiles-python` (python/pip package)?
-- [x] Re-write cli in rust with clap?
-- **Maybe:**
-  - [] Mbtiles support for the python lib??
-  - [] Reading/writing mvt files?
