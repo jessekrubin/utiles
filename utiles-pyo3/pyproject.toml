@@ -39,6 +39,7 @@ entry-points."rasterio.rio_plugins".utiles = "utiles.rio_plugin:rio_utiles"
 module-name = "utiles._utiles"
 bindings = "pyo3"
 python-source = "python"
+include = [ { path = "python/ry/.git-sha", format = "sdist" } ]
 features = [ "pyo3/extension-module" ]
 
 [tool.ruff]

@@ -8,7 +8,13 @@ __build_profile__: t.Literal["debug", "release"]
 __build_timestamp__: str
 __authors__: str
 __description__: str
-__pkg_name__: str
+__pkg_name__: t.Literal["utiles"]
+__target__: str
+__opt_level__: t.Literal["0", "1", "2", "3", "s", "z"]
+__allocator__: t.Literal["mimalloc", "system"]
+__git_repo__: t.Literal["git@github.com:jessekrubin/utiles.git"]
+__git_sha__: str
+
 __all__: list[str] = [
     "TILETYPE_GIF",
     "TILETYPE_JPG",
@@ -25,6 +31,7 @@ __all__: list[str] = [
     "Tile",
     "TileFmts",
     "TileType",
+    "__allocator__",
     "__authors__",
     "__build_profile__",
     "__build_timestamp__",
