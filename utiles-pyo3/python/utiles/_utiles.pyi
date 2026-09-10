@@ -10,7 +10,7 @@ __authors__: str
 __description__: str
 __pkg_name__: t.Literal["utiles"]
 __target__: str
-__opt_level__: t.Literal["0", "1", "2", "3", "s", "z"]
+__opt_level__: t.Literal[0, 1, 2, 3, "s", "z"]
 __allocator__: t.Literal["mimalloc", "system"]
 __git_repo__: t.Literal["git@github.com:jessekrubin/utiles.git"]
 __git_sha__: str
