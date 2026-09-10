@@ -21,7 +21,7 @@ def _main() -> None:
     except ImportError:
         from pprint import pprint
 
-        rich = inspect = None  # ty:ignore[invalid-assignment]
+        rich = inspect = None
 
     # locals
     local = globals()
@@ -42,7 +42,7 @@ def _main() -> None:
         import IPython
 
         IPython.InteractiveShell.banner1 = _banner()  # type: ignore[attr-defined,assignment]  # ty:ignore[invalid-assignment]
-        rich = None  # ty:ignore[invalid-assignment]
+        rich = None
         ipython_argv = [
             "--no-tip",
             "--TerminalInteractiveShell.editing_mode=vi",

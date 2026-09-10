@@ -201,8 +201,9 @@ def test_tiletype_rs(
     expected_format = expected.split(".")[0]
     assert ttype.format == expected_format
     ttype_str = utiles.tiletype_str(buffer)
+    assert ttype_str in (expected, "unknown")
     if filename == "unknown.txt":
-        assert ttype_str is False or ttype_str == "unknown"  # type: ignore
+        assert ttype_str == "unknown"
     else:
         assert ttype_str == expected
 

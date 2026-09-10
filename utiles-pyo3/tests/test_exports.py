@@ -8,11 +8,6 @@ import utiles
 from utiles import _utiles as libutiles
 
 
-def test_import() -> None:
-    assert utiles
-    assert libutiles
-
-
 @pytest.mark.skip(reason="ruff now handles this")
 def test_all_sorted() -> None:
     all_current = utiles.__all__

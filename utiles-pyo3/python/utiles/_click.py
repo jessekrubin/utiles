@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class NoHelpCommand(click.Command):
-    def get_help_option(self, _ctx: click.Context) -> None:
+    def get_help_option(self, ctx: click.Context) -> click.Option | None:
+        del ctx
         return None
 
 
