@@ -17,10 +17,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  UTILES_GIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: ubuntu-latest
@@ -43,10 +47,11 @@ jobs:
         with:
           enable-cache: true
       - name: install-python
-        run: uv python install 3.11 3.12 3.13 3.14 pypy3.11
+        run: uv python install 3.11 3.12 3.13 3.14 3.14t pypy3.11
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -67,9 +72,34 @@ jobs:
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements.dev.txt
           pytest --benchmark-disable
+      - name: cross-architecture smoke test
+        if: ${{ !startsWith(matrix.platform.target, 'x86') }}
+        uses: uraimo/run-on-arch-action@fd7aa8593480287702b446a273a68f788a9bad3a # v3
+        with:
+          arch: ${{ matrix.platform.target }}
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          dockerRunArgs: |
+            --volume "${{ github.workspace }}:/workspace"
+            --workdir /workspace
+          install: |
+            set -euxo pipefail
+            apt-get update
+            apt-get install -y --no-install-recommends software-properties-common gnupg dirmngr ca-certificates curl tzdata
+            add-apt-repository -y ppa:deadsnakes/ppa
+            apt-get update
+            apt-get install -y --no-install-recommends python3.11 python3.11-venv python3.11-distutils
+            curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+            python3.11 -m pip install -U pip
+          run: |
+            set -e
+            ls -l /workspace/utiles-pyo3/dist
+            python3.11 -m pip install utiles --no-index --no-deps --find-links /workspace/utiles-pyo3/dist --force-reinstall
+            python3.11 -m utiles
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: ubuntu-latest
@@ -92,6 +122,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
           sccache: "true"
@@ -102,10 +133,41 @@ jobs:
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
           path: utiles-pyo3/dist
+      - name: musllinux smoke test
+        if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
+        uses: maus007/docker-run-action-fork@5ddaad0f7eedd03f64e412b1931852bd3031b273 # v1
+        with:
+          image: alpine:latest
+          options: -v ${{ github.workspace }}:/io -w /io -e TZ=America/Los_Angeles
+          run: |
+            set -e
+            apk add py3-pip py3-virtualenv tzdata
+            python3 -m virtualenv .venv
+            source .venv/bin/activate
+            pip install utiles --no-index --no-deps --find-links utiles-pyo3/dist --force-reinstall
+            python -m utiles
+      - name: musllinux cross-architecture smoke test
+        if: ${{ !startsWith(matrix.platform.target, 'x86') }}
+        uses: uraimo/run-on-arch-action@fd7aa8593480287702b446a273a68f788a9bad3a # v3
+        with:
+          arch: ${{ matrix.platform.target }}
+          distro: alpine_latest
+          githubToken: ${{ github.token }}
+          env: |
+            TZ: America/Los_Angeles
+          install: |
+            apk add py3-virtualenv tzdata
+          run: |
+            set -e
+            python3 -m virtualenv .venv
+            source .venv/bin/activate
+            pip install utiles --no-index --no-deps --find-links /workspace/utiles-pyo3/dist --force-reinstall
+            python -m utiles
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: windows-latest
@@ -122,6 +184,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -135,6 +198,7 @@ jobs:
   macos:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: macos-15
@@ -151,6 +215,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -169,6 +234,7 @@ jobs:
       - name: Build sdist
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           command: sdist
           args: --out dist
           working-directory: ./utiles-pyo3
@@ -222,8 +288,27 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
       - name: install-uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
       - name: List files
-        run: find . -name "wheels-*/*"
+        run: find . -type f \( -name '*.whl' -o -name '*.tar.gz' \) -print
+      - name: Verify release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t artifacts < <(find . -type f \( -name '*.whl' -o -name '*.tar.gz' \) -print)
+          test "${#artifacts[@]}" -gt 0
+
+          sdist="$(find wheels-sdist -type f -name '*.tar.gz' -print -quit)"
+          test -n "$sdist"
+          tar -tzf "$sdist" | grep -q '\.git-sha$'
+
+          wheel="$(find wheels-linux-x86_64 -type f -name '*cp311*.whl' -print -quit)"
+          test -n "$wheel"
+          uv venv .release-check --python 3.11
+          uv pip install --python .release-check/bin/python "$wheel"
+          .release-check/bin/python -m utiles
       - name: Generate artifact attestation
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
@@ -246,4 +331,5 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            wheels-*/*
+            wheels-*/*.whl
+            wheels-*/*.tar.gz

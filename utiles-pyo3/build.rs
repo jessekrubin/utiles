@@ -33,7 +33,7 @@ fn git_stdout(args: &[&str]) -> Option<String> {
 
 fn main() {
     pyo3_build_config::use_pyo3_cfgs();
-    println!("cargo:rerun-if-env-changed=RY_GIT_SHA");
+    println!("cargo:rerun-if-env-changed=UTILES_GIT_SHA");
     println!("cargo:rerun-if-changed=python/utiles/.git-sha");
     println!("cargo:rerun-if-changed=.git/HEAD");
     println!("cargo:rerun-if-changed=.git/refs");

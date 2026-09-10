@@ -126,6 +126,7 @@ lint.ignore = [
   "PLR0913", # too-many-arguments
   "PLR2004", # magic-value-comparison
 ]
+lint.per-file-ignores."python/utiles/dev/*.py" = ["PLC0415"]
 lint.per-file-ignores."bench/**/*" = [
   "ANN401",
   "D",

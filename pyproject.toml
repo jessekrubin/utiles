@@ -31,7 +31,9 @@ dev = [
   "pytest-cov>=7.0.0",
   "pytest-xdist>=3.8.0",
   "ruff>=0.16.2",
+  "ry>=0.0.100",
   "tomli>=2.3.0",
+  "ty>=0.0.80",
   "typing-extensions>=4.16.0",
 ]
 
@@ -39,6 +41,14 @@ dev = [
 workspace.members = [
   "utiles-pyo3",
 ]
+
+[tool.ty]  # https://docs.astral.sh/ty/reference/configuration/
+analysis.allowed-unresolved-imports = [ "tests.**", "utiles.dev.**"]
+analysis.replace-imports-with-any = [ "rich.**" ]
+# Multiple directories (priority order)
+environment.root = [ ".", "./utiles-pyo3/python", "utiles-pyo3", "./scripts" ]
+src.exclude-scripts = true
+src.exclude = [ "_references" ]
 
 [tool.rumdl]
 disable = [ "MD033" ]
