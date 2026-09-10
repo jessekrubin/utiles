@@ -107,8 +107,8 @@ impl PyTile {
     }
 
     #[staticmethod]
-    fn from_quadkey(quadkey: String) -> PyResult<Self> {
-        let xyz = Tile::from_quadkey(&quadkey);
+    fn from_quadkey(quadkey: &str) -> PyResult<Self> {
+        let xyz = Tile::from_quadkey(quadkey);
         match xyz {
             Ok(xyz) => Ok(Self::from(xyz)),
             Err(e) => Err(PyErr::new::<PyValueError, _>(format!("Error: {e}"))),
@@ -116,7 +116,7 @@ impl PyTile {
     }
 
     #[staticmethod]
-    fn from_qk(qk: String) -> PyResult<Self> {
+    fn from_qk(qk: &str) -> PyResult<Self> {
         Self::from_quadkey(qk)
     }
 
