@@ -10,8 +10,8 @@ impl IntIterator {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<u32> {
-        slf.iter.next()
+    fn __next__(&mut self) -> Option<u32> {
+        self.iter.next()
     }
 }
 
@@ -25,8 +25,8 @@ impl FloatIterator {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<f64> {
-        slf.iter.next()
+    fn __next__(&mut self) -> Option<f64> {
+        self.iter.next()
     }
 }
 
@@ -40,7 +40,8 @@ impl CoordinateIterator {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(f64, f64)> {
-        slf.iter.next()
+
+    fn __next__(&mut self) -> Option<(f64, f64)> {
+        self.iter.next()
     }
 }
