@@ -69,6 +69,11 @@ fmtpy:
     uv run ruff format
     uv run ruff check --select "I" --show-fixes --fix .
 
+# pyproject-fmt
+fmt-pyproject:
+    uvx pyproject-fmt . --keep-full-version
+    uvx pyproject-fmt {{ pyut_pyproject_toml }} --keep-full-version
+
 # format-check
 fmtcpy:
     uv run ruff format --check

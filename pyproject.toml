@@ -10,6 +10,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
 ]
 dependencies = []
 
@@ -43,12 +44,12 @@ workspace.members = [
 ]
 
 [tool.ty]  # https://docs.astral.sh/ty/reference/configuration/
-analysis.allowed-unresolved-imports = [ "tests.**", "utiles.dev.**"]
-analysis.replace-imports-with-any = [ "rich.**" ]
+src.exclude = [ "_references" ]
+src.exclude-scripts = true
 # Multiple directories (priority order)
 environment.root = [ ".", "./utiles-pyo3/python", "utiles-pyo3", "./scripts" ]
-src.exclude-scripts = true
-src.exclude = [ "_references" ]
+analysis.allowed-unresolved-imports = [ "tests.**", "utiles.dev.**" ]
+analysis.replace-imports-with-any = [ "rich.**" ]
 
 [tool.rumdl]
 disable = [ "MD033" ]

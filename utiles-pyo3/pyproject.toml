@@ -18,6 +18,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "Programming Language :: Rust",
@@ -126,7 +127,6 @@ lint.ignore = [
   "PLR0913", # too-many-arguments
   "PLR2004", # magic-value-comparison
 ]
-lint.per-file-ignores."python/utiles/dev/*.py" = ["PLC0415"]
 lint.per-file-ignores."bench/**/*" = [
   "ANN401",
   "D",
@@ -143,6 +143,7 @@ lint.per-file-ignores."python/utiles/_legacy/cli.py" = [
   "PLW0120",
 ]
 lint.per-file-ignores."python/utiles/_utiles.pyi" = [ "PYI021", "PYI029" ]
+lint.per-file-ignores."python/utiles/dev/*.py" = [ "PLC0415" ]
 # Tests can use magic values, assertions, and relative imports
 lint.per-file-ignores."tests/**/*" = [
   "ANN401",

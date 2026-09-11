@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   UTILES_GIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
