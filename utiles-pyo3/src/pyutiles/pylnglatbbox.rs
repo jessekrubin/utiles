@@ -6,7 +6,7 @@ use pyo3::prelude::*;
 use utiles::bbox::BBox;
 
 use crate::float_hash::Float64Hash;
-use crate::pyutiles::pyiters::FloatIterator;
+use crate::pyutiles::pyiters::F64Iterator;
 use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(
@@ -49,8 +49,8 @@ impl PyLngLatBbox {
         }
     }
 
-    fn __iter__(&self) -> FloatIterator {
-        FloatIterator {
+    fn __iter__(&self) -> F64Iterator {
+        F64Iterator {
             iter: Box::new(
                 vec![
                     self.bbox.west(),

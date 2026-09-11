@@ -7,7 +7,7 @@ use pyo3::prelude::*;
 use utiles::BBox;
 
 use crate::float_hash::Float64Hash;
-use crate::pyutiles::pyiters::FloatIterator;
+use crate::pyutiles::pyiters::F64Iterator;
 use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(name = "Bbox", module = "utiles._utiles", frozen, skip_from_py_object)]
@@ -147,8 +147,8 @@ impl PyBbox {
         self.bbox.tuple()
     }
 
-    fn __iter__(&self) -> FloatIterator {
-        FloatIterator {
+    fn __iter__(&self) -> F64Iterator {
+        F64Iterator {
             iter: Box::new(
                 vec![self.west(), self.south(), self.east(), self.north()].into_iter(),
             ),
