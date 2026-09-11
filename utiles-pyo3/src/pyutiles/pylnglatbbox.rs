@@ -49,20 +49,18 @@ impl PyLngLatBbox {
         }
     }
 
-    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
-    fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<FloatIterator>> {
-        let iter = FloatIterator {
+    fn __iter__(&self) -> FloatIterator {
+        FloatIterator {
             iter: Box::new(
                 vec![
-                    slf.bbox.west(),
-                    slf.bbox.south(),
-                    slf.bbox.east(),
-                    slf.bbox.north(),
+                    self.bbox.west(),
+                    self.bbox.south(),
+                    self.bbox.east(),
+                    self.bbox.north(),
                 ]
                 .into_iter(),
             ),
-        };
-        Py::new(slf.py(), iter)
+        }
     }
 
     fn __repr__(&self) -> String {

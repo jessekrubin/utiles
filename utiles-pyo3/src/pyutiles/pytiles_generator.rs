@@ -14,13 +14,12 @@ impl TilesGenerator {
         slf
     }
 
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<PyTile> {
-        slf.iter.next()
+    fn __next__(&mut self) -> Option<PyTile> {
+        self.iter.next()
     }
 
-    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
     #[expect(clippy::cast_possible_truncation, reason = "TODO")]
-    fn __len__(slf: PyRefMut<'_, Self>) -> usize {
-        slf.length as usize
+    fn __len__(&self) -> usize {
+        self.length as usize
     }
 }

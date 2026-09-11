@@ -7,6 +7,7 @@ use utiles::BBox;
 
 use crate::float_hash::Float64Hash;
 use crate::pyutiles::PyLngLatBbox;
+use crate::pyutiles::pyiters::FloatIterator;
 use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(name = "Bbox", module = "utiles._utiles", frozen, skip_from_py_object)]
@@ -111,6 +112,14 @@ impl PyBbox {
 
     pub fn tuple(&self) -> (f64, f64, f64, f64) {
         self.bbox.tuple()
+    }
+
+    fn __iter__(&self) -> FloatIterator {
+        FloatIterator {
+            iter: Box::new(
+                vec![self.west(), self.south(), self.east(), self.north()].into_iter(),
+            ),
+        }
     }
 
     #[expect(clippy::unused_self, reason = "python method")]

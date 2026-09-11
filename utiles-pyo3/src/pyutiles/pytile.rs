@@ -86,14 +86,10 @@ impl PyTile {
         map
     }
 
-    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
-    fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<IntIterator>> {
-        let iter = IntIterator {
-            iter: Box::new(
-                vec![slf.xyz.x, slf.xyz.y, u32::from(slf.xyz.z)].into_iter(),
-            ),
-        };
-        Py::new(slf.py(), iter)
+    fn __iter__(&self) -> IntIterator {
+        let iter =
+            Box::new(vec![self.xyz.x, self.xyz.y, u32::from(self.xyz.z)].into_iter());
+        IntIterator { iter }
     }
 
     #[pyo3(signature = (sep = None))]
