@@ -314,7 +314,7 @@ def tiles(
                 bbox += bbox
             elif len(bbox) != 4:
                 msg = f"{bbox}"
-                raise click.BadParameter(msg, param=input, param_hint="input")
+                raise click.BadParameter(msg, param_hint="input")
         elif isinstance(obj, dict):
             bbox = obj["bbox"] if "bbox" in obj else utiles.geojson_bounds(obj)
 
@@ -401,7 +401,7 @@ def bounding_tile(_ctx: click.Context, input: str, seq: bool = False) -> None:
                 bbox += bbox
             elif len(bbox) != 4:
                 msg = f"{bbox}"
-                raise click.BadParameter(msg, param=input, param_hint="input")
+                raise click.BadParameter(msg, param_hint="input")
 
         elif isinstance(obj, dict):
             bbox = obj["bbox"] if "bbox" in obj else utiles.geojson_bounds(obj)

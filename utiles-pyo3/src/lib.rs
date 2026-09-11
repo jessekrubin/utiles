@@ -10,6 +10,7 @@
 #![expect(clippy::similar_names)]
 #![expect(clippy::used_underscore_items)]
 #![expect(clippy::missing_const_for_fn)]
+use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
 use pyutiles::{PyBbox, PyLngLat, PyLngLatBbox, PyTile};
 use utiles::tile_type;
@@ -26,14 +27,42 @@ const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const BUILD_PROFILE: &str = env!("PROFILE");
 const BUILD_TIMESTAMP: &str = env!("BUILD_TIMESTAMP");
+const OPT_LEVEL_STR: &str = env!("OPT_LEVEL");
+const GIT_SHA: &str = env!("GIT_SHA");
+const GIT_REPO: &str = "git@github.com:jessekrubin/utiles.git";
+const TARGET: &str = env!("TARGET");
+
+#[cfg(feature = "mimalloc")]
+#[global_allocator]
+static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
+#[cfg(feature = "mimalloc")]
+const ALLOCATOR: &str = "mimalloc";
+
+#[cfg(not(feature = "mimalloc"))]
+const ALLOCATOR: &str = "system";
 
 fn lib_constants(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    let py = m.py();
+    let opt_level = match OPT_LEVEL_STR {
+        "0" => 0.into_py_any(py),
+        "1" => 1.into_py_any(py),
+        "2" => 2.into_py_any(py),
+        "3" => 3.into_py_any(py),
+        _ => OPT_LEVEL_STR.into_py_any(py),
+    }?;
     m.add("__pkg_name__", PACKAGE)?;
     m.add("__description__", DESCRIPTION)?;
     m.add("__version__", VERSION)?;
     m.add("__build_profile__", BUILD_PROFILE)?;
     m.add("__build_timestamp__", BUILD_TIMESTAMP)?;
     m.add("__authors__", AUTHORS)?;
+    m.add("__git_sha__", GIT_SHA)?;
+    m.add("__git_repo__", GIT_REPO)?;
+    m.add("__allocator__", ALLOCATOR)?;
+    m.add("__opt_level__", opt_level)?;
+    m.add("__authors__", AUTHORS)?;
+    m.add("__target__", TARGET)?;
     Ok(())
 }
 

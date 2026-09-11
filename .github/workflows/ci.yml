@@ -15,41 +15,59 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  UTILES_GIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: ubuntu-latest
             target: x86_64
+            manylinux: auto
+            features: "mimalloc"
           - runner: ubuntu-latest
             target: x86
+            manylinux: auto
+            features: "mimalloc"
           - runner: ubuntu-latest
             target: aarch64
+            manylinux: "2_28"
+            features: "mimalloc"
           - runner: ubuntu-latest
             target: armv7
+            manylinux: auto
+            features: "default"
           - runner: ubuntu-latest
             target: s390x
+            manylinux: auto
+            features: "default"
           - runner: ubuntu-latest
             target: ppc64le
+            manylinux: auto
+            features: "default"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/utiles-git-sha
       - name: install-uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           enable-cache: true
       - name: install-python
-        run: uv python install 3.11 3.12 3.13 3.14 pypy3.11
+        run: uv python install 3.11 3.12 3.13 3.14 3.14t pypy3.11
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
+          args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11 --features "${{ matrix.platform.features }}"
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
-          manylinux: auto
+          manylinux: ${{ matrix.platform.manylinux }}
           working-directory: ./utiles-pyo3
       - name: Upload wheels
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -66,9 +84,34 @@ jobs:
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements.dev.txt
           pytest --benchmark-disable
+      - name: linux-cross-smoke-test
+        if: ${{ !startsWith(matrix.platform.target, 'x86') }}
+        uses: uraimo/run-on-arch-action@fd7aa8593480287702b446a273a68f788a9bad3a # v3
+        with:
+          arch: ${{ matrix.platform.target }}
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          dockerRunArgs: |
+            --volume "${{ github.workspace }}:/workspace"
+            --workdir /workspace
+          install: |
+            set -euxo pipefail
+            apt-get update
+            apt-get install -y --no-install-recommends software-properties-common gnupg dirmngr ca-certificates curl tzdata
+            add-apt-repository -y ppa:deadsnakes/ppa
+            apt-get update
+            apt-get install -y --no-install-recommends python3.13 python3.13-venv
+            curl -sS https://bootstrap.pypa.io/get-pip.py | python3.13
+            python3.13 -m pip install -U pip
+          run: |
+            set -e
+            ls -l /workspace/utiles-pyo3/dist
+            python3.13 -m pip install utiles --no-index --no-deps --find-links /workspace/utiles-pyo3/dist --force-reinstall
+            python3.13 -m utiles
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: ubuntu-latest
@@ -81,6 +124,7 @@ jobs:
             target: armv7
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/utiles-git-sha
       - name: install-uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
@@ -90,6 +134,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
           sccache: "true"
@@ -100,27 +145,69 @@ jobs:
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
           path: utiles-pyo3/dist
+      - name: musllinux-smoke-test
+        if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
+        uses: maus007/docker-run-action-fork@5ddaad0f7eedd03f64e412b1931852bd3031b273 # v1
+        with:
+          image: python:3.13-alpine
+          options: -v ${{ github.workspace }}:/io -w /io -e TZ=America/Los_Angeles
+          run: |
+            set -euxo pipefail
+            python --version
+            python -m venv .venv
+            source .venv/bin/activate
+            pip install utiles --no-index --no-deps --find-links utiles-pyo3/dist --force-reinstall
+            python -m utiles
+      - name: musllinux-cross-smoke-test
+        if: ${{ !startsWith(matrix.platform.target, 'x86') }}
+        uses: uraimo/run-on-arch-action@fd7aa8593480287702b446a273a68f788a9bad3a # v3
+        with:
+          arch: ${{ matrix.platform.target }}
+          distro: alpine_latest
+          githubToken: ${{ github.token }}
+          env: |
+            TZ: America/Los_Angeles
+          install: |
+            set -euxo pipefail
+            apk add py3-virtualenv tzdata
+          run: |
+            set -euxo pipefail
+            python3 --version
+            python3 -m virtualenv .venv
+            source .venv/bin/activate
+            pip install utiles --no-index --no-deps --find-links utiles-pyo3/dist --force-reinstall
+            python -m utiles
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: windows-latest
             target: x64
+            architecture: x64
+          - runner: windows-latest
+            target: x86
+            architecture: x86
+          - runner: windows-11-arm
+            target: aarch64
+            architecture: arm64
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/utiles-git-sha
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           # python-version: 3.x
           python-version: "3.13"
           # Need to include architecture: https://github.com/PyO3/maturin-action/issues/375
-          architecture: ${{ matrix.platform.target }}
+          architecture: ${{ matrix.platform.architecture }}
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter --features "mimalloc"
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           working-directory: ./utiles-pyo3
       - name: Upload wheels
@@ -132,12 +219,14 @@ jobs:
   macos:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: macos-15
             target: aarch64
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/utiles-git-sha
       - name: install-uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
@@ -147,8 +236,9 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11
+          args: --release --out dist --interpreter 3.11 3.12 3.13 3.14 3.14t pypy3.11 --features "mimalloc"
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           working-directory: ./utiles-pyo3
       - name: Upload wheels
@@ -161,9 +251,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/utiles-git-sha
       - name: Build sdist
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.14.1
           command: sdist
           args: --out dist
           working-directory: ./utiles-pyo3
@@ -173,9 +265,37 @@ jobs:
           name: wheels-sdist
           path: utiles-pyo3/dist
 
+  # release:
+  #   name: Release
+  #   runs-on: ubuntu-latest
+  #   if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
+  #   needs: [linux, musllinux, windows, macos, sdist]
+  #   permissions:
+  #     # Use to sign the release artifacts
+  #     id-token: write
+  #     # Used to upload release artifacts
+  #     contents: write
+  #     # Used to generate artifact attestation
+  #     attestations: write
+  #   steps:
+  #     - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+  #     - name: Generate artifact attestation
+  #       uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+  #       with:
+  #         subject-path: "wheels-*/*"
+  #     - name: Publish to PyPI
+  #       if: ${{ startsWith(github.ref, 'refs/tags/') }}
+  #       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
+  #       env:
+  #         MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+  #       with:
+  #         command: upload
+  #         args: --non-interactive --skip-existing wheels-*/*
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment:
+      name: release-pypi
     if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
     needs: [linux, musllinux, windows, macos, sdist]
     permissions:
@@ -187,15 +307,50 @@ jobs:
       attestations: write
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      - name: install-uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+      - name: List files
+        run: find . -type f \( -name '*.whl' -o -name '*.tar.gz' \) -print
+      - name: Verify release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t artifacts < <(find . -type f \( -name '*.whl' -o -name '*.tar.gz' \) -print)
+          test "${#artifacts[@]}" -gt 0
+
+          sdist="$(find wheels-sdist -type f -name '*.tar.gz' -print -quit)"
+          test -n "$sdist"
+          tar -tzf "$sdist" | grep -q '\.git-sha$'
+
+          wheel="$(find wheels-linux-x86_64 -type f -name '*cp311*.whl' -print -quit)"
+          test -n "$wheel"
+          uv venv .release-check --python 3.11
+          uv pip install --python .release-check/bin/python "$wheel"
+          .release-check/bin/python -m utiles
       - name: Generate artifact attestation
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-path: "wheels-*/*"
-      - name: Publish to PyPI
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
+      - name: Publish 2 PyPI (--dryrun)
+        run: uv publish --dry-run --trusted-publishing automatic 'wheels-*/*'
         env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish 2 PyPI
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: uv publish --trusted-publishing automatic 'wheels-*/*'
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: gh-release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         with:
-          command: upload
-          args: --non-interactive --skip-existing wheels-*/*
+          generate_release_notes: true
+          files: |
+            wheels-*/*.whl
+            wheels-*/*.tar.gz

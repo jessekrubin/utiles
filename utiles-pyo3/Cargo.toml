@@ -24,6 +24,7 @@ size.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 utiles = { path = "../crates/utiles", features = ["python"] }
+mimalloc = { workspace = true, optional = true }
 
 [dev-dependencies]
 pyo3 = { workspace = true, features = [] }
@@ -31,6 +32,10 @@ pyo3 = { workspace = true, features = [] }
 [build-dependencies]
 pyo3-build-config.workspace = true
 jiff.workspace = true
+
+[features]
+default = []
+mimalloc = ["dep:mimalloc"]
 
 [lints]
 workspace = true

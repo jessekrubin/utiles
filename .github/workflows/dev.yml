@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install-rust-stable
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
+        with:
+          components: clippy,rustfmt
       - uses: taiki-e/install-action@7b8d4719ee4aaa279bdf55df38dacb9ebfe12a6c # v2
         with:
           tool: just
@@ -54,3 +58,49 @@ jobs:
           pip install utiles --no-index --no-deps --find-links dist --force-reinstall
           pip install -r requirements.dev.txt
           pytest --benchmark-disable
+
+  typecheck:
+    name: typecheck-python-${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: install dependencies
+        run: uv sync --locked
+      - name: mypy
+        run: uv run mypy --config-file utiles-pyo3/pyproject.toml utiles-pyo3/python utiles-pyo3/tests utiles-pyo3/bench
+
+  test-python:
+    name: test-python-${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.14t", "pypy3.11"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: install dependencies
+        run: uv sync --locked
+      - name: install utiles
+        run: uv run maturin develop -m utiles-pyo3/Cargo.toml
+        env:
+          RUST_BACKTRACE: 1
+      - name: package smoke test
+        run: uv run python -m utiles
+      - name: pytest
+        run: uv run pytest --benchmark-disable --config-file=utiles-pyo3/pyproject.toml utiles-pyo3

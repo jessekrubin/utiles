@@ -12,14 +12,18 @@ from time import time_ns
 import utiles
 
 try:
-    from orjson import loads as json_loads
+    from ry import parse_json as _json_loads
 except ImportError:
-    from json import loads as json_loads
+    from json import loads as _json_loads  # type: ignore[assignment]
 
 if t.TYPE_CHECKING:
     from pathlib import Path
 
 echo = print
+
+
+def json_loads(data: str | bytes | bytearray) -> t.Any:
+    return t.cast("t.Any", _json_loads(data))
 
 
 @dataclass

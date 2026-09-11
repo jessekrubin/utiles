@@ -89,6 +89,13 @@ fmt: cargo-fmt fmtpy justfilefmt
 mypy:
     uv run mypy --config-file {{ pyut }}/pyproject.toml {{ pyut }}/python {{ pyut }}/tests {{ pyut }}/bench
 
+# type check w/ ty
+ty *ARGS:
+    uv run ty check {{ ARGS }}
+
+# typecheck python
+typecheck: mypy ty
+
 # ruff check/lint
 ruff:
     uv run ruff check .

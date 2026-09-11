@@ -39,6 +39,7 @@ entry-points."rasterio.rio_plugins".utiles = "utiles.rio_plugin:rio_utiles"
 module-name = "utiles._utiles"
 bindings = "pyo3"
 python-source = "python"
+include = [ { path = "python/utiles/.git-sha", format = "sdist" } ]
 features = [ "pyo3/extension-module" ]
 
 [tool.ruff]
@@ -125,6 +126,7 @@ lint.ignore = [
   "PLR0913", # too-many-arguments
   "PLR2004", # magic-value-comparison
 ]
+lint.per-file-ignores."python/utiles/dev/*.py" = ["PLC0415"]
 lint.per-file-ignores."bench/**/*" = [
   "ANN401",
   "D",
