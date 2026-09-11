@@ -292,7 +292,7 @@ jobs:
   #         command: upload
   #         args: --non-interactive --skip-existing wheels-*/*
   release:
-    name: Release
+    name: release
     runs-on: ubuntu-latest
     environment:
       name: release-pypi
