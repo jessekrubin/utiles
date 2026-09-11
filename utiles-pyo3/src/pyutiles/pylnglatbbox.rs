@@ -6,7 +6,7 @@ use pyo3::prelude::*;
 use utiles::bbox::BBox;
 
 use crate::float_hash::Float64Hash;
-use crate::pyutiles::pyiters::FloatIterator;
+use crate::pyutiles::pyiters::F64Iterator;
 use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(
@@ -49,20 +49,18 @@ impl PyLngLatBbox {
         }
     }
 
-    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
-    fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<FloatIterator>> {
-        let iter = FloatIterator {
+    fn __iter__(&self) -> F64Iterator {
+        F64Iterator {
             iter: Box::new(
                 vec![
-                    slf.bbox.west(),
-                    slf.bbox.south(),
-                    slf.bbox.east(),
-                    slf.bbox.north(),
+                    self.bbox.west(),
+                    self.bbox.south(),
+                    self.bbox.east(),
+                    self.bbox.north(),
                 ]
                 .into_iter(),
             ),
-        };
-        Py::new(slf.py(), iter)
+        }
     }
 
     fn __repr__(&self) -> String {

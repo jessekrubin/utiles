@@ -13,7 +13,7 @@ use utiles::projection::Projection;
 use utiles::tile::{FeatureOptions, Tile};
 use utiles::{TileChildren1, TileLike, TileParent};
 
-use crate::pyutiles::pyiters::IntIterator;
+use crate::pyutiles::pyiters::U32Iterator;
 use crate::pyutiles::pylnglat::PyLngLat;
 use crate::pyutiles::pylnglatbbox::PyLngLatBbox;
 use crate::pyutiles::pytile_tuple::TileTuple;
@@ -86,14 +86,10 @@ impl PyTile {
         map
     }
 
-    #[expect(clippy::needless_pass_by_value, reason = "python ref")]
-    fn __iter__(slf: PyRef<'_, Self>) -> PyResult<Py<IntIterator>> {
-        let iter = IntIterator {
-            iter: Box::new(
-                vec![slf.xyz.x, slf.xyz.y, u32::from(slf.xyz.z)].into_iter(),
-            ),
-        };
-        Py::new(slf.py(), iter)
+    fn __iter__(&self) -> U32Iterator {
+        let iter =
+            Box::new(vec![self.xyz.x, self.xyz.y, u32::from(self.xyz.z)].into_iter());
+        U32Iterator { iter }
     }
 
     #[pyo3(signature = (sep = None))]

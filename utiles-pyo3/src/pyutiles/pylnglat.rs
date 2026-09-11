@@ -4,6 +4,7 @@ use pyo3::class::basic::CompareOp;
 use pyo3::exceptions::{PyIndexError, PyNotImplementedError, PyStopIteration};
 use pyo3::prelude::*;
 
+use crate::pyutiles::pyiters::F64Iterator;
 use crate::pyutiles::pytile::PyTile;
 
 #[pyclass(
@@ -93,6 +94,12 @@ impl PyLngLat {
                 CompareOp::Ne => Ok(true),
                 _ => Err(PyErr::new::<PyNotImplementedError, _>("Not implemented")),
             }
+        }
+    }
+
+    fn __iter__(&self) -> F64Iterator {
+        F64Iterator {
+            iter: Box::new(vec![self._lng(), self._lat()].into_iter()),
         }
     }
 
