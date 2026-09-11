@@ -57,6 +57,7 @@ dummy/
 .env.yaml
 build/
 scratch/
+_scratch/
 .cache/
 .parcel-cache/
 storybook-static/

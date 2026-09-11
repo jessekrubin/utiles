@@ -88,14 +88,14 @@ jobs:
             apt-get install -y --no-install-recommends software-properties-common gnupg dirmngr ca-certificates curl tzdata
             add-apt-repository -y ppa:deadsnakes/ppa
             apt-get update
-            apt-get install -y --no-install-recommends python3.11 python3.11-venv python3.11-distutils
-            curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
-            python3.11 -m pip install -U pip
+            apt-get install -y --no-install-recommends python3.13 python3.13-venv
+            curl -sS https://bootstrap.pypa.io/get-pip.py | python3.13
+            python3.13 -m pip install -U pip
           run: |
             set -e
             ls -l /workspace/utiles-pyo3/dist
-            python3.11 -m pip install utiles --no-index --no-deps --find-links /workspace/utiles-pyo3/dist --force-reinstall
-            python3.11 -m utiles
+            python3.13 -m pip install utiles --no-index --no-deps --find-links /workspace/utiles-pyo3/dist --force-reinstall
+            python3.13 -m utiles
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -141,8 +141,8 @@ jobs:
           options: -v ${{ github.workspace }}:/io -w /io -e TZ=America/Los_Angeles
           run: |
             set -e
-            apk add py3-pip py3-virtualenv tzdata
-            python3 -m virtualenv .venv
+            apk add python3.13 py3-pip py3-virtualenv tzdata
+            virtualenv --python python3.13 .venv
             source .venv/bin/activate
             pip install utiles --no-index --no-deps --find-links utiles-pyo3/dist --force-reinstall
             python -m utiles
@@ -156,12 +156,12 @@ jobs:
           env: |
             TZ: America/Los_Angeles
           install: |
-            apk add py3-virtualenv tzdata
+            apk add python3.13 py3-pip py3-virtualenv tzdata
           run: |
             set -e
-            python3 -m virtualenv .venv
+            virtualenv --python python3.13 .venv
             source .venv/bin/activate
-            pip install utiles --no-index --no-deps --find-links /workspace/utiles-pyo3/dist --force-reinstall
+            pip install utiles --no-index --no-deps --find-links utiles-pyo3/dist --force-reinstall
             python -m utiles
 
   windows:
