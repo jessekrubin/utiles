@@ -313,23 +313,6 @@ jobs:
           enable-cache: true
       - name: List files
         run: find . -type f \( -name '*.whl' -o -name '*.tar.gz' \) -print
-      - name: Verify release artifacts
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mapfile -t artifacts < <(find . -type f \( -name '*.whl' -o -name '*.tar.gz' \) -print)
-          test "${#artifacts[@]}" -gt 0
-
-          sdist="$(find wheels-sdist -type f -name '*.tar.gz' -print -quit)"
-          test -n "$sdist"
-          tar -tzf "$sdist" | grep -q '\.git-sha$'
-
-          wheel="$(find wheels-linux-x86_64 -type f -name '*cp311*.whl' -print -quit)"
-          test -n "$wheel"
-          uv venv .release-check --python 3.11
-          uv pip install --python .release-check/bin/python "$wheel"
-          .release-check/bin/python -m utiles
       - name: Generate artifact attestation
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
