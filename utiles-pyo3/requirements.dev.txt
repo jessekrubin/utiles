@@ -6,7 +6,7 @@ ast-serialize==0.8.0
     # via mypy
 attrs==26.1.0
     # via nox
-click==8.4.2
+click==8.5.0
     # via mercantile
 colorlog==6.10.1
     # via nox
