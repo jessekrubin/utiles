@@ -78,7 +78,7 @@ python-discovery==1.4.2
     # via
     #   nox
     #   virtualenv
-ruff==0.16.5
+ruff==0.16.7
     # via -r utiles-pyo3/requirements.dev.in
 sortedcontainers==2.4.0
     # via hypothesis
