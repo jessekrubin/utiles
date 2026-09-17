@@ -6,16 +6,16 @@ use crate::errors::UtilesCoreResult;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuadkeyError {
-    InvalidChar,
+    InvalidByte,
     InvalidLength(usize),
 }
 
 impl std::fmt::Display for QuadkeyError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::InvalidChar => write!(f, "Invalid char in quadkey"),
+            Self::InvalidByte => write!(f, "invalid-quadkey-byte"),
             Self::InvalidLength(len) => {
-                write!(f, "Invalid length for quadkey: {len}")
+                write!(f, "invalid-quadkey-length ({len})")
             }
         }
     }
@@ -279,7 +279,7 @@ impl<'a> QuadkeyRef<'a> {
         if s.len() >= 30 {
             Err(QuadkeyError::InvalidLength(s.len()))
         } else if !is_quadkey(s) {
-            Err(QuadkeyError::InvalidChar)
+            Err(QuadkeyError::InvalidByte)
         } else {
             Ok(Self::new_unchecked(s))
         }
