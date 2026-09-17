@@ -4,6 +4,8 @@ use std::num::TryFromIntError;
 
 use thiserror::Error;
 
+use crate::QuadkeyError;
+
 /// Error type for utiles-core
 #[derive(Error, Debug)]
 pub enum UtilesCoreError {
@@ -24,8 +26,8 @@ pub enum UtilesCoreError {
     InvalidTile(String),
 
     /// Error on invalid tile-quadkey
-    #[error("invalid quadkey: {0}")]
-    InvalidQuadkey(String),
+    #[error("quadkey: {0}")]
+    Quadkey(#[from] QuadkeyError),
 
     /// Error for invalid bbox (bounding-box)
     #[error("invalid bbox: {0}")]
