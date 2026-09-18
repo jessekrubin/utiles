@@ -207,7 +207,7 @@ def test_empty_quadkey_to_tile() -> None:
 
 def test_quadkey_failure() -> None:
     """expect a deprecation warning"""
-    with pytest.raises(ValueError, match="invalid quadkey"):
+    with pytest.raises(ValueError, match="invalid-quadkey-byte"):
         mercantile.quadkey_to_tile("lolwut")
 
 

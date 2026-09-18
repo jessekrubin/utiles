@@ -4,6 +4,10 @@
 
 ## 0.9.1 (unreleased)
 
+- `utiles-core`
+  - `QuadkeyRef` struct with fast conversion to xyz
+  - `is_quadkey` function to check if string is valid quadkey
+
 ---
 
 ## 0.9.0 (2026-09-11)

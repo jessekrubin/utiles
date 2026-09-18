@@ -42,7 +42,7 @@ pub struct TileFeatureGeometry {
     pub type_: String,
 
     /// coordinates for the geometry [ [ [x1, y1], [x2, y2], ... ] ]
-    pub coordinates: Vec<Vec<Vec<f64>>>,
+    pub coordinates: Vec<Vec<[f64; 2]>>,
 }
 
 /// Options for creating a tile-feature
@@ -570,11 +570,11 @@ impl Tile {
         );
         let xyz = self.tuple_string();
         let geometry_coordinates = vec![vec![
-            vec![west, south],
-            vec![east, south],
-            vec![east, north],
-            vec![west, north],
-            vec![west, south],
+            [west, south],
+            [east, south],
+            [east, north],
+            [west, north],
+            [west, south],
         ]];
         let mut properties: Map<String, Value> = Map::new();
         properties.insert("title".to_string(), Value::from(format!("XYZ tile {xyz}")));

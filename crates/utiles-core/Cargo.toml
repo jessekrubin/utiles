@@ -19,6 +19,13 @@ serde_json.workspace = true
 thiserror.workspace = true
 ahash = { workspace = true, optional = true }
 
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name = "quadkey"
+harness = false
+
 [features]
 default = ["pmtiles", "ahash"]
 ahash = ["dep:ahash"]
