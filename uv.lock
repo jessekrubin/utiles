@@ -1142,7 +1142,7 @@ dev = [
     { name = "click", specifier = "!=8.2.1,>=8.4.2" },
     { name = "hypothesis", specifier = ">=6.142.0" },
     { name = "ipython", specifier = ">=9.17.1" },
-    { name = "maturin", specifier = ">=1.14.1" },
+    { name = "maturin", specifier = ">=1.15.0" },
     { name = "mercantile", specifier = ">=1.2.1" },
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "nox", specifier = ">=2025.10.14" },

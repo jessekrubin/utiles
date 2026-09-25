@@ -7,6 +7,8 @@
 - `utiles-core`
   - `QuadkeyRef` struct with fast conversion to xyz
   - `is_quadkey` function to check if string is valid quadkey
+- `utiles-pyo3`
+  - update maturin to `v1.15.0`
 
 ---
 
