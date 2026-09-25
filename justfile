@@ -56,6 +56,12 @@ cargo-fmt:
     cargo +nightly fmt --all -- --unstable-features --config group_imports=StdExternalCrate,imports_granularity=Module,reorder_imports=true
     cargo fmt --all
 
+cargo-sort:
+    cargo sort -w -g --config ./.config/tomlfmt.cargo.toml
+
+cargo-sort-check:
+    cargo sort -c -w -g --config ./.config/tomlfmt.cargo.toml
+
 # sort imports
 sort-all:
     sort-all {{ pyut }}/python/utiles/__init__.py
