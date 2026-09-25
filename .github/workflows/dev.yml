@@ -42,6 +42,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
         with:
+          maturin-version: v1.15.0
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --verbose
           sccache: "true"
