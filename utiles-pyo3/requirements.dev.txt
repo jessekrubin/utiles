@@ -56,7 +56,7 @@ pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
-pmtiles==3.7.0
+pmtiles==3.8.1
     # via -r utiles-pyo3/requirements.dev.in
 py-cpuinfo2==10.1.1
     # via pytest-benchmark
