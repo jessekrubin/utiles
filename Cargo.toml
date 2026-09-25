@@ -1,18 +1,20 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/utiles",
-    "crates/utiles-core", "crates/utiles-cover",
-    "crates/utiles-dev", "crates/utiles-doubledown",
-    "crates/utiles-oxipng",
-    "utiles-pyo3",
+  "crates/utiles",
+  "crates/utiles-core",
+  "crates/utiles-cover",
+  "crates/utiles-dev",
+  "crates/utiles-doubledown",
+  "crates/utiles-oxipng",
+  "utiles-pyo3",
 ]
 
 [workspace.package]
 version = "0.9.1"
 authors = [
-    "Jesse Rubin <jessekrubin@gmail.com>",
-    "Dan Costello <dan.costello2@gmail.com>",
+  "Jesse Rubin <jessekrubin@gmail.com>",
+  "Dan Costello <dan.costello2@gmail.com>",
 ]
 documentation = "https://github.com/jessekrubin/utiles"
 edition = "2024"
@@ -28,7 +30,7 @@ anyhow = "1.0.102"
 async-sqlite = { version = "0.6", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.88"
 axum = { version = "0.8.9", features = ["tokio", "json", "macros"] }
-axum-extra = { version = "0.12.5", features = [ "typed-header" ] }
+axum-extra = { version = "0.12.5", features = ["typed-header"] }
 base64 = "0.23.0"
 clap = { version = "4.6", features = ["derive", "color", "wrap_help"] }
 criterion = "0.8.2"
@@ -54,7 +56,7 @@ noncrypto-digests = "0.4"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.3.0", features = ["supports-color"] }
 oxipng = { version = "10.1.1", features = [] }
-pmtiles = { version = "0.24.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false}
+pmtiles = { version = "0.24.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false }
 pyo3 = "0.29"
 pyo3-build-config = "0.29"
 # TODO: remove fallible_uint usage
@@ -86,31 +88,17 @@ ci = "github"
 # The installers to generate for each app
 installers = []
 # Target platforms to build apps for (Rust target-triple syntax)
-targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+targets = [
+  "aarch64-apple-darwin",
+  "x86_64-apple-darwin",
+  "x86_64-unknown-linux-gnu",
+  "x86_64-pc-windows-msvc",
+]
 # Publish jobs to run in CI
 pr-run-mode = "plan"
 
-[profile.dev]
-opt-level = 0
-debug = 0
-
-[profile.dev.package]
-image.opt-level = 3
-quote.opt-level = 3
-serde_derive.opt-level = 3
-syn.opt-level = 3
-proc-macro2.opt-level = 3
-
-[profile.release]
-opt-level = 3
-strip = true
-lto = "thin"
-# lto = "fat"
-
-# The profile that 'cargo dist' will build with
-[profile.dist]
-inherits = "release"
-lto = "thin"
+[workspace.metadata.release]
+tag-name = "v{{version}}"
 
 [workspace.lints.rust]
 unsafe_code = "warn"
@@ -161,7 +149,24 @@ equatable_if_let = "warn"
 # needless_pass_by_ref_mut = "allow"
 # cognitive_complexity = "allow"
 
+[profile.dev]
+opt-level = 0
+debug = 0
 
+[profile.dev.package]
+image.opt-level = 3
+quote.opt-level = 3
+serde_derive.opt-level = 3
+syn.opt-level = 3
+proc-macro2.opt-level = 3
 
-[workspace.metadata.release]
-tag-name = "v{{version}}"
+[profile.release]
+opt-level = 3
+strip = true
+lto = "thin"
+# lto = "fat"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

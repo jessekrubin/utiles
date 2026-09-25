@@ -11,17 +11,6 @@ readme = "README.md"
 repository = "https://github.com/jessekrubin/utiles"
 description = "Map tile utilities aka utiles"
 
-[dependencies]
-# Not going to get rid of fast_hilbert
-fast_hilbert = { workspace = true, optional = true }
-serde.workspace = true
-serde_json.workspace = true
-thiserror.workspace = true
-ahash = { workspace = true, optional = true }
-
-[dev-dependencies]
-criterion.workspace = true
-
 [[bench]]
 name = "quadkey"
 harness = false
@@ -30,6 +19,17 @@ harness = false
 default = ["pmtiles", "ahash"]
 ahash = ["dep:ahash"]
 pmtiles = ["dep:fast_hilbert"]
+
+[dependencies]
+ahash = { workspace = true, optional = true }
+# Not going to get rid of fast_hilbert
+fast_hilbert = { workspace = true, optional = true }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
 
 [lints]
 workspace = true

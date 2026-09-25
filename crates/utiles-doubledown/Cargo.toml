@@ -23,8 +23,8 @@ tokio.workspace = true
 tokio-stream.workspace = true
 tracing.workspace = true
 utiles = { path = "../utiles", features = [
-    "internal",
-    "lager",
+  "internal",
+  "lager",
 ], default-features = false }
 
 [lints]
