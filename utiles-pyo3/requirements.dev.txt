@@ -24,7 +24,7 @@ filelock==4.0.12
     #   virtualenv
 humanize==4.16.0
     # via nox
-hypothesis==6.168.5
+hypothesis==6.168.3
     # via -r utiles-pyo3/requirements.dev.in
 iniconfig==2.3.0
     # via pytest
