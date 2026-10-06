@@ -31,7 +31,7 @@ async-sqlite = { version = "0.6", features = ["bundled", "functions", "trace"] }
 async-trait = "0.1.88"
 axum = { version = "0.8.9", features = ["tokio", "json", "macros"] }
 axum-extra = { version = "0.12.5", features = ["typed-header"] }
-base64 = "0.23.0"
+base64 = "0.23.1"
 clap = { version = "4.6", features = ["derive", "color", "wrap_help"] }
 criterion = "0.8.2"
 crossbeam = { version = "0.8.4", features = ["crossbeam-channel"] }
@@ -56,7 +56,7 @@ noncrypto-digests = "0.4"
 num_cpus = "1.17.0"
 owo-colors = { version = "4.3.0", features = ["supports-color"] }
 oxipng = { version = "10.1.1", features = [] }
-pmtiles = { version = "0.24.0", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false }
+pmtiles = { version = "0.24.1", features = ["iter-async", "mmap-async-tokio", "tilejson", "write"], default-features = false }
 pyo3 = "0.29"
 pyo3-build-config = "0.29"
 # TODO: remove fallible_uint usage
@@ -77,7 +77,7 @@ tower-http = { version = "0.7", features = ["trace", "timeout", "add-extension",
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["serde", "serde_json", "env-filter"] }
 walkdir = "2.5.0"
-xxhash-rust = { version = "0.8.15", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
+xxhash-rust = { version = "0.8.19", features = ["xxh32", "xxh64", "xxh3", "const_xxh32", "const_xxh64", "const_xxh3"] }
 
 # Config for 'cargo dist'
 [workspace.metadata.dist]

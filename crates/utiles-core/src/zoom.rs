@@ -388,8 +388,8 @@ mod tests {
     #[test]
     fn zvec2zset_none() {
         let zset_int: u32 = 0b0000_0000_0000_0000_0000_0000_0000_0000;
-        assert!(zset2zvec(zset_int).is_empty());
-        assert!(zset2zvec_rev(zset_int).is_empty());
+        assert_eq!(zset2zvec(zset_int), [] as [u8; 0]);
+        assert_eq!(zset2zvec_rev(zset_int), [] as [u8; 0]);
     }
 
     #[test]
