@@ -25,10 +25,8 @@ pub fn geojson_geometry_points(g: Geometry) -> Box<dyn Iterator<Item = Position>
     }
 }
 
-#[must_use]
 pub fn geojson_geometry_coords(g: Geometry) -> Box<dyn Iterator<Item = Position>> {
-    let coord_vecs = geojson_geometry_points(g);
-    Box::new(coord_vecs.into_iter())
+    geojson_geometry_points(g)
 }
 
 pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Position> {
@@ -52,7 +50,6 @@ pub fn geojson_geometry_points_vec(g: Geometry) -> Vec<Position> {
     }
 }
 
-#[must_use]
 pub fn geojson_feature_coords(feature: Feature) -> Box<dyn Iterator<Item = Position>> {
     match feature.geometry {
         Some(g) => geojson_geometry_coords(g),
