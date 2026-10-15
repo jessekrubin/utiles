@@ -7,12 +7,7 @@ use pyo3::prelude::*;
 use crate::pyutiles::pyiters::F64Iterator;
 use crate::pyutiles::pytile::PyTile;
 
-#[pyclass(
-    name = "LngLat",
-    module = "utiles._utiles",
-    frozen,
-    skip_from_py_object
-)]
+#[pyclass(name = "LngLat", module = "utiles._utiles", frozen)]
 #[derive(Clone, Copy, PartialEq, PartialOrd, Hash)]
 pub struct PyLngLat {
     lnglat: utiles::LngLat,

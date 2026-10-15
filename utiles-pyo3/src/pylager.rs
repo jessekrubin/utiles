@@ -35,7 +35,7 @@ pub(crate) fn error(msg: &str) {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[pyclass(name = "Lager", module = "utiles._utiles", frozen, skip_from_py_object)]
+#[pyclass(name = "Lager", module = "utiles._utiles", frozen)]
 pub struct PyLager;
 
 impl Default for PyLager {

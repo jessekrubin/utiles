@@ -5,13 +5,7 @@ use serde::Serialize;
 
 use crate::pyutiles::pytile::PyTile;
 
-#[pyclass(
-    name = "Tiles",
-    module = "utiles._utiles",
-    sequence,
-    frozen,
-    skip_from_py_object
-)]
+#[pyclass(name = "Tiles", module = "utiles._utiles", sequence, frozen)]
 #[derive(Clone, Debug, PartialEq, Serialize, Eq, Hash)]
 struct PyTiles {
     tiles: Vec<PyTile>,
