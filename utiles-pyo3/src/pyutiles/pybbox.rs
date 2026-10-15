@@ -10,7 +10,7 @@ use crate::float_hash::Float64Hash;
 use crate::pyutiles::pyiters::F64Iterator;
 use crate::pyutiles::pytile::PyTile;
 
-#[pyclass(name = "Bbox", module = "utiles._utiles", frozen, skip_from_py_object)]
+#[pyclass(name = "Bbox", module = "utiles._utiles", frozen)]
 #[derive(Clone)]
 pub struct PyBbox {
     bbox: BBox,

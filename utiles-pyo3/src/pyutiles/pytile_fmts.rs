@@ -7,12 +7,7 @@ use utiles::TileStringFormatter;
 use crate::pyutiles::pyparsing::PyTileArg;
 
 #[derive(Clone, Debug, PartialEq, Hash)]
-#[pyclass(
-    name = "TileFmts",
-    module = "utiles._utiles",
-    frozen,
-    skip_from_py_object
-)]
+#[pyclass(name = "TileFmts", module = "utiles._utiles", frozen)]
 pub struct PyTileFmts(TileStringFormatter);
 
 #[pymethods]

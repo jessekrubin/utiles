@@ -31,13 +31,7 @@ macro_rules! pytile {
     };
 }
 
-#[pyclass(
-    name = "Tile",
-    module = "utiles._utiles",
-    sequence,
-    frozen,
-    skip_from_py_object
-)]
+#[pyclass(name = "Tile", module = "utiles._utiles", sequence, frozen)]
 #[derive(Clone, Debug, PartialEq, Serialize, Eq, Hash, Copy)]
 pub struct PyTile {
     pub xyz: Tile,

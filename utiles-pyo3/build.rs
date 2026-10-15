@@ -2,20 +2,6 @@ use std::process::Command;
 
 use jiff::{Unit, Zoned};
 
-// fn main() {
-//     pyo3_build_config::use_pyo3_cfgs();
-//     println!(
-//         "cargo:rustc-env=PROFILE={}",
-//         std::env::var("PROFILE").expect("PROFILE not set")
-//     );
-
-//     let build_ts = Zoned::now()
-//         .round(Unit::Second)
-//         .expect("oh no, build time error");
-//     // build timestamp
-//     println!("cargo:rustc-env=BUILD_TIMESTAMP={build_ts}");
-// }
-
 fn git_stdout(args: &[&str]) -> Option<String> {
     let output = Command::new("git").args(args).output().ok()?;
     if !output.status.success() {
