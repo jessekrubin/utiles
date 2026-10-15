@@ -9,6 +9,7 @@
   - `is_quadkey` function to check if string is valid quadkey
 - `utiles-pyo3`
   - update maturin to `v1.15.0`
+  - update pyo3 to `v0.30.1`
 
 ---
 
