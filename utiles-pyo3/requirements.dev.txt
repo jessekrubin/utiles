@@ -82,7 +82,7 @@ ruff==0.17.1
     # via -r utiles-pyo3/requirements.dev.in
 sortedcontainers==2.4.0
     # via hypothesis
-tomli==2.4.1
+tomli==2.5.0
     # via -r utiles-pyo3/requirements.dev.in
 typing-extensions==4.16.0
     # via
