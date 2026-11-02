@@ -28,7 +28,7 @@ jobs:
         with:
           enable-cache: true
       - name: Setup mdBook
-        uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2
+        uses: taiki-e/install-action@86f7a0ffb25f40114606501a311ebcfaf882ea32 # v2
         with:
           tool: mdbook,lychee
       - name: build-docs
