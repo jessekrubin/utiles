@@ -62,7 +62,7 @@ py-cpuinfo2==10.1.1
     # via pytest-benchmark
 pygments==2.21.0
     # via pytest
-pytest==9.1.1
+pytest==9.2.0
     # via
     #   -r utiles-pyo3/requirements.dev.in
     #   pytest-benchmark
