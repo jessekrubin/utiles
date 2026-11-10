@@ -6,7 +6,7 @@ ast-serialize==0.13.1
     # via mypy
 attrs==26.1.0
     # via nox
-click==8.5.0
+click==8.5.1
     # via mercantile
 colorlog==6.12.0
     # via nox
@@ -24,7 +24,7 @@ filelock==4.2.7
     #   virtualenv
 humanize==4.16.0
     # via nox
-hypothesis==6.170.14
+hypothesis==6.170.15
     # via -r utiles-pyo3/requirements.dev.in
 iniconfig==2.3.1
     # via pytest
@@ -78,7 +78,7 @@ python-discovery==1.9.2
     # via
     #   nox
     #   virtualenv
-ruff==0.17.3
+ruff==0.17.4
     # via -r utiles-pyo3/requirements.dev.in
 sortedcontainers==2.4.0
     # via hypothesis
