@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use jiff::{Unit, Zoned};
+use jiff::{Unit, ZonedDateTime};
 
 fn git_stdout(args: &[&str]) -> Option<String> {
     let output = Command::new("git").args(args).output().ok()?;
@@ -35,7 +35,7 @@ fn main() {
         .expect("PROFILE env var not found which is SUPER strange!");
     println!("cargo:rustc-env=PROFILE={profile}");
 
-    let build_ts = Zoned::now()
+    let build_ts = ZonedDateTime::now()
         .round(Unit::Second)
         .expect("oh no, build time error");
     // build timestamp
