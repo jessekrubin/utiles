@@ -6,7 +6,6 @@ version.workspace = true
 authors.workspace = true
 documentation.workspace = true
 edition.workspace = true
-homepage.workspace = true
 license.workspace = true
 repository.workspace = true
 
