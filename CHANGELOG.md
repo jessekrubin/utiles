@@ -4,6 +4,7 @@
 
 ## 0.9.1 (unreleased)
 
+- jiff v1
 - `utiles-core`
   - `QuadkeyRef` struct with fast conversion to xyz
   - `is_quadkey` function to check if string is valid quadkey
